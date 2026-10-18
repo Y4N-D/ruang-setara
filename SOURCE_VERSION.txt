@@ -1,0 +1,9 @@
+Ruang Setara — source export v8
+Published version: 8
+Source commit: 4f1ce31248680d1a2944dd7c7509f8d40b77e2d5
+Export date (UTC): 2026-10-07
+
+Application source and assets are exported from the published Git commit.
+Generated TypeScript incremental cache (tsconfig.tsbuildinfo) is excluded.
+MULAI_DI_SINI.md, SOURCE_VERSION.txt, and SHA256SUMS.txt are export documentation.
+SHA256SUMS.txt covers all other files in this package.

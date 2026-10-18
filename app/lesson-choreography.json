@@ -1,0 +1,732 @@
+[
+  {
+    "id": "balance",
+    "duration": 30,
+    "moments": [
+      [
+        0,
+        "Arga dan Bayu berbincang di ruang belajar."
+      ],
+      [
+        8,
+        "Intan menyampaikan kebutuhannya."
+      ],
+      [
+        16,
+        "Bayu mengajak Arga berpindah tempat."
+      ],
+      [
+        23,
+        "Mereka memberi ruang untuk belajar."
+      ]
+    ],
+    "beats": [
+      {
+        "actor": "Arga",
+        "start": 1,
+        "end": 6.8,
+        "text": "Bayu, ceritanya seru sekali! Kita lanjut di sini, ya?"
+      },
+      {
+        "actor": "Intan",
+        "start": 8,
+        "end": 14.8,
+        "text": "Aku sedang membaca. Boleh suaranya lebih pelan?"
+      },
+      {
+        "actor": "Bayu",
+        "start": 16,
+        "end": 22.2,
+        "text": "Ayo pindah ke sudut diskusi. Intan bisa tetap belajar."
+      },
+      {
+        "actor": "Arga",
+        "start": 24,
+        "end": 28.8,
+        "text": "Setuju. Setelah selesai, kita rapikan juga tempatnya."
+      }
+    ],
+    "actors": {
+      "Intan": {
+        "template": "Mira",
+        "keys": [
+          [
+            0,
+            0.35,
+            1.35,
+            0.15,
+            1
+          ],
+          [
+            30,
+            0.35,
+            1.35,
+            0.15,
+            1
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Arga"
+          ],
+          [
+            16,
+            "Bayu"
+          ],
+          [
+            24,
+            "Arga"
+          ]
+        ],
+        "role": "Teman yang sedang belajar",
+        "shirt": "school"
+      },
+      "Arga": {
+        "template": "Seno",
+        "keys": [
+          [
+            0,
+            2.5,
+            0.45,
+            0.6,
+            0
+          ],
+          [
+            8,
+            2.5,
+            0.45,
+            -0.9,
+            0
+          ],
+          [
+            16,
+            2.5,
+            0.45,
+            -0.9,
+            0
+          ],
+          [
+            23,
+            3.8,
+            2.7,
+            0.15,
+            0
+          ],
+          [
+            30,
+            3.8,
+            2.7,
+            0.15,
+            0
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Bayu"
+          ],
+          [
+            8,
+            "Intan"
+          ],
+          [
+            16,
+            "Bayu"
+          ],
+          [
+            24,
+            "Intan"
+          ]
+        ],
+        "role": "Teman yang berbincang",
+        "shirt": "blue"
+      },
+      "Bayu": {
+        "template": "Reno",
+        "keys": [
+          [
+            0,
+            4.1,
+            1.55,
+            -0.5,
+            0
+          ],
+          [
+            4,
+            3.35,
+            0.9,
+            -0.5,
+            0
+          ],
+          [
+            15,
+            3.35,
+            0.9,
+            -0.8,
+            0
+          ],
+          [
+            19,
+            2.1,
+            0.8,
+            -0.8,
+            0
+          ],
+          [
+            25,
+            2.8,
+            2.7,
+            0.4,
+            0
+          ],
+          [
+            30,
+            2.8,
+            2.7,
+            0.4,
+            0
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Arga"
+          ],
+          [
+            8,
+            "Intan"
+          ],
+          [
+            16,
+            "Arga"
+          ],
+          [
+            24,
+            "Arga"
+          ]
+        ],
+        "role": "Teman yang mengajak bekerja sama",
+        "shirt": "sage"
+      }
+    }
+  },
+  {
+    "id": "constitution",
+    "duration": 34,
+    "moments": [
+      [
+        0,
+        "Lila maju menyampaikan usul."
+      ],
+      [
+        7,
+        "Fajar menyela, Lila memberi jarak."
+      ],
+      [
+        13,
+        "Bu Ratih mendekat dan mengajak bergiliran."
+      ],
+      [
+        24,
+        "Fajar mendengarkan; Lila kembali menyampaikan usul."
+      ]
+    ],
+    "beats": [
+      {
+        "actor": "Lila",
+        "start": 1,
+        "end": 6.2,
+        "text": "Bagaimana kalau kita membuat pojok baca?"
+      },
+      {
+        "actor": "Fajar",
+        "start": 7.5,
+        "end": 12.3,
+        "text": "Aku punya usul lain. Tidak perlu mendengarkan yang itu!"
+      },
+      {
+        "actor": "Ratih",
+        "start": 14,
+        "end": 22,
+        "text": "Dengarkan Lila sampai selesai. Setelah itu, Fajar juga mendapat giliran."
+      },
+      {
+        "actor": "Fajar",
+        "start": 23,
+        "end": 26.5,
+        "text": "Baik. Aku akan mendengarkan dulu."
+      },
+      {
+        "actor": "Lila",
+        "start": 27.5,
+        "end": 32.8,
+        "text": "Terima kasih. Kita bisa membahas alasan tiap usul bersama."
+      }
+    ],
+    "actors": {
+      "Lila": {
+        "template": "Nadia",
+        "keys": [
+          [
+            0,
+            0.3,
+            1.65,
+            0.25,
+            0
+          ],
+          [
+            4,
+            1.2,
+            0.45,
+            0.2,
+            0
+          ],
+          [
+            7,
+            1.2,
+            0.45,
+            0.2,
+            0
+          ],
+          [
+            11,
+            0.45,
+            1.4,
+            0.2,
+            0
+          ],
+          [
+            23,
+            0.45,
+            1.4,
+            0.2,
+            0
+          ],
+          [
+            27,
+            1.2,
+            0.45,
+            0.2,
+            0
+          ],
+          [
+            34,
+            1.2,
+            0.45,
+            0.2,
+            0
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Fajar"
+          ],
+          [
+            14,
+            "Ratih"
+          ],
+          [
+            23,
+            "Fajar"
+          ]
+        ],
+        "role": "Siswa yang mengusulkan ide",
+        "shirt": "sage"
+      },
+      "Fajar": {
+        "template": "Seno",
+        "keys": [
+          [
+            0,
+            2.65,
+            0.5,
+            -0.6,
+            0
+          ],
+          [
+            13,
+            2.65,
+            0.5,
+            -0.6,
+            0
+          ],
+          [
+            19,
+            3.25,
+            1.9,
+            -0.25,
+            0
+          ],
+          [
+            34,
+            3.25,
+            1.9,
+            -0.25,
+            0
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Lila"
+          ],
+          [
+            14,
+            "Ratih"
+          ],
+          [
+            24,
+            "Lila"
+          ]
+        ],
+        "role": "Siswa dengan usul berbeda",
+        "shirt": "blue"
+      },
+      "Ratih": {
+        "template": "Ibu",
+        "keys": [
+          [
+            0,
+            4.35,
+            2.7,
+            -0.4,
+            0
+          ],
+          [
+            9,
+            4.35,
+            2.7,
+            -0.4,
+            0
+          ],
+          [
+            13,
+            2.15,
+            1.6,
+            0.15,
+            0
+          ],
+          [
+            34,
+            2.15,
+            1.6,
+            0.15,
+            0
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Lila"
+          ],
+          [
+            7,
+            "Fajar"
+          ],
+          [
+            14,
+            "Fajar"
+          ],
+          [
+            27,
+            "Lila"
+          ]
+        ],
+        "role": "Guru pendamping",
+        "shirt": "coral"
+      }
+    }
+  },
+  {
+    "id": "justice",
+    "duration": 36,
+    "moments": [
+      [
+        0,
+        "Arif mendekati meja berkas."
+      ],
+      [
+        10,
+        "Sari melihat berkas dan menjelaskan penuntutan."
+      ],
+      [
+        19,
+        "Laras mendekat untuk menjelaskan pendampingan."
+      ],
+      [
+        27,
+        "Hasan duduk di meja pemeriksaan."
+      ]
+    ],
+    "beats": [
+      {
+        "actor": "Arif",
+        "start": 1,
+        "end": 8.8,
+        "text": "Polisi melindungi masyarakat dan menindaklanjuti laporan sesuai kewenangannya."
+      },
+      {
+        "actor": "Sari",
+        "start": 11,
+        "end": 18.3,
+        "text": "Jaksa menjalankan penuntutan. Tuntutan belum sama dengan putusan."
+      },
+      {
+        "actor": "Laras",
+        "start": 20,
+        "end": 26.8,
+        "text": "Advokat memberi bantuan dan pendampingan hukum agar hak orang tetap terlindungi."
+      },
+      {
+        "actor": "Hasan",
+        "start": 28,
+        "end": 35,
+        "text": "Hakim memeriksa, mengadili, dan memutus perkara secara adil. Tuduhan saja tidak cukup."
+      }
+    ],
+    "actors": {
+      "Arif": {
+        "template": "Guru",
+        "keys": [
+          [
+            0,
+            0.2,
+            1.45,
+            0.3,
+            0
+          ],
+          [
+            4,
+            1.45,
+            0.7,
+            0.15,
+            0
+          ],
+          [
+            9,
+            1.45,
+            0.7,
+            0.15,
+            0
+          ],
+          [
+            14,
+            0.3,
+            0.85,
+            0.5,
+            0
+          ],
+          [
+            36,
+            0.3,
+            0.85,
+            0.5,
+            0
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Sari"
+          ],
+          [
+            11,
+            "Sari"
+          ],
+          [
+            20,
+            "Laras"
+          ],
+          [
+            28,
+            "Hasan"
+          ]
+        ],
+        "role": "Polisi · simulasi",
+        "shirt": "ochre"
+      },
+      "Sari": {
+        "template": "Ibu",
+        "keys": [
+          [
+            0,
+            3.65,
+            1.4,
+            -0.4,
+            0
+          ],
+          [
+            8,
+            3.65,
+            1.4,
+            -0.4,
+            0
+          ],
+          [
+            11,
+            2.35,
+            0.55,
+            -0.2,
+            0
+          ],
+          [
+            19,
+            2.35,
+            0.55,
+            -0.2,
+            0
+          ],
+          [
+            24,
+            1.8,
+            0.45,
+            0.4,
+            0
+          ],
+          [
+            36,
+            1.8,
+            0.45,
+            0.4,
+            0
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Arif"
+          ],
+          [
+            11,
+            "Arif"
+          ],
+          [
+            20,
+            "Laras"
+          ],
+          [
+            28,
+            "Hasan"
+          ]
+        ],
+        "role": "Jaksa · simulasi",
+        "shirt": "sage"
+      },
+      "Laras": {
+        "template": "Teman",
+        "keys": [
+          [
+            0,
+            4.65,
+            2.5,
+            -0.45,
+            0
+          ],
+          [
+            16,
+            4.65,
+            2.5,
+            -0.45,
+            0
+          ],
+          [
+            20,
+            3.1,
+            0.6,
+            -0.45,
+            0
+          ],
+          [
+            36,
+            3.1,
+            0.6,
+            -0.45,
+            0
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Arif"
+          ],
+          [
+            11,
+            "Sari"
+          ],
+          [
+            20,
+            "Sari"
+          ],
+          [
+            28,
+            "Hasan"
+          ]
+        ],
+        "role": "Advokat · simulasi",
+        "shirt": "blue"
+      },
+      "Hasan": {
+        "template": "Petani",
+        "keys": [
+          [
+            0,
+            4.4,
+            3.4,
+            0,
+            0
+          ],
+          [
+            23,
+            4.4,
+            3.4,
+            0,
+            0
+          ],
+          [
+            26,
+            2.55,
+            3.1,
+            0,
+            0
+          ],
+          [
+            28,
+            2.55,
+            3.1,
+            0,
+            1
+          ],
+          [
+            36,
+            2.55,
+            3.1,
+            0,
+            1
+          ]
+        ],
+        "look": [
+          [
+            0,
+            "Arif"
+          ],
+          [
+            11,
+            "Sari"
+          ],
+          [
+            20,
+            "Laras"
+          ],
+          [
+            28,
+            "Sari"
+          ]
+        ],
+        "role": "Hakim · simulasi",
+        "shirt": "ochre"
+      }
+    }
+  }
+]

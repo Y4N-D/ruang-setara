@@ -1,0 +1,40 @@
+[
+ {"id":"media-sosial","duration":28,
+  "beats":[{"actor":"Dio","start":0.6,"end":5.4,"text":"Cuma bercanda. Videonya sudah ramai!"},{"actor":"Raka","start":6,"end":10.5,"text":"Aku tidak mengizinkan videoku dibagikan."},{"actor":"Seno","start":11,"end":16.8,"text":"Dia jadi menjauh dari teman-temannya…"},{"actor":"Mira","start":20,"end":27,"text":"Raka, kamu mau cerita?"}],
+  "moments":[[0,"Dio memperlihatkan unggahannya."],[6,"Raka berbicara di dekat Seno."],[11,"Raka menjauh dari percakapan."],[15,"Mira mendekat untuk menemani Raka."],[18,"Mira duduk di samping Raka."],[20,"Mira membuka percakapan dengan Raka."]],
+  "actors":{
+   "Dio":{"keys":[[0,2.75,0.65,-0.8,0],[10,2.75,0.65,-0.8,0],[16,2.75,0.65,-1.1,0],[28,2.75,0.65,-1.1,0]],"look":[[0,"Raka"],[12,"Seno"],[20,"Mira"]]},
+   "Raka":{"keys":[[0,0.85,-0.3,1,0],[10,0.85,-0.3,1,0],[10.7,0.85,-0.3,-2.55,0],[14,0.05,0.75,0,0],[15.6,0.05,1.13,0,1],[28,0.05,1.13,0,1]],"look":[[0,"Dio"],[5.6,"Seno"],[11,null],[19,"Mira"]]},
+   "Seno":{"keys":[[0,1.9,0.15,-1.1,0],[12,1.9,0.15,-1.1,0],[14,1.7,0.4,-1.1,0],[28,1.7,0.4,-1.1,0]],"look":[[0,"Dio"],[5.6,"Raka"],[20,"Mira"]]},
+   "Mira":{"keys":[[0,-1.8,1.05,1.05,0],[15,-1.8,1.05,1.05,0],[18,-0.6,0.75,0,0],[19.6,-0.6,1.23,0,1],[28,-0.6,1.23,0,1]],"look":[[0,"Raka"],[15,null],[19.5,"Raka"]]}
+  }
+ },
+ {"id":"perundungan","duration":28,
+  "beats":[{"actor":"Bima","start":0.6,"end":5.3,"text":"Kalau setia kawan, ikut kami!"},{"actor":"Ari","start":6.2,"end":10.4,"text":"Aku takut. Aku sebenarnya tidak mau."},{"actor":"Nadia","start":13,"end":18,"text":"Kamu tidak harus menghadapinya sendirian."},{"actor":"Guru","start":21,"end":27,"text":"Silakan cerita. Bapak siap mendengarkan."}],
+  "moments":[[0,"Bima mendekati Ari; Reno berada di dekatnya."],[6,"Ari mundur dan menyampaikan penolakannya."],[10.5,"Nadia mendekat untuk mendampingi Ari."],[18,"Nadia dan Ari menuju guru BK."],[21,"Guru menyambut dan mendengarkan mereka."]],
+  "actors":{
+   "Ari":{"keys":[[0,0.65,0.5,1,0],[6,0.65,0.5,1,0],[9,0.05,0.7,0.2,0],[18,0.05,0.7,-0.5,0],[21,0.05,1.6,0.2,0],[28,0.05,1.6,0.2,0]],"look":[[0,"Bima"],[10,"Nadia"],[19,"Guru"]]},
+   "Bima":{"keys":[[0,1.9,0.6,-1.2,0],[2.5,1.45,0.6,-1.2,0],[18,1.45,0.6,-1.2,0],[21,1.9,0.7,-1,0],[28,1.9,0.7,-1,0]],"look":[[0,"Ari"],[13,"Nadia"],[21,"Guru"]]},
+   "Reno":{"keys":[[0,2.9,1.2,-0.9,0],[18,2.9,1.2,-0.9,0],[21,3.2,1.6,-1,0],[28,3.2,1.6,-1,0]],"look":[[0,"Bima"],[6,"Ari"],[18,"Guru"]]},
+   "Nadia":{"keys":[[0,-1.6,-0.1,1,0],[10.5,-1.6,-0.1,1,0],[13,-0.65,0.5,1,0],[18,-0.65,0.5,1,0],[21,-0.8,1.5,0.7,0],[28,-0.8,1.5,0.7,0]],"look":[[0,"Ari"],[18,"Guru"]]},
+   "Guru":{"keys":[[0,-1.3,2.7,0.1,0],[19,-1.3,2.7,0.1,0],[21,-0.35,2.3,0.2,0],[28,-0.35,2.3,0.2,0]],"look":[[0,"Ari"],[18,"Nadia"],[22,"Ari"]]}
+  }
+ },
+ {"id":"lalu-lintas","duration":29,
+  "beats":[{"actor":"Siswa","start":0.6,"end":5.8,"text":"Sekolah jauh. Aku tidak mau terlambat lagi."},{"actor":"Ibu","start":7.5,"end":14.3,"text":"Tetapi kamu belum punya SIM. Helmnya juga belum dipakai."},{"actor":"Siswa","start":15.5,"end":20.4,"text":"Lalu, bagaimana aku bisa berangkat dengan aman?"},{"actor":"Ibu","start":22,"end":28,"text":"Kita cari antar-jemput atau orang dewasa yang bisa mengantar."}],
+  "moments":[[0,"Siswa berhenti di dekat motor yang diparkir."],[4,"Ibu mendekat untuk berbicara."],[7.5,"Siswa berbalik dan mendengarkan Ibu."],[15.5,"Siswa menanyakan pilihan yang lebih aman."],[22,"Keduanya berjalan menuju area antar-jemput."]],
+  "actors":{
+   "Siswa":{"keys":[[0,2.05,-0.05,-0.35,0],[6,2.05,-0.05,-0.35,0],[8,2.05,-0.05,1.1,0],[22,2.05,-0.05,1.1,0],[23,2.05,-0.05,2.95,0],[27,2.3,1.75,2.95,0],[29,2.3,1.75,2.95,0]],"look":[[0,null],[6,"Ibu"],[23,null]]},
+   "Ibu":{"keys":[[0,4,2.4,-0.5,0],[4,4,2.4,-0.5,0],[7,3,0.8,-1.25,0],[22,3,0.8,-1.25,0],[23,3,0.8,2.75,0],[27,3.45,1.9,2.75,0],[29,3.45,1.9,2.75,0]],"look":[[0,"Siswa"],[23,null]]}
+  }
+ },
+ {"id":"lingkungan","duration":28,
+  "beats":[{"actor":"Petani","start":1,"end":6.4,"text":"Lahan ini menjadi sumber penghasilan kami."},{"actor":"Warga","start":8,"end":15,"text":"Air mulai sulit didapat. Saat hujan, rumah kami kebanjiran."},{"actor":"Teman","start":18,"end":27,"text":"Bagaimana kebutuhan warga dan hutan bisa sama-sama dijaga?"}],
+  "moments":[[0,"Petani menjelaskan kebutuhan pengelolaan lahan."],[6.5,"Warga mendekat dari sisi hilir."],[8,"Petani berbalik mendengarkan dampaknya."],[15.5,"Pendamping mendekat untuk mempertemukan keduanya."],[18,"Ketiganya saling mendengarkan dan mencari titik temu."]],
+  "actors":{
+   "Petani":{"keys":[[0,1.8,1.4,-0.65,0],[2.7,1.45,0.75,-0.75,0],[16,1.45,0.75,-0.75,0],[19,1.1,0.65,-1.1,0],[28,1.1,0.65,-1.1,0]],"look":[[0,"Warga"],[18,"Teman"]]},
+   "Warga":{"keys":[[0,-0.3,-0.55,1,0],[6.5,-0.3,-0.55,1,0],[8.5,0.05,-0.2,1,0],[28,0.05,-0.2,1,0]],"look":[[0,"Petani"],[18,"Teman"]]},
+   "Teman":{"keys":[[0,-1.45,0.1,1.1,0],[15.5,-1.45,0.1,1.1,0],[18,-0.65,0.35,1.2,0],[28,-0.65,0.35,1.2,0]],"look":[[0,"Petani"],[8,"Warga"],[18,"Petani"],[23,"Warga"]]}
+  }
+ }
+]
