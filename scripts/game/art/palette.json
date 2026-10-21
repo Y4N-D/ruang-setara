@@ -1,0 +1,13 @@
+{
+  "_catatan": "Palet resmi Sehari Setara (36 warna). Sumber tunggal untuk aset gambar. Token CSS di game.css harus memakai nilai yang sama.",
+  "netral":  {"INK": "#1F2A44", "DUSK": "#3A4A6B", "SLATE": "#6B7A99", "MIST": "#C9D4E5", "CREAM": "#FFF6E0", "WHITE": "#FFFFFF"},
+  "aksen":   {"SUN": "#FFD23F", "MANGO": "#FF9F1C", "CORAL": "#FF6B5B", "ROSE": "#FF8FB8", "BERRY": "#9B5DE5",
+              "TEAL": "#2EC4B6", "LEAF": "#8AD95B", "GRASS": "#3BA55C", "SKYD": "#3A86D9", "NAVY": "#2B3F8C"},
+  "langit":  {"PAGI1": "#9ED8F5", "PAGI2": "#FFF1C9", "PAGI3": "#FFD9A8",
+              "SIANG1": "#6EC6F2", "SIANG2": "#A8E2FA", "SIANG3": "#E8F8FF",
+              "SORE1": "#FFE3A3", "SORE2": "#FFC27A", "SORE3": "#FF9E6B",
+              "MALAM1": "#4A4F9C", "MALAM2": "#6D6FC7", "LAMPU": "#F7D774"},
+  "kulit":   {"SK1": "#FFDDBE", "SK2": "#F1B98A", "SK3": "#C98A5B", "SK4": "#8C5A3C"},
+  "rambut":  {"HR1": "#2B1E1A", "HR2": "#5A3B2E"},
+  "kayu":    {"WOOD": "#C98B4F", "WOODD": "#8A5A33"}
+}
