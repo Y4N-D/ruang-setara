@@ -7,6 +7,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-01 | Selesai (21 Okt 2026) | [F-01-kerangka-halaman.md](specs/F-01-kerangka-halaman.md) | [F-01-hasil.md](tests/F-01-hasil.md) — lulus |
 | F-02 | Selesai (21 Okt 2026) | [F-02-mesin-permainan.md](specs/F-02-mesin-permainan.md) | [F-02-hasil.md](tests/F-02-hasil.md) — lulus |
 | F-03 | Selesai (21 Okt 2026) | [F-03-konten-adegan.md](specs/F-03-konten-adegan.md) | [F-03-hasil.md](tests/F-03-hasil.md) — lulus |
+| F-12 | Selesai (21 Okt 2026) | [F-12-integrasi-aset.md](specs/F-12-integrasi-aset.md) | [F-12-hasil.md](tests/F-12-hasil.md) — lulus |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -18,13 +19,13 @@ Dicatat 21 Okt 2026 atas permintaan pemilik proyek agar tidak terlewat. Setiap p
 | Skrip `content:check` | Skrip, memakai `vitest` | F-03 (ditambahkan 21 Okt 2026) | `app/sehari-setara/__tests__/content.test.ts` |
 | `@playwright/test` | Dependensi pengembangan | F-04 | Skrip `test:e2e`, `playwright.config.ts`, `e2e/sehari-setara.spec.ts`, dan folder hasil Playwright di `.gitignore`. Versi 1.56, agar cocok dengan browser di lingkungan agen. |
 | `@fontsource/press-start-2p`, `@fontsource/pixelify-sans` | Dependensi aplikasi | F-04 | Impor di `github-pages/sehari-setara/main.tsx`, lalu uji keterbacaan di proyektor (PRD bagian 14). |
-| Skrip `assets:build` | Skrip | F-12 | `python scripts/game/art/build_assets.py` (Architecture bagian 4) |
+| Skrip `assets:build` | Skrip | F-12 (ditambahkan 21 Okt 2026) | `python scripts/game/art/build_assets.py` (Architecture bagian 4); `__pycache__/` di `.gitignore` |
 
 Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur pertama sesudah F-01 yang menampilkan antarmuka permainan, sehingga uji ujung ke ujung, tangkapan layar, dan huruf final mulai berguna di sana.
 
 ## Catatan untuk Plan berikutnya
 
-- Plan F-04: F-04 sudah menampilkan latar dan sprite, sedangkan `manifest.ts` baru dibuat di F-12. Perlu diputuskan apakah F-12 dikerjakan lebih dulu.
+- Plan F-04: F-04 sudah menampilkan latar dan sprite, sedangkan `manifest.ts` baru dibuat di F-12. Diputuskan 21 Okt 2026 (Gerbang 1 F-12): F-12 dikerjakan lebih dulu. F-04 cukup memakai kunci manifest dan fungsi `spriteFor` serta `sceneAssets` dari F-12, termasuk untuk pramuat gambar adegan berikutnya (Architecture bagian 8).
 - Plan F-13: F-13 kini juga memuat FR-18, ulangi adegan dan kembali ke adegan sebelumnya (keputusan 21 Okt 2026). Reducer F-02 menjadikan `history` sumber kebenaran, sehingga pembatalan pilihan cukup memotong `history` lalu menghitung ulang.
 - Plan F-11: aktifkan pemeriksaan ketat rujukan (`RILIS=1 npx pnpm@11.25.0 content:check`) di CI sebelum permainan ditautkan dari galeri. Rilis hanya bila semua kotak di `Verifikasi_Rujukan.md` sudah dicentang pemilik proyek.
 - Plan F-05: Design System bagian 7 menyebut bingkai piksel "garis ink 2 px". F-01 membacanya sebagai px CSS. Sebelum panel dibangun, perlu dipastikan apakah yang dimaksud adalah piksel logis panggung.
@@ -135,3 +136,52 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
      - Rujukan adegan 6 "Pasal 28J UUD NRI 1945" diganti "Pasal 28J ayat (1) UUD NRI 1945", sama dengan adegan 3 dan 4.
      - Rujukan "UU No. 2 Tahun 2002 tentang Polri" diganti "UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g".
      - Kedua rujukan itu tetap belum dicentang sampai diverifikasi pemilik proyek di JDIH.
+
+## F-12 — Integrasi aset: `manifest.ts`, uji palet, uji kelengkapan manifest
+- Status: Selesai (21 Okt 2026). Riwayat 21 Okt 2026: direncanakan dan disetujui (balasan `Setuju: F-12`, keenam usulan diterima); spesifikasi disetujui (`Spesifikasi disetujui: F-12`, [F-12-integrasi-aset.md](specs/F-12-integrasi-aset.md)); dibangun; diuji dan lulus ketiga belas kriteria ([laporan](tests/F-12-hasil.md)). Halaman yang terbit tidak berubah, jadi aman digabung ke `main`.
+- Memenuhi:
+  - Architecture bagian 8: `assets/manifest.ts` sebagai satu-satunya pintu masuk aset, lengkap dengan jumlah bingkai, fps, dan ukuran setiap strip, serta anggaran ukuran per aset.
+  - Architecture bagian 12, lapisan Aset: uji Vitest yang memastikan token warna di `game.css` sama dengan `palette.json` dan setiap kunci di `manifest.ts` punya berkas.
+  - AGENTS bagian 7 aturan 1 dan bagian 9: aset hanya lewat manifest, dan setiap aset tercatat di `CREDITS.md`.
+  - Skrip `assets:build` dari tabel "Dependensi dan skrip yang ditunda".
+  - Tidak ada FR yang selesai di F-12. Fitur ini menyiapkan jalan untuk F-04 dan fitur antarmuka sesudahnya.
+- Bergantung pada: F-01 (selesai dan sudah terbit). Uji silang memakai naskah F-03 (selesai).
+- Mengapa sebelum F-04: urutan backlog menempatkan F-04 lebih dulu, tetapi F-04 menampilkan latar dan sprite yang wajib dimuat lewat manifest (AGENTS bagian 7 aturan 1). Bila manifest dibuat di dalam F-04, fitur itu membengkak dan lebih sulit diuji. F-12 berukuran S dan dependensinya sudah selesai, sesuai tujuan tahap Plan (fitur terkecil yang bernilai dan siap). Pemilik proyek condong ke urutan ini (21 Okt 2026); lihat usulan 1.
+- File yang dibuat/diubah:
+  - Baru `app/sehari-setara/assets/manifest.ts`: mengimpor ke-63 PNG dan mengelompokkannya menurut pemakaiannya:
+    - latar, dengan kunci yang sama dengan `Scene.bg` di `scenes.ts` (misalnya `bg_s1_rumah_pagi`), ditambah `bg_title`;
+    - ilustrasi akhir menurut `EndingId`;
+    - strip tokoh `tokoh → pose → { src, frames, fps, w, h }`;
+    - ikon antarmuka, termasuk strip bintang (3 bingkai) dan timbangan (5 bingkai);
+    - bentuk tim, ikon peran, dan ikon emosi.
+
+    Ditambah fungsi pencari kecil yang mengubah satu adegan menjadi daftar asetnya. Fungsi ini dipakai uji sekarang dan panggung di F-04.
+  - Baru `app/sehari-setara/assets/png.d.ts`: deklarasi tipe agar TypeScript menerima impor `*.png`.
+  - Baru `app/sehari-setara/__tests__/assets.test.ts`: uji palet, kelengkapan, dan anggaran (lihat "Isi uji"). Ukuran gambar dibaca dari kepala berkas PNG, tanpa dependensi baru. Spesifikasi menambah `__tests__/asset-checks.ts` untuk fungsi pemeriksa murni, seperti `schema.ts` di F-03.
+  - Diubah `vite.pages.config.ts`: aset game selalu dikeluarkan sebagai berkas berhash dan tidak diselipkan ke JS (usulan 2). Aturannya hanya berlaku untuk `app/sehari-setara/assets/`.
+  - Diubah `package.json`: hanya menambah skrip `"assets:build": "python scripts/game/art/build_assets.py"` (Architecture bagian 4). Dependensi tidak berubah.
+  - Diubah `.gitignore`: menambah `__pycache__/` (usulan 3).
+  - Diubah `docs/sehari-setara/Architecture.md` (bagian 3, 8, dan 12), `Design_System.md` (tabel kit bagian 12), dan `Daftar_Aset.md` (catatan `ikon.py`): usulan 4.
+  - Dokumen: `specs/F-12-integrasi-aset.md`, `tests/F-12-hasil.md`, dan entri ini.
+  - Tidak disentuh: `Game.tsx` dan antarmuka, sehingga halaman yang terbit tidak berubah (manifest baru dipakai layar mulai F-04); naskah dan uji F-03; PNG dan kode kit gambar; file galeri; workflow; `pnpm-lock.yaml`.
+- Isi uji (`assets.test.ts`, ikut berjalan di langkah "Uji game" CI):
+  - Palet: setiap warna di `game.css`, baik token `--ss-*` maupun warna yang ditulis langsung, ada di `palette.json` dengan nilai yang sama.
+  - Kelengkapan: setiap entri manifest punya berkas; setiap PNG di `assets/` terdaftar di manifest (menurut spesifikasi, berkas yang belum terdaftar hanya dilaporkan dan tidak menggagalkan uji); lebar berkas sama dengan jumlah bingkai × lebar bingkai dan tingginya cocok; setiap berkas tercatat di `CREDITS.md`; setiap latar, pasangan tokoh-pose, dan ikon emosi di `scenes.ts` ada di manifest; setiap peran, bentuk tim, dan jenis akhir punya gambar; fps berada dalam rentang Design System bagian 8.
+  - Anggaran (Architecture bagian 8): satu latar ≤ 40 KB, satu strip sprite ≤ 15 KB, seluruh aset ≤ 4 MB.
+- Aset yang dibutuhkan: tidak ada aset baru. Ke-63 PNG (7 latar, 3 ilustrasi akhir, 33 strip dari 11 tokoh, dan 20 gambar antarmuka) sudah Disetujui (Daftar_Aset, 21 Okt 2026) dan tercatat di `CREDITS.md`. Ukuran setiap berkas sudah dicek cocok dengan ukuran bingkai di Daftar_Aset. Placeholder tidak diperlukan.
+- Risiko (angka dari percobaan di salinan sementara di luar repositori, 21 Okt 2026):
+  - Vite menyelipkan gambar di bawah 4 KB ke dalam JS sebagai data URI. Dalam percobaan berkas tiruan yang mengimpor ke-63 PNG, 62 di antaranya terselip dan JS game menjadi 56,2 kB gzip (sekarang 0,5 kB). Bersama React (60,2 kB), 116 dari 150 KB anggaran kode sudah terpakai sebelum antarmuka dibuat. Dengan aturan usulan 2, ke-63 PNG keluar sebagai berkas berhash dengan URL relatif (`new URL(…, import.meta.url)`), JS game hanya 1,4 kB gzip, dan keluaran galeri identik dengan build sekarang.
+  - TypeScript menolak impor PNG tanpa deklarasi (TS2307). Dengan `png.d.ts`, `tsc` seluruh proyek 0 galat. Catatan: Next/Vinext bisa membuat `next-env.d.ts` di komputer pengembang, yang juga mendeklarasikan `*.png`. Berkas itu tidak ada di repositori, dan CI tidak menjalankan `tsc`.
+  - Halaman yang terbit tidak berubah karena manifest belum dipakai layar. Akibatnya, aturan Vite hanya bisa dibuktikan lewat build percobaan yang memuat manifest (usulan 6).
+  - `build_assets.py` menghasilkan 63 PNG dan 43 pratinjau yang identik byte dengan repositori (3 detik), tetapi meninggalkan folder `__pycache__/` yang akan tampil di GitHub Desktop (usulan 3). Di komputer dengan versi Pillow lain, byte PNG bisa berbeda walau gambarnya sama. Uji F-12 memeriksa keberadaan dan ukuran, bukan byte.
+  - Dokumen hanya memberi rentang fps (diam dan bicara 2–4, berjalan 6–8). Nilai pasti per strip, termasuk pose khusus seperti motor dan merekam, diusulkan di spesifikasi.
+  - Architecture bagian 8 menyebut latar sebagai PNG terindeks, sedangkan berkas yang disetujui ber-mode RGBA. Latar terbesar hanya 3,6 KB dari anggaran 40 KB, jadi uji memeriksa ukuran, bukan format, dan kalimat dokumen itu tidak diubah.
+  - Uji membaca kolom path di tabel `CREDITS.md`. Bila format tabel itu berubah, uji gagal dengan pesan yang menyebut berkasnya.
+- Ukuran: S
+- Keputusan Gerbang 1 (21 Okt 2026, balasan `Setuju: F-12`; keenam usulan disetujui):
+  1. F-12 dikerjakan sebelum F-04. F-04 kemudian cukup memakai kunci manifest.
+  2. Aturan di `vite.pages.config.ts` agar aset game dikeluarkan sebagai berkas terpisah. Ini menjaga anggaran kode 150 KB dan sesuai keputusan A5 (nama berhash untuk cache).
+  3. `.gitignore` menambah `__pycache__/`, agar file sementara Python tidak ikut ter-commit setelah `assets:build`.
+  4. Pembaruan dokumen: `ikon.py` dicatat di Architecture bagian 3 dan 8 serta tabel kit Design System bagian 12 (usulan yang masih tertunda di Daftar_Aset); contoh manifest di Architecture bagian 8 memakai kunci nama berkas seperti `scenes.ts`; aturan aset sebagai berkas terpisah dicatat di bagian 8.
+  5. Mekanisme placeholder (AGENTS bagian 5) belum dibuat, karena semua aset sudah Disetujui. Mekanisme dan laporannya di `content:check` dibuat oleh fitur pertama yang membutuhkan aset yang belum disetujui.
+  6. Cara uji: `content:check`, `test`, `build:pages`, `tsc`, ESLint, dan `assets:build`. `test:e2e` belum ada (Playwright dijadwalkan di F-04), jadi diganti pemeriksaan browser seperti F-02 dan F-03, ditambah build percobaan di salinan sementara yang memuat manifest dan menyajikannya di `/ruang-setara/` untuk memastikan gambar termuat tanpa respons 4xx.

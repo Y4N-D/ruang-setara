@@ -2,9 +2,10 @@
 
 | | |
 |---|---|
-| Versi | 0.2 (draf) |
-| Tanggal | 19 Oktober 2026 |
+| Versi | 0.3 (draf) |
+| Tanggal | 21 Oktober 2026 |
 | Perubahan 0.2 | Aset digambar dengan kode oleh Claude (bagian 12); palet 36 warna; desain Nara, Ibu, Gita, dan latar adegan 1 disetujui |
+| Perubahan 0.3 | `ikon.py` masuk tabel kit bagian 12 (F-12) |
 | Berlaku untuk | Semua layar, aset visual, animasi, dan suara game Sehari Setara |
 | Dokumen terkait | `PRD.md`, `Architecture.md`, `AGENTS.md` |
 
@@ -324,6 +325,7 @@ Semua aset gambar **digambar lewat kode** (Python + Pillow) oleh Claude di proye
 | `pixelart.py` | Kanvas dan alat gambar: `r`, `hl`, `vl`, `disc`, `ring`, `dither`, `outline`, `place`, serta `flip`, `strip`, `scanlines`, `palette_violations` |
 | `tokoh.py` | Fungsi tokoh dengan parameter pose dan bingkai (`student`, `mother`, `kid`, …) |
 | `latar.py` | Satu fungsi per latar (`bg_s1_rumah_pagi`, …) |
+| `ikon.py` | Ikon antarmuka, ikon peran, ikon emosi, dan timbangan (`ui_hak`, `role_icon`, `emote`, `ui_timbangan`, …) |
 | `build_assets.py` | Daftar aset (`ASSETS`), pratinjau (`PREVIEW_SCENES`, `POSE_SHEETS`), ekspor PNG, dan pemeriksaan otomatis |
 
 ### Aturan menggambar

@@ -2,12 +2,13 @@
 
 | | |
 |---|---|
-| Versi | 0.4 (draf) |
+| Versi | 0.5 (draf) |
 | Tanggal | 21 Oktober 2026 |
 | Repositori | `ruang-setara` (akun GitHub Y4N-D), diterbitkan lewat GitHub Pages |
 | Perubahan 0.2 | Aset digambar dengan kode (A8, bagian 8); `pixelize.py` diganti kit `scripts/game/art/`; rumus posisi sprite disesuaikan |
 | Perubahan 0.3 | Keputusan A9 (`vitest`); `quizAnswer` di `GameState`; `LANJUT` keluar dari fase `transition`; `history` sebagai sumber kebenaran (F-02) |
 | Perubahan 0.4 | Verifikasi rujukan dicatat di `Verifikasi_Rujukan.md`, sehingga `Reference` menjadi `{ id, text }`; `references.ts`; `CharId` ditambah `siswa` dan `warga`; `RoleInfo` (F-03) |
+| Perubahan 0.5 | `manifest.ts` dengan kunci nama berkas, `spriteFor`, dan `sceneAssets`; aset game selalu menjadi berkas terpisah (`assetsInlineLimit`); `png.d.ts`; `ikon.py` di kit gambar; uji aset `assets.test.ts` (F-12) |
 | Dokumen terkait | `PRD.md`, `Design_System.md`, `AGENTS.md`, `Daftar_Aset.md` |
 
 ---
@@ -77,14 +78,15 @@ ruang-setara/
 │  │  └─ Title.tsx · Setup.tsx · Settings.tsx
 │  ├─ assets/
 │  │  ├─ manifest.ts             # satu-satunya pintu masuk aset
+│  │  ├─ png.d.ts                # tipe impor *.png untuk TypeScript
 │  │  ├─ CREDITS.md              # asal-usul setiap aset
 │  │  ├─ bg/ · sprites/ · ui/ · end/ · sfx/   # PNG hasil build_assets.py
 │  ├─ styles/game.css            # token, bingkai piksel, garis pindai
-│  └─ __tests__/                 # uji unit dan uji konten
+│  └─ __tests__/                 # uji unit, konten, dan aset
 ├─ scripts/game/
 │  ├─ art/                       # kit gambar piksel (sumber utama aset)
 │  │  ├─ palette.json            # 36 warna resmi (sumber tunggal)
-│  │  ├─ pixelart.py · tokoh.py · latar.py
+│  │  ├─ pixelart.py · tokoh.py · latar.py · ikon.py
 │  │  └─ build_assets.py         # ekspor PNG + pratinjau + pemeriksaan
 │  └─ serve-subpath.mjs          # server uji di /ruang-setara/
 └─ e2e/sehari-setara.spec.ts     # uji Playwright
@@ -321,15 +323,20 @@ Bilah atas, panel samping, dan panel bawah adalah HTML biasa di luar panggung, d
 `assets/manifest.ts` adalah satu-satunya tempat aset diimpor. Komponen hanya memakai kunci.
 
 ```ts
-import bgS1 from "./bg/bg_s1_rumah_pagi.png";
-import naraIdle from "./sprites/char_nara_idle.png";
+import bgS1RumahPagi from "./bg/bg_s1_rumah_pagi.png";
+import charNaraIdle from "./sprites/char_nara_idle.png";
 
-export const backgrounds = { s1: bgS1 /* … */ } as const;
+export const backgrounds = { bg_s1_rumah_pagi: bgS1RumahPagi /* … */ } as const;
 
 export const sprites = {
-  nara: { idle: { src: naraIdle, frames: 2, fps: 2, w: 26, h: 62 } /* … */ },
+  nara: { idle: { src: charNaraIdle, frames: 2, fps: 2, w: 26, h: 62 } /* … */ },
 } as const;
 ```
+
+- **Kelompok:** `backgrounds`, `endings` (per `EndingId`), `sprites`, `icons`, `iconStrips` (bintang dan timbangan), `teamIcons`, `roleIcons`, dan `emoteIcons`. Isi lengkapnya ada di `specs/F-12-integrasi-aset.md`.
+- **Kunci** mengikuti cara naskah menyebut aset. Latar memakai nama berkas utuh, sama dengan `Scene.bg` (`bg_s1_rumah_pagi`). Kelompok lain memakai bagian `{nama}` dari pola penamaan di bawah, misalnya `roleIcons.hakim` untuk `role_hakim.png`.
+- **Fungsi:** `spriteFor(char, pose)` mencari strip tanpa membaca properti bawaan objek. `sceneAssets(scene)` mendaftar aset panggung satu adegan tanpa duplikat, untuk uji dan pramuat.
+- Impor `*.png` dikenali TypeScript lewat `assets/png.d.ts`.
 
 ### Penamaan file
 
@@ -351,13 +358,14 @@ export const sprites = {
 | Kode game (gzip) | ≤ 150 KB |
 
 - Gambar: PNG, hanya warna dari palet 36 warna, tanpa piksel semi-transparan (dicek otomatis oleh `build_assets.py`).
+- **Berkas, bukan data URI:** aset game selalu dikeluarkan sebagai berkas berhash di `dist-pages/assets/`. `build.assetsInlineLimit` di `vite.pages.config.ts` mengembalikan `false` untuk berkas di `app/sehari-setara/assets/` (F-12). Tanpa aturan ini, Vite menyelipkan gambar di bawah 4 KB ke JS sebagai data URI, sehingga gambar ikut menghabiskan anggaran kode 150 KB.
 - Suara: MP3 mono, ≤ 30 KB per efek; dimuat setelah interaksi pertama.
 - Huruf: impor dari paket `@fontsource` di `main.tsx`.
 - **Pramuat:** saat adegan *n* tampil, aset adegan *n+1* dimuat dan di-*decode* (`img.decode()`) di latar belakang.
 
 ### Kit gambar (`scripts/game/art/`)
 
-Aset tidak dibuat dengan editor gambar, melainkan **digambar oleh kode**. Rincian aturan menggambar ada di `Design_System.md` bagian 12.
+Aset tidak dibuat dengan editor gambar, melainkan **digambar oleh kode**. Kit terdiri atas `palette.json`, `pixelart.py`, `tokoh.py`, `latar.py`, `ikon.py` (ikon antarmuka, ikon peran, ikon emosi, dan timbangan), dan `build_assets.py`. Rincian aturan menggambar ada di `Design_System.md` bagian 12.
 
 ```
 python scripts/game/art/build_assets.py                 # bangun semua aset + pratinjau
@@ -415,7 +423,7 @@ Keduanya berupa tautan biasa `href="sehari-setara/"` (relatif, tanpa garis mirin
 |---|---|---|
 | Unit | Vitest | `rules.ts` (clamp, giliran, ambang akhir), reducer (setiap transisi, kunci klik ganda, bendera) |
 | Konten | Vitest + zod | Semua aturan skema di bagian 5; daftar rujukan belum terverifikasi |
-| Aset | `build_assets.py` + Vitest | Palet, transparansi, ukuran, anggaran; uji Vitest memastikan token warna di `game.css` sama dengan `palette.json` dan setiap kunci di `manifest.ts` punya file |
+| Aset | `build_assets.py` + Vitest (`assets.test.ts`) | `build_assets.py`: palet per piksel, transparansi, ukuran, dan anggaran total. Vitest: token dan warna `game.css` sesuai Design System bagian 4 dan `palette.json`; manifest cocok dengan berkas (nama, ukuran bingkai, fps), `CREDITS.md`, dan naskah; anggaran per aset dan total; aset game sebagai berkas terpisah. Berkas yang belum terdaftar hanya dilaporkan |
 | Ujung ke ujung | Playwright | Main penuh dengan keyboard di `/ruang-setara/sehari-setara/`; ketiga jenis akhir bisa dicapai; tidak ada respons 4xx; tidak ada galat konsol; tangkapan layar setiap adegan di 1280×720 dan 1024×768 |
 | Manual | Daftar periksa | Proyektor dan keterbacaan dari bangku belakang; laptop lama; keyboard saja; kurangi gerak; suara mati |
 

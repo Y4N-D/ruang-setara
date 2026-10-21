@@ -18,6 +18,10 @@ export default defineConfig({
     outDir: "../dist-pages",
     emptyOutDir: true,
     chunkSizeWarningLimit: 2000,
+    // Aset game selalu menjadi berkas berhash, tidak diselipkan ke JS sebagai data URI
+    // (Architecture bagian 8; F-12). Berkas lain memakai aturan bawaan Vite.
+    assetsInlineLimit: (filePath) =>
+      filePath.replaceAll("\\", "/").includes("/app/sehari-setara/assets/") ? false : undefined,
     // Vite 8: rolldownOptions menggantikan rollupOptions yang sudah usang.
     rolldownOptions: {
       input: {

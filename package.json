@@ -16,7 +16,8 @@
     "build:pages": "vite build --config vite.pages.config.ts",
     "preview:pages": "vite preview --config vite.pages.config.ts",
     "test": "vitest run",
-    "content:check": "vitest run app/sehari-setara/__tests__/content.test.ts"
+    "content:check": "vitest run app/sehari-setara/__tests__/content.test.ts",
+    "assets:build": "python scripts/game/art/build_assets.py"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

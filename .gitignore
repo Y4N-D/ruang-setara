@@ -45,3 +45,6 @@ next-env.d.ts
 /outputs/
 /work/
 /dist-pages/
+
+# python (kit gambar Sehari Setara)
+__pycache__/
