@@ -29,6 +29,9 @@ jobs:
       - name: Pasang dependensi
         run: npx -y pnpm@11.25.0 install --frozen-lockfile
 
+      - name: Uji game
+        run: npx -y pnpm@11.25.0 test
+
       - name: Build versi statis
         run: npx -y pnpm@11.25.0 build:pages
 

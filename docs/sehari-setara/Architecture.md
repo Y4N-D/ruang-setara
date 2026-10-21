@@ -2,10 +2,11 @@
 
 | | |
 |---|---|
-| Versi | 0.2 (draf) |
-| Tanggal | 19 Oktober 2026 |
+| Versi | 0.3 (draf) |
+| Tanggal | 21 Oktober 2026 |
 | Repositori | `ruang-setara` (akun GitHub Y4N-D), diterbitkan lewat GitHub Pages |
 | Perubahan 0.2 | Aset digambar dengan kode (A8, bagian 8); `pixelize.py` diganti kit `scripts/game/art/`; rumus posisi sprite disesuaikan |
+| Perubahan 0.3 | Keputusan A9 (`vitest`); `quizAnswer` di `GameState`; `LANJUT` keluar dari fase `transition`; `history` sebagai sumber kebenaran (F-02) |
 | Dokumen terkait | `PRD.md`, `Design_System.md`, `AGENTS.md`, `Daftar_Aset.md` |
 
 ---
@@ -22,6 +23,7 @@
 | A6 | Reaksi tokoh berupa **animasi sprite** (strip PNG + CSS `steps()`), bukan video | Jauh lebih ringan, sesuai gaya retro, mudah direvisi (lihat PRD bagian 9) |
 | A7 | **Tanpa server dan tanpa penyimpanan data siswa** | Hosting statis; privasi siswa di bawah umur |
 | A8 | **Aset digambar dengan kode** (Python + Pillow) di `scripts/game/art/`; PNG hasilnya di-*commit* | Gaya dan tokoh konsisten, warna pasti sesuai palet, revisi cukup mengubah kode. Build web tidak membutuhkan Python karena PNG sudah tersedia |
+| A9 | **Vitest** untuk uji unit dan uji konten, dengan konfigurasi terpisah `vitest.config.ts` | Cepat dan memakai Vite yang sudah ada; konfigurasi terpisah mencegah vitest memuat `vite.config.ts` milik Vinext. Disetujui pemilik proyek 21 Okt 2026 (F-02) |
 
 ## 2. Konteks sistem
 
@@ -191,6 +193,7 @@ export interface GameState {
   history: { sceneId: Scene["id"]; choiceId: ChoiceId; teamId: string; stars: 0 | 1 | 2 }[];
   timer: { duration: number; remaining: number; running: boolean };
   settings: { sound: boolean; reducedMotion: boolean; typewriter: boolean; discussSeconds: 30 | 60 | 90 };
+  quizAnswer: RoleId | null;                // jawaban kuis peran adegan berjalan; null sebelum dijawab
 }
 ```
 
@@ -219,8 +222,8 @@ stateDiagram-v2
   impact --> stars: LANJUT [tanpa kuis]
   quiz --> stars: LANJUT
   stars --> transition: BERI_BINTANG(0|1|2)
-  transition --> intro: [adegan berikutnya ada]
-  transition --> ending: [adegan 6 selesai]
+  transition --> intro: LANJUT [adegan berikutnya ada]
+  transition --> ending: LANJUT [adegan 6 selesai]
   ending --> recap: LANJUT
   recap --> reflection: LANJUT
   reflection --> title: MAIN_LAGI
@@ -247,6 +250,8 @@ export function endingFor(m: { hak: number; kewajiban: number }) {
 - Pilihan hanya bisa diambil sekali per adegan; tombol dikunci selama `reaction`, `impact`, dan `transition` untuk mencegah klik ganda.
 - Pengatur waktu hanya berjalan pada fase `discuss`. `useTimer` mengirim `TICK` setiap detik; reducer tidak memakai `setInterval`.
 - Saat waktu habis, fase tetap `discuss`; antarmuka menampilkan "Waktunya memilih".
+- `LANJUT` di fase `quiz` hanya diterima setelah `JAWAB_KUIS`. Jawaban pertama disimpan di `quizAnswer` dan dikosongkan saat adegan berikutnya dimulai.
+- `history` adalah sumber kebenaran. `meters`, `flags`, dan bintang tim dihitung ulang dari `history` setiap kali isinya berubah, sehingga pembatalan pilihan (FR-18, F-13) cukup memotong `history` lalu menghitung ulang.
 
 ## 7. Rendering
 

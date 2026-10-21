@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan game **Sehari Setara** di repositori `ruang-setara`. Baca seluruh file ini sebelum mengubah apa pun.
 
+Versi 0.3 (21 Oktober 2026): FR-18 (ulangi adegan dan kembali ke adegan sebelumnya) masuk ke F-13 atas keputusan pemilik proyek.
 Versi 0.2 (19 Oktober 2026): aset gambar kini digambar dengan kode di `scripts/game/art/`, bukan dibuat dengan Gemini.
 
 ---
@@ -119,7 +120,7 @@ flowchart TD
 | F-10 | Layar judul, pengaturan, prolog | FR-01, 02, 03 | S | F-07 |
 | F-11 | Integrasi dengan galeri Ruang Setara | FR-15 | S | F-09 |
 | F-12 | Integrasi aset: `manifest.ts`, uji palet CSS vs `palette.json`, uji kelengkapan manifest | Architecture §8, §12 | S | F-01 |
-| F-13 | Suara, layar penuh, kurangi gerak | FR-17, 19 | S | F-10 (P1) |
+| F-13 | Suara, layar penuh, kurangi gerak, ulangi dan kembali adegan | FR-17, 18, 19 | M | F-10 (P1) |
 
 Pembuatan aset gambar berjalan **paralel** dan dilacak di `Daftar_Aset.md`, bukan di backlog fitur ini. Selama sebuah aset belum berstatus "Disetujui", fitur memakai **placeholder**: kotak warna dari palet dengan label kunci aset. Placeholder wajib diganti sebelum rilis; `content:check` melaporkan placeholder yang tersisa.
 
