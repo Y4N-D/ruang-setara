@@ -2,11 +2,12 @@
 
 | | |
 |---|---|
-| Versi | 0.3 (draf) |
+| Versi | 0.4 (draf) |
 | Tanggal | 21 Oktober 2026 |
 | Repositori | `ruang-setara` (akun GitHub Y4N-D), diterbitkan lewat GitHub Pages |
 | Perubahan 0.2 | Aset digambar dengan kode (A8, bagian 8); `pixelize.py` diganti kit `scripts/game/art/`; rumus posisi sprite disesuaikan |
 | Perubahan 0.3 | Keputusan A9 (`vitest`); `quizAnswer` di `GameState`; `LANJUT` keluar dari fase `transition`; `history` sebagai sumber kebenaran (F-02) |
+| Perubahan 0.4 | Verifikasi rujukan dicatat di `Verifikasi_Rujukan.md`, sehingga `Reference` menjadi `{ id, text }`; `references.ts`; `CharId` ditambah `siswa` dan `warga`; `RoleInfo` (F-03) |
 | Dokumen terkait | `PRD.md`, `Design_System.md`, `AGENTS.md`, `Daftar_Aset.md` |
 
 ---
@@ -46,6 +47,7 @@ ruang-setara/
 ├─ docs/sehari-setara/
 │  ├─ PRD.md · Design_System.md · Architecture.md
 │  ├─ Daftar_Aset.md             # status setiap aset gambar
+│  ├─ Verifikasi_Rujukan.md      # daftar centang verifikasi rujukan (diisi manusia)
 │  ├─ preview/                   # pratinjau aset (adegan x4, lembar pose x6)
 │  ├─ PLAN.md                    # backlog dan status (dikelola alur Plan)
 │  ├─ specs/F-xx-nama.md         # spesifikasi per fitur
@@ -65,6 +67,7 @@ ruang-setara/
 │  ├─ content/
 │  │  ├─ schema.ts               # skema zod
 │  │  ├─ scenes.ts               # enam adegan
+│  │  ├─ references.ts           # rujukan R-01 dst. (status verifikasi di Verifikasi_Rujukan.md)
 │  │  ├─ endings.ts · roles.ts · copy.ts
 │  ├─ ui/
 │  │  ├─ Stage.tsx · Sprite.tsx · DayArc.tsx · Meters.tsx
@@ -143,12 +146,13 @@ export type TimeOfDay = "pagi" | "siang" | "sore" | "malam";
 export type Tier = "tepat" | "kurang" | "berisiko";
 export type ChoiceId = "A" | "B" | "C";
 export type Flag = "komangDibela";
-export type CharId = "nara" | "ibu" | "gita" | "dimas" | "sinta" | "ratih" | "komang" | "made" | "bayu";
+export type CharId = "nara" | "ibu" | "gita" | "dimas" | "sinta" | "ratih" | "komang" | "made" | "bayu" | "siswa" | "warga";
 export type PoseId = "idle" | "talk" | "happy" | "sad" | string; // pose khusus didaftarkan di manifest
 export type RoleId = "polisi" | "jaksa" | "advokat" | "hakim";
 
 export interface CastSlot { char: CharId; pose: PoseId; x: number; facing: "left" | "right" }
-export interface Reference { text: string; verified: boolean }
+export interface Reference { id: string; text: string }   // status verifikasi di Verifikasi_Rujukan.md
+export interface RoleInfo { id: RoleId; label: string; tugas: string }
 
 export interface Choice {
   id: ChoiceId;
@@ -205,7 +209,8 @@ Aturan skema (`content/schema.ts`), dicek oleh `content:check`:
 - Setiap `impact.rujukan` tidak kosong.
 - Narasi per layar ≤ 3 kalimat; teks pilihan ≤ 140 karakter.
 - Setiap bendera yang dibaca (`textIfFlag`, `narrationIfFlag`) pernah disetel oleh pilihan di adegan sebelumnya.
-- Laporan berisi daftar rujukan `verified: false`. **Rilis diblokir** bila masih ada.
+- Setiap berkas latar, sprite, dan ikon emosi yang dirujuk naskah ada di `app/sehari-setara/assets/`, dan naskah sama dengan PRD bagian 8.
+- Laporan berisi daftar rujukan yang belum dicentang di `docs/sehari-setara/Verifikasi_Rujukan.md`. **Rilis diblokir** bila masih ada (pemeriksaan ketat `RILIS=1`).
 
 ## 6. Mesin permainan
 

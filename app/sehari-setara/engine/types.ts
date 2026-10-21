@@ -6,12 +6,18 @@ export type TimeOfDay = "pagi" | "siang" | "sore" | "malam";
 export type Tier = "tepat" | "kurang" | "berisiko";
 export type ChoiceId = "A" | "B" | "C";
 export type Flag = "komangDibela";
-export type CharId = "nara" | "ibu" | "gita" | "dimas" | "sinta" | "ratih" | "komang" | "made" | "bayu";
+export type CharId =
+  | "nara" | "ibu" | "gita" | "dimas" | "sinta" | "ratih" | "komang" | "made" | "bayu"
+  | "siswa" | "warga"; // siswa: pose merekam/tertawa; warga: pose a/b (F-03)
 export type PoseId = "idle" | "talk" | "happy" | "sad" | string; // pose khusus didaftarkan di manifest
 export type RoleId = "polisi" | "jaksa" | "advokat" | "hakim";
 
 export interface CastSlot { char: CharId; pose: PoseId; x: number; facing: "left" | "right" }
-export interface Reference { text: string; verified: boolean }
+/** Status verifikasi tidak disimpan di kode, melainkan di docs/sehari-setara/Verifikasi_Rujukan.md (F-03). */
+export interface Reference { id: string; text: string }
+
+/** Peran pada kuis adegan 5 (FR-11). */
+export interface RoleInfo { id: RoleId; label: string; tugas: string }
 
 export interface Choice {
   id: ChoiceId;

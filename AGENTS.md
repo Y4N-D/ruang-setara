@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan game **Sehari Setara** di repositori `ruang-setara`. Baca seluruh file ini sebelum mengubah apa pun.
 
+Versi 0.4 (21 Oktober 2026): verifikasi rujukan dicatat di `docs/sehari-setara/Verifikasi_Rujukan.md`, bukan di kode.
 Versi 0.3 (21 Oktober 2026): FR-18 (ulangi adegan dan kembali ke adegan sebelumnya) masuk ke F-13 atas keputusan pemilik proyek.
 Versi 0.2 (19 Oktober 2026): aset gambar kini digambar dengan kode di `scripts/game/art/`, bukan dibuat dengan Gemini.
 
@@ -81,7 +82,7 @@ flowchart TD
 | Langkah | 1) Tulis perilaku dalam format *Diberikan / Ketika / Maka*. 2) Gambarkan setiap status antarmuka (biasa, fokus, nonaktif, kosong, galat). 3) Tulis semua teks Bahasa Indonesia final yang akan tampil. 4) Sebutkan tipe data dan aksi reducer yang terlibat. 5) Daftar aset dengan nama file sesuai konvensi. 6) Tulis rencana uji. 7) Tulis apa yang **tidak** termasuk |
 | Keluaran | `docs/sehari-setara/specs/F-xx-nama.md` (templat 11.2) |
 | Selesai bila | Tidak ada "TBD"; setiap kriteria penerimaan bisa diuji; manusia membalas `Spesifikasi disetujui: F-xx` |
-| Dilarang | Mengarang rujukan pasal baru tanpa tanda `verified: false`; mengubah token Design System |
+| Dilarang | Mengarang rujukan pasal baru, atau menambahkan rujukan tanpa kotak kosong di `Verifikasi_Rujukan.md`; mengubah token Design System |
 
 ### 4.3 Build
 
@@ -154,10 +155,11 @@ python scripts/game/art/build_assets.py  # bangun ulang aset dari kode + pemerik
 - Tidak menyalahkan korban. Tidak menampilkan kekerasan fisik. Tokoh berwenang digambarkan membantu.
 - Tokoh Bayu (pemuda yang dituduh) tidak bersalah dan digambarkan netral.
 - **Rujukan pasal:**
-  - Setiap rujukan baru dibuat dengan `verified: false`.
-  - **Agen dilarang mengubah `verified` menjadi `true`.** Hanya peninjau konten (manusia) yang boleh, setelah mencocokkan dengan naskah resmi di JDIH.
+  - Status verifikasi dicatat di `docs/sehari-setara/Verifikasi_Rujukan.md`, satu kotak centang per rujukan.
+  - Setiap rujukan baru ditambahkan ke daftar itu dengan kotak kosong (`[ ]`).
+  - **Agen dilarang mencentang kotak (`[x]`).** Hanya peninjau konten (manusia) yang boleh, setelah mencocokkan dengan naskah resmi di JDIH. Bila teks sebuah rujukan berubah, agen mengosongkan kotaknya agar diverifikasi ulang.
   - Agen tidak boleh mengarang nomor pasal atau undang-undang. Bila ragu, tulis usulan dengan catatan "perlu verifikasi".
-  - Rilis diblokir selama masih ada rujukan `verified: false`.
+  - Rilis diblokir selama masih ada kotak yang kosong.
 
 ## 9. Aturan aset
 

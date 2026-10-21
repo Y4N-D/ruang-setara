@@ -180,7 +180,7 @@ Sepeda Pak Made hilang dari depan warung. Beberapa warga langsung menuduh Bayu, 
 **Kuis peran (setelah kartu dampak):** "Jika perkara ini sampai ke pengadilan, siapa yang memeriksa, mengadili, dan memutusnya?" Pilihan: Polisi, Jaksa, Advokat, Hakim. Jawaban: Hakim. Setelah dijawab, tampil kartu empat peran: polisi menerima laporan dan menyidik, jaksa menuntut, advokat mendampingi, hakim memutus. Kuis tidak memengaruhi indikator.
 
 Hak dan kewajiban: hak atas kepastian hukum yang adil dan perlakuan yang sama di hadapan hukum; kewajiban menghormati proses hukum.
-Rujukan: Pasal 28D ayat (1), Pasal 28G ayat (1), Pasal 24 UUD NRI 1945; UU No. 2 Tahun 2002 tentang Polri; UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah).
+Rujukan: Pasal 28D ayat (1), Pasal 28G ayat (1), Pasal 24 UUD NRI 1945; UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g; UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah).
 
 ### Adegan 6 — Malam, media sosial (20.00)
 
@@ -196,7 +196,7 @@ Video Komang tadi siang beredar di grup kelas dengan stiker ejekan. Banyak yang 
 | C | Keluar dari grup tanpa berbuat apa-apa | −5 | 0 | kurang tepat |
 
 Hak dan kewajiban: hak atas rasa aman, kehormatan, dan martabat; kewajiban menghormati privasi dan tidak merendahkan orang lain.
-Rujukan: Pasal 28E ayat (3), Pasal 28G ayat (1), Pasal 28J UUD NRI 1945.
+Rujukan: Pasal 28E ayat (3), Pasal 28G ayat (1), Pasal 28J ayat (1) UUD NRI 1945.
 
 ## 9. Aturan permainan
 
@@ -259,7 +259,7 @@ Semua aset gambar **digambar dengan kode oleh Claude** dan disetujui pengembang.
 | Gaya aset tidak konsisten antar-tokoh atau antar-adegan | Semua aset digambar dari kit kode yang sama: palet, proporsi, dan fungsi tokoh dipakai ulang; pemeriksaan otomatis palet dan ukuran |
 | Adegan ramai (jalan raya, kerumunan warga) sulit digambar dengan gaya sederhana | Batasi paling banyak 4 tokoh per adegan; sederhanakan komposisi panggung; perbaiki lewat beberapa putaran pratinjau |
 | Aset tanpa sengaja mirip karakter game yang sudah ada | Tokoh dan latar dirancang orisinal; hanya ciri gaya yang diambil dari acuan; setiap aset ditinjau dengan daftar periksa |
-| Rujukan pasal keliru | Gerbang verifikasi: konten tidak dirilis sebelum `verified: true` dicek manusia di JDIH |
+| Rujukan pasal keliru | Gerbang verifikasi: konten tidak dirilis sebelum semua rujukan dicentang manusia di `Verifikasi_Rujukan.md` setelah dicek di JDIH |
 | Huruf piksel sulit dibaca di proyektor | Uji keterbacaan sejak minggu pertama; siapkan huruf cadangan yang lebih jelas |
 | Waktu pengembangan mepet dengan tenggat 20 November | Kerjakan P0 dulu; P1 hanya bila jadwal aman |
 | Penggambaran tokoh memuat stereotip (misalnya "pendatang") | Tinjauan naskah dan visual; tokoh Bayu digambarkan netral dan ternyata tidak bersalah |
@@ -291,3 +291,5 @@ Semua aset gambar **digambar dengan kode oleh Claude** dan disetujui pengembang.
 | 19 Okt 2026 | Gaya visual: retro 8-bit seperti gambar acuan, tetapi cerah dan ramah; hanya ciri gaya yang diambil |
 | 19 Okt 2026 | Game dibangun sebagai halaman terpisah `sehari-setara/` di build GitHub Pages yang sama |
 | 19 Okt 2026 | **Aset digambar dengan kode oleh Claude**, bukan dengan Gemini; contoh adegan 1 (Nara, Ibu, Gita, dapur pagi) disetujui sebagai acuan gaya |
+| 21 Okt 2026 | Rujukan adegan 5 menjadi UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g; rujukan Pasal 28J di adegan 6 menjadi Pasal 28J ayat (1). Keduanya tetap perlu verifikasi |
+| 21 Okt 2026 | Verifikasi rujukan dicatat pemilik proyek di daftar centang `docs/sehari-setara/Verifikasi_Rujukan.md` |

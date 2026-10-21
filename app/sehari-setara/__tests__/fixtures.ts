@@ -16,7 +16,7 @@ function choice(sceneNo: number, id: ChoiceId, effect: Effect, extra: Partial<Ch
       terjadi: `Akibat pilihan ${id} adegan ${sceneNo}`,
       hak: "Hak tiruan",
       kewajiban: "Kewajiban tiruan",
-      rujukan: [{ text: "Rujukan tiruan", verified: false }],
+      rujukan: [{ id: "R-99", text: "Rujukan tiruan" }],
     },
     ...extra,
   };
