@@ -335,3 +335,45 @@ def role_icon(role):
         c.r(23, 28, 3, 3, WOOD); c.vl(25, 28, 30, WOODD)
         c.r(18, 28, 4, 3, p['skin'])
     c.outline(); return c
+
+
+# ---------------------------------------------------------------------------
+# D-11 Busur hari (F-04): matahari untuk adegan pagi sampai sore, bulan sabit untuk adegan malam.
+# Penanda titik jam berjalan di bilah atas (Design System bagian 1 dan 7).
+# ---------------------------------------------------------------------------
+def ui_matahari():
+    c = C(16, 16)
+    disc = {4: (6, 9), 5: (5, 10), 6: (4, 11), 7: (4, 11), 8: (4, 11), 9: (4, 11), 10: (5, 10), 11: (6, 9)}
+    for y, (x0, x1) in disc.items():
+        c.hl(x0, x1, y, SUN)
+    for y in disc:                                                                   # bayangan kanan bawah
+        for x in range(4, 12):
+            if c.px[x, y] == SUN and x + y >= 18: c.p(x, y, MANGO)
+    c.p(6, 6, WHITE); c.p(7, 6, WHITE); c.p(6, 7, WHITE)                             # kilau
+    for (x, y) in ((7, 1), (7, 13), (1, 7), (13, 7)):                                # sinar tegak dan mendatar
+        c.r(x, y, 2, 2, SUN)
+    for (x, y) in ((2, 2), (3, 3), (13, 2), (12, 3), (2, 13), (3, 12), (13, 13), (12, 12)):   # sinar miring
+        c.p(x, y, SUN)
+    c.outline(); return c
+
+
+def ui_bulan():
+    c = C(16, 16)
+    crescent = ["................",
+                "................",
+                ".....##.........",
+                "....###.........",
+                "...###..........",
+                "..####..........",
+                "..####..........",
+                "..####..........",
+                "..####..........",
+                "..#####.........",
+                "..######........",
+                "...######.......",
+                "....#######.....",
+                ".....#####......"]
+    _mask(c, crescent, CREAM)
+    for y, row in enumerate(crescent):                                               # cahaya hangat di lengkung dalam
+        if "#" in row: c.p(row.rindex("#"), y, LAMPU)
+    c.outline(); return c

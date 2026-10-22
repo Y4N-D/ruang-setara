@@ -2,13 +2,14 @@
 
 | | |
 |---|---|
-| Versi | 0.5 (draf) |
-| Tanggal | 21 Oktober 2026 |
+| Versi | 0.6 (draf) |
+| Tanggal | 22 Oktober 2026 |
 | Repositori | `ruang-setara` (akun GitHub Y4N-D), diterbitkan lewat GitHub Pages |
 | Perubahan 0.2 | Aset digambar dengan kode (A8, bagian 8); `pixelize.py` diganti kit `scripts/game/art/`; rumus posisi sprite disesuaikan |
 | Perubahan 0.3 | Keputusan A9 (`vitest`); `quizAnswer` di `GameState`; `LANJUT` keluar dari fase `transition`; `history` sebagai sumber kebenaran (F-02) |
 | Perubahan 0.4 | Verifikasi rujukan dicatat di `Verifikasi_Rujukan.md`, sehingga `Reference` menjadi `{ id, text }`; `references.ts`; `CharId` ditambah `siswa` dan `warga`; `RoleInfo` (F-03) |
 | Perubahan 0.5 | `manifest.ts` dengan kunci nama berkas, `spriteFor`, dan `sceneAssets`; aset game selalu menjadi berkas terpisah (`assetsInlineLimit`); `png.d.ts`; `ikon.py` di kit gambar; uji aset `assets.test.ts` (F-12) |
+| Perubahan 0.6 | Keputusan A10 (Playwright) dan A11 (huruf `@fontsource`); tata letak layar, bayangan kaki, ikon emosi, vinyet, busur hari, dan pratinjau panggung (bagian 7); `head` dan `floorShadows` di manifest; pramuat di `ui/preload.ts` (F-04) |
 | Dokumen terkait | `PRD.md`, `Design_System.md`, `AGENTS.md`, `Daftar_Aset.md` |
 
 ---
@@ -26,6 +27,8 @@
 | A7 | **Tanpa server dan tanpa penyimpanan data siswa** | Hosting statis; privasi siswa di bawah umur |
 | A8 | **Aset digambar dengan kode** (Python + Pillow) di `scripts/game/art/`; PNG hasilnya di-*commit* | Gaya dan tokoh konsisten, warna pasti sesuai palet, revisi cukup mengubah kode. Build web tidak membutuhkan Python karena PNG sudah tersedia |
 | A9 | **Vitest** untuk uji unit dan uji konten, dengan konfigurasi terpisah `vitest.config.ts` | Cepat dan memakai Vite yang sudah ada; konfigurasi terpisah mencegah vitest memuat `vite.config.ts` milik Vinext. Disetujui pemilik proyek 21 Okt 2026 (F-02) |
+| A10 | **`@playwright/test` 1.56.1** untuk uji ujung ke ujung (`test:e2e`), hanya di lingkungan agen | Versi ini cocok dengan Chromium 141 yang tersedia di lingkungan agen. Uji tidak dijalankan di CI (bagian 4) dan tidak perlu dijalankan pemilik proyek. Disetujui 21 Okt 2026 (F-04) |
+| A11 | **Huruf dari `@fontsource/press-start-2p` dan `@fontsource/pixelify-sans` 5.3.0**, hanya subset latin berbobot 400 | Huruf ikut terbit dari situs sendiri tanpa layanan luar; berkasnya kecil (woff2 7,7 KB dan 12,5 KB). Disetujui 21 Okt 2026 (F-04) |
 
 ## 2. Konteks sistem
 
@@ -72,6 +75,7 @@ ruang-setara/
 │  │  ├─ endings.ts · roles.ts · copy.ts
 │  ├─ ui/
 │  │  ├─ Stage.tsx · Sprite.tsx · DayArc.tsx · Meters.tsx
+│  │  ├─ layout.ts · preload.ts · StagePreview.tsx   # F-04 (pratinjau sementara)
 │  │  ├─ NarrationBox.tsx · ChoicePanel.tsx · ImpactCard.tsx
 │  │  ├─ Timer.tsx · Teams.tsx · StarsAward.tsx · RoleQuiz.tsx
 │  │  ├─ Ending.tsx · Recap.tsx · Reflection.tsx
@@ -89,7 +93,8 @@ ruang-setara/
 │  │  ├─ pixelart.py · tokoh.py · latar.py · ikon.py
 │  │  └─ build_assets.py         # ekspor PNG + pratinjau + pemeriksaan
 │  └─ serve-subpath.mjs          # server uji di /ruang-setara/
-└─ e2e/sehari-setara.spec.ts     # uji Playwright
+├─ e2e/sehari-setara.spec.ts     # uji Playwright
+└─ playwright.config.ts          # webServer: build:pages lalu serve-subpath.mjs
 ```
 
 Semua kelas CSS game memakai awalan `ss-`.
@@ -316,6 +321,16 @@ Diletakkan pada pembungkus panggung yang **tidak** ikut diskalakan, supaya garis
 
 Bilah atas, panel samping, dan panel bawah adalah HTML biasa di luar panggung, dengan ukuran huruf berbasis `--u` (lihat Design System bagian 5). Teks tidak pernah digambar ke dalam gambar.
 
+### Tata letak, lapisan, dan efek (F-04)
+
+- **Tata letak:** layar 16:9 dibagi menjadi bilah atas 8u, area panggung 62u, dan panel bawah 30u. Panel samping (minimal 30u) disediakan untuk F-06 dan F-07. Skala k = `stageScale((177,78 − 60)u, 62u)`, sehingga k hanya bergantung pada tinggi layar: 2 pada 720p dan 768p, 3 pada 1080p, dan 1,984 pada 1024×768 (`ui/layout.ts`).
+- **Lapisan:** latar z 0; bayangan kaki dan tokoh z 20 (semua bayangan sebelum semua tokoh); ikon emosi z 30; vinyet dan garis pindai z 40.
+- **Bayangan kaki:** kotak `(w − 6)` × 2 piksel di y 155, berwarna menurut `floorShadows` di manifest, sama dengan pratinjau adegan yang disetujui.
+- **Ikon emosi:** 8×8, dua piksel di atas titik kepala strip (`head` di manifest, dicerminkan bila tokoh menghadap kiri).
+- **Vinyet:** dua cincin keras 2 dan 4 piksel logis di dalam panggung, masing-masing `ink` 6 %.
+- **Busur hari:** gambar logis 136×22 berskala k di bilah atas. Warna bilah mengikuti waktu adegan, dan ikon matahari atau bulan menandai titik berjalan (Design System bagian 7).
+- **Pratinjau panggung:** `#adegan-N` dan `#adegan-N-a|b|c` di halaman game menampilkan panggung tanpa mesin permainan, sampai alur permainan dibuat (spesifikasi F-04).
+
 ## 8. Manajemen aset
 
 ### Manifest
@@ -360,8 +375,9 @@ export const sprites = {
 - Gambar: PNG, hanya warna dari palet 36 warna, tanpa piksel semi-transparan (dicek otomatis oleh `build_assets.py`).
 - **Berkas, bukan data URI:** aset game selalu dikeluarkan sebagai berkas berhash di `dist-pages/assets/`. `build.assetsInlineLimit` di `vite.pages.config.ts` mengembalikan `false` untuk berkas di `app/sehari-setara/assets/` (F-12). Tanpa aturan ini, Vite menyelipkan gambar di bawah 4 KB ke JS sebagai data URI, sehingga gambar ikut menghabiskan anggaran kode 150 KB.
 - Suara: MP3 mono, ≤ 30 KB per efek; dimuat setelah interaksi pertama.
-- Huruf: impor dari paket `@fontsource` di `main.tsx`.
-- **Pramuat:** saat adegan *n* tampil, aset adegan *n+1* dimuat dan di-*decode* (`img.decode()`) di latar belakang.
+- Huruf: impor `latin-400.css` dari paket `@fontsource` di `main.tsx` (A11).
+- **Pramuat:** saat adegan *n* tampil, aset adegan *n+1* dimuat dan di-*decode* (`img.decode()`) di latar belakang. Fungsinya `preloadScene` di `ui/preload.ts`, memakai `sceneAssets` dari manifest (F-04).
+- **Tambahan manifest (F-04):** setiap strip tokoh punya `head` (titik kepala untuk ikon emosi), setiap latar punya warna bayangan kaki di `floorShadows`, dan `backgroundFor` serta `shadowFor` mencari dengan aman. Uji aset mengukur ulang titik kepala dari PNG.
 
 ### Kit gambar (`scripts/game/art/`)
 
@@ -424,7 +440,7 @@ Keduanya berupa tautan biasa `href="sehari-setara/"` (relatif, tanpa garis mirin
 | Unit | Vitest | `rules.ts` (clamp, giliran, ambang akhir), reducer (setiap transisi, kunci klik ganda, bendera) |
 | Konten | Vitest + zod | Semua aturan skema di bagian 5; daftar rujukan belum terverifikasi |
 | Aset | `build_assets.py` + Vitest (`assets.test.ts`) | `build_assets.py`: palet per piksel, transparansi, ukuran, dan anggaran total. Vitest: token dan warna `game.css` sesuai Design System bagian 4 dan `palette.json`; manifest cocok dengan berkas (nama, ukuran bingkai, fps), `CREDITS.md`, dan naskah; anggaran per aset dan total; aset game sebagai berkas terpisah. Berkas yang belum terdaftar hanya dilaporkan |
-| Ujung ke ujung | Playwright | Main penuh dengan keyboard di `/ruang-setara/sehari-setara/`; ketiga jenis akhir bisa dicapai; tidak ada respons 4xx; tidak ada galat konsol; tangkapan layar setiap adegan di 1280×720 dan 1024×768 |
+| Ujung ke ujung | Playwright (A10) | Main penuh dengan keyboard di `/ruang-setara/sehari-setara/`; ketiga jenis akhir bisa dicapai; tidak ada respons 4xx; tidak ada galat konsol; tangkapan layar setiap adegan di 1280×720 dan 1024×768. Sejak F-04: layar kerangka, ke-24 alamat pratinjau (posisi tokoh, bayangan, ikon emosi, bilah atas), skala di empat ukuran, kurangi gerak, pramuat, keyboard, huruf, dan galeri |
 | Manual | Daftar periksa | Proyektor dan keterbacaan dari bangku belakang; laptop lama; keyboard saja; kurangi gerak; suara mati |
 
 `scripts/game/serve-subpath.mjs` menyajikan `dist-pages/` di bawah `/ruang-setara/` agar uji Playwright meniru alamat GitHub Pages yang sebenarnya. Konfigurasi `webServer` Playwright menjalankan `build:pages` lalu skrip ini.

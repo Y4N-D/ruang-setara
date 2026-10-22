@@ -112,6 +112,11 @@ body {
   line-height: 1.3;
   text-decoration: none;
   white-space: nowrap;
+}
+
+/* Sudut terpotong 1 px, dipakai tombol dan tombol kecil pratinjau. */
+.ss-button,
+.ss-chip {
   clip-path: polygon(
     1px 0, calc(100% - 1px) 0, calc(100% - 1px) 1px, 100% 1px,
     100% calc(100% - 1px), calc(100% - 1px) calc(100% - 1px), calc(100% - 1px) 100%, 1px 100%,
@@ -158,7 +163,322 @@ body {
 }
 
 @media (forced-colors: active) {
-  .ss-button {
+  .ss-button,
+  .ss-chip {
     clip-path: none;
+  }
+}
+
+/* Layar kerangka: baris tombol (F-04 menambah tombol pratinjau panggung). */
+.ss-placeholder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: calc(var(--u) * 3);
+}
+
+/* ------------------------------------------------------------------ */
+/* Pratinjau panggung (F-04): bilah atas 8u, area panggung 62u, panel bawah 30u.
+   Panel samping (minimal 30u) dibiarkan kosong untuk F-06 dan F-07.        */
+/* ------------------------------------------------------------------ */
+.ss-preview {
+  box-sizing: border-box;
+  height: 100%;
+  display: grid;
+  grid-template-rows: calc(var(--u) * 8) calc(var(--u) * 62) calc(var(--u) * 30);
+}
+
+/* Bilah atas: warna langit mengikuti waktu adegan (Design System bagian 1, 4, dan 7). */
+.ss-topbar {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 3);
+  padding: 0 calc(var(--u) * 3);
+  overflow: hidden;
+}
+
+.ss-topbar[data-time="pagi"] {
+  background: #FFD9A8;
+  color: var(--ss-ink);
+}
+
+.ss-topbar[data-time="siang"] {
+  background: #6EC6F2;
+  color: var(--ss-ink);
+}
+
+.ss-topbar[data-time="sore"] {
+  background: #FFC27A;
+  color: var(--ss-ink);
+}
+
+/* Teks ink di langit malam hanya 2,0:1; cream mencapai 6,8:1. */
+.ss-topbar[data-time="malam"] {
+  background: #4A4F9C;
+  color: var(--ss-cream);
+}
+
+.ss-topbar-clock {
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 2.8);
+  line-height: 1;
+}
+
+.ss-topbar-counter {
+  margin-left: auto;
+  font-size: calc(var(--u) * 3.1);
+  line-height: 1;
+}
+
+.ss-dayarc {
+  display: block;
+  flex: none;
+  overflow: hidden;
+}
+
+.ss-dayarc-line {
+  fill: currentColor;
+}
+
+.ss-dayarc-fill {
+  fill: var(--ss-sun);
+}
+
+.ss-dayarc-icon {
+  image-rendering: pixelated;
+}
+
+/* Denyut pelan: ikon naik 1 piksel logis selama 0,8 detik, lalu kembali. */
+.ss-dayarc-icon[data-animate="ya"] {
+  animation: ss-pulse 1.6s infinite;
+}
+
+@keyframes ss-pulse {
+  0%,
+  49.99% {
+    transform: translateY(0);
+  }
+  50%,
+  100% {
+    transform: translateY(-1px);
+  }
+}
+
+/* Area dan bingkai panggung. Bingkai tidak diskalakan; isinya diskalakan dengan k. */
+.ss-stage-area {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.ss-stage-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--ss-mist);
+}
+
+/* Garis pindai: satu piksel layar setiap 3 piksel layar, ink 10 % (Architecture bagian 7). */
+.ss-stage-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(31 42 68 / 0.10) 2px 3px);
+}
+
+.ss-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 320px;
+  height: 180px;
+  transform-origin: 0 0;
+}
+
+/* Vinyet: dua cincin keras 2 dan 4 piksel logis, masing-masing ink 6 % (tepi paling gelap sekitar 12 %). */
+.ss-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 2px rgb(31 42 68 / 0.06), inset 0 0 0 4px rgb(31 42 68 / 0.06);
+}
+
+.ss-stage-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 320px;
+  height: 180px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* Bayangan kaki: warna per latar sesuai pratinjau adegan yang disetujui (manifest floorShadows). */
+.ss-shadow {
+  position: absolute;
+  z-index: 20;
+}
+
+.ss-shadow[data-tone="wood-d"] {
+  background: #8A5A33;
+}
+
+.ss-shadow[data-tone="dusk"] {
+  background: #3A4A6B;
+}
+
+.ss-shadow[data-tone="slate"] {
+  background: #6B7A99;
+}
+
+.ss-shadow[data-tone="wood"] {
+  background: #C98B4F;
+}
+
+.ss-sprite {
+  position: absolute;
+  z-index: 20;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  image-rendering: pixelated;
+}
+
+@keyframes ss-strip {
+  to {
+    background-position-x: var(--ss-strip-end);
+  }
+}
+
+.ss-emote {
+  position: absolute;
+  z-index: 30;
+  width: 8px;
+  height: 8px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* Panel bawah pratinjau: teks rata kiri, jarak tepi 6u (Design System bagian 3). */
+.ss-preview-panel {
+  box-sizing: border-box;
+  padding: calc(var(--u) * 2) calc(var(--u) * 6);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.5);
+  overflow: hidden;
+}
+
+.ss-preview-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 calc(var(--u) * 2);
+}
+
+.ss-preview-title {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 2.8);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.ss-preview-title:focus {
+  outline: none;
+}
+
+.ss-preview-title:focus-visible {
+  outline: 2px solid var(--ss-ink);
+  outline-offset: 4px;
+}
+
+.ss-preview-status,
+.ss-preview-label {
+  margin: 0;
+  color: var(--ss-text-2);
+  font-size: calc(var(--u) * 2.5);
+  line-height: 1.3;
+}
+
+.ss-preview-nav {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.5);
+}
+
+.ss-preview-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--u) * 1.5) calc(var(--u) * 4);
+}
+
+.ss-preview-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--u) * 1.5);
+}
+
+/* Tombol kecil pratinjau: bingkai piksel seperti ss-button; ruang kursor ▶ di dalam padding kiri. */
+.ss-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: calc(var(--u) * 0.8) calc(var(--u) * 2) calc(var(--u) * 0.8) calc(var(--u) * 2.8);
+  border: 2px solid var(--ss-ink);
+  background: var(--ss-surface);
+  box-shadow: inset 0 1px 0 0 var(--ss-white);
+  color: var(--ss-text);
+  font-size: calc(var(--u) * 2.8);
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ss-chip::before {
+  content: "\25B6\FE0E";
+  content: "\25B6\FE0E" / "";
+  position: absolute;
+  left: calc(var(--u) * 0.6);
+  font-size: 0.7em;
+  visibility: hidden;
+}
+
+/* Terpilih: latar sun dan garis tampak 4 px tanpa mengubah ukuran tombol. */
+.ss-chip[aria-current] {
+  background: var(--ss-focus);
+  box-shadow: inset 0 0 0 2px var(--ss-ink);
+}
+
+.ss-chip:focus-visible {
+  background: var(--ss-focus);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.ss-chip:focus-visible::before {
+  visibility: visible;
+}
+
+@media (hover: hover) {
+  .ss-chip:hover {
+    background: var(--ss-focus);
+  }
+
+  .ss-chip:hover::before {
+    visibility: visible;
+  }
+}
+
+/* Kurangi gerak: sprite di bingkai pertama dan ikon busur tanpa denyut. */
+@media (prefers-reduced-motion: reduce) {
+  .ss-sprite,
+  .ss-dayarc-icon {
+    animation: none !important;
   }
 }

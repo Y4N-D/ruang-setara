@@ -2,10 +2,11 @@
 
 | | |
 |---|---|
-| Versi | 0.3 (draf) |
-| Tanggal | 21 Oktober 2026 |
+| Versi | 0.4 (draf) |
+| Tanggal | 22 Oktober 2026 |
 | Perubahan 0.2 | Aset digambar dengan kode oleh Claude (bagian 12); palet 36 warna; desain Nara, Ibu, Gita, dan latar adegan 1 disetujui |
 | Perubahan 0.3 | `ikon.py` masuk tabel kit bagian 12 (F-12) |
+| Perubahan 0.4 | Kontras teks bilah atas per waktu (bagian 4); rincian busur hari (bagian 7); ikon matahari dan bulan D-11 (bagian 11) (F-04) |
 | Berlaku untuk | Semua layar, aset visual, animasi, dan suara game Sehari Setara |
 | Dokumen terkait | `PRD.md`, `Architecture.md`, `AGENTS.md` |
 
@@ -150,6 +151,8 @@ Palet terbatas **36 warna**. Aset gambar **hanya** boleh memakai warna di tabel 
 | `dusk` di atas `cream` | 8,2 : 1 | Teks sekunder |
 | `slate` di atas `cream` | 4,0 : 1 | **Jangan** untuk teks kecil |
 | Putih di atas `grass` / `sky-d` | 3,1 / 3,8 : 1 | **Jangan** untuk teks |
+| `ink` di atas bilah pagi `#FFD9A8` / siang `#6EC6F2` / sore `#FFC27A` | 10,7 / 7,5 / 9,0 : 1 | Teks bilah atas (F-04) |
+| `cream` di atas bilah malam `#4A4F9C` | 6,8 : 1 | Teks bilah atas malam; `ink` di sini hanya 2,0 : 1 (F-04) |
 
 Aturan praktis: **teks di atas warna aksen selalu memakai `ink`**, bukan putih.
 
@@ -211,7 +214,7 @@ Semua panel memakai **bingkai piksel**: garis `ink` 2 px, sudut terpotong satu p
 
 | Komponen | Isi dan perilaku |
 |---|---|
-| **Busur hari** | Enam titik jam; titik lewat terisi `sun`, titik berjalan berdenyut pelan, titik berikutnya kosong. Latar bilah mengikuti warna langit adegan |
+| **Busur hari** | Enam titik jam; titik lewat terisi `sun`, titik berjalan berdenyut pelan, titik berikutnya kosong. Latar bilah mengikuti warna langit adegan: pagi `#FFD9A8`, siang `#6EC6F2`, sore `#FFC27A`, malam `#4A4F9C` (teks `cream`). Titik berjalan ditandai ikon matahari (pagi sampai sore) atau bulan (malam) yang naik 1 piksel setiap 0,8 detik; denyut berhenti saat kurangi gerak (F-04) |
 | **Kotak narasi/dialog** | Label nama penutur di tab kiri atas. Teks muncul per huruf (bisa dimatikan); klik atau Spasi menampilkan seluruh teks sekaligus |
 | **Tombol pilihan A/B/C** | Status: biasa (`cream`), fokus/arah (`sun` + kursor ▶), dipilih (`sun` + garis tebal), nonaktif (`mist`, teks `dusk`). Huruf A/B/C dalam kotak di kiri. Pintasan tombol 1/2/3 |
 | **Indikator** | Dua batang 10 segmen dengan ikon dan label: "Hak orang lain terjaga" (ikon perisai-hati, `teal`) dan "Kewajiban dijalankan" (ikon tangan-centang, `sky-d`). Nilai angka di ujung. Saat berubah, segmen terisi atau terkosongkan satu per satu dan muncul angka melayang "+15" atau "−10" |
@@ -305,7 +308,7 @@ Tokoh yang menghadap berlawanan cukup dicerminkan secara horizontal, kecuali det
 | `bg_s5_kampung_sore` | 320×180 | Warung dengan kamera CCTV kecil, pos ronda, langit jingga |
 | `bg_s6_kamar_malam` | 320×180 | Kamar Nara, meja belajar, lampu meja hangat, layar HP menyala (tanpa tulisan) |
 | `end_setara`, `end_hampir`, `end_berat` | 320×180 | Nara di teras malam; suasana bahagia, merenung, dan termenung tetapi berharap |
-| Ikon antarmuka | 16×16 | Perisai-hati, tangan-centang, bintang, jam, suara, layar penuh, empat bentuk tim |
+| Ikon antarmuka | 16×16 | Perisai-hati, tangan-centang, bintang, jam, suara, layar penuh, empat bentuk tim, matahari dan bulan untuk busur hari (D-11) |
 | Ikon peran | 32×32 | Polisi, jaksa, advokat, hakim |
 | Ikon emosi | 8×8 | Hati, tetes keringat, tanda tanya, tanda seru |
 

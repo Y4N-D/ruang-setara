@@ -48,3 +48,7 @@ next-env.d.ts
 
 # python (kit gambar Sehari Setara)
 __pycache__/
+
+# hasil uji ujung ke ujung (Playwright)
+/test-results/
+/playwright-report/

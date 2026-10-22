@@ -4,13 +4,16 @@ import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import pagesConfig from "../../../vite.pages.config";
 import {
+  backgroundFor,
   backgrounds,
   emoteIcons,
   endings,
+  floorShadows,
   iconStrips,
   icons,
   roleIcons,
   sceneAssets,
+  shadowFor,
   spriteFor,
   sprites,
   teamIcons,
@@ -23,14 +26,18 @@ import {
   budgetProblems,
   colorLiteralProblems,
   creditProblems,
+  decodePng,
   flattenPalette,
   groupProblems,
+  headProblems,
   manifestEntries,
   manifestProblems,
   pngSize,
   sceneProblems,
+  shadowProblems,
   tokenProblems,
   unregisteredFiles,
+  type DecodedPng,
   type FileInfo,
   type ManifestGroups,
 } from "./asset-checks";
@@ -199,26 +206,28 @@ describe("manifest, berkas, kredit, dan naskah (AC-1, AC-3)", () => {
   });
 });
 
-describe("berkas yang belum terdaftar hanya dilaporkan (AC-4)", () => {
-  it("keadaan sekarang: tidak ada", () => {
-    expect(unregisteredFiles(ENTRIES, FILES)).toEqual([]);
-    expect(creditProblems(ENTRIES, CREDITS).extra).toEqual([]);
+// Ralat F-12 (dikerjakan di F-04): isi folder boleh memuat aset yang masih ditinjau dan belum terdaftar.
+// Uji di sini tidak bergantung pada isi folder; yang diuji adalah laporan dan tidak adanya kegagalan.
+describe("berkas yang belum terdaftar hanya dilaporkan (F-12 AC-4, ralat F-04 AC-13)", () => {
+  it("berkas yang belum terdaftar di folder sungguhan muncul di ringkasan", () => {
+    const unregistered = unregisteredFiles(ENTRIES, FILES);
+    const lines = assetSummary(ENTRIES, FILES, unregistered, creditProblems(ENTRIES, CREDITS).extra).split("\n");
+    for (const path of unregistered) expect(lines).toContain(`- ${path}`);
   });
 
   it("contoh muncul di ringkasan tanpa menggagalkan uji", () => {
-    const files = new Map(FILES).set("ui/ui_baru.png", { bytes: 100, width: 16, height: 16 });
-    const credits = `${CREDITS}\n| \`ui/ui_lama.png\` | D-99 | Contoh |\n`;
+    const files = new Map(FILES).set("ui/zz_contoh_baru.png", { bytes: 100, width: 16, height: 16 });
+    const credits = `${CREDITS}\n| \`ui/zz_contoh_lama.png\` | D-99 | Contoh |\n`;
     expect(manifestProblems(ENTRIES, files)).toEqual([]);
     expect(budgetProblems(ENTRIES, files)).toEqual([]);
     const { problems, extra } = creditProblems(ENTRIES, credits);
     expect(problems).toEqual([]);
-    expect(extra).toEqual(["ui/ui_lama.png"]);
-    expect(assetSummary(ENTRIES, files, unregisteredFiles(ENTRIES, files), extra).split("\n").slice(1)).toEqual([
-      "Belum terdaftar di manifest:",
-      "- ui/ui_baru.png",
-      "Tercatat di CREDITS.md tetapi belum terdaftar:",
-      "- ui/ui_lama.png",
-    ]);
+    expect(extra).toContain("ui/zz_contoh_lama.png");
+    const unregistered = unregisteredFiles(ENTRIES, files);
+    expect(unregistered).toEqual([...unregisteredFiles(ENTRIES, FILES), "ui/zz_contoh_baru.png"].sort());
+    const lines = assetSummary(ENTRIES, files, unregistered, extra).split("\n");
+    expect(lines).toContain("- ui/zz_contoh_baru.png");
+    expect(lines).toContain("- ui/zz_contoh_lama.png");
   });
 });
 
@@ -228,7 +237,7 @@ describe("anggaran ukuran (AC-5)", () => {
     const summary = assetSummary(ENTRIES, FILES, unregisteredFiles(ENTRIES, FILES), creditProblems(ENTRIES, CREDITS).extra);
     console.log(summary);
     expect(summary).toMatch(
-      /^Aset game: \d+ berkas terdaftar, \d+,\d KB dari anggaran 4 MB\.\nBelum terdaftar di manifest: tidak ada\.\nTercatat di CREDITS\.md tetapi belum terdaftar: tidak ada\.$/,
+      /^Aset game: \d+ berkas terdaftar, \d+,\d KB dari anggaran 4 MB\.\nBelum terdaftar di manifest:( tidak ada\.|(\n- \S+)+)\nTercatat di CREDITS\.md tetapi belum terdaftar:( tidak ada\.|(\n- \S+)+)$/,
     );
   });
 
@@ -240,14 +249,16 @@ describe("anggaran ukuran (AC-5)", () => {
       "bg/bg_s1_rumah_pagi.png: 41,2 KB melebihi anggaran latar 40 KB.",
       "sprites/char_nara_walk.png: 15,5 KB melebihi anggaran strip 15 KB.",
     ]);
-    const besar = new Map([...FILES].map(([path, info]) => [path, { ...info, bytes: 70_000 }]));
+    // Total dibuat tepat 4,2 MB tanpa bergantung pada jumlah aset terdaftar (ralat F-12, F-04 AC-13).
+    const besar = new Map([...FILES].map(([path, info]) => [path, { ...info, bytes: 0 }]));
+    besar.set("bg/bg_title.png", { ...FILES.get("bg/bg_title.png"), bytes: Math.round(4.2 * 1024 * 1024) });
     expect(budgetProblems(ENTRIES, besar)).toContain("Seluruh aset terdaftar 4,2 MB melebihi anggaran 4 MB.");
   });
 });
 
 describe("fungsi pencari (AC-6)", () => {
   it("spriteFor mengembalikan strip yang ada dan undefined untuk yang tidak ada", () => {
-    expect(spriteFor("nara", "walk")).toEqual({ src: sprites.nara.walk.src, frames: 4, fps: 8, w: 26, h: 62 });
+    expect(spriteFor("nara", "walk")).toEqual({ src: sprites.nara.walk.src, frames: 4, fps: 8, w: 26, h: 62, head: { x: 13, y: 2 } });
     expect(spriteFor("dimas", "motor")).toBe(sprites.dimas.motor);
     expect(spriteFor("nara", "terbang")).toBeUndefined();
     expect(spriteFor("nara", "constructor")).toBeUndefined();
@@ -292,5 +303,69 @@ describe("aturan build aset sebagai berkas terpisah (AC-7)", () => {
     expect(limit("C:\\Users\\guru\\ruang-setara\\app\\sehari-setara\\assets\\ui\\ui_star.png", content)).toBe(false);
     expect(limit("/home/guru/ruang-setara/public/stories/0-scene.jpg", content)).toBeUndefined();
     expect(limit("/home/guru/ruang-setara/app/sehari-setara/styles/game.css", content)).toBeUndefined();
+  });
+});
+
+/** Gambar strip tokoh yang terdaftar, dibaca sebagai piksel RGBA (untuk titik kepala). */
+function readSpriteImages(): Map<string, DecodedPng> {
+  const images = new Map<string, DecodedPng>();
+  for (const path of FILES.keys()) {
+    if (!path.startsWith("sprites/")) continue;
+    const png = decodePng(readFileSync(new URL(path, ASSETS)));
+    if (png) images.set(path, png);
+  }
+  return images;
+}
+
+describe("titik kepala dan bayangan kaki (F-04 AC-12)", () => {
+  const IMAGES = readSpriteImages();
+
+  it("pembaca PNG cocok dengan ukuran di kepala berkas", () => {
+    expect(IMAGES.size).toBe(ENTRIES.filter((entry) => entry.head).length);
+    for (const [path, png] of IMAGES) {
+      expect({ path, width: png.width, height: png.height }).toEqual({ path, width: FILES.get(path)?.width, height: FILES.get(path)?.height });
+    }
+    expect(decodePng(new Uint8Array([1, 2, 3]))).toBeUndefined();
+  });
+
+  it("titik kepala ke-33 strip sama dengan hasil pengukuran gambar", () => {
+    expect(ENTRIES.filter((entry) => entry.head)).toHaveLength(33);
+    expect(headProblems(ENTRIES, IMAGES)).toEqual([]);
+  });
+
+  it("titik kepala yang salah tertangkap", () => {
+    const happy = sprites.dimas.happy;
+    expect(headProblems(manifestEntries(withSprite("dimas", "happy", { ...happy, head: { x: 14, y: 1 } })), IMAGES)).toEqual([
+      "Manifest: sprites.dimas.happy titik kepala (14, 1), seharusnya (19, 1) menurut gambar.",
+    ]);
+    const sinta = sprites.sinta.idle;
+    expect(headProblems(manifestEntries(withSprite("sinta", "idle", { ...sinta, head: { x: 13, y: 3 } })), IMAGES)).toEqual([
+      "Manifest: sprites.sinta.idle titik kepala (13, 3), seharusnya (13,5, 3) menurut gambar.",
+    ]);
+  });
+
+  it("setiap latar punya warna bayangan dengan aturan CSS-nya", () => {
+    expect(shadowProblems(backgrounds, floorShadows, CSS)).toEqual([]);
+    expect(Object.keys(floorShadows).sort()).toEqual(Object.keys(backgrounds).sort());
+  });
+
+  it("latar tanpa warna bayangan dan aturan CSS yang hilang tertangkap", () => {
+    expect(shadowProblems({ ...backgrounds, bg_s7_contoh: "x" }, floorShadows, CSS)).toEqual([
+      "Manifest: floorShadows belum punya warna untuk bg_s7_contoh.",
+    ]);
+    const rule = '.ss-shadow[data-tone="dusk"]';
+    expect(CSS).toContain(rule);
+    expect(shadowProblems(backgrounds, floorShadows, CSS.split(rule).join(".ss-shadow-lain"))).toEqual([
+      'game.css: tidak ada aturan .ss-shadow[data-tone="dusk"].',
+    ]);
+  });
+
+  it("pencarian latar dan bayangan aman untuk kunci yang tidak ada", () => {
+    expect(backgroundFor("bg_s1_rumah_pagi")).toBe(backgrounds.bg_s1_rumah_pagi);
+    expect(shadowFor("bg_s2_jalan_pagi")).toBe("dusk");
+    for (const key of ["bg_tidak_ada", "constructor", "toString"]) {
+      expect(backgroundFor(key)).toBeUndefined();
+      expect(shadowFor(key)).toBeUndefined();
+    }
   });
 });

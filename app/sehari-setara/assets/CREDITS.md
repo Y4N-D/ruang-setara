@@ -86,6 +86,8 @@ Format atribusi mengikuti `AGENTS.md` bagian 9: "Digambar dengan kode (kit Sehar
 | `ui/ui_team_persegi.png` | D-07 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 21 Oktober 2026 |
 | `ui/ui_team_segitiga.png` | D-07 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 21 Oktober 2026 |
 | `ui/ui_timbangan.png` | D-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 21 Oktober 2026 |
+| `ui/ui_matahari.png` | D-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 22 Oktober 2026 |
+| `ui/ui_bulan.png` | D-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 22 Oktober 2026 |
 
 ## Di luar folder ini
 

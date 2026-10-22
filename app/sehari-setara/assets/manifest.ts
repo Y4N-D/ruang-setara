@@ -61,10 +61,12 @@ import roleAdvokat from "./ui/role_advokat.png";
 import roleHakim from "./ui/role_hakim.png";
 import roleJaksa from "./ui/role_jaksa.png";
 import rolePolisi from "./ui/role_polisi.png";
+import uiBulan from "./ui/ui_bulan.png";
 import uiClock from "./ui/ui_clock.png";
 import uiFullscreen from "./ui/ui_fullscreen.png";
 import uiHak from "./ui/ui_hak.png";
 import uiKewajiban from "./ui/ui_kewajiban.png";
+import uiMatahari from "./ui/ui_matahari.png";
 import uiSoundOff from "./ui/ui_sound_off.png";
 import uiSoundOn from "./ui/ui_sound_on.png";
 import uiStar from "./ui/ui_star.png";
@@ -74,13 +76,18 @@ import uiTeamPersegi from "./ui/ui_team_persegi.png";
 import uiTeamSegitiga from "./ui/ui_team_segitiga.png";
 import uiTimbangan from "./ui/ui_timbangan.png";
 
-/** Strip tokoh: bingkai berjajar mendatar dengan lebar seragam. w dan h adalah ukuran satu bingkai. */
+/**
+ * Strip tokoh: bingkai berjajar mendatar dengan lebar seragam. w dan h adalah ukuran satu bingkai.
+ * head adalah titik kepala di bingkai pertama saat menghadap kanan (spesifikasi F-04): x = pusat mendatar
+ * kepala (boleh setengah), y = baris teratas yang tak transparan. Dipakai untuk ikon emosi; diperiksa uji aset.
+ */
 export interface SpriteStrip {
   readonly src: string;
   readonly frames: number;
   readonly fps: number;
   readonly w: number;
   readonly h: number;
+  readonly head: { readonly x: number; readonly y: number };
 }
 
 /** Strip antarmuka. Waktu animasinya ditentukan fitur pemakainya (bintang F-07, timbangan F-09). */
@@ -104,10 +111,19 @@ export interface AssetRef {
   (bicara atau tertawa), 2 bila hanya tubuh yang bergerak, 8 untuk berjalan, dan 2 untuk strip
   satu bingkai (nilainya tidak berpengaruh). Ukuran bingkai mengikuti Design System bagian 10.
 */
-const anak = (src: string, frames: number, fps: number): SpriteStrip => ({ src, frames, fps, w: 24, h: 48 });
-const smp = (src: string, frames: number, fps: number): SpriteStrip => ({ src, frames, fps, w: 26, h: 62 });
-const dewasa = (src: string, frames: number, fps: number): SpriteStrip => ({ src, frames, fps, w: 30, h: 68 });
-const motor = (src: string, frames: number, fps: number): SpriteStrip => ({ src, frames, fps, w: 56, h: 62 });
+type Head = readonly [x: number, y: number];
+const strip = (w: number, h: number) => (src: string, frames: number, fps: number, [x, y]: Head): SpriteStrip => ({
+  src,
+  frames,
+  fps,
+  w,
+  h,
+  head: { x, y },
+});
+const anak = strip(24, 48);
+const smp = strip(26, 62);
+const dewasa = strip(30, 68);
+const motor = strip(56, 62);
 
 /** Latar 320×180. Kunci = Scene.bg di content/scenes.ts. */
 export const backgrounds = {
@@ -120,6 +136,19 @@ export const backgrounds = {
   bg_title: bgTitle,
 } as const satisfies Readonly<Record<string, string>>;
 
+/** Warna bayangan kaki tokoh per latar, sesuai pratinjau adegan yang disetujui (spesifikasi F-04). */
+export type ShadowTone = "wood-d" | "dusk" | "slate" | "wood";
+
+export const floorShadows = {
+  bg_s1_rumah_pagi: "wood-d",
+  bg_s2_jalan_pagi: "dusk",
+  bg_s3_kelas_siang: "slate",
+  bg_s4_koridor_siang: "wood",
+  bg_s5_kampung_sore: "slate",
+  bg_s6_kamar_malam: "wood-d",
+  bg_title: "wood",
+} as const satisfies Readonly<Record<keyof typeof backgrounds, ShadowTone>>;
+
 /** Ilustrasi akhir 320×180 untuk setiap jenis akhir (PRD bagian 9). */
 export const endings = {
   setara: endSetara,
@@ -130,63 +159,63 @@ export const endings = {
 /** Strip tokoh: tokoh → pose → strip. Nama berkas: char_{tokoh}_{pose}.png. */
 export const sprites = {
   nara: {
-    idle: smp(charNaraIdle, 2, 2), // bernapas
-    talk: smp(charNaraTalk, 2, 4), // bicara
-    happy: smp(charNaraHappy, 1, 2),
-    sad: smp(charNaraSad, 1, 2),
-    walk: smp(charNaraWalk, 4, 8), // berjalan
-    phone: smp(charNaraPhone, 2, 2), // bernapas, ibu jari bergerak
+    idle: smp(charNaraIdle, 2, 2, [13, 2]), // bernapas
+    talk: smp(charNaraTalk, 2, 4, [13, 2]), // bicara
+    happy: smp(charNaraHappy, 1, 2, [13, 2]),
+    sad: smp(charNaraSad, 1, 2, [13, 3]),
+    walk: smp(charNaraWalk, 4, 8, [13, 2]), // berjalan
+    phone: smp(charNaraPhone, 2, 2, [13, 2]), // bernapas, ibu jari bergerak
   },
   ibu: {
-    talk: dewasa(charIbuTalk, 2, 4), // bicara
-    happy: dewasa(charIbuHappy, 1, 2),
-    sad: dewasa(charIbuSad, 1, 2),
+    talk: dewasa(charIbuTalk, 2, 4, [14, 0]), // bicara
+    happy: dewasa(charIbuHappy, 1, 2, [14, 0]),
+    sad: dewasa(charIbuSad, 1, 2, [14, 0]),
   },
   gita: {
-    idle: anak(charGitaIdle, 1, 2),
-    happy: anak(charGitaHappy, 1, 2),
-    sad: anak(charGitaSad, 1, 2),
+    idle: anak(charGitaIdle, 1, 2, [12, 1]),
+    happy: anak(charGitaHappy, 1, 2, [12, 1]),
+    sad: anak(charGitaSad, 1, 2, [12, 2]),
   },
   dimas: {
-    motor: motor(charDimasMotor, 2, 4), // bicara sambil menepuk jok
-    happy: motor(charDimasHappy, 1, 2),
-    sad: motor(charDimasSad, 1, 2),
+    motor: motor(charDimasMotor, 2, 4, [19, 1]), // bicara sambil menepuk jok
+    happy: motor(charDimasHappy, 1, 2, [19, 1]),
+    sad: motor(charDimasSad, 1, 2, [19, 2]),
   },
   sinta: {
-    idle: smp(charSintaIdle, 2, 2), // bernapas
-    talk: smp(charSintaTalk, 2, 4), // bicara
-    happy: smp(charSintaHappy, 1, 2),
-    sad: smp(charSintaSad, 1, 2),
+    idle: smp(charSintaIdle, 2, 2, [13.5, 3]), // bernapas
+    talk: smp(charSintaTalk, 2, 4, [13.5, 3]), // bicara
+    happy: smp(charSintaHappy, 1, 2, [13.5, 3]),
+    sad: smp(charSintaSad, 1, 2, [13.5, 4]),
   },
   ratih: {
-    idle: dewasa(charRatihIdle, 2, 2), // bernapas
-    talk: dewasa(charRatihTalk, 2, 4), // bicara sambil menjelaskan
+    idle: dewasa(charRatihIdle, 2, 2, [14, 4]), // bernapas
+    talk: dewasa(charRatihTalk, 2, 4, [14, 4]), // bicara sambil menjelaskan
   },
   komang: {
-    idle: smp(charKomangIdle, 2, 2), // bernapas
-    sad: smp(charKomangSad, 2, 2), // menunduk memegang sepatu
-    happy: smp(charKomangHappy, 1, 2),
+    idle: smp(charKomangIdle, 2, 2, [13, 4]), // bernapas
+    sad: smp(charKomangSad, 2, 2, [13, 5]), // menunduk memegang sepatu
+    happy: smp(charKomangHappy, 1, 2, [13, 4]),
   },
   made: {
-    talk: dewasa(charMadeTalk, 2, 4), // bicara sambil menunjuk
-    happy: dewasa(charMadeHappy, 1, 2),
-    sad: dewasa(charMadeSad, 1, 2),
+    talk: dewasa(charMadeTalk, 2, 4, [14, 4]), // bicara sambil menunjuk
+    happy: dewasa(charMadeHappy, 1, 2, [14, 4]),
+    sad: dewasa(charMadeSad, 1, 2, [14, 5]),
   },
   bayu: {
-    idle: dewasa(charBayuIdle, 2, 2), // menggaruk kepala
-    happy: dewasa(charBayuHappy, 1, 2),
+    idle: dewasa(charBayuIdle, 2, 2, [14, 4]), // menggaruk kepala
+    happy: dewasa(charBayuHappy, 1, 2, [14, 4]),
   },
   siswa: {
-    merekam: smp(charSiswaMerekam, 2, 4), // tertawa sambil merekam
-    tertawa: smp(charSiswaTertawa, 2, 4), // tertawa
+    merekam: smp(charSiswaMerekam, 2, 4, [13, 0]), // tertawa sambil merekam
+    tertawa: smp(charSiswaTertawa, 2, 4, [12, 2]), // tertawa
   },
   warga: {
-    a: dewasa(charWargaA, 2, 4), // bicara keras sambil menunjuk
-    b: dewasa(charWargaB, 2, 4), // bicara keras sambil bersedekap
+    a: dewasa(charWargaA, 2, 4, [14, 5]), // bicara keras sambil menunjuk
+    b: dewasa(charWargaB, 2, 4, [13.5, 3]), // bicara keras sambil bersedekap
   },
 } as const satisfies Readonly<Record<CharId, Readonly<Record<string, SpriteStrip>>>>;
 
-/** Ikon antarmuka 16×16. Nama berkas: ui_{kunci}.png. */
+/** Ikon antarmuka 16×16. Nama berkas: ui_{kunci}.png. matahari dan bulan menandai busur hari (D-11, F-04). */
 export const icons = {
   hak: uiHak,
   kewajiban: uiKewajiban,
@@ -194,6 +223,8 @@ export const icons = {
   sound_on: uiSoundOn,
   sound_off: uiSoundOff,
   fullscreen: uiFullscreen,
+  matahari: uiMatahari,
+  bulan: uiBulan,
 } as const satisfies Readonly<Record<string, string>>;
 
 /** Strip antarmuka. Nama berkas: ui_{kunci}.png. */
@@ -235,7 +266,18 @@ function own<T>(table: Readonly<Record<string, T>>, key: string): T | undefined 
 
 const spriteTable: Readonly<Record<string, Readonly<Record<string, SpriteStrip>>>> = sprites;
 const backgroundTable: Readonly<Record<string, string>> = backgrounds;
+const shadowTable: Readonly<Record<string, ShadowTone>> = floorShadows;
 const emoteTable: Readonly<Record<string, string>> = emoteIcons;
+
+/** URL latar untuk kunci Scene.bg; undefined bila kunci tidak ada. */
+export function backgroundFor(key: string): string | undefined {
+  return own(backgroundTable, key);
+}
+
+/** Warna bayangan kaki untuk kunci Scene.bg; undefined bila kunci tidak ada. */
+export function shadowFor(key: string): ShadowTone | undefined {
+  return own(shadowTable, key);
+}
 
 /** Strip untuk pasangan tokoh-pose; undefined bila pasangan itu tidak ada. */
 export function spriteFor(char: CharId, pose: PoseId): SpriteStrip | undefined {

@@ -8,6 +8,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-02 | Selesai (21 Okt 2026) | [F-02-mesin-permainan.md](specs/F-02-mesin-permainan.md) | [F-02-hasil.md](tests/F-02-hasil.md) — lulus |
 | F-03 | Selesai (21 Okt 2026) | [F-03-konten-adegan.md](specs/F-03-konten-adegan.md) | [F-03-hasil.md](tests/F-03-hasil.md) — lulus |
 | F-12 | Selesai (21 Okt 2026) | [F-12-integrasi-aset.md](specs/F-12-integrasi-aset.md) | [F-12-hasil.md](tests/F-12-hasil.md) — lulus |
+| F-04 | Selesai (22 Okt 2026) | [F-04-panggung.md](specs/F-04-panggung.md) | [F-04-hasil.md](tests/F-04-hasil.md) — lulus |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -17,17 +18,20 @@ Dicatat 21 Okt 2026 atas permintaan pemilik proyek agar tidak terlewat. Setiap p
 |---|---|---|---|
 | `vitest` | Dependensi pengembangan | F-02 (terpasang 21 Okt 2026, versi 5.0.4) | Skrip `test` dan langkah "Uji game" di `.github/workflows/deploy-pages.yml` (Architecture bagian 4). Seri 5.x mendukung Vite 8; versi yang dipilih harus berumur ≥ 7 hari (`minimumReleaseAge` di `pnpm-workspace.yaml`). |
 | Skrip `content:check` | Skrip, memakai `vitest` | F-03 (ditambahkan 21 Okt 2026) | `app/sehari-setara/__tests__/content.test.ts` |
-| `@playwright/test` | Dependensi pengembangan | F-04 | Skrip `test:e2e`, `playwright.config.ts`, `e2e/sehari-setara.spec.ts`, dan folder hasil Playwright di `.gitignore`. Versi 1.56, agar cocok dengan browser di lingkungan agen. |
-| `@fontsource/press-start-2p`, `@fontsource/pixelify-sans` | Dependensi aplikasi | F-04 | Impor di `github-pages/sehari-setara/main.tsx`, lalu uji keterbacaan di proyektor (PRD bagian 14). |
+| `@playwright/test` | Dependensi pengembangan | F-04 (ditambahkan 22 Okt 2026, versi 1.56.1) | Skrip `test:e2e`, `playwright.config.ts`, `e2e/sehari-setara.spec.ts`, dan folder hasil Playwright di `.gitignore`. Versi 1.56, agar cocok dengan browser di lingkungan agen. |
+| `@fontsource/press-start-2p`, `@fontsource/pixelify-sans` | Dependensi aplikasi | F-04 (ditambahkan 22 Okt 2026, versi 5.3.0) | Impor di `github-pages/sehari-setara/main.tsx`, lalu uji keterbacaan di proyektor (PRD bagian 14). Keterbacaan di proyektor menunggu pengecekan pemilik proyek. |
 | Skrip `assets:build` | Skrip | F-12 (ditambahkan 21 Okt 2026) | `python scripts/game/art/build_assets.py` (Architecture bagian 4); `__pycache__/` di `.gitignore` |
 
 Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur pertama sesudah F-01 yang menampilkan antarmuka permainan, sehingga uji ujung ke ujung, tangkapan layar, dan huruf final mulai berguna di sana.
 
 ## Catatan untuk Plan berikutnya
 
-- Plan F-04: F-04 sudah menampilkan latar dan sprite, sedangkan `manifest.ts` baru dibuat di F-12. Diputuskan 21 Okt 2026 (Gerbang 1 F-12): F-12 dikerjakan lebih dulu. F-04 cukup memakai kunci manifest dan fungsi `spriteFor` serta `sceneAssets` dari F-12, termasuk untuk pramuat gambar adegan berikutnya (Architecture bagian 8).
+- Plan F-04: F-04 sudah menampilkan latar dan sprite, sedangkan `manifest.ts` baru dibuat di F-12. Diputuskan 21 Okt 2026 (Gerbang 1 F-12): F-12 dikerjakan lebih dulu. F-04 cukup memakai kunci manifest dan fungsi `spriteFor` serta `sceneAssets` dari F-12, termasuk untuk pramuat gambar adegan berikutnya (Architecture bagian 8). Rencana F-04 ditulis 21 Okt 2026 (entri F-04).
 - Plan F-13: F-13 kini juga memuat FR-18, ulangi adegan dan kembali ke adegan sebelumnya (keputusan 21 Okt 2026). Reducer F-02 menjadikan `history` sumber kebenaran, sehingga pembatalan pilihan cukup memotong `history` lalu menghitung ulang.
 - Plan F-11: aktifkan pemeriksaan ketat rujukan (`RILIS=1 npx pnpm@11.25.0 content:check`) di CI sebelum permainan ditautkan dari galeri. Rilis hanya bila semua kotak di `Verifikasi_Rujukan.md` sudah dicentang pemilik proyek.
+- Plan F-05: sapuan blok piksel saat pergantian adegan (Design System bagian 8) dikerjakan di F-05, fitur pertama yang menjalankan fase transition (keputusan Gerbang 1 F-04 nomor 5).
+- Plan F-05: pratinjau panggung F-04 (`#adegan-N`) adalah layar sementara. Putuskan apakah tetap dipertahankan sebagai alat tinjau setelah alur permainan dibuat.
+- Semua fitur: Tailwind galeri membaca seluruh repositori, termasuk dokumen. Kata lepas yang sama dengan nama kelas Tailwind di kode atau dokumen baru bisa menambah aturan CSS galeri. Uji build membandingkan berkas galeri (F-04, Temuan 2).
 - Plan F-05: Design System bagian 7 menyebut bingkai piksel "garis ink 2 px". F-01 membacanya sebagai px CSS. Sebelum panel dibangun, perlu dipastikan apakah yang dimaksud adalah piksel logis panggung.
 
 ## F-01 — Kerangka halaman game dan build dua halaman
@@ -185,3 +189,65 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
   4. Pembaruan dokumen: `ikon.py` dicatat di Architecture bagian 3 dan 8 serta tabel kit Design System bagian 12 (usulan yang masih tertunda di Daftar_Aset); contoh manifest di Architecture bagian 8 memakai kunci nama berkas seperti `scenes.ts`; aturan aset sebagai berkas terpisah dicatat di bagian 8.
   5. Mekanisme placeholder (AGENTS bagian 5) belum dibuat, karena semua aset sudah Disetujui. Mekanisme dan laporannya di `content:check` dibuat oleh fitur pertama yang membutuhkan aset yang belum disetujui.
   6. Cara uji: `content:check`, `test`, `build:pages`, `tsc`, ESLint, dan `assets:build`. `test:e2e` belum ada (Playwright dijadwalkan di F-04), jadi diganti pemeriksaan browser seperti F-02 dan F-03, ditambah build percobaan di salinan sementara yang memuat manifest dan menyajikannya di `/ruang-setara/` untuk memastikan gambar termuat tanpa respons 4xx.
+
+## F-04 — Panggung: skala, lapisan, sprite, garis pindai, busur hari
+- Status: Selesai (22 Okt 2026). Riwayat 21 Okt 2026: direncanakan dan disetujui (balasan `Setuju: F-04` dan `Izinkan dependensi: @playwright/test, @fontsource/press-start-2p, @fontsource/pixelify-sans`; keenam usulan diterima); spesifikasi ditulis dan ikon D-11 digambar. Riwayat 22 Okt 2026: spesifikasi dan ikon D-11 disetujui (`Spesifikasi disetujui: F-04`, [F-04-panggung.md](specs/F-04-panggung.md)); dibangun; diuji dan lulus kesembilan belas kriteria ([laporan](tests/F-04-hasil.md)). Halaman permainan bawaan tetap layar kerangka, kini dengan tombol ke pratinjau panggung.
+- Memenuhi:
+  - Design System bagian 1: "Langit sehari", yaitu warna bilah atas yang mengikuti waktu adegan, dan busur hari dengan enam titik jam.
+  - Design System bagian 3: panggung logis 320×180 yang diskalakan, garis lantai y = 156, urutan lapisan, dan tata letak layar 16:9 dengan bingkai `ink` untuk layar 4:3.
+  - Design System bagian 6 dan 8: garis pindai, vinyet, piksel tajam, gerak sprite bertahap, dan kurangi gerak (`prefers-reduced-motion`).
+  - Architecture bagian 7 (rumus skala dan sprite), bagian 8 (pramuat gambar adegan berikutnya), bagian 10 (teks alternatif adegan), dan bagian 12 (uji ujung ke ujung mulai dipakai).
+  - PRD bagian 10 (layar 16:9 dan 4:3, empat ukuran uji, kurangi gerak) dan bagian 14 (uji keterbacaan huruf sejak awal).
+  - FR-04 sebagian: keenam adegan sudah bisa dilihat, tetapi belum bisa dimainkan.
+- Bergantung pada: F-01 dan F-12 (selesai dan sudah terbit). Memakai naskah F-03 dan tipe F-02.
+- File yang dibuat/diubah:
+  - Baru `app/sehari-setara/ui/Stage.tsx`: panggung 320×180 berskala dengan lapisan latar, bayangan kaki, tokoh, ikon emosi, garis pindai, dan vinyet. Panggung memakai `role="img"` dengan teks alternatif adegan.
+  - Baru `app/sehari-setara/ui/Sprite.tsx`: strip animasi sesuai Architecture bagian 7, yang berhenti di bingkai pertama bila kurangi gerak aktif.
+  - Baru `app/sehari-setara/ui/DayArc.tsx`: bilah atas berisi busur hari, ikon matahari atau bulan di titik jam berjalan, warna langit, dan "Adegan n/6".
+  - Baru `app/sehari-setara/ui/layout.ts`: fungsi murni untuk skala panggung dan posisi sprite, bayangan, ikon emosi, serta titik busur hari.
+  - Baru `app/sehari-setara/ui/preload.ts`: memuat dan men-*decode* gambar adegan berikutnya lewat `sceneAssets`.
+  - Baru `app/sehari-setara/ui/StagePreview.tsx`: layar pratinjau panggung sementara (usulan 2).
+  - Baru `app/sehari-setara/__tests__/layout.test.ts`: uji unit `layout.ts`.
+  - Baru `playwright.config.ts` dan `e2e/sehari-setara.spec.ts`: uji ujung ke ujung di `/ruang-setara/` (Architecture bagian 12).
+  - Baru `app/sehari-setara/assets/ui/ui_matahari.png` dan `ui_bulan.png` beserta pratinjaunya (usulan 3).
+  - Diubah `app/sehari-setara/Game.tsx`: memilih layar kerangka atau pratinjau menurut alamat.
+  - Diubah `app/sehari-setara/content/copy.ts`: teks bilah atas dan pratinjau.
+  - Diubah `app/sehari-setara/styles/game.css`: kelas panggung, sprite, bilah atas, dan pratinjau. Warna langit diambil dari palet (Design System bagian 4), tanpa token baru.
+  - Diubah `app/sehari-setara/assets/manifest.ts`: warna bayangan kaki per latar, titik kepala untuk ikon emosi, dan dua ikon baru (usulan 4). Ikut diubah `__tests__/asset-checks.ts` dan `assets.test.ts` agar data tambahan itu diperiksa, serta `assets/CREDITS.md`.
+  - Diubah `github-pages/sehari-setara/main.tsx`: impor huruf, hanya subset latin berbobot 400.
+  - Diubah `scripts/game/art/ikon.py` dan `build_assets.py`: gambar dua ikon baru, dikerjakan dalam peran Pembuat aset.
+  - Diubah `package.json` dan `pnpm-lock.yaml`: tiga dependensi (usulan 1) dan skrip `test:e2e`.
+  - Diubah `.gitignore`: folder hasil Playwright (`test-results/`, `playwright-report/`).
+  - Diubah `docs/sehari-setara/Architecture.md` (keputusan A10 dan A11, bagian 3 dan 7), `Design_System.md` (ikon busur hari di bagian 11), `Daftar_Aset.md` (D-11), dan `PLAN.md`.
+  - Dokumen: `specs/F-04-panggung.md`, `tests/F-04-hasil.md`, dan tangkapan layar di `tests/F-04/`.
+  - Tambahan dari spesifikasi: ralat tiga uji F-12 yang keliru menggagalkan uji bila ada aset yang belum terdaftar (tertangkap saat ikon D-11 dibangun), pembaca PNG kecil di `asset-checks.ts` untuk memeriksa titik kepala, dan catatan ralat di `tests/F-12-hasil.md`.
+  - Tidak disentuh: `engine/`, `content/scenes.ts` (posisi tokoh tetap seperti pratinjau yang disetujui), file galeri, `vite.pages.config.ts`, dan workflow. Playwright tidak dijalankan di CI (Architecture bagian 4).
+- Aset yang dibutuhkan:
+  - Tersedia dan Disetujui: enam latar, semua strip tokoh yang dirujuk naskah, dan empat ikon emosi, semuanya lewat manifest F-12.
+  - Belum ada: ikon matahari untuk busur hari. Design System bagian 1 menyebutnya, tetapi daftar ikon di Design System bagian 11, PRD bagian 11, dan Daftar_Aset tidak memuatnya. Lihat usulan 3.
+  - Bayangan kaki: pratinjau adegan yang disetujui menggambar bayangan setinggi 2 piksel di bawah setiap tokoh, dengan warna per latar. Adegan 1 dan 6 memakai `wood-d`, adegan 2 `dusk`, adegan 3 dan 5 `slate`, serta adegan 4 dan layar judul `wood` (sumber: `PREVIEW_SCENES` di `build_assets.py`). Panggung meniru bayangan ini agar tampilannya sama dengan yang sudah disetujui.
+- Risiko (angka dari percobaan di salinan sementara di luar repositori, 21 Okt 2026):
+  - Dependensi:
+    - `@playwright/test` 1.56.1 cocok dengan Chromium 141 di lingkungan agen; uji contoh berjalan. Paket ini menambah 3 paket, ditambah `fsevents` yang opsional dan khusus Mac.
+    - Kedua paket huruf 5.3.0 menambah 2 paket tanpa dependensi lain.
+    - Semua versi berumur lebih dari 7 hari dan lolos kebijakan rantai pasok.
+    - Lockfile bertambah 66 baris dan berkurang 11. Sebagian karena `next` dan `vinext` mendaftarkan Playwright sebagai peer opsional. Sebagian lagi karena pnpm menaikkan tiga paket transitif ke versi terbaru dalam rentangnya: `es-module-lexer` 2.1.0 → 2.3.2, `tinyglobby` 0.2.16 → 0.2.17, dan `@jridgewell/sourcemap-codec` 1.5.5 → 1.6.0. Kenaikan ini juga terjadi bila hanya paket huruf yang dipasang.
+    - Dengan lockfile percobaan, 120 uji tetap lulus dan hasil build identik.
+  - Huruf: subset latin berbobot 400 berukuran 7,7 KB (Pixelify Sans) dan 12,5 KB (Press Start 2P) dalam format woff2. Tampilan layar kerangka yang sudah terbit ikut berubah, karena hurufnya kini benar-benar dimuat. Keterbacaan di proyektor perlu dicek langsung oleh pemilik proyek.
+  - Skala pecahan: pada 1024×768, panggung diperbesar sekitar 1,98 kali, sehingga ukuran piksel tidak seragam. Design System bagian 3 menerima hal ini dengan `image-rendering: pixelated`, dan tangkapan layar akan menunjukkannya.
+  - Ikon emosi belum punya acuan, karena pratinjau adegan yang disetujui tidak memuatnya. Kepala sebagian besar tokoh berada di tengah bingkai (selisih paling banyak 1,5 piksel), tetapi kepala Dimas di atas motor berada 9 piksel di kiri tengah. Spesifikasi akan mengusulkan titik kepala per strip dan menyertakan tangkapan layar setiap reaksi.
+  - Kontras bilah atas di adegan malam: teks `ink` di atas langit malam (`#4A4F9C`) hanya 2,0:1. Spesifikasi akan memakai `cream` (6,8:1) khusus untuk bilah malam. Di langit pagi, siang, dan sore, `ink` mencapai 7,0:1 atau lebih.
+  - Halaman yang terbit berubah: layar kerangka mendapat tautan ke pratinjau, dan pratinjau bisa dibuka siapa pun yang tahu alamatnya. Game belum ditautkan dari galeri (F-11).
+  - Temuan lama tentang keranjang Ibu (Daftar_Aset, Batch A1) akan terlihat di pratinjau adegan 1. Perbaikannya tetap tugas pembuat aset dan menunggu keputusan pemilik proyek.
+  - Uji Playwright hanya berjalan di lingkungan agen. Uji ini tidak dijalankan di CI dan tidak perlu dijalankan pemilik proyek. Tangkapan layar setiap adegan menambah sekitar 0,5 MB ke folder `docs/`.
+- Ukuran: M (batas atas). Sapuan pergantian adegan ditunda (usulan 5) agar ukurannya tetap M.
+- Keputusan Gerbang 1 (21 Okt 2026, balasan `Setuju: F-04` dan `Izinkan dependensi: @playwright/test, @fontsource/press-start-2p, @fontsource/pixelify-sans`; keenam usulan disetujui):
+  1. Dependensi dipasang dengan versi persis: `@playwright/test` 1.56.1 untuk pengembangan, serta `@fontsource/press-start-2p` 5.3.0 dan `@fontsource/pixelify-sans` 5.3.0 untuk aplikasi, termasuk perubahan lockfile di atas. Hanya subset latin berbobot 400 yang diimpor.
+  2. Halaman utama game tetap berupa layar kerangka, dengan tambahan tautan "Lihat pratinjau panggung". Pratinjau dibuka lewat alamat `sehari-setara/#adegan-1` sampai `#adegan-6`, ditambah reaksi A, B, dan C setiap adegan (misalnya `#adegan-4-b`). Pratinjau ini sementara sampai alur permainan dibuat (mulai F-05), dan dipakai untuk uji serta tangkapan layar.
+  3. Ikon busur hari baru: `ui_matahari` untuk adegan pagi sampai sore dan `ui_bulan` untuk adegan malam, masing-masing 16×16. Keduanya digambar dengan kit dalam peran Pembuat aset, lalu pratinjaunya dikirim bersama spesifikasi untuk disetujui di Gerbang 2. Bila disetujui, keduanya dicatat sebagai D-11 dan masuk daftar ikon Design System bagian 11.
+  4. Warna bayangan kaki dan titik kepala untuk ikon emosi disimpan di manifest, sehingga uji aset F-12 ikut memeriksanya.
+  5. Sapuan blok piksel saat pergantian adegan (Design System bagian 8) ditunda ke fitur pertama yang menjalankan fase transition, yaitu F-05.
+  6. Cara uji: `content:check`, `test`, `build:pages`, dan `test:e2e` untuk pertama kalinya.
+     - Uji ujung ke ujung memeriksa keenam adegan di 1280×720 dan 1024×768: respons, galat konsol, skala, posisi tokoh, dan kurangi gerak. Tangkapan layarnya disimpan sebagai bukti.
+     - Ditambah uji unit `layout.ts`, `tsc`, dan ESLint.
+     - Daftar periksa manual AGENTS bagian 9 yang berlaku: tampilan di 1024×768 dan 1920×1080, serta mode kurangi gerak.

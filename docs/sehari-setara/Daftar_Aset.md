@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Versi | 0.1 |
-| Diperbarui | 21 Oktober 2026 |
+| Diperbarui | 22 Oktober 2026 |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (lihat `Design_System.md` bagian 12) |
 | Cara membangun | `python scripts/game/art/build_assets.py` |
 
@@ -84,6 +84,7 @@ Perbarui tabel ini setiap kali sebuah aset selesai atau berubah status. Ukuran t
 | D-08 | `role_polisi/jaksa/advokat/hakim.png` | 32×32 | Ikon peran penegak hukum: potret setengah badan dalam lencana bundar, tanpa lambang instansi. Polisi berseragam dan bertopi cokelat dengan buku laporan; jaksa bertoga hitam, simare hitam, bef putih, dengan berkas tuntutan; advokat bertoga sama dengan tas kerja; hakim bertoga bersimare merah dan berpeci dengan palu sidang | Disetujui (21 Okt) |
 | D-09 | `emote_hati/keringat/tanya/seru.png` | 8×8 | Ikon emosi di atas kepala: hati `coral`, tetes `sky`, tanda tanya putih, tanda seru `sun`, semuanya bergaris luar | Disetujui (21 Okt) |
 | D-10 | `ui_timbangan.png` | 5 × 48×32 | Strip: miring kiri, sedikit kiri, seimbang, sedikit kanan, miring kanan (kemiringan 22°, 10°, 0°). Piring kiri Hak (hati `teal`), piring kanan Kewajiban (centang `sky-d`) | Disetujui (21 Okt) |
+| D-11 | `ui_matahari.png` / `ui_bulan.png` | 16×16 | Penanda titik jam berjalan di busur hari (F-04): matahari `sun` dengan bayangan `mango`, kilau putih, dan delapan sinar untuk adegan pagi sampai sore; bulan sabit `cream` dengan lengkung dalam `lampu` untuk adegan malam; keduanya bergaris luar `ink` | Disetujui (22 Okt) |
 
 ## Catatan
 

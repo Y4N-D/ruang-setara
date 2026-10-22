@@ -2,6 +2,7 @@
 // Semua fungsi murni: menerima teks dan data, lalu mengembalikan pesan. Pembacaan berkas ada di assets.test.ts,
 // sehingga setiap aturan bisa diuji dengan contoh pelanggaran tanpa mengubah berkas sungguhan.
 // Hanya diimpor uji, jadi tidak ikut terbundel.
+import { inflateSync } from "node:zlib";
 import type { AssetRef, EmoteIcon, FrameStrip, SpriteStrip } from "../assets/manifest";
 import type { CharId, EndingId, RoleId, Scene, Team } from "../engine/types";
 
@@ -166,6 +167,7 @@ export interface ManifestEntry {
   readonly strip: boolean; // true: ukuran dari manifest; false: ukuran tetap kelompoknya
   readonly fps?: number; // hanya strip tokoh
   readonly pose?: string; // hanya strip tokoh
+  readonly head?: { readonly x: number; readonly y: number }; // hanya strip tokoh (F-04)
 }
 
 /** Ukuran dan isi berkas di subfolder assets/. Lebar dan tinggi hanya ada untuk PNG. */
@@ -214,6 +216,7 @@ export function manifestEntries(groups: ManifestGroups): ManifestEntry[] {
         strip: true,
         fps: strip.fps,
         pose,
+        head: strip.head,
       });
     }
   }
@@ -371,4 +374,122 @@ export function assetSummary(
     `Belum terdaftar di manifest:${list(unregistered)}`,
     `Tercatat di CREDITS.md tetapi belum terdaftar:${list(extraCredits)}`,
   ].join("\n");
+}
+
+/* ------------------------------------------------------------------ */
+/* Titik kepala dan bayangan kaki (spesifikasi F-04)                    */
+/* ------------------------------------------------------------------ */
+
+/** Piksel RGBA hasil pembacaan PNG. */
+export interface DecodedPng {
+  readonly width: number;
+  readonly height: number;
+  readonly rgba: Uint8Array;
+}
+
+/**
+ * Pembaca PNG kecil untuk aset kit: kedalaman 8 bit, tipe warna 6 (RGBA) atau 2 (RGB), tanpa interlace.
+ * Mengembalikan undefined untuk format lain.
+ */
+export function decodePng(data: Uint8Array): DecodedPng | undefined {
+  const size = pngSize(data);
+  if (!size) return undefined;
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  const idat: Uint8Array[] = [];
+  let bitDepth = 0;
+  let colorType = 0;
+  let interlace = 0;
+  for (let at = 8; at + 8 <= data.byteLength; ) {
+    const length = view.getUint32(at);
+    const type = String.fromCharCode(data[at + 4], data[at + 5], data[at + 6], data[at + 7]);
+    const body = data.subarray(at + 8, at + 8 + length);
+    if (type === "IHDR") [bitDepth, colorType, interlace] = [body[8], body[9], body[12]];
+    if (type === "IDAT") idat.push(body);
+    if (type === "IEND") break;
+    at += 12 + length;
+  }
+  const channels = colorType === 6 ? 4 : colorType === 2 ? 3 : 0;
+  if (bitDepth !== 8 || channels === 0 || interlace !== 0) return undefined;
+  const joined = new Uint8Array(idat.reduce((sum, part) => sum + part.byteLength, 0));
+  idat.reduce((offset, part) => (joined.set(part, offset), offset + part.byteLength), 0);
+  const raw = inflateSync(joined);
+  const stride = size.width * channels;
+  const rows = new Uint8Array(stride * size.height);
+  for (let y = 0; y < size.height; y++) {
+    const rowFilter = raw[y * (stride + 1)]; // jenis penyaringan baris PNG (0–4)
+    const line = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1));
+    for (let i = 0; i < stride; i++) {
+      const a = i >= channels ? rows[y * stride + i - channels] : 0; // kiri
+      const b = y > 0 ? rows[(y - 1) * stride + i] : 0; // atas
+      const c = y > 0 && i >= channels ? rows[(y - 1) * stride + i - channels] : 0; // kiri atas
+      const p = a + b - c;
+      const paeth = Math.abs(p - a) <= Math.abs(p - b) && Math.abs(p - a) <= Math.abs(p - c) ? a : Math.abs(p - b) <= Math.abs(p - c) ? b : c;
+      const predictor = [0, a, b, (a + b) >> 1, paeth][rowFilter] ?? 0;
+      rows[y * stride + i] = (line[i] + predictor) & 0xff;
+    }
+  }
+  if (channels === 4) return { width: size.width, height: size.height, rgba: rows };
+  const rgba = new Uint8Array(size.width * size.height * 4);
+  for (let i = 0, j = 0; i < rows.length; i += 3, j += 4) rgba.set([rows[i], rows[i + 1], rows[i + 2], 255], j);
+  return { width: size.width, height: size.height, rgba };
+}
+
+/**
+ * Titik kepala pada bingkai pertama (spesifikasi F-04): y = baris teratas yang tak transparan;
+ * x = (kolom terkiri + kolom terkanan + 1) / 2 dari piksel tak transparan di enam baris mulai y.
+ */
+export function measureHead(png: DecodedPng, frameW: number): { x: number; y: number } | undefined {
+  const opaque = (x: number, y: number) => png.rgba[(y * png.width + x) * 4 + 3] > 0;
+  let top = -1;
+  for (let y = 0; y < png.height && top < 0; y++) {
+    for (let x = 0; x < frameW; x++) if (opaque(x, y)) { top = y; break; }
+  }
+  if (top < 0) return undefined;
+  let left = Infinity;
+  let right = -Infinity;
+  for (let y = top; y < Math.min(top + 6, png.height); y++) {
+    for (let x = 0; x < frameW; x++) {
+      if (opaque(x, y)) {
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+      }
+    }
+  }
+  return { x: (left + right + 1) / 2, y: top };
+}
+
+const decimalPoint = (value: number) => String(value).replace(".", ",");
+
+/** Titik kepala setiap strip tokoh di manifest harus sama dengan hasil pengukuran gambar. */
+export function headProblems(entries: readonly ManifestEntry[], images: ReadonlyMap<string, DecodedPng>): string[] {
+  const problems: string[] = [];
+  for (const entry of entries) {
+    if (!entry.head) continue;
+    const path = assetPath(entry.src);
+    const png = path === undefined ? undefined : images.get(path);
+    if (!png) continue; // berkas yang tidak ada sudah dilaporkan manifestProblems
+    const measured = measureHead(png, entry.w);
+    if (!measured || measured.x !== entry.head.x || measured.y !== entry.head.y) {
+      const want = measured ? `(${decimalPoint(measured.x)}, ${measured.y})` : "(tidak terbaca)";
+      problems.push(`Manifest: ${entry.label} titik kepala (${decimalPoint(entry.head.x)}, ${entry.head.y}), seharusnya ${want} menurut gambar.`);
+    }
+  }
+  return problems;
+}
+
+/** Setiap latar punya warna bayangan, dan setiap warna yang dipakai punya aturan .ss-shadow[data-tone] di game.css. */
+export function shadowProblems(
+  backgrounds: Readonly<Record<string, string>>,
+  shadows: Readonly<Record<string, string>>,
+  css: string,
+): string[] {
+  const problems: string[] = [];
+  for (const key of Object.keys(backgrounds)) {
+    if (!Object.prototype.hasOwnProperty.call(shadows, key)) problems.push(`Manifest: floorShadows belum punya warna untuk ${key}.`);
+  }
+  const text = stripComments(css);
+  for (const tone of [...new Set(Object.values(shadows))].sort()) {
+    if (!text.includes(`.ss-shadow[data-tone="${tone}"]`)) problems.push(`game.css: tidak ada aturan .ss-shadow[data-tone="${tone}"].`);
+  }
+  return problems;
 }

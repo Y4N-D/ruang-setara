@@ -25,7 +25,7 @@ from latar import (bg_s1_rumah_pagi, bg_s2_jalan_pagi, bg_s3_kelas_siang,   # no
                    bg_s4_koridor_siang, bg_s5_kampung_sore, bg_s6_kamar_malam,
                    bg_title, end_setara, end_hampir, end_berat, TITLE_ZONE, END_SCALE_ZONE)
 from ikon import (ui_hak, ui_kewajiban, ui_star, ui_clock, ui_sound_on, ui_sound_off,   # noqa: E402
-                  ui_fullscreen, ui_team, role_icon, emote, ui_timbangan)
+                  ui_fullscreen, ui_team, role_icon, emote, ui_timbangan, ui_matahari, ui_bulan)
 
 if HERE.parts[-3:] == ("scripts", "game", "art"):      # berada di dalam repositori
     REPO = HERE.parents[2]
@@ -112,6 +112,9 @@ ASSETS = {
     "emote_tanya": ("ui", lambda: emote("tanya").im),
     "emote_seru": ("ui", lambda: emote("seru").im),
     "ui_timbangan": ("ui", lambda: strip([ui_timbangan(i) for i in range(5)])),   # 5 bingkai
+    # Batch D2 (F-04, Ditinjau): penanda busur hari di bilah atas
+    "ui_matahari": ("ui", lambda: ui_matahari().im),
+    "ui_bulan": ("ui", lambda: ui_bulan().im),
 }
 
 # Komposisi pratinjau adegan: latar + (sprite, posisi tengah x, cermin?) [+ warna bayangan kaki, bawaan WOODD]
@@ -284,13 +287,15 @@ POSE_SHEETS = {
     "ikon_timbangan": [("Miring kiri", lambda: ui_timbangan(0)), ("Sedikit kiri", lambda: ui_timbangan(1)),
                        ("Seimbang", lambda: ui_timbangan(2)), ("Sedikit kanan", lambda: ui_timbangan(3)),
                        ("Miring kanan", lambda: ui_timbangan(4))],
+    # Batch D2 (F-04): penanda busur hari
+    "ikon_busur_hari": [("Matahari", ui_matahari), ("Bulan", ui_bulan)],
 }
 
 SIZE_RULES = {"bg": (320, 180), "end": (320, 180)}
 # Ukuran pasti ikon (lebar strip = jumlah bingkai x lebar bingkai)
 ICON_SIZES = {"ui_star": (48, 16), "ui_timbangan": (240, 32)}
 for _n in ("ui_hak", "ui_kewajiban", "ui_clock", "ui_sound_on", "ui_sound_off", "ui_fullscreen",
-           "ui_team_lingkaran", "ui_team_segitiga", "ui_team_persegi", "ui_team_bintang"):
+           "ui_team_lingkaran", "ui_team_segitiga", "ui_team_persegi", "ui_team_bintang", "ui_matahari", "ui_bulan"):
     ICON_SIZES[_n] = (16, 16)
 for _n in ("role_polisi", "role_jaksa", "role_advokat", "role_hakim"):
     ICON_SIZES[_n] = (32, 32)

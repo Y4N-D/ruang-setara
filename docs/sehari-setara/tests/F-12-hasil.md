@@ -110,6 +110,7 @@ Spesifikasi: [`specs/F-12-integrasi-aset.md`](../specs/F-12-integrasi-aset.md). 
 5. **Ketergantungan pada bentuk URL impor di Vitest.** Uji memetakan URL seperti `/app/sehari-setara/assets/bg/bg_title.png` ke berkas. Bila versi Vitest lain mengubah bentuk ini, uji gagal dengan pesan "berkas yang tidak ada", tidak lolos diam-diam.
 6. **Fetch yang dibatalkan di galeri sudah ada sejak sebelum F-01.** Satu fetch `gallery/ruang-setara.glb` dibatalkan (`net::ERR_ABORTED`), sama seperti F-01 Temuan 2. Ini bukan respons 4xx dan bukan galat konsol.
 7. **Belum diuji:** build sungguhan di Windows (aturan path Windows hanya diuji unit) dan jalannya uji baru di GitHub Actions. Hasil CI pertama terlihat pada push berikutnya.
+8. **Ralat (22 Okt 2026, ditemukan saat F-04).** Tiga uji di `assets.test.ts` mewajibkan "tidak ada berkas yang belum terdaftar", dan satu contoh anggaran total bergantung pada jumlah aset terdaftar. Akibatnya, aset yang masih ditinjau akan menggagalkan langkah "Uji game", bertentangan dengan perilaku di spesifikasi F-12. AC-4 dan AC-5 memang lulus pada keadaan 21 Okt 2026, tetapi ujinya terlalu ketat. Perbaikannya dikerjakan di F-04 (AC-13); lihat [`tests/F-04-hasil.md`](F-04-hasil.md).
 
 ## Keputusan: Lulus
 
