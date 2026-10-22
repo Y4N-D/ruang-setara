@@ -26,6 +26,10 @@ const CHECKLIST = read("docs/sehari-setara/Verifikasi_Rujukan.md");
 
 /** Salinan naskah yang boleh diubah untuk uji pelanggaran. */
 const copy = (): Scene[] => structuredClone([...SCENES]);
+/** Jumlah rujukan dihitung dari references.ts agar tidak ditulis mati di uji. */
+const REFERENCE_COUNT = REFERENCES.length;
+/** Kode R-xx sesudah rujukan terakhir, yang belum dimiliki rujukan mana pun. */
+const NEXT_REFERENCE_ID = `R-${String(REFERENCE_COUNT + 1).padStart(2, "0")}`;
 const problemsOf = (scenes: Scene[], references: readonly Reference[] = REFERENCES, roles: readonly RoleInfo[] = ROLES) =>
   contentProblems(scenes, references, roles).join("\n");
 
@@ -73,7 +77,11 @@ describe("naskah memenuhi aturan (AC-3)", () => {
 
   it("aturan 10 dan 11: peran dan rujukan yang tidak sesuai tertangkap", () => {
     expect(problemsOf(copy(), REFERENCES, ROLES.slice(0, 3))).toContain("hakim harus muncul tepat sekali");
-    expect(problemsOf(copy(), [...REFERENCES, { id: "R-13", text: "Rujukan lebih" }])).toContain("R-13 tidak dipakai");
+    // Contoh rujukan tidak dipakai: kode berikutnya yang berurutan, sehingga hanya aturan "dipakai" yang dilanggar.
+    const unused = problemsOf(copy(), [...REFERENCES, { id: NEXT_REFERENCE_ID, text: "Rujukan lebih" }]);
+    expect(unused).toContain(`${NEXT_REFERENCE_ID} tidak dipakai`);
+    expect(unused).not.toContain("harus R-");
+    expect(unused).not.toContain("berbeda dengan references.ts");
     expect(problemsOf(copy(), [REFERENCES[1], REFERENCES[0], ...REFERENCES.slice(2)])).toContain("kode ke-1 harus R-01");
   });
 });
@@ -99,7 +107,9 @@ describe("sama dengan PRD bagian 8 (AC-2)", () => {
 });
 
 describe("rujukan (AC-4, AC-5)", () => {
-  it("references.ts memuat R-01 sampai R-12 sesuai spesifikasi", () => {
+  it("references.ts memuat rujukan sesuai tabel rujukan spesifikasi", () => {
+    // Teks harapan sengaja ditulis lengkap: uji ini menangkap perubahan teks rujukan yang tidak disengaja.
+    // Bila pemilik proyek mengubah rujukan, tabel spesifikasi F-03, Verifikasi_Rujukan.md, dan daftar ini diperbarui bersama.
     expect(REFERENCES.map((r) => `${r.id} ${r.text}`)).toEqual([
       "R-01 Pasal 28B ayat (2) UUD NRI 1945",
       "R-02 UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19",
@@ -110,20 +120,22 @@ describe("rujukan (AC-4, AC-5)", () => {
       "R-07 Pasal 28E ayat (3) UUD NRI 1945",
       "R-08 Pasal 28J ayat (1) UUD NRI 1945",
       "R-09 Pasal 28D ayat (1) UUD NRI 1945",
-      "R-10 Pasal 24 UUD NRI 1945",
-      "R-11 UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g",
+      "R-10 Pasal 24 ayat (1) dan ayat (2) UUD NRI 1945",
+      "R-11 UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g",
       "R-12 UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah)",
+      "R-13 UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 14 ayat (1)",
+      "R-14 UU No. 48 Tahun 2009, Pasal 11 ayat (1)",
     ]);
   });
 
   it("setiap pilihan merujuk kode adegannya", () => {
     const expected: Record<Scene["id"], string> = {
-      s1: "R-01 R-02",
+      s1: "R-01 R-13 R-02",
       s2: "R-03 R-04 R-05 R-06",
       s3: "R-07 R-08",
       s4: "R-01 R-03 R-08",
-      s5: "R-09 R-03 R-10 R-11 R-12",
-      s6: "R-07 R-03 R-08",
+      s5: "R-09 R-03 R-10 R-14 R-11 R-12",
+      s6: "R-03 R-08",
     };
     for (const scene of SCENES) {
       for (const choice of scene.choices) {
@@ -132,7 +144,7 @@ describe("rujukan (AC-4, AC-5)", () => {
     }
   });
 
-  it("Verifikasi_Rujukan.md memuat 12 butir berkotak kosong dengan teks yang sama", () => {
+  it(`Verifikasi_Rujukan.md memuat ${REFERENCE_COUNT} butir berkotak kosong dengan teks yang sama`, () => {
     const entries = parseChecklist(CHECKLIST);
     expect(entries.map((e) => [e.id, e.text, e.checked])).toEqual(REFERENCES.map((r) => [r.id, r.text, false]));
   });
@@ -176,8 +188,14 @@ describe("laporan verifikasi rujukan (AC-7)", () => {
   const statuses = verificationReport(REFERENCES, parseChecklist(CHECKLIST));
 
   it("dicetak di setiap uji tanpa menahan terbitan", () => {
-    console.info(formatReport(statuses));
-    expect(statuses).toHaveLength(12);
+    const report = formatReport(statuses);
+    console.info(report);
+    expect(statuses.map((s) => s.id)).toEqual(REFERENCES.map((r) => r.id));
+    const pending = statuses.filter((s) => !s.verified);
+    expect(report.split("\n")[0]).toBe(
+      `Verifikasi rujukan: ${REFERENCE_COUNT - pending.length} dari ${REFERENCE_COUNT} terverifikasi.`,
+    );
+    for (const status of pending) expect(report).toContain(`- ${status.id} ${status.text} (${status.reason})`);
   });
 
   it.runIf(process.env.RILIS === "1")("mode rilis: semua rujukan sudah terverifikasi", () => {

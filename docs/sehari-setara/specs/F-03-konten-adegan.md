@@ -5,6 +5,7 @@
 | Status | Disetujui 21 Oktober 2026 (`Spesifikasi disetujui: F-03`) |
 | Tanggal | 21 Oktober 2026 |
 | Rencana | `docs/sehari-setara/PLAN.md`, entri F-03 (disetujui 21 Oktober 2026) |
+| Revisi | 22 Oktober 2026: rujukan mengikuti keputusan pemilik proyek (R-07 dilepas dari adegan 6; R-10 dan R-11 diganti; R-13 dan R-14 ditambahkan), dan uji konten disesuaikan. Lihat bagian "Riwayat perubahan" |
 
 ## Ringkasan
 
@@ -64,7 +65,7 @@ Ikon emosi pada reaksi semuanya **[DRAF]** dan mengikuti satu aturan: tingkat *t
 | Pertanyaan | Apa yang sebaiknya Nara lakukan terhadap permintaan Ibu? | **[DRAF]** |
 | Hak yang terdampak | Hak anak atas pengasuhan dan perlindungan. | [PRD, format] |
 | Kewajiban terkait | Kewajiban anak menghormati orang tua dan menyayangi keluarga. | [PRD, format] |
-| Rujukan | R-01, R-02 | [PRD] |
+| Rujukan | R-01, R-13, R-02 | [PRD]; R-13 [Pemilik] |
 
 **Pilihan A** — H −10, K −15, kurang tepat [PRD]
 - Teks [PRD, format]: Menolak karena “itu tugas Ibu”, lalu berangkat sendiri
@@ -176,7 +177,7 @@ Ikon emosi pada reaksi semuanya **[DRAF]** dan mengikuti satu aturan: tingkat *t
 | Pertanyaan | Apa yang sebaiknya Nara lakukan saat warga menuduh Bayu? | **[DRAF]** |
 | Hak yang terdampak | Hak atas kepastian hukum yang adil dan perlakuan yang sama di hadapan hukum. | [PRD, format] |
 | Kewajiban terkait | Kewajiban menghormati proses hukum. | [PRD, format] |
-| Rujukan | R-09, R-03, R-10, R-11, R-12 | [PRD]; R-11 [Pemilik] |
+| Rujukan | R-09, R-03, R-10, R-14, R-11, R-12 | [PRD]; R-10, R-11, R-14 [Pemilik] |
 | Kuis peran | Jika perkara ini sampai ke pengadilan, siapa yang memeriksa, mengadili, dan memutusnya? Jawaban: hakim | [PRD] |
 
 **Pilihan A** — H −20, K −15, berisiko [PRD]
@@ -207,7 +208,7 @@ Ikon emosi pada reaksi semuanya **[DRAF]** dan mengikuti satu aturan: tingkat *t
 | Pertanyaan | Apa yang sebaiknya Nara lakukan dengan video itu? | **[DRAF]** |
 | Hak yang terdampak | Hak atas rasa aman, kehormatan, dan martabat. | [PRD, format] |
 | Kewajiban terkait | Kewajiban menghormati privasi dan tidak merendahkan orang lain. | [PRD, format] |
-| Rujukan | R-07, R-03, R-08 | [PRD]; R-08 [Pemilik] |
+| Rujukan | R-03, R-08 | [PRD]; R-08 [Pemilik]; R-07 dilepas [Pemilik] |
 
 Reaksi adegan 6 memakai pose Nara memegang HP ditambah ikon emosi untuk sementara [Pemilik], sampai varian pakaian rumah tersedia.
 
@@ -229,7 +230,7 @@ Reaksi adegan 6 memakai pose Nara memegang HP ditambah ikon emosi untuk sementar
 
 ### Rujukan
 
-Setiap pasal UUD NRI 1945 dicatat sebagai satu rujukan, karena beberapa dipakai di lebih dari satu adegan. Rujukan undang-undang ditulis seperti di PRD atau keputusan pemilik, satu baris per undang-undang. Jumlahnya 12, bukan 14 seperti perkiraan di rencana: Pasal 28J kini satu rujukan untuk adegan 3, 4, dan 6, dan pasal-pasal UU LLAJ tetap satu baris seperti di PRD.
+Setiap pasal UUD NRI 1945 dicatat sebagai satu rujukan, karena beberapa dipakai di lebih dari satu adegan. Rujukan undang-undang ditulis seperti di PRD atau keputusan pemilik, satu baris per undang-undang. Saat spesifikasi disetujui (21 Oktober 2026) jumlahnya 12: Pasal 28J menjadi satu rujukan untuk adegan 3, 4, dan 6, dan pasal-pasal UU LLAJ tetap satu baris seperti di PRD. Sejak revisi 22 Oktober 2026 jumlahnya 14, karena pemilik proyek menambahkan R-13 dan R-14. Alasan setiap keputusan dicatat di baris "Riwayat" pada `Verifikasi_Rujukan.md`.
 
 | Kode | Teks | Dipakai di | Asal |
 |---|---|---|---|
@@ -239,12 +240,14 @@ Setiap pasal UUD NRI 1945 dicatat sebagai satu rujukan, karena beberapa dipakai 
 | R-04 | Pasal 31 ayat (1) UUD NRI 1945 | Adegan 2 | [PRD] |
 | R-05 | Pasal 27 ayat (1) UUD NRI 1945 | Adegan 2 | [PRD] |
 | R-06 | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 77 ayat (1) dan Pasal 106 ayat (8) | Adegan 2 | [PRD] |
-| R-07 | Pasal 28E ayat (3) UUD NRI 1945 | Adegan 3, 6 | [PRD] |
+| R-07 | Pasal 28E ayat (3) UUD NRI 1945 | Adegan 3 | [PRD]; dilepas dari adegan 6 [Pemilik] |
 | R-08 | Pasal 28J ayat (1) UUD NRI 1945 | Adegan 3, 4, 6 | [PRD]; adegan 6 [Pemilik] |
 | R-09 | Pasal 28D ayat (1) UUD NRI 1945 | Adegan 5 | [PRD] |
-| R-10 | Pasal 24 UUD NRI 1945 | Adegan 5 | [PRD] |
-| R-11 | UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g | Adegan 5 | [Pemilik] |
+| R-10 | Pasal 24 ayat (1) dan ayat (2) UUD NRI 1945 | Adegan 5 | [Pemilik] |
+| R-11 | UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g | Adegan 5 | [Pemilik] |
 | R-12 | UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah) | Adegan 5 | [PRD] |
+| R-13 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 14 ayat (1) | Adegan 1 | [Pemilik] |
+| R-14 | UU No. 48 Tahun 2009, Pasal 11 ayat (1) | Adegan 5 | [Pemilik] |
 
 Ketiga pilihan dalam satu adegan memakai rujukan, "Hak yang terdampak", dan "Kewajiban terkait" yang sama, sesuai baris tingkat adegan di PRD.
 
@@ -261,7 +264,7 @@ Ketiga pilihan dalam satu adegan memakai rujukan, "Hak yang terdampak", dan "Kew
 
 | Keadaan | Pesan |
 |---|---|
-| Ringkasan | `Verifikasi rujukan: <n> dari 12 terverifikasi.` |
+| Ringkasan | `Verifikasi rujukan: <n> dari <jumlah> terverifikasi.`, dengan `<jumlah>` banyaknya rujukan di `references.ts` (kini 14) |
 | Daftar yang belum | `- R-01 Pasal 28B ayat (2) UUD NRI 1945 (belum dicentang)` |
 | Alasan lain | `(tidak ada di daftar)`, `(teks di daftar berbeda)` |
 | Mode rilis gagal | `Rilis diblokir: <n> rujukan belum terverifikasi.` |
@@ -278,7 +281,7 @@ Ketiga pilihan dalam satu adegan memakai rujukan, "Hak yang terdampak", dan "Kew
 
 ### Berkas konten
 
-- `content/references.ts`: kode `R-01` sampai `R-12` dengan teksnya, ditambah fungsi `ref(kode)` yang menghasilkan `Reference`. Kode diketik sebagai tipe gabungan, sehingga salah ketik tertangkap saat kompilasi.
+- `content/references.ts`: kode `R-01` sampai `R-14` dengan teksnya (`R-12` saat spesifikasi disetujui), ditambah fungsi `ref(kode)` yang menghasilkan `Reference`. Kode diketik sebagai tipe gabungan, sehingga salah ketik tertangkap saat kompilasi.
 - `content/scenes.ts`: `SCENES`, enam objek `Scene` sesuai bagian naskah di atas.
 - `content/roles.ts`: `ROLES`, empat `RoleInfo` dengan urutan polisi, jaksa, advokat, hakim.
 - `content/schema.ts`: skema `zod` untuk `Scene`, `Choice`, `CastSlot`, dan `Reference`, aturan lintas-adegan, penghitung kalimat, pembaca daftar centang, dan pembuat laporan verifikasi. Berkas ini hanya diimpor uji, jadi `zod` tidak ikut terbundel.
@@ -300,13 +303,13 @@ Aturan tambahan F-03:
 8. Berkas `assets/bg/{bg}.png`, setiap `assets/sprites/char_{tokoh}_{pose}.png` di pemeran dan reaksi, dan `assets/ui/emote_{ikon}.png` ada.
 9. Tokoh pada ikon emosi ada di susunan reaksinya. Posisi x berada di 0–320.
 10. Hanya adegan 5 yang punya kuis, dan jawabannya `hakim`. `ROLES` memuat keempat peran tepat sekali.
-11. Kode rujukan unik dan berurutan, dan setiap rujukan dipakai minimal satu adegan.
+11. Kode rujukan unik dan berurutan, dan setiap rujukan dipakai minimal satu adegan. Uji pelanggarannya memakai kode sesudah rujukan terakhir (kini R-15) sebagai contoh rujukan yang tidak dipakai, sehingga contoh itu tetap sah bila rujukan bertambah.
 12. Teks pilihan (termasuk varian adegan 6), efek, tingkat, bendera, situasi, pertanyaan kuis, serta baris hak dan kewajiban sama dengan PRD bagian 8. Perbandingan mengabaikan perbedaan tanda petik lurus dan “ ”, huruf kapital di awal, dan titik di akhir.
 13. Naskah asli dimainkan dengan reducer F-02 sampai ketiga akhir tercapai, dan varian adegan 6 aktif bila pilihan B adegan 4 diambil.
 
 Laporan verifikasi:
 
-14. Membaca `docs/sehari-setara/Verifikasi_Rujukan.md` dan mencetak laporan. Uji ini selalu lulus dalam mode biasa.
+14. Membaca `docs/sehari-setara/Verifikasi_Rujukan.md` dan mencetak laporan. Uji ini selalu lulus dalam mode biasa. Jumlah rujukan pada laporan dihitung dari `REFERENCES`, tidak ditulis mati di uji.
 15. Dengan `RILIS=1`, uji gagal bila masih ada rujukan yang belum terverifikasi.
 
 ### Format daftar centang (`docs/sehari-setara/Verifikasi_Rujukan.md`)
@@ -324,7 +327,7 @@ Bagian atas file berisi cara memakai dan aturan untuk agen. Setiap rujukan ditul
 - Hanya baris pertama yang dibaca pemeriksa: kotak, kode, dan teks. Baris lain bebas diisi.
 - Kotak yang dianggap tercentang adalah `[x]` atau `[X]`; spasi tambahan dan tanda `**` boleh ada atau tidak.
 - Teks dibandingkan setelah spasi berlebih dirapikan. Huruf besar-kecil tetap dibedakan.
-- Semua kotak dibuat kosong oleh agen. Untuk R-08 dan R-11, baris "Riwayat" mencatat keputusan pemilik tanggal 21 Oktober 2026.
+- Semua kotak dibuat kosong oleh agen. Untuk R-08 dan R-11, baris "Riwayat" mencatat keputusan pemilik tanggal 21 Oktober 2026. Keputusan tanggal 22 Oktober 2026 dicatat di baris "Riwayat" R-07, R-10, R-11, R-13, dan R-14.
 
 ### Skrip dan perubahan dokumen
 
@@ -362,10 +365,10 @@ Tidak ada aset baru. Naskah merujuk aset yang sudah Disetujui: enam latar `bg_s1
 - [ ] AC-1 `scenes.ts` memuat enam adegan dengan setiap teks, angka, posisi, dan pose sama persis dengan bagian "Teks yang tampil (final)".
 - [ ] AC-2 Uji membandingkan naskah dengan PRD bagian 8 (aturan 12) dan lulus. Uji ini juga gagal bila satu teks pilihan, efek, atau tingkat sengaja diubah dalam salinan uji.
 - [ ] AC-3 Aturan 1–11 lulus untuk naskah asli. Setiap aturan punya minimal satu uji yang membuktikan pelanggarannya tertangkap.
-- [ ] AC-4 `references.ts` memuat R-01 sampai R-12 sesuai tabel rujukan. Setiap pilihan merujuk kode adegannya, dan R-08 serta R-11 mengikuti keputusan pemilik.
-- [ ] AC-5 `Verifikasi_Rujukan.md` memuat 12 butir dengan kotak kosong, berformat seperti di atas, dan teksnya sama dengan `references.ts`.
+- [ ] AC-4 `references.ts` memuat R-01 sampai R-14 sesuai tabel rujukan. Setiap pilihan merujuk kode adegannya, dan R-07 (adegan 6), R-08, R-10, R-11, R-13, serta R-14 mengikuti keputusan pemilik.
+- [ ] AC-5 `Verifikasi_Rujukan.md` memuat satu butir untuk setiap rujukan di `references.ts` (kini 14) dengan kotak kosong, berformat seperti di atas, dan teksnya sama dengan `references.ts`.
 - [ ] AC-6 Pembaca daftar centang diuji dengan contoh: `[x]` dengan teks sama menghasilkan terverifikasi; `[ ]`, teks berbeda, kode hilang, dan baris rusak menghasilkan belum terverifikasi dengan alasan yang benar, tanpa membuat uji gagal.
-- [ ] AC-7 `npx pnpm@11.25.0 content:check` lulus dan mencetak "Verifikasi rujukan: 0 dari 12 terverifikasi." beserta 12 baris. Dengan `RILIS=1`, perintah yang sama gagal dengan pesan "Rilis diblokir: 12 rujukan belum terverifikasi."
+- [ ] AC-7 `npx pnpm@11.25.0 content:check` lulus dan mencetak "Verifikasi rujukan: 0 dari 14 terverifikasi." beserta 14 baris. Dengan `RILIS=1`, perintah yang sama gagal dengan pesan "Rilis diblokir: 14 rujukan belum terverifikasi." Angka 14 adalah banyaknya rujukan di `references.ts`; uji menghitungnya dari `REFERENCES`.
 - [ ] AC-8 `ROLES` sesuai tabel peran, dan kuis adegan 5 menjawab `hakim`.
 - [ ] AC-9 `Reference` dan `CharId` berubah sesuai spesifikasi, `RoleInfo` ada, dan semua uji F-02 tetap lulus.
 - [ ] AC-10 Dengan naskah asli dan reducer F-02, semua pilihan B berakhir `setara`, B-B-B-C-C-C berakhir `hampir`, semua pilihan A berakhir `berat`, dan varian adegan 6 muncul hanya bila pilihan B adegan 4 diambil.
@@ -387,3 +390,33 @@ Tidak ada aset baru. Naskah merujuk aset yang sudah Disetujui: enam latar `bg_s1
 | 7 | Daftar periksa manual AGENTS bagian 9: belum ada butir yang berlaku, karena halaman tidak berubah | — |
 
 Hasil ditulis di `docs/sehari-setara/tests/F-03-hasil.md` (templat 11.3).
+
+## Riwayat perubahan
+
+### 22 Oktober 2026: penyesuaian rujukan dan uji konten
+
+Pemicu: setelah rujukan diperbarui atas keputusan pemilik proyek (commit `983f6c6`, "Perbaikan pasal"), langkah "Uji game" di CI gagal dengan 4 uji di `content.test.ts`, sehingga terbitan ke GitHub Pages tertahan. Penyebabnya, uji masih memakai harapan lama: 12 rujukan, teks lama R-10 dan R-11, serta R-13 sebagai contoh rujukan yang tidak dipakai.
+
+Perubahan rujukan (keputusan pemilik proyek, alasannya di baris "Riwayat" `Verifikasi_Rujukan.md`):
+
+| Kode | Perubahan |
+|---|---|
+| R-07 | Dilepas dari adegan 6; kini hanya adegan 3. Teks tidak berubah |
+| R-10 | Teks menjadi "Pasal 24 ayat (1) dan ayat (2) UUD NRI 1945" |
+| R-11 | Teks menjadi "UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g" |
+| R-13 | Baru, adegan 1: "UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 14 ayat (1)" |
+| R-14 | Baru, adegan 5: "UU No. 48 Tahun 2009, Pasal 11 ayat (1)" |
+
+Perubahan uji (`app/sehari-setara/__tests__/content.test.ts`). `scenes.ts`, `references.ts`, dan `Verifikasi_Rujukan.md` tidak diubah, dan tidak ada kotak yang dicentang.
+
+- Jumlah rujukan dihitung dari `REFERENCES` (`REFERENCE_COUNT`), tidak lagi ditulis mati. Ini berlaku untuk nama uji daftar centang (AC-5) dan baris ringkasan laporan (AC-7).
+- Uji AC-7 kini memeriksa isi laporan, bukan hanya panjangnya: kode pada laporan sama dan berurutan dengan `REFERENCES`, baris ringkasan berbunyi `Verifikasi rujukan: <n> dari <jumlah> terverifikasi.`, dan setiap rujukan yang belum terverifikasi tercetak beserta alasannya.
+- Uji AC-4 memuat teks lengkap R-01 sampai R-14 dan susunan rujukan per adegan yang baru (adegan 1: R-01, R-13, R-02; adegan 5: R-09, R-03, R-10, R-14, R-11, R-12; adegan 6: R-03, R-08). Teks harapan sengaja tetap ditulis lengkap, agar perubahan teks rujukan yang tidak disengaja tertangkap.
+- Uji pelanggaran aturan 11 memakai kode sesudah rujukan terakhir (kini R-15) sebagai contoh rujukan yang tidak dipakai, menggantikan R-13 yang kini rujukan sah. Uji itu juga memastikan contoh tersebut tidak melanggar aturan urutan kode maupun kecocokan teks, sehingga yang diuji benar-benar aturan "setiap rujukan dipakai".
+
+Bukti bahwa uji tidak dilonggarkan (percobaan sementara, dikembalikan sesudahnya): teks R-10 dikembalikan ke teks lama, R-14 dilepas dari adegan 5, atau baris R-14 di daftar centang dirusak; ketiganya membuat uji gagal. `RILIS=1` tetap gagal dengan "Rilis diblokir: 14 rujukan belum terverifikasi."
+
+Belum diubah dan menunggu keputusan pemilik proyek:
+
+- PRD bagian 8 masih memuat baris rujukan lama untuk adegan 1, 5, dan 6, dan bagian 17 belum mencatat keputusan 22 Oktober 2026. Uji tidak membandingkan rujukan dengan PRD, sehingga selisih ini tidak menggagalkan CI.
+- Uji AC-5 mewajibkan semua kotak di `Verifikasi_Rujukan.md` kosong. Begitu pemilik proyek mencentang satu kotak, `test` gagal dan terbitan tertahan. Hal ini bertentangan dengan perilaku "Uji biasa tetap lulus, sehingga situs tetap terbit" dan dengan kalimat di `Verifikasi_Rujukan.md` bahwa mengubah file itu tidak pernah membuat situs gagal terbit. Masalah ini sudah ada sejak F-03 dan tidak disebabkan revisi ini.

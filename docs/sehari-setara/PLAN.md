@@ -6,7 +6,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 |---|---|---|---|
 | F-01 | Selesai (21 Okt 2026) | [F-01-kerangka-halaman.md](specs/F-01-kerangka-halaman.md) | [F-01-hasil.md](tests/F-01-hasil.md) — lulus |
 | F-02 | Selesai (21 Okt 2026) | [F-02-mesin-permainan.md](specs/F-02-mesin-permainan.md) | [F-02-hasil.md](tests/F-02-hasil.md) — lulus |
-| F-03 | Selesai (21 Okt 2026) | [F-03-konten-adegan.md](specs/F-03-konten-adegan.md) | [F-03-hasil.md](tests/F-03-hasil.md) — lulus |
+| F-03 | Selesai (21 Okt 2026); uji rujukan disesuaikan 22 Okt 2026 | [F-03-konten-adegan.md](specs/F-03-konten-adegan.md) | [F-03-hasil.md](tests/F-03-hasil.md) — lulus |
 | F-12 | Selesai (21 Okt 2026) | [F-12-integrasi-aset.md](specs/F-12-integrasi-aset.md) | [F-12-hasil.md](tests/F-12-hasil.md) — lulus |
 | F-04 | Selesai (22 Okt 2026) | [F-04-panggung.md](specs/F-04-panggung.md) | [F-04-hasil.md](tests/F-04-hasil.md) — lulus |
 
@@ -101,7 +101,7 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
   3. Cara uji disetujui.
 
 ## F-03 — Skema konten, data enam adegan, pemeriksa konten
-- Status: Selesai (21 Okt 2026). Riwayat 21 Okt 2026: direncanakan dan disetujui; spesifikasi disetujui; dibangun; diuji dan lulus semua kriteria ([laporan](tests/F-03-hasil.md)).
+- Status: Selesai (21 Okt 2026). Riwayat 21 Okt 2026: direncanakan dan disetujui; spesifikasi disetujui; dibangun; diuji dan lulus semua kriteria ([laporan](tests/F-03-hasil.md)). Riwayat 22 Okt 2026: uji konten disesuaikan dengan rujukan baru (lihat "Revisi 22 Okt 2026" di bawah).
 - Memenuhi (sisi konten; tampilannya menyusul di fitur antarmuka):
   - FR-04: enam adegan sesuai PRD bagian 8, masing-masing dengan tiga pilihan.
   - FR-10: varian adegan 6 yang bergantung pada bendera `komangDibela` dari pilihan B adegan 4.
@@ -140,6 +140,16 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
      - Rujukan adegan 6 "Pasal 28J UUD NRI 1945" diganti "Pasal 28J ayat (1) UUD NRI 1945", sama dengan adegan 3 dan 4.
      - Rujukan "UU No. 2 Tahun 2002 tentang Polri" diganti "UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g".
      - Kedua rujukan itu tetap belum dicentang sampai diverifikasi pemilik proyek di JDIH.
+- Revisi 22 Okt 2026 (instruksi langsung pemilik proyek; peran Pembangun dan Penguji):
+  - Pemicu: push `983f6c6` ("Perbaikan pasal") memperbarui rujukan, lalu langkah "Uji game" di CI gagal pada 4 uji `content.test.ts` sehingga terbitan tertahan. Uji masih memakai harapan lama: 12 rujukan, teks lama R-10 dan R-11, dan R-13 sebagai contoh rujukan yang tidak dipakai.
+  - Keputusan rujukan pemilik proyek (dicatat di baris "Riwayat" `Verifikasi_Rujukan.md`): R-07 dilepas dari adegan 6; teks R-10 dan R-11 diganti; R-13 (adegan 1) dan R-14 (adegan 5) ditambahkan. Rujukan kini 14.
+  - Diubah `app/sehari-setara/__tests__/content.test.ts`: jumlah rujukan dihitung dari `REFERENCES`; teks R-01 sampai R-14 dan susunan rujukan per adegan mengikuti keadaan terbaru; contoh "rujukan tidak dipakai" memakai kode sesudah rujukan terakhir (kini R-15); uji laporan AC-7 memeriksa baris ringkasan dan setiap baris rujukan yang belum terverifikasi.
+  - Diubah `specs/F-03-konten-adegan.md`: tabel rujukan, baris rujukan adegan 1, 5, dan 6, AC-4, AC-5, AC-7, dan bagian "Riwayat perubahan".
+  - Tidak disentuh: `scenes.ts`, `references.ts`, `Verifikasi_Rujukan.md` (tidak ada kotak yang dicentang), kode permainan, dan workflow.
+  - Hasil: `test` 5 berkas, 138 lulus, 1 dilewati (uji mode rilis); `content:check` 36 lulus, 1 dilewati, dan mencetak "Verifikasi rujukan: 0 dari 14 terverifikasi."; `build:pages` kode 0; `tsc --noEmit` 0 galat; ESLint pada berkas uji kode 0. Dengan `RILIS=1`, `content:check` gagal dengan "Rilis diblokir: 14 rujukan belum terverifikasi.", sesuai harapan. Percobaan sementara membuktikan uji tetap menangkap teks rujukan yang berubah, rujukan yang dilepas dari adegan, dan baris daftar centang yang rusak. `test:e2e` tidak dijalankan karena halaman permainan tidak berubah.
+  - Menunggu keputusan pemilik proyek:
+    1. PRD bagian 8 masih memuat baris rujukan lama untuk adegan 1, 5, dan 6, dan bagian 17 belum mencatat keputusan 22 Okt 2026. CI tidak terpengaruh, karena uji tidak membandingkan rujukan dengan PRD.
+    2. Uji AC-5 mewajibkan semua kotak kosong. Begitu pemilik proyek mencentang satu kotak, atau baris sebuah butir rusak, `test` gagal dan terbitan tertahan. Ini bertentangan dengan perilaku di spesifikasi F-03 dan dengan petunjuk di `Verifikasi_Rujukan.md`. Masalah ini sudah ada sejak F-03 dan perlu diperbaiki sebelum pemilik proyek mulai mencentang.
 
 ## F-12 — Integrasi aset: `manifest.ts`, uji palet, uji kelengkapan manifest
 - Status: Selesai (21 Okt 2026). Riwayat 21 Okt 2026: direncanakan dan disetujui (balasan `Setuju: F-12`, keenam usulan diterima); spesifikasi disetujui (`Spesifikasi disetujui: F-12`, [F-12-integrasi-aset.md](specs/F-12-integrasi-aset.md)); dibangun; diuji dan lulus ketiga belas kriteria ([laporan](tests/F-12-hasil.md)). Halaman yang terbit tidak berubah, jadi aman digabung ke `main`.
