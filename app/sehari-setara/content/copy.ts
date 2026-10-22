@@ -1,6 +1,7 @@
 // Teks antarmuka Sehari Setara.
 // Semua teks yang tampil ke pengguna berasal dari folder content/ (Architecture bagian 14).
-// Teks F-01 mengikuti docs/sehari-setara/specs/F-01-kerangka-halaman.md; teks F-04 mengikuti specs/F-04-panggung.md.
+// Teks F-01 mengikuti docs/sehari-setara/specs/F-01-kerangka-halaman.md; teks F-04 mengikuti specs/F-04-panggung.md;
+// teks F-05 mengikuti specs/F-05-panel-narasi-pilihan.md.
 import type { ChoiceId } from "../engine/types";
 
 export const copy = {
@@ -10,6 +11,7 @@ export const copy = {
     lead: "Temani Nara menjalani satu hari dan pilih tindakannya bersama kelas.",
     status: "Permainan ini sedang dibuat.",
     previewLink: "Lihat pratinjau panggung",
+    playLink: "Coba alur permainan",
   },
   topBar: {
     counter: (n: number, total: number) => `Adegan ${n}/${total}`,
@@ -26,5 +28,19 @@ export const copy = {
     situation: "Situasi",
     reaction: (id: ChoiceId) => `Reaksi ${id}`,
     close: "Tutup pratinjau",
+  },
+  play: {
+    heading: (n: number, title: string) => `Adegan ${n}: ${title}`,
+    next: "Lanjut",
+    showChoices: "Tampilkan pilihan",
+    choicePrefix: (id: ChoiceId) => `Pilihan ${id}: `,
+    chosenMark: " (dipilih)",
+    chosen: (id: ChoiceId) => `Kelas memilih ${id}.`,
+    bridgeNext: "Lanjut",
+    stageReaction: (id: ChoiceId) => `Reaksi tokoh atas pilihan ${id}.`,
+    endTitle: "Keenam adegan selesai",
+    endLead: "Terima kasih sudah menemani Nara sampai malam.",
+    endStatus: "Layar akhir, rekap, dan refleksi sedang dibuat.",
+    playAgain: "Main lagi dari adegan 1",
   },
 } as const;

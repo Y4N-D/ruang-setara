@@ -1,4 +1,4 @@
-// Uji unit tata letak panggung Sehari Setara (spesifikasi F-04, AC-15).
+// Uji unit tata letak panggung Sehari Setara (spesifikasi F-04 AC-15; tambahan F-05 AC-15).
 import { describe, expect, it } from "vitest";
 import { spriteFor, sprites } from "../assets/manifest";
 import { SCENES } from "../content/scenes";
@@ -8,13 +8,17 @@ import {
   arcPointStates,
   arcTrackPixels,
   emoteBox,
+  LAYOUT,
   parsePreviewHash,
+  parseRoute,
+  PLAY_HASH,
   previewHash,
   routeCast,
   shadowBox,
   spriteBox,
   stageScale,
   stageScaleForScreen,
+  uiPixel,
 } from "../ui/layout";
 
 const slot = (char: CastSlot["char"], pose: string, x: number, facing: CastSlot["facing"] = "right"): CastSlot => ({
@@ -34,11 +38,20 @@ describe("skala panggung (Architecture bagian 7)", () => {
     expect(stageScale(320 * 0.8, 180 * 0.8)).toBeCloseTo(0.8, 10);
   });
 
-  it("menghitung k dari tinggi layar 16:9 untuk keempat ukuran uji", () => {
+  it("menghitung k dari tinggi layar 16:9 untuk keempat ukuran uji (area panggung 52u sejak F-05)", () => {
+    expect([LAYOUT.barU, LAYOUT.stageU, LAYOUT.bottomU]).toEqual([8, 52, 40]);
     expect(stageScaleForScreen(720)).toBe(2); // 1280×720
     expect(stageScaleForScreen(768)).toBe(2); // 1366×768
     expect(stageScaleForScreen(1080)).toBe(3); // 1920×1080
-    expect(stageScaleForScreen(576)).toBeCloseTo(1.984, 3); // 1024×768, layar 1024×576
+    expect(stageScaleForScreen(576)).toBeCloseTo(1.664, 3); // 1024×768, layar 1024×576
+  });
+
+  it("satu piksel antarmuka adalah k yang dibulatkan, paling kecil 1 (F-05)", () => {
+    expect([720, 768, 1080, 576].map((h) => uiPixel(stageScaleForScreen(h)))).toEqual([2, 2, 3, 2]);
+    expect(uiPixel(1.664)).toBe(2);
+    expect(uiPixel(1.4)).toBe(1);
+    expect(uiPixel(2.5)).toBe(3);
+    expect(uiPixel(0.4)).toBe(1);
   });
 });
 
@@ -133,6 +146,13 @@ describe("alamat pratinjau", () => {
     for (const hash of ["", "#", "#adegan-0", "#adegan-7", "#adegan-01", "#adegan-1-d", "#adegan-1-A", "#adegan-1-", "#lain", "adegan-1"]) {
       expect(parsePreviewHash(hash, 6)).toBeNull();
     }
+  });
+
+  it("#main membuka layar permainan; alamat pratinjau dan alamat lain tetap seperti F-04 (F-05)", () => {
+    expect(PLAY_HASH).toBe("#main");
+    expect(parseRoute("#main", 6)).toEqual({ kind: "main" });
+    expect(parseRoute("#adegan-2-b", 6)).toEqual({ kind: "pratinjau", preview: { sceneIndex: 1, view: "B" } });
+    for (const hash of ["", "#", "#Main", "#main-1", "#mainkan", "main", "#adegan-7", "#lain"]) expect(parseRoute(hash, 6)).toBeNull();
   });
 
   it("tampilan situasi memakai pemeran adegan; tampilan reaksi memakai susunan dan ikon emosi pilihannya", () => {

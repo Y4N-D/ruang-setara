@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Versi | 0.6 (draf) |
+| Versi | 0.7 (draf) |
 | Tanggal | 22 Oktober 2026 |
 | Repositori | `ruang-setara` (akun GitHub Y4N-D), diterbitkan lewat GitHub Pages |
 | Perubahan 0.2 | Aset digambar dengan kode (A8, bagian 8); `pixelize.py` diganti kit `scripts/game/art/`; rumus posisi sprite disesuaikan |
@@ -10,6 +10,7 @@
 | Perubahan 0.4 | Verifikasi rujukan dicatat di `Verifikasi_Rujukan.md`, sehingga `Reference` menjadi `{ id, text }`; `references.ts`; `CharId` ditambah `siswa` dan `warga`; `RoleInfo` (F-03) |
 | Perubahan 0.5 | `manifest.ts` dengan kunci nama berkas, `spriteFor`, dan `sceneAssets`; aset game selalu menjadi berkas terpisah (`assetsInlineLimit`); `png.d.ts`; `ikon.py` di kit gambar; uji aset `assets.test.ts` (F-12) |
 | Perubahan 0.6 | Keputusan A10 (Playwright) dan A11 (huruf `@fontsource`); tata letak layar, bayangan kaki, ikon emosi, vinyet, busur hari, dan pratinjau panggung (bagian 7); `head` dan `floorShadows` di manifest; pramuat di `ui/preload.ts` (F-04) |
+| Perubahan 0.7 | Layar permainan `#main`, tata letak 8u/52u/40u, satu piksel antarmuka (`uiPixel`), sapuan, dan jembatan sementara (bagian 7); berkas layar permainan dan `content/teams.ts` (bagian 3); tombol yang sudah aktif (bagian 9); uji alur permainan (bagian 12) (F-05) |
 | Dokumen terkait | `PRD.md`, `Design_System.md`, `AGENTS.md`, `Daftar_Aset.md` |
 
 ---
@@ -72,10 +73,11 @@ ruang-setara/
 │  │  ├─ schema.ts               # skema zod
 │  │  ├─ scenes.ts               # enam adegan
 │  │  ├─ references.ts           # rujukan R-01 dst. (status verifikasi di Verifikasi_Rujukan.md)
-│  │  ├─ endings.ts · roles.ts · copy.ts
+│  │  ├─ endings.ts · roles.ts · copy.ts · teams.ts
 │  ├─ ui/
 │  │  ├─ Stage.tsx · Sprite.tsx · DayArc.tsx · Meters.tsx
-│  │  ├─ layout.ts · preload.ts · StagePreview.tsx   # F-04 (pratinjau sementara)
+│  │  ├─ layout.ts · preload.ts · hooks.ts · StagePreview.tsx   # F-04 (pratinjau, kini alat tinjau)
+│  │  ├─ PlayScreen.tsx · controls.ts · SceneWipe.tsx           # F-05 (layar permainan #main sementara)
 │  │  ├─ NarrationBox.tsx · ChoicePanel.tsx · ImpactCard.tsx
 │  │  ├─ Timer.tsx · Teams.tsx · StarsAward.tsx · RoleQuiz.tsx
 │  │  ├─ Ending.tsx · Recap.tsx · Reflection.tsx
@@ -93,7 +95,7 @@ ruang-setara/
 │  │  ├─ pixelart.py · tokoh.py · latar.py · ikon.py
 │  │  └─ build_assets.py         # ekspor PNG + pratinjau + pemeriksaan
 │  └─ serve-subpath.mjs          # server uji di /ruang-setara/
-├─ e2e/sehari-setara.spec.ts     # uji Playwright
+├─ e2e/                         # uji Playwright: sehari-setara.spec.ts, alur-permainan.spec.ts, bantuan.ts
 └─ playwright.config.ts          # webServer: build:pages lalu serve-subpath.mjs
 ```
 
@@ -323,13 +325,22 @@ Bilah atas, panel samping, dan panel bawah adalah HTML biasa di luar panggung, d
 
 ### Tata letak, lapisan, dan efek (F-04)
 
-- **Tata letak:** layar 16:9 dibagi menjadi bilah atas 8u, area panggung 62u, dan panel bawah 30u. Panel samping (minimal 30u) disediakan untuk F-06 dan F-07. Skala k = `stageScale((177,78 − 60)u, 62u)`, sehingga k hanya bergantung pada tinggi layar: 2 pada 720p dan 768p, 3 pada 1080p, dan 1,984 pada 1024×768 (`ui/layout.ts`).
+- **Tata letak:** layar 16:9 dibagi menjadi bilah atas 8u, area panggung 52u, dan panel bawah 40u (F-05; semula 62u dan 30u di F-04). Panel samping (minimal 30u) disediakan untuk F-06 dan F-07. Skala k = `stageScale((177,78 − 60)u, 52u)`, sehingga k hanya bergantung pada tinggi layar: 2 pada 720p dan 768p, 3 pada 1080p, dan 1,664 pada 1024×768 (`ui/layout.ts`).
 - **Lapisan:** latar z 0; bayangan kaki dan tokoh z 20 (semua bayangan sebelum semua tokoh); ikon emosi z 30; vinyet dan garis pindai z 40.
 - **Bayangan kaki:** kotak `(w − 6)` × 2 piksel di y 155, berwarna menurut `floorShadows` di manifest, sama dengan pratinjau adegan yang disetujui.
 - **Ikon emosi:** 8×8, dua piksel di atas titik kepala strip (`head` di manifest, dicerminkan bila tokoh menghadap kiri).
 - **Vinyet:** dua cincin keras 2 dan 4 piksel logis di dalam panggung, masing-masing `ink` 6 %.
 - **Busur hari:** gambar logis 136×22 berskala k di bilah atas. Warna bilah mengikuti waktu adegan, dan ikon matahari atau bulan menandai titik berjalan (Design System bagian 7).
-- **Pratinjau panggung:** `#adegan-N` dan `#adegan-N-a|b|c` di halaman game menampilkan panggung tanpa mesin permainan, sampai alur permainan dibuat (spesifikasi F-04).
+- **Pratinjau panggung:** `#adegan-N` dan `#adegan-N-a|b|c` di halaman game menampilkan panggung tanpa mesin permainan (spesifikasi F-04). Sejak F-05 dipertahankan sebagai alat tinjau; nasib tautannya ditinjau lagi di F-10.
+
+### Layar permainan (F-05)
+
+- **Alamat:** `#main` membuka `ui/PlayScreen.tsx`, yang menjalankan reducer F-02 dengan naskah F-03 (`useReducer`). Judul, pengaturan, dan prolog dilewati dengan dua tim bawaan dari `content/teams.ts`, sampai layar judul dibuat di F-10. Meninggalkan `#main` mengakhiri permainan.
+- **Satu piksel antarmuka:** `uiPixel(k)` = maks(1, bulat(k)) px, disimpan di variabel CSS `--ss-px` pada `.ss-screen` oleh `Game.tsx`. Bingkai piksel memakai garis 2 × `--ss-px`, sudut terpotong dan sorotan 1 × `--ss-px`.
+- **Panel bawah:** kotak narasi (`NarrationBox.tsx`) di fase `intro`; pertanyaan dan tiga pilihan (`ChoicePanel.tsx`) di fase `discuss` sampai `stars`. Teks per huruf dihitung dari waktu berlalu (`typedLength`, 40 huruf per detik).
+- **Waktu:** reaksi 1.200 ms lalu `REAKSI_SELESAI`; sapuan 400 ms dengan `LANJUT` pada 200 ms, atau pudar 75 + 75 ms bila kurangi gerak aktif. Pengatur waktunya ada di `PlayScreen.tsx`; reducer tetap tanpa `setTimeout`.
+- **Sapuan:** `SceneWipe.tsx` menampilkan 144 blok 20×20 piksel panggung berwarna langit adegan berikutnya di atas panggung dan di bawah garis pindai. Jadwalnya `wipeSchedule()` di `ui/controls.ts`.
+- **Jembatan sementara:** fase `impact`, `quiz`, dan `stars` dilewati tombol "Lanjut" dengan `bridgeActions(scene)`: `LANJUT`, jawaban kuis dari naskah bila ada, dan `BERI_BINTANG` 0. Bagian ini diganti F-06, F-07, dan F-08. Sesudah adegan 6 tampil layar akhir sementara sampai F-09.
 
 ## 8. Manajemen aset
 
@@ -415,6 +426,8 @@ Fps animasi diatur di `manifest.ts`: diam dan bicara 2–4 fps, berjalan 6–8 f
 
 Semua tombol juga bisa diklik atau disentuh. Fokus keyboard selalu terlihat (latar `sun` dan kursor ▶).
 
+Sejak F-05, di layar `#main` sudah aktif `1` `2` `3`, `A` `B` `C`, `Spasi`, dan `Enter` (`keyCommand` di `ui/controls.ts`). Tekanan bersama Ctrl, Alt, atau Meta, tekanan berulang karena tombol ditahan, dan tekanan di kolom isian diabaikan. `Spasi` dan `Enter` pada tombol yang berfokus ditangani browser sebagai klik, sehingga satu tekanan tidak menjadi dua aksi. Tombol lain menyusul bersama fiturnya (F-07, F-10, F-13).
+
 ## 10. Aksesibilitas
 
 - Narasi dan isi kartu dampak diumumkan melalui wilayah `aria-live="polite"`.
@@ -440,7 +453,7 @@ Keduanya berupa tautan biasa `href="sehari-setara/"` (relatif, tanpa garis mirin
 | Unit | Vitest | `rules.ts` (clamp, giliran, ambang akhir), reducer (setiap transisi, kunci klik ganda, bendera) |
 | Konten | Vitest + zod | Semua aturan skema di bagian 5; daftar rujukan belum terverifikasi |
 | Aset | `build_assets.py` + Vitest (`assets.test.ts`) | `build_assets.py`: palet per piksel, transparansi, ukuran, dan anggaran total. Vitest: token dan warna `game.css` sesuai Design System bagian 4 dan `palette.json`; manifest cocok dengan berkas (nama, ukuran bingkai, fps), `CREDITS.md`, dan naskah; anggaran per aset dan total; aset game sebagai berkas terpisah. Berkas yang belum terdaftar hanya dilaporkan |
-| Ujung ke ujung | Playwright (A10) | Main penuh dengan keyboard di `/ruang-setara/sehari-setara/`; ketiga jenis akhir bisa dicapai; tidak ada respons 4xx; tidak ada galat konsol; tangkapan layar setiap adegan di 1280×720 dan 1024×768. Sejak F-04: layar kerangka, ke-24 alamat pratinjau (posisi tokoh, bayangan, ikon emosi, bilah atas), skala di empat ukuran, kurangi gerak, pramuat, keyboard, huruf, dan galeri |
+| Ujung ke ujung | Playwright (A10) | Main penuh dengan keyboard di `/ruang-setara/sehari-setara/`; ketiga jenis akhir bisa dicapai; tidak ada respons 4xx; tidak ada galat konsol; tangkapan layar setiap adegan di 1280×720 dan 1024×768. Sejak F-04: layar kerangka, ke-24 alamat pratinjau (posisi tokoh, bayangan, ikon emosi, bilah atas), skala di empat ukuran, kurangi gerak, pramuat, keyboard, huruf, dan galeri. Sejak F-05: layar `#main` dimainkan sampai akhir dengan keyboard pada tiga jalur naskah, sapuan pada 100 ms dan 300 ms (jam uji), pudar, aturan keyboard, serta panel bawah tanpa luapan di empat ukuran |
 | Manual | Daftar periksa | Proyektor dan keterbacaan dari bangku belakang; laptop lama; keyboard saja; kurangi gerak; suara mati |
 
 `scripts/game/serve-subpath.mjs` menyajikan `dist-pages/` di bawah `/ruang-setara/` agar uji Playwright meniru alamat GitHub Pages yang sebenarnya. Konfigurasi `webServer` Playwright menjalankan `build:pages` lalu skrip ini.

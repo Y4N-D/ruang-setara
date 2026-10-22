@@ -1,23 +1,27 @@
 // Komponen akar game Sehari Setara.
-// F-01: layar kerangka. F-04: pratinjau panggung lewat #adegan-N (sementara, sampai alur permainan dibuat).
-// Layar judul menggantikan layar kerangka di F-10.
-import { useEffect, useRef, useState } from "react";
+// F-01: layar kerangka. F-04: pratinjau panggung lewat #adegan-N (alat tinjau, keputusan Gerbang 1 F-05 nomor 5).
+// F-05: layar permainan lewat #main. Layar judul menggantikan layar kerangka dan #main di F-10.
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { copy } from "./content/copy";
 import { SCENES } from "./content/scenes";
-import { parsePreviewHash, type PreviewRoute } from "./ui/layout";
+import { useStageScale } from "./ui/hooks";
+import { parseRoute, PLAY_HASH, uiPixel, type ScreenRoute } from "./ui/layout";
+import { PlayScreen } from "./ui/PlayScreen";
 import { StagePreview } from "./ui/StagePreview";
 
 // Tautan kembali ke galeri, relatif terhadap /ruang-setara/sehari-setara/ (Architecture bagian 11).
 const GALLERY_HREF = "../";
 const PREVIEW_START = "#adegan-1";
 
-type Focus = "none" | "preview-title" | "preview-link";
+type Focus = "none" | "preview-title" | "preview-link" | "play-link";
 
-function Placeholder({ focusPreviewLink }: { focusPreviewLink: boolean }) {
+function Placeholder({ focus }: { focus: Focus }) {
   const previewLinkRef = useRef<HTMLAnchorElement>(null);
+  const playLinkRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
-    if (focusPreviewLink) previewLinkRef.current?.focus();
-  }, [focusPreviewLink]);
+    if (focus === "preview-link") previewLinkRef.current?.focus();
+    if (focus === "play-link") playLinkRef.current?.focus();
+  }, [focus]);
 
   return (
     <main className="ss-placeholder" aria-labelledby="ss-placeholder-title">
@@ -33,21 +37,34 @@ function Placeholder({ focusPreviewLink }: { focusPreviewLink: boolean }) {
         <a ref={previewLinkRef} className="ss-button" href={PREVIEW_START}>
           {copy.placeholder.previewLink}
         </a>
+        <a ref={playLinkRef} className="ss-button" href={PLAY_HASH}>
+          {copy.placeholder.playLink}
+        </a>
       </div>
     </main>
   );
 }
 
+/** Ke mana fokus pindah saat tanda pagar berganti; null berarti fokus tidak dipindahkan Game.tsx. */
+function focusAfter(before: ScreenRoute | null, next: ScreenRoute | null): Focus | null {
+  if (next?.kind === "pratinjau") return before?.kind === "pratinjau" ? null : "preview-title";
+  if (next === null && before?.kind === "pratinjau") return "preview-link";
+  if (next === null && before?.kind === "main") return "play-link";
+  return null;
+}
+
 export default function Game() {
-  const [route, setRoute] = useState<PreviewRoute | null>(() => parsePreviewHash(window.location.hash, SCENES.length));
+  const screenRef = useRef<HTMLDivElement>(null);
+  const scale = useStageScale(screenRef);
+  const [route, setRoute] = useState<ScreenRoute | null>(() => parseRoute(window.location.hash, SCENES.length));
   const [focus, setFocus] = useState<Focus>("none");
   const previous = useRef(route);
 
   useEffect(() => {
     const onHashChange = () => {
-      const next = parsePreviewHash(window.location.hash, SCENES.length);
-      if (previous.current === null && next) setFocus("preview-title");
-      else if (previous.current !== null && !next) setFocus("preview-link");
+      const next = parseRoute(window.location.hash, SCENES.length);
+      const moved = focusAfter(previous.current, next);
+      if (moved) setFocus(moved);
       previous.current = next;
       setRoute(next);
     };
@@ -55,13 +72,18 @@ export default function Game() {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
+  // Satu piksel antarmuka untuk bingkai piksel (keputusan Gerbang 1 F-05 nomor 1).
+  const screenStyle = { "--ss-px": `${uiPixel(scale)}px` } as CSSProperties;
+
   return (
     <div className="ss-viewport">
-      <div className="ss-screen">
-        {route ? (
-          <StagePreview route={route} focusTitle={focus === "preview-title"} />
+      <div ref={screenRef} className="ss-screen" style={screenStyle}>
+        {route?.kind === "main" ? (
+          <PlayScreen scale={scale} />
+        ) : route?.kind === "pratinjau" ? (
+          <StagePreview route={route.preview} focusTitle={focus === "preview-title"} scale={scale} />
         ) : (
-          <Placeholder focusPreviewLink={focus === "preview-link"} />
+          <Placeholder focus={focus} />
         )}
       </div>
     </div>

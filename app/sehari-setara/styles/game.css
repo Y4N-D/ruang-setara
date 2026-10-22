@@ -54,6 +54,8 @@ body {
   height: calc(var(--u) * 100);
   overflow: hidden;
   background: var(--ss-surface);
+  /* Satu piksel antarmuka (F-05): skala panggung dibulatkan, diisi Game.tsx. Bukan token :root. */
+  --ss-px: 2px;
 }
 
 /* Layar kerangka F-01. Digantikan layar judul di F-10. */
@@ -96,31 +98,39 @@ body {
 }
 
 /*
-  Tombol berbingkai piksel (Design System bagian 7): garis ink 2 px, sudut terpotong 1 px,
-  sorotan white 1 px di sisi atas-dalam. Fokus dan arah: latar sun dengan kursor ▶.
+  Tombol berbingkai piksel (Design System bagian 7): garis ink 2 piksel antarmuka, sudut terpotong 1,
+  sorotan white 1 di sisi atas-dalam. Satu piksel antarmuka (--ss-px) = skala panggung yang dibulatkan (F-05).
+  Fokus dan arah: latar sun dengan kursor ▶.
   Ruang kursor selalu disediakan (dan dicerminkan di kanan) agar lebar tombol tidak berubah.
 */
 .ss-button {
   display: inline-flex;
   align-items: center;
+  margin: 0;
   padding: calc(var(--u) * 1.5) calc(var(--u) * 3);
-  border: 2px solid var(--ss-ink);
+  border: calc(var(--ss-px) * 2) solid var(--ss-ink);
   background: var(--ss-surface);
-  box-shadow: inset 0 1px 0 0 var(--ss-white);
+  box-shadow: inset 0 var(--ss-px) 0 0 var(--ss-white);
   color: var(--ss-text);
+  font-family: inherit;
   font-size: calc(var(--u) * 3.1);
   line-height: 1.3;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
 }
 
-/* Sudut terpotong 1 px, dipakai tombol dan tombol kecil pratinjau. */
+/* Sudut terpotong satu piksel antarmuka, dipakai semua tombol, kotak narasi, dan tab judulnya. */
 .ss-button,
-.ss-chip {
+.ss-chip,
+.ss-next,
+.ss-choice,
+.ss-narration,
+.ss-narration-tab {
   clip-path: polygon(
-    1px 0, calc(100% - 1px) 0, calc(100% - 1px) 1px, 100% 1px,
-    100% calc(100% - 1px), calc(100% - 1px) calc(100% - 1px), calc(100% - 1px) 100%, 1px 100%,
-    1px calc(100% - 1px), 0 calc(100% - 1px), 0 1px, 1px 1px
+    var(--ss-px) 0, calc(100% - var(--ss-px)) 0, calc(100% - var(--ss-px)) var(--ss-px), 100% var(--ss-px),
+    100% calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) 100%, var(--ss-px) 100%,
+    var(--ss-px) calc(100% - var(--ss-px)), 0 calc(100% - var(--ss-px)), 0 var(--ss-px), var(--ss-px) var(--ss-px)
   );
 }
 
@@ -164,7 +174,11 @@ body {
 
 @media (forced-colors: active) {
   .ss-button,
-  .ss-chip {
+  .ss-chip,
+  .ss-next,
+  .ss-choice,
+  .ss-narration,
+  .ss-narration-tab {
     clip-path: none;
   }
 }
@@ -178,14 +192,15 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* Pratinjau panggung (F-04): bilah atas 8u, area panggung 62u, panel bawah 30u.
-   Panel samping (minimal 30u) dibiarkan kosong untuk F-06 dan F-07.        */
+/* Pratinjau panggung (F-04) dan layar permainan (F-05): bilah atas 8u, area panggung 52u, panel bawah 40u
+   (keputusan Gerbang 1 F-05 nomor 2). Panel samping (minimal 30u) dibiarkan kosong untuk F-06 dan F-07. */
 /* ------------------------------------------------------------------ */
-.ss-preview {
+.ss-preview,
+.ss-play {
   box-sizing: border-box;
   height: 100%;
   display: grid;
-  grid-template-rows: calc(var(--u) * 8) calc(var(--u) * 62) calc(var(--u) * 30);
+  grid-template-rows: calc(var(--u) * 8) calc(var(--u) * 52) calc(var(--u) * 40);
 }
 
 /* Bilah atas: warna langit mengikuti waktu adegan (Design System bagian 1, 4, dan 7). */
@@ -430,9 +445,9 @@ body {
   display: inline-flex;
   align-items: center;
   padding: calc(var(--u) * 0.8) calc(var(--u) * 2) calc(var(--u) * 0.8) calc(var(--u) * 2.8);
-  border: 2px solid var(--ss-ink);
+  border: calc(var(--ss-px) * 2) solid var(--ss-ink);
   background: var(--ss-surface);
-  box-shadow: inset 0 1px 0 0 var(--ss-white);
+  box-shadow: inset 0 var(--ss-px) 0 0 var(--ss-white);
   color: var(--ss-text);
   font-size: calc(var(--u) * 2.8);
   line-height: 1.3;
@@ -449,10 +464,10 @@ body {
   visibility: hidden;
 }
 
-/* Terpilih: latar sun dan garis tampak 4 px tanpa mengubah ukuran tombol. */
+/* Terpilih: latar sun dan garis tampak 4 piksel antarmuka tanpa mengubah ukuran tombol. */
 .ss-chip[aria-current] {
   background: var(--ss-focus);
-  box-shadow: inset 0 0 0 2px var(--ss-ink);
+  box-shadow: inset 0 0 0 calc(var(--ss-px) * 2) var(--ss-ink);
 }
 
 .ss-chip:focus-visible {
@@ -480,5 +495,318 @@ body {
   .ss-sprite,
   .ss-dayarc-icon {
     animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Layar permainan (F-05): kotak narasi, pertanyaan, tiga pilihan, sapuan, dan layar akhir sementara */
+/* ------------------------------------------------------------------ */
+
+/* Hanya terbaca pembaca layar. */
+.ss-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Panel bawah: jarak tepi 1,2u × 4u, celah antarbagian 1,2u; isi tidak pernah meluap. */
+.ss-play-panel {
+  box-sizing: border-box;
+  height: 100%;
+  overflow: hidden;
+  padding: calc(var(--u) * 1.2) calc(var(--u) * 4);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.2);
+}
+
+/* Kotak narasi dengan tab judul adegan di tengah garis atasnya. */
+.ss-narration-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: calc(var(--u) * 1.6);
+}
+
+.ss-narration {
+  flex: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: calc(var(--u) * 3.6) calc(var(--u) * 2.4) calc(var(--u) * 1.6);
+  border: calc(var(--ss-px) * 2) solid var(--ss-ink);
+  background: var(--ss-surface);
+  box-shadow: inset 0 var(--ss-px) 0 0 var(--ss-white);
+  cursor: pointer;
+}
+
+.ss-narration-tab {
+  position: absolute;
+  top: 0;
+  left: calc(var(--u) * 2.4);
+  z-index: 1;
+  margin: 0;
+  padding: calc(var(--u) * 0.8) calc(var(--u) * 1.6);
+  transform: translateY(-50%);
+  background: var(--ss-ink);
+  color: var(--ss-cream);
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 2.8);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.ss-narration-text {
+  margin: 0;
+  max-width: 60ch;
+  font-size: calc(var(--u) * 3.6);
+  line-height: 1.35;
+}
+
+/* Bagian teks yang belum muncul tetap memakan tempat agar kata tidak berpindah baris. */
+.ss-narration-rest {
+  visibility: hidden;
+}
+
+/* Tombol lanjut: bentuk ss-chip, di kanan bawah kotak narasi atau di kanan baris status. */
+.ss-next {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-end;
+  margin: auto 0 0;
+  padding: calc(var(--u) * 0.8) calc(var(--u) * 2) calc(var(--u) * 0.8) calc(var(--u) * 2.8);
+  border: calc(var(--ss-px) * 2) solid var(--ss-ink);
+  background: var(--ss-surface);
+  box-shadow: inset 0 var(--ss-px) 0 0 var(--ss-white);
+  color: var(--ss-text);
+  font-family: inherit;
+  font-size: calc(var(--u) * 2.8);
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ss-next::before {
+  content: "\25B6\FE0E";
+  content: "\25B6\FE0E" / "";
+  position: absolute;
+  left: calc(var(--u) * 0.6);
+  font-size: 0.7em;
+  visibility: hidden;
+}
+
+.ss-next:focus-visible {
+  background: var(--ss-focus);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.ss-next:focus-visible::before {
+  visibility: visible;
+}
+
+/* Baris pertanyaan atau status: tinggi tetap 5,8u, sehingga pilihan tidak bergeser sesudah memilih. */
+.ss-question-row {
+  flex: none;
+  height: calc(var(--u) * 5.8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--u) * 2);
+}
+
+.ss-question-row .ss-next {
+  margin: 0;
+  padding-top: calc(var(--u) * 0.5);
+  padding-bottom: calc(var(--u) * 0.5);
+}
+
+.ss-question,
+.ss-status {
+  margin: 0;
+  font-size: calc(var(--u) * 3.6);
+  line-height: 1.35;
+}
+
+.ss-question:focus,
+.ss-status:focus,
+.ss-play-end .ss-placeholder-title:focus {
+  outline: none;
+}
+
+.ss-question:focus-visible,
+.ss-status:focus-visible,
+.ss-play-end .ss-placeholder-title:focus-visible {
+  outline: 2px solid var(--ss-ink);
+  outline-offset: 4px;
+}
+
+/* Tiga pilihan: tiga kolom sama lebar dan sama tinggi. */
+.ss-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--u) * 1.5);
+  align-items: stretch;
+}
+
+.ss-choice {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  gap: calc(var(--u) * 1.2);
+  align-items: flex-start;
+  margin: 0;
+  padding: calc(var(--u) * 1) calc(var(--u) * 1.2) calc(var(--u) * 1) calc(var(--u) * 2.6);
+  border: calc(var(--ss-px) * 2) solid var(--ss-ink);
+  background: var(--ss-surface);
+  box-shadow: inset 0 var(--ss-px) 0 0 var(--ss-white);
+  color: var(--ss-text);
+  text-align: left;
+  font-family: inherit;
+  font-size: calc(var(--u) * 3.1);
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.ss-choice::before {
+  content: "\25B6\FE0E";
+  content: "\25B6\FE0E" / "";
+  position: absolute;
+  top: calc(var(--u) * 1.6);
+  left: calc(var(--u) * 0.6);
+  font-size: 0.7em;
+  line-height: 1;
+  visibility: hidden;
+}
+
+.ss-choice-key {
+  flex: none;
+  padding: calc(var(--u) * 0.6);
+  background: var(--ss-ink);
+  color: var(--ss-cream);
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 2.8);
+  line-height: 1;
+}
+
+.ss-choice:focus-visible {
+  background: var(--ss-focus);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.ss-choice:focus-visible::before {
+  visibility: visible;
+}
+
+/* Dipilih: latar sun dan garis tampak 4 piksel antarmuka, tanpa kursor. */
+.ss-choice[data-state="dipilih"] {
+  background: var(--ss-focus);
+  box-shadow: inset 0 0 0 calc(var(--ss-px) * 2) var(--ss-ink);
+  cursor: default;
+}
+
+/* Nonaktif: latar mist, teks dusk. */
+.ss-choice[data-state="nonaktif"] {
+  background: var(--ss-mist);
+  color: var(--ss-dusk);
+  cursor: default;
+}
+
+.ss-choice[data-state="nonaktif"] .ss-choice-key {
+  background: var(--ss-dusk);
+}
+
+@media (hover: hover) {
+  .ss-next:hover,
+  .ss-choice:enabled:hover {
+    background: var(--ss-focus);
+  }
+
+  .ss-next:hover::before,
+  .ss-choice:enabled:hover::before {
+    visibility: visible;
+  }
+}
+
+/* Pemegang panggung: tempat lapisan sapuan dan pudar saat pergantian adegan. */
+.ss-stage-holder {
+  position: relative;
+}
+
+/* Sapuan blok piksel (Design System bagian 8): di atas panggung, di bawah garis pindai bingkai (z 40). */
+.ss-wipe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.ss-wipe-block {
+  position: absolute;
+  visibility: hidden;
+  animation-name: ss-wipe-show;
+  animation-timing-function: linear;
+}
+
+.ss-wipe[data-time="pagi"] .ss-wipe-block {
+  background: #FFD9A8;
+}
+
+.ss-wipe[data-time="siang"] .ss-wipe-block {
+  background: #6EC6F2;
+}
+
+.ss-wipe[data-time="sore"] .ss-wipe-block {
+  background: #FFC27A;
+}
+
+.ss-wipe[data-time="malam"] .ss-wipe-block {
+  background: #4A4F9C;
+}
+
+/* Setiap blok terlihat selama animasinya berjalan, dan tersembunyi sebelum dan sesudahnya. */
+@keyframes ss-wipe-show {
+  from,
+  to {
+    visibility: visible;
+  }
+}
+
+/* Pudar bila kurangi gerak aktif: 75 ms keluar, lalu 75 ms masuk. */
+.ss-stage-holder[data-fade="keluar"] {
+  animation: ss-fade-out 75ms linear forwards;
+}
+
+.ss-stage-holder[data-fade="masuk"] {
+  animation: ss-fade-in 75ms linear;
+}
+
+@keyframes ss-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ss-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

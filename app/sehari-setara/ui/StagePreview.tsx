@@ -1,49 +1,21 @@
 // Pratinjau panggung (spesifikasi F-04): dibuka lewat #adegan-N atau #adegan-N-a|b|c.
-// Layar sementara sampai alur permainan dibuat (mulai F-05). Tidak memakai mesin permainan.
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+// Sejak F-05 dipertahankan sebagai alat tinjau (keputusan Gerbang 1 F-05 nomor 5). Tidak memakai mesin permainan.
+// Skala panggung k diukur Game.tsx dan diteruskan lewat prop scale.
+import { useEffect, useRef } from "react";
 import { copy } from "../content/copy";
 import { SCENES } from "../content/scenes";
 import { DayArc } from "./DayArc";
-import { previewHash, routeCast, stageScaleForScreen, type PreviewRoute } from "./layout";
+import { usePrefersReducedMotion } from "./hooks";
+import { previewHash, routeCast, type PreviewRoute } from "./layout";
 import { preloadScene } from "./preload";
 import { Stage } from "./Stage";
 
 // Relatif terhadap /ruang-setara/sehari-setara/ (Architecture bagian 11).
 const GALLERY_HREF = "../";
 const VIEWS: ReadonlyArray<PreviewRoute["view"]> = ["situasi", "A", "B", "C"];
-const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(() => window.matchMedia(REDUCED_MOTION).matches);
-  useEffect(() => {
-    const media = window.matchMedia(REDUCED_MOTION);
-    const update = () => setReduced(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-  return reduced;
-}
-
-/** k dihitung dari tinggi layar 16:9 dan dihitung ulang setiap kali ukurannya berubah. */
-function useStageScale(ref: RefObject<HTMLElement | null>): number {
-  const [scale, setScale] = useState(1);
-  useLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    const update = () => setScale(stageScaleForScreen(element.getBoundingClientRect().height));
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [ref]);
-  return scale;
-}
-
-export function StagePreview({ route, focusTitle }: { route: PreviewRoute; focusTitle: boolean }) {
-  const rootRef = useRef<HTMLElement>(null);
+export function StagePreview({ route, focusTitle, scale }: { route: PreviewRoute; focusTitle: boolean; scale: number }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const scale = useStageScale(rootRef);
   const animate = !usePrefersReducedMotion();
   const scene = SCENES[route.sceneIndex];
   const { cast, emote } = routeCast(scene, route.view);
@@ -60,7 +32,7 @@ export function StagePreview({ route, focusTitle }: { route: PreviewRoute; focus
   }, [route.sceneIndex]);
 
   return (
-    <main ref={rootRef} className="ss-preview" aria-labelledby="ss-preview-title">
+    <main className="ss-preview" aria-labelledby="ss-preview-title">
       <DayArc scenes={SCENES} sceneIndex={route.sceneIndex} scale={scale} animate={animate} />
       <div className="ss-stage-area">
         <Stage scene={scene} cast={cast} emote={emote} scale={scale} animate={animate} label={label} />

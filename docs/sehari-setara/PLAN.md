@@ -9,6 +9,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-03 | Selesai (21 Okt 2026); uji rujukan disesuaikan 22 Okt 2026 | [F-03-konten-adegan.md](specs/F-03-konten-adegan.md) | [F-03-hasil.md](tests/F-03-hasil.md) — lulus |
 | F-12 | Selesai (21 Okt 2026) | [F-12-integrasi-aset.md](specs/F-12-integrasi-aset.md) | [F-12-hasil.md](tests/F-12-hasil.md) — lulus |
 | F-04 | Selesai (22 Okt 2026) | [F-04-panggung.md](specs/F-04-panggung.md) | [F-04-hasil.md](tests/F-04-hasil.md) — lulus |
+| F-05 | Selesai (22 Okt 2026) | [F-05-panel-narasi-pilihan.md](specs/F-05-panel-narasi-pilihan.md) | [F-05-hasil.md](tests/F-05-hasil.md) — lulus |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -29,10 +30,13 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
 - Plan F-04: F-04 sudah menampilkan latar dan sprite, sedangkan `manifest.ts` baru dibuat di F-12. Diputuskan 21 Okt 2026 (Gerbang 1 F-12): F-12 dikerjakan lebih dulu. F-04 cukup memakai kunci manifest dan fungsi `spriteFor` serta `sceneAssets` dari F-12, termasuk untuk pramuat gambar adegan berikutnya (Architecture bagian 8). Rencana F-04 ditulis 21 Okt 2026 (entri F-04).
 - Plan F-13: F-13 kini juga memuat FR-18, ulangi adegan dan kembali ke adegan sebelumnya (keputusan 21 Okt 2026). Reducer F-02 menjadikan `history` sumber kebenaran, sehingga pembatalan pilihan cukup memotong `history` lalu menghitung ulang.
 - Plan F-11: aktifkan pemeriksaan ketat rujukan (`RILIS=1 npx pnpm@11.25.0 content:check`) di CI sebelum permainan ditautkan dari galeri. Rilis hanya bila semua kotak di `Verifikasi_Rujukan.md` sudah dicentang pemilik proyek.
-- Plan F-05: sapuan blok piksel saat pergantian adegan (Design System bagian 8) dikerjakan di F-05, fitur pertama yang menjalankan fase transition (keputusan Gerbang 1 F-04 nomor 5).
-- Plan F-05: pratinjau panggung F-04 (`#adegan-N`) adalah layar sementara. Putuskan apakah tetap dipertahankan sebagai alat tinjau setelah alur permainan dibuat.
+- Plan F-05: sapuan blok piksel saat pergantian adegan (Design System bagian 8) dikerjakan di F-05, fitur pertama yang menjalankan fase transition (keputusan Gerbang 1 F-04 nomor 5). Masuk rencana F-05 (22 Okt 2026).
+- Plan F-05: pratinjau panggung F-04 (`#adegan-N`) adalah layar sementara. Putuskan apakah tetap dipertahankan sebagai alat tinjau setelah alur permainan dibuat. Lihat usulan 5 entri F-05.
 - Semua fitur: Tailwind galeri membaca seluruh repositori, termasuk dokumen. Kata lepas yang sama dengan nama kelas Tailwind di kode atau dokumen baru bisa menambah aturan CSS galeri. Uji build membandingkan berkas galeri (F-04, Temuan 2).
-- Plan F-05: Design System bagian 7 menyebut bingkai piksel "garis ink 2 px". F-01 membacanya sebagai px CSS. Sebelum panel dibangun, perlu dipastikan apakah yang dimaksud adalah piksel logis panggung.
+- Plan F-05: Design System bagian 7 menyebut bingkai piksel "garis ink 2 px". F-01 membacanya sebagai px CSS. Sebelum panel dibangun, perlu dipastikan apakah yang dimaksud adalah piksel logis panggung. Lihat usulan 1 entri F-05.
+- Plan F-06 sampai F-10: jembatan sementara dan pintu masuk `#main` dari F-05 diganti fitur pemiliknya (keputusan Gerbang 1 F-05 nomor 3 dan 4). Kartu dampak (F-06), bintang (F-07), dan kuis (F-08) menggantikan bagiannya masing-masing di `bridgeActions` dan `PlayScreen.tsx`. Layar akhir (F-09) menggantikan layar akhir sementara. Layar judul (F-10) menggantikan layar kerangka dan `#main`, dan memutuskan nasib tautan pratinjau.
+- Plan F-06 dan seterusnya: di layar pilihan terpanjang, panel bawah 40u hanya menyisakan 3,05–3,3u, kurang dari satu baris pilihan (F-05, Temuan 2). Unsur baru di panel bawah perlu diukur ulang.
+- Semua fitur: uji ujung ke ujung yang memakai `page.clock` harus menjeda jam dengan `pauseAt` sebelum mengatur waktu, karena jam palsu Playwright tetap berjalan sampai dijeda (F-05, Temuan 1).
 
 ## F-01 — Kerangka halaman game dan build dua halaman
 - Status: Selesai (21 Okt 2026). Riwayat 21 Okt 2026: direncanakan dan disetujui; spesifikasi disetujui; dibangun; diuji dan lulus semua kriteria ([laporan](tests/F-01-hasil.md)); digabung ke `main` dan terbit di GitHub Pages (dikonfirmasi pemilik proyek).
@@ -261,3 +265,82 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
      - Uji ujung ke ujung memeriksa keenam adegan di 1280×720 dan 1024×768: respons, galat konsol, skala, posisi tokoh, dan kurangi gerak. Tangkapan layarnya disimpan sebagai bukti.
      - Ditambah uji unit `layout.ts`, `tsc`, dan ESLint.
      - Daftar periksa manual AGENTS bagian 9 yang berlaku: tampilan di 1024×768 dan 1920×1080, serta mode kurangi gerak.
+
+## F-05 — Panel narasi, pertanyaan, dan tombol pilihan + kontrol keyboard
+- Status: Selesai (22 Okt 2026). Riwayat 22 Okt 2026: direncanakan dan disetujui (balasan `Setuju: F-05`; keenam usulan diterima); spesifikasi ditulis dan disetujui (balasan `Spesifikasi disetujui: F-05`; [F-05-panel-narasi-pilihan.md](specs/F-05-panel-narasi-pilihan.md)); dibangun; diuji dan lulus kesembilan belas kriteria ([F-05-hasil.md](tests/F-05-hasil.md)). Layar bawaan halaman permainan tetap layar kerangka; alur permainan dibuka lewat tombol "Coba alur permainan" (`#main`).
+- Memenuhi:
+  - FR-04: keenam adegan bisa dimainkan berurutan, masing-masing dengan tiga pilihan. Sampai F-04, adegan hanya bisa dilihat lewat pratinjau.
+  - FR-10 (sisi tampilan): narasi tambahan dan teks pilihan B adegan 6 mengikuti bendera `komangDibela`, lewat `narrationFor` dan `choiceText` dari F-02.
+  - FR-16 sebagian (Architecture bagian 9): `1` `2` `3` atau `A` `B` `C` untuk memilih, serta `Spasi` dan `Enter` untuk lanjut dan menampilkan seluruh teks narasi. Tombol lain menyusul bersama fiturnya: `P`, `T`, `S`, dan `0` `1` `2` di F-07; `Esc` di F-10; `F` dan `M` di F-13.
+  - Architecture bagian 6: antarmuka pertama yang menjalankan fase `intro`, `discuss`, `reaction`, dan `transition`, dengan aksi `NARASI_SELESAI`, `PILIH`, `REAKSI_SELESAI`, dan `LANJUT`.
+  - Architecture bagian 10: narasi dan pertanyaan diumumkan lewat wilayah `aria-live="polite"`.
+  - Design System bagian 7: kotak narasi dan tombol pilihan A/B/C dengan status biasa, fokus/arah, dipilih, dan nonaktif.
+  - Design System bagian 8: reaksi tokoh 1–1,5 detik, serta sapuan blok piksel 400 ms ke kanan saat pergantian adegan, atau pudar 150 ms bila kurangi gerak aktif (catatan Plan F-05 tentang sapuan).
+- Bergantung pada: F-02 dan F-04 (selesai dan sudah terbit). Memakai naskah F-03 dan manifest F-12.
+- File yang dibuat/diubah:
+  - Baru `app/sehari-setara/ui/PlayScreen.tsx`: layar permainan. Menjalankan reducer F-02 lewat `useReducer`, menampilkan bilah atas, panggung, dan panel bawah menurut fase, mengatur lama tampil reaksi dan sapuan, menangani keyboard, dan memuat jembatan sementara (usulan 4).
+  - Baru `app/sehari-setara/ui/NarrationBox.tsx`: kotak narasi berbingkai piksel dengan tab label. Teks muncul per huruf (mengikuti `settings.typewriter`), dan klik, `Spasi`, atau `Enter` menampilkan seluruh teks sekaligus.
+  - Baru `app/sehari-setara/ui/ChoicePanel.tsx`: pertanyaan dan tiga tombol pilihan, dengan huruf A/B/C dalam kotak di kiri.
+  - Baru `app/sehari-setara/ui/SceneWipe.tsx`: lapisan sapuan blok piksel di atas bingkai panggung, atau pudar bila kurangi gerak aktif.
+  - Baru `app/sehari-setara/ui/controls.ts`: fungsi murni untuk memetakan tombol keyboard ke aksi menurut fase, menghitung langkah teks per huruf, dan menyusun urutan blok sapuan.
+  - Baru `app/sehari-setara/ui/hooks.ts`: `usePrefersReducedMotion` dan `useStageScale`, dipindahkan dari `StagePreview.tsx` agar dipakai bersama.
+  - Baru `app/sehari-setara/content/teams.ts`: empat tim bawaan Design System bagian 7 (Tim Mangga, Tim Laut, Tim Daun, Tim Mentari). F-05 memakai dua yang pertama tanpa menampilkannya (usulan 3); F-07 dan F-10 memakai daftar yang sama.
+  - Baru `app/sehari-setara/__tests__/controls.test.ts`: uji unit `controls.ts`.
+  - Baru `e2e/alur-permainan.spec.ts`: uji ujung ke ujung alur permainan (usulan 6).
+  - Diubah `app/sehari-setara/Game.tsx`: alamat `#main` membuka layar permainan, dan layar kerangka mendapat tombol ketiga (usulan 3).
+  - Diubah `app/sehari-setara/content/copy.ts`: teks antarmuka baru.
+  - Diubah `app/sehari-setara/styles/game.css`: kelas kotak narasi, tombol pilihan, sapuan, dan jembatan; tinggi baris layar (usulan 2); satuan bingkai piksel (usulan 1), termasuk `ss-button` dan `ss-chip` bila usulan 1 disetujui. Tidak ada token `:root` baru.
+  - Diubah `app/sehari-setara/ui/layout.ts`: konstanta tata letak (usulan 2) dan satuan piksel antarmuka (usulan 1).
+  - Diubah `app/sehari-setara/ui/StagePreview.tsx`: memakai `hooks.ts` dan tata letak yang sama dengan layar permainan.
+  - Diubah `app/sehari-setara/__tests__/layout.test.ts` dan `e2e/sehari-setara.spec.ts`: harapan tata letak baru dan tombol ketiga layar kerangka.
+  - Diubah `docs/sehari-setara/Design_System.md` (bagian 3 dan 7, sesuai usulan 1 dan 2) dan `docs/sehari-setara/Architecture.md` (bagian 3, 7, dan 9).
+  - Dokumen: `specs/F-05-panel-narasi-pilihan.md`, `tests/F-05-hasil.md`, tangkapan layar di `tests/F-05/`, dan entri ini.
+  - Tambahan dari spesifikasi: `e2e/bantuan.ts` (fungsi uji bersama untuk kedua berkas uji ujung ke ujung), serta `Design_System.md` bagian 8 dan `Architecture.md` bagian 12.
+  - Tidak disentuh: `engine/` (reducer F-02 sudah mencukupi), `content/scenes.ts` dan naskah lain, `Stage.tsx`, `Sprite.tsx`, `DayArc.tsx`, aset dan kit gambar, file galeri, `vite.pages.config.ts`, `package.json`, `pnpm-lock.yaml`, dan workflow.
+- Aset yang dibutuhkan: tidak ada aset baru. Latar, strip tokoh, pose reaksi, dan ikon emosi sudah Disetujui dan terdaftar di manifest. Huruf A/B/C, kursor ▶, dan tanda lanjut berupa teks. Placeholder tidak diperlukan.
+- Risiko (angka dari percobaan di luar repositori, 22 Okt 2026, memakai huruf Pixelify Sans dan Press Start 2P yang terpasang):
+  - **Panel bawah 30u tidak cukup untuk pertanyaan dan tiga pilihan.** Dengan ukuran huruf Design System bagian 5 (pertanyaan 3,6u, pilihan 3,1u) dan tiga pilihan berdampingan seperti bagan bagian 3:
+    - adegan 2 dan 4 muat (sekitar 29u), adegan 1 dan 6 butuh sekitar 34u, adegan 3 dan 5 sekitar 38u;
+    - pilihan B adegan 5 (139 karakter) terbungkus menjadi 6 baris dan terpotong sekitar 6u, di 1280×720 maupun 1024×768;
+    - tiga pilihan bertumpuk ke bawah malah butuh 34–39u;
+    - narasi terpanjang (adegan 5, 184 karakter) hanya butuh sekitar 23u, jadi masalahnya hanya di layar pilihan.
+
+    Lihat usulan 2.
+  - **Satuan bingkai piksel belum pasti** (catatan Plan F-05). Lihat usulan 1.
+  - **Fase yang tampilannya milik fitur lain.** Sesudah reaksi, mesin masuk ke fase dampak (F-06), kuis di adegan 5 (F-08), bintang (F-07), lalu akhir (F-09). Reducer tidak melewatinya sendiri: `LANJUT` di fase kuis ditolak sebelum `JAWAB_KUIS`, dan fase bintang menunggu `BERI_BINTANG`. Lihat usulan 4.
+  - **Layar judul, pengaturan, dan prolog belum ada** (F-10), padahal reducer menolak `PILIH` bila belum ada tim. Lihat usulan 3.
+  - **Keyboard.** Satu tekanan `Spasi` atau `Enter` pada tombol yang sedang berfokus memicu klik bawaan browser sekaligus pintasan, sehingga bisa menjadi dua aksi. Tombol yang ditahan juga mengirim tekanan berulang, dan kombinasi dengan Ctrl, Alt, atau Meta harus diabaikan. Spesifikasi menetapkan aturannya dan uji ujung ke ujung memeriksanya. Reducer sudah mengabaikan `PILIH` kedua.
+  - **Waktu di antarmuka.** Lama reaksi dan sapuan diatur pengatur waktu di komponen, karena reducer tetap tanpa `setTimeout` (F-02 AC-14). Pengatur waktu wajib dibersihkan saat layar ditutup, dan tidak boleh mengirim aksi dua kali walau `StrictMode` menjalankan efek dua kali saat pengembangan.
+  - **Teks per huruf dan pembaca layar.** Wilayah `aria-live` harus menerima teks utuh satu kali, bukan per huruf.
+  - **Pengatur waktu diskusi di mesin** sudah berstatus berjalan sejak `NARASI_SELESAI`, tetapi belum ada yang mengirim `TICK` sampai `useTimer` dibuat di F-07. Di F-05 hal ini tidak tampil dan tidak berpengaruh.
+  - **Halaman yang terbit berubah.** Layar kerangka mendapat tombol ketiga, dan alur permainan sementara bisa dibuka siapa pun yang tahu alamatnya. Permainan belum ditautkan dari galeri (F-11). Bila usulan 1 disetujui, garis tombol di layar kerangka dan pratinjau ikut menebal.
+  - **Perbedaan huruf antarkomputer.** Pemenggalan baris di Windows bisa sedikit berbeda dari lingkungan agen. Usulan 2 menyisakan ruang cadangan, dan uji ujung ke ujung memastikan panel tidak meluap di keenam adegan (termasuk varian adegan 6) pada empat ukuran. Pengecekan di laptop dan proyektor kelas tetap perlu dilakukan pemilik proyek.
+  - **Tailwind galeri** (catatan "Semua fitur"): kata baru di kode dan dokumen bisa menambah aturan CSS galeri. Sesudah entri ini ditulis, `build:pages` diulang dan berkas galeri tetap identik byte. Pemeriksaan yang sama diulang di tahap Test.
+- Ukuran: M (batas atas).
+- Keputusan Gerbang 1 (22 Okt 2026, balasan `Setuju: F-05`; keenam usulan disetujui):
+  1. **Bingkai piksel = 2 piksel panggung.** "Garis ink 2 px" di Design System bagian 7 dibaca sebagai piksel panggung, dibulatkan ke piksel layar utuh: 4 px di 1280×720, 1366×768, dan 1024×768, serta 6 px di 1920×1080. Sudut terpotong dan sorotan putih masing-masing 1 piksel panggung. Alasannya:
+     - Design System bagian 6 sudah menyebut bayangan antarmuka dalam "piksel logis";
+     - garis 2 px CSS terlihat tipis di 1920×1080 (F-01 Temuan 4);
+     - garis bingkai menjadi setebal piksel latar dan tokoh, sehingga panel dan panggung terasa satu gaya.
+
+     Berlaku untuk semua bingkai, termasuk tombol layar kerangka (F-01) dan pratinjau (F-04), agar seragam. Design System bagian 7 diperjelas sesuai keputusan. Bila tidak disetujui, bingkai tetap 2 px CSS seperti sekarang.
+  2. **Panel bawah 40u dan area panggung 52u**, bilah atas tetap 8u, untuk layar permainan dan pratinjau.
+     - Skala panggung tetap di 1280×720 dan 1366×768 (k = 2) serta 1920×1080 (k = 3).
+     - Di 1024×768 panggung mengecil dari k = 1,984 menjadi 1,664 (lebar 635 menjadi 532 px).
+     - Dengan jarak dalam yang sedikit lebih rapat, pilihan terpanjang butuh sekitar 36u, sehingga tersisa hampir satu baris cadangan.
+     - Design System bagian 3 ("panel bawah sekitar 30%") dan Architecture bagian 7 diperbarui.
+
+     Alternatif yang tidak diusulkan: memperkecil huruf pilihan (mengurangi keterbacaan dari bangku belakang), memendekkan teks pilihan (mengubah naskah PRD bagian 8), atau membiarkan layar 4:3 memakai tinggi penuh alih-alih bingkai `ink`. Alternatif terakhir membuat panggung di 1024×768 malah membesar ke k = 2, tetapi mengubah aturan PRD bagian 10 dan Design System bagian 3, sehingga lebih cocok diputuskan tersendiri.
+  3. **Pintu masuk sementara.** Alamat `sehari-setara/#main` membuka alur permainan langsung di adegan 1. Judul, pengaturan, dan prolog (F-10) dilewati dengan dua tim bawaan yang belum ditampilkan (F-07). Layar kerangka mendapat tombol ketiga, dengan usulan teks "Coba alur permainan" (`href="#main"`). Meninggalkan alamat itu mengakhiri permainan, dan membukanya lagi mulai dari awal. Pintu ini diganti layar judul di F-10.
+  4. **Jembatan sementara untuk fase milik fitur lain.**
+     - Sesudah reaksi, panel menampilkan pilihan yang diambil dalam status terkunci, ditambah tombol "Lanjut".
+     - "Lanjut" melewati fase dampak, kuis, dan bintang dengan nilai netral tanpa menampilkannya: bintang 0, dan jawaban kuis adegan 5 diisi dari naskah. Sesudah itu sapuan berjalan ke adegan berikutnya.
+     - Sesudah adegan 6 tampil layar sementara yang menyatakan keenam adegan selesai, dengan tombol untuk main lagi dari adegan 1 dan kembali ke galeri.
+     - Setiap bagian jembatan diganti fitur pemiliknya: kartu dampak (F-06), bintang (F-07), kuis (F-08), dan layar akhir (F-09).
+  5. **Pratinjau panggung tetap dipertahankan** sebagai alat tinjau (catatan Plan F-05), tanpa fitur baru. Alasannya: pratinjau adalah cara tercepat memeriksa ke-24 tampilan panggung, dan 16 uji ujung ke ujung F-04 bergantung padanya. Nasib tautannya ditinjau lagi di F-10, saat layar judul menggantikan layar kerangka.
+  6. **Cara uji**: `content:check`, `test` (ditambah `controls.test.ts`), `build:pages` (berkas galeri harus identik byte), dan `test:e2e`.
+     - Uji F-04 disesuaikan dengan tata letak baru.
+     - Uji alur baru: main dari adegan 1 sampai 6 hanya dengan keyboard, tiga jalur naskah (semua B, B-B-B-C-C-C, semua A), varian adegan 6, kunci klik ganda, sapuan dan pudar, serta panel tanpa luapan di keenam adegan pada empat ukuran.
+     - Tangkapan layar di 1280×720 dan 1024×768, ditambah 1920×1080.
+     - Daftar periksa manual AGENTS bagian 9 yang kini berlaku: dimainkan sampai akhir hanya dengan keyboard, kurangi gerak mematikan sapuan, serta tampilan di 1024×768 dan 1920×1080. Keterbacaan di proyektor dan laptop kelas bawah tetap dicek pemilik proyek.
+     - Tidak ada dependensi baru, jadi `package.json` dan `pnpm-lock.yaml` tidak berubah.

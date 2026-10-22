@@ -1,4 +1,4 @@
-// Tata letak panggung Sehari Setara (spesifikasi F-04). Semua fungsi murni dan diuji di layout.test.ts.
+// Tata letak panggung Sehari Setara (spesifikasi F-04 dan F-05). Semua fungsi murni dan diuji di layout.test.ts.
 // Satuan: piksel logis panggung (320×180), kecuali disebut lain.
 import type { SpriteStrip } from "../assets/manifest";
 import type { CastSlot, ChoiceId, Scene } from "../engine/types";
@@ -6,8 +6,11 @@ import type { CastSlot, ChoiceId, Scene } from "../engine/types";
 /** Panggung logis dan garis lantai (Design System bagian 3). */
 export const STAGE = { w: 320, h: 180, floorTop: 157, shadowY: 155 } as const;
 
-/** Tinggi baris layar dalam satuan u, dan ruang minimum panel samping (spesifikasi F-04). */
-export const LAYOUT = { screenU: 1600 / 9, barU: 8, stageU: 62, bottomU: 30, sideU: 30 } as const;
+/**
+ * Tinggi baris layar dalam satuan u, dan ruang minimum panel samping.
+ * F-05 (keputusan Gerbang 1 nomor 2): panel bawah 40u dan area panggung 52u, agar pertanyaan dan tiga pilihan muat.
+ */
+export const LAYOUT = { screenU: 1600 / 9, barU: 8, stageU: 52, bottomU: 40, sideU: 30 } as const;
 
 /** Architecture bagian 7: skala bulat bila sisa ruang di bawah 25 %, selain itu pecahan. */
 export function stageScale(availW: number, availH: number): number {
@@ -20,6 +23,14 @@ export function stageScale(availW: number, availH: number): number {
 export function stageScaleForScreen(screenHeightPx: number): number {
   const u = screenHeightPx / 100;
   return stageScale((LAYOUT.screenU - 2 * LAYOUT.sideU) * u, LAYOUT.stageU * u);
+}
+
+/**
+ * Satu piksel antarmuka untuk bingkai piksel (spesifikasi F-05): skala panggung dibulatkan ke piksel layar utuh,
+ * paling kecil 1. Garis bingkai 2 piksel antarmuka, sudut terpotong dan sorotan 1 piksel antarmuka.
+ */
+export function uiPixel(k: number): number {
+  return Math.max(1, Math.round(k));
 }
 
 /** Kotak sprite: titik tengah di x, baris terbawah di garis lantai (sama dengan place() di kit gambar). */
@@ -132,6 +143,22 @@ export function parsePreviewHash(hash: string, sceneCount: number): PreviewRoute
 export function previewHash(route: PreviewRoute): string {
   const suffix = route.view === "situasi" ? "" : `-${route.view.toLowerCase()}`;
   return `#adegan-${route.sceneIndex + 1}${suffix}`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layar menurut tanda pagar (spesifikasi F-05)                          */
+/* ------------------------------------------------------------------ */
+
+/** Alamat layar permainan sementara, sampai layar judul dibuat di F-10. */
+export const PLAY_HASH = "#main";
+
+export type ScreenRoute = { readonly kind: "main" } | { readonly kind: "pratinjau"; readonly preview: PreviewRoute };
+
+/** #main untuk layar permainan, #adegan-N[-a|b|c] untuk pratinjau panggung, selain itu null (layar kerangka). */
+export function parseRoute(hash: string, sceneCount: number): ScreenRoute | null {
+  if (hash === PLAY_HASH) return { kind: "main" };
+  const preview = parsePreviewHash(hash, sceneCount);
+  return preview ? { kind: "pratinjau", preview } : null;
 }
 
 /** Pemeran dan ikon emosi yang tampil di panggung untuk satu tampilan pratinjau. */
