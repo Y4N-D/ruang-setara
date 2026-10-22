@@ -20,7 +20,7 @@ function impactFor(hak: string, kewajiban: string, rujukan: Reference[]) {
 const s1Impact = impactFor(
   "Hak anak atas pengasuhan dan perlindungan.",
   "Kewajiban anak menghormati orang tua dan menyayangi keluarga.",
-  [ref("R-01"), ref("R-02")],
+  [ref("R-01"), ref("R-13"), ref("R-02")],
 );
 
 const s1: Scene = {
@@ -257,7 +257,7 @@ const s4: Scene = {
 const s5Impact = impactFor(
   "Hak atas kepastian hukum yang adil dan perlakuan yang sama di hadapan hukum.",
   "Kewajiban menghormati proses hukum.",
-  [ref("R-09"), ref("R-03"), ref("R-10"), ref("R-11"), ref("R-12")],
+  [ref("R-09"), ref("R-03"), ref("R-10"), ref("R-14"), ref("R-11"), ref("R-12")],
 );
 
 /** Susunan saat tuduhan berlanjut (pratinjau reaksi kurang adegan 5, untuk pilihan A dan C). */
@@ -330,7 +330,7 @@ const s5: Scene = {
 const s6Impact = impactFor(
   "Hak atas rasa aman, kehormatan, dan martabat.",
   "Kewajiban menghormati privasi dan tidak merendahkan orang lain.",
-  [ref("R-07"), ref("R-03"), ref("R-08")],
+  [ref("R-03"), ref("R-08")],
 );
 
 /** Untuk sementara reaksi adegan 6 memakai pose memegang HP ditambah ikon emosi (keputusan pemilik proyek). */

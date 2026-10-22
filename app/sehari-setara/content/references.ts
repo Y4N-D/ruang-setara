@@ -13,9 +13,12 @@ export const REFERENCE_TEXT = {
   "R-07": "Pasal 28E ayat (3) UUD NRI 1945",
   "R-08": "Pasal 28J ayat (1) UUD NRI 1945",
   "R-09": "Pasal 28D ayat (1) UUD NRI 1945",
-  "R-10": "Pasal 24 UUD NRI 1945",
-  "R-11": "UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g",
+  "R-10": "Pasal 24 ayat (1) dan ayat (2) UUD NRI 1945",
+  "R-11":
+    "UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g",
   "R-12": "UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah)",
+  "R-13": "UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 14 ayat (1)",
+  "R-14": "UU No. 48 Tahun 2009, Pasal 11 ayat (1)",
 } as const;
 
 export type RefId = keyof typeof REFERENCE_TEXT;
