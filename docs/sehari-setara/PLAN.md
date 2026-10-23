@@ -10,6 +10,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-12 | Selesai (21 Okt 2026) | [F-12-integrasi-aset.md](specs/F-12-integrasi-aset.md) | [F-12-hasil.md](tests/F-12-hasil.md) — lulus |
 | F-04 | Selesai (22 Okt 2026) | [F-04-panggung.md](specs/F-04-panggung.md) | [F-04-hasil.md](tests/F-04-hasil.md) — lulus |
 | F-05 | Selesai (22 Okt 2026) | [F-05-panel-narasi-pilihan.md](specs/F-05-panel-narasi-pilihan.md) | [F-05-hasil.md](tests/F-05-hasil.md) — lulus |
+| F-06 | Selesai (23 Okt 2026) | [F-06-indikator-kartu-dampak.md](specs/F-06-indikator-kartu-dampak.md) | [F-06-hasil.md](tests/F-06-hasil.md), lulus |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -36,6 +37,9 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
 - Plan F-05: Design System bagian 7 menyebut bingkai piksel "garis ink 2 px". F-01 membacanya sebagai px CSS. Sebelum panel dibangun, perlu dipastikan apakah yang dimaksud adalah piksel logis panggung. Lihat usulan 1 entri F-05.
 - Plan F-06 sampai F-10: jembatan sementara dan pintu masuk `#main` dari F-05 diganti fitur pemiliknya (keputusan Gerbang 1 F-05 nomor 3 dan 4). Kartu dampak (F-06), bintang (F-07), dan kuis (F-08) menggantikan bagiannya masing-masing di `bridgeActions` dan `PlayScreen.tsx`. Layar akhir (F-09) menggantikan layar akhir sementara. Layar judul (F-10) menggantikan layar kerangka dan `#main`, dan memutuskan nasib tautan pratinjau.
 - Plan F-06 dan seterusnya: di layar pilihan terpanjang, panel bawah 40u hanya menyisakan 3,05–3,3u, kurang dari satu baris pilihan (F-05, Temuan 2). Unsur baru di panel bawah perlu diukur ulang.
+- Plan F-07: kartu dampak menutupi panel kanan selama kartu tampil, karena FR-09 dibaca "papan tim selalu terlihat, kecuali saat sebuah dialog terbuka" (keputusan Gerbang 1 F-06 nomor 1). Bagian bintang di `bridgeActions` (`BERI_BINTANG` 0) diganti F-07.
+- Plan F-08: bagian kuis di `bridgeActions` (jawaban dari naskah) diganti F-08. Fase `quiz` datang sesudah tombol "Lanjut" kartu dampak adegan 5.
+- Semua fitur dengan jam uji: waktu yang dihitung sejak sebuah elemen tampil baru mulai sesudah React menggambarnya. Majukan jam dalam dua langkah, misalnya `runFor(1200)`, tunggu kartu tampil, lalu `runFor(600)` (F-06, Temuan 3).
 - Semua fitur: uji ujung ke ujung yang memakai `page.clock` harus menjeda jam dengan `pauseAt` sebelum mengatur waktu, karena jam palsu Playwright tetap berjalan sampai dijeda (F-05, Temuan 1).
 
 ## F-01 — Kerangka halaman game dan build dua halaman
@@ -343,4 +347,81 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
      - Uji alur baru: main dari adegan 1 sampai 6 hanya dengan keyboard, tiga jalur naskah (semua B, B-B-B-C-C-C, semua A), varian adegan 6, kunci klik ganda, sapuan dan pudar, serta panel tanpa luapan di keenam adegan pada empat ukuran.
      - Tangkapan layar di 1280×720 dan 1024×768, ditambah 1920×1080.
      - Daftar periksa manual AGENTS bagian 9 yang kini berlaku: dimainkan sampai akhir hanya dengan keyboard, kurangi gerak mematikan sapuan, serta tampilan di 1024×768 dan 1920×1080. Keterbacaan di proyektor dan laptop kelas bawah tetap dicek pemilik proyek.
+     - Tidak ada dependensi baru, jadi `package.json` dan `pnpm-lock.yaml` tidak berubah.
+
+## F-06 — Indikator dan kartu dampak
+- Status: Selesai (23 Okt 2026). Riwayat 23 Okt 2026: direncanakan; disetujui (balasan `Setuju: F-06`; kesembilan usulan diterima); spesifikasi disetujui ([F-06-indikator-kartu-dampak.md](specs/F-06-indikator-kartu-dampak.md), balasan `Spesifikasi disetujui: F-06`); dibangun dan diuji ([F-06-hasil.md](tests/F-06-hasil.md), lulus).
+- Memenuhi:
+  - FR-07: sesudah reaksi tokoh (F-05), kartu dampak menampilkan "Yang terjadi", "Hak yang terdampak", "Kewajiban terkait", dan "Rujukan", dengan kepala berwarna dan bertanda tingkat.
+  - FR-08 (sisi tampilan): dua indikator 0–100 di panel kiri, yang bergerak naik atau turun saat kartu dampak tampil. Sisi mesin sudah selesai di F-02.
+  - Design System bagian 7 (indikator dan kartu dampak) dan bagian 8 (angka melayang, kurangi gerak).
+  - Architecture bagian 10: kartu memakai `role="dialog"` dengan fokus di dalamnya, isinya diumumkan lewat wilayah `aria-live`, dan tingkat ditandai ikon serta teks, tidak hanya warna.
+  - PRD bagian 5 (TP 2 dan TP 3) dan bagian 6 ("kartu dampak + indikator bergerak").
+- Bergantung pada: F-05 (selesai dan sudah terbit). Memakai mesin F-02, naskah F-03, manifest F-12, serta tata letak F-04 dan F-05.
+- File yang dibuat/diubah:
+  - Baru `app/sehari-setara/ui/Meters.tsx`: panel indikator kiri berisi ikon, label, batang 10 segmen, angka nilai, dan angka melayang.
+  - Baru `app/sehari-setara/ui/ImpactCard.tsx`: kartu dampak sebagai dialog.
+  - Baru `app/sehari-setara/ui/impact.ts`: fungsi murni untuk nilai indikator sebelum dan sesudah pilihan (dihitung dari `history`, usulan 5), isi segmen termasuk setengah segmen, jadwal gerak segmen, dan teks angka melayang.
+  - Baru `app/sehari-setara/__tests__/impact.test.ts`: uji unit `impact.ts`.
+  - Baru `e2e/kartu-dampak.spec.ts`: uji ujung ke ujung kartu dan indikator.
+  - Diubah `app/sehari-setara/ui/PlayScreen.tsx`: panel indikator di semua fase permainan, kartu dampak di fase `impact`, dan jembatan sementara yang kini hanya melewati kuis dan bintang (usulan 8).
+  - Diubah `app/sehari-setara/ui/controls.ts`: `bridgeActions` dipecah karena bagian dampak diganti kartu, serta `Spasi` dan `Enter` di fase `impact` menjadi tombol lanjut kartu.
+  - Diubah `app/sehari-setara/content/copy.ts`: label indikator, tulisan tingkat, judul bagian kartu, dan teks pembaca layar.
+  - Diubah `app/sehari-setara/styles/game.css`: kelas panel indikator dan kartu dampak. Warnanya hanya dari token yang sudah ada (`--ss-meter-hak`, `--ss-meter-kewajiban`, `--ss-tier-*`); tidak ada token `:root` baru.
+  - Diubah `app/sehari-setara/ui/layout.ts` bila letak kartu dan panel indikator perlu konstanta; diputuskan di spesifikasi.
+  - Diubah `app/sehari-setara/__tests__/controls.test.ts` dan `e2e/alur-permainan.spec.ts`: harapan jembatan dan alur baru, yaitu kartu muncul sebelum adegan berganti.
+  - Diubah `docs/sehari-setara/Design_System.md` (bagian 7 dan 8: letak dan isi kartu, setengah segmen, angka melayang) dan `Architecture.md` (bagian 3, 7, 9, 10, dan 12).
+  - Dokumen: `specs/F-06-indikator-kartu-dampak.md`, `tests/F-06-hasil.md`, tangkapan layar di `tests/F-06/`, dan entri ini.
+  - Perbedaan dari daftar di atas, disetujui bersama spesifikasi: `ui/controls.ts`, `__tests__/controls.test.ts`, dan `ui/layout.ts` tidak diubah, karena urutan `bridgeActions` sudah tepat untuk tombol kartu; `e2e/bantuan.ts` diubah untuk fungsi uji bersama kartu dampak.
+  - Penyesuaian saat Build, disetujui pemilik proyek 23 Okt 2026 (balasan `Lanjutkan`): celah antarindikator 7u, bukan 6u (laporan uji, Temuan 1).
+  - Tidak disentuh: `engine/`, naskah (`scenes.ts`, `references.ts`), `Verifikasi_Rujukan.md`, `content.test.ts`, aset dan kit gambar (bila usulan 2 disetujui), `Stage.tsx`, `StagePreview.tsx`, file galeri, `vite.pages.config.ts`, `package.json`, `pnpm-lock.yaml`, dan workflow.
+- Aset yang dibutuhkan:
+  - Tersedia dan Disetujui: `ui_hak` (D-01) dan `ui_kewajiban` (D-02) untuk indikator.
+  - Ikon tingkat di kepala kartu: belum ada aset khusus, padahal Design System bagian 7 meminta "ikon dan tulisan tingkat". Usulan 2 memakai ikon emosi D-09 yang sudah Disetujui, sehingga placeholder tidak diperlukan.
+- Risiko (angka dari percobaan di luar repositori, 23 Okt 2026: maket kartu disuntikkan ke hasil build F-05 di `/ruang-setara/sehari-setara/#main`, lalu diukur dengan huruf asli di Chromium 141 pada empat ukuran layar):
+  - **Isi kartu terpanjang.** Kartu adegan 5 memuat sampai 168 huruf "Yang terjadi", 76 huruf hak, dan enam rujukan sepanjang 330 huruf (R-11 saja 120 huruf). Pilihan A adegan 2 memuat 171 huruf "Yang terjadi". Sisa ruang terkecil dari ke-18 kartu (angka negatif berarti meluap):
+
+    | Letak kartu | Ukuran huruf | Sisa terkecil |
+    |---|---|---|
+    | Panel bawah 40u, satu halaman | lega atau ringkas | −15 sampai −32u (semua kartu meluap) |
+    | Panel bawah 40u, dua halaman | ringkas | halaman 1 −4,2 sampai −6,5u; halaman rujukan 0,2 sampai 2,5u |
+    | Kolom tengah selebar panggung, satu kolom | ringkas | 1,0u di 1280×720 dan 1920×1080; −1,8u di 1366×768; −0,8u di 1024×768 |
+    | Kolom tengah, dua kolom, "Lanjut" di kepala kartu | ringkas | 7,5u (1366×768) sampai 15,7u (1024×768) |
+    | Kolom tengah, dua kolom, "Lanjut" di kepala kartu | lega | −0,6 sampai −12,9u |
+    | Kartu lebar (semua kecuali panel indikator kiri), dua kolom | lega | 15,7u (1024×768) sampai 17,9u (1366×768) |
+
+    Huruf lega: "Yang terjadi" 3,6u (sama dengan narasi), hak, kewajiban, dan rujukan 3,1u. Huruf ringkas: "Yang terjadi", hak, dan kewajiban 3,1u, rujukan 2,5u (batas minimum Design System bagian 5). Judul bagian 2,5u. Lihat usulan 1.
+  - **Papan tim F-07.** Kartu lebar menutupi panel kanan selama kartu terbuka, padahal FR-09 menyebut papan skor tim selalu terlihat. Kartu kolom tengah tidak menutupinya, tetapi hanya muat dengan huruf ringkas.
+  - **Nilai indikator sudah berubah sejak `PILIH`.** Reducer F-02 menerapkan efek saat memilih, sedangkan PRD bagian 6 menggerakkan indikator bersama kartu dampak. Tanpa penanganan, indikator melompat ketika reaksi baru dimulai. Lihat usulan 5.
+  - **Batas 0 dan 100.** Pada jalur semua B, hak menjadi 60, 70, 85, 100, 100, 100 dan kewajiban 65, 80, 90, 100, 100, 100, karena F-02 membatasi nilai per langkah. Di adegan 5 dan 6 batang tidak bergerak walaupun efeknya +15 dan +20. Efek nol juga ada di tiga pilihan: hak pada 2C dan 3C, kewajiban pada 6C. Lihat usulan 3.
+  - **Kelipatan 5 dan 10 segmen.** Satu segmen bernilai 10, sedangkan nilai bisa 65 atau 75; ambang akhir 75 dan 40 (PRD bagian 9) juga tidak jatuh di batas segmen. Lihat usulan 4.
+  - **Tanda minus.** Pixelify Sans memuat tanda minus (U+2212), sedangkan Press Start 2P tidak. Angka melayang ditulis dengan Pixelify Sans agar "−10" tidak tampil dengan huruf cadangan. Kedua huruf juga tidak memuat kursor ▶ (U+25B6); ini sudah berlaku sejak F-01 dan di luar cakupan F-06.
+  - **Tekanan ganda.** Kartu muncul 1,2 detik sesudah memilih. `Spasi` yang ditekan berulang bisa langsung menutup kartu sebelum dibaca. Lihat usulan 6.
+  - **Fokus dialog.** Architecture bagian 10 meminta fokus kembali ke tombol pemicu sesudah dialog ditutup, padahal kartu dampak muncul sendiri dan langsung diikuti pergantian adegan. Spesifikasi akan menetapkan fokus masuk ke kartu saat muncul, lalu ke tombol lanjut kotak narasi adegan berikutnya seperti aturan F-05.
+  - **Panel indikator kiri.** Ruang di samping panggung 42,7u (1024×768), 44,4u (1280×720 dan 1920×1080), dan 47,2u (1366×768). Dengan jarak tepi 2u, baris batang dan angka butuh 35,6–36,3u dari 38,7–43,3u yang tersedia, dan kedua label muat dalam satu baris.
+  - **Panel bawah.** F-06 tidak menambah apa pun ke panel pilihan, sehingga sisa ruang 3,05–3,3u (F-05, Temuan 2) tidak berkurang.
+  - **Rujukan yang belum terverifikasi** mulai terlihat di alamat `#main` (0 dari 14 terverifikasi). Lihat usulan 7.
+  - **Halaman yang terbit berubah.** Alamat `#main` kini menampilkan indikator dan kartu dampak. Permainan belum ditautkan dari galeri (F-11).
+  - **Tailwind galeri** (catatan "Semua fitur"): sesudah entri ini ditulis, `build:pages` diulang dan berkas galeri tetap identik byte dengan build sebelum F-06. Pemeriksaan yang sama diulang di tahap Test.
+  - **Jam uji Playwright** (catatan "Semua fitur"): uji yang mengatur waktu gerak indikator dan pengaman tekanan ganda menjeda jam dengan `pauseAt`.
+  - **Anggaran:** kode game sekarang 13,93 KB gzip ditambah React 60,18 KB gzip, sekitar 74 KB dari 150 KB. F-06 menambah dua komponen kecil.
+- Ukuran: M (batas atas).
+- Keputusan Gerbang 1 (23 Okt 2026, balasan `Setuju: F-06`; kesembilan usulan disetujui):
+  1. **Kartu lebar.** Kartu menutupi panggung, panel kanan, dan panel bawah, sedangkan panel indikator kiri tetap terlihat agar gerak indikator bisa diikuti. Isinya dua kolom: kiri "Yang terjadi", "Hak yang terdampak", dan "Kewajiban terkait"; kanan "Rujukan". Ukuran hurufnya lega, dengan sisa ruang paling sedikit 15,7u.
+     - Papan tim F-07 tertutup selama kartu terbuka. FR-09 dibaca sebagai "selalu terlihat, kecuali saat sebuah dialog terbuka", dan bacaan ini dicatat di Design System bagian 7.
+     - Alternatif: kartu di kolom tengah selebar panggung, sehingga kedua panel samping tetap terlihat, dengan huruf ringkas (rujukan 2,5u) dan "Lanjut" di kepala kartu.
+     - Tidak diusulkan: kartu di panel bawah 40u, karena satu halaman maupun dua halaman tetap meluap.
+     - Maket kedua letak untuk adegan 5 pilihan B dikirim lewat percakapan dan tidak disimpan di repositori.
+  2. **Ikon tingkat dari ikon emosi D-09** dengan aturan yang sama dengan reaksi F-03: hati untuk tepat, keringat untuk kurang tepat, dan seru untuk berisiko. Ikon 8×8 itu ditampilkan dua kali lipat di kepala kartu, di sebelah tulisan tingkat. Tidak ada aset baru. Alternatif: tiga ikon tingkat 16×16 baru (D-12), digambar dalam peran Pembuat aset dan diajukan di Gerbang 2.
+  3. **Angka melayang menampilkan efek di naskah** ("+15", "−10", atau "0"), juga ketika batang sudah mentok di 0 atau 100. Batang dan angka di ujungnya selalu menunjukkan nilai sebenarnya sesudah dibatasi. Bila kurangi gerak aktif, angka melayang tidak tampil (Design System bagian 8), dan perubahan nilai tetap dibacakan lewat wilayah `aria-live`.
+  4. **Setengah segmen.** Setiap segmen bernilai 10, dan nilai kelipatan 5 ditampilkan dengan segmen terisi separuh; misalnya 65 menjadi enam segmen penuh dan satu segmen separuh. Angka pasti tetap tampil di ujung batang.
+  5. **Indikator bergerak bersama kartu.** Selama reaksi, indikator masih menunjukkan nilai sebelum memilih, yang dihitung ulang dari `history` tanpa entri adegan berjalan. Saat kartu muncul, kedua batang bergerak bersamaan per setengah segmen, paling lama 0,4 detik. `engine/` tidak diubah.
+  6. **Pengaman tekanan ganda.** Tombol "Lanjut" kartu baru menerima klik dan tombol keyboard sesudah gerak indikator selesai, paling lama 0,6 detik sesudah kartu muncul.
+  7. **Rujukan tampil apa adanya**, tanpa tanda "perlu verifikasi", karena alamat `#main` belum ditautkan dari galeri dan rilis tetap diblokir di F-11 sampai semua kotak `Verifikasi_Rujukan.md` dicentang pemilik proyek. Alternatif: catatan kecil "Rujukan sedang diverifikasi" di kartu sampai F-11.
+  8. **Jembatan sementara diperpendek.** "Lanjut" di kartu langsung membawa kelas ke adegan berikutnya lewat sapuan atau pudar. Kuis adegan 5 dan bintang tetap dilewati tanpa ditampilkan (jawaban dari naskah dan bintang 0) sampai F-08 dan F-07. Tombol "Lanjut" jembatan di baris status tidak muncul lagi.
+  9. **Cara uji:** `content:check`, `test` (ditambah `impact.test.ts` dan `controls.test.ts` yang disesuaikan), `build:pages` (berkas galeri identik byte, ukuran, path relatif), dan `test:e2e`.
+     - Ke-28 uji lama disesuaikan dengan alur baru.
+     - Uji baru: isi ke-18 kartu sama dengan naskah; warna, ikon, dan tulisan tingkat; nilai indikator pada tiga jalur naskah, termasuk batas 100 dan 0; setengah segmen; angka melayang dan kurangi gerak; fokus dialog dan keyboard; pengaman tekanan ganda; kartu dan panel indikator tanpa luapan di empat ukuran; serta tanpa galat konsol dan tanpa respons 4xx.
+     - Tangkapan layar di 1280×720 dan 1024×768, ditambah 1920×1080; `tsc` dan ESLint.
+     - Daftar periksa manual AGENTS bagian 9 yang berlaku. Keterbacaan di proyektor dan laptop kelas bawah tetap dicek pemilik proyek.
      - Tidak ada dependensi baru, jadi `package.json` dan `pnpm-lock.yaml` tidak berubah.

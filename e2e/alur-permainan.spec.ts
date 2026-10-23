@@ -1,4 +1,5 @@
 // Uji ujung ke ujung layar permainan Sehari Setara (spesifikasi F-05, Rencana uji langkah 3 dan 4).
+// Disesuaikan di F-06: sesudah reaksi, kartu dampak menggantikan tombol jembatan (spesifikasi F-06, Rencana uji).
 // Membuka hasil build di /ruang-setara/sehari-setara/#main lewat serve-subpath.mjs, seperti alamat GitHub Pages.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
@@ -6,6 +7,7 @@ import { choiceText, narrationFor } from "../app/sehari-setara/engine/rules";
 import type { CastSlot, ChoiceId, Flag } from "../app/sehari-setara/engine/types";
 import { WIPE, wipeSchedule } from "../app/sehari-setara/ui/controls";
 import {
+  cardNext,
   contrast,
   CREAM,
   EMOTES,
@@ -15,6 +17,7 @@ import {
   SHOTS,
   SUN,
   VIEWPORTS,
+  waitCardReady,
   watch,
   type ViewportName,
 } from "./bantuan";
@@ -40,7 +43,9 @@ async function pauseClock(page: Page) {
 
 const live = (page: Page) => page.locator('.ss-play [aria-live="polite"]');
 const narrationNext = (page: Page) => page.locator(".ss-narration .ss-next");
+/** Tombol jembatan F-05 di baris status; sejak F-06 tidak muncul lagi pada pemakaian biasa. */
 const bridgeNext = (page: Page) => page.locator(".ss-question-row .ss-next");
+const cardTitle = (page: Page) => page.locator("#ss-impact-title");
 
 async function openPlay(page: Page, size: ViewportName = "1280x720", reduce = true) {
   const { width, height } = VIEWPORTS[size];
@@ -124,7 +129,7 @@ async function checkChosen(page: Page, sceneIndex: number, choiceId: ChoiceId) {
 }
 
 /** Main dari adegan yang sedang tampil sampai layar akhir sementara, hanya dengan keyboard. */
-async function playPath(page: Page, path: ChoiceId[], shots?: { bridgeS4?: string; discussS5?: string }) {
+async function playPath(page: Page, path: ChoiceId[], shots?: { discussS5?: string }) {
   const flags: Flag[] = [];
   for (let i = 0; i < SCENES.length; i++) {
     const scene = SCENES[i];
@@ -144,10 +149,10 @@ async function playPath(page: Page, path: ChoiceId[], shots?: { bridgeS4?: strin
     await page.keyboard.press(path[i]);
     await checkChosen(page, i, path[i]);
     if (i === 3 && path[i] === "B") flags.push("komangDibela");
-    await expect(bridgeNext(page)).toBeVisible({ timeout: 3000 });
-    await expect(bridgeNext(page)).toBeFocused();
-    await expect(page.locator('[role="dialog"]')).toHaveCount(0);
-    if (i === 3 && shots?.bridgeS4) await page.screenshot({ path: `${SHOTS}/${shots.bridgeS4}` });
+    // Kartu dampak (F-06) satu-satunya dialog; kuis dan tombol jembatan tidak tampil.
+    await waitCardReady(page);
+    await expect(page.locator('[role="dialog"]')).toHaveCount(1);
+    await expect(bridgeNext(page)).toHaveCount(0);
     await page.keyboard.press("Enter");
   }
   await expect(page.locator(".ss-play-end h1")).toHaveText("Keenam adegan selesai");
@@ -335,7 +340,7 @@ test("pilihan: teks, fokus, status tombol, dan aturan keyboard (AC-3, AC-4, AC-1
   expectClean(log);
 });
 
-test("reaksi dan jembatan: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, AC-6)", async ({ page }) => {
+test("reaksi dan kartu dampak: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, AC-6; F-06 AC-6, AC-9, AC-10)", async ({ page }) => {
   const log = watch(page);
   await openPlay(page);
   await toQuestion(page);
@@ -343,13 +348,12 @@ test("reaksi dan jembatan: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, AC-6)
     const run = window as unknown as Run;
     window.addEventListener("keydown", () => (run.ssTekan = performance.now()), { capture: true, once: true });
     new MutationObserver(() => {
-      if (!run.ssMuncul && document.querySelector(".ss-question-row .ss-next")) run.ssMuncul = performance.now();
+      if (!run.ssMuncul && document.querySelector(".ss-impact")) run.ssMuncul = performance.now();
     }).observe(document.body, { childList: true, subtree: true });
   });
   await page.keyboard.press("2");
   await checkChosen(page, 0, "B");
-  await expect(bridgeNext(page)).toBeVisible({ timeout: 3000 });
-  await expect(bridgeNext(page)).toBeFocused();
+  await waitCardReady(page);
   const waited = await page.evaluate(() => {
     const run = window as unknown as Run;
     return (run.ssMuncul ?? 0) - (run.ssTekan ?? 0);
@@ -357,8 +361,8 @@ test("reaksi dan jembatan: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, AC-6)
   expect(waited).toBeGreaterThanOrEqual(1150);
   expect(waited).toBeLessThanOrEqual(1600);
 
-  // Klik ganda hanya memajukan satu adegan.
-  await bridgeNext(page).dblclick();
+  // Klik ganda pada Lanjut kartu hanya memajukan satu adegan.
+  await cardNext(page).dblclick();
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 2/6");
   await expect(narrationNext(page)).toBeVisible();
   await page.waitForTimeout(500);
@@ -368,7 +372,7 @@ test("reaksi dan jembatan: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, AC-6)
   // Dua kali Enter dengan cepat juga hanya memajukan satu adegan.
   await readNarration(page, 1, []);
   await page.keyboard.press("2");
-  await expect(bridgeNext(page)).toBeFocused({ timeout: 3000 });
+  await waitCardReady(page);
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 3/6");
@@ -380,12 +384,13 @@ test("reaksi dan jembatan: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, AC-6)
   for (const i of [2, 3]) {
     await readNarration(page, i, []);
     await page.keyboard.press("B");
-    await expect(bridgeNext(page)).toBeFocused({ timeout: 3000 });
+    await waitCardReady(page);
     await page.keyboard.press("Enter");
   }
   await readNarration(page, 4, []);
   await page.keyboard.press("b");
-  await expect(bridgeNext(page)).toBeFocused({ timeout: 3000 });
+  await waitCardReady(page);
+  await expect(bridgeNext(page)).toHaveCount(0);
   for (const role of ["Polisi", "Jaksa", "Advokat", "Hakim"]) await expect(page.getByText(role, { exact: true })).toHaveCount(0);
   await page.keyboard.press("Enter");
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 6/6");
@@ -401,7 +406,8 @@ test("sapuan blok piksel pada 100 ms dan 300 ms (AC-7)", async ({ page }) => {
   while ((await page.locator(".ss-question").count()) === 0) await page.keyboard.press("Space");
   await page.keyboard.press("2");
   await page.clock.runFor(1200);
-  await expect(bridgeNext(page)).toBeFocused();
+  await expect(cardTitle(page)).toBeFocused();
+  await page.clock.runFor(600);
   await page.keyboard.press("Enter");
   await expect(page.locator(".ss-wipe")).toHaveAttribute("data-time", "pagi");
   await page.clock.runFor(400);
@@ -413,7 +419,8 @@ test("sapuan blok piksel pada 100 ms dan 300 ms (AC-7)", async ({ page }) => {
   await expect(page.locator(".ss-question")).toBeVisible();
   await page.keyboard.press("2");
   await page.clock.runFor(1200);
-  await expect(bridgeNext(page)).toBeFocused();
+  await expect(cardTitle(page)).toBeFocused();
+  await page.clock.runFor(600);
   await page.keyboard.press("Enter");
   const wipe = page.locator(".ss-wipe");
   await expect(wipe).toHaveAttribute("data-time", "siang");
@@ -493,7 +500,7 @@ test("sapuan tepat waktu dan tanpa sapuan sesudah adegan 6 (AC-7)", async ({ pag
       await page.waitForTimeout(50);
     }
     await page.keyboard.press("C");
-    await expect(bridgeNext(page)).toBeFocused({ timeout: 3000 });
+    await waitCardReady(page);
     await page.evaluate(() => {
       const run = window as unknown as Run;
       run.ssMuncul = 0;
@@ -535,8 +542,9 @@ test("kurangi gerak: teks langsung lengkap, pudar 75 + 75 ms, tanpa animasi lain
   await toQuestion(page);
   await page.keyboard.press("2");
   await page.clock.runFor(1200);
-  await expect(bridgeNext(page)).toBeFocused();
+  await expect(cardTitle(page)).toBeFocused();
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+  await page.clock.runFor(600);
   await page.keyboard.press("Enter");
   const holder = page.locator(".ss-stage-holder");
   const fade = () =>
@@ -565,7 +573,7 @@ test("tiga jalur sampai akhir dengan keyboard, layar akhir sementara, dan main l
   await openPlay(page);
   await waitImages(page);
   await page.screenshot({ path: `${SHOTS}/adegan_1_narasi_1280x720.png` });
-  await playPath(page, ["B", "B", "B", "B", "B", "B"], { bridgeS4: "adegan_4_jembatan_b_1280x720.png" });
+  await playPath(page, ["B", "B", "B", "B", "B", "B"]);
 
   // Layar akhir sementara.
   const end = page.locator(".ss-play-end");
@@ -682,10 +690,9 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
           await waitImages(page);
           await page.screenshot({ path: `${SHOTS}/adegan_5_pilihan_${size}.png` });
         }
-        // Layar jembatan.
+        // Layar reaksi: pilihan terkunci di panel bawah (F-05).
         await page.keyboard.press(path[i]);
-        await page.clock.runFor(1200);
-        await expect(bridgeNext(page)).toBeFocused();
+        await expect(page.locator(".ss-status")).toHaveText(`Kelas memilih ${path[i]}.`);
         expect(await overflow()).toBeLessThanOrEqual(0);
         const states = await page.locator(".ss-choice").evaluateAll((all) =>
           all.map((element) => ({
@@ -701,7 +708,14 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
           expect(contrast(s.key[0], s.key[1])).toBeGreaterThanOrEqual(4.5);
           if (s.state === "dipilih") expect(s.ring).toBe(`${INK} 0px 0px 0px ${2 * px}px inset`);
         }
-        expect(await border(".ss-question-row .ss-next")).toBe(`${2 * px}px`);
+        // Layar kartu dampak (F-06): panel bawah kosong, bingkai 2p, dan isi kartu tidak meluap.
+        await page.clock.runFor(1200);
+        await expect(cardTitle(page)).toBeFocused();
+        await expect(page.locator(".ss-play-panel > *")).toHaveCount(0);
+        expect(await border(".ss-impact")).toBe(`${2 * px}px`);
+        expect(await border(".ss-impact .ss-next")).toBe(`${2 * px}px`);
+        expect(await page.locator(".ss-impact-body").evaluate((element) => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(0);
+        await page.clock.runFor(600);
         await page.keyboard.press("Enter");
         await page.clock.runFor(150);
       }

@@ -1,6 +1,7 @@
-// Layar permainan Sehari Setara (spesifikasi F-05), dibuka lewat #main sampai layar judul dibuat di F-10.
-// Menjalankan mesin F-02 dengan naskah F-03: narasi, pertanyaan, pilihan, reaksi, jembatan sementara,
-// pergantian adegan, dan layar akhir sementara. Logika permainan tetap di engine/; layar ini hanya mengirim aksi.
+// Layar permainan Sehari Setara (spesifikasi F-05 dan F-06), dibuka lewat #main sampai layar judul dibuat di F-10.
+// Menjalankan mesin F-02 dengan naskah F-03: narasi, pertanyaan, pilihan, reaksi, indikator, kartu dampak,
+// jembatan sementara, pergantian adegan, dan layar akhir sementara. Logika permainan tetap di engine/;
+// layar ini hanya mengirim aksi.
 import { useEffect, useEffectEvent, useReducer, useRef, useState, type ReactNode } from "react";
 import { copy } from "../content/copy";
 import { SCENES } from "../content/scenes";
@@ -24,8 +25,11 @@ import {
 } from "./controls";
 import { DayArc } from "./DayArc";
 import { usePrefersReducedMotion } from "./hooks";
+import { ImpactCard } from "./ImpactCard";
+import { IMPACT_GUARD_MS, impactAnnouncement, METER_STEP_MS, meterValueAt, metersBefore } from "./impact";
 import { STAGE } from "./layout";
 import { NarrationBox, type NarrationHandle } from "./NarrationBox";
+import { Meters } from "./Meters";
 import { preloadScene } from "./preload";
 import { SceneWipe } from "./SceneWipe";
 import { Stage } from "./Stage";
@@ -35,10 +39,13 @@ const GALLERY_HREF = "../";
 
 const reducer = createReducer(SCENES);
 
-/** Fase yang menampilkan pertanyaan dan tiga pilihan di panel bawah. */
-const CHOICE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["discuss", "reaction", "impact", "quiz", "stars"]);
-/** Fase milik fitur lain yang dilewati jembatan sementara (keputusan Gerbang 1 F-05 nomor 4). */
-const BRIDGE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["impact", "quiz", "stars"]);
+/** Fase yang menampilkan pertanyaan dan tiga pilihan di panel bawah; di fase impact panel bawah kosong (F-06). */
+const CHOICE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["discuss", "reaction", "quiz", "stars"]);
+/**
+ * Fase milik fitur lain yang dilewati jembatan sementara (keputusan Gerbang 1 F-05 nomor 4). Sejak F-06 keduanya
+ * dilewati dalam tekanan Lanjut kartu dampak, jadi tombol jembatan hanya pengaman sampai F-07 dan F-08.
+ */
+const BRIDGE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["quiz", "stars"]);
 /** Fase saat panggung menampilkan reaksi pilihan adegan berjalan. */
 const REACTING_PHASES: ReadonlySet<Phase> = new Set<Phase>(["reaction", "impact", "quiz", "stars", "transition"]);
 /** Fase yang memakai layar akhir sementara, sampai layar akhir dibuat di F-09. */
@@ -71,6 +78,9 @@ export function PlayScreen({ scale }: { scale: number }) {
   const narrationRef = useRef<NarrationHandle>(null);
   const endTitleRef = useRef<HTMLHeadingElement>(null);
   const bridgeUsed = useRef("");
+  // Waktu sejak kartu dampak tampil: state untuk tampilan, ref untuk pengaman tekanan ganda (spesifikasi F-06).
+  const [impactTime, setImpactTime] = useState({ key: "", ms: 0 });
+  const impactStart = useRef({ key: "", at: 0 });
 
   const reduced = prefersReduced || state.settings.reducedMotion;
   const scene = SCENES[state.sceneIndex];
@@ -81,6 +91,7 @@ export function PlayScreen({ scale }: { scale: number }) {
   const reaction = chosen && REACTING_PHASES.has(state.phase) ? chosen : undefined;
   const ended = END_PHASES.has(state.phase);
   const sceneKey = `${round}-${state.sceneIndex}`;
+  const impactElapsed = state.phase === "impact" && impactTime.key === sceneKey ? impactTime.ms : 0;
 
   const send = (actions: readonly GameAction[]) => {
     for (const action of actions) dispatch(action);
@@ -100,14 +111,30 @@ export function PlayScreen({ scale }: { scale: number }) {
 
   const choose = (id: ChoiceId) => dispatch({ type: "PILIH", choice: id });
 
-  /** Jembatan sementara: sekali per adegan, lalu sapuan atau pudar ke adegan berikutnya. */
-  const bridge = () => {
-    if (!BRIDGE_PHASES.has(state.phase) || bridgeUsed.current === sceneKey) return;
+  /** Sekali per adegan: kuis dan bintang dilewati (jembatan sementara), lalu sapuan atau pudar ke adegan berikutnya. */
+  const advance = () => {
+    if (bridgeUsed.current === sceneKey) return;
     bridgeUsed.current = sceneKey;
     send(bridgeActions(scene));
     const next = SCENES[state.sceneIndex + 1];
     if (next) setChange({ kind: reduced ? "pudar" : "sapuan", nextTime: next.timeOfDay });
     else dispatch({ type: "LANJUT" });
+  };
+
+  /** Tombol jembatan F-05, hanya bila fase kuis atau bintang sempat tampil. */
+  const bridge = () => {
+    if (BRIDGE_PHASES.has(state.phase)) advance();
+  };
+
+  /** Masa tunggu 600 ms dihitung dari waktu sebenarnya, sehingga tidak bergantung pada render terakhir. */
+  const cardReady = () =>
+    state.phase === "impact" &&
+    impactStart.current.key === sceneKey &&
+    performance.now() - impactStart.current.at >= IMPACT_GUARD_MS;
+
+  /** Tombol Lanjut kartu dampak: bekerja sesudah masa tunggu, sekali per adegan. */
+  const continueFromCard = () => {
+    if (cardReady()) advance();
   };
 
   const restart = () => {
@@ -120,6 +147,20 @@ export function PlayScreen({ scale }: { scale: number }) {
     if (state.phase !== "reaction") return;
     const timer = setTimeout(() => dispatch({ type: "REAKSI_SELESAI" }), REACTION_MS);
     return () => clearTimeout(timer);
+  }, [state.phase, sceneKey]);
+
+  // Kartu dampak: waktu berlalu dihitung dari saat kartu tampil, untuk gerak indikator (paling lama 400 ms)
+  // dan masa tunggu tombol Lanjut (600 ms). Pengatur waktu berhenti sesudah masa tunggu atau saat fase berganti.
+  useEffect(() => {
+    if (state.phase !== "impact") return;
+    const start = performance.now();
+    impactStart.current = { key: sceneKey, at: start };
+    const timer = setInterval(() => {
+      const ms = performance.now() - start;
+      setImpactTime({ key: sceneKey, ms });
+      if (ms >= IMPACT_GUARD_MS) clearInterval(timer);
+    }, METER_STEP_MS / 2);
+    return () => clearInterval(timer);
   }, [state.phase, sceneKey]);
 
   // Pergantian adegan: LANJUT di tengah sapuan (200 ms) atau sesudah pudar keluar (75 ms); lapisan dibuang di akhir.
@@ -164,6 +205,7 @@ export function PlayScreen({ scale }: { scale: number }) {
     event.preventDefault();
     if (command.type === "pilih") choose(command.choice);
     else if (state.phase === "intro") narrationRef.current?.activate();
+    else if (state.phase === "impact") continueFromCard();
     else bridge();
   });
 
@@ -195,7 +237,27 @@ export function PlayScreen({ scale }: { scale: number }) {
 
   const stageLabel = reaction ? `${scene.altText} ${copy.play.stageReaction(reaction.id)}` : scene.altText;
   const fade = change?.kind === "pudar" ? (state.phase === "transition" ? "keluar" : "masuk") : undefined;
-  const live = state.phase === "intro" && !change ? screens[screen] : "";
+  // Indikator: nilai sebelum memilih selama reaksi, bergerak saat kartu dampak tampil, lalu nilai sesudah (F-06).
+  const showingImpact = state.phase === "impact" && chosen !== undefined && !change;
+  const before =
+    chosen && (state.phase === "reaction" || state.phase === "impact")
+      ? metersBefore(state.history, SCENES, scene.id)
+      : state.meters;
+  const meterTime = reduced ? Number.POSITIVE_INFINITY : impactElapsed;
+  const shownMeters =
+    state.phase === "reaction"
+      ? before
+      : state.phase === "impact"
+        ? {
+            hak: meterValueAt(before.hak, state.meters.hak, meterTime),
+            kewajiban: meterValueAt(before.kewajiban, state.meters.kewajiban, meterTime),
+          }
+        : state.meters;
+  const meterEffects = showingImpact && !reduced && chosen ? chosen.effects : null;
+
+  let live = "";
+  if (!change && state.phase === "intro") live = screens[screen];
+  else if (showingImpact && chosen) live = impactAnnouncement(chosen, before, state.meters);
 
   let panel: ReactNode = null;
   if (!change && state.phase === "intro") {
@@ -234,6 +296,7 @@ export function PlayScreen({ scale }: { scale: number }) {
         {live}
       </div>
       <DayArc scenes={SCENES} sceneIndex={state.sceneIndex} scale={scale} animate={!reduced} />
+      <Meters values={shownMeters} effects={meterEffects} scale={scale} />
       <div className="ss-stage-area">
         <div className="ss-stage-holder" data-fade={fade} style={{ width: STAGE.w * scale, height: STAGE.h * scale }}>
           <Stage
@@ -248,6 +311,15 @@ export function PlayScreen({ scale }: { scale: number }) {
         </div>
       </div>
       <div className="ss-play-panel">{panel}</div>
+      {showingImpact && chosen && (
+        <ImpactCard
+          key={sceneKey}
+          choice={chosen}
+          scale={scale}
+          ready={impactElapsed >= IMPACT_GUARD_MS}
+          onNext={continueFromCard}
+        />
+      )}
     </main>
   );
 }

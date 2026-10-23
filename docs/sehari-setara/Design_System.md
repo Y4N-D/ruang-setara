@@ -2,12 +2,13 @@
 
 | | |
 |---|---|
-| Versi | 0.5 (draf) |
-| Tanggal | 22 Oktober 2026 |
+| Versi | 0.6 (draf) |
+| Tanggal | 23 Oktober 2026 |
 | Perubahan 0.2 | Aset digambar dengan kode oleh Claude (bagian 12); palet 36 warna; desain Nara, Ibu, Gita, dan latar adegan 1 disetujui |
 | Perubahan 0.3 | `ikon.py` masuk tabel kit bagian 12 (F-12) |
 | Perubahan 0.4 | Kontras teks bilah atas per waktu (bagian 4); rincian busur hari (bagian 7); ikon matahari dan bulan D-11 (bagian 11) (F-04) |
 | Perubahan 0.5 | Panel bawah 40% dan area panggung 52% (bagian 3); bingkai piksel dalam piksel panggung, kotak narasi, dan tombol pilihan (bagian 7); rincian sapuan dan lama reaksi (bagian 8) (F-05) |
+| Perubahan 0.6 | Letak kartu dampak (bagian 3); rincian indikator dan kartu dampak (bagian 7); gerak indikator, angka melayang, dan masa tunggu tombol "Lanjut" kartu (bagian 8) (F-06) |
 | Berlaku untuk | Semua layar, aset visual, animasi, dan suara game Sehari Setara |
 | Dokumen terkait | `PRD.md`, `Architecture.md`, `AGENTS.md` |
 
@@ -80,6 +81,7 @@ Satu elemen yang menjadi identitas game: **warna langit dan bilah atas berubah m
 
 - Bilah atas: sekitar 8% tinggi layar. Area panggung: sekitar 52%. Panel bawah: sekitar 40%, agar pertanyaan dan tiga pilihan muat dengan ukuran huruf bagian 5 (F-05). Panggung tetap ×2 di 1280×720 dan 1366×768 serta ×3 di 1920×1080; di layar 4:3 (1024×768) skalanya 1,664.
 - Panggung berada di tengah. Panel kiri berisi indikator, panel kanan berisi tim dan pengatur waktu.
+- Saat kartu dampak tampil, kartu menutupi panggung, panel kanan, dan panel bawah, sedangkan bilah atas dan panel indikator tetap terlihat (F-06).
 - Pada layar 4:3, sisa ruang menjadi bingkai berwarna `--ss-ink`.
 - Teks rata kiri di panel; judul layar dan kartu akhir rata tengah.
 
@@ -218,8 +220,8 @@ Semua panel memakai **bingkai piksel**: garis `ink` 2 piksel antarmuka, sudut te
 | **Busur hari** | Enam titik jam; titik lewat terisi `sun`, titik berjalan berdenyut pelan, titik berikutnya kosong. Latar bilah mengikuti warna langit adegan: pagi `#FFD9A8`, siang `#6EC6F2`, sore `#FFC27A`, malam `#4A4F9C` (teks `cream`). Titik berjalan ditandai ikon matahari (pagi sampai sore) atau bulan (malam) yang naik 1 piksel setiap 0,8 detik; denyut berhenti saat kurangi gerak (F-04) |
 | **Kotak narasi/dialog** | Label nama penutur di tab kiri atas; selama naskah tidak memakai penutur, tab berisi judul adegan (F-05). Teks muncul per huruf, 40 huruf per detik (bisa dimatikan, dan langsung lengkap bila kurangi gerak aktif); klik atau Spasi menampilkan seluruh teks sekaligus. Tombol lanjut di kanan bawah bertuliskan "Lanjut", atau "Tampilkan pilihan" di layar narasi terakhir |
 | **Tombol pilihan A/B/C** | Status: biasa (`cream`), fokus/arah (`sun` + kursor ▶), dipilih (`sun` + garis tebal: cincin dalam 2 piksel antarmuka), nonaktif (`mist`, teks `dusk`). Huruf A/B/C dalam kotak `ink` berhuruf `cream` di kiri (nonaktif: kotak `dusk`). Tiga tombol berdampingan, sama lebar dan sama tinggi. Pintasan tombol 1/2/3 dan A/B/C |
-| **Indikator** | Dua batang 10 segmen dengan ikon dan label: "Hak orang lain terjaga" (ikon perisai-hati, `teal`) dan "Kewajiban dijalankan" (ikon tangan-centang, `sky-d`). Nilai angka di ujung. Saat berubah, segmen terisi atau terkosongkan satu per satu dan muncul angka melayang "+15" atau "−10" |
-| **Kartu dampak** | Kepala kartu berwarna sesuai tingkat (`leaf` tepat, `mango` kurang tepat, `coral` berisiko) dengan ikon dan tulisan tingkat. Isi: "Yang terjadi", "Hak yang terdampak", "Kewajiban terkait", "Rujukan". Tombol "Lanjut" |
+| **Indikator** | Dua batang 10 segmen dengan ikon dan label: "Hak orang lain terjaga" (ikon perisai-hati, `teal`) dan "Kewajiban dijalankan" (ikon tangan-centang, `sky-d`). Nilai angka di ujung. Saat berubah, segmen terisi atau terkosongkan satu per satu dan muncul angka melayang "+15" atau "−10". Rincian F-06: panel kiri mulai 8u dari atas, setinggi area panggung, dengan jarak dalam 3u atas dan 2u kiri-kanan, serta celah antarindikator 7u. Satu segmen bernilai 10, dan nilai kelipatan 5 tampil sebagai segmen separuh (3p kiri berwarna indikator). Segmen 6p × 10p, batang 71p × 12p berlatar `ink`; label Pixelify Sans 2,5u; angka nilai Press Start 2P 2,8u. Angka melayang (Pixelify Sans 3,1u, karena Press Start 2P tidak memuat tanda minus) tampil 0,6u di bawah ujung baris batang, berlatar `leaf` (naik), `coral` (turun), atau `mist` (nol) dengan teks `ink`, dan selalu menampilkan efek naskah walaupun batang sudah mentok |
+| **Kartu dampak** | Kepala kartu berwarna sesuai tingkat (`leaf` tepat, `mango` kurang tepat, `coral` berisiko) dengan ikon dan tulisan tingkat. Isi: "Yang terjadi", "Hak yang terdampak", "Kewajiban terkait", "Rujukan". Tombol "Lanjut". Rincian F-06: kartu lebar dari tepi kiri bingkai panggung sampai 2u dari tepi kanan layar, 9,2u dari atas dan 1,2u dari bawah, dengan bingkai piksel F-05. Ikon tingkat memakai ikon emosi 8×8 selebar 16p: hati (tepat), tetes keringat (kurang tepat), dan tanda seru (berisiko). Tulisan tingkat Press Start 2P 2,8u, "Kelas memilih X." di kanan kepala. Isi dua kolom 1,1 : 1: kiri "Yang terjadi" (3,6u), hak, dan kewajiban (3,1u); kanan rujukan (3,1u, butir menjorok dengan penanda kotak 2p). Judul bagian 2,5u `dusk`. Papan tim (F-07) ikut tertutup selama kartu tampil, karena FR-09 dibaca "papan tim selalu terlihat, kecuali saat sebuah dialog terbuka" (keputusan Gerbang 1 F-06) |
 | **Pengatur waktu** | Batang 12 blok plus angka menit:detik. Sepuluh detik terakhir berwarna `mango` dengan bunyi tik pelan. Saat habis: tulisan "Waktunya memilih", tidak memilih otomatis. Tombol jeda, +30 detik, dan lewati |
 | **Papan tim** | Setiap tim punya warna **dan bentuk** (lingkaran, segitiga, persegi, bintang) agar tidak bergantung pada warna saja. Tim aktif ditandai ▶ dan tulisan "Giliran". Jumlah bintang alasan di kanan |
 | **Bintang alasan** | Tiga tombol: 0, 1, 2 bintang. Bintang muncul dengan animasi pop 3 bingkai |
@@ -239,8 +241,9 @@ Nama tim bawaan: Tim Mangga (`mango`, lingkaran), Tim Laut (`sky-d`, segitiga), 
 | Durasi antarmuka | 120–400 ms |
 | Pergantian adegan | Sapuan blok piksel 400 ms ke arah kanan, mengikuti matahari: blok 20×20 piksel panggung berwarna langit adegan berikutnya, dengan tepi bergerigi. Adegan berganti di balik blok pada 200 ms (F-05) |
 | Reaksi setelah memilih | Ganti pose tokoh + ikon emosi kecil di atas kepala (hati, tetes keringat, tanda tanya), 1–1,5 detik (F-05: 1,2 detik) |
+| Indikator dan kartu dampak | Kartu muncul langsung sesudah reaksi. Batang bergerak setengah segmen setiap 100 ms, paling lama 400 ms. Angka melayang naik 4p dalam dua langkah selama 240 ms, lalu tetap terlihat sampai kartu ditutup. Tombol "Lanjut" kartu baru bekerja 600 ms sesudah kartu tampil, agar tekanan ganda tidak melewatkan kartu (F-06) |
 | Momen utama | Satu-satunya animasi besar ada di layar akhir: timbangan bergerak ke posisi akhirnya |
-| Kurangi gerak | Bila `prefers-reduced-motion` atau pengaturan aktif: pergantian adegan menjadi pudar 150 ms, tanpa sapuan, tanpa angka melayang, sprite tetap di bingkai pertama |
+| Kurangi gerak | Bila `prefers-reduced-motion` atau pengaturan aktif: pergantian adegan menjadi pudar 150 ms, tanpa sapuan, tanpa angka melayang, indikator langsung ke nilai sesudah, sprite tetap di bingkai pertama; masa tunggu tombol "Lanjut" kartu tetap 600 ms |
 
 ## 9. Suara (P1)
 

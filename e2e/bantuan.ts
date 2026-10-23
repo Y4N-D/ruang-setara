@@ -1,5 +1,5 @@
-// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05).
-// Dipakai e2e/sehari-setara.spec.ts dan e2e/alur-permainan.spec.ts. Berkas ini bukan berkas uji.
+// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05; ditambah di F-06).
+// Dipakai e2e/sehari-setara.spec.ts, e2e/alur-permainan.spec.ts, dan e2e/kartu-dampak.spec.ts. Berkas ini bukan berkas uji.
 import { mkdirSync } from "node:fs";
 import { expect, type Page } from "@playwright/test";
 
@@ -157,4 +157,18 @@ export function luminance(rgb: string): number {
 export function contrast(a: string, b: string): number {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
+}
+
+/** Kartu dampak F-06 dan tombol Lanjut-nya. */
+export const impactCard = (page: Page) => page.locator(".ss-impact");
+export const cardNext = (page: Page) => page.locator(".ss-impact .ss-next");
+
+/**
+ * Menunggu kartu dampak tampil dengan judul berfokus, lalu menunggu masa tunggu 600 ms selesai.
+ * Hanya untuk uji dengan jam berjalan; uji dengan jam dijeda memajukan waktu dengan page.clock.runFor.
+ */
+export async function waitCardReady(page: Page) {
+  await expect(impactCard(page)).toBeVisible({ timeout: 3000 });
+  await expect(page.locator("#ss-impact-title")).toBeFocused();
+  await expect(cardNext(page)).not.toHaveAttribute("aria-disabled", "true");
 }
