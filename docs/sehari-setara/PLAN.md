@@ -12,6 +12,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-05 | Selesai (22 Okt 2026) | [F-05-panel-narasi-pilihan.md](specs/F-05-panel-narasi-pilihan.md) | [F-05-hasil.md](tests/F-05-hasil.md) — lulus |
 | F-06 | Selesai (23 Okt 2026) | [F-06-indikator-kartu-dampak.md](specs/F-06-indikator-kartu-dampak.md) | [F-06-hasil.md](tests/F-06-hasil.md), lulus |
 | F-07 | Selesai (26 Okt 2026) | [F-07-tim-waktu-bintang.md](specs/F-07-tim-waktu-bintang.md) | [F-07-hasil.md](tests/F-07-hasil.md), lulus |
+| F-08 | Direncanakan (26 Okt 2026), menunggu `Setuju: F-08` | — | — |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -604,3 +605,163 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
 - Tambahan pemilik proyek (26 Okt 2026, dalam balasan `Setuju: F-07`): bunyi teks gaya B, bunyi klik tombol gaya A, bunyi teks setiap 2 huruf, dan tinggi nada teks "Tinggi", dipilih lewat halaman "Uji suara Sehari Setara".
   - Bunyi dikerjakan di F-07 sebagai bagian tersendiri spesifikasi, dengan volume 60% (Design System bagian 9). Bagian FR-19 lainnya tetap di F-13.
   - Hal baru yang muncul karenanya diajukan untuk Gerbang 2 sebagai butir S-1 sampai S-8 spesifikasi: format WAV, kapan klik berbunyi, kerapatan bunyi teks, `M` untuk mematikan suara, tik pelan sepuluh detik terakhir, asal dan lisensi bunyi, durasi 60 detik, serta status bunyi di `Daftar_Aset.md`.
+
+## F-08 — Kuis peran penegak hukum
+- Status: Direncanakan (26 Okt 2026). Menunggu balasan `Setuju: F-08`. Diperiksa sebelum Plan: entri F-07 berstatus Selesai dan `tests/F-07-hasil.md` berkeputusan Lulus.
+- Memenuhi:
+  - FR-11: kuis peran penegak hukum di adegan 5, dengan empat peran dan satu jawaban. Sisi mesin (fase `quiz`, `JAWAB_KUIS`, `quizAnswer`, dan `isQuizCorrect`) sudah ada sejak F-02, dan sisi naskah (pertanyaan, jawaban hakim, dan tugas keempat peran di `roles.ts`) sejak F-03. F-08 menampilkannya.
+  - PRD bagian 5, TP 4 (membedakan peran polisi, jaksa, hakim, dan advokat), dan PRD bagian 8 adegan 5: kuis sesudah kartu dampak; sesudah dijawab, tampil kartu empat peran; kuis tidak memengaruhi indikator.
+  - FR-16 sebagian: pintasan kuis (usulan 4), ditambahkan ke Architecture bagian 9.
+  - Design System bagian 7 ("Kuis peran": empat kartu peran dengan ikon, yang terbuka dan menampilkan tugas sesudah dijawab) dan Architecture bagian 10 (kuis sebagai dialog dengan fokus terkunci di dalamnya).
+  - Catatan "Plan F-06 sampai F-10" dan "Plan F-08": bagian kuis di `bridgeActions` diganti, dan tombol jembatan di baris status dihapus bersama kuis (usulan 7).
+- Bergantung pada: F-06 (selesai; kartu dampak adegan 5 membuka kuis, dan kuis memakai pola dialog kartu) dan F-07 (selesai; fase `stars` datang sesudah kuis). Memakai mesin F-02, naskah F-03, manifest F-12, serta tata letak F-04 dan F-05.
+- File yang dibuat/diubah:
+  - Baru `app/sehari-setara/ui/RoleQuiz.tsx`: dialog kuis berisi pertanyaan, empat kartu peran, umpan balik, dan tombol "Lanjut". Nama berkas ini sudah tercantum di Architecture bagian 3.
+  - Baru `app/sehari-setara/ui/quiz.ts`: fungsi murni untuk peran per tombol `1` sampai `4`, keadaan setiap kartu sesudah dijawab, kalimat umpan balik, dan kalimat pengumuman. Diuji di `__tests__/quiz.test.ts` (baru).
+  - Baru `e2e/kuis-peran.spec.ts`.
+  - Diubah `ui/PlayScreen.tsx`: dialog kuis di fase `quiz`, aksi `JAWAB_KUIS` dan `LANJUT` dari kuis, masa tunggu "Lanjut" kuis, pengumuman, serta panel bawah kosong dan panggung disembunyikan selama kuis. Jembatan dihapus (usulan 7).
+  - Diubah `ui/controls.ts` dan `__tests__/controls.test.ts`: `keyCommand` mengenal `1` sampai `4` di fase `quiz`; `bridgeActions` dihapus.
+  - Diubah `ui/ChoicePanel.tsx`: tombol "Lanjut" jembatan di baris status dihapus.
+  - Diubah `content/copy.ts`: teks kuis (usulan 3 dan 5); `bridgeNext` dihapus.
+  - Diubah `styles/game.css`: kelas dialog kuis dan kartu peran; aturan tombol jembatan dihapus. Warna hanya dari token yang sudah ada; tidak ada token `:root` baru.
+  - Diubah `e2e/bantuan.ts` (langkah kuis bersama), `e2e/alur-permainan.spec.ts`, `e2e/kartu-dampak.spec.ts`, `e2e/tim-waktu-bintang.spec.ts`, dan `e2e/suara.spec.ts`: 31 uji lama melewati kuis di adegan 5, tiga pemeriksaan "kuis tidak tampil" dibalik, dan pemilih tombol jembatan dihapus (risiko "Uji lama").
+  - Diubah `docs/sehari-setara/Architecture.md` (bagian 3, 7, 9, 10, dan 12) dan `Design_System.md` (bagian 3, 7, dan 8).
+  - Dokumen: `specs/F-08-kuis-peran.md`, `tests/F-08-hasil.md`, tangkapan layar di `tests/F-08/`, dan entri ini.
+  - Bila usulan 6b dipilih: juga `ui/StarsAward.tsx`.
+  - Tidak disentuh: `engine/`, naskah (`scenes.ts`, `roles.ts`, `references.ts`), `Verifikasi_Rujukan.md`, `content.test.ts`, aset dan kit gambar, `manifest.ts`, `CREDITS.md`, `Daftar_Aset.md`, `ImpactCard.tsx`, `Teams.tsx`, `Timer.tsx`, `Meters.tsx`, `NarrationBox.tsx`, `Stage.tsx`, `Sprite.tsx`, `DayArc.tsx`, `StagePreview.tsx`, `Game.tsx`, `layout.ts`, file galeri, `vite.pages.config.ts`, `playwright.config.ts`, `package.json`, `pnpm-lock.yaml`, dan workflow.
+- Aset yang dibutuhkan: tidak ada aset baru, dan placeholder tidak diperlukan. Semua yang dipakai sudah Disetujui (21 Okt 2026) dan terdaftar di manifest:
+  - ikon peran D-08 (`roleIcons`): `role_polisi`, `role_jaksa`, `role_advokat`, dan `role_hakim`, masing-masing 32×32. F-08 adalah fitur pertama yang menampilkannya di layar permainan. Catatan warna toga dan simare ada di usulan 9;
+  - ikon emosi D-09 (`emoteIcons`): `hati` untuk jawaban tepat dan `tanya` untuk jawaban yang belum tepat (usulan 3). `tanya` baru pertama kali dipakai layar permainan.
+
+  Nomor kartu 1 sampai 4 dan tanda "?" berupa teks, seperti kursor ▶.
+- Risiko (angka dari percobaan di luar repositori, 26 Okt 2026: salinan ZIP `main`, commit `7b6b7f8`; maket kuis disuntikkan ke `/ruang-setara/sehari-setara/#main` di kartu dampak adegan 5 pada jalur semua B, lalu diukur dengan huruf asli di Chromium 153 pada empat ukuran):
+  - **Ruang.** Tiga letak dicoba dengan isi terpanjang (pertanyaan 88 huruf, tugas polisi, dan kalimat umpan balik usulan 3). Sisa ruang terkecil di bawah isi sesudah dijawab (angka negatif berarti meluap). Di letak A, angkanya sama dalam keadaan tertutup, karena tiga baris tugas selalu dicadangkan:
+
+    | Letak | 1280×720 | 1366×768 | 1920×1080 | 1024×768 |
+    |---|---|---|---|---|
+    | A. Kotak kartu dampak, empat kartu sebaris, tugas 3,6u, umpan balik 3,1u (usulan 1) | 16,1u | 16,9u | 16,1u | 12,9u |
+    | A dengan umpan balik 3,6u (setiap kalimat terbungkus dua baris) | 5,4u | 6,2u | 5,4u | 2,2u |
+    | A dengan tugas dan umpan balik 3,1u | 18,0u | 18,8u | 18,0u | 14,8u |
+    | B. Kolom tengah selebar panggung, kartu 2 × 2, huruf 3,1u | −12,2u | −15,7u | −12,2u | −17,9u |
+    | C. Panel bawah 40u, empat kartu sebaris, huruf 3,1u | −1,0u | −0,4u | −1,1u | −3,8u |
+
+    Di letak A, pertanyaan dua baris, tugas polisi tiga baris (tiga baris dicadangkan di setiap kartu), setiap kalimat umpan balik satu baris, dan tidak ada teks yang meluap ke samping. Bila di komputer lain pertanyaan dan kedua kalimat umpan balik masing-masing bertambah satu baris (+12,9u), isi masih muat di 1024×768.
+  - **Klik ganda pada "Lanjut" kartu dampak.** Tombol itu berada 90,3–97,1u dari atas dan 156,7–172,9u dari kiri. Di letak A, kartu peran berada 28–66u dari atas, paling sedikit 24,7u di atasnya, dan tempat itu diisi "Lanjut" kuis yang masih nonaktif. Di letak C, kartu Hakim, jawaban yang benar, tepat berada di tempat itu, sehingga klik ganda bisa menjawab tanpa sengaja. Lihat usulan 1 dan 6.
+  - **Jembatan menjawab sendiri.** Kode jembatan sekarang menjawab kuis dengan jawaban naskah saat `Spasi` atau `Enter` ditekan di fase `quiz`. Bila kode itu tertinggal, `Enter` kedua dari tekanan ganda pada "Lanjut" kartu akan menjawab "Hakim" untuk kelas. Karena itu jembatan dihapus bersamaan dengan munculnya kuis (usulan 7), dan uji memeriksa `Enter` ganda.
+  - **Fokus.** `ChoicePanel` mengambil fokus saat dipasang. Di fase `quiz` panel bawah sekarang berisi baris status dan tombol jembatan, lalu memfokuskan tombol itu. Agar fokus tetap di dialog, panel bawah dikosongkan selama kuis, seperti selama kartu dampak (F-06), lalu dipasang lagi di fase `stars` tanpa mengambil fokus (F-07).
+  - **Pita panggung.** Kuis memakai kotak kartu dampak, jadi pita panggung tipis di 1024×768 (Temuan 5 F-06) akan muncul lagi. Panggung disembunyikan selama kuis, seperti selama kartu (keputusan Gerbang 1 F-07 nomor 8).
+  - **Uji lama.** Dalam salinan percobaan yang berhenti di fase `quiz` (bagian kuis dibuang dari `bridgeActions`), 31 dari 64 uji ujung ke ujung gagal menunggu ajakan bintang sesudah kartu adegan 5: 7 di `alur-permainan.spec.ts`, 13 di `kartu-dampak.spec.ts`, 9 di `tim-waktu-bintang.spec.ts`, dan 2 di `suara.spec.ts`. Ke-16 uji F-04 tidak memakai alur permainan, dan 17 uji lain berhenti sebelum adegan 5. Tiga dari ke-31 uji juga memeriksa bahwa kuis tidak tampil, sehingga pemeriksaan itu dibalik. Langkah kuis dibuat sebagai fungsi bersama di `e2e/bantuan.ts`, seperti langkah bintang F-07.
+  - **Lingkungan uji.** Chromium 141 untuk `@playwright/test` 1.56.1 tetap tidak tersedia. Dengan berkas konfigurasi pengganti di luar repositori yang hanya menambah jalur Chromium 153 (keputusan Gerbang 1 F-07 nomor 10), ke-64 uji ujung ke ujung `main` lulus dalam dua bagian: 28 uji dalam 2,1 menit dan 36 uji dalam 1,5 menit. Uji dasar lain: `test` 9 berkas, 214 lulus, 1 dilewati; `content:check` 36 lulus, 1 dilewati.
+  - **Jam uji.** Masa tunggu "Lanjut" kuis (usulan 6) dihitung sejak jawaban tampil. Aturan di "Catatan untuk Plan berikutnya" berlaku: `pauseAt` sebelum halaman dimuat, waktu hanya dimajukan dengan `runFor`, dan dua langkah sesudah unsur tampil.
+  - **Keputusan pedagogis di luar PRD.** PRD tidak mengatur siapa yang menjawab, kalimat umpan balik, dan cara menandai jawaban (AGENTS bagian 12). Lihat usulan 2 dan 3. Semua teks baru bertanda "draf baru" (keputusan Gerbang 1 F-03 nomor 2).
+  - **Rujukan R-14.** R-14 (UU No. 48 Tahun 2009, Pasal 11 ayat (1)) menopang kuis. Rujukan ini masuk naskah adegan 5 pada 22 Okt 2026 dan sudah tampil di kartu dampak adegan 5 sejak F-06. Kuis sendiri tidak menampilkan rujukan, karena PRD bagian 8 tidak memintanya. Kalimat umpan balik memakai kata "memeriksa, mengadili, dan memutus" dari pertanyaan naskah, sejalan dengan bunyi R-14. `Verifikasi_Rujukan.md` tidak diubah dan tidak ada kotak yang dicentang. Masalah lama di luar F-08 tetap ada: begitu satu kotak dicentang, uji konten AC-5 F-03 gagal dan terbitan tertahan (revisi F-03 22 Okt 2026, butir 2; laporan F-06, Temuan 8). Sebaiknya dibereskan sebelum R-14 atau rujukan lain dicentang.
+  - **Rekap F-09.** Reducer F-02 mengosongkan `quizAnswer` saat adegan 6 dimulai, sehingga rekap tidak bisa menampilkan jawaban kelas tanpa perubahan mesin. Lihat usulan 8.
+  - **Keterbacaan.** Tugas peran 3,6u (sama dengan narasi), nama peran Press Start 2P 2,8u, umpan balik 3,1u, dan label 2,5u (batas minimum Design System bagian 5). Keterbacaan di proyektor dicek pemilik proyek.
+  - **Halaman yang terbit berubah.** Di alamat `#main`, adegan 5 kini menampilkan kuis sebelum bintang alasan. Permainan belum ditautkan dari galeri (F-11).
+  - **Tailwind galeri** (catatan "Semua fitur"): sesudah entri ini ditulis, `build:pages` diulang, dan keempat berkas galeri (`index.html`, `main-Bp-7VtNx.css`, `main-CC47J1DW.js`, `jsx-runtime-CmKW-gyo.js`) tetap identik byte dengan build `main`. Pemeriksaan yang sama diulang di tahap Test.
+  - **Anggaran:** JS permainan sekarang 18,52 KB gzip ditambah React 60,18 KB gzip, sekitar 79 KB dari 150 KB. F-08 diperkirakan menambah 1–2 KB gzip. Aset tidak bertambah.
+- Ukuran: S menurut backlog; perkiraan sekarang M (batas bawah). Selain satu dialog dan fungsi murninya, F-08 menghapus jembatan dan menyesuaikan 31 uji ujung ke ujung lama.
+- Temuan F-07 yang menunggu keputusan dan menyangkut F-08:
+  - Temuan 1 (klik ganda pada "Lanjut" kartu memindahkan fokus dari ajakan bintang): dibawa ke usulan 6, karena "Lanjut" kuis juga membuka fase bintang.
+  - Tidak dibawa: Temuan 8 (asal dan lisensi bunyi, butir S-6) tidak mengubah F-08, karena F-08 hanya memakai bunyi klik yang sudah ada; jawabannya tetap diperlukan sebelum rilis (catatan Plan F-11). Temuan 9 dan butir daftar periksa manual F-07 adalah pengecekan oleh pemilik proyek, bukan keputusan.
+- Usulan untuk Gerbang 1. Balasan `Setuju: F-08` berarti saran di setiap usulan diterima, kecuali usulan 8 yang tidak memuat saran. Sebutkan nomornya bila memilih alternatif. Maket dikirim lewat percakapan dan tidak disimpan di repositori:
+  1. **Kuis sebagai dialog lebar di kotak kartu dampak.**
+     - Kapan: langsung sesudah "Lanjut" kartu dampak adegan 5, tanpa sapuan. Sesudah "Lanjut" kuis, fase bintang dimulai (F-07).
+     - Di mana: kotak yang sama dengan kartu dampak (kiri di tepi kiri bingkai panggung, atas 9,2u, kanan 2u, bawah 1,2u), dengan bingkai piksel F-05. Bilah atas dan panel indikator tetap terlihat; panggung, papan tim, dan panel bawah tertutup. Selama kuis, panggung disembunyikan dan panel bawah kosong (risiko "Pita panggung" dan "Fokus"). Papan tim tertutup sesuai bacaan FR-09, "selalu terlihat, kecuali saat sebuah dialog terbuka" (keputusan Gerbang 1 F-06 nomor 1).
+     - Susunan dan huruf:
+       - kepala berlatar `mist`: "Kuis peran" (Press Start 2P 2,8u), dan sesudah dijawab, di kanan, "Kelas menjawab {peran}." (Pixelify Sans 2,8u);
+       - pertanyaan naskah (Pixelify Sans 3,6u, sama dengan pertanyaan F-05), dua baris;
+       - empat kartu peran sebaris, sama lebar (29,6–30,6u) dan sama tinggi (34,1–37,2u), dengan celah 1,5u. Setiap kartu berisi kotak nomor 1 sampai 4 seperti kotak A/B/C pilihan F-05 (Press Start 2P 2,8u, `cream` di atas `ink`), ikon peran D-08 berukuran 32p × 32p (64 px di 1280×720, 1366×768, dan 1024×768; 96 px di 1920×1080), nama peran (Press Start 2P 2,8u), lalu ruang tugas tiga baris (Pixelify Sans 3,6u);
+       - sebelum dijawab, ruang tugas ditutup kotak `mist` bertanda "?" (`dusk`). Sesudah dijawab, keempat kartu terbuka serentak, dan ukurannya tidak berubah;
+       - pita umpan balik di bawah kartu, sesudah dijawab (usulan 3);
+       - kaki berisi "Lanjut" di kanan, di tempat yang sama dengan "Lanjut" kartu dampak.
+     - Hasil ukur: tabel di risiko "Ruang".
+     - Dialog: `role="dialog"` dan `aria-modal="true"`, bernama "Kuis peran". Fokus terkunci di dalamnya: Tab dan Shift+Tab beredar di kartu dan "Lanjut", dan klik di ruang kosong dialog tidak memindahkan fokus keluar (dialog bisa difokus lewat kode). Kuis muncul sendiri tanpa tombol pemicu, jadi aturan "fokus kembali ke tombol pemicu" di Architecture bagian 10 diperjelas seperti untuk kartu dampak: sesudah "Lanjut" kuis, fokus pindah ke ajakan bintang (usulan 6).
+     - Alternatif yang tidak diusulkan karena meluap: (a) kolom tengah selebar panggung dengan kartu 2 × 2, agar papan tim tetap terlihat; (b) panel bawah 40u, agar panggung dan papan tetap terlihat, padahal kartu Hakim jatuh di tempat "Lanjut" kartu dampak. Alternatif yang muat: (c) tugas peran 3,1u, dengan sisa 14,8–18,8u, tetapi lebih kecil daripada narasi.
+  2. **Kuis dijawab kelas bersama, tanpa pengatur waktu.**
+     - Pertanyaan berasal dari `roleQuiz.question`, jawabannya dari `roleQuiz.answer` (hakim), dan nama serta tugas peran dari `roles.ts`. Semuanya teks naskah PRD bagian 8, tanpa perubahan. Urutan kartu tetap seperti naskah (Polisi, Jaksa, Advokat, Hakim) dan tidak diacak.
+     - Kelas berdiskusi singkat, lalu guru mengklik atau menekan jawaban yang disepakati kelas. Tidak ada pengatur waktu, karena pengatur waktu mesin hanya berjalan di fase `discuss` (F-02).
+     - Jawaban pertama dikunci (F-02). Kuis tidak mengubah indikator, bintang, giliran, maupun papan tim, dan `engine/` tidak berubah.
+     - Alternatif: (a) tim aktif yang menjawab, dengan kepala "Kuis untuk {nama tim}" dan "{nama tim} menjawab {peran}.", tetap tanpa bintang otomatis, karena bintang hanya untuk alasan (PRD bagian 9); (b) kuis memakai pengatur waktu: mesin harus diubah, jadi tidak diusulkan.
+  3. **Tanda jawaban dan umpan balik (semua teks baru berstatus draf baru).**
+     - Sesudah dijawab, keempat kartu terbuka dan menampilkan tugasnya dari `roles.ts`. Jawaban ditandai dengan tulisan, tidak hanya warna:
+       - kartu Hakim berlatar `leaf` dengan label "Jawaban tepat";
+       - kartu pilihan kelas diberi cincin dalam `ink` 2p, seperti pilihan yang diambil (F-05). Bila jawabannya keliru, kartu itu juga berlatar `sun` dengan label "Pilihan kelas";
+       - kartu lain tetap `cream`;
+       - label memakai Pixelify Sans 2,5u, `cream` di atas `ink`.
+     - Pita umpan balik di bawah kartu berisi ikon emosi D-09 16p dan dua kalimat (Pixelify Sans 3,1u, `ink`):
+
+       | Jawaban | Latar dan ikon | Kalimat pertama | Kalimat kedua |
+       |---|---|---|---|
+       | Hakim | `leaf`, hati | Tepat! Hakimlah yang memeriksa, mengadili, dan memutus perkara. (draf baru) | Setiap peran punya tugas sendiri agar perkara diproses dengan adil. (draf baru) |
+       | Polisi, Jaksa, atau Advokat | `mango`, tanda tanya | Belum tepat. Hakimlah yang memeriksa, mengadili, dan memutus perkara. (draf baru) | Sama dengan baris di atas |
+
+     - Teks baru lain yang tampil: judul "Kuis peran", kepala kanan "Kelas menjawab {peran}." (meniru "Kelas memilih X." F-05), serta label "Jawaban tepat" dan "Pilihan kelas" (semuanya draf baru). Tombol tetap "Lanjut" (teks F-05).
+     - Nada: tanpa kata "salah" atau "kalah" (Design System bagian 2 nomor 3). Kalimat kedua sama untuk semua jawaban, agar perhatian kelas pindah ke tugas keempat peran.
+     - Kontras: `ink` di atas `leaf` 8,3:1, `mango` 6,9:1, `sun` 9,9:1, `mist` 9,5:1, dan `cream` 13,3:1; `cream` di atas `ink` 13,3:1; "?" `dusk` di atas `mist` 5,9:1.
+     - Alternatif: (a) kalimat kedua diganti "Sebelum ada putusan hakim, siapa pun tidak boleh dianggap bersalah.", yang mengaitkan kuis dengan asas praduga tak bersalah (R-12), tetapi perlu ditinjau peninjau konten; (b) tanpa kalimat kedua; (c) baris "Rujukan: UU No. 48 Tahun 2009, Pasal 11 ayat (1)" (R-14) di bawah umpan balik, padahal R-14 sudah tampil di kartu dampak tepat sebelum kuis; (d) jawaban yang belum tepat memakai ikon keringat, seperti tingkat "Kurang tepat" di kartu dampak.
+  4. **Pintasan `1` `2` `3` `4`.**
+     - Di fase `quiz` sebelum dijawab: `1` Polisi, `2` Jaksa, `3` Advokat, dan `4` Hakim, sama dengan nomor di kartu dan meniru `1` `2` `3` untuk pilihan. Sesudah dijawab, angka tidak berpengaruh, dan `Spasi` atau `Enter` berarti "Lanjut" (sesudah masa tunggu, usulan 6). `M` tetap mematikan dan menyalakan suara. `0`, `5` sampai `9`, huruf, `P` `T` `S`, dan `Esc` tidak berpengaruh selama kuis.
+     - Tidak bentrok: `1` `2` `3` hanya memilih di fase `discuss`, `0` `1` `2` hanya memberi bintang di fase `stars`, dan fase `stars` baru dimulai sesudah "Lanjut" kuis. Tekanan angka kedua tidak mengubah jawaban (F-02) dan tidak memberi bintang.
+     - Architecture bagian 9 mendapat baris "`1` `2` `3` `4`: menjawab kuis peran (fase kuis)". Arti `Esc` selama dialog diputuskan di F-10 bersama layar pengaturan, dan dicatat untuk Plan F-10 saat Build.
+     - Alternatif: (a) huruf awal `P` `J` `A` `H`. Mudah diingat, tetapi `P` sudah berarti jeda dan `A` berarti pilihan A, sehingga guru yang terbiasa menekan `P` bisa menjawab "Polisi" tanpa sengaja; (b) panah kiri dan kanan untuk berpindah kartu, lalu `Enter`; (c) tanpa pintasan, cukup Tab dan `Enter` atau klik.
+  5. **Pembaca layar dan kurangi gerak.**
+     - Pengumuman di wilayah `aria-live="polite"` yang sama dengan narasi dan kartu dampak (draf baru):
+       - saat kuis tampil: "Kuis peran. {pertanyaan} Pilihannya: 1 Polisi, 2 Jaksa, 3 Advokat, 4 Hakim."
+       - sesudah dijawab: "{Tepat! atau Belum tepat.} Kelas menjawab {peran}. Hakimlah yang memeriksa, mengadili, dan memutus perkara. Tugas setiap peran: Polisi: Menerima laporan dan menyidik. Jaksa: Menuntut. Advokat: Mendampingi. Hakim: Memutus. Setiap peran punya tugas sendiri agar perkara diproses dengan adil."
+     - Judul "Kuis peran" berupa `<h2>`. Sebelum dijawab, kartu berupa tombol bernama nomor dan peran, misalnya "Peran 1: Polisi" (draf baru). Sesudah dijawab, kartu terkunci seperti pilihan yang sudah diambil (F-05), dan namanya memuat tugas serta labelnya, sehingga tetap terbaca dalam mode baca. Ikon, nomor yang terlihat, dan "?" disembunyikan dari pembaca layar.
+     - Tepat atau keliru tidak hanya ditandai warna: ada kata pembuka "Tepat!" atau "Belum tepat.", ikon hati atau tanda tanya, label "Jawaban tepat" dan "Pilihan kelas", serta "Kelas menjawab {peran}.".
+     - Kurangi gerak: kuis tidak punya animasi. Kartu terbuka serentak tanpa gerak, sehingga tampilannya sama dengan atau tanpa kurangi gerak. Masa tunggu "Lanjut" tetap 600 ms, seperti kartu dampak, dan bunyi klik tetap ada.
+     - Alternatif: kartu terbuka dengan animasi balik dua bingkai selama 160 ms (`steps(2)`) yang dimatikan saat kurangi gerak. Uji perlu mengatur waktunya lewat Web Animations API (catatan "Semua fitur dengan animasi CSS").
+  6. **Pengaman klik ganda dan perpindahan fokus.**
+     - Masuk ke kuis:
+       - fokus pindah ke judul "Kuis peran" (bisa difokus lewat kode), sehingga `Spasi` tidak menekan kartu tanpa sengaja. Tab berikutnya berpindah ke kartu 1;
+       - "Lanjut" kuis tampil nonaktif (`mist`, teks `dusk`, `aria-disabled="true"`) sampai kelas menjawab;
+       - klik kedua dari klik ganda pada "Lanjut" kartu dampak jatuh di "Lanjut" kuis yang masih nonaktif, sehingga tidak berpengaruh dan fokus tetap di dialog. Kartu peran berada jauh di atasnya (risiko "Klik ganda");
+       - `Spasi` atau `Enter` kedua sebelum dijawab tidak berpengaruh;
+       - tanpa masa tunggu di awal kuis.
+     - Menjawab: klik kartu, `Enter` atau `Spasi` pada kartu yang berfokus, atau `1` sampai `4`. Hanya jawaban pertama yang diterima, berbunyi klik, dan diumumkan; tekanan berikutnya tidak berbunyi. Sesudah dijawab, fokus pindah ke "Lanjut" kuis, dan Tab tetap di tombol itu, seperti di kartu dampak.
+     - Keluar dari kuis: "Lanjut" kuis baru bekerja 600 ms sesudah jawaban, baik lewat klik, `Enter` atau `Spasi` pada tombol, maupun `Spasi` atau `Enter` sebagai pintasan, sama dengan kartu dampak (F-06). Selama masa tunggu, tombol tampil biasa dengan `aria-disabled="true"`. Sesudah itu fase `stars` dimulai: fokus pindah ke ajakan bintang, `Spasi` dan `Enter` tidak memberi bintang, dan panel bawah sama dengan fase bintang adegan lain (F-07).
+     - Bunyi: klik F-07 untuk jawaban dan "Lanjut" kuis yang diterima. Tidak ada bunyi baru; bunyi tepat dan keliru milik F-13.
+     - Temuan 1 F-07, yang menunggu keputusan: klik ganda pada "Lanjut" kuis membuat klik kedua jatuh di panel bawah fase bintang, sehingga fokus pindah dari ajakan ke halaman, sama dengan "Lanjut" kartu di adegan lain. Pilihan:
+       - (a, saran) dibiarkan, seperti usul laporan F-07. Bintang tetap bisa diberikan lewat tombol atau `0` `1` `2`, dan temuan ini tetap dicatat untuk F-13;
+       - (b) dibereskan di F-08 untuk semua adegan: di fase bintang, klik di tempat yang bukan tombol mengembalikan fokus ke ajakan bintang. Perilaku F-07 sedikit berubah, dan satu uji ditambahkan.
+     - Alternatif untuk fokus sesudah menjawab: (a) tetap di kartu yang diklik, sehingga `Enter` berikutnya tertelan kartu yang sudah terkunci dan tidak berarti "Lanjut"; (b) ke kalimat umpan balik, sehingga pembaca layar membaca umpan balik dua kali.
+  7. **Jembatan sementara dihapus seluruhnya.**
+     - Yang tersisa dari jembatan sesudah F-07:
+       - `bridgeActions(scene)` di `ui/controls.ts`: `LANJUT`, lalu di adegan 5 jawaban naskah dan `LANJUT`, yang dikirim "Lanjut" kartu dampak;
+       - `BRIDGE_PHASES` dan `bridge()` di `PlayScreen.tsx`, termasuk `Spasi` dan `Enter` di fase `quiz` yang menjawab dari naskah;
+       - tombol "Lanjut" jembatan di baris status `ChoicePanel` (properti `bridgeReady` dan `onBridge`), teks `copy.play.bridgeNext`, aturan CSS `.ss-question-row .ss-next`, dan fase `quiz` di `CHOICE_PHASES`;
+       - dua uji jembatan di `controls.test.ts`, serta pemilih tombol jembatan dan pemeriksaan "kuis tidak tampil" di tiga berkas uji ujung ke ujung;
+       - uraian "Jembatan sementara" di Architecture bagian 7 dan komentar kode.
+     - Sesudah F-08 tidak ada lagi fase yang dilewati: "Lanjut" kartu dampak cukup mengirim `LANJUT` (di adegan 5 ke fase `quiz`, di adegan lain ke fase `stars`). Semua bagian di atas dihapus atau disesuaikan, dan Architecture bagian 7 menggantinya dengan uraian kuis.
+     - Yang tetap ada karena milik fitur lain: pintu masuk `#main`, `#main-3`, dan `#main-4` serta `startActions`, yang melewati judul, pengaturan, dan prolog (F-10); layar akhir sementara dan `restartActions` (F-09).
+     - Alternatif: `bridgeActions` dipertahankan dengan isi `LANJUT` saja, dan tombol jembatan tetap sebagai pengaman yang tidak pernah tampil. Perubahannya lebih sedikit, tetapi kode yang tidak dipakai tertinggal.
+  8. **Hasil kuis di rekap F-09 (perlu keputusan pemilik proyek; agen tidak memberi saran).**
+     - Fakta: FR-13 menyebut enam pilihan kelas, pilihan yang paling menjaga keseimbangan, dan rujukannya, dan Design System bagian 7 menyebut rekap enam baris. Keduanya tidak menyebut kuis. Reducer F-02 mengosongkan `quizAnswer` saat adegan 6 dimulai.
+     - Pilihan:
+       - (a) tidak tampil di rekap. Mesin tidak berubah;
+       - (b) satu baris tetap tanpa jawaban kelas, misalnya "Kuis peran: hakimlah yang memeriksa, mengadili, dan memutus perkara." Mesin tidak berubah, tetapi rekap menjadi tujuh baris;
+       - (c) satu baris dengan jawaban kelas, misalnya "Kuis peran: kelas menjawab Advokat; jawaban tepat Hakim." Mesin harus menyimpan jawaban sesudah adegan 5, sebaiknya di entri `history` adegan 5 agar "ulangi adegan" F-13 ikut menghapusnya. Perubahan mesin itu dikerjakan di F-09, dan rekap juga menjadi tujuh baris.
+     - F-08 sama untuk ketiga pilihan. Bila balasan `Setuju: F-08` tidak menyebut pilihan, butir ini tetap terbuka dan dicatat di "Catatan untuk Plan berikutnya" untuk Plan F-09.
+  9. **Tugas pemilik proyek, bukan penghalang: warna toga dan simare ikon peran D-08.**
+     - `Daftar_Aset.md` mencatat bahwa warna simare (merah untuk hakim, hitam untuk jaksa dan advokat) diambil dari hukumonline.com dan perlu dicek peninjau konten. F-08 adalah fitur pertama yang menampilkan ikon itu di layar permainan.
+     - Ikon sudah Disetujui (21 Okt 2026), jadi F-08 memakainya apa adanya. Bila pengecekan menemukan warna yang perlu diubah, perbaikannya cukup di `scripts/game/art/ikon.py` dan PNG D-08 (peran Pembuat aset, dengan persetujuan pratinjau), tanpa mengubah kode F-08.
+     - Status D-08 di `Daftar_Aset.md` tidak diubah.
+  10. **Cara uji.**
+      - `content:check`; naskah tidak berubah.
+      - `test`:
+        - baru `quiz.test.ts`: peran untuk `1` sampai `4`, keadaan kartu untuk keempat jawaban, kalimat umpan balik dan pengumuman, serta jawaban, nama, dan tugas yang selalu diambil dari naskah dan `roles.ts`;
+        - `controls.test.ts` disesuaikan: `1` sampai `4` hanya di fase `quiz`, angka lain tidak, `Spasi` dan `Enter` di fase `quiz`, dan uji jembatan dihapus. Dari kartu dampak adegan 5 sampai fase `stars` lewat `JAWAB_KUIS` dan `LANJUT`, diuji dengan reducer dan naskah asli untuk keempat jawaban, tanpa mengubah indikator, bendera, dan bintang;
+        - uji lain tidak berubah.
+      - `build:pages`: keempat berkas galeri identik byte dengan build sebelum F-08, juga sesudah semua dokumen F-08 ditulis; JS permainan ≤ 150 KB gzip tanpa penanda `__THREE__`; `src` dan `href` HTML permainan relatif.
+      - `test:e2e`:
+        - memakai Chromium 153 lewat berkas konfigurasi pengganti di luar repositori, seperti F-07, sehingga `playwright.config.ts`, `package.json`, dan lockfile tidak berubah;
+        - aturan jam uji di "Catatan untuk Plan berikutnya": `pauseAt` sebelum halaman dimuat, waktu hanya dimajukan dengan `runFor`, dan dua langkah sesudah unsur tampil (kuis tampil, lalu masa tunggu 600 ms dihitung sejak jawaban tampil);
+        - uji baru `kuis-peran.spec.ts`: kuis hanya di adegan 5 dan hanya sesudah "Lanjut" kartu; letak, ukuran huruf, dan tanpa luapan di empat ukuran dalam keadaan tertutup, tepat, dan belum tepat; keempat jawaban lewat klik, `Enter` pada kartu, dan `1` sampai `4`; kartu terbuka dengan tugas dari `roles.ts`, label, umpan balik, dan kontras; indikator, bintang, dan papan tim tidak berubah; dialog, fokus terkunci, urutan Tab, serta fokus sesudah menjawab dan sesudah "Lanjut"; klik ganda dan `Enter` ganda pada "Lanjut" kartu tidak menjawab; jawaban kedua dan tombol lain diabaikan; masa tunggu pada 599 dan 600 ms; pengumuman; kurangi gerak tanpa animasi; bunyi klik hanya untuk tekanan yang diterima; `#main-3` dan `#main-4`; kuis baru sesudah "Main lagi"; 0 galat konsol dan 0 respons 4xx/5xx;
+        - 31 uji lama ditambah langkah kuis lewat `e2e/bantuan.ts`, tiga pemeriksaan "kuis tidak tampil" dibalik, dan pemilih tombol jembatan dihapus;
+        - bila satu perintah terlalu lama untuk lingkungan agen, uji dijalankan dalam beberapa bagian dengan konfigurasi yang sama.
+      - Tangkapan layar di 1280×720, 1024×768, dan 1920×1080: kuis tertutup, jawaban tepat, jawaban belum tepat, dan fase bintang sesudah kuis.
+      - `tsc --noEmit` dan ESLint `--max-warnings 0` pada berkas kode baru dan yang diubah.
+      - Daftar periksa manual AGENTS bagian 9 yang berlaku. Keterbacaan kartu peran dari bangku belakang dicek pemilik proyek.
+      - Tidak ada dependensi baru.
