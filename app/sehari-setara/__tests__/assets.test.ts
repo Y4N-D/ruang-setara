@@ -1,5 +1,5 @@
 // Uji aset Sehari Setara (spesifikasi F-12): warna game.css, manifest dan berkasnya, CREDITS.md, naskah,
-// anggaran ukuran, fungsi pencari, dan aturan build aset sebagai berkas terpisah.
+// anggaran ukuran, fungsi pencari, dan aturan build aset sebagai berkas terpisah. Efek suara WAV: spesifikasi F-07.
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import pagesConfig from "../../../vite.pages.config";
@@ -14,6 +14,7 @@ import {
   roleIcons,
   sceneAssets,
   shadowFor,
+  sounds,
   spriteFor,
   sprites,
   teamIcons,
@@ -37,6 +38,7 @@ import {
   shadowProblems,
   tokenProblems,
   unregisteredFiles,
+  wavInfo,
   type DecodedPng,
   type FileInfo,
   type ManifestGroups,
@@ -51,7 +53,7 @@ const DESIGN = read("docs/sehari-setara/Design_System.md");
 const PALETTE = flattenPalette(JSON.parse(read("scripts/game/art/palette.json")) as Record<string, unknown>);
 const CREDITS = read("app/sehari-setara/assets/CREDITS.md");
 
-/** Semua berkas di subfolder assets/ (bg, end, sprites, ui, dan sfx kelak) beserta ukurannya. */
+/** Semua berkas di subfolder assets/ (bg, end, sprites, ui, dan sfx) beserta ukuran dan formatnya. */
 function readAssetFiles(): Map<string, FileInfo> {
   const files = new Map<string, FileInfo>();
   for (const folder of readdirSync(ASSETS, { withFileTypes: true })) {
@@ -60,14 +62,15 @@ function readAssetFiles(): Map<string, FileInfo> {
       if (!file.isFile() || file.name.startsWith(".")) continue;
       const path = `${folder.name}/${file.name}`;
       const data = readFileSync(new URL(path, ASSETS));
-      files.set(path, { bytes: data.byteLength, ...pngSize(data) });
+      const wav = wavInfo(data);
+      files.set(path, { bytes: data.byteLength, ...pngSize(data), ...(wav && { wav }) });
     }
   }
   return files;
 }
 
 const FILES = readAssetFiles();
-const GROUPS: ManifestGroups = { backgrounds, endings, sprites, icons, iconStrips, teamIcons, roleIcons, emoteIcons };
+const GROUPS: ManifestGroups = { backgrounds, endings, sprites, icons, iconStrips, teamIcons, roleIcons, emoteIcons, sounds };
 const ENTRIES = manifestEntries(GROUPS);
 
 /** Awalan URL impor aset di lingkungan uji, diambil dari impor sungguhan. */
@@ -253,6 +256,73 @@ describe("anggaran ukuran (AC-5)", () => {
     const besar = new Map([...FILES].map(([path, info]) => [path, { ...info, bytes: 0 }]));
     besar.set("bg/bg_title.png", { ...FILES.get("bg/bg_title.png"), bytes: Math.round(4.2 * 1024 * 1024) });
     expect(budgetProblems(ENTRIES, besar)).toContain("Seluruh aset terdaftar 4,2 MB melebihi anggaran 4 MB.");
+  });
+});
+
+/** WAV PCM sintetis untuk contoh pelanggaran: kanal, bit, laju, dan banyak bingkai bisa diatur. */
+function makeWav({ channels = 1, bits = 16, rate = 22050, frames = 700, format = 1 } = {}): Uint8Array {
+  const dataBytes = frames * channels * (bits / 8);
+  const bytes = new Uint8Array(44 + dataBytes);
+  const view = new DataView(bytes.buffer);
+  const tag = (at: number, text: string) => [...text].forEach((char, i) => (bytes[at + i] = char.charCodeAt(0)));
+  tag(0, "RIFF");
+  view.setUint32(4, 36 + dataBytes, true);
+  tag(8, "WAVE");
+  tag(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, format, true);
+  view.setUint16(22, channels, true);
+  view.setUint32(24, rate, true);
+  view.setUint32(28, rate * channels * (bits / 8), true);
+  view.setUint16(32, channels * (bits / 8), true);
+  view.setUint16(34, bits, true);
+  tag(36, "data");
+  view.setUint32(40, dataBytes, true);
+  return bytes;
+}
+
+describe("efek suara (spesifikasi F-07, AC-18)", () => {
+  const klikPath = "sfx/sfx_klik.wav";
+  const withFile = (data: Uint8Array) => {
+    const wav = wavInfo(data);
+    return new Map(FILES).set(klikPath, { bytes: data.byteLength, ...(wav && { wav }) });
+  };
+
+  it("kedua bunyi terdaftar, berupa WAV PCM 16 bit mono 22.050 Hz, dan durasinya sesuai spesifikasi", () => {
+    expect(Object.keys(sounds).sort()).toEqual(["klik", "teks"]);
+    expect(FILES.get("sfx/sfx_klik.wav")).toEqual({ bytes: 2028, wav: { format: 1, channels: 1, sampleRate: 22050, bits: 16, durationMs: 45 } });
+    expect(FILES.get("sfx/sfx_teks.wav")).toEqual({ bytes: 1454, wav: { format: 1, channels: 1, sampleRate: 22050, bits: 16, durationMs: 32 } });
+    expect(ENTRIES.filter((entry) => entry.sound).map((entry) => [entry.label, entry.expected])).toEqual([
+      ["sounds.klik", "sfx/sfx_klik.wav"],
+      ["sounds.teks", "sfx/sfx_teks.wav"],
+    ]);
+    expect(creditProblems(ENTRIES, CREDITS).problems).toEqual([]);
+  });
+
+  it("stereo, 8 bit, bukan PCM, lebih dari 1 detik, dan bukan WAV tertangkap", () => {
+    expect(problemsOf(GROUPS, withFile(makeWav({ channels: 2 })))).toEqual(["Manifest: sounds.klik harus mono, ternyata 2 kanal."]);
+    expect(problemsOf(GROUPS, withFile(makeWav({ bits: 8 })))).toEqual(["Manifest: sounds.klik harus 16 bit, ternyata 8 bit."]);
+    expect(problemsOf(GROUPS, withFile(makeWav({ format: 3, bits: 32 })))).toEqual([
+      "Manifest: sounds.klik bukan WAV PCM (format 3).",
+      "Manifest: sounds.klik harus 16 bit, ternyata 32 bit.",
+    ]);
+    expect(problemsOf(GROUPS, withFile(makeWav({ frames: 26_460 })))).toEqual(["Manifest: sounds.klik berdurasi 1200 ms, lebih dari 1 detik."]);
+    expect(problemsOf(GROUPS, withFile(new Uint8Array([1, 2, 3])))).toEqual(["Manifest: sounds.klik bukan berkas WAV yang terbaca."]);
+    expect(wavInfo(new Uint8Array(8))).toBeUndefined();
+  });
+
+  it("efek suara di atas 30 KB, nama berkas yang salah, kunci yang hilang, dan kredit yang hilang tertangkap", () => {
+    const big = new Map(FILES).set(klikPath, { ...FILES.get(klikPath), bytes: 31 * 1024 });
+    expect(budgetProblems(ENTRIES, big)).toEqual(["sfx/sfx_klik.wav: 31,0 KB melebihi anggaran efek suara 30 KB."]);
+    expect(problemsOf(withGroups({ sounds: { ...sounds, klik: sounds.teks } }))).toEqual([
+      "Manifest: sounds.klik menunjuk sfx/sfx_teks.wav, seharusnya sfx/sfx_klik.wav.",
+      "Manifest: sfx/sfx_teks.wav terdaftar lebih dari sekali (sounds.klik, sounds.teks).",
+    ]);
+    expect(groupProblems(withGroups({ sounds: without(sounds, "teks") }))).toEqual(["Manifest: sounds belum punya bunyi untuk teks."]);
+    const row = "`sfx/sfx_klik.wav`";
+    expect(CREDITS).toContain(row);
+    const tanpaKlik = CREDITS.split("\n").filter((line) => !line.includes(row)).join("\n");
+    expect(creditProblems(ENTRIES, tanpaKlik).problems).toEqual(["CREDITS.md: sfx/sfx_klik.wav belum tercatat."]);
   });
 });
 

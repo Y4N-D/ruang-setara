@@ -1,7 +1,8 @@
 // Teks antarmuka Sehari Setara.
 // Semua teks yang tampil ke pengguna berasal dari folder content/ (Architecture bagian 14).
 // Teks F-01 mengikuti docs/sehari-setara/specs/F-01-kerangka-halaman.md; teks F-04 mengikuti specs/F-04-panggung.md;
-// teks F-05 mengikuti specs/F-05-panel-narasi-pilihan.md; teks F-06 mengikuti specs/F-06-indikator-kartu-dampak.md.
+// teks F-05 mengikuti specs/F-05-panel-narasi-pilihan.md; teks F-06 mengikuti specs/F-06-indikator-kartu-dampak.md;
+// teks F-07 mengikuti specs/F-07-tim-waktu-bintang.md.
 import type { ChoiceId, Tier } from "../engine/types";
 
 export const copy = {
@@ -58,5 +59,44 @@ export const copy = {
     hak: "Hak yang terdampak",
     kewajiban: "Kewajiban terkait",
     rujukan: "Rujukan",
+  },
+  teams: {
+    board: "Papan tim",
+    turn: "Giliran",
+    sentence: (name: string, active: boolean, stars: number) => `${name}, ${active ? "giliran, " : ""}${stars} bintang.`,
+  },
+  timer: {
+    group: "Pengatur waktu",
+    running: "Waktu diskusi",
+    paused: "Waktu dijeda",
+    over: "Waktunya memilih",
+    remaining: (duration: string) => `Sisa ${duration}`,
+    none: "Waktu habis",
+    pause: "Jeda",
+    add: "+30",
+    addName: "+30 detik",
+    skip: "Lewati",
+    skipName: "Lewati diskusi",
+    seconds: (n: number) => `${n} detik`,
+    minutes: (n: number) => `${n} menit`,
+    minutesSeconds: (m: number, s: number) => `${m} menit ${s} detik`,
+    announce: {
+      start: (duration: string) => `Waktu diskusi ${duration} dimulai.`,
+      last: (duration: string) => `Sisa waktu ${duration}.`,
+      over: "Waktunya memilih.",
+      pause: (duration: string) => `Waktu dijeda. Sisa ${duration}.`,
+      resume: (duration: string) => `Waktu berjalan lagi. Sisa ${duration}.`,
+      add: (duration: string) => `Waktu ditambah 30 detik. Sisa ${duration}.`,
+      skip: "Diskusi dilewati. Waktunya memilih.",
+    },
+  },
+  stars: {
+    prompt: (name: string) => `Bintang alasan untuk ${name}`,
+    buttonName: (n: number) => `${n} bintang`,
+    announce: (name: string, n: number, total: number) => `${name} mendapat ${n} bintang. Jumlah bintangnya sekarang ${total}.`,
+  },
+  sound: {
+    off: "Suara dimatikan.",
+    on: "Suara dinyalakan.",
   },
 } as const;

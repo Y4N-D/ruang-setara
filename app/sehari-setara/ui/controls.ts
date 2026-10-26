@@ -1,7 +1,7 @@
-// Kontrol layar permainan Sehari Setara (spesifikasi F-05).
+// Kontrol layar permainan Sehari Setara (spesifikasi F-05; tombol pengatur waktu, bintang, dan suara: F-07).
 // Semua fungsi di sini murni dan diuji di controls.test.ts. Waktu dan pengatur waktu dijalankan
-// oleh PlayScreen.tsx; reducer di engine/ tetap tanpa setTimeout (spesifikasi F-02, AC-14).
-import type { ChoiceId, GameAction, GameState, Phase, Scene, TeamSetup } from "../engine/types";
+// oleh PlayScreen.tsx dan useTimer.ts; reducer di engine/ tetap tanpa setTimeout (spesifikasi F-02, AC-14).
+import type { ChoiceId, GameAction, GameState, Phase, Scene, Stars, TeamSetup } from "../engine/types";
 
 /** Lama tampil reaksi tokoh sebelum REAKSI_SELESAI (Design System bagian 8: 1–1,5 detik). */
 export const REACTION_MS = 1200;
@@ -23,7 +23,15 @@ export const WIPE = { block: 20, cols: 16, rows: 9, offsets: [0, 2, 1, 3], showM
 /* Keyboard (Architecture bagian 9)                                      */
 /* ------------------------------------------------------------------ */
 
-export type PlayCommand = { readonly type: "pilih"; readonly choice: ChoiceId } | { readonly type: "lanjut" };
+/** Aksi pengatur waktu yang punya tombol dan pintasan (F-07): P, T, dan S. */
+export type TimerActionType = "JEDA_WAKTU" | "TAMBAH_30" | "LEWATI_DISKUSI";
+
+export type PlayCommand =
+  | { readonly type: "pilih"; readonly choice: ChoiceId }
+  | { readonly type: "lanjut" }
+  | { readonly type: "waktu"; readonly action: TimerActionType }
+  | { readonly type: "bintang"; readonly stars: Stars }
+  | { readonly type: "suara" };
 
 const CHOICE_KEYS: Readonly<Record<string, ChoiceId>> = {
   "1": "A",
@@ -37,14 +45,46 @@ const CHOICE_KEYS: Readonly<Record<string, ChoiceId>> = {
   C: "C",
 };
 
-/** Fase tempat Spasi dan Enter berarti lanjut: narasi dan jembatan sementara. */
-const NEXT_PHASES: ReadonlySet<Phase> = new Set<Phase>(["intro", "impact", "quiz", "stars"]);
+const TIMER_KEYS: Readonly<Record<string, TimerActionType>> = {
+  p: "JEDA_WAKTU",
+  P: "JEDA_WAKTU",
+  t: "TAMBAH_30",
+  T: "TAMBAH_30",
+  s: "LEWATI_DISKUSI",
+  S: "LEWATI_DISKUSI",
+};
+
+const STAR_KEYS: Readonly<Record<string, Stars>> = { "0": 0, "1": 1, "2": 2 };
+
+/**
+ * Fase tempat Spasi dan Enter berarti lanjut: narasi, kartu dampak, dan jembatan kuis. Sejak F-07 tidak lagi di fase
+ * stars, sehingga tekanan kedua dari tekanan ganda pada Lanjut kartu tidak memberi bintang.
+ */
+const NEXT_PHASES: ReadonlySet<Phase> = new Set<Phase>(["intro", "impact", "quiz"]);
+
+/** Fase adegan, tempat M mematikan atau menyalakan suara (F-07). */
+const SOUND_PHASES: ReadonlySet<Phase> = new Set<Phase>(["intro", "discuss", "reaction", "impact", "quiz", "stars", "transition"]);
+
+/** Membaca properti milik objek saja, sehingga kunci seperti "constructor" tidak terbaca dari prototipe. */
+function own<T>(table: Readonly<Record<string, T>>, key: string): T | undefined {
+  return Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined;
+}
 
 /** Perintah untuk satu tombol di satu fase, atau null bila tombol itu tidak berpengaruh. */
 export function keyCommand(phase: Phase, key: string): PlayCommand | null {
   if (key === " " || key === "Enter") return NEXT_PHASES.has(phase) ? { type: "lanjut" } : null;
-  if (phase !== "discuss" || !Object.prototype.hasOwnProperty.call(CHOICE_KEYS, key)) return null;
-  return { type: "pilih", choice: CHOICE_KEYS[key] };
+  if (key === "m" || key === "M") return SOUND_PHASES.has(phase) ? { type: "suara" } : null;
+  if (phase === "discuss") {
+    const choice = own(CHOICE_KEYS, key);
+    if (choice) return { type: "pilih", choice };
+    const action = own(TIMER_KEYS, key);
+    return action ? { type: "waktu", action } : null;
+  }
+  if (phase === "stars") {
+    const stars = own(STAR_KEYS, key);
+    return stars === undefined ? null : { type: "bintang", stars };
+  }
+  return null;
 }
 
 /** Keterangan satu tekanan tombol; target menyebut jenis elemen yang sedang berfokus. */
@@ -111,8 +151,9 @@ export function startActions(teams: readonly TeamSetup[]): GameAction[] {
 }
 
 /**
- * Jembatan sementara dari fase impact, quiz, atau stars ke fase transition. Dampak, kuis, dan bintang tidak
- * ditampilkan: kuis dijawab dari naskah dan bintang 0. Aksi yang tidak berlaku untuk fase berjalan diabaikan reducer.
+ * Jembatan sementara dari fase impact atau quiz ke fase stars (F-07): LANJUT, lalu hanya di adegan berkuis, jawaban
+ * dari naskah dan LANJUT, sampai kuis ditampilkan di F-08. Bintang alasan diberikan guru di fase stars.
+ * Aksi yang tidak berlaku untuk fase berjalan diabaikan reducer.
  */
 export function bridgeActions(scene: Scene): GameAction[] {
   const quiz: GameAction[] = scene.roleQuiz
@@ -121,7 +162,7 @@ export function bridgeActions(scene: Scene): GameAction[] {
         { type: "LANJUT" },
       ]
     : [];
-  return [{ type: "LANJUT" }, ...quiz, { type: "BERI_BINTANG", stars: 0 }];
+  return [{ type: "LANJUT" }, ...quiz];
 }
 
 /** Dari layar akhir sementara (fase ending, recap, atau reflection) kembali ke fase intro adegan 1. */

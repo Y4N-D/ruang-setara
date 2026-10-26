@@ -1,14 +1,14 @@
-// Layar permainan Sehari Setara (spesifikasi F-05 dan F-06), dibuka lewat #main sampai layar judul dibuat di F-10.
-// Menjalankan mesin F-02 dengan naskah F-03: narasi, pertanyaan, pilihan, reaksi, indikator, kartu dampak,
-// jembatan sementara, pergantian adegan, dan layar akhir sementara. Logika permainan tetap di engine/;
-// layar ini hanya mengirim aksi.
+// Layar permainan Sehari Setara (spesifikasi F-05, F-06, dan F-07), dibuka lewat #main sampai layar judul dibuat di F-10.
+// Menjalankan mesin F-02 dengan naskah F-03: narasi, pertanyaan, pilihan, pengatur waktu, reaksi, indikator, kartu
+// dampak, bintang alasan, pergantian adegan, dan layar akhir sementara, ditambah papan tim dan bunyi (F-07).
+// Logika permainan tetap di engine/; layar ini hanya mengirim aksi.
 import { useEffect, useEffectEvent, useReducer, useRef, useState, type ReactNode } from "react";
 import { copy } from "../content/copy";
 import { SCENES } from "../content/scenes";
-import { PLAY_TEAMS } from "../content/teams";
+import { DEFAULT_TEAMS } from "../content/teams";
 import { createInitialState, createReducer } from "../engine/reducer";
-import { narrationFor } from "../engine/rules";
-import type { ChoiceId, GameAction, GameState, Phase, TimeOfDay } from "../engine/types";
+import { activeTeam, activeTeamIndex, narrationFor } from "../engine/rules";
+import type { ChoiceId, GameAction, GameState, Phase, Stars, TeamSetup, TimeOfDay } from "../engine/types";
 import { ChoicePanel } from "./ChoicePanel";
 import {
   bridgeActions,
@@ -22,17 +22,24 @@ import {
   WIPE_COVER_MS,
   WIPE_MS,
   type KeyContext,
+  type TimerActionType,
 } from "./controls";
 import { DayArc } from "./DayArc";
 import { usePrefersReducedMotion } from "./hooks";
 import { ImpactCard } from "./ImpactCard";
 import { IMPACT_GUARD_MS, impactAnnouncement, METER_STEP_MS, meterValueAt, metersBefore } from "./impact";
-import { STAGE } from "./layout";
-import { NarrationBox, type NarrationHandle } from "./NarrationBox";
+import { STAGE, type TeamCount } from "./layout";
 import { Meters } from "./Meters";
+import { NarrationBox, type NarrationHandle } from "./NarrationBox";
 import { preloadScene } from "./preload";
 import { SceneWipe } from "./SceneWipe";
+import { CLICK_RATE, soundPlayer, TEXT_BLIP_RATE } from "./sound";
 import { Stage } from "./Stage";
+import { StarsAward } from "./StarsAward";
+import { Teams, type StarPop } from "./Teams";
+import { Timer } from "./Timer";
+import { canAddTime, starsAnnouncement, timerAnnouncement, type TimerCause } from "./turn";
+import { useTimer } from "./useTimer";
 
 // Relatif terhadap /ruang-setara/sehari-setara/ (Architecture bagian 11).
 const GALLERY_HREF = "../";
@@ -42,23 +49,35 @@ const reducer = createReducer(SCENES);
 /** Fase yang menampilkan pertanyaan dan tiga pilihan di panel bawah; di fase impact panel bawah kosong (F-06). */
 const CHOICE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["discuss", "reaction", "quiz", "stars"]);
 /**
- * Fase milik fitur lain yang dilewati jembatan sementara (keputusan Gerbang 1 F-05 nomor 4). Sejak F-06 keduanya
- * dilewati dalam tekanan Lanjut kartu dampak, jadi tombol jembatan hanya pengaman sampai F-07 dan F-08.
+ * Fase milik fitur lain yang masih dilewati jembatan sementara: kuis sampai F-08. Kuis dilewati dalam tekanan Lanjut
+ * kartu dampak, jadi tombol jembatan di baris status hanya pengaman (spesifikasi F-07).
  */
-const BRIDGE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["quiz", "stars"]);
+const BRIDGE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["quiz"]);
 /** Fase saat panggung menampilkan reaksi pilihan adegan berjalan. */
 const REACTING_PHASES: ReadonlySet<Phase> = new Set<Phase>(["reaction", "impact", "quiz", "stars", "transition"]);
 /** Fase yang memakai layar akhir sementara, sampai layar akhir dibuat di F-09. */
 const END_PHASES: ReadonlySet<Phase> = new Set<Phase>(["ending", "recap", "reflection"]);
+
+/** Interaksi yang membuat atau melanjutkan konteks audio (Architecture bagian 8: bunyi dimuat sesudah interaksi pertama). */
+const UNLOCK_EVENTS = ["keydown", "pointerdown", "pointerup"] as const;
+
+const TIMER_CAUSE: Readonly<Record<TimerActionType, TimerCause>> = {
+  JEDA_WAKTU: "jeda",
+  TAMBAH_30: "tambah",
+  LEWATI_DISKUSI: "lewati",
+};
 
 interface SceneChange {
   kind: "sapuan" | "pudar";
   nextTime: TimeOfDay;
 }
 
-/** Keadaan awal: judul, pengaturan, dan prolog dilewati dengan dua tim bawaan (F-10 belum ada). */
-function initialPlayState(): GameState {
-  return runActions(reducer, createInitialState(), startActions(PLAY_TEAMS));
+/** Tim bawaan pertama sebanyak alamat layar: dua untuk #main, tiga dan empat untuk alamat uji (F-07). */
+const teamsFor = (count: TeamCount): TeamSetup[] => DEFAULT_TEAMS.slice(0, count);
+
+/** Keadaan awal: judul, pengaturan, dan prolog dilewati dengan tim bawaan (F-10 belum ada). */
+function initialPlayState(count: TeamCount): GameState {
+  return runActions(reducer, createInitialState(), startActions(teamsFor(count)));
 }
 
 /** Jenis elemen yang menerima tekanan tombol, untuk aturan pengabaian pintasan. */
@@ -69,20 +88,25 @@ function targetKind(target: EventTarget | null): KeyContext["target"] {
   return "lain";
 }
 
-export function PlayScreen({ scale }: { scale: number }) {
+export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: TeamCount }) {
   const prefersReduced = usePrefersReducedMotion();
-  const [state, dispatch] = useReducer(reducer, undefined, initialPlayState);
+  const [state, dispatch] = useReducer(reducer, teamCount, initialPlayState);
   const [round, setRound] = useState(0);
   const [narration, setNarration] = useState({ round: 0, scene: 0, screen: 0 });
   const [change, setChange] = useState<SceneChange | null>(null);
+  // Pengumuman wilayah status kedua (F-07); berlaku untuk satu permainan saja.
+  const [status, setStatus] = useState({ round: 0, text: "" });
+  const [pop, setPop] = useState<StarPop | null>(null);
   const narrationRef = useRef<NarrationHandle>(null);
   const endTitleRef = useRef<HTMLHeadingElement>(null);
   const bridgeUsed = useRef("");
+  const starsUsed = useRef("");
   // Waktu sejak kartu dampak tampil: state untuk tampilan, ref untuk pengaman tekanan ganda (spesifikasi F-06).
   const [impactTime, setImpactTime] = useState({ key: "", ms: 0 });
   const impactStart = useRef({ key: "", at: 0 });
 
   const reduced = prefersReduced || state.settings.reducedMotion;
+  const soundOn = state.settings.sound;
   const scene = SCENES[state.sceneIndex];
   const screens = narrationFor(scene, state.flags);
   const screen = narration.round === round && narration.scene === state.sceneIndex ? narration.screen : 0;
@@ -92,15 +116,34 @@ export function PlayScreen({ scale }: { scale: number }) {
   const ended = END_PHASES.has(state.phase);
   const sceneKey = `${round}-${state.sceneIndex}`;
   const impactElapsed = state.phase === "impact" && impactTime.key === sceneKey ? impactTime.ms : 0;
+  const team = activeTeam(state);
 
   const send = (actions: readonly GameAction[]) => {
     for (const action of actions) dispatch(action);
   };
 
+  /** Bunyi klik untuk tekanan yang diterima permainan (spesifikasi F-07, bagian Bunyi klik). */
+  const click = () => {
+    if (soundOn) soundPlayer.play("klik", CLICK_RATE);
+  };
+
+  /** Bunyi teks dari kotak narasi, paling banyak sekali per pembaruan teks per huruf. */
+  const typeSound = () => {
+    if (soundOn) soundPlayer.play("teks", TEXT_BLIP_RATE);
+  };
+
+  /** Wilayah status kedua: hanya diisi pada peristiwa, tidak setiap detik. */
+  const announce = (text: string | null) => {
+    if (text) setStatus({ round, text });
+  };
+
   /** Layar narasi berikutnya, atau pertanyaan sesudah layar terakhir. Tekanan ganda tidak melewati layar. */
   const nextNarration = (from: number) => {
     if (from >= screens.length - 1) {
+      const next = reducer(state, { type: "NARASI_SELESAI" });
+      if (next === state) return;
       dispatch({ type: "NARASI_SELESAI" });
+      announce(timerAnnouncement(state.timer, next.timer, "mulai"));
       return;
     }
     setNarration((current) => {
@@ -109,22 +152,34 @@ export function PlayScreen({ scale }: { scale: number }) {
     });
   };
 
-  const choose = (id: ChoiceId) => dispatch({ type: "PILIH", choice: id });
-
-  /** Sekali per adegan: kuis dan bintang dilewati (jembatan sementara), lalu sapuan atau pudar ke adegan berikutnya. */
-  const advance = () => {
-    if (bridgeUsed.current === sceneKey) return;
-    bridgeUsed.current = sceneKey;
-    send(bridgeActions(scene));
-    const next = SCENES[state.sceneIndex + 1];
-    if (next) setChange({ kind: reduced ? "pudar" : "sapuan", nextTime: next.timeOfDay });
-    else dispatch({ type: "LANJUT" });
+  const choose = (id: ChoiceId) => {
+    const action: GameAction = { type: "PILIH", choice: id };
+    if (reducer(state, action) === state) return;
+    dispatch(action);
+    click();
   };
 
-  /** Tombol jembatan F-05, hanya bila fase kuis atau bintang sempat tampil. */
-  const bridge = () => {
-    if (BRIDGE_PHASES.has(state.phase)) advance();
+  /** Jeda, +30, dan lewati: hanya di fase diskusi, dan hanya bila aksinya mengubah pengatur waktu. */
+  const timerAction = (type: TimerActionType) => {
+    if (state.phase !== "discuss" || change) return;
+    if (type === "TAMBAH_30" && !canAddTime(state.timer.remaining)) return;
+    const next = reducer(state, { type });
+    if (next === state) return;
+    dispatch({ type });
+    click();
+    announce(timerAnnouncement(state.timer, next.timer, TIMER_CAUSE[type]));
   };
+
+  /** Detik dari useTimer; diumumkan hanya saat masuk sepuluh detik terakhir dan saat waktu habis. */
+  const onTicks = (count: number) => {
+    let next = state;
+    for (let i = 0; i < count; i++) next = reducer(next, { type: "TICK" });
+    if (next === state) return;
+    for (let i = 0; i < count; i++) dispatch({ type: "TICK" });
+    announce(timerAnnouncement(state.timer, next.timer, "tick"));
+  };
+
+  useTimer(state.phase === "discuss" && state.timer.running && state.timer.remaining > 0 && change === null, onTicks);
 
   /** Masa tunggu 600 ms dihitung dari waktu sebenarnya, sehingga tidak bergantung pada render terakhir. */
   const cardReady = () =>
@@ -132,14 +187,50 @@ export function PlayScreen({ scale }: { scale: number }) {
     impactStart.current.key === sceneKey &&
     performance.now() - impactStart.current.at >= IMPACT_GUARD_MS;
 
-  /** Tombol Lanjut kartu dampak: bekerja sesudah masa tunggu, sekali per adegan. */
+  /** Tombol Lanjut kartu dampak: sekali per adegan, sesudah masa tunggu; kuis dilewati, lalu fase bintang (F-07). */
   const continueFromCard = () => {
-    if (cardReady()) advance();
+    if (!cardReady() || bridgeUsed.current === sceneKey) return;
+    bridgeUsed.current = sceneKey;
+    send(bridgeActions(scene));
+    click();
+  };
+
+  /** Tombol jembatan F-05, hanya bila fase kuis sempat tampil (pengaman sampai F-08). */
+  const bridge = () => {
+    if (!BRIDGE_PHASES.has(state.phase)) return;
+    send(bridgeActions(scene));
+    click();
+  };
+
+  /** Bintang alasan untuk tim aktif, sekali per adegan; lalu sapuan atau pudar ke adegan berikutnya. */
+  const giveStars = (stars: Stars) => {
+    if (state.phase !== "stars" || change || starsUsed.current === sceneKey || !team) return;
+    starsUsed.current = sceneKey;
+    dispatch({ type: "BERI_BINTANG", stars });
+    click();
+    announce(starsAnnouncement(team.name, stars, team.stars + stars));
+    setPop(stars > 0 && !reduced ? { key: sceneKey, teamId: team.id } : null);
+    const next = SCENES[state.sceneIndex + 1];
+    if (next) setChange({ kind: reduced ? "pudar" : "sapuan", nextTime: next.timeOfDay });
+    else dispatch({ type: "LANJUT" });
+  };
+
+  /** M: suara mati atau nyala lewat UBAH_PENGATURAN; saat dinyalakan, satu klik sebagai tanda. */
+  const toggleSound = () => {
+    const on = !soundOn;
+    dispatch({ type: "UBAH_PENGATURAN", settings: { sound: on } });
+    announce(on ? copy.sound.on : copy.sound.off);
+    if (on) {
+      soundPlayer.unlock();
+      soundPlayer.play("klik", CLICK_RATE);
+    }
   };
 
   const restart = () => {
-    send(restartActions(PLAY_TEAMS));
+    send(restartActions(teamsFor(teamCount)));
     setRound((value) => value + 1);
+    setPop(null);
+    click();
   };
 
   // Reaksi tokoh tampil 1,2 detik, lalu REAKSI_SELESAI.
@@ -187,7 +278,7 @@ export function PlayScreen({ scale }: { scale: number }) {
     if (ended) endTitleRef.current?.focus();
   }, [ended]);
 
-  // Pintasan keyboard (Architecture bagian 9; spesifikasi F-05), hanya aktif di layar permainan.
+  // Pintasan keyboard (Architecture bagian 9; spesifikasi F-05 dan F-07), hanya aktif di layar permainan.
   const onKey = useEffectEvent((event: KeyboardEvent) => {
     if (change) return;
     const context: KeyContext = {
@@ -204,6 +295,9 @@ export function PlayScreen({ scale }: { scale: number }) {
     if (!command) return;
     event.preventDefault();
     if (command.type === "pilih") choose(command.choice);
+    else if (command.type === "waktu") timerAction(command.action);
+    else if (command.type === "bintang") giveStars(command.stars);
+    else if (command.type === "suara") toggleSound();
     else if (state.phase === "intro") narrationRef.current?.activate();
     else if (state.phase === "impact") continueFromCard();
     else bridge();
@@ -213,6 +307,19 @@ export function PlayScreen({ scale }: { scale: number }) {
     const listener = (event: KeyboardEvent) => onKey(event);
     window.addEventListener("keydown", listener);
     return () => window.removeEventListener("keydown", listener);
+  }, []);
+
+  // Konteks audio dibuat pada interaksi pertama di layar permainan, dan dilanjutkan bila peramban menangguhkannya.
+  const unlockSound = useEffectEvent(() => {
+    if (soundOn) soundPlayer.unlock();
+  });
+
+  useEffect(() => {
+    const listener = () => unlockSound();
+    for (const type of UNLOCK_EVENTS) window.addEventListener(type, listener, true);
+    return () => {
+      for (const type of UNLOCK_EVENTS) window.removeEventListener(type, listener, true);
+    };
   }, []);
 
   if (ended) {
@@ -270,6 +377,8 @@ export function PlayScreen({ scale }: { scale: number }) {
         isLast={screen === screens.length - 1}
         typewriter={state.settings.typewriter && !reduced}
         onNext={() => nextNarration(screen)}
+        onTypeSound={typeSound}
+        onPress={click}
       />
     );
   } else if (!change && CHOICE_PHASES.has(state.phase)) {
@@ -283,17 +392,21 @@ export function PlayScreen({ scale }: { scale: number }) {
         bridgeReady={BRIDGE_PHASES.has(state.phase)}
         onChoose={choose}
         onBridge={bridge}
+        takeFocus={state.phase !== "stars"}
       />
     );
   }
 
   return (
-    <main className="ss-play" aria-labelledby="ss-play-title">
+    <main className="ss-play" aria-labelledby="ss-play-title" data-kartu={showingImpact ? "" : undefined}>
       <h1 id="ss-play-title" className="ss-sr">
         {copy.play.heading(state.sceneIndex + 1, scene.title)}
       </h1>
       <div className="ss-sr" aria-live="polite">
         {live}
+      </div>
+      <div className="ss-sr" role="status">
+        {status.round === round ? status.text : ""}
       </div>
       <DayArc scenes={SCENES} sceneIndex={state.sceneIndex} scale={scale} animate={!reduced} />
       <Meters values={shownMeters} effects={meterEffects} scale={scale} />
@@ -311,6 +424,25 @@ export function PlayScreen({ scale }: { scale: number }) {
         </div>
       </div>
       <div className="ss-play-panel">{panel}</div>
+      {/* Panel kanan sesudah panel bawah, agar urutan Tab tetap pertanyaan, A, B, C, lalu tombol pengatur waktu (F-07). */}
+      <div className="ss-side" style={{ width: `calc(50% - ${160 * scale}px)` }}>
+        <Teams
+          teams={state.teams}
+          activeIndex={activeTeamIndex(state.sceneIndex, state.teams.length)}
+          pop={reduced ? null : pop}
+        />
+        {!change && state.phase === "discuss" && (
+          <Timer
+            timer={state.timer}
+            onPause={() => timerAction("JEDA_WAKTU")}
+            onAdd={() => timerAction("TAMBAH_30")}
+            onSkip={() => timerAction("LEWATI_DISKUSI")}
+          />
+        )}
+        {!change && state.phase === "stars" && team && (
+          <StarsAward key={sceneKey} teamName={team.name} onGive={giveStars} />
+        )}
+      </div>
       {showingImpact && chosen && (
         <ImpactCard
           key={sceneKey}

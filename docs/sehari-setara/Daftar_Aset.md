@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Versi | 0.1 |
-| Diperbarui | 22 Oktober 2026 |
+| Diperbarui | 26 Oktober 2026 |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (lihat `Design_System.md` bagian 12) |
 | Cara membangun | `python scripts/game/art/build_assets.py` |
 
@@ -86,10 +86,19 @@ Perbarui tabel ini setiap kali sebuah aset selesai atau berubah status. Ukuran t
 | D-10 | `ui_timbangan.png` | 5 × 48×32 | Strip: miring kiri, sedikit kiri, seimbang, sedikit kanan, miring kanan (kemiringan 22°, 10°, 0°). Piring kiri Hak (hati `teal`), piring kanan Kewajiban (centang `sky-d`) | Disetujui (21 Okt) |
 | D-11 | `ui_matahari.png` / `ui_bulan.png` | 16×16 | Penanda titik jam berjalan di busur hari (F-04): matahari `sun` dengan bayangan `mango`, kilau putih, dan delapan sinar untuk adegan pagi sampai sore; bulan sabit `cream` dengan lengkung dalam `lampu` untuk adegan malam; keduanya bergaris luar `ink` | Disetujui (22 Okt) |
 
+## E. Efek suara
+
+Efek suara tidak dibuat dengan kit gambar. Berkasnya ada di `app/sehari-setara/assets/sfx/` dan didaftarkan di kelompok `sounds` manifest (F-07).
+
+| ID | File | Panjang | Isi | Status |
+|---|---|---|---|---|
+| S-01 | `sfx_klik.wav` | 45 ms | Bunyi klik tombol gaya A ("kotak, lebih nyaring") dari halaman uji suara Sehari Setara, diputar dengan laju 1 untuk setiap tekanan yang diterima permainan. WAV PCM mono 22.050 Hz 16 bit, 2.028 byte | Disetujui (26 Okt) |
+| S-02 | `sfx_teks.wav` | 32 ms | Bunyi teks gaya B ("lembut") dari halaman uji suara, diputar dengan laju 1,2 (nada "Tinggi") setiap 2 huruf saat teks narasi muncul per huruf. WAV PCM mono 22.050 Hz 16 bit, 1.454 byte | Disetujui (26 Okt) |
+
 ## Catatan
 
 - 21 Okt 2026: semua aset kelompok A–D disetujui pengembang (YAN). Atribusi setiap aset ada di `app/sehari-setara/assets/CREDITS.md`.
-- Total ukuran aset saat ini: sekitar 61,4 KB dari anggaran 4 MB.
+- Total ukuran aset saat ini: sekitar 65,2 KB dari anggaran 4 MB, termasuk dua efek suara bagian E (26 Okt 2026, uji aset F-07).
 - Warna kulit tokoh (usulan Batch A2, dipakai mulai A3): `skin-4` juga untuk tokoh yang membantu (Bu Ratih); dua siswa di adegan 4 memakai `skin-3` dan `skin-1`, Komang `skin-2`, agar tidak ada kesan perundungan karena warna kulit. Di adegan 5, Bayu memakai `skin-2` seperti Nara, dua warga `skin-3` dan `skin-1`, Pak Made `skin-4`.
 - Temuan Batch A1 (20 Okt): pada semua pose Ibu (A-07, A-08, A-09) sisi kanan keranjang menyentuh tepi kanvas, dan pada A-07/A-08 puncak sanggul juga, sehingga garis luar di bagian itu tidak tergambar. Usulan perbaikan menunggu persetujuan karena A-07 sudah Disetujui.
 - Posisi tokoh pada pratinjau Batch B1 (usulan untuk `cast`): adegan 2 — Dimas x 168 menghadap kanan, Nara x 228 menghadap kiri; adegan 3 — Nara x 140 menghadap kanan, Sinta x 186 menghadap kiri, Bu Ratih x 268 menghadap kanan (sedang mendampingi kelompok lain). Tiang bendera dan tanaman ditata agar tidak tampak menancap di kepala tokoh pada posisi ini.
@@ -103,4 +112,4 @@ Perbarui tabel ini setiap kali sebuah aset selesai atau berubah status. Ukuran t
 - Keputusan 21 Okt untuk kelompok D: (1) D-10 menjadi 5 bingkai agar akhir "Hampir Seimbang" punya posisi "sedikit miring"; bingkai antara juga dipakai untuk gerak timbangan menuju posisi akhir; (2) bentuk Tim Mentari memakai bintang bersudut empat, bintang alasan tetap bersudut lima; (3) ikon peran berupa potret tokoh dengan alat perannya.
 - Pakaian sidang pada D-08 mengikuti PP 27/1983 Pasal 4 (hakim, penuntut umum, dan penasihat hukum bertoga hitam berlengan lebar dengan simare dan bef; perbedaannya pada ukuran dan warna simare dan bef). Warna simare merah untuk hakim pengadilan negeri/tinggi dan hitam untuk jaksa dan advokat diambil dari hukumonline.com; perlu dicek peninjau konten.
 - Ikon antarmuka digambar di file kit `scripts/game/art/ikon.py`. File ini sudah dicatat di `Design_System.md` bagian 12 dan `Architecture.md` bagian 3 dan 8 (F-12, 21 Okt 2026).
-- Efek suara (P1) tidak dibuat dengan kit gambar; lihat `Design_System.md` bagian 9.
+- Efek suara tidak dibuat dengan kit gambar; lihat `Design_System.md` bagian 9. Dua efek suara pertama (bagian E) dipilih pemilik proyek lewat halaman uji suara pada 26 Okt 2026 dan disimpan apa adanya (keputusan Gerbang 2 F-07, S-1 dan S-8). Pembuat dan lisensinya menunggu jawaban pemilik proyek (butir S-6 spesifikasi F-07). Efek suara lain dibuat di F-13.

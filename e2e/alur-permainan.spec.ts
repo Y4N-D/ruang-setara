@@ -1,5 +1,6 @@
 // Uji ujung ke ujung layar permainan Sehari Setara (spesifikasi F-05, Rencana uji langkah 3 dan 4).
 // Disesuaikan di F-06: sesudah reaksi, kartu dampak menggantikan tombol jembatan (spesifikasi F-06, Rencana uji).
+// Disesuaikan di F-07: sesudah kartu dampak, bintang alasan diberikan sebelum adegan berganti (giveStars).
 // Membuka hasil build di /ruang-setara/sehari-setara/#main lewat serve-subpath.mjs, seperti alamat GitHub Pages.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
@@ -7,11 +8,13 @@ import { choiceText, narrationFor } from "../app/sehari-setara/engine/rules";
 import type { CastSlot, ChoiceId, Flag } from "../app/sehari-setara/engine/types";
 import { WIPE, wipeSchedule } from "../app/sehari-setara/ui/controls";
 import {
+  awardPrompt,
   cardNext,
   contrast,
   CREAM,
   EMOTES,
   expectClean,
+  giveStars,
   INK,
   measureStage,
   SHOTS,
@@ -154,6 +157,7 @@ async function playPath(page: Page, path: ChoiceId[], shots?: { discussS5?: stri
     await expect(page.locator('[role="dialog"]')).toHaveCount(1);
     await expect(bridgeNext(page)).toHaveCount(0);
     await page.keyboard.press("Enter");
+    await giveStars(page);
   }
   await expect(page.locator(".ss-play-end h1")).toHaveText("Keenam adegan selesai");
 }
@@ -361,20 +365,31 @@ test("reaksi dan kartu dampak: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, A
   expect(waited).toBeGreaterThanOrEqual(1150);
   expect(waited).toBeLessThanOrEqual(1600);
 
-  // Klik ganda pada Lanjut kartu hanya memajukan satu adegan.
+  // Klik ganda pada Lanjut kartu hanya membuka fase bintang (F-07): klik kedua jatuh di ruang kosong panel bawah, tidak
+  // pada tombol bintang. Fokus bisa ikut berpindah ke halaman karena klik itu, jadi bintang diberikan dengan tombol 1.
   await cardNext(page).dblclick();
+  await expect(awardPrompt(page)).toBeVisible();
+  await expect(page.locator(".ss-team-count")).toHaveText(["0", "0"]);
+  await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 1/6");
+  await page.keyboard.press("1");
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 2/6");
   await expect(narrationNext(page)).toBeVisible();
   await page.waitForTimeout(500);
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 2/6");
   await expect(live(page)).toHaveText(SCENES[1].narration[0]);
 
-  // Dua kali Enter dengan cepat juga hanya memajukan satu adegan.
+  // Dua kali Enter dengan cepat juga hanya memajukan satu adegan: Enter kedua tidak memberi bintang (F-07).
   await readNarration(page, 1, []);
   await page.keyboard.press("2");
   await waitCardReady(page);
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");
+  await expect(awardPrompt(page)).toBeFocused();
+  await page.waitForTimeout(300);
+  await expect(awardPrompt(page)).toBeFocused();
+  await expect(page.locator(".ss-team-count")).toHaveText(["1", "0"]);
+  await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 2/6");
+  await giveStars(page, 2);
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 3/6");
   await page.waitForTimeout(500);
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 3/6");
@@ -386,6 +401,7 @@ test("reaksi dan kartu dampak: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, A
     await page.keyboard.press("B");
     await waitCardReady(page);
     await page.keyboard.press("Enter");
+    await giveStars(page);
   }
   await readNarration(page, 4, []);
   await page.keyboard.press("b");
@@ -393,6 +409,11 @@ test("reaksi dan kartu dampak: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, A
   await expect(bridgeNext(page)).toHaveCount(0);
   for (const role of ["Polisi", "Jaksa", "Advokat", "Hakim"]) await expect(page.getByText(role, { exact: true })).toHaveCount(0);
   await page.keyboard.press("Enter");
+  // Kuis tetap dilewati: sesudah kartu adegan 5 langsung fase bintang, tanpa tombol jembatan.
+  await expect(awardPrompt(page)).toBeFocused();
+  await expect(bridgeNext(page)).toHaveCount(0);
+  for (const role of ["Polisi", "Jaksa", "Advokat", "Hakim"]) await expect(page.getByText(role, { exact: true })).toHaveCount(0);
+  await giveStars(page);
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 6/6");
   expectClean(log);
 });
@@ -409,6 +430,7 @@ test("sapuan blok piksel pada 100 ms dan 300 ms (AC-7)", async ({ page }) => {
   await expect(cardTitle(page)).toBeFocused();
   await page.clock.runFor(600);
   await page.keyboard.press("Enter");
+  await giveStars(page);
   await expect(page.locator(".ss-wipe")).toHaveAttribute("data-time", "pagi");
   await page.clock.runFor(400);
   await expect(page.locator(".ss-wipe")).toHaveCount(0);
@@ -422,6 +444,7 @@ test("sapuan blok piksel pada 100 ms dan 300 ms (AC-7)", async ({ page }) => {
   await expect(cardTitle(page)).toBeFocused();
   await page.clock.runFor(600);
   await page.keyboard.press("Enter");
+  await giveStars(page);
   const wipe = page.locator(".ss-wipe");
   await expect(wipe).toHaveAttribute("data-time", "siang");
   await expect(page.locator(".ss-play-panel > *")).toHaveCount(0);
@@ -501,6 +524,9 @@ test("sapuan tepat waktu dan tanpa sapuan sesudah adegan 6 (AC-7)", async ({ pag
     }
     await page.keyboard.press("C");
     await waitCardReady(page);
+    // Sejak F-07 sapuan dimulai saat bintang diberikan, jadi waktunya diukur dari tekanan tombol bintang.
+    await page.keyboard.press("Enter");
+    await expect(awardPrompt(page)).toBeFocused();
     await page.evaluate(() => {
       const run = window as unknown as Run;
       run.ssMuncul = 0;
@@ -513,7 +539,7 @@ test("sapuan tepat waktu dan tanpa sapuan sesudah adegan 6 (AC-7)", async ({ pag
       });
       observer.observe(document.body, { childList: true, subtree: true });
     });
-    await page.keyboard.press("Enter");
+    await page.keyboard.press("1");
     if (i < SCENES.length - 1) {
       await expect(page.locator(".ss-wipe")).toHaveAttribute("data-time", SCENES[i + 1].timeOfDay);
       await expect(page.locator(".ss-narration")).toBeVisible();
@@ -546,6 +572,7 @@ test("kurangi gerak: teks langsung lengkap, pudar 75 + 75 ms, tanpa animasi lain
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
   await page.clock.runFor(600);
   await page.keyboard.press("Enter");
+  await giveStars(page, 2);
   const holder = page.locator(".ss-stage-holder");
   const fade = () =>
     holder.evaluate((element) => [
@@ -717,6 +744,7 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
         expect(await page.locator(".ss-impact-body").evaluate((element) => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(0);
         await page.clock.runFor(600);
         await page.keyboard.press("Enter");
+        await giveStars(page);
         await page.clock.runFor(150);
       }
       await expect(page.locator(".ss-play-end")).toBeVisible();

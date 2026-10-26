@@ -1,4 +1,4 @@
-// Uji unit tata letak panggung Sehari Setara (spesifikasi F-04 AC-15; tambahan F-05 AC-15).
+// Uji unit tata letak panggung Sehari Setara (spesifikasi F-04 AC-15; tambahan F-05 AC-15 dan F-07 AC-18).
 import { describe, expect, it } from "vitest";
 import { spriteFor, sprites } from "../assets/manifest";
 import { SCENES } from "../content/scenes";
@@ -148,11 +148,14 @@ describe("alamat pratinjau", () => {
     }
   });
 
-  it("#main membuka layar permainan; alamat pratinjau dan alamat lain tetap seperti F-04 (F-05)", () => {
+  it("#main membuka layar permainan dengan dua tim; #main-3 dan #main-4 dengan tiga dan empat tim (F-05, F-07)", () => {
     expect(PLAY_HASH).toBe("#main");
-    expect(parseRoute("#main", 6)).toEqual({ kind: "main" });
+    expect(parseRoute("#main", 6)).toEqual({ kind: "main", teams: 2 });
+    expect(parseRoute("#main-3", 6)).toEqual({ kind: "main", teams: 3 });
+    expect(parseRoute("#main-4", 6)).toEqual({ kind: "main", teams: 4 });
     expect(parseRoute("#adegan-2-b", 6)).toEqual({ kind: "pratinjau", preview: { sceneIndex: 1, view: "B" } });
-    for (const hash of ["", "#", "#Main", "#main-1", "#mainkan", "main", "#adegan-7", "#lain"]) expect(parseRoute(hash, 6)).toBeNull();
+    const rejected = ["", "#", "#Main", "#main-1", "#main-2", "#main-5", "#main-4x", "#main-03", "#mainkan", "main", "#adegan-7", "#lain", "#constructor"];
+    for (const hash of rejected) expect(parseRoute(hash, 6)).toBeNull();
   });
 
   it("tampilan situasi memakai pemeran adegan; tampilan reaksi memakai susunan dan ikon emosi pilihannya", () => {

@@ -1,8 +1,10 @@
-# CREDITS — Aset gambar Sehari Setara
+# CREDITS — Aset gambar dan suara Sehari Setara
 
 Semua gambar di folder ini digambar dengan kode memakai kit Sehari Setara (`scripts/game/art/`: `palette.json`, `pixelart.py`, `tokoh.py`, `latar.py`, `ikon.py`) dan dibangun dengan `python scripts/game/art/build_assets.py`. Kode adalah sumber utama; PNG tidak disunting manual. Status dan rincian setiap aset ada di `docs/sehari-setara/Daftar_Aset.md`.
 
 Format atribusi mengikuti `AGENTS.md` bagian 9: "Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui [nama], [tanggal]".
+
+Efek suara di `sfx/` tidak dibuat dengan kit gambar; asal-usulnya dicatat di bagian "Efek suara" di bawah (spesifikasi F-07).
 
 ## Latar (`bg/`)
 
@@ -89,7 +91,16 @@ Format atribusi mengikuti `AGENTS.md` bagian 9: "Digambar dengan kode (kit Sehar
 | `ui/ui_matahari.png` | D-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 22 Oktober 2026 |
 | `ui/ui_bulan.png` | D-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 22 Oktober 2026 |
 
+## Efek suara (`sfx/`)
+
+Kedua bunyi diambil apa adanya (identik byte) dari halaman uji suara "Uji suara Sehari Setara" yang dipilih pemilik proyek pada 26 Oktober 2026. Pembuat dan lisensinya menunggu keterangan pemilik proyek (spesifikasi F-07, butir S-6), lalu dicatat di kolom atribusi.
+
+| File | ID | Atribusi |
+|---|---|---|
+| `sfx/sfx_klik.wav` | S-01 | Bunyi klik gaya A dari halaman uji suara Sehari Setara, dipilih YAN, 26 Oktober 2026 |
+| `sfx/sfx_teks.wav` | S-02 | Bunyi teks gaya B dari halaman uji suara Sehari Setara, dipilih YAN, 26 Oktober 2026 |
+
 ## Di luar folder ini
 
 - Huruf Press Start 2P dan Pixelify Sans (SIL Open Font License 1.1) dipasang dari paket `@fontsource`; atribusinya ditampilkan di layar "Tentang" sesuai `Design_System.md` bagian 13.
-- Efek suara (P1) belum dibuat.
+- Efek suara lain (konfirmasi, dampak, tik pelan sepuluh detik terakhir, dan akhir hari; P1) belum dibuat (F-13).

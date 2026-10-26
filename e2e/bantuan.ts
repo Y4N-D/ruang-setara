@@ -1,5 +1,5 @@
-// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05; ditambah di F-06).
-// Dipakai e2e/sehari-setara.spec.ts, e2e/alur-permainan.spec.ts, dan e2e/kartu-dampak.spec.ts. Berkas ini bukan berkas uji.
+// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05; ditambah di F-06 dan F-07).
+// Dipakai semua berkas e2e/*.spec.ts. Berkas ini bukan berkas uji.
 import { mkdirSync } from "node:fs";
 import { expect, type Page } from "@playwright/test";
 
@@ -171,4 +171,16 @@ export async function waitCardReady(page: Page) {
   await expect(impactCard(page)).toBeVisible({ timeout: 3000 });
   await expect(page.locator("#ss-impact-title")).toBeFocused();
   await expect(cardNext(page)).not.toHaveAttribute("aria-disabled", "true");
+}
+
+/** Ajakan bintang alasan F-07, yang berfokus saat fase bintang dimulai. */
+export const awardPrompt = (page: Page) => page.locator(".ss-award-prompt");
+
+/**
+ * Langkah bintang alasan F-07 sesudah tombol Lanjut kartu dampak: menunggu ajakan berfokus, lalu menekan 0, 1, atau 2.
+ * Pergantian adegan dimulai sesudahnya; uji dengan jam dijeda memajukan waktunya sendiri.
+ */
+export async function giveStars(page: Page, stars: 0 | 1 | 2 = 1) {
+  await expect(awardPrompt(page)).toBeFocused();
+  await page.keyboard.press(String(stars));
 }

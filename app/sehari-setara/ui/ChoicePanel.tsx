@@ -1,6 +1,6 @@
 // Pertanyaan dan tiga tombol pilihan A/B/C (Design System bagian 7; spesifikasi F-05).
-// Sesudah memilih, baris pertanyaan menjadi status, dan tombol "Lanjut" jembatan sementara muncul di fase
-// impact, quiz, dan stars (keputusan Gerbang 1 F-05 nomor 4). Tombol pilihan terkunci sejak pilihan diambil.
+// Sesudah memilih, baris pertanyaan menjadi status. Tombol "Lanjut" jembatan sementara hanya tersisa sebagai pengaman
+// fase quiz sampai F-08 (spesifikasi F-07). Tombol pilihan terkunci sejak pilihan diambil.
 import { useEffect, useRef } from "react";
 import { copy } from "../content/copy";
 import { choiceText } from "../engine/rules";
@@ -14,19 +14,22 @@ interface ChoicePanelProps {
   bridgeReady: boolean;
   onChoose(id: ChoiceId): void;
   onBridge(): void;
+  /** Salah di fase bintang (F-07): fokus tetap pada ajakan bintang di panel kanan. */
+  takeFocus?: boolean;
 }
 
-export function ChoicePanel({ question, choices, flags, chosen, bridgeReady, onChoose, onBridge }: ChoicePanelProps) {
+export function ChoicePanel({ question, choices, flags, chosen, bridgeReady, onChoose, onBridge, takeFocus = true }: ChoicePanelProps) {
   const questionRef = useRef<HTMLParagraphElement>(null);
   const statusRef = useRef<HTMLParagraphElement>(null);
   const bridgeRef = useRef<HTMLButtonElement>(null);
 
   // Fokus: pertanyaan (agar Spasi tidak memilih tanpa sengaja), lalu baris status, lalu tombol jembatan.
   useEffect(() => {
+    if (!takeFocus) return;
     if (chosen === null) questionRef.current?.focus();
     else if (bridgeReady) bridgeRef.current?.focus();
     else statusRef.current?.focus();
-  }, [chosen, bridgeReady]);
+  }, [chosen, bridgeReady, takeFocus]);
 
   return (
     <>

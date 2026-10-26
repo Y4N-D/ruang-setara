@@ -1,9 +1,9 @@
-// Pemeriksa aset Sehari Setara (spesifikasi F-12).
+// Pemeriksa aset Sehari Setara (spesifikasi F-12; efek suara F-07).
 // Semua fungsi murni: menerima teks dan data, lalu mengembalikan pesan. Pembacaan berkas ada di assets.test.ts,
 // sehingga setiap aturan bisa diuji dengan contoh pelanggaran tanpa mengubah berkas sungguhan.
 // Hanya diimpor uji, jadi tidak ikut terbundel.
 import { inflateSync } from "node:zlib";
-import type { AssetRef, EmoteIcon, FrameStrip, SpriteStrip } from "../assets/manifest";
+import type { AssetRef, EmoteIcon, FrameStrip, SoundName, SpriteStrip } from "../assets/manifest";
 import type { CharId, EndingId, RoleId, Scene, Team } from "../engine/types";
 
 /* ------------------------------------------------------------------ */
@@ -154,9 +154,10 @@ export interface ManifestGroups {
   readonly teamIcons: Readonly<Record<string, string>>;
   readonly roleIcons: Readonly<Record<string, string>>;
   readonly emoteIcons: Readonly<Record<string, string>>;
+  readonly sounds: Readonly<Record<string, string>>;
 }
 
-/** Satu entri manifest yang sudah diratakan. Ukuran dalam piksel logis. */
+/** Satu entri manifest yang sudah diratakan. Ukuran dalam piksel logis; efek suara tidak punya ukuran gambar. */
 export interface ManifestEntry {
   readonly label: string; // misalnya "sprites.nara.idle"
   readonly src: string; // URL hasil impor
@@ -168,13 +169,24 @@ export interface ManifestEntry {
   readonly fps?: number; // hanya strip tokoh
   readonly pose?: string; // hanya strip tokoh
   readonly head?: { readonly x: number; readonly y: number }; // hanya strip tokoh (F-04)
+  readonly sound?: boolean; // efek suara WAV (F-07): diperiksa formatnya, bukan ukuran gambar
 }
 
-/** Ukuran dan isi berkas di subfolder assets/. Lebar dan tinggi hanya ada untuk PNG. */
+/** Format berkas WAV dari potongan fmt dan data. */
+export interface WavInfo {
+  readonly format: number; // 1 = PCM
+  readonly channels: number;
+  readonly sampleRate: number;
+  readonly bits: number;
+  readonly durationMs: number;
+}
+
+/** Ukuran dan isi berkas di subfolder assets/. Lebar dan tinggi hanya ada untuk PNG, wav hanya untuk WAV. */
 export interface FileInfo {
   readonly bytes: number;
   readonly width?: number;
   readonly height?: number;
+  readonly wav?: WavInfo;
 }
 
 const ASSET_DIR = "app/sehari-setara/assets/";
@@ -192,6 +204,32 @@ export function pngSize(data: Uint8Array): { width: number; height: number } | u
   if (String.fromCharCode(data[12], data[13], data[14], data[15]) !== "IHDR") return undefined;
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   return { width: view.getUint32(16), height: view.getUint32(20) };
+}
+
+/** Format WAV dari potongan RIFF; undefined bila bukan WAV yang terbaca (F-07). */
+export function wavInfo(data: Uint8Array): WavInfo | undefined {
+  if (data.byteLength < 12) return undefined;
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  const tag = (at: number) => String.fromCharCode(data[at], data[at + 1], data[at + 2], data[at + 3]);
+  if (tag(0) !== "RIFF" || tag(8) !== "WAVE") return undefined;
+  let fmt: Omit<WavInfo, "durationMs"> | undefined;
+  let dataBytes: number | undefined;
+  for (let at = 12; at + 8 <= data.byteLength; ) {
+    const size = view.getUint32(at + 4, true);
+    if (tag(at) === "fmt " && size >= 16 && at + 24 <= data.byteLength) {
+      fmt = {
+        format: view.getUint16(at + 8, true),
+        channels: view.getUint16(at + 10, true),
+        sampleRate: view.getUint32(at + 12, true),
+        bits: view.getUint16(at + 22, true),
+      };
+    }
+    if (tag(at) === "data") dataBytes = Math.min(size, data.byteLength - at - 8);
+    at += 8 + size + (size % 2);
+  }
+  if (!fmt || dataBytes === undefined || fmt.channels === 0 || fmt.bits === 0 || fmt.sampleRate === 0) return undefined;
+  const frames = dataBytes / (fmt.channels * (fmt.bits / 8));
+  return { ...fmt, durationMs: Math.round((frames / fmt.sampleRate) * 1000) };
 }
 
 /** Meratakan manifest. Ukuran tetap per kelompok mengikuti Design System bagian 11. */
@@ -227,6 +265,9 @@ export function manifestEntries(groups: ManifestGroups): ManifestEntry[] {
   single("teamIcons", groups.teamIcons, (key) => `ui/ui_team_${key}.png`, 16, 16);
   single("roleIcons", groups.roleIcons, (key) => `ui/role_${key}.png`, 32, 32);
   single("emoteIcons", groups.emoteIcons, (key) => `ui/emote_${key}.png`, 8, 8);
+  for (const [key, src] of Object.entries(groups.sounds)) {
+    entries.push({ label: `sounds.${key}`, src, expected: `sfx/sfx_${key}.wav`, frames: 1, w: 0, h: 0, strip: false, sound: true });
+  }
   return entries;
 }
 
@@ -248,6 +289,10 @@ export function manifestProblems(entries: readonly ManifestEntry[], files: Reado
     }
     labelsByPath.set(path, [...(labelsByPath.get(path) ?? []), entry.label]);
     if (path !== entry.expected) problems.push(`Manifest: ${entry.label} menunjuk ${path}, seharusnya ${entry.expected}.`);
+    if (entry.sound) {
+      problems.push(...soundProblems(entry.label, info.wav));
+      continue;
+    }
     const width = entry.frames * entry.w;
     if (info.width !== width || info.height !== entry.h) {
       const actual = info.width === undefined ? "tidak terbaca" : `${info.width}×${info.height}`;
@@ -258,6 +303,17 @@ export function manifestProblems(entries: readonly ManifestEntry[], files: Reado
   for (const [path, labels] of labelsByPath) {
     if (labels.length > 1) problems.push(`Manifest: ${path} terdaftar lebih dari sekali (${[...labels].sort().join(", ")}).`);
   }
+  return problems;
+}
+
+/** Efek suara: WAV PCM 16 bit mono, paling lama 1 detik (Design System bagian 9; spesifikasi F-07). */
+function soundProblems(label: string, wav: WavInfo | undefined): string[] {
+  if (!wav) return [`Manifest: ${label} bukan berkas WAV yang terbaca.`];
+  const problems: string[] = [];
+  if (wav.format !== 1) problems.push(`Manifest: ${label} bukan WAV PCM (format ${wav.format}).`);
+  if (wav.channels !== 1) problems.push(`Manifest: ${label} harus mono, ternyata ${wav.channels} kanal.`);
+  if (wav.bits !== 16) problems.push(`Manifest: ${label} harus 16 bit, ternyata ${wav.bits} bit.`);
+  if (wav.durationMs > 1000) problems.push(`Manifest: ${label} berdurasi ${wav.durationMs} ms, lebih dari 1 detik.`);
   return problems;
 }
 
@@ -273,9 +329,10 @@ const REQUIRED_KEYS = {
   teamIcons: keysOf<Team["shape"]>({ lingkaran: true, segitiga: true, persegi: true, bintang: true }),
   roleIcons: keysOf<RoleId>({ polisi: true, jaksa: true, advokat: true, hakim: true }),
   emoteIcons: keysOf<EmoteIcon>({ hati: true, keringat: true, tanya: true, seru: true }),
+  sounds: keysOf<SoundName>({ klik: true, teks: true }),
 } as const;
 
-/** Kelompok bertipe lengkap: setiap akhir, tokoh, bentuk tim, peran, dan ikon emosi punya gambar. */
+/** Kelompok bertipe lengkap: setiap akhir, tokoh, bentuk tim, peran, dan ikon emosi punya gambar, dan setiap bunyi ada. */
 export function groupProblems(groups: ManifestGroups): string[] {
   const problems: string[] = [];
   for (const [group, keys] of Object.entries(REQUIRED_KEYS)) {
@@ -283,7 +340,7 @@ export function groupProblems(groups: ManifestGroups): string[] {
     for (const key of keys) {
       const value = Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined;
       const empty = value === undefined || (typeof value === "object" && value !== null && Object.keys(value).length === 0);
-      if (empty) problems.push(`Manifest: ${group} belum punya gambar untuk ${key}.`);
+      if (empty) problems.push(`Manifest: ${group} belum punya ${group === "sounds" ? "bunyi" : "gambar"} untuk ${key}.`);
     }
   }
   return problems;
@@ -333,7 +390,7 @@ export function sceneProblems(scenes: readonly Scene[], assetsOf: (scene: Scene)
 /* ------------------------------------------------------------------ */
 
 const KB = 1024; // sama dengan build_assets.py
-export const BUDGET = { latar: 40 * KB, strip: 15 * KB, total: 4 * KB * KB } as const;
+export const BUDGET = { latar: 40 * KB, strip: 15 * KB, suara: 30 * KB, total: 4 * KB * KB } as const;
 
 /** Satu angka di belakang koma desimal, misalnya 61,4. */
 const decimal = (value: number) => value.toFixed(1).replace(".", ",");
@@ -341,7 +398,7 @@ const decimal = (value: number) => value.toFixed(1).replace(".", ",");
 const totalBytes = (paths: readonly string[], files: ReadonlyMap<string, FileInfo>) =>
   paths.reduce((sum, path) => sum + (files.get(path)?.bytes ?? 0), 0);
 
-/** Latar dan ilustrasi akhir ≤ 40 KB, strip tokoh ≤ 15 KB, seluruh aset terdaftar ≤ 4 MB. */
+/** Latar dan ilustrasi akhir ≤ 40 KB, strip tokoh ≤ 15 KB, efek suara ≤ 30 KB (F-07), seluruh aset terdaftar ≤ 4 MB. */
 export function budgetProblems(entries: readonly ManifestEntry[], files: ReadonlyMap<string, FileInfo>): string[] {
   const problems: string[] = [];
   const paths = registeredPaths(entries, files);
@@ -352,6 +409,9 @@ export function budgetProblems(entries: readonly ManifestEntry[], files: Readonl
     }
     if (path.startsWith("sprites/") && bytes > BUDGET.strip) {
       problems.push(`${path}: ${decimal(bytes / KB)} KB melebihi anggaran strip 15 KB.`);
+    }
+    if (path.startsWith("sfx/") && bytes > BUDGET.suara) {
+      problems.push(`${path}: ${decimal(bytes / KB)} KB melebihi anggaran efek suara 30 KB.`);
     }
   }
   const total = totalBytes(paths, files);

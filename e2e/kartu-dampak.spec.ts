@@ -1,4 +1,5 @@
 // Uji ujung ke ujung panel indikator dan kartu dampak (spesifikasi F-06, Rencana uji langkah 3 sampai 5).
+// Disesuaikan di F-07: sesudah kartu dampak, bintang alasan diberikan sebelum adegan berganti (giveStars).
 // Membuka hasil build di /ruang-setara/sehari-setara/#main lewat serve-subpath.mjs, seperti alamat GitHub Pages.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
@@ -14,7 +15,20 @@ import {
   TIER_ICON,
   type MeterValues,
 } from "../app/sehari-setara/ui/impact";
-import { cardNext, contrast, CREAM, expectClean, impactCard, INK, SHOTS, VIEWPORTS, watch, type ViewportName } from "./bantuan";
+import {
+  awardPrompt,
+  cardNext,
+  contrast,
+  CREAM,
+  expectClean,
+  giveStars,
+  impactCard,
+  INK,
+  SHOTS,
+  VIEWPORTS,
+  watch,
+  type ViewportName,
+} from "./bantuan";
 
 const T0 = new Date("2026-10-23T08:00:00+08:00").getTime();
 const DUSK = "rgb(58, 74, 107)";
@@ -319,6 +333,7 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
         await page.keyboard.press("Enter");
         await expect(impactCard(page)).toHaveCount(0);
         await expect(page.locator(".ss-meter-delta")).toHaveCount(0);
+        await giveStars(page);
         // Adegan 6 langsung ke layar akhir sementara; adegan lain berganti lewat sapuan dengan nilai sesudah.
         if (i < SCENES.length - 1) await expectMeters(page, after, `jalur ${id}, pergantian sesudah adegan ${i + 1}`);
         await page.clock.runFor(400);
@@ -362,6 +377,7 @@ test("gerak indikator per 100 ms bersama kartu (AC-4)", async ({ page }) => {
     }
     await page.clock.runFor(100);
     await page.keyboard.press("Space");
+    await giveStars(page);
     await page.clock.runFor(400);
   }
   await expect(counter(page)).toHaveText("Adegan 4/6");
@@ -398,6 +414,7 @@ test("fokus, dialog, keyboard, dan pengaman tekanan ganda (AC-8, AC-9, AC-10)", 
   // Dua Enter cepat pada tombol hanya memajukan satu adegan; fokus pindah ke tombol narasi adegan 2.
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");
+  await giveStars(page);
   await page.clock.runFor(150);
   await expect(counter(page)).toHaveText("Adegan 2/6");
   await expect(page.locator(".ss-narration .ss-next")).toBeFocused();
@@ -412,6 +429,7 @@ test("fokus, dialog, keyboard, dan pengaman tekanan ganda (AC-8, AC-9, AC-10)", 
   await expect(title(page)).toBeFocused();
   await page.clock.runFor(600);
   await page.keyboard.press("Space");
+  await giveStars(page);
   await page.clock.runFor(150);
   await expect(counter(page)).toHaveText("Adegan 3/6");
 
@@ -427,6 +445,10 @@ test("fokus, dialog, keyboard, dan pengaman tekanan ganda (AC-8, AC-9, AC-10)", 
   await expect(impactCard(page)).toBeVisible();
   await expect(counter(page)).toHaveText("Adegan 3/6");
   await cardNext(page).dblclick();
+  // Klik kedua jatuh di ruang kosong panel bawah, jadi bintang diberikan dengan tombol 1 tanpa bergantung pada fokus (F-07).
+  await expect(awardPrompt(page)).toBeVisible();
+  await expect(counter(page)).toHaveText("Adegan 3/6");
+  await page.keyboard.press("1");
   await page.clock.runFor(150);
   await expect(counter(page)).toHaveText("Adegan 4/6");
   await page.clock.runFor(500);
@@ -442,6 +464,7 @@ test("fokus, dialog, keyboard, dan pengaman tekanan ganda (AC-8, AC-9, AC-10)", 
     for (const role of ["Polisi", "Jaksa", "Advokat", "Hakim"]) await expect(page.getByText(role, { exact: true })).toHaveCount(0);
     await page.clock.runFor(600);
     await page.keyboard.press("Enter");
+    await giveStars(page);
     await page.clock.runFor(150);
   }
   await expect(page.locator(".ss-play-end h1")).toBeFocused();
@@ -467,6 +490,7 @@ test("kurangi gerak: nilai langsung, tanpa angka melayang, masa tunggu tetap (AC
   await expect(impactCard(page)).toBeVisible();
   await page.clock.runFor(1);
   await page.keyboard.press("Space");
+  await giveStars(page);
   await page.clock.runFor(150);
   await expect(counter(page)).toHaveText("Adegan 2/6");
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);

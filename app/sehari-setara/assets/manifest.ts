@@ -1,4 +1,4 @@
-// Satu-satunya pintu masuk aset gambar Sehari Setara (Architecture bagian 8; spesifikasi F-12).
+// Satu-satunya pintu masuk aset gambar dan suara Sehari Setara (Architecture bagian 8; spesifikasi F-12 dan F-07).
 // Komponen hanya memakai kunci di sini, tidak pernah path berkas. Vite mengubah setiap impor menjadi
 // URL berkas berhash yang relatif terhadap halaman (aturan assetsInlineLimit di vite.pages.config.ts).
 //
@@ -75,6 +75,9 @@ import uiTeamLingkaran from "./ui/ui_team_lingkaran.png";
 import uiTeamPersegi from "./ui/ui_team_persegi.png";
 import uiTeamSegitiga from "./ui/ui_team_segitiga.png";
 import uiTimbangan from "./ui/ui_timbangan.png";
+
+import sfxKlik from "./sfx/sfx_klik.wav";
+import sfxTeks from "./sfx/sfx_teks.wav";
 
 /**
  * Strip tokoh: bingkai berjajar mendatar dengan lebar seragam. w dan h adalah ukuran satu bingkai.
@@ -258,6 +261,17 @@ export const emoteIcons = {
   tanya: emoteTanya,
   seru: emoteSeru,
 } as const satisfies Readonly<Record<EmoteIcon, string>>;
+
+/**
+ * Efek suara (spesifikasi F-07). Nama berkas: sfx/sfx_{peristiwa}.wav. Klik untuk setiap tekanan yang diterima
+ * permainan, teks untuk bunyi teks per huruf. Dimuat sesudah interaksi pertama lewat ui/sound.ts.
+ */
+export const sounds = {
+  klik: sfxKlik,
+  teks: sfxTeks,
+} as const satisfies Readonly<Record<string, string>>;
+
+export type SoundName = keyof typeof sounds;
 
 /** Membaca properti milik objek saja, sehingga kunci seperti "constructor" tidak terbaca dari prototipe. */
 function own<T>(table: Readonly<Record<string, T>>, key: string): T | undefined {

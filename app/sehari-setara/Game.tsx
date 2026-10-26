@@ -1,6 +1,7 @@
 // Komponen akar game Sehari Setara.
 // F-01: layar kerangka. F-04: pratinjau panggung lewat #adegan-N (alat tinjau, keputusan Gerbang 1 F-05 nomor 5).
-// F-05: layar permainan lewat #main. Layar judul menggantikan layar kerangka dan #main di F-10.
+// F-05: layar permainan lewat #main. F-07: alamat uji #main-3 dan #main-4 dengan tiga dan empat tim.
+// Layar judul menggantikan layar kerangka dan alamat-alamat itu di F-10.
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { copy } from "./content/copy";
 import { SCENES } from "./content/scenes";
@@ -79,7 +80,8 @@ export default function Game() {
     <div className="ss-viewport">
       <div ref={screenRef} className="ss-screen" style={screenStyle}>
         {route?.kind === "main" ? (
-          <PlayScreen scale={scale} />
+          // Kunci per jumlah tim: pindah antara #main, #main-3, dan #main-4 memulai permainan baru.
+          <PlayScreen key={`main-${route.teams}`} scale={scale} teamCount={route.teams} />
         ) : route?.kind === "pratinjau" ? (
           <StagePreview route={route.preview} focusTitle={focus === "preview-title"} scale={scale} />
         ) : (

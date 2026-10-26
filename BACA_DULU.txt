@@ -1,0 +1,23 @@
+F-07 - Tim, giliran, bintang alasan, pengatur waktu, serta bunyi klik dan bunyi teks
+=====================================================================================
+
+Isi ZIP ini: 51 berkas F-07 dalam versi akhirnya, dengan jalur yang sama seperti di repositori
+ruang-setara. Tidak ada berkas yang dihapus.
+
+Dasar perubahan: ekspor ZIP 23 Oktober 2026 (keadaan sebelum F-07).
+
+Cara memasang (pilih salah satu):
+1. Dengan git, di cabang baru dari main:
+     git checkout -b fitur/F-07-tim-waktu-bintang
+     git am F-07-tim-waktu-bintang.patch
+   Bila main sudah berubah sesudah 23 Oktober (misalnya revisi F-03), git am bisa berhenti di
+   dokumen yang ikut berubah. Selesaikan bentroknya, lalu git am --continue.
+2. Tanpa git: salin isi folder ini ke akar repositori, menimpa berkas yang sama.
+
+Sesudah memasang, jalankan:
+     npx pnpm@11.25.0 install --frozen-lockfile
+     npx pnpm@11.25.0 content:check
+     npx pnpm@11.25.0 test
+     npx pnpm@11.25.0 build:pages
+
+Laporan uji: docs/sehari-setara/tests/F-07-hasil.md

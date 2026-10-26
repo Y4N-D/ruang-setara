@@ -293,3 +293,5 @@ Semua aset gambar **digambar dengan kode oleh Claude** dan disetujui pengembang.
 | 19 Okt 2026 | **Aset digambar dengan kode oleh Claude**, bukan dengan Gemini; contoh adegan 1 (Nara, Ibu, Gita, dapur pagi) disetujui sebagai acuan gaya |
 | 21 Okt 2026 | Rujukan adegan 5 menjadi UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g; rujukan Pasal 28J di adegan 6 menjadi Pasal 28J ayat (1). Keduanya tetap perlu verifikasi |
 | 21 Okt 2026 | Verifikasi rujukan dicatat pemilik proyek di daftar centang `docs/sehari-setara/Verifikasi_Rujukan.md` |
+| 26 Okt 2026 | Durasi diskusi bawaan tetap 60 detik (balasan `Setuju: F-07`, usulan 7 rencana F-07), menjawab pertanyaan terbuka bagian 16 nomor 3; pilihan 30, 60, atau 90 detik tetap dibuat di pengaturan kelas (F-10) |
+| 26 Okt 2026 | Bunyi klik (gaya A) dan bunyi teks per huruf (gaya B, setiap 2 huruf, nada tinggi, volume 60%) dikerjakan lebih awal di F-07 atas pilihan pemilik proyek lewat halaman uji suara. Sisa efek suara FR-19 tetap di F-13 |

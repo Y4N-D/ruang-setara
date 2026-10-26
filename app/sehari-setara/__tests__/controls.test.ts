@@ -1,10 +1,10 @@
-// Uji unit kontrol layar permainan Sehari Setara (spesifikasi F-05, AC-15).
+// Uji unit kontrol layar permainan Sehari Setara (spesifikasi F-05, AC-15; tombol dan jembatan F-07, AC-18).
 import { describe, expect, it } from "vitest";
 import { SCENES } from "../content/scenes";
 import { DEFAULT_TEAMS, PLAY_TEAMS } from "../content/teams";
 import { createInitialState, createReducer } from "../engine/reducer";
 import { choiceText, endingFor, narrationFor } from "../engine/rules";
-import type { ChoiceId, GameState, Phase } from "../engine/types";
+import type { ChoiceId, GameState, Phase, Stars } from "../engine/types";
 import {
   bridgeActions,
   FADE_MS,
@@ -30,12 +30,14 @@ const ALL_PHASES: Phase[] = [
 
 const start = () => runActions(reducer, createInitialState(), startActions(PLAY_TEAMS));
 
-/** Satu adegan dari intro sampai transition dengan pilihan tertentu, memakai aksi yang sama dengan layar permainan. */
-function playScene(state: GameState, choice: ChoiceId): GameState {
+/** Satu adegan dari intro sampai adegan berikutnya, memakai aksi yang sama dengan layar permainan (F-07: bintang guru). */
+function playScene(state: GameState, choice: ChoiceId, stars: Stars = 0): GameState {
   const scene = SCENES[state.sceneIndex];
   let next = runActions(reducer, state, [{ type: "NARASI_SELESAI" }, { type: "PILIH", choice }, { type: "REAKSI_SELESAI" }]);
   expect(next.phase).toBe("impact");
   next = runActions(reducer, next, bridgeActions(scene));
+  expect(next.phase).toBe("stars");
+  next = reducer(next, { type: "BERI_BINTANG", stars });
   expect(next.phase).toBe("transition");
   return reducer(next, { type: "LANJUT" });
 }
@@ -48,27 +50,56 @@ describe("konstanta (spesifikasi F-05)", () => {
 });
 
 describe("perintah keyboard", () => {
-  it("1/2/3, a/b/c, dan A/B/C memilih hanya di fase discuss", () => {
+  it("1/2/3, a/b/c, dan A/B/C memilih hanya di fase discuss (di fase stars, 1 dan 2 memberi bintang sejak F-07)", () => {
     const expected: Array<[string, ChoiceId]> = [
       ["1", "A"], ["a", "A"], ["A", "A"], ["2", "B"], ["b", "B"], ["B", "B"], ["3", "C"], ["c", "C"], ["C", "C"],
     ];
     for (const [key, choice] of expected) {
       expect(keyCommand("discuss", key)).toEqual({ type: "pilih", choice });
-      for (const phase of ALL_PHASES.filter((p) => p !== "discuss")) expect(keyCommand(phase, key)).toBeNull();
+      const starKey = key === "1" || key === "2";
+      for (const phase of ALL_PHASES.filter((p) => p !== "discuss" && !(starKey && p === "stars"))) expect(keyCommand(phase, key)).toBeNull();
     }
   });
 
-  it("Spasi dan Enter berarti lanjut hanya di narasi dan jembatan", () => {
+  it("Spasi dan Enter berarti lanjut hanya di narasi, kartu dampak, dan jembatan kuis; tidak di fase bintang (F-07)", () => {
     for (const key of [" ", "Enter"]) {
       for (const phase of ALL_PHASES) {
-        const lanjut = ["intro", "impact", "quiz", "stars"].includes(phase);
+        const lanjut = ["intro", "impact", "quiz"].includes(phase);
         expect(keyCommand(phase, key)).toEqual(lanjut ? { type: "lanjut" } : null);
       }
     }
   });
 
+  it("P, T, dan S mengatur waktu hanya di fase discuss (F-07)", () => {
+    const expected: Array<[string, string]> = [
+      ["p", "JEDA_WAKTU"], ["P", "JEDA_WAKTU"], ["t", "TAMBAH_30"], ["T", "TAMBAH_30"], ["s", "LEWATI_DISKUSI"], ["S", "LEWATI_DISKUSI"],
+    ];
+    for (const [key, action] of expected) {
+      expect(keyCommand("discuss", key)).toEqual({ type: "waktu", action });
+      for (const phase of ALL_PHASES.filter((p) => p !== "discuss")) expect(keyCommand(phase, key)).toBeNull();
+    }
+  });
+
+  it("0, 1, dan 2 memberi bintang hanya di fase stars; di fase discuss 1 dan 2 tetap memilih (F-07)", () => {
+    for (const stars of [0, 1, 2] as const) {
+      expect(keyCommand("stars", String(stars))).toEqual({ type: "bintang", stars });
+      for (const phase of ALL_PHASES.filter((p) => p !== "stars" && p !== "discuss")) expect(keyCommand(phase, String(stars))).toBeNull();
+    }
+    expect(keyCommand("discuss", "0")).toBeNull();
+    expect(keyCommand("discuss", "1")).toEqual({ type: "pilih", choice: "A" });
+    expect(keyCommand("discuss", "2")).toEqual({ type: "pilih", choice: "B" });
+    for (const key of ["3", "a", "b", "p"]) expect(keyCommand("stars", key)).toBeNull();
+  });
+
+  it("M mematikan atau menyalakan suara di fase intro sampai transition (F-07)", () => {
+    const scenePhases = ["intro", "discuss", "reaction", "impact", "quiz", "stars", "transition"];
+    for (const key of ["m", "M"]) {
+      for (const phase of ALL_PHASES) expect(keyCommand(phase, key)).toEqual(scenePhases.includes(phase) ? { type: "suara" } : null);
+    }
+  });
+
   it("tombol lain dan nama properti bawaan objek tidak berpengaruh", () => {
-    for (const key of ["4", "d", "D", "0", "Escape", "Tab", "p", "constructor", "toString", "__proto__", ""]) {
+    for (const key of ["4", "d", "D", "x", "Escape", "Tab", "f", "constructor", "toString", "__proto__", "hasOwnProperty", ""]) {
       for (const phase of ALL_PHASES) expect(keyCommand(phase, key)).toBeNull();
     }
   });
@@ -182,38 +213,47 @@ describe("urutan aksi layar permainan", () => {
     expect(state.history).toEqual([]);
   });
 
-  it("jembatan: tanpa kuis LANJUT lalu bintang 0; adegan 5 menjawab kuis dari naskah", () => {
-    expect(bridgeActions(SCENES[0])).toEqual([{ type: "LANJUT" }, { type: "BERI_BINTANG", stars: 0 }]);
-    expect(bridgeActions(SCENES[4])).toEqual([
-      { type: "LANJUT" },
-      { type: "JAWAB_KUIS", role: "hakim" },
-      { type: "LANJUT" },
-      { type: "BERI_BINTANG", stars: 0 },
-    ]);
-    for (const scene of SCENES) expect(bridgeActions(scene).some((a) => a.type === "JAWAB_KUIS")).toBe(scene.roleQuiz !== undefined);
+  it("jembatan F-07: LANJUT saja; adegan 5 menjawab kuis dari naskah; tidak ada lagi BERI_BINTANG", () => {
+    expect(bridgeActions(SCENES[0])).toEqual([{ type: "LANJUT" }]);
+    expect(bridgeActions(SCENES[4])).toEqual([{ type: "LANJUT" }, { type: "JAWAB_KUIS", role: "hakim" }, { type: "LANJUT" }]);
+    for (const scene of SCENES) {
+      expect(bridgeActions(scene).some((a) => a.type === "JAWAB_KUIS")).toBe(scene.roleQuiz !== undefined);
+      expect(bridgeActions(scene).some((a) => a.type === "BERI_BINTANG")).toBe(false);
+    }
   });
 
-  it("jembatan membawa ke transition dari impact, quiz, atau stars tanpa mengubah indikator dan bendera", () => {
+  it("jembatan berhenti di fase stars dari impact atau quiz di keenam adegan, tanpa mengubah indikator, bendera, dan bintang", () => {
     let state = start();
     for (let i = 0; i < SCENES.length; i++) {
       state = runActions(reducer, state, [{ type: "NARASI_SELESAI" }, { type: "PILIH", choice: "B" }, { type: "REAKSI_SELESAI" }]);
-      const before = { meters: state.meters, flags: state.flags };
-      const afterBridge = runActions(reducer, state, bridgeActions(SCENES[i]));
-      expect(afterBridge.phase).toBe("transition");
-      expect({ meters: afterBridge.meters, flags: afterBridge.flags }).toEqual(before);
-      expect(afterBridge.history.at(-1)?.stars).toBe(0);
-      // Jembatan juga tuntas bila dimulai dari fase quiz atau stars.
+      const before = { meters: state.meters, flags: state.flags, teams: state.teams };
+      const atStars = runActions(reducer, state, bridgeActions(SCENES[i]));
+      expect(atStars.phase).toBe("stars");
+      expect({ meters: atStars.meters, flags: atStars.flags, teams: atStars.teams }).toEqual(before);
+      // Jembatan juga tuntas bila dimulai dari fase quiz (pengaman tombol jembatan sampai F-08).
       const later = reducer(state, { type: "LANJUT" });
-      expect(runActions(reducer, later, bridgeActions(SCENES[i])).phase).toBe("transition");
-      if (later.phase === "quiz") {
-        const answered = reducer(later, { type: "JAWAB_KUIS", role: "hakim" });
-        const atStars = reducer(answered, { type: "LANJUT" });
-        expect(atStars.phase).toBe("stars");
-        expect(runActions(reducer, atStars, bridgeActions(SCENES[i])).phase).toBe("transition");
-      }
-      state = reducer(afterBridge, { type: "LANJUT" });
+      expect(later.phase).toBe(SCENES[i].roleQuiz ? "quiz" : "stars");
+      expect(runActions(reducer, later, bridgeActions(SCENES[i])).phase).toBe("stars");
+      // Bintang kedua di adegan yang sama ditolak reducer.
+      const given = reducer(atStars, { type: "BERI_BINTANG", stars: 2 });
+      expect(given.phase).toBe("transition");
+      expect(reducer(given, { type: "BERI_BINTANG", stars: 1 })).toBe(given);
+      state = reducer(given, { type: "LANJUT" });
     }
     expect(state.phase).toBe("ending");
+    expect(state.teams.map((t) => [t.id, t.stars])).toEqual([["mangga", 6], ["laut", 6]]);
+  });
+
+  it("bintang 2, 1, 0, 2, 1, 0 pada dua tim: Tim Mangga 3 dan Tim Laut 3 (spesifikasi F-07, AC-5)", () => {
+    const stars: Stars[] = [2, 1, 0, 2, 1, 0];
+    let state = start();
+    const seen: Array<[number, number]> = [];
+    stars.forEach((n, i) => {
+      state = playScene(state, "B", n);
+      if (i < stars.length - 1) seen.push([state.teams[0].stars, state.teams[1].stars]);
+    });
+    expect(seen).toEqual([[2, 0], [2, 1], [2, 1], [2, 3], [3, 3]]);
+    expect(state.teams.map((t) => t.stars)).toEqual([3, 3]);
   });
 
   it("main lagi dari layar akhir kembali ke intro adegan 1 dengan history kosong", () => {

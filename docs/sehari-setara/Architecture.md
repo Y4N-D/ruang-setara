@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Versi | 0.8 (draf) |
-| Tanggal | 23 Oktober 2026 |
+| Versi | 0.9 (draf) |
+| Tanggal | 26 Oktober 2026 |
 | Repositori | `ruang-setara` (akun GitHub Y4N-D), diterbitkan lewat GitHub Pages |
 | Perubahan 0.2 | Aset digambar dengan kode (A8, bagian 8); `pixelize.py` diganti kit `scripts/game/art/`; rumus posisi sprite disesuaikan |
 | Perubahan 0.3 | Keputusan A9 (`vitest`); `quizAnswer` di `GameState`; `LANJUT` keluar dari fase `transition`; `history` sebagai sumber kebenaran (F-02) |
@@ -12,6 +12,7 @@
 | Perubahan 0.6 | Keputusan A10 (Playwright) dan A11 (huruf `@fontsource`); tata letak layar, bayangan kaki, ikon emosi, vinyet, busur hari, dan pratinjau panggung (bagian 7); `head` dan `floorShadows` di manifest; pramuat di `ui/preload.ts` (F-04) |
 | Perubahan 0.7 | Layar permainan `#main`, tata letak 8u/52u/40u, satu piksel antarmuka (`uiPixel`), sapuan, dan jembatan sementara (bagian 7); berkas layar permainan dan `content/teams.ts` (bagian 3); tombol yang sudah aktif (bagian 9); uji alur permainan (bagian 12) (F-05) |
 | Perubahan 0.8 | Panel indikator, kartu dampak, nilai sebelum memilih, dan jembatan yang kini hanya melewati kuis dan bintang (bagian 7); `ui/impact.ts` (bagian 3); `Spasi` dan `Enter` di kartu dampak (bagian 9); fokus dan pengumuman kartu dampak (bagian 10); uji kartu dampak (bagian 12) (F-06) |
+| Perubahan 0.9 | `useTimer.ts` pindah ke `ui/`; `turn.ts`, `sound.ts`, `wav.d.ts`, dan folder `sfx/` berisi WAV (bagian 3); `useTimer` menghitung detik dengan `performance.now()` (bagian 6); panel kanan, fase `stars`, jembatan yang kini hanya melewati kuis, panggung tersembunyi selama kartu, `#main-3` dan `#main-4`, serta bunyi (bagian 7); kelompok manifest `sounds`, pola `sfx_{peristiwa}.wav`, format WAV atau MP3 (bagian 8); `P` `T` `S`, `0` `1` `2`, dan `M` (bagian 9); wilayah pengumuman kedua, `role="timer"`, dan fokus di fase bintang (bagian 10); uji F-07 dengan perekam bunyi (bagian 12) (F-07) |
 | Dokumen terkait | `PRD.md`, `Design_System.md`, `AGENTS.md`, `Daftar_Aset.md` |
 
 ---
@@ -68,8 +69,7 @@ ruang-setara/
 │  ├─ engine/
 │  │  ├─ types.ts                # tipe data dan status
 │  │  ├─ reducer.ts              # transisi status (murni)
-│  │  ├─ rules.ts                # clamp, efek, akhir, giliran
-│  │  └─ useTimer.ts             # pengatur waktu diskusi
+│  │  └─ rules.ts                # clamp, efek, akhir, giliran
 │  ├─ content/
 │  │  ├─ schema.ts               # skema zod
 │  │  ├─ scenes.ts               # enam adegan
@@ -80,14 +80,17 @@ ruang-setara/
 │  │  ├─ layout.ts · preload.ts · hooks.ts · StagePreview.tsx   # F-04 (pratinjau, kini alat tinjau)
 │  │  ├─ PlayScreen.tsx · controls.ts · SceneWipe.tsx           # F-05 (layar permainan #main sementara)
 │  │  ├─ NarrationBox.tsx · ChoicePanel.tsx · ImpactCard.tsx · impact.ts  # impact.ts: hitungan indikator dan kartu (F-06)
-│  │  ├─ Timer.tsx · Teams.tsx · StarsAward.tsx · RoleQuiz.tsx
+│  │  ├─ Teams.tsx · Timer.tsx · StarsAward.tsx · useTimer.ts            # F-07: panel kanan; useTimer: pengatur waktu diskusi
+│  │  ├─ turn.ts · sound.ts      # F-07: hitungan panel kanan; aturan bunyi dan pemutar Web Audio
+│  │  ├─ RoleQuiz.tsx
 │  │  ├─ Ending.tsx · Recap.tsx · Reflection.tsx
 │  │  └─ Title.tsx · Setup.tsx · Settings.tsx
 │  ├─ assets/
 │  │  ├─ manifest.ts             # satu-satunya pintu masuk aset
-│  │  ├─ png.d.ts                # tipe impor *.png untuk TypeScript
+│  │  ├─ png.d.ts · wav.d.ts     # tipe impor *.png dan *.wav untuk TypeScript
 │  │  ├─ CREDITS.md              # asal-usul setiap aset
-│  │  ├─ bg/ · sprites/ · ui/ · end/ · sfx/   # PNG hasil build_assets.py
+│  │  ├─ bg/ · sprites/ · ui/ · end/   # PNG hasil build_assets.py
+│  │  ├─ sfx/                    # efek suara WAV (F-07)
 │  ├─ styles/game.css            # token, bingkai piksel, garis pindai
 │  └─ __tests__/                 # uji unit, konten, dan aset
 ├─ scripts/game/
@@ -96,7 +99,8 @@ ruang-setara/
 │  │  ├─ pixelart.py · tokoh.py · latar.py · ikon.py
 │  │  └─ build_assets.py         # ekspor PNG + pratinjau + pemeriksaan
 │  └─ serve-subpath.mjs          # server uji di /ruang-setara/
-├─ e2e/                         # uji Playwright: sehari-setara.spec.ts, alur-permainan.spec.ts, bantuan.ts
+├─ e2e/                         # uji Playwright: sehari-setara.spec.ts, alur-permainan.spec.ts, kartu-dampak.spec.ts,
+│                               #   tim-waktu-bintang.spec.ts, suara.spec.ts, bantuan.ts
 └─ playwright.config.ts          # webServer: build:pages lalu serve-subpath.mjs
 ```
 
@@ -263,7 +267,7 @@ export function endingFor(m: { hak: number; kewajiban: number }) {
 
 - Saat `PILIH`: terapkan efek dengan `clamp`, tambahkan bendera bila ada, catat ke `history`.
 - Pilihan hanya bisa diambil sekali per adegan; tombol dikunci selama `reaction`, `impact`, dan `transition` untuk mencegah klik ganda.
-- Pengatur waktu hanya berjalan pada fase `discuss`. `useTimer` mengirim `TICK` setiap detik; reducer tidak memakai `setInterval`.
+- Pengatur waktu hanya berjalan pada fase `discuss`. `useTimer` mengirim `TICK` setiap detik; reducer tidak memakai `setInterval`. Sejak F-07 `useTimer` berada di `ui/useTimer.ts`, bukan di `engine/`: setiap 250 ms ia menghitung detik utuh sejak titik acuan `performance.now()` dan mengirim `TICK` sebanyak itu. Titik acuan dipasang ulang setiap kali pengatur waktu mulai atau berjalan lagi, sehingga sisa pecahan detik dibuang saat dijeda dan waktu tetap tepat walaupun browser terlambat menjalankan pengatur waktu.
 - Saat waktu habis, fase tetap `discuss`; antarmuka menampilkan "Waktunya memilih".
 - `LANJUT` di fase `quiz` hanya diterima setelah `JAWAB_KUIS`. Jawaban pertama disimpan di `quizAnswer` dan dikosongkan saat adegan berikutnya dimulai.
 - `history` adalah sumber kebenaran. `meters`, `flags`, dan bintang tim dihitung ulang dari `history` setiap kali isinya berubah, sehingga pembatalan pilihan (FR-18, F-13) cukup memotong `history` lalu menghitung ulang.
@@ -326,7 +330,7 @@ Bilah atas, panel samping, dan panel bawah adalah HTML biasa di luar panggung, d
 
 ### Tata letak, lapisan, dan efek (F-04)
 
-- **Tata letak:** layar 16:9 dibagi menjadi bilah atas 8u, area panggung 52u, dan panel bawah 40u (F-05; semula 62u dan 30u di F-04). Panel samping (minimal 30u): panel kiri berisi indikator sejak F-06; panel kanan untuk F-07. Skala k = `stageScale((177,78 − 60)u, 52u)`, sehingga k hanya bergantung pada tinggi layar: 2 pada 720p dan 768p, 3 pada 1080p, dan 1,664 pada 1024×768 (`ui/layout.ts`).
+- **Tata letak:** layar 16:9 dibagi menjadi bilah atas 8u, area panggung 52u, dan panel bawah 40u (F-05; semula 62u dan 30u di F-04). Panel samping (minimal 30u): panel kiri berisi indikator sejak F-06; panel kanan berisi papan tim, pengatur waktu, dan bintang alasan sejak F-07. Skala k = `stageScale((177,78 − 60)u, 52u)`, sehingga k hanya bergantung pada tinggi layar: 2 pada 720p dan 768p, 3 pada 1080p, dan 1,664 pada 1024×768 (`ui/layout.ts`).
 - **Lapisan:** latar z 0; bayangan kaki dan tokoh z 20 (semua bayangan sebelum semua tokoh); ikon emosi z 30; vinyet dan garis pindai z 40.
 - **Bayangan kaki:** kotak `(w − 6)` × 2 piksel di y 155, berwarna menurut `floorShadows` di manifest, sama dengan pratinjau adegan yang disetujui.
 - **Ikon emosi:** 8×8, dua piksel di atas titik kepala strip (`head` di manifest, dicerminkan bila tokoh menghadap kiri).
@@ -336,12 +340,12 @@ Bilah atas, panel samping, dan panel bawah adalah HTML biasa di luar panggung, d
 
 ### Layar permainan (F-05)
 
-- **Alamat:** `#main` membuka `ui/PlayScreen.tsx`, yang menjalankan reducer F-02 dengan naskah F-03 (`useReducer`). Judul, pengaturan, dan prolog dilewati dengan dua tim bawaan dari `content/teams.ts`, sampai layar judul dibuat di F-10. Meninggalkan `#main` mengakhiri permainan.
+- **Alamat:** `#main` membuka `ui/PlayScreen.tsx`, yang menjalankan reducer F-02 dengan naskah F-03 (`useReducer`). Judul, pengaturan, dan prolog dilewati dengan dua tim bawaan dari `content/teams.ts`, sampai layar judul dibuat di F-10. Meninggalkan `#main` mengakhiri permainan. Sejak F-07, alamat uji `#main-3` dan `#main-4` membuka layar yang sama dengan tiga dan empat tim bawaan pertama (`parseRoute` mengembalikan `{ kind: "main", teams }`); pindah antaralamat memulai permainan baru. Keduanya tidak ditautkan dari layar kerangka.
 - **Satu piksel antarmuka:** `uiPixel(k)` = maks(1, bulat(k)) px, disimpan di variabel CSS `--ss-px` pada `.ss-screen` oleh `Game.tsx`. Bingkai piksel memakai garis 2 × `--ss-px`, sudut terpotong dan sorotan 1 × `--ss-px`.
 - **Panel bawah:** kotak narasi (`NarrationBox.tsx`) di fase `intro`; pertanyaan dan tiga pilihan (`ChoicePanel.tsx`) di fase `discuss`, `reaction`, `quiz`, dan `stars`; kosong di fase `impact` (F-06). Teks per huruf dihitung dari waktu berlalu (`typedLength`, 40 huruf per detik).
 - **Waktu:** reaksi 1.200 ms lalu `REAKSI_SELESAI`; sapuan 400 ms dengan `LANJUT` pada 200 ms, atau pudar 75 + 75 ms bila kurangi gerak aktif. Pengatur waktunya ada di `PlayScreen.tsx`; reducer tetap tanpa `setTimeout`.
 - **Sapuan:** `SceneWipe.tsx` menampilkan 144 blok 20×20 piksel panggung berwarna langit adegan berikutnya di atas panggung dan di bawah garis pindai. Jadwalnya `wipeSchedule()` di `ui/controls.ts`.
-- **Jembatan sementara:** `bridgeActions(scene)` mengirim `LANJUT`, jawaban kuis dari naskah bila ada, dan `BERI_BINTANG` 0. Sejak F-06 urutan ini dikirim tombol "Lanjut" kartu dampak, sehingga fase `quiz` dan `stars` dilewati dalam tekanan yang sama dan tombol jembatan di baris status hanya pengaman. Bagian bintang diganti F-07 dan bagian kuis F-08. Sesudah adegan 6 tampil layar akhir sementara sampai F-09.
+- **Jembatan sementara:** `bridgeActions(scene)` mengirim `LANJUT`, jawaban kuis dari naskah bila ada, dan `BERI_BINTANG` 0. Sejak F-06 urutan ini dikirim tombol "Lanjut" kartu dampak, sehingga fase `quiz` dan `stars` dilewati dalam tekanan yang sama dan tombol jembatan di baris status hanya pengaman. Bagian bintang diganti F-07 dan bagian kuis F-08. Sesudah adegan 6 tampil layar akhir sementara sampai F-09. Sejak F-07, `bridgeActions` hanya mengirim `LANJUT` dan, di adegan 5, jawaban kuis dari naskah lalu `LANJUT`, sehingga permainan berhenti di fase `stars`.
 
 ### Indikator dan kartu dampak (F-06)
 
@@ -350,6 +354,14 @@ Bilah atas, panel samping, dan panel bawah adalah HTML biasa di luar panggung, d
 - **Kartu dampak:** `ui/ImpactCard.tsx` tampil di fase `impact`, menutupi panggung, panel kanan, dan panel bawah. Ikon tingkat diambil dari `emoteIcons` lewat `TIER_ICON`.
 - **Waktu:** waktu berlalu sejak kartu tampil dihitung dengan `performance.now()` dan pengatur waktu 50 ms di `PlayScreen.tsx`. Masa tunggu tombol "Lanjut" (600 ms) juga dihitung dari waktu sebenarnya sejak kartu tampil, sehingga tidak bergantung pada render terakhir.
 - **Hitungan murni:** `ui/impact.ts` (segmen, gerak, teks angka melayang, nilai sebelum memilih, dan pengumuman kartu), diuji di `__tests__/impact.test.ts`.
+
+### Panel kanan, bintang alasan, dan bunyi (F-07)
+
+- **Panel kanan:** `ui/Teams.tsx`, `ui/Timer.tsx`, dan `ui/StarsAward.tsx` di `.ss-side`, diletakkan mutlak di `.ss-play` dari tepi kanan bingkai panggung (lebar layar ÷ 2 + 160k) sampai tepi kanan layar, di bawah bilah atas setinggi area panggung, mencerminkan panel indikator. Di DOM, panel kanan berada sesudah panel bawah, sehingga urutan Tab tetap pertanyaan, A, B, C, lalu tombol pengatur waktu. Pengatur waktu tampil di fase `discuss`, blok bintang alasan di fase `stars`.
+- **Fase bintang:** sesudah "Lanjut" kartu, fase `stars` tampil dan fokus pindah ke ajakan bintang. Tombol bintang atau `0` `1` `2` mengirim `BERI_BINTANG` sekali per adegan, lalu sapuan atau pudar (adegan 1–5) atau `LANJUT` langsung ke layar akhir sementara (adegan 6). Ikon bintang tim penerima dipasang ulang dengan kunci adegan, sehingga animasi pop CSS diputar sekali.
+- **Panggung selama kartu:** `.ss-play[data-kartu] .ss-stage-area { visibility: hidden }`, sehingga pita panggung tipis di atas kartu tidak terlihat (Temuan 5 F-06).
+- **Hitungan murni:** `ui/turn.ts` (angka menit:detik, durasi tertulis, blok berisi, nada dan keadaan pengatur waktu, batas +30 pada 569 detik, detik yang lewat, dan kalimat pengumuman), diuji di `__tests__/turn.test.ts`.
+- **Bunyi:** `ui/sound.ts` berisi aturan bunyi teks (`textBlipDue`: huruf dan angka ke-0, ke-2, ke-4, dan seterusnya, paling banyak sekali per pembaruan) dan pemutar `soundPlayer`. Pemutar membuat satu `AudioContext` untuk seluruh halaman pada `keydown`, `pointerdown`, atau `pointerup` pertama di layar permainan (pendengar fase tangkap di `window`), dengan satu `GainNode` 0,6; kedua berkas diambil dengan `fetch` dari URL manifest lalu di-*decode*. Bunyi yang diminta sebelum siap dilewati, konteks yang `suspended` dilanjutkan dengan `resume()`, dan galat pemuatan membuat permainan berjalan tanpa bunyi. `PlayScreen` memutar klik hanya untuk tekanan yang diterima (reducer mengembalikan keadaan baru, atau layar narasi dan pergantian adegan berubah), dan `NarrationBox` memanggil bunyi teks dari pengatur waktu teks per huruf, bukan dari render.
 
 ## 8. Manajemen aset
 
@@ -368,10 +380,10 @@ export const sprites = {
 } as const;
 ```
 
-- **Kelompok:** `backgrounds`, `endings` (per `EndingId`), `sprites`, `icons`, `iconStrips` (bintang dan timbangan), `teamIcons`, `roleIcons`, dan `emoteIcons`. Isi lengkapnya ada di `specs/F-12-integrasi-aset.md`.
+- **Kelompok:** `backgrounds`, `endings` (per `EndingId`), `sprites`, `icons`, `iconStrips` (bintang dan timbangan), `teamIcons`, `roleIcons`, dan `emoteIcons`. Isi lengkapnya ada di `specs/F-12-integrasi-aset.md`. Sejak F-07 ditambah `sounds` (`klik` dan `teks`, menunjuk `sfx/sfx_{kunci}.wav`).
 - **Kunci** mengikuti cara naskah menyebut aset. Latar memakai nama berkas utuh, sama dengan `Scene.bg` (`bg_s1_rumah_pagi`). Kelompok lain memakai bagian `{nama}` dari pola penamaan di bawah, misalnya `roleIcons.hakim` untuk `role_hakim.png`.
 - **Fungsi:** `spriteFor(char, pose)` mencari strip tanpa membaca properti bawaan objek. `sceneAssets(scene)` mendaftar aset panggung satu adegan tanpa duplikat, untuk uji dan pramuat.
-- Impor `*.png` dikenali TypeScript lewat `assets/png.d.ts`.
+- Impor `*.png` dikenali TypeScript lewat `assets/png.d.ts`, dan impor `*.wav` lewat `assets/wav.d.ts` (F-07).
 
 ### Penamaan file
 
@@ -381,7 +393,7 @@ export const sprites = {
 | Sprite | `char_{tokoh}_{pose}.png` | `char_komang_sad.png` |
 | Ikon | `ui_{nama}.png` | `ui_star.png` |
 | Akhir | `end_{jenis}.png` | `end_setara.png` |
-| Suara | `sfx_{peristiwa}.mp3` | `sfx_confirm.mp3` |
+| Suara | `sfx_{peristiwa}.wav` atau `.mp3` | `sfx_klik.wav` |
 
 ### Anggaran dan format
 
@@ -394,7 +406,7 @@ export const sprites = {
 
 - Gambar: PNG, hanya warna dari palet 36 warna, tanpa piksel semi-transparan (dicek otomatis oleh `build_assets.py`).
 - **Berkas, bukan data URI:** aset game selalu dikeluarkan sebagai berkas berhash di `dist-pages/assets/`. `build.assetsInlineLimit` di `vite.pages.config.ts` mengembalikan `false` untuk berkas di `app/sehari-setara/assets/` (F-12). Tanpa aturan ini, Vite menyelipkan gambar di bawah 4 KB ke JS sebagai data URI, sehingga gambar ikut menghabiskan anggaran kode 150 KB.
-- Suara: MP3 mono, ≤ 30 KB per efek; dimuat setelah interaksi pertama.
+- Suara: WAV PCM atau MP3, mono 16 bit, ≤ 1 detik dan ≤ 30 KB per efek, dicek `assets.test.ts`; dimuat setelah interaksi pertama di layar permainan. Kedua bunyi F-07 berformat WAV persis seperti di halaman uji suara pemilik proyek (keputusan Gerbang 2 F-07, S-1).
 - Huruf: impor `latin-400.css` dari paket `@fontsource` di `main.tsx` (A11).
 - **Pramuat:** saat adegan *n* tampil, aset adegan *n+1* dimuat dan di-*decode* (`img.decode()`) di latar belakang. Fungsinya `preloadScene` di `ui/preload.ts`, memakai `sceneAssets` dari manifest (F-04).
 - **Tambahan manifest (F-04):** setiap strip tokoh punya `head` (titik kepala untuk ikon emosi), setiap latar punya warna bayangan kaki di `floorShadows`, dan `backgroundFor` serta `shadowFor` mencari dengan aman. Uji aset mengukur ulang titik kepala dari PNG.
@@ -435,15 +447,17 @@ Fps animasi diatur di `manifest.ts`: diam dan bicara 2–4 fps, berjalan 6–8 f
 
 Semua tombol juga bisa diklik atau disentuh. Fokus keyboard selalu terlihat (latar `sun` dan kursor ▶).
 
-Sejak F-05, di layar `#main` sudah aktif `1` `2` `3`, `A` `B` `C`, `Spasi`, dan `Enter` (`keyCommand` di `ui/controls.ts`). Tekanan bersama Ctrl, Alt, atau Meta, tekanan berulang karena tombol ditahan, dan tekanan di kolom isian diabaikan. `Spasi` dan `Enter` pada tombol yang berfokus ditangani browser sebagai klik, sehingga satu tekanan tidak menjadi dua aksi. Sejak F-06, `Spasi` dan `Enter` saat kartu dampak tampil sama dengan tombol "Lanjut" kartu, sesudah masa tunggu 600 ms. Tombol lain menyusul bersama fiturnya (F-07, F-10, F-13).
+Sejak F-05, di layar `#main` sudah aktif `1` `2` `3`, `A` `B` `C`, `Spasi`, dan `Enter` (`keyCommand` di `ui/controls.ts`). Tekanan bersama Ctrl, Alt, atau Meta, tekanan berulang karena tombol ditahan, dan tekanan di kolom isian diabaikan. `Spasi` dan `Enter` pada tombol yang berfokus ditangani browser sebagai klik, sehingga satu tekanan tidak menjadi dua aksi. Sejak F-06, `Spasi` dan `Enter` saat kartu dampak tampil sama dengan tombol "Lanjut" kartu, sesudah masa tunggu 600 ms. Sejak F-07, `P` `T` `S` (fase `discuss`), `0` `1` `2` (fase `stars`), dan `M` (fase `intro` sampai `transition`) juga aktif, huruf kecil maupun besar. `T` diabaikan bila sisa waktu 570 detik atau lebih. `Spasi` dan `Enter` tidak berlaku sebagai pintasan di fase `stars`, sehingga tekanan kedua dari tekanan ganda pada "Lanjut" kartu tidak memberi bintang. `F` dan `Esc` menyusul (F-10, F-13).
 
 ## 10. Aksesibilitas
 
 - Narasi dan isi kartu dampak diumumkan melalui wilayah `aria-live="polite"`. Pengumuman kartu memuat tingkat, perubahan kedua indikator, isi kartu, dan rujukan (F-06).
+- Pengatur waktu, bintang, dan suara memakai wilayah pengumuman kedua `role="status"` tanpa `aria-live`, terpisah dari wilayah narasi, sehingga pengumuman tidak saling menimpa. Isinya hanya berubah pada peristiwa (diskusi dimulai, sisa 10 detik, waktu habis, jeda, berjalan lagi, tambah 30 detik, lewati, bintang, dan `M`), tidak setiap detik. Angka pengatur waktu memakai `role="timer"` dengan isi "Sisa {durasi}" atau "Waktu habis". Papan tim adalah `<ol>` bernama "Papan tim" dengan satu kalimat per tim; bagian yang terlihat disembunyikan dari pembaca layar (F-07).
+- Saat fase bintang dimulai, fokus pindah ke ajakan bintang (`tabIndex=-1`), bukan ke tombol, dan panel pilihan yang dipasang lagi tidak mengambil fokus. Tombol nonaktif memakai `aria-disabled="true"`, sehingga fokus tidak hilang (F-07).
 - Kartu dampak, pengaturan, dan kuis memakai `role="dialog"` dengan fokus terkunci di dalamnya; fokus kembali ke tombol pemicu setelah ditutup. Kartu dampak tidak punya tombol pemicu karena muncul sendiri: fokus masuk ke judulnya saat tampil, dan sesudah "Lanjut" pindah ke tombol lanjut kotak narasi adegan berikutnya atau ke judul layar akhir (F-06).
 - Setiap adegan punya `altText` yang menggambarkan situasi tanpa bergantung pada gambar.
 - Tingkat dampak dan tim selalu ditandai dengan ikon dan teks, tidak hanya warna.
-- `prefers-reduced-motion` dan pengaturan "Kurangi gerak" mematikan sapuan, angka melayang, dan animasi sprite.
+- `prefers-reduced-motion` dan pengaturan "Kurangi gerak" mematikan sapuan, angka melayang, animasi sprite, dan pop bintang (F-07).
 - `<html lang="id">`.
 
 ## 11. Integrasi dengan galeri Ruang Setara
@@ -459,10 +473,10 @@ Keduanya berupa tautan biasa `href="sehari-setara/"` (relatif, tanpa garis mirin
 
 | Lapisan | Alat | Cakupan |
 |---|---|---|
-| Unit | Vitest | `rules.ts` (clamp, giliran, ambang akhir), reducer (setiap transisi, kunci klik ganda, bendera); sejak F-06 `ui/impact.ts` (segmen, gerak indikator, pengumuman kartu) |
+| Unit | Vitest | `rules.ts` (clamp, giliran, ambang akhir), reducer (setiap transisi, kunci klik ganda, bendera); sejak F-06 `ui/impact.ts` (segmen, gerak indikator, pengumuman kartu); sejak F-07 `ui/turn.ts` (angka, blok, pengumuman) dan `ui/sound.ts` (bunyi teks pada naskah asli, pemutar dengan konteks tiruan) |
 | Konten | Vitest + zod | Semua aturan skema di bagian 5; daftar rujukan belum terverifikasi |
-| Aset | `build_assets.py` + Vitest (`assets.test.ts`) | `build_assets.py`: palet per piksel, transparansi, ukuran, dan anggaran total. Vitest: token dan warna `game.css` sesuai Design System bagian 4 dan `palette.json`; manifest cocok dengan berkas (nama, ukuran bingkai, fps), `CREDITS.md`, dan naskah; anggaran per aset dan total; aset game sebagai berkas terpisah. Berkas yang belum terdaftar hanya dilaporkan |
-| Ujung ke ujung | Playwright (A10) | Main penuh dengan keyboard di `/ruang-setara/sehari-setara/`; ketiga jenis akhir bisa dicapai; tidak ada respons 4xx; tidak ada galat konsol; tangkapan layar setiap adegan di 1280×720 dan 1024×768. Sejak F-04: layar kerangka, ke-24 alamat pratinjau (posisi tokoh, bayangan, ikon emosi, bilah atas), skala di empat ukuran, kurangi gerak, pramuat, keyboard, huruf, dan galeri. Sejak F-05: layar `#main` dimainkan sampai akhir dengan keyboard pada tiga jalur naskah, sapuan pada 100 ms dan 300 ms (jam uji), pudar, aturan keyboard, serta panel bawah tanpa luapan di empat ukuran. Sejak F-06: ke-18 kartu dampak (isi, tingkat, letak, luapan, kontras) dan nilai indikator pada tiga jalur di empat ukuran, gerak per 100 ms dan masa tunggu 600 ms dengan jam uji, fokus dialog, keyboard, dan kurangi gerak |
+| Aset | `build_assets.py` + Vitest (`assets.test.ts`) | `build_assets.py`: palet per piksel, transparansi, ukuran, dan anggaran total. Vitest: token dan warna `game.css` sesuai Design System bagian 4 dan `palette.json`; manifest cocok dengan berkas (nama, ukuran bingkai, fps), `CREDITS.md`, dan naskah; anggaran per aset dan total; aset game sebagai berkas terpisah. Berkas yang belum terdaftar hanya dilaporkan. Sejak F-07: kelompok `sounds` berupa WAV PCM mono 16 bit, ≤ 1 detik, ≤ 30 KB, tercatat di `CREDITS.md` |
+| Ujung ke ujung | Playwright (A10) | Main penuh dengan keyboard di `/ruang-setara/sehari-setara/`; ketiga jenis akhir bisa dicapai; tidak ada respons 4xx; tidak ada galat konsol; tangkapan layar setiap adegan di 1280×720 dan 1024×768. Sejak F-04: layar kerangka, ke-24 alamat pratinjau (posisi tokoh, bayangan, ikon emosi, bilah atas), skala di empat ukuran, kurangi gerak, pramuat, keyboard, huruf, dan galeri. Sejak F-05: layar `#main` dimainkan sampai akhir dengan keyboard pada tiga jalur naskah, sapuan pada 100 ms dan 300 ms (jam uji), pudar, aturan keyboard, serta panel bawah tanpa luapan di empat ukuran. Sejak F-06: ke-18 kartu dampak (isi, tingkat, letak, luapan, kontras) dan nilai indikator pada tiga jalur di empat ukuran, gerak per 100 ms dan masa tunggu 600 ms dengan jam uji, fokus dialog, keyboard, dan kurangi gerak. Sejak F-07: panel kanan di empat ukuran dengan dua dan empat tim, giliran dua sampai empat tim, pengatur waktu per detik dan tombolnya dengan jam uji yang dijeda sebelum halaman dimuat, bintang alasan, pop lewat Web Animations API, pengumuman, alamat `#main-3` dan `#main-4`, serta bunyi lewat perekam bunyi di skrip awal halaman uji (pemuatan, klik, bunyi teks, `M`, galat bunyi) |
 | Manual | Daftar periksa | Proyektor dan keterbacaan dari bangku belakang; laptop lama; keyboard saja; kurangi gerak; suara mati |
 
 `scripts/game/serve-subpath.mjs` menyajikan `dist-pages/` di bawah `/ruang-setara/` agar uji Playwright meniru alamat GitHub Pages yang sebenarnya. Konfigurasi `webServer` Playwright menjalankan `build:pages` lalu skrip ini.

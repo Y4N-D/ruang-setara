@@ -11,6 +11,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-04 | Selesai (22 Okt 2026) | [F-04-panggung.md](specs/F-04-panggung.md) | [F-04-hasil.md](tests/F-04-hasil.md) — lulus |
 | F-05 | Selesai (22 Okt 2026) | [F-05-panel-narasi-pilihan.md](specs/F-05-panel-narasi-pilihan.md) | [F-05-hasil.md](tests/F-05-hasil.md) — lulus |
 | F-06 | Selesai (23 Okt 2026) | [F-06-indikator-kartu-dampak.md](specs/F-06-indikator-kartu-dampak.md) | [F-06-hasil.md](tests/F-06-hasil.md), lulus |
+| F-07 | Selesai (26 Okt 2026) | [F-07-tim-waktu-bintang.md](specs/F-07-tim-waktu-bintang.md) | [F-07-hasil.md](tests/F-07-hasil.md), lulus |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -37,10 +38,15 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
 - Plan F-05: Design System bagian 7 menyebut bingkai piksel "garis ink 2 px". F-01 membacanya sebagai px CSS. Sebelum panel dibangun, perlu dipastikan apakah yang dimaksud adalah piksel logis panggung. Lihat usulan 1 entri F-05.
 - Plan F-06 sampai F-10: jembatan sementara dan pintu masuk `#main` dari F-05 diganti fitur pemiliknya (keputusan Gerbang 1 F-05 nomor 3 dan 4). Kartu dampak (F-06), bintang (F-07), dan kuis (F-08) menggantikan bagiannya masing-masing di `bridgeActions` dan `PlayScreen.tsx`. Layar akhir (F-09) menggantikan layar akhir sementara. Layar judul (F-10) menggantikan layar kerangka dan `#main`, dan memutuskan nasib tautan pratinjau.
 - Plan F-06 dan seterusnya: di layar pilihan terpanjang, panel bawah 40u hanya menyisakan 3,05–3,3u, kurang dari satu baris pilihan (F-05, Temuan 2). Unsur baru di panel bawah perlu diukur ulang.
-- Plan F-07: kartu dampak menutupi panel kanan selama kartu tampil, karena FR-09 dibaca "papan tim selalu terlihat, kecuali saat sebuah dialog terbuka" (keputusan Gerbang 1 F-06 nomor 1). Bagian bintang di `bridgeActions` (`BERI_BINTANG` 0) diganti F-07.
-- Plan F-08: bagian kuis di `bridgeActions` (jawaban dari naskah) diganti F-08. Fase `quiz` datang sesudah tombol "Lanjut" kartu dampak adegan 5.
-- Semua fitur dengan jam uji: waktu yang dihitung sejak sebuah elemen tampil baru mulai sesudah React menggambarnya. Majukan jam dalam dua langkah, misalnya `runFor(1200)`, tunggu kartu tampil, lalu `runFor(600)` (F-06, Temuan 3).
-- Semua fitur: uji ujung ke ujung yang memakai `page.clock` harus menjeda jam dengan `pauseAt` sebelum mengatur waktu, karena jam palsu Playwright tetap berjalan sampai dijeda (F-05, Temuan 1).
+- Plan F-07: kartu dampak menutupi panel kanan selama kartu tampil, karena FR-09 dibaca "papan tim selalu terlihat, kecuali saat sebuah dialog terbuka" (keputusan Gerbang 1 F-06 nomor 1). Bagian bintang di `bridgeActions` (`BERI_BINTANG` 0) diganti F-07. Dikerjakan di F-07.
+- Plan F-08: bagian kuis di `bridgeActions` (jawaban dari naskah) diganti F-08. Fase `quiz` datang sesudah tombol "Lanjut" kartu dampak adegan 5. Sejak F-07, `bridgeActions` berhenti di fase `stars`, sehingga kuis F-08 berada di antara kartu dampak adegan 5 dan fase bintang; tombol jembatan baris status (pengaman fase `quiz`) bisa dihapus bersama kuis.
+- Plan F-09: jumlah bintang akhir setiap tim perlu tampil di layar akhir atau rekap. Sesudah bintang adegan 6, layar akhir sementara langsung tampil, sehingga pop dan jumlah terakhir di papan tidak terlihat (F-07).
+- Plan F-10: (1) nama tim paling lebar 18,6u agar muat di papan pada 1024×768; "Tim Mentari" selebar 17,8u, sedangkan "Tim Kupu-kupu" (20,7u) atau "Tim Jalak Bali" (19,3u) tidak muat (F-07); (2) pengaturan suara di layar pengaturan memakai `settings.sound` yang sama dengan tombol `M` (F-07); (3) durasi diskusi 30, 60, atau 90 detik per kelas, dengan bawaan 60 detik (keputusan 26 Okt 2026); (4) alamat uji `#main-3` dan `#main-4` diganti layar judul, seperti `#main`.
+- Plan F-11: asal dan lisensi bunyi klik dan bunyi teks (butir S-6 spesifikasi F-07) masih menunggu jawaban pemilik proyek. `CREDITS.md` dan Design System bagian 13 perlu dilengkapi sebelum rilis.
+- Plan F-13: sisa FR-19, yaitu bunyi konfirmasi, dampak tepat dan berisiko, tik pelan sepuluh detik terakhir, dan jingle akhir hari, serta ikon suara D-05 di bilah atas (alternatif S-4a tidak dipilih di F-07) dan pengatur volume. Pertimbangkan juga laporan F-07 Temuan 1: klik ganda pada "Lanjut" kartu memindahkan fokus dari ajakan bintang ke halaman.
+- Semua fitur dengan jam uji: waktu yang dihitung sejak sebuah elemen tampil baru mulai sesudah React menggambarnya. Majukan jam dalam dua langkah, misalnya `runFor(1200)`, tunggu kartu tampil, lalu `runFor(600)` (F-06, Temuan 3). Aturan yang sama berlaku untuk pengatur waktu diskusi dan teks per huruf sesudah sapuan (F-07, Temuan 3).
+- Semua fitur: uji ujung ke ujung yang memakai `page.clock` harus menjeda jam dengan `pauseAt` sebelum mengatur waktu, karena jam palsu Playwright tetap berjalan sampai dijeda (F-05, Temuan 1). Sejak F-07, pengatur waktu diskusi berjalan dari jam itu: `pauseAt` yang melompat saat diskusi berjalan langsung menghabiskan waktu diskusi. Panggil `pauseAt` sebelum diskusi dimulai, paling aman sebelum halaman dimuat, dan majukan waktu diskusi hanya dengan `runFor`.
+- Semua fitur dengan animasi CSS: animasi CSS (sapuan, pop bintang) tidak mengikuti jam uji. Uji menjedanya dan mengatur waktunya lewat Web Animations API (uji sapuan F-05; laporan F-07, Temuan 4).
 
 ## F-01 — Kerangka halaman game dan build dua halaman
 - Status: Selesai (21 Okt 2026). Riwayat 21 Okt 2026: direncanakan dan disetujui; spesifikasi disetujui; dibangun; diuji dan lulus semua kriteria ([laporan](tests/F-01-hasil.md)); digabung ke `main` dan terbit di GitHub Pages (dikonfirmasi pemilik proyek).
@@ -425,3 +431,176 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
      - Tangkapan layar di 1280×720 dan 1024×768, ditambah 1920×1080; `tsc` dan ESLint.
      - Daftar periksa manual AGENTS bagian 9 yang berlaku. Keterbacaan di proyektor dan laptop kelas bawah tetap dicek pemilik proyek.
      - Tidak ada dependensi baru, jadi `package.json` dan `pnpm-lock.yaml` tidak berubah.
+
+## F-07 — Tim, giliran, bintang alasan, pengatur waktu
+- Status: Selesai (26 Okt 2026). Riwayat 26 Okt 2026: direncanakan; disetujui (balasan `Setuju: F-07`; kesepuluh usulan diterima; durasi bawaan tetap 60 detik), dengan tambahan bunyi dari pemilik proyek; spesifikasi disetujui ([F-07-tim-waktu-bintang.md](specs/F-07-tim-waktu-bintang.md), balasan `Spesifikasi disetujui: F-07`; saran S-1 sampai S-8 dipakai, S-6 menunggu jawaban); dibangun dan diuji ([F-07-hasil.md](tests/F-07-hasil.md), lulus).
+- Memenuhi:
+  - FR-05: pengatur waktu diskusi yang bisa dijeda, ditambah 30 detik, dan dilewati, lewat tombol atau `P`, `T`, `S`. Saat waktu habis tampil "Waktunya memilih" tanpa pilihan otomatis. Sisi mesin (`TICK`, `JEDA_WAKTU`, `TAMBAH_30`, `LEWATI_DISKUSI`) sudah ada sejak F-02.
+  - FR-06 (sisi tampilan): papan tim menandai tim aktif dengan ▶ dan tulisan "Giliran". Giliran berotasi per adegan lewat `activeTeamIndex` F-02.
+  - FR-09: guru memberi 0, 1, atau 2 bintang kepada tim aktif lewat tombol atau `0` `1` `2`. Papan tim selalu terlihat, kecuali saat kartu dampak terbuka (bacaan FR-09, keputusan Gerbang 1 F-06 nomor 1).
+  - FR-02 sebagian: papan tim menampung 2–4 tim dengan warna, bentuk, dan nama dari `content/teams.ts`, dan durasi diskusi bawaan diputuskan (PRD bagian 16 nomor 3). Layar pengaturan kelas tetap milik F-10.
+  - FR-16 sebagian: `P`, `T`, `S`, serta `0` `1` `2` (Architecture bagian 9); ditambah `M` karena tambahan bunyi.
+  - FR-19 sebagian (tambahan pemilik proyek, 26 Okt 2026): bunyi klik tombol dan bunyi teks per huruf. Bunyi lain FR-19 tetap di F-13.
+  - Design System bagian 7 (pengatur waktu, papan tim, bintang alasan), bagian 8 (pop bintang, kurangi gerak), dan bagian 9 (suara); Architecture bagian 6 (fase `stars`), 8, 9, dan 10.
+- Bergantung pada: F-05 (selesai dan sudah terbit). Memakai mesin F-02 (giliran, bintang, dan aksi pengatur waktu), manifest F-12, tata letak F-04 dan F-05, serta kartu dampak F-06.
+- File yang dibuat/diubah:
+  - Baru `app/sehari-setara/ui/Teams.tsx`: papan tim (usulan 1).
+  - Baru `app/sehari-setara/ui/Timer.tsx`: pengatur waktu dan ketiga tombolnya (usulan 2).
+  - Baru `app/sehari-setara/ui/StarsAward.tsx`: ajakan dan tombol bintang alasan (usulan 4).
+  - Baru `app/sehari-setara/ui/useTimer.ts`: kait yang mengirim `TICK` (usulan 3).
+  - Baru `app/sehari-setara/ui/timer.ts`: fungsi murni untuk teks menit:detik, isi 12 blok, nada (biasa, sepuluh detik terakhir, habis), detik yang jatuh tempo, batas "+30", jadwal pop bintang, serta peristiwa dan kalimat pengumuman (usulan 5).
+  - Baru `app/sehari-setara/__tests__/timer.test.ts` dan `e2e/tim-waktu-bintang.spec.ts`.
+  - Diubah `app/sehari-setara/ui/PlayScreen.tsx`: panel kanan, fase `stars`, pemberian bintang, kait pengatur waktu, wilayah pengumuman kedua, dan panggung yang disembunyikan selama kartu tampil (usulan 8).
+  - Diubah `app/sehari-setara/ui/controls.ts` dan `__tests__/controls.test.ts`: `keyCommand` untuk `P` `T` `S` (fase `discuss`) dan `0` `1` `2` (fase `stars`); `Spasi` dan `Enter` tidak lagi berarti lanjut di fase `stars`; `bridgeActions` berhenti di fase `stars` (usulan 4).
+  - Diubah `app/sehari-setara/ui/ChoicePanel.tsx` bila perlu, agar baris status tidak mengambil fokus dari ajakan bintang (risiko "Fokus di fase `stars`").
+  - Diubah `app/sehari-setara/content/copy.ts`: teks papan, pengatur waktu, bintang, dan pengumuman.
+  - Diubah `app/sehari-setara/styles/game.css`: kelas panel kanan, papan, pengatur waktu, tombol bintang, dan pop. Warnanya hanya dari token yang sudah ada; tidak ada token `:root` baru.
+  - Bila usulan 9 disetujui: `ui/layout.ts` (`parseRoute` mengenali `#main-3` dan `#main-4`), `Game.tsx`, dan `__tests__/layout.test.ts`. `content/teams.ts` tidak berubah.
+  - Bila durasi bawaan bukan 60 detik (usulan 7): `engine/reducer.ts` (`DEFAULT_SETTINGS`), `__tests__/reducer.test.ts`, dan `PRD.md` bagian 16 dan 17.
+  - Diubah `e2e/alur-permainan.spec.ts`, `e2e/kartu-dampak.spec.ts`, dan `e2e/bantuan.ts`: langkah bintang sesudah setiap kartu.
+  - Diubah `docs/sehari-setara/Design_System.md` (bagian 3, 7, dan 8) dan `Architecture.md` (bagian 3, 6, 7, 9, 10, dan 12).
+  - Dokumen: `specs/F-07-tim-waktu-bintang.md`, `tests/F-07-hasil.md`, tangkapan layar di `tests/F-07/`, dan entri ini.
+  - Tidak disentuh: `engine/` (kecuali usulan 7), naskah, rujukan, `Verifikasi_Rujukan.md`, aset, kit gambar, manifest, `CREDITS.md`, `Stage.tsx`, `Sprite.tsx`, `DayArc.tsx`, `Meters.tsx`, `ImpactCard.tsx`, `StagePreview.tsx`, file galeri, `vite.pages.config.ts`, `playwright.config.ts`, `package.json`, `pnpm-lock.yaml`, dan workflow.
+  - Perbedaan dari daftar di atas, terutama karena tambahan bunyi, disetujui bersama spesifikasi (Gerbang 2, 26 Okt 2026; rinciannya di spesifikasi, "Perbedaan dengan daftar file di rencana"):
+    - baru `ui/sound.ts`, `assets/wav.d.ts`, `assets/sfx/sfx_klik.wav`, `assets/sfx/sfx_teks.wav`, `__tests__/sound.test.ts`, dan `e2e/suara.spec.ts`;
+    - diubah `assets/manifest.ts` (kelompok `sounds`), `assets/CREDITS.md`, `ui/NarrationBox.tsx`, `__tests__/asset-checks.ts`, `__tests__/assets.test.ts`, `Daftar_Aset.md`, `AGENTS.md` (baris backlog F-07 dan F-13), dan `PRD.md` bagian 17;
+    - `ui/timer.ts` dan `__tests__/timer.test.ts` menjadi `ui/turn.ts` dan `__tests__/turn.test.ts`, karena `timer.ts` dan `Timer.tsx` hanya berbeda huruf besar dan bisa tertukar saat diimpor di Windows dan macOS;
+    - `ui/ChoicePanel.tsx` pasti diubah, sedangkan `engine/reducer.ts` dan `__tests__/reducer.test.ts` tidak, karena durasi tetap 60 detik.
+  - Penyesuaian saat Build, dicatat sebagai **[Build]** di spesifikasi: wilayah pengumuman kedua tidak dikosongkan saat adegan berganti; `Teams` menerima `pop`, bukan `popKey` dan `animate`; kelas tambahan `ss-timer-text` dan `ss-timer-row`; dua uji lama yang mengklik ganda kartu memberi bintang tanpa memeriksa fokus; simulasi bunyi teks di uji ujung ke ujung memakai salinan aturan `textBlipDue`; dan `pauseAt` dipanggil sebelum halaman dimuat (laporan uji, Temuan 1–5).
+- Aset yang dibutuhkan: tidak ada aset baru, dan placeholder tidak diperlukan. Semua yang dipakai sudah Disetujui (21 Okt 2026) dan terdaftar di manifest:
+  - bentuk tim D-07 (`teamIcons`): lingkaran `mango`, segitiga `sky-d`, persegi `leaf`, dan bintang bersudut empat `sun`;
+  - bintang alasan D-03 (`iconStrips.star`, 3 bingkai: kecil, besar berkilau, normal) untuk jumlah bintang dan pop;
+  - jam D-04 (`icons.clock`) untuk pengatur waktu.
+
+  Kursor ▶ berupa teks, seperti sejak F-01.
+
+  Tambahan bunyi (26 Okt 2026): dua berkas WAV dari halaman uji suara pemilik proyek, `sfx/sfx_klik.wav` (klik gaya A, 2.028 byte) dan `sfx/sfx_teks.wav` (teks gaya B, 1.454 byte), identik byte dengan aslinya. Format, asal, dan lisensinya diputuskan di Gerbang 2 (spesifikasi, butir S-1, S-6, dan S-8).
+- Risiko (angka dari percobaan di luar repositori, 26 Okt 2026: build `main` dari ZIP; maket papan tim, pengatur waktu, dan tombol bintang disuntikkan ke `/ruang-setara/sehari-setara/#main`, lalu diukur dengan huruf asli di Chromium 153 pada empat ukuran):
+  - **Ruang panel kanan.** Panel kanan selebar panel indikator. Sesudah jarak dalam 2u kiri-kanan, lebar isinya 40,4u (1280×720 dan 1920×1080), 43,2u (1366×768), dan 38,7u (1024×768); tingginya 52u.
+    - Rancangan pertama, dengan ruang bingkai di setiap baris tim dan tombol "+30 detik" yang terbungkus dua baris, tidak muat: 4 tim meluap 5,3u di 1280×720 dan 1920×1080 serta 12,3u di 1024×768, dan 3 tim pun meluap 3,7u di 1024×768.
+    - Rancangan ringkas usulan 1, 2, dan 4 muat. Sisa ruang di bawah blok terakhir:
+
+      | Isi panel kanan | 1280×720 | 1366×768 | 1920×1080 | 1024×768 |
+      |---|---|---|---|---|
+      | 2 tim, fase diskusi | 18,2u | 19,0u | 18,2u | 14,8u |
+      | 4 tim, fase diskusi (papan dan pengatur waktu) | 6,9u | 8,3u | 6,9u | 1,3u |
+      | 4 tim, fase bintang (papan dan tombol bintang) | 9,0u | 13,1u | 9,0u | 5,4u |
+
+    - Tinggi setiap baris tetap dan tidak ada teks yang terbungkus, sehingga sisa 1,3u di 1024×768 tidak bergantung pada perbedaan huruf antarkomputer. Uji ujung ke ujung memeriksanya dengan 4 tim (usulan 9).
+  - **Lebar nama tim.** Kotak nama 18,6u di 1024×768, 22,6u di 1280×720 dan 1920×1080, serta 25,9u di 1366×768. "Tim Mentari", nama bawaan terpanjang, selebar 17,8u, jadi sisanya 0,7u di 1024×768. Nama seperti "Tim Jalak Bali" (19,3u) atau "Tim Kupu-kupu" (20,7u) tidak muat di 1024×768. Daftar nama di F-10 perlu mengikuti batas ini; dicatat di "Catatan untuk Plan berikutnya" saat Build.
+  - **Bentrok dokumen: letak `useTimer`.** Architecture bagian 3 menaruh `useTimer.ts` di `engine/`, sedangkan uji F-02 AC-14 (`reducer.test.ts`) memeriksa setiap berkas `.ts` di `engine/` bebas dari `setInterval`, `setTimeout`, `Date`, dan `Math.random`. Kait pengatur waktu pasti memakai salah satunya. Lihat usulan 3.
+  - **Jam uji dan pengatur waktu.** Model kait usulan 3 dicoba dengan jam uji Playwright:
+    - `runFor(999)` belum menghasilkan detik, `runFor(1000)` menghasilkan 1, dan 10 detik menghasilkan 10;
+    - jeda membuang sisa pecahan detik (0,7 detik), dan hitungan mulai dari nol lagi saat dilanjutkan;
+    - `performance.now()` ikut jam uji;
+    - tetapi `pauseAt` yang melompat 30 detik saat diskusi berjalan langsung menghabiskan 30 detik.
+
+    Aturan uji: `pauseAt` dipanggil sebelum diskusi dimulai (di fase narasi, seperti uji sekarang), dan waktu diskusi hanya dimajukan dengan `runFor`. Aturan dua langkah F-06 juga berlaku, karena kait baru mulai menghitung sesudah React menggambar fase `discuss`. Ditambahkan ke catatan "Semua fitur dengan jam uji" saat Build.
+  - **Uji lama perlu langkah bintang.** Sesudah F-07, "Lanjut" kartu berhenti di fase `stars`. Akibatnya 24 dari 43 uji ujung ke ujung lama (9 uji `alur-permainan.spec.ts` dan 15 uji `kartu-dampak.spec.ts`) harus menekan `0`, `1`, atau `2` sesudah setiap kartu. Ke-16 uji F-04 dan 3 uji awal F-05 tidak berubah.
+  - **Lingkungan uji berubah.** Chromium 141 (revisi 1194) untuk `@playwright/test` 1.56.1 tidak lagi ada di lingkungan agen, dan unduhannya ditolak (403). Yang tersedia Chromium 153. Dengan berkas konfigurasi pengganti di luar repositori yang hanya menambah jalur Chromium 153, ke-43 uji lama lulus: 16 uji F-04 dalam 28 detik dan 27 uji F-05/F-06 dalam 2,1 menit. Ukuran huruf hampir sama dengan laporan sebelumnya: sisa panel bawah 3,05–3,38u (usulan 6) dan sisa kartu terpanjang 15,7–17,5u (laporan F-06: 15,7–17,9u). Lihat usulan 10.
+  - **Fokus di fase `stars`.** `ChoicePanel` memfokuskan baris status saat dipasang, dan panel pilihan dipasang lagi tepat saat fase `stars` dimulai, karena di fase `impact` panel bawah kosong. Fokus harus berakhir di ajakan bintang (usulan 4), jadi urutannya ditetapkan di spesifikasi dan diuji.
+  - **Adegan 6.** Sesudah bintang adegan 6, layar akhir sementara langsung tampil, sehingga pop dan jumlah bintang terakhir tidak sempat terlihat. Jumlah bintang akhir setiap tim perlu tampil di F-09 (layar akhir atau rekap); dicatat untuk Plan F-09 saat Build.
+  - **Pembaruan setiap detik.** Selama diskusi, layar permainan digambar ulang sekali per detik. Ringan di lingkungan agen, tetapi termasuk butir manual "laptop kelas bawah".
+  - **Halaman yang terbit berubah.** Alamat `#main` kini menampilkan papan tim dan pengatur waktu, dan setiap adegan menunggu bintang dari guru sebelum berganti. Permainan belum ditautkan dari galeri (F-11).
+  - **Tailwind galeri** (catatan "Semua fitur"): sesudah entri ini ditulis, `build:pages` diulang, dan keempat berkas galeri (`index.html`, `main-Bp-7VtNx.css`, `main-CC47J1DW.js`, `jsx-runtime-CmKW-gyo.js`) tetap identik byte dengan build `main`. Pemeriksaan yang sama diulang di tahap Test.
+  - **Anggaran:** JS permainan sekarang 15,40 KB gzip ditambah React 60,18 KB gzip, sekitar 76 KB dari 150 KB. F-07 diperkirakan menambah 2–3 KB gzip.
+  - **Bunyi (tambahan 26 Okt 2026).** Diukur di luar repositori dengan berkas asli dari halaman uji suara, di Chromium 153:
+    - Format: Architecture bagian 8 dan Design System bagian 9 meminta MP3, sedangkan bunyi yang dipilih berupa WAV (2.028 dan 1.454 byte). MP3 64 kbps hasil ffmpeg berukuran 1.088 byte per berkas dan di-*decode* tanpa hening di awal, tetapi bentuk gelombang klik sedikit berubah (kemiripan 0,993, puncak turun sekitar 1 dB). Lihat butir S-1 spesifikasi.
+    - Build: WAV yang diimpor lewat manifest menjadi berkas berhash terpisah (`sfx_klik-*.wav` 2,02 kB dan `sfx_teks-*.wav` 1,45 kB) dengan URL relatif; `tsc` lulus dengan deklarasi `*.wav`; keempat berkas galeri tetap identik byte.
+    - Aturan putar otomatis peramban: konteks audio harus dibuat saat interaksi. Konteks yang dibuat pada `keydown` pertama berstatus `running`, dan sebelum interaksi tidak ada konteks. Akibatnya klik pertama dan layar narasi pertama adegan 1 biasanya tanpa bunyi.
+    - Kerapatan: pada 40 huruf per detik, bunyi teks setiap 2 huruf terdengar sekitar 16,5 kali per detik, lebih rapat daripada di halaman uji (sekitar 11,8). Pada naskah asli, 9 layar narasi menghasilkan 424 bunyi teks, tanpa bunyi yang menumpuk. Lihat butir S-3.
+    - Jam uji: dengan jam uji Playwright, bunyi di halaman uji terhitung tepat (33 bunyi teks untuk 66 huruf, dan 1 klik) lewat pembungkus `AudioBufferSourceNode.prototype.start` di skrip uji, sehingga bunyi bisa diuji tanpa didengarkan.
+    - Asal bunyi dan lisensinya belum diketahui, padahal diperlukan untuk `CREDITS.md` (butir S-6). Tik pelan sepuluh detik terakhir (Design System bagian 7 dan 9) belum punya bunyi pilihan (butir S-5). Tanpa tombol mematikan, guru hanya bisa memakai volume laptop (butir S-4).
+    - Anggaran: aset bertambah 3,4 KB, dari 61,8 KB menjadi 65,2 KB dari 4 MB.
+- Ukuran: L: tiga komponen kecil, satu kait, dua modul murni, pemutar bunyi, perluasan uji aset, dan penyesuaian 24 uji lama. Sebelum tambahan bunyi, M (batas atas).
+- Keputusan Gerbang 1 (26 Okt 2026, balasan `Setuju: F-07`; kesepuluh usulan diterima). Teks usulan di bawah dipertahankan sebagai catatan; alternatifnya tidak dipilih. Maket dikirim lewat percakapan dan tidak disimpan di repositori:
+  1. **Papan tim di panel kanan.**
+     - Panel kanan mencerminkan panel indikator: dari tepi kanan bingkai panggung sampai tepi kanan layar, atas 8u, tinggi 52u, dengan jarak dalam 3u atas dan 2u kiri-kanan. Papan tim di bagian atas. Di bawahnya satu blok yang berganti menurut fase: pengatur waktu di fase `discuss` (usulan 2), tombol bintang di fase `stars` (usulan 4), dan kosong di fase lain. Kartu dampak menutup panel ini (keputusan F-06), dan layar akhir sementara tidak menampilkannya.
+     - Satu baris per tim, urut sesuai pengaturan: ikon bentuk 16p, nama tim (Pixelify Sans 3,1u), lalu di kanan ikon bintang 16p (bingkai normal D-03) dan jumlah bintang (Press Start 2P 2,8u). Jumlah paling banyak 6 (dengan dua tim, satu tim mendapat tiga giliran), jadi selalu satu angka. Tinggi baris 5,2u (1280×720 dan 1920×1080), 5,0u (1366×768), dan 6,4u (1024×768, karena ikon 16p di sana setinggi 5,6u), dengan celah 0,4u.
+     - Warna tim hanya pada ikon bentuk D-07, yang sudah berwarna tim. Nama dan angka selalu `ink` di atas `cream` (13,3:1). Latar berwarna tim tidak dipakai, karena teks `ink` di atas `sky-d` (Tim Laut) hanya 3,8:1.
+     - Tim aktif ditandai ▶ di kiri, bingkai piksel F-05 di sekeliling barisnya (garis `ink` 2p, sudut terpotong, sorotan putih), dan tulisan "Giliran" (Pixelify Sans 2,5u) di bawah nama; baris ini setinggi 8,1u. Bingkai digambar di dalam baris, sehingga tidak ada yang bergeser saat giliran berpindah. ▶ berpindah ke tim berikutnya saat adegan berganti, di tengah sapuan (200 ms) atau pudar (75 ms).
+     - Tanpa baris judul "Tim ★ skor" dari bagan Design System bagian 3, karena judul itu (sekitar 3,7u menurut hitungan) membuat 4 tim meluap sekitar 2,3u di 1024×768. Bagi pembaca layar, papan berupa daftar bernama "Papan tim", dan setiap butir dibaca seperti "Tim Mangga, giliran, 2 bintang".
+     - Alternatif: (a) "Giliran" sebaris dengan nama, yang tidak muat di 1024×768; (b) baris tim aktif berlatar `sun`, yang lebih mencolok tetapi sama dengan tampilan fokus keyboard F-05; (c) baris judul dipertahankan dengan jarak yang dirapatkan.
+  2. **Pengatur waktu di bawah papan tim, hanya di fase `discuss`.**
+     - Baris label: ikon jam 16p (D-04) dan "Waktu diskusi". Saat dijeda tulisannya "Waktu dijeda", dan saat habis "Waktunya memilih" berlatar `mango` (teks `ink`, 6,9:1).
+     - Baris batang: 12 blok 5p × 10p di lintasan `ink`, seperti batang indikator, lalu angka menit:detik (Press Start 2P 2,8u, sama dengan angka indikator). Blok berisi berwarna `sky-d` (3,8:1 terhadap lintasan), dan `mango` pada sepuluh detik terakhir (6,9:1). Blok kosong menyatu dengan lintasan, karena `mango` di atas `cream` hanya 1,9:1. Banyak blok berisi adalah sisa ÷ durasi × 12, dibulatkan ke atas; pada 60 detik, satu blok bernilai 5 detik.
+     - Tiga tombol sebaris bergaya tombol lanjut F-05 (Pixelify Sans 2,5u): "Jeda" (tombol alih dengan `aria-pressed`; berlatar `sun` dengan cincin saat dijeda), "+30" (bagi pembaca layar "+30 detik"), dan "Lewati". Pintasannya `P`, `T`, dan `S`, hanya di fase `discuss`. Saat waktu habis, "Jeda" dan "Lewati" nonaktif karena reducer memang mengabaikannya, sedangkan "+30" menjalankan waktu lagi.
+     - Saat habis, fase tetap `discuss`: tidak ada pilihan otomatis, dan tombol pilihan tetap bisa dipakai (F-02).
+     - "+30" dan `T` tidak berlaku bila sisa lebih dari 9:29, agar angka tidak mencapai 10:00 (meluap 1,9u di 1024×768). Batas ini hanya di antarmuka; reducer tidak berubah.
+     - Urutan Tab: pertanyaan, A, B, C, lalu "Jeda", "+30", dan "Lewati", sehingga urutan F-05 tidak berubah.
+     - Alternatif: (a) tulisan tombol "+30 detik", yang membuat tombol terbungkus dua baris dan 4 tim meluap 5,3u di 1024×768; (b) pengatur waktu tetap tampil beku sesudah memilih, agar kelas melihat sisa waktu saat memilih; (c) pengatur waktu di bilah atas, yang berbeda dari Design System bagian 3 dan mengganggu ciri "Langit sehari".
+  3. **`useTimer` di `ui/`, bukan `engine/`.**
+     - `ui/useTimer.ts` hanya aktif bila fase `discuss`, pengatur waktu berjalan, sisa lebih dari 0, dan adegan tidak sedang berganti. Setiap 250 ms kait menghitung detik utuh sejak titik acuan dengan `performance.now()`, lalu mengirim `TICK` sebanyak itu. Dengan begitu waktu tetap tepat walaupun peramban terlambat menjalankan pengatur atau tab sempat di belakang. Sisa pecahan detik dibuang saat dijeda.
+     - Pengatur dibersihkan saat fase berganti, saat dijeda, dan saat layar ditutup, dan tidak mengirim `TICK` dua kali walaupun `StrictMode` menjalankan efek dua kali.
+     - Reducer tidak berubah dan tetap tanpa pengatur waktu, dan uji F-02 AC-14 tetap berlaku untuk seluruh `engine/`. Architecture bagian 3 dan 6 diperbarui: `useTimer.ts` pindah ke `ui/`. Hitungan murninya ada di `ui/timer.ts` dan diuji unit.
+     - Alternatif: tetap `engine/useTimer.ts` sesuai Architecture bagian 3, dan uji F-02 AC-14 mengecualikan berkas itu.
+  4. **Bintang alasan di panel kanan, hanya di fase `stars`.**
+     - Kapan: sesudah "Lanjut" kartu dampak (di adegan 5 sesudah kuis, yang masih dilewati sampai F-08), sampai bintang diberikan.
+     - Di mana: menggantikan blok pengatur waktu di bawah papan tim. Isinya ajakan "Bintang alasan untuk Tim Mangga" (Pixelify Sans 2,5u; nama mengikuti tim aktif; boleh dua baris) dan tombol "0", "1", "2" (Press Start 2P 2,8u; bagi pembaca layar "0 bintang", "1 bintang", "2 bintang"). Pintasan `0` `1` `2` hanya berlaku di fase `stars`.
+     - Sesudah memilih: jumlah bintang tim aktif langsung bertambah, dan ikon bintang di barisnya memainkan pop 3 bingkai: kecil, besar berkilau, lalu normal, 80 ms per bingkai (total 240 ms, di dalam rentang 120–400 ms Design System bagian 8), berhenti di bingkai normal. Sapuan atau pudar ke adegan berikutnya langsung dimulai seperti F-06. Bingkai normal sudah tampil pada 160 ms, sebelum ▶ berpindah di tengah sapuan (200 ms). Bintang 0 tidak memainkan pop. Sesudah adegan 6, layar akhir sementara langsung tampil.
+     - Kurangi gerak: tanpa pop. Ikon tetap di bingkai normal, jumlah langsung berubah, dan tidak ada animasi yang berjalan.
+     - Pengaman tekanan ganda dan perpindahan fokus:
+       - saat fase `stars` mulai, fokus pindah ke teks ajakan (bisa difokus lewat kode, bukan tombol), lalu Tab berurutan ke 0, 1, dan 2, seperti pertanyaan F-05 dan judul kartu F-06;
+       - sebagai pintasan, `Spasi` dan `Enter` tidak berpengaruh di fase `stars`, sehingga `Enter` kedua dari tekanan ganda pada "Lanjut" kartu tidak memberi bintang. Pada tombol bintang yang berfokus, keduanya tetap menekan tombol itu seperti tombol lain (F-05);
+       - tombol bintang berada di 8–60u, jauh dari "Lanjut" kartu di kanan bawah (sekitar 91–97u), sehingga klik ganda tidak mengenainya;
+       - bintang hanya bisa diberikan sekali per adegan: tekanan selama pergantian adegan diabaikan (F-05), dan reducer menolak `BERI_BINTANG` kedua;
+       - tanpa masa tunggu tambahan.
+     - `bridgeActions`: "Lanjut" kartu kini hanya mengirim `LANJUT`, ditambah `JAWAB_KUIS` dengan jawaban naskah lalu `LANJUT` di adegan 5, sehingga permainan berhenti di fase `stars`. `BERI_BINTANG` dikirim tombol bintang. Tombol jembatan baris status tinggal pengaman untuk fase `quiz` sampai F-08.
+     - Alternatif: (a) tombol bintang di kanan baris status panel bawah, sesudah "Kelas memilih X." (muat; lihat usulan 6); (b) masa tunggu 600 ms seperti kartu; (c) pop 100 ms per bingkai, dan sapuan menunggu 300 ms sampai pop selesai.
+  5. **Pembaca layar: diumumkan per peristiwa, bukan per detik.**
+     - Angka waktu memakai `role="timer"`, yang tidak diumumkan otomatis. Nilainya bisa dibaca kapan saja dalam kalimat, misalnya "sisa 42 detik".
+     - Wilayah pengumuman kedua (`role="status"`) dipisah dari wilayah narasi dan kartu, sehingga pengumuman tidak saling menimpa. Isinya hanya berubah saat:
+       - diskusi dimulai, dengan durasinya;
+       - sisa 10 detik;
+       - waktu habis ("Waktunya memilih");
+       - waktu dijeda atau berjalan lagi, dengan sisa waktu;
+       - waktu ditambah 30 detik, dengan sisa baru;
+       - diskusi dilewati;
+       - bintang diberikan, dengan nama tim, jumlah yang diberikan, dan jumlah barunya.
+     - Uji lama memakai pemilih `[aria-live="polite"]`. Wilayah baru memakai `role="status"` tanpa atribut itu, sehingga pemilih lama tetap menunjuk wilayah narasi.
+     - Alternatif: (a) hanya waktu habis yang diumumkan; (b) ditambah pengumuman setiap 30 detik.
+  6. **Panel bawah tidak mendapat unsur baru.** Diukur ulang dengan Chromium 153, sisa layar pilihan terpanjang (adegan 3 dan 5) tetap 3,33u (1280×720), 3,38u (1366×768), 3,32u (1920×1080), dan 3,05u (1024×768). Di fase `stars`, panel bawah sama dengan fase reaksi: "Kelas memilih X." dan pilihan terkunci, tanpa tombol jembatan.
+     - Bila alternatif 4a dipilih, tombol bintang masuk ke baris status yang tingginya tetap 5,8u. Tombolnya setinggi 5,75u (1280×720 dan 1920×1080) dan 5,68u (1366×768); di 1024×768 setinggi 6,02u, sama dengan tombol jembatan F-05 di baris itu. Sisa panel tetap tidak berubah.
+  7. **Durasi diskusi bawaan (PRD bagian 16 nomor 3), diputuskan pemilik proyek.**
+
+     | Pertimbangan | 30 detik | 60 detik (sekarang) | 90 detik |
+     |---|---|---|---|
+     | Diskusi enam adegan | 3 menit | 6 menit | 9 menit |
+     | Perkiraan satu permainan (asumsi di bawah) | 16–17 menit | 19–20 menit | 22–23 menit |
+     | Target PRD bagian 1 (15–20 menit) | terpenuhi | di batas atas | terlampaui |
+     | Membaca pertanyaan dan tiga pilihan (29–46 kata, 12–23 detik) | 40–77% waktu diskusi | 20–38% | 13–26% |
+     | Tujuan PRD bagian 3 nomor 3 ("alasan, bukan tebakan cepat") | mendorong tebakan cepat | cukup untuk menyusun satu alasan | paling longgar, tetapi tempo paling lambat |
+     | Satu blok batang | 2,5 detik | 5 detik | 7,5 detik |
+     | Sepuluh detik terakhir (`mango`) | sepertiga waktu | seperenam | sepersembilan |
+     | Perubahan kode | `DEFAULT_SETTINGS` dan ujinya | tidak ada | `DEFAULT_SETTINGS` dan ujinya |
+
+     - Asumsi perkiraan, kasar: semua teks yang tampil dibaca keras (361 kata sebelum memilih dan 368–395 kata kartu, 5–6 menit pada 120–150 kata per menit), bintang sekitar 20 detik per adegan, kuis sekitar 1 menit, serta pembuka dan penutup (F-10 dan F-09) sekitar 5 menit. Setiap kenaikan 30 detik menambah 3 menit ke satu permainan.
+     - Pengatur waktu mulai begitu pertanyaan tampil (F-02), jadi waktu membaca pilihan ikut terpakai kecuali guru menjeda (`P`).
+     - Apa pun pilihannya, guru tetap bisa menambah (`T`) atau melewati (`S`) di setiap adegan, dan F-10 menyediakan pilihan 30/60/90 per kelas. Yang diputuskan di sini hanya nilai bawaan.
+     - Keputusan: tetap 60 detik, karena balasan `Setuju: F-07` tidak menyebut durasi lain. Masih bisa diubah di Gerbang 2 (spesifikasi, butir S-7).
+  8. **Temuan 5 F-06 dibereskan di F-07: panggung disembunyikan selama kartu tampil.**
+     - Pita terukur 6,9 px di 1024×768, 1,5 px di 1280×720, 2,2 px di 1920×1080, dan 0 di 1366×768.
+     - Bila panggung disembunyikan selama fase `impact`, pita hilang di keempat ukuran, sedangkan letak, ukuran, dan sisa isi kartu F-06 tidak berubah (15,7–17,5u). Angka Design System dan uji F-06 tetap berlaku. Kartu sudah bersifat modal, sehingga panggung yang tersembunyi tidak mengubah apa yang dibacakan pembaca layar. F-07 sudah mengubah `PlayScreen.tsx` dan `game.css`, jadi perubahannya kecil.
+     - Alternatif: (A) kartu mulai 8u, tepat di bawah bilah atas: pita hilang dan isi kartu bertambah 1,2u (16,9–18,7u), tetapi angka 9,2u di Design System bagian 7 dan uji F-06 berubah; (B) kartu mulai di tepi atas panggung (8u di 1024×768, 9u di 1280×720 dan 1920×1080, 10,56u di 1366×768): pita hilang, tetapi sisa isi di 1366×768 turun menjadi 15,9u; (C) dibiarkan, karena hanya kosmetik.
+  9. **Alamat uji `#main-3` dan `#main-4`.** Sampai F-10, `#main` tetap memakai dua tim bawaan. Agar syarat "muat 2–4 tim di empat ukuran" bisa diuji ujung ke ujung dan dilihat sendiri, `#main-3` dan `#main-4` membuka layar permainan yang sama dengan tiga atau empat tim bawaan pertama. Keduanya tidak ditautkan dari layar kerangka, dan diganti layar judul di F-10, seperti `#main`.
+     - Alternatif: 3 dan 4 tim hanya diukur dengan maket di tahap Plan dan Test, sehingga belum ada uji yang bisa diulang sampai F-10.
+  10. **Cara uji.**
+      - `content:check`.
+      - `test`:
+        - baru `timer.test.ts`: teks menit:detik, isi blok, nada, detik yang jatuh tempo, batas "+30", jadwal pop, dan peristiwa pengumuman;
+        - `controls.test.ts` disesuaikan: `P` `T` `S`, `0` `1` `2`, `Spasi` dan `Enter` di fase `stars`, serta `bridgeActions` yang berhenti di fase `stars`, diuji bersama reducer dan naskah asli;
+        - `layout.test.ts` bila usulan 9 disetujui, dan `reducer.test.ts` hanya bila durasi bawaan berubah.
+      - `build:pages`: keempat berkas galeri identik byte dengan build sebelum F-07, juga sesudah semua dokumen F-07 ditulis; JS permainan ≤ 150 KB gzip tanpa penanda `__THREE__`; `src` dan `href` HTML permainan relatif.
+      - `test:e2e`:
+        - memakai Chromium 153 lewat berkas konfigurasi pengganti di luar repositori, seperti percobaan di atas, sehingga `playwright.config.ts`, `package.json`, dan lockfile tidak berubah. Alternatif: izin tertulis menaikkan `@playwright/test` ke versi yang cocok dengan Chromium 153, atau `playwright.config.ts` membaca jalur browser dari variabel lingkungan;
+        - aturan jam uji: `pauseAt` di fase narasi sebelum diskusi dimulai, waktu diskusi hanya dimajukan dengan `runFor`, dan jam dimajukan dua langkah sesudah unsur tampil (catatan F-05 dan F-06);
+        - uji baru: papan 2, 3, dan 4 tim di empat ukuran (tanpa luapan; nama, ikon, ▶, "Giliran", dan jumlah bintang); giliran di keenam adegan untuk 2, 3, dan 4 tim; pengatur waktu per detik, sepuluh detik terakhir, habis tanpa pilihan otomatis, `P` `T` `S` beserta tombolnya, batas 9:29, `TICK` hanya di fase `discuss`, dan waktu penuh lagi di adegan berikutnya; bintang lewat tombol dan `0` `1` `2`, sekali per adegan, jumlah per tim, pop pada 0, 80, dan 160 ms dengan jam uji, serta kurangi gerak tanpa animasi; tekanan ganda dan fokus; pengumuman; kontras; papan tertutup kartu; kartu tanpa pita panggung; 0 galat konsol dan 0 respons 4xx/5xx;
+        - 24 uji lama ditambah langkah bintang;
+        - bila satu perintah terlalu lama untuk lingkungan agen, uji dijalankan dalam beberapa bagian dengan konfigurasi yang sama, seperti F-06.
+      - Tangkapan layar di 1280×720, 1024×768, dan 1920×1080: papan 2 dan 4 tim saat diskusi, sepuluh detik terakhir, waktu habis, dijeda, fase bintang, pop, dan kartu tanpa pita.
+      - `tsc --noEmit` dan ESLint `--max-warnings 0` pada berkas kode baru dan yang diubah.
+      - Daftar periksa manual AGENTS bagian 9 yang berlaku. Keterbacaan papan dan pengatur waktu dari bangku belakang, serta kelancaran di laptop kelas bawah, dicek pemilik proyek.
+      - Tidak ada dependensi baru.
+- Tambahan pemilik proyek (26 Okt 2026, dalam balasan `Setuju: F-07`): bunyi teks gaya B, bunyi klik tombol gaya A, bunyi teks setiap 2 huruf, dan tinggi nada teks "Tinggi", dipilih lewat halaman "Uji suara Sehari Setara".
+  - Bunyi dikerjakan di F-07 sebagai bagian tersendiri spesifikasi, dengan volume 60% (Design System bagian 9). Bagian FR-19 lainnya tetap di F-13.
+  - Hal baru yang muncul karenanya diajukan untuk Gerbang 2 sebagai butir S-1 sampai S-8 spesifikasi: format WAV, kapan klik berbunyi, kerapatan bunyi teks, `M` untuk mematikan suara, tik pelan sepuluh detik terakhir, asal dan lisensi bunyi, durasi 60 detik, serta status bunyi di `Daftar_Aset.md`.

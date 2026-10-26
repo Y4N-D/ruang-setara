@@ -2,13 +2,14 @@
 
 | | |
 |---|---|
-| Versi | 0.6 (draf) |
-| Tanggal | 23 Oktober 2026 |
+| Versi | 0.7 (draf) |
+| Tanggal | 26 Oktober 2026 |
 | Perubahan 0.2 | Aset digambar dengan kode oleh Claude (bagian 12); palet 36 warna; desain Nara, Ibu, Gita, dan latar adegan 1 disetujui |
 | Perubahan 0.3 | `ikon.py` masuk tabel kit bagian 12 (F-12) |
 | Perubahan 0.4 | Kontras teks bilah atas per waktu (bagian 4); rincian busur hari (bagian 7); ikon matahari dan bulan D-11 (bagian 11) (F-04) |
 | Perubahan 0.5 | Panel bawah 40% dan area panggung 52% (bagian 3); bingkai piksel dalam piksel panggung, kotak narasi, dan tombol pilihan (bagian 7); rincian sapuan dan lama reaksi (bagian 8) (F-05) |
 | Perubahan 0.6 | Letak kartu dampak (bagian 3); rincian indikator dan kartu dampak (bagian 7); gerak indikator, angka melayang, dan masa tunggu tombol "Lanjut" kartu (bagian 8) (F-06) |
+| Perubahan 0.7 | Panel kanan berisi papan tim dan, menurut fase, pengatur waktu atau bintang alasan; panggung disembunyikan selama kartu dampak (bagian 3); kontras tombol nonaktif dan blok pengatur waktu (bagian 4); rincian pengatur waktu, papan tim, dan bintang alasan (bagian 7); pop bintang dan perpindahan ▶ (bagian 8); bunyi klik dan bunyi teks berformat WAV (bagian 9); atribusi efek suara menunggu jawaban pemilik proyek (bagian 13) (F-07) |
 | Berlaku untuk | Semua layar, aset visual, animasi, dan suara game Sehari Setara |
 | Dokumen terkait | `PRD.md`, `Architecture.md`, `AGENTS.md` |
 
@@ -68,11 +69,11 @@ Satu elemen yang menjadi identitas game: **warna langit dan bilah atas berubah m
 ┌──────────────────────────────────────────────────────────┐
 │ Busur hari  ☀ ─●──●──○──○──○──○                Adegan 2/6 │
 ├────────────┬──────────────────────────────┬──────────────┤
-│ Hak orang  │                              │ Tim  ★ skor  │
-│ lain ▮▮▮▮▯ │       PANGGUNG 320×180       │ ▶ Tim Mangga │
-│            │       (latar + tokoh)        │   Tim Laut   │
-│ Kewajiban  │                              │              │
-│ ▮▮▮▯▯      │                              │ Diskusi 0:42 │
+│ Hak orang  │                              │ ▶ Tim Mangga │
+│ lain ▮▮▮▮▯ │       PANGGUNG 320×180       │   Giliran ★0 │
+│            │       (latar + tokoh)        │   Tim Laut ★0│
+│ Kewajiban  │                              │ Diskusi 0:42 │
+│ ▮▮▮▯▯      │                              │ ▮▮▮▮▯ Jeda…  │
 ├────────────┴──────────────────────────────┴──────────────┤
 │ Narasi / pertanyaan                                      │
 │ [A  pilihan…]      [B  pilihan…]      [C  pilihan…]      │
@@ -80,8 +81,8 @@ Satu elemen yang menjadi identitas game: **warna langit dan bilah atas berubah m
 ```
 
 - Bilah atas: sekitar 8% tinggi layar. Area panggung: sekitar 52%. Panel bawah: sekitar 40%, agar pertanyaan dan tiga pilihan muat dengan ukuran huruf bagian 5 (F-05). Panggung tetap ×2 di 1280×720 dan 1366×768 serta ×3 di 1920×1080; di layar 4:3 (1024×768) skalanya 1,664.
-- Panggung berada di tengah. Panel kiri berisi indikator, panel kanan berisi tim dan pengatur waktu.
-- Saat kartu dampak tampil, kartu menutupi panggung, panel kanan, dan panel bawah, sedangkan bilah atas dan panel indikator tetap terlihat (F-06).
+- Panggung berada di tengah. Panel kiri berisi indikator. Panel kanan berisi papan tim tanpa baris judul, ditambah pengatur waktu selama diskusi atau bintang alasan sesudah kartu dampak. Letaknya mencerminkan panel indikator: dari tepi kanan bingkai panggung sampai tepi kanan layar, mulai 8u dari atas dan setinggi area panggung, dengan jarak dalam 3u atas dan 2u kiri-kanan serta celah 2u antara papan dan blok di bawahnya (F-07).
+- Saat kartu dampak tampil, kartu menutupi panggung, panel kanan, dan panel bawah, sedangkan bilah atas dan panel indikator tetap terlihat (F-06). Area panggung disembunyikan selama kartu tampil, sehingga tidak ada pita panggung tipis di atas kartu (F-07).
 - Pada layar 4:3, sisa ruang menjadi bingkai berwarna `--ss-ink`.
 - Teks rata kiri di panel; judul layar dan kartu akhir rata tengah.
 
@@ -156,6 +157,8 @@ Palet terbatas **36 warna**. Aset gambar **hanya** boleh memakai warna di tabel 
 | Putih di atas `grass` / `sky-d` | 3,1 / 3,8 : 1 | **Jangan** untuk teks |
 | `ink` di atas bilah pagi `#FFD9A8` / siang `#6EC6F2` / sore `#FFC27A` | 10,7 / 7,5 / 9,0 : 1 | Teks bilah atas (F-04) |
 | `cream` di atas bilah malam `#4A4F9C` | 6,8 : 1 | Teks bilah atas malam; `ink` di sini hanya 2,0 : 1 (F-04) |
+| `dusk` di atas `mist` | 5,9 : 1 | Tombol nonaktif (F-05, F-07) |
+| Blok `sky-d` / `mango` di atas lintasan `ink` | 3,8 / 6,9 : 1 | Blok pengatur waktu, bukan teks; `mango` di atas `cream` hanya 1,9 : 1, jadi blok kosong memakai `ink` (F-07) |
 
 Aturan praktis: **teks di atas warna aksen selalu memakai `ink`**, bukan putih.
 
@@ -222,9 +225,9 @@ Semua panel memakai **bingkai piksel**: garis `ink` 2 piksel antarmuka, sudut te
 | **Tombol pilihan A/B/C** | Status: biasa (`cream`), fokus/arah (`sun` + kursor ▶), dipilih (`sun` + garis tebal: cincin dalam 2 piksel antarmuka), nonaktif (`mist`, teks `dusk`). Huruf A/B/C dalam kotak `ink` berhuruf `cream` di kiri (nonaktif: kotak `dusk`). Tiga tombol berdampingan, sama lebar dan sama tinggi. Pintasan tombol 1/2/3 dan A/B/C |
 | **Indikator** | Dua batang 10 segmen dengan ikon dan label: "Hak orang lain terjaga" (ikon perisai-hati, `teal`) dan "Kewajiban dijalankan" (ikon tangan-centang, `sky-d`). Nilai angka di ujung. Saat berubah, segmen terisi atau terkosongkan satu per satu dan muncul angka melayang "+15" atau "−10". Rincian F-06: panel kiri mulai 8u dari atas, setinggi area panggung, dengan jarak dalam 3u atas dan 2u kiri-kanan, serta celah antarindikator 7u. Satu segmen bernilai 10, dan nilai kelipatan 5 tampil sebagai segmen separuh (3p kiri berwarna indikator). Segmen 6p × 10p, batang 71p × 12p berlatar `ink`; label Pixelify Sans 2,5u; angka nilai Press Start 2P 2,8u. Angka melayang (Pixelify Sans 3,1u, karena Press Start 2P tidak memuat tanda minus) tampil 0,6u di bawah ujung baris batang, berlatar `leaf` (naik), `coral` (turun), atau `mist` (nol) dengan teks `ink`, dan selalu menampilkan efek naskah walaupun batang sudah mentok |
 | **Kartu dampak** | Kepala kartu berwarna sesuai tingkat (`leaf` tepat, `mango` kurang tepat, `coral` berisiko) dengan ikon dan tulisan tingkat. Isi: "Yang terjadi", "Hak yang terdampak", "Kewajiban terkait", "Rujukan". Tombol "Lanjut". Rincian F-06: kartu lebar dari tepi kiri bingkai panggung sampai 2u dari tepi kanan layar, 9,2u dari atas dan 1,2u dari bawah, dengan bingkai piksel F-05. Ikon tingkat memakai ikon emosi 8×8 selebar 16p: hati (tepat), tetes keringat (kurang tepat), dan tanda seru (berisiko). Tulisan tingkat Press Start 2P 2,8u, "Kelas memilih X." di kanan kepala. Isi dua kolom 1,1 : 1: kiri "Yang terjadi" (3,6u), hak, dan kewajiban (3,1u); kanan rujukan (3,1u, butir menjorok dengan penanda kotak 2p). Judul bagian 2,5u `dusk`. Papan tim (F-07) ikut tertutup selama kartu tampil, karena FR-09 dibaca "papan tim selalu terlihat, kecuali saat sebuah dialog terbuka" (keputusan Gerbang 1 F-06) |
-| **Pengatur waktu** | Batang 12 blok plus angka menit:detik. Sepuluh detik terakhir berwarna `mango` dengan bunyi tik pelan. Saat habis: tulisan "Waktunya memilih", tidak memilih otomatis. Tombol jeda, +30 detik, dan lewati |
-| **Papan tim** | Setiap tim punya warna **dan bentuk** (lingkaran, segitiga, persegi, bintang) agar tidak bergantung pada warna saja. Tim aktif ditandai ▶ dan tulisan "Giliran". Jumlah bintang alasan di kanan |
-| **Bintang alasan** | Tiga tombol: 0, 1, 2 bintang. Bintang muncul dengan animasi pop 3 bingkai |
+| **Pengatur waktu** | Batang 12 blok plus angka menit:detik. Sepuluh detik terakhir berwarna `mango` dengan bunyi tik pelan. Saat habis: tulisan "Waktunya memilih", tidak memilih otomatis. Tombol jeda, +30 detik, dan lewati. Rincian F-07: tampil di panel kanan hanya selama diskusi, dalam tiga baris. Baris label berisi ikon jam 16p dan "Waktu diskusi", "Waktu dijeda", atau "Waktunya memilih" (berlatar `mango`), Pixelify Sans 2,5u. Baris batang: batang 73p × 12p berlatar `ink` dengan 12 blok 5p × 10p, lalu angka Press Start 2P 2,8u. Banyak blok berisi adalah sisa × 12 ÷ durasi, dibulatkan ke atas; blok berisi `sky-d`, atau `mango` pada sepuluh detik terakhir, dan blok kosong menyatu dengan lintasan `ink`. Baris tombol: "Jeda", "+30", dan "Lewati" dengan tampilan tombol lanjut F-05 (Pixelify Sans 2,5u). "Jeda" yang ditekan berlatar `sun` dengan cincin dalam 2p; tombol nonaktif berlatar `mist` dengan teks `dusk`. "+30" nonaktif mulai sisa 9:30, sehingga angka tidak pernah mencapai 10:00. Saat habis, "Jeda" dan "Lewati" nonaktif. Bunyi tik pelan belum ada (F-13) |
+| **Papan tim** | Setiap tim punya warna **dan bentuk** (lingkaran, segitiga, persegi, bintang) agar tidak bergantung pada warna saja. Tim aktif ditandai ▶ dan tulisan "Giliran". Jumlah bintang alasan di kanan. Rincian F-07: satu baris per tim tanpa baris judul, berisi ruang kursor ▶, ikon bentuk 16p, nama (Pixelify Sans 3,1u, satu baris), lalu di kanan ikon bintang 16p dan jumlah bintang (Press Start 2P 2,8u). Warna tim hanya tampil lewat ikon; teks selalu `ink`. Tim aktif ditandai tiga hal sekaligus: ▶, bingkai piksel di dalam baris, dan "Giliran" (2,5u) di bawah nama. Nama tim paling lebar 18,6u agar muat di 1024×768 |
+| **Bintang alasan** | Tiga tombol: 0, 1, 2 bintang. Bintang muncul dengan animasi pop 3 bingkai. Rincian F-07: tampil di bawah papan tim sesudah tombol "Lanjut" kartu dampak, berisi ajakan "Bintang alasan untuk {nama tim}" (Pixelify Sans 2,5u, boleh dua baris) dan tombol "0", "1", "2" (Press Start 2P 2,8u, tampilan tombol lanjut F-05). Fokus pindah ke ajakan, bukan ke tombol, sehingga tekanan ganda pada "Lanjut" kartu tidak memberi bintang |
 | **Kuis peran** | Empat kartu peran dengan ikon (polisi, jaksa, advokat, hakim). Setelah dijawab, keempat kartu terbuka dan menampilkan tugas masing-masing |
 | **Layar akhir** | Ilustrasi penuh panggung, judul akhir, dua kalimat pesan, posisi akhir kedua indikator, dan timbangan piksel yang miring atau seimbang |
 | **Rekap** | Enam baris: adegan, pilihan kelas, tanda tingkat, pilihan yang paling menjaga keseimbangan, rujukan |
@@ -242,23 +245,27 @@ Nama tim bawaan: Tim Mangga (`mango`, lingkaran), Tim Laut (`sky-d`, segitiga), 
 | Pergantian adegan | Sapuan blok piksel 400 ms ke arah kanan, mengikuti matahari: blok 20×20 piksel panggung berwarna langit adegan berikutnya, dengan tepi bergerigi. Adegan berganti di balik blok pada 200 ms (F-05) |
 | Reaksi setelah memilih | Ganti pose tokoh + ikon emosi kecil di atas kepala (hati, tetes keringat, tanda tanya), 1–1,5 detik (F-05: 1,2 detik) |
 | Indikator dan kartu dampak | Kartu muncul langsung sesudah reaksi. Batang bergerak setengah segmen setiap 100 ms, paling lama 400 ms. Angka melayang naik 4p dalam dua langkah selama 240 ms, lalu tetap terlihat sampai kartu ditutup. Tombol "Lanjut" kartu baru bekerja 600 ms sesudah kartu tampil, agar tekanan ganda tidak melewatkan kartu (F-06) |
+| Bintang alasan dan giliran | Ikon bintang tim yang menerima bintang memainkan strip 3 bingkai sekali: kecil, besar berkilau, lalu normal, masing-masing 80 ms (240 ms, `steps(3)`), bersamaan dengan bertambahnya angka. Tidak ada pop untuk 0 bintang. ▶, bingkai, dan "Giliran" pindah ke tim berikutnya bersamaan dengan pergantian adegan di tengah sapuan (F-07) |
 | Momen utama | Satu-satunya animasi besar ada di layar akhir: timbangan bergerak ke posisi akhirnya |
-| Kurangi gerak | Bila `prefers-reduced-motion` atau pengaturan aktif: pergantian adegan menjadi pudar 150 ms, tanpa sapuan, tanpa angka melayang, indikator langsung ke nilai sesudah, sprite tetap di bingkai pertama; masa tunggu tombol "Lanjut" kartu tetap 600 ms |
+| Kurangi gerak | Bila `prefers-reduced-motion` atau pengaturan aktif: pergantian adegan menjadi pudar 150 ms, tanpa sapuan, tanpa angka melayang, tanpa pop bintang, indikator langsung ke nilai sesudah, sprite tetap di bingkai pertama; masa tunggu tombol "Lanjut" kartu tetap 600 ms. Teks langsung lengkap, sehingga bunyi teks juga tidak ada; bunyi klik tetap ada, karena bunyi bukan gerak |
 
 ## 9. Suara (P1)
 
-Efek chiptune pendek (≤ 1 detik), volume bawaan 60%, bisa dimatikan.
+Efek chiptune pendek (≤ 1 detik), volume bawaan 60%, bisa dimatikan. Di layar permainan, tombol `M` mematikan dan menyalakan suara (F-07); pengaturan suara di layar pengaturan dibuat di F-10.
 
 | Peristiwa | Karakter bunyi |
 |---|---|
-| Arahkan/pilih | Klik tinggi singkat |
+| Tekanan yang diterima (klik) | Klik gaya A dari halaman uji suara pemilik proyek: kotak, lebih nyaring, 45 ms, laju 1 (`sfx_klik.wav`, F-07). Berbunyi sekali untuk setiap tekanan yang diterima permainan, lewat tetikus, sentuhan, maupun keyboard; tidak saat fokus atau tetikus sekadar berpindah (keputusan Gerbang 2 F-07, S-2) |
+| Teks muncul per huruf | Bunyi teks gaya B: lembut, 32 ms, laju 1,2 (nada "Tinggi"), setiap 2 huruf atau angka, paling banyak sekali per pembaruan teks (`sfx_teks.wav`, F-07). Tambahan pemilik proyek 26 Oktober 2026 |
 | Konfirmasi pilihan | Dua nada naik |
 | Dampak tepat | Arpeggio ceria |
 | Dampak kurang tepat/berisiko | Nada rendah lembut, tidak mengagetkan |
-| Detik terakhir | Tik pelan |
+| Detik terakhir | Tik pelan (belum ada; F-13) |
 | Akhir hari | Jingle 3–4 detik sesuai jenis akhir |
 
-Bunyi dapat dibuat dengan generator efek retro seperti jsfxr (hasilnya bebas dipakai). Simpan sebagai MP3.
+Bunyi dapat dibuat dengan generator efek retro seperti jsfxr (hasilnya bebas dipakai). Format berkas: WAV PCM mono 16 bit atau MP3, paling besar 30 KB per efek. Kedua bunyi F-07 disimpan sebagai WAV persis seperti di halaman uji suara, karena itulah bunyi yang dipilih pemilik proyek (keputusan Gerbang 2 F-07, S-1).
+
+Bunyi dimuat sesudah interaksi pertama di layar permainan: satu `AudioContext` untuk seluruh halaman, dengan satu `GainNode` bernilai 0,6 (volume 60%). Bunyi yang diminta sebelum kedua berkas siap dilewati, tidak diantre. Bila bunyi gagal dimuat, permainan tetap berjalan tanpa bunyi (F-07).
 
 ## 10. Tokoh
 
@@ -374,4 +381,4 @@ Cantumkan di layar "Tentang" game dan di flipbook:
 
 - Aset visual digambar dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan [nama pengembang].
 - Huruf Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.
-- Efek suara dibuat dengan [nama alat], [lisensi].
+- Efek suara dibuat dengan [nama alat], [lisensi]. Bunyi klik dan bunyi teks (F-07) berasal dari halaman uji suara Sehari Setara; pembuat dan lisensinya menunggu jawaban pemilik proyek (butir S-6 spesifikasi F-07). Bila bunyi itu dibuat Claude dengan kode, tulisannya "Dibuat dengan kode oleh Claude (Anthropic)".

@@ -115,13 +115,13 @@ flowchart TD
 | F-04 | Panggung: skala, lapisan, sprite, garis pindai, busur hari | Design §1, 3, 6 | M | F-01 |
 | F-05 | Panel narasi, pertanyaan, dan tombol pilihan + kontrol keyboard | FR-04, 16 | M | F-02, F-04 |
 | F-06 | Indikator dan kartu dampak | FR-07, 08 | M | F-05 |
-| F-07 | Tim, giliran, bintang alasan, pengatur waktu | FR-02, 05, 06, 09 | M | F-05 |
+| F-07 | Tim, giliran, bintang alasan, pengatur waktu, serta bunyi klik dan bunyi teks | FR-02, 05, 06, 09; FR-19 sebagian (klik dan bunyi teks, keputusan pemilik proyek 26 Okt 2026) | M | F-05 |
 | F-08 | Kuis peran penegak hukum | FR-11 | S | F-06 |
 | F-09 | Layar akhir, rekap, refleksi | FR-12, 13, 14 | M | F-06, F-07 |
 | F-10 | Layar judul, pengaturan, prolog | FR-01, 02, 03 | S | F-07 |
 | F-11 | Integrasi dengan galeri Ruang Setara | FR-15 | S | F-09 |
 | F-12 | Integrasi aset: `manifest.ts`, uji palet CSS vs `palette.json`, uji kelengkapan manifest | Architecture §8, §12 | S | F-01 |
-| F-13 | Suara, layar penuh, kurangi gerak, ulangi dan kembali adegan | FR-17, 18, 19 | M | F-10 (P1) |
+| F-13 | Suara (sisa FR-19: bunyi konfirmasi, dampak, tik pelan, akhir hari, dan ikon suara), layar penuh, kurangi gerak, ulangi dan kembali adegan | FR-17, 18; sisa FR-19 | M | F-10 (P1) |
 
 Pembuatan aset gambar berjalan **paralel** dan dilacak di `Daftar_Aset.md`, bukan di backlog fitur ini. Selama sebuah aset belum berstatus "Disetujui", fitur memakai **placeholder**: kotak warna dari palet dengan label kunci aset. Placeholder wajib diganti sebelum rilis; `content:check` melaporkan placeholder yang tersisa.
 
