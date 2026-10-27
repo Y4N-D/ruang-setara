@@ -1,4 +1,4 @@
-// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05; ditambah di F-06 dan F-07).
+// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05; ditambah di F-06 sampai F-08).
 // Dipakai semua berkas e2e/*.spec.ts. Berkas ini bukan berkas uji.
 import { mkdirSync } from "node:fs";
 import { expect, type Page } from "@playwright/test";
@@ -183,4 +183,37 @@ export const awardPrompt = (page: Page) => page.locator(".ss-award-prompt");
 export async function giveStars(page: Page, stars: 0 | 1 | 2 = 1) {
   await expect(awardPrompt(page)).toBeFocused();
   await page.keyboard.press(String(stars));
+}
+
+/** Baris status panel bawah tidak pernah berisi tombol sejak tombol jembatan dihapus (F-08). */
+export const statusRowButtons = (page: Page) => page.locator(".ss-question-row button");
+
+/** Dialog kuis peran F-08, judulnya, kartu perannya, dan tombol Lanjut-nya. */
+export const quizDialog = (page: Page) => page.locator(".ss-quiz");
+export const quizTitle = (page: Page) => page.locator("#ss-quiz-title");
+export const quizCard = (page: Page) => page.locator(".ss-quiz-card");
+export const quizNext = (page: Page) => page.locator(".ss-quiz .ss-next");
+
+/** Nomor adegan yang sedang tampil, dari bilah atas ("Adegan 5/6" menjadi 5). */
+export async function sceneNumber(page: Page): Promise<number> {
+  return Number(/\d+/.exec((await page.locator(".ss-topbar-counter").textContent()) ?? "")?.[0]);
+}
+
+/**
+ * Langkah kuis peran F-08 sesudah tombol Lanjut kartu dampak adegan 5: kuis tampil belum dijawab dengan judul berfokus,
+ * lalu 4 (Hakim), kartu terbuka dengan fokus di Lanjut, masa tunggu 600 ms, dan Enter pada Lanjut. Dengan jam dijeda
+ * (paused), masa tunggu dimajukan lewat page.clock.runFor sesudah jawaban tampil (aturan dua langkah); tanpa itu, uji
+ * menunggu tombol siap. Fase bintang dimulai sesudahnya.
+ */
+export async function answerQuiz(page: Page, paused = false) {
+  await expect(quizDialog(page)).toBeVisible();
+  await expect(quizTitle(page)).toBeFocused();
+  await expect(page.locator(".ss-quiz-card[data-terbuka]")).toHaveCount(0);
+  await page.keyboard.press("4");
+  await expect(page.locator(".ss-quiz-card[data-terbuka]")).toHaveCount(4);
+  await expect(quizNext(page)).toBeFocused();
+  if (paused) await page.clock.runFor(600);
+  else await expect(quizNext(page)).not.toHaveAttribute("aria-disabled", /.*/);
+  await page.keyboard.press("Enter");
+  await expect(quizDialog(page)).toHaveCount(0);
 }

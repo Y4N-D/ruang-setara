@@ -631,12 +631,6 @@ body {
   gap: calc(var(--u) * 2);
 }
 
-.ss-question-row .ss-next {
-  margin: 0;
-  padding-top: calc(var(--u) * 0.5);
-  padding-bottom: calc(var(--u) * 0.5);
-}
-
 .ss-question,
 .ss-status {
   margin: 0;
@@ -1424,5 +1418,310 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .ss-team-star {
     animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Kuis peran (F-08): dialog di adegan 5 sesudah kartu dampak. Ukuran mengikuti specs/F-08-kuis-peran.md;
+   p = --ss-px (satu piksel antarmuka). Tepi kiri dialog diberikan lewat style dari skala panggung, seperti kartu dampak. */
+/* ------------------------------------------------------------------ */
+
+/* Selama kuis, panggung disembunyikan seperti saat kartu dampak tampil. */
+.ss-play[data-kuis] .ss-stage-area {
+  visibility: hidden;
+}
+
+/* Dialog: kotak yang sama dengan kartu dampak (atas 9,2u, kanan 2u, bawah 1,2u), bingkai piksel F-05, lapisan z 60. */
+.ss-quiz {
+  position: absolute;
+  z-index: 60;
+  top: calc(var(--u) * 9.2);
+  right: calc(var(--u) * 2);
+  bottom: calc(var(--u) * 1.2);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border: calc(var(--ss-px) * 2) solid var(--ss-ink);
+  background: var(--ss-cream);
+  box-shadow: inset 0 var(--ss-px) 0 0 var(--ss-white);
+  color: var(--ss-ink);
+  clip-path: polygon(
+    var(--ss-px) 0, calc(100% - var(--ss-px)) 0, calc(100% - var(--ss-px)) var(--ss-px), 100% var(--ss-px),
+    100% calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) 100%, var(--ss-px) 100%,
+    var(--ss-px) calc(100% - var(--ss-px)), 0 calc(100% - var(--ss-px)), 0 var(--ss-px), var(--ss-px) var(--ss-px)
+  );
+}
+
+/* Dialog yang berfokus (sesudah klik di ruang kosong) tidak diberi garis fokus. */
+.ss-quiz:focus {
+  outline: none;
+}
+
+/* Kepala mist: judul di kiri, jawaban kelas di kanan sesudah dijawab. */
+.ss-quiz-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 1.2);
+  padding: calc(var(--u) * 0.9) calc(var(--u) * 2.4);
+  border-bottom: calc(var(--ss-px) * 2) solid var(--ss-ink);
+  background: var(--ss-mist);
+}
+
+.ss-quiz-title {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 2.8);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.ss-quiz-title:focus {
+  outline: none;
+}
+
+.ss-quiz-title:focus-visible {
+  outline: 2px solid var(--ss-ink);
+  outline-offset: 4px;
+}
+
+.ss-quiz-answer {
+  margin: 0 0 0 auto;
+  font-size: calc(var(--u) * 2.8);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* Isi: pertanyaan, empat kartu, lalu pita umpan balik sesudah dijawab. */
+.ss-quiz-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.2);
+  padding: calc(var(--u) * 1.4) calc(var(--u) * 2.4) calc(var(--u) * 0.6);
+}
+
+.ss-quiz-question {
+  margin: 0;
+  font-size: calc(var(--u) * 3.6);
+  line-height: 1.35;
+}
+
+/* Empat kartu sebaris, sama lebar dan sama tinggi. */
+.ss-quiz-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(var(--u) * 1.5);
+  align-items: stretch;
+}
+
+/* Kartu peran: bingkai piksel F-05 dan ruang kursor ▶ di kiri, seperti tombol pilihan. */
+.ss-quiz-card {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(var(--u) * 0.6);
+  margin: 0;
+  padding: calc(var(--u) * 1) calc(var(--u) * 1.2) calc(var(--u) * 1) calc(var(--u) * 2.6);
+  border: calc(var(--ss-px) * 2) solid var(--ss-ink);
+  background: var(--ss-cream);
+  box-shadow: inset 0 var(--ss-px) 0 0 var(--ss-white);
+  color: var(--ss-ink);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  clip-path: polygon(
+    var(--ss-px) 0, calc(100% - var(--ss-px)) 0, calc(100% - var(--ss-px)) var(--ss-px), 100% var(--ss-px),
+    100% calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) 100%, var(--ss-px) 100%,
+    var(--ss-px) calc(100% - var(--ss-px)), 0 calc(100% - var(--ss-px)), 0 var(--ss-px), var(--ss-px) var(--ss-px)
+  );
+}
+
+/* Kursor ▶ 2,2u, 0,6u dari tepi kiri, sejajar tengah ikon (1u + 16p dari tepi atas bagian dalam). */
+.ss-quiz-card::before {
+  content: "\25B6\FE0E";
+  content: "\25B6\FE0E" / "";
+  position: absolute;
+  top: calc(var(--u) * 1 + var(--ss-px) * 16);
+  left: calc(var(--u) * 0.6);
+  transform: translateY(-50%);
+  font-size: calc(var(--u) * 2.2);
+  line-height: 1;
+  visibility: hidden;
+}
+
+.ss-quiz-card:focus-visible {
+  background: var(--ss-sun);
+  /* Tak terlihat dalam mode biasa; menjadi garis fokus dalam mode warna paksa. */
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.ss-quiz-card:focus-visible::before {
+  visibility: visible;
+}
+
+/* Sesudah dijawab: kartu terkunci tanpa warna arah tetikus; jawaban tepat leaf, pilihan kelas bercincin dalam ink 2p,
+   dan pilihan kelas yang keliru sun (K-4). */
+.ss-quiz-card:disabled {
+  cursor: default;
+}
+
+.ss-quiz-card[data-tepat] {
+  background: var(--ss-leaf);
+}
+
+.ss-quiz-card[data-pilihan] {
+  box-shadow: inset 0 0 0 calc(var(--ss-px) * 2) var(--ss-ink);
+}
+
+.ss-quiz-card[data-pilihan]:not([data-tepat]) {
+  background: var(--ss-sun);
+}
+
+.ss-quiz-card-top {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 1.2);
+}
+
+.ss-quiz-icon {
+  flex: none;
+  width: calc(var(--ss-px) * 32);
+  height: calc(var(--ss-px) * 32);
+  background: center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+
+.ss-quiz-role {
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 2.8);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* Ruang tugas setinggi tiga baris, selalu dicadangkan; sebelum dijawab berupa kotak mist bertanda "?". */
+.ss-quiz-duty {
+  align-self: stretch;
+  min-height: calc(var(--u) * 3.6 * 1.3 * 3);
+  margin: 0;
+  font-size: calc(var(--u) * 3.6);
+  line-height: 1.3;
+}
+
+.ss-quiz-card:not([data-terbuka]) .ss-quiz-duty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ss-mist);
+  color: var(--ss-dusk);
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 2.8);
+}
+
+/* Label "Jawaban tepat" atau "Pilihan kelas": satu baris, ruangnya selalu dicadangkan. */
+.ss-quiz-mark {
+  min-height: calc(var(--u) * 2.5 * 1.3);
+  padding: 0 calc(var(--u) * 0.6);
+  background: var(--ss-ink);
+  color: var(--ss-cream);
+  font-size: calc(var(--u) * 2.5);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.ss-quiz-mark:empty {
+  visibility: hidden;
+}
+
+/* Pita umpan balik: leaf dengan ikon hati bila tepat, mango dengan ikon tanda tanya bila belum tepat. */
+.ss-quiz-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--u) * 1.2);
+  padding: calc(var(--u) * 0.6) calc(var(--u) * 1.2);
+}
+
+.ss-quiz[data-hasil="tepat"] .ss-quiz-feedback {
+  background: var(--ss-leaf);
+}
+
+.ss-quiz[data-hasil="belum"] .ss-quiz-feedback {
+  background: var(--ss-mango);
+}
+
+.ss-quiz-feedback-icon {
+  flex: none;
+  width: calc(var(--ss-px) * 16);
+  height: calc(var(--ss-px) * 16);
+  margin-top: calc(var(--u) * 0.4);
+  background: center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+
+.ss-quiz-feedback-text {
+  margin: 0;
+  font-size: calc(var(--u) * 3.1);
+  line-height: 1.3;
+}
+
+.ss-quiz-feedback-text + .ss-quiz-feedback-text {
+  margin-top: calc(var(--u) * 0.4);
+}
+
+/* Kaki: tombol Lanjut di kanan, di tempat yang sama dengan Lanjut kartu dampak. */
+.ss-quiz-foot {
+  flex: none;
+  display: flex;
+  justify-content: flex-end;
+  padding: calc(var(--u) * 0.4) calc(var(--u) * 2.4) calc(var(--u) * 1.2);
+}
+
+.ss-quiz-foot .ss-next {
+  margin: 0;
+}
+
+/* Lanjut nonaktif sebelum dijawab: mist dan dusk; bila berfokus, kursor ▶ dan garis fokus ink, seperti tombol nonaktif F-07. */
+.ss-quiz .ss-next[data-nonaktif],
+.ss-quiz .ss-next[data-nonaktif]:focus-visible {
+  background: var(--ss-mist);
+  color: var(--ss-dusk);
+  cursor: default;
+}
+
+.ss-quiz .ss-next[data-nonaktif]:focus-visible {
+  outline: 2px solid var(--ss-ink);
+}
+
+/* Nonaktif dan masa tunggu 600 ms: tidak berubah warna saat diarahkan tetikus. */
+@media (hover: hover) {
+  .ss-quiz-card:enabled:hover {
+    background: var(--ss-sun);
+  }
+
+  .ss-quiz-card:enabled:hover::before {
+    visibility: visible;
+  }
+
+  .ss-quiz .ss-next[aria-disabled="true"]:not([data-nonaktif]):not(:focus-visible):hover {
+    background: var(--ss-surface);
+  }
+
+  .ss-quiz .ss-next[aria-disabled="true"]:not(:focus-visible):hover::before {
+    visibility: hidden;
+  }
+}
+
+/* Mode warna paksa: sudut terpotong dimatikan seperti F-05. Ditulis sesudah aturan clip-path dialog dan kartu di atas,
+   agar tidak tertimpa aturan yang sama kuatnya. Cincin pilihan kelas (box-shadow) dihapus browser dalam mode ini;
+   maknanya tetap terbaca dari label, kepala kanan, dan kalimat umpan balik. */
+@media (forced-colors: active) {
+  .ss-quiz,
+  .ss-quiz-card {
+    clip-path: none;
   }
 }

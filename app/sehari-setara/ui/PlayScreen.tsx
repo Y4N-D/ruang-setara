@@ -1,17 +1,17 @@
-// Layar permainan Sehari Setara (spesifikasi F-05, F-06, dan F-07), dibuka lewat #main sampai layar judul dibuat di F-10.
+// Layar permainan Sehari Setara (spesifikasi F-05 sampai F-08), dibuka lewat #main sampai layar judul dibuat di F-10.
 // Menjalankan mesin F-02 dengan naskah F-03: narasi, pertanyaan, pilihan, pengatur waktu, reaksi, indikator, kartu
-// dampak, bintang alasan, pergantian adegan, dan layar akhir sementara, ditambah papan tim dan bunyi (F-07).
-// Logika permainan tetap di engine/; layar ini hanya mengirim aksi.
+// dampak, kuis peran di adegan 5 (F-08), bintang alasan, pergantian adegan, dan layar akhir sementara, ditambah papan tim
+// dan bunyi (F-07). Logika permainan tetap di engine/; layar ini hanya mengirim aksi.
 import { useEffect, useEffectEvent, useReducer, useRef, useState, type ReactNode } from "react";
 import { copy } from "../content/copy";
+import { ROLES } from "../content/roles";
 import { SCENES } from "../content/scenes";
 import { DEFAULT_TEAMS } from "../content/teams";
 import { createInitialState, createReducer } from "../engine/reducer";
-import { activeTeam, activeTeamIndex, narrationFor } from "../engine/rules";
-import type { ChoiceId, GameAction, GameState, Phase, Stars, TeamSetup, TimeOfDay } from "../engine/types";
+import { activeTeam, activeTeamIndex, isQuizCorrect, narrationFor } from "../engine/rules";
+import type { ChoiceId, GameAction, GameState, Phase, RoleId, Stars, TeamSetup, TimeOfDay } from "../engine/types";
 import { ChoicePanel } from "./ChoicePanel";
 import {
-  bridgeActions,
   FADE_MS,
   keyCommand,
   REACTION_MS,
@@ -32,6 +32,8 @@ import { STAGE, type TeamCount } from "./layout";
 import { Meters } from "./Meters";
 import { NarrationBox, type NarrationHandle } from "./NarrationBox";
 import { preloadScene } from "./preload";
+import { QUIZ_GUARD_MS, quizResultAnnouncement, quizStartAnnouncement, roleForNumber } from "./quiz";
+import { RoleQuiz } from "./RoleQuiz";
 import { SceneWipe } from "./SceneWipe";
 import { CLICK_RATE, soundPlayer, TEXT_BLIP_RATE } from "./sound";
 import { Stage } from "./Stage";
@@ -46,13 +48,8 @@ const GALLERY_HREF = "../";
 
 const reducer = createReducer(SCENES);
 
-/** Fase yang menampilkan pertanyaan dan tiga pilihan di panel bawah; di fase impact panel bawah kosong (F-06). */
-const CHOICE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["discuss", "reaction", "quiz", "stars"]);
-/**
- * Fase milik fitur lain yang masih dilewati jembatan sementara: kuis sampai F-08. Kuis dilewati dalam tekanan Lanjut
- * kartu dampak, jadi tombol jembatan di baris status hanya pengaman (spesifikasi F-07).
- */
-const BRIDGE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["quiz"]);
+/** Fase yang menampilkan pertanyaan dan tiga pilihan di panel bawah; di fase impact dan quiz panel bawah kosong (F-06, F-08). */
+const CHOICE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["discuss", "reaction", "stars"]);
 /** Fase saat panggung menampilkan reaksi pilihan adegan berjalan. */
 const REACTING_PHASES: ReadonlySet<Phase> = new Set<Phase>(["reaction", "impact", "quiz", "stars", "transition"]);
 /** Fase yang memakai layar akhir sementara, sampai layar akhir dibuat di F-09. */
@@ -99,11 +96,15 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   const [pop, setPop] = useState<StarPop | null>(null);
   const narrationRef = useRef<NarrationHandle>(null);
   const endTitleRef = useRef<HTMLHeadingElement>(null);
-  const bridgeUsed = useRef("");
+  const cardUsed = useRef("");
+  const quizUsed = useRef("");
   const starsUsed = useRef("");
   // Waktu sejak kartu dampak tampil: state untuk tampilan, ref untuk pengaman tekanan ganda (spesifikasi F-06).
   const [impactTime, setImpactTime] = useState({ key: "", ms: 0 });
   const impactStart = useRef({ key: "", at: 0 });
+  // Masa tunggu Lanjut kuis (F-08): ref waktu mulai untuk pengaman tekanan, state hanya untuk tampilan tombol.
+  const quizStart = useRef({ key: "", at: 0 });
+  const [quizReady, setQuizReady] = useState("");
 
   const reduced = prefersReduced || state.settings.reducedMotion;
   const soundOn = state.settings.sound;
@@ -187,18 +188,32 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     impactStart.current.key === sceneKey &&
     performance.now() - impactStart.current.at >= IMPACT_GUARD_MS;
 
-  /** Tombol Lanjut kartu dampak: sekali per adegan, sesudah masa tunggu; kuis dilewati, lalu fase bintang (F-07). */
+  /** Tombol Lanjut kartu dampak: sekali per adegan, sesudah masa tunggu; reducer membuka kuis di adegan 5, selain itu fase bintang. */
   const continueFromCard = () => {
-    if (!cardReady() || bridgeUsed.current === sceneKey) return;
-    bridgeUsed.current = sceneKey;
-    send(bridgeActions(scene));
+    if (!cardReady() || cardUsed.current === sceneKey) return;
+    cardUsed.current = sceneKey;
+    dispatch({ type: "LANJUT" });
     click();
   };
 
-  /** Tombol jembatan F-05, hanya bila fase kuis sempat tampil (pengaman sampai F-08). */
-  const bridge = () => {
-    if (!BRIDGE_PHASES.has(state.phase)) return;
-    send(bridgeActions(scene));
+  /** Jawaban kuis peran: kartu atau 1 sampai 4; hanya jawaban pertama yang diterima reducer (F-02, F-08). */
+  const answerQuiz = (role: RoleId) => {
+    const action: GameAction = { type: "JAWAB_KUIS", role };
+    if (state.phase !== "quiz" || change || reducer(state, action) === state) return;
+    dispatch(action);
+    click();
+  };
+
+  /**
+   * Tombol Lanjut kuis: sesudah dijawab, sekali per adegan, dan sesudah masa tunggu 600 ms. Waktu diperiksa saat tekanan
+   * diterima, bukan dari tampilan tombol, sehingga tekanan pada 600 ms tetap diterima (spesifikasi F-08).
+   */
+  const continueFromQuiz = () => {
+    if (state.phase !== "quiz" || change || state.quizAnswer === null || quizUsed.current === sceneKey) return;
+    if (quizStart.current.key !== sceneKey || performance.now() - quizStart.current.at < QUIZ_GUARD_MS) return;
+    if (reducer(state, { type: "LANJUT" }) === state) return;
+    quizUsed.current = sceneKey;
+    dispatch({ type: "LANJUT" });
     click();
   };
 
@@ -254,6 +269,15 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     return () => clearInterval(timer);
   }, [state.phase, sceneKey]);
 
+  // Kuis peran: masa tunggu Lanjut kuis dihitung sejak jawaban pertama tampil (spesifikasi F-08, K-5). Satu pengatur
+  // waktu hanya memperbarui tampilan tombol, dan dibersihkan saat fase berganti atau layar ditutup.
+  useEffect(() => {
+    if (state.phase !== "quiz" || state.quizAnswer === null) return;
+    quizStart.current = { key: sceneKey, at: performance.now() };
+    const timer = setTimeout(() => setQuizReady(sceneKey), QUIZ_GUARD_MS);
+    return () => clearTimeout(timer);
+  }, [state.phase, state.quizAnswer, sceneKey]);
+
   // Pergantian adegan: LANJUT di tengah sapuan (200 ms) atau sesudah pudar keluar (75 ms); lapisan dibuang di akhir.
   useEffect(() => {
     if (!change) return;
@@ -278,7 +302,7 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     if (ended) endTitleRef.current?.focus();
   }, [ended]);
 
-  // Pintasan keyboard (Architecture bagian 9; spesifikasi F-05 dan F-07), hanya aktif di layar permainan.
+  // Pintasan keyboard (Architecture bagian 9; spesifikasi F-05, F-07, dan F-08), hanya aktif di layar permainan.
   const onKey = useEffectEvent((event: KeyboardEvent) => {
     if (change) return;
     const context: KeyContext = {
@@ -298,9 +322,12 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     else if (command.type === "waktu") timerAction(command.action);
     else if (command.type === "bintang") giveStars(command.stars);
     else if (command.type === "suara") toggleSound();
-    else if (state.phase === "intro") narrationRef.current?.activate();
+    else if (command.type === "jawab") {
+      const role = roleForNumber(command.nomor, ROLES);
+      if (role) answerQuiz(role.id);
+    } else if (state.phase === "intro") narrationRef.current?.activate();
     else if (state.phase === "impact") continueFromCard();
-    else bridge();
+    else if (state.phase === "quiz") continueFromQuiz();
   });
 
   useEffect(() => {
@@ -361,10 +388,18 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
           }
         : state.meters;
   const meterEffects = showingImpact && !reduced && chosen ? chosen.effects : null;
+  // Kuis peran di adegan yang punya roleQuiz (adegan 5), di tempat kartu dampak (F-08).
+  const quiz = state.phase === "quiz" && !change ? scene.roleQuiz : undefined;
 
   let live = "";
   if (!change && state.phase === "intro") live = screens[screen];
   else if (showingImpact && chosen) live = impactAnnouncement(chosen, before, state.meters);
+  else if (quiz) {
+    live =
+      state.quizAnswer === null
+        ? quizStartAnnouncement(quiz.question, ROLES)
+        : quizResultAnnouncement(ROLES, state.quizAnswer, isQuizCorrect(scene, state.quizAnswer));
+  }
 
   let panel: ReactNode = null;
   if (!change && state.phase === "intro") {
@@ -389,16 +424,19 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
         choices={scene.choices}
         flags={state.flags}
         chosen={state.phase === "discuss" ? null : (entry?.choiceId ?? null)}
-        bridgeReady={BRIDGE_PHASES.has(state.phase)}
         onChoose={choose}
-        onBridge={bridge}
         takeFocus={state.phase !== "stars"}
       />
     );
   }
 
   return (
-    <main className="ss-play" aria-labelledby="ss-play-title" data-kartu={showingImpact ? "" : undefined}>
+    <main
+      className="ss-play"
+      aria-labelledby="ss-play-title"
+      data-kartu={showingImpact ? "" : undefined}
+      data-kuis={quiz ? "" : undefined}
+    >
       <h1 id="ss-play-title" className="ss-sr">
         {copy.play.heading(state.sceneIndex + 1, scene.title)}
       </h1>
@@ -450,6 +488,19 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
           scale={scale}
           ready={impactElapsed >= IMPACT_GUARD_MS}
           onNext={continueFromCard}
+        />
+      )}
+      {quiz && (
+        <RoleQuiz
+          key={sceneKey}
+          question={quiz.question}
+          roles={ROLES}
+          answer={state.quizAnswer}
+          correctId={quiz.answer}
+          scale={scale}
+          ready={quizReady === sceneKey}
+          onAnswer={answerQuiz}
+          onNext={continueFromQuiz}
         />
       )}
     </main>

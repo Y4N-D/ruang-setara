@@ -1,7 +1,8 @@
-// Kontrol layar permainan Sehari Setara (spesifikasi F-05; tombol pengatur waktu, bintang, dan suara: F-07).
-// Semua fungsi di sini murni dan diuji di controls.test.ts. Waktu dan pengatur waktu dijalankan
-// oleh PlayScreen.tsx dan useTimer.ts; reducer di engine/ tetap tanpa setTimeout (spesifikasi F-02, AC-14).
-import type { ChoiceId, GameAction, GameState, Phase, Scene, Stars, TeamSetup } from "../engine/types";
+// Kontrol layar permainan Sehari Setara (spesifikasi F-05; tombol pengatur waktu, bintang, dan suara: F-07;
+// pintasan kuis peran: F-08). Semua fungsi di sini murni dan diuji di controls.test.ts. Waktu dan pengatur waktu
+// dijalankan oleh PlayScreen.tsx dan useTimer.ts; reducer di engine/ tetap tanpa setTimeout (spesifikasi F-02, AC-14).
+import type { ChoiceId, GameAction, GameState, Phase, Stars, TeamSetup } from "../engine/types";
+import type { QuizNumber } from "./quiz";
 
 /** Lama tampil reaksi tokoh sebelum REAKSI_SELESAI (Design System bagian 8: 1–1,5 detik). */
 export const REACTION_MS = 1200;
@@ -31,7 +32,8 @@ export type PlayCommand =
   | { readonly type: "lanjut" }
   | { readonly type: "waktu"; readonly action: TimerActionType }
   | { readonly type: "bintang"; readonly stars: Stars }
-  | { readonly type: "suara" };
+  | { readonly type: "suara" }
+  | { readonly type: "jawab"; readonly nomor: QuizNumber };
 
 const CHOICE_KEYS: Readonly<Record<string, ChoiceId>> = {
   "1": "A",
@@ -56,8 +58,11 @@ const TIMER_KEYS: Readonly<Record<string, TimerActionType>> = {
 
 const STAR_KEYS: Readonly<Record<string, Stars>> = { "0": 0, "1": 1, "2": 2 };
 
+/** Pintasan kuis peran (F-08): 1 sampai 4 menjawab peran ke-n. */
+const QUIZ_KEYS: Readonly<Record<string, QuizNumber>> = { "1": 1, "2": 2, "3": 3, "4": 4 };
+
 /**
- * Fase tempat Spasi dan Enter berarti lanjut: narasi, kartu dampak, dan jembatan kuis. Sejak F-07 tidak lagi di fase
+ * Fase tempat Spasi dan Enter berarti lanjut: narasi, kartu dampak, dan kuis peran. Sejak F-07 tidak lagi di fase
  * stars, sehingga tekanan kedua dari tekanan ganda pada Lanjut kartu tidak memberi bintang.
  */
 const NEXT_PHASES: ReadonlySet<Phase> = new Set<Phase>(["intro", "impact", "quiz"]);
@@ -83,6 +88,10 @@ export function keyCommand(phase: Phase, key: string): PlayCommand | null {
   if (phase === "stars") {
     const stars = own(STAR_KEYS, key);
     return stars === undefined ? null : { type: "bintang", stars };
+  }
+  if (phase === "quiz") {
+    const nomor = own(QUIZ_KEYS, key);
+    return nomor === undefined ? null : { type: "jawab", nomor };
   }
   return null;
 }
@@ -148,21 +157,6 @@ export function wipeSchedule(): WipeBlock[] {
 /** Dari keadaan awal sampai fase intro adegan 1: judul, pengaturan, dan prolog dilewati (F-10 belum ada). */
 export function startActions(teams: readonly TeamSetup[]): GameAction[] {
   return [{ type: "MULAI" }, { type: "SIMPAN_PENGATURAN", teams: [...teams], settings: {} }, { type: "LANJUT" }];
-}
-
-/**
- * Jembatan sementara dari fase impact atau quiz ke fase stars (F-07): LANJUT, lalu hanya di adegan berkuis, jawaban
- * dari naskah dan LANJUT, sampai kuis ditampilkan di F-08. Bintang alasan diberikan guru di fase stars.
- * Aksi yang tidak berlaku untuk fase berjalan diabaikan reducer.
- */
-export function bridgeActions(scene: Scene): GameAction[] {
-  const quiz: GameAction[] = scene.roleQuiz
-    ? [
-        { type: "JAWAB_KUIS", role: scene.roleQuiz.answer },
-        { type: "LANJUT" },
-      ]
-    : [];
-  return [{ type: "LANJUT" }, ...quiz];
 }
 
 /** Dari layar akhir sementara (fase ending, recap, atau reflection) kembali ke fase intro adegan 1. */

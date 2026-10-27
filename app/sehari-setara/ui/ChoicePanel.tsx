@@ -1,6 +1,5 @@
 // Pertanyaan dan tiga tombol pilihan A/B/C (Design System bagian 7; spesifikasi F-05).
-// Sesudah memilih, baris pertanyaan menjadi status. Tombol "Lanjut" jembatan sementara hanya tersisa sebagai pengaman
-// fase quiz sampai F-08 (spesifikasi F-07). Tombol pilihan terkunci sejak pilihan diambil.
+// Sesudah memilih, baris pertanyaan menjadi status. Tombol pilihan terkunci sejak pilihan diambil.
 import { useEffect, useRef } from "react";
 import { copy } from "../content/copy";
 import { choiceText } from "../engine/rules";
@@ -11,25 +10,21 @@ interface ChoicePanelProps {
   choices: Scene["choices"];
   flags: readonly Flag[];
   chosen: ChoiceId | null;
-  bridgeReady: boolean;
   onChoose(id: ChoiceId): void;
-  onBridge(): void;
   /** Salah di fase bintang (F-07): fokus tetap pada ajakan bintang di panel kanan. */
   takeFocus?: boolean;
 }
 
-export function ChoicePanel({ question, choices, flags, chosen, bridgeReady, onChoose, onBridge, takeFocus = true }: ChoicePanelProps) {
+export function ChoicePanel({ question, choices, flags, chosen, onChoose, takeFocus = true }: ChoicePanelProps) {
   const questionRef = useRef<HTMLParagraphElement>(null);
   const statusRef = useRef<HTMLParagraphElement>(null);
-  const bridgeRef = useRef<HTMLButtonElement>(null);
 
-  // Fokus: pertanyaan (agar Spasi tidak memilih tanpa sengaja), lalu baris status, lalu tombol jembatan.
+  // Fokus: pertanyaan (agar Spasi tidak memilih tanpa sengaja), lalu baris status sesudah memilih.
   useEffect(() => {
     if (!takeFocus) return;
     if (chosen === null) questionRef.current?.focus();
-    else if (bridgeReady) bridgeRef.current?.focus();
     else statusRef.current?.focus();
-  }, [chosen, bridgeReady, takeFocus]);
+  }, [chosen, takeFocus]);
 
   return (
     <>
@@ -39,16 +34,9 @@ export function ChoicePanel({ question, choices, flags, chosen, bridgeReady, onC
             {question}
           </p>
         ) : (
-          <>
-            <p ref={statusRef} className="ss-status" tabIndex={-1}>
-              {copy.play.chosen(chosen)}
-            </p>
-            {bridgeReady && (
-              <button ref={bridgeRef} type="button" className="ss-next" onClick={onBridge}>
-                {copy.play.bridgeNext}
-              </button>
-            )}
-          </>
+          <p ref={statusRef} className="ss-status" tabIndex={-1}>
+            {copy.play.chosen(chosen)}
+          </p>
         )}
       </div>
       <div className="ss-choices" role="group" aria-label={question}>

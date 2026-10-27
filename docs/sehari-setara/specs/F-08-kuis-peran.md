@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Menunggu persetujuan (balasan `Spesifikasi disetujui: F-08`) |
+| Status | Disetujui 27 Oktober 2026 (balasan `Spesifikasi disetujui: F-08`; saran K-1 sampai K-6 dipakai). Catatan Build ditandai **[Build]** |
 | Tanggal | 27 Oktober 2026 |
 | Rencana | `docs/sehari-setara/PLAN.md`, entri F-08 (disetujui 26 Oktober 2026 dengan balasan `Setuju: F-08`; saran usulan 1–7, 9, dan 10 diterima; usulan 6: Temuan 1 F-07 dibiarkan; usulan 8 tetap terbuka untuk Plan F-09) |
 
@@ -568,6 +568,7 @@ Cara uji yang perlu diperhatikan:
 - Ikon gagal dimuat: `page.route` menggagalkan permintaan `role_*.png` dan `emote_tanya*.png`, seperti uji "bunyi gagal dimuat" F-07.
 - Pramuat: permintaan ikon dicatat dengan `page.on("request")` sebelum adegan 5 dimulai.
 - Uji yang mengukur atau memotret kuis menunggu gambar latar `.ss-quiz-icon` dan `.ss-quiz-feedback-icon` termuat dan ter-*decode*, dengan cara fungsi `waitImages` di uji F-06 dan F-07.
+- **[Build]** Uji bunyi klik di kuis (AC-14) ditambahkan ke `e2e/suara.spec.ts`, karena perekam bunyinya ada di berkas itu; `kuis-peran.spec.ts` berisi uji AC-1 sampai AC-13. `e2e/bantuan.ts` juga mendapat `sceneNumber`, yang membaca nomor adegan dari bilah atas, sehingga fungsi bantu `toStars` dan `playScene` menjawab kuis hanya di adegan 5. Permainan baru dalam satu uji dimulai lewat layar kerangka lalu `#main` lagi, tanpa memuat ulang halaman (F-07 AC-11).
 
 Penyesuaian uji lama: `e2e/bantuan.ts` mendapat pemilih dialog kuis dan fungsi bersama yang menunggu judul kuis berfokus, menekan `4`, menunggu kartu terbuka, menunggu masa tunggu (waktu sebenarnya, atau `page.clock.runFor` di uji dengan jam dijeda), lalu menekan `Enter`. Fungsi ini dipakai sesudah "Lanjut" kartu adegan 5 di ke-31 uji berikut (hasil percobaan Plan). Pemeriksaan "kuis tidak tampil" yang sudah ada dipertahankan, karena dilakukan saat kartu dampak tampil atau di fase bintang. Nama `bridgeNext` dan pemilih `.ss-question-row .ss-next` diganti pemeriksaan bahwa baris status tidak berisi tombol (`.ss-question-row button`).
 

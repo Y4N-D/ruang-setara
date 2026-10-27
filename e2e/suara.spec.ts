@@ -3,10 +3,11 @@
 // AudioContext, decodeAudioData, AudioNode.prototype.connect, dan AudioBufferSourceNode.prototype.start, lalu mencatat
 // waktu jam uji, laju, panjang bunyi, keadaan konteks, dan sambungan. Bunyi dibedakan dari panjangnya: klik 45 ms dan
 // teks 32 ms. Jam uji dijeda sebelum halaman dimuat, sehingga teks per huruf hanya maju lewat page.clock.runFor.
+// Disesuaikan di F-08: playScene menjawab kuis peran di adegan 5; uji baru menghitung klik di kuis (spesifikasi F-08, AC-14).
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
 import { typedLength } from "../app/sehari-setara/ui/controls";
-import { awardPrompt, cardNext, expectClean, VIEWPORTS, watch } from "./bantuan";
+import { answerQuiz, awardPrompt, cardNext, expectClean, quizCard, quizDialog, quizNext, sceneNumber, VIEWPORTS, watch } from "./bantuan";
 
 const T0 = new Date("2026-10-26T09:00:00+08:00").getTime();
 
@@ -158,14 +159,16 @@ function blipSchedule(text: string, untilMs = Number.POSITIVE_INFINITY) {
   return times;
 }
 
-/** Satu adegan dengan keyboard sampai pergantian adegan selesai (400 ms sapuan). */
+/** Satu adegan dengan keyboard sampai pergantian adegan selesai (400 ms sapuan); di adegan 5 kuis peran dijawab (F-08). */
 async function playScene(page: Page) {
+  const quiz = SCENES[(await sceneNumber(page)) - 1].roleQuiz !== undefined;
   while ((await page.locator(".ss-question").count()) === 0) await page.keyboard.press("Space");
   await page.keyboard.press("B");
   await page.clock.runFor(1200);
   await expect(page.locator("#ss-impact-title")).toBeFocused();
   await page.clock.runFor(600);
   await page.keyboard.press("Enter");
+  if (quiz) await answerQuiz(page, true);
   await expect(awardPrompt(page)).toBeFocused();
   await page.keyboard.press("1");
   await page.clock.runFor(400);
@@ -311,6 +314,63 @@ test("bunyi klik dengan tetikus: jalur yang sama, jumlah klik yang sama (AC-13)"
   await expectClicks(page, 10, "bintang dan sapuan");
   await page.clock.runFor(400);
   await expectClicks(page, 10, "sesudah sapuan");
+  expectClean(log);
+});
+
+test("bunyi klik di kuis peran: Lanjut kartu, jawaban, dan Lanjut kuis masing-masing satu klik (spesifikasi F-08, AC-14)", async ({ page }) => {
+  const log = watch(page);
+  await openPlay(page);
+  await unlock(page);
+  for (let i = 0; i < 4; i++) await playScene(page);
+  await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 5/6");
+  while ((await page.locator(".ss-question").count()) === 0) await page.keyboard.press("Space");
+  await page.keyboard.press("B");
+  await page.clock.runFor(1200);
+  await expect(page.locator("#ss-impact-title")).toBeFocused();
+  await page.clock.runFor(600);
+  const start = clicks(await soundLog(page)).length;
+
+  // Klik ganda pada Lanjut kartu: kuis tampil dengan satu klik; klik kedua jatuh di Lanjut kuis yang masih nonaktif.
+  await cardNext(page).dblclick();
+  await expect(quizDialog(page)).toBeVisible();
+  await expectClicks(page, start + 1, "Lanjut kartu yang membuka kuis");
+
+  // Sebelum dijawab: Lanjut kuis (klik, Enter, Spasi), 0, 5, dan Escape tanpa bunyi.
+  await quizNext(page).click({ force: true });
+  await quizNext(page).focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Space");
+  for (const key of ["0", "5", "Escape"]) await page.keyboard.press(key);
+  await expectClicks(page, start + 1, "tekanan tanpa pengaruh sebelum dijawab");
+
+  // Jawaban dengan Enter yang ditahan pada kartu 1: satu klik; pengulangan tidak berbunyi.
+  await page.keyboard.press("Tab");
+  await expect(quizCard(page).nth(0)).toBeFocused();
+  await page.keyboard.down("Enter");
+  await expect(page.locator(".ss-quiz-card[data-terbuka]")).toHaveCount(4);
+  await page.keyboard.down("Enter");
+  await page.keyboard.down("Enter");
+  await expectClicks(page, start + 2, "jawaban dengan Enter yang ditahan");
+
+  // Masa tunggu: pengulangan, Lanjut kuis, dan angka sesudah dijawab tanpa bunyi.
+  await page.clock.runFor(599);
+  await page.keyboard.down("Enter");
+  await page.keyboard.up("Enter");
+  await quizNext(page).click({ force: true });
+  await page.keyboard.press("Space");
+  for (const key of ["1", "2", "3", "4", "0", "Escape"]) await page.keyboard.press(key);
+  await expectClicks(page, start + 2, "masa tunggu dan angka sesudah dijawab");
+
+  // Lanjut kuis yang diterima: satu klik, lalu fase bintang.
+  await page.clock.runFor(1);
+  await page.keyboard.press("Space");
+  await expect(awardPrompt(page)).toBeFocused();
+  await expectClicks(page, start + 3, "Lanjut kuis");
+  for (const played of clicks(await soundLog(page))) {
+    expect(played.duration).toBeCloseTo(0.045, 3);
+    expect(played.rate).toBe(1);
+    expect(played.state).toBe("running");
+  }
   expectClean(log);
 });
 

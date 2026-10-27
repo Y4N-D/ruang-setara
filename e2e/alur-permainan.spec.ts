@@ -1,6 +1,7 @@
 // Uji ujung ke ujung layar permainan Sehari Setara (spesifikasi F-05, Rencana uji langkah 3 dan 4).
 // Disesuaikan di F-06: sesudah reaksi, kartu dampak menggantikan tombol jembatan (spesifikasi F-06, Rencana uji).
 // Disesuaikan di F-07: sesudah kartu dampak, bintang alasan diberikan sebelum adegan berganti (giveStars).
+// Disesuaikan di F-08: sesudah kartu dampak adegan 5, kuis peran dijawab sebelum bintang alasan (answerQuiz).
 // Membuka hasil build di /ruang-setara/sehari-setara/#main lewat serve-subpath.mjs, seperti alamat GitHub Pages.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
@@ -8,6 +9,7 @@ import { choiceText, narrationFor } from "../app/sehari-setara/engine/rules";
 import type { CastSlot, ChoiceId, Flag } from "../app/sehari-setara/engine/types";
 import { WIPE, wipeSchedule } from "../app/sehari-setara/ui/controls";
 import {
+  answerQuiz,
   awardPrompt,
   cardNext,
   contrast,
@@ -18,6 +20,7 @@ import {
   INK,
   measureStage,
   SHOTS,
+  statusRowButtons,
   SUN,
   VIEWPORTS,
   waitCardReady,
@@ -46,8 +49,6 @@ async function pauseClock(page: Page) {
 
 const live = (page: Page) => page.locator('.ss-play [aria-live="polite"]');
 const narrationNext = (page: Page) => page.locator(".ss-narration .ss-next");
-/** Tombol jembatan F-05 di baris status; sejak F-06 tidak muncul lagi pada pemakaian biasa. */
-const bridgeNext = (page: Page) => page.locator(".ss-question-row .ss-next");
 const cardTitle = (page: Page) => page.locator("#ss-impact-title");
 
 async function openPlay(page: Page, size: ViewportName = "1280x720", reduce = true) {
@@ -152,11 +153,13 @@ async function playPath(page: Page, path: ChoiceId[], shots?: { discussS5?: stri
     await page.keyboard.press(path[i]);
     await checkChosen(page, i, path[i]);
     if (i === 3 && path[i] === "B") flags.push("komangDibela");
-    // Kartu dampak (F-06) satu-satunya dialog; kuis dan tombol jembatan tidak tampil.
+    // Kartu dampak (F-06) satu-satunya dialog, dan baris status tanpa tombol. Kuis peran (F-08) baru tampil sesudah
+    // Lanjut kartu adegan 5.
     await waitCardReady(page);
     await expect(page.locator('[role="dialog"]')).toHaveCount(1);
-    await expect(bridgeNext(page)).toHaveCount(0);
+    await expect(statusRowButtons(page)).toHaveCount(0);
     await page.keyboard.press("Enter");
+    if (scene.roleQuiz) await answerQuiz(page);
     await giveStars(page);
   }
   await expect(page.locator(".ss-play-end h1")).toHaveText("Keenam adegan selesai");
@@ -344,7 +347,7 @@ test("pilihan: teks, fokus, status tombol, dan aturan keyboard (AC-3, AC-4, AC-1
   expectClean(log);
 });
 
-test("reaksi dan kartu dampak: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, AC-6; F-06 AC-6, AC-9, AC-10)", async ({ page }) => {
+test("reaksi dan kartu dampak: 1,2 detik, sekali per adegan, kuis hanya di adegan 5 (AC-5, AC-6; F-06 AC-6, AC-9, AC-10; F-08 AC-1)", async ({ page }) => {
   const log = watch(page);
   await openPlay(page);
   await toQuestion(page);
@@ -395,7 +398,7 @@ test("reaksi dan kartu dampak: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, A
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 3/6");
   await expect(page.locator(".ss-narration")).toBeVisible();
 
-  // Adegan 3 dan 4 dengan B, lalu adegan 5: kuis peran tidak tampil.
+  // Adegan 3 dan 4 dengan B, lalu adegan 5: kuis peran belum tampil selama kartu, lalu tampil sesudah Lanjut kartu (F-08).
   for (const i of [2, 3]) {
     await readNarration(page, i, []);
     await page.keyboard.press("B");
@@ -406,12 +409,15 @@ test("reaksi dan kartu dampak: 1,2 detik, sekali per adegan, tanpa kuis (AC-5, A
   await readNarration(page, 4, []);
   await page.keyboard.press("b");
   await waitCardReady(page);
-  await expect(bridgeNext(page)).toHaveCount(0);
+  await expect(statusRowButtons(page)).toHaveCount(0);
   for (const role of ["Polisi", "Jaksa", "Advokat", "Hakim"]) await expect(page.getByText(role, { exact: true })).toHaveCount(0);
   await page.keyboard.press("Enter");
-  // Kuis tetap dilewati: sesudah kartu adegan 5 langsung fase bintang, tanpa tombol jembatan.
+  // Kuis tampil di adegan 5 dengan keempat peran, lalu dijawab; di fase bintang kuis sudah ditutup.
+  await expect(page.getByRole("dialog", { name: "Kuis peran" })).toBeVisible();
+  for (const role of ["Polisi", "Jaksa", "Advokat", "Hakim"]) await expect(page.getByText(role, { exact: true })).toHaveCount(1);
+  await answerQuiz(page);
   await expect(awardPrompt(page)).toBeFocused();
-  await expect(bridgeNext(page)).toHaveCount(0);
+  await expect(statusRowButtons(page)).toHaveCount(0);
   for (const role of ["Polisi", "Jaksa", "Advokat", "Hakim"]) await expect(page.getByText(role, { exact: true })).toHaveCount(0);
   await giveStars(page);
   await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 6/6");
@@ -526,6 +532,7 @@ test("sapuan tepat waktu dan tanpa sapuan sesudah adegan 6 (AC-7)", async ({ pag
     await waitCardReady(page);
     // Sejak F-07 sapuan dimulai saat bintang diberikan, jadi waktunya diukur dari tekanan tombol bintang.
     await page.keyboard.press("Enter");
+    if (SCENES[i].roleQuiz) await answerQuiz(page);
     await expect(awardPrompt(page)).toBeFocused();
     await page.evaluate(() => {
       const run = window as unknown as Run;
@@ -744,6 +751,7 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
         expect(await page.locator(".ss-impact-body").evaluate((element) => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(0);
         await page.clock.runFor(600);
         await page.keyboard.press("Enter");
+        if (SCENES[i].roleQuiz) await answerQuiz(page, true);
         await giveStars(page);
         await page.clock.runFor(150);
       }

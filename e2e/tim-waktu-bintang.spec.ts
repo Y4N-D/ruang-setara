@@ -2,19 +2,23 @@
 // uji langkah 3 sampai 5 dan 7). Membuka hasil build di /ruang-setara/sehari-setara/#main, #main-3, dan #main-4.
 // Jam uji dijeda sebelum halaman dimuat, sehingga teks per huruf, pengatur waktu, kartu, dan pergantian adegan hanya
 // maju lewat page.clock.runFor, dalam dua langkah sesudah unsur tampil (catatan PLAN F-05, F-06, dan F-07).
+// Disesuaikan di F-08: sesudah kartu dampak adegan 5, kuis peran dijawab sebelum bintang alasan (answerQuiz di toStars).
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
 import { DEFAULT_TEAMS } from "../app/sehari-setara/content/teams";
 import type { ChoiceId } from "../app/sehari-setara/engine/types";
 import { clockText, filledBlocks, teamSentence } from "../app/sehari-setara/ui/turn";
 import {
+  answerQuiz,
   awardPrompt,
   contrast,
   expectClean,
   giveStars,
   impactCard,
   INK,
+  sceneNumber,
   SHOTS,
+  statusRowButtons,
   SUN,
   VIEWPORTS,
   watch,
@@ -76,10 +80,12 @@ async function toCard(page: Page, choice: ChoiceId) {
   await page.clock.runFor(600);
 }
 
-/** Dari pertanyaan sampai fase bintang: memilih, kartu dampak, lalu Enter pada kartu. */
+/** Dari pertanyaan sampai fase bintang: memilih, kartu dampak, Enter pada kartu, lalu kuis peran di adegan 5 (F-08). */
 async function toStars(page: Page, choice: ChoiceId) {
+  const quiz = SCENES[(await sceneNumber(page)) - 1].roleQuiz !== undefined;
   await toCard(page, choice);
   await page.keyboard.press("Enter");
+  if (quiz) await answerQuiz(page, true);
   await expect(awardPrompt(page)).toBeFocused();
 }
 
@@ -410,7 +416,7 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
     await expect(awardPrompt(page)).toBeFocused();
     expect(await page.locator(".ss-stage-area").evaluate((element) => getComputedStyle(element).visibility)).toBe("visible");
     expect(await page.locator(".ss-play-panel").innerHTML()).toBe(reactionPanel);
-    await expect(page.locator(".ss-question-row .ss-next")).toHaveCount(0);
+    await expect(statusRowButtons(page)).toHaveCount(0);
     const outline = await awardPrompt(page).evaluate((element) => {
       const style = getComputedStyle(element);
       return [style.outlineStyle, style.outlineWidth, style.outlineColor, style.outlineOffset];
@@ -752,7 +758,7 @@ test("bintang alasan: fokus, tombol, pintasan, dan tekanan ganda (AC-5)", async 
   await expect(page.locator(".ss-award-button")).toHaveText(["0", "1", "2"]);
   for (const stars of [0, 1, 2] as const) await expect(starButton(page, stars)).toBeVisible();
   expect(await page.locator(".ss-play-panel").innerHTML()).toBe(reactionPanel);
-  await expect(page.locator(".ss-question-row .ss-next")).toHaveCount(0);
+  await expect(statusRowButtons(page)).toHaveCount(0);
   for (const stars of [0, 1, 2] as const) {
     await page.keyboard.press("Tab");
     await expect(starButton(page, stars)).toBeFocused();
@@ -806,7 +812,7 @@ test("bintang alasan: fokus, tombol, pintasan, dan tekanan ganda (AC-5)", async 
   await expect(counts(page)).toHaveText(["3", "2"]);
   await page.clock.runFor(400);
 
-  // Adegan 5: kuis tidak tampil; sesudah kartu langsung fase bintang.
+  // Adegan 5: kuis peran tampil sesudah kartu dan dijawab (F-08, lewat toStars); di fase bintang kuis sudah ditutup.
   await toQuestion(page);
   await toStars(page, "B");
   for (const role of ROLES) await expect(page.getByText(role, { exact: true })).toHaveCount(0);

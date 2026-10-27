@@ -2,7 +2,7 @@
 // Semua teks yang tampil ke pengguna berasal dari folder content/ (Architecture bagian 14).
 // Teks F-01 mengikuti docs/sehari-setara/specs/F-01-kerangka-halaman.md; teks F-04 mengikuti specs/F-04-panggung.md;
 // teks F-05 mengikuti specs/F-05-panel-narasi-pilihan.md; teks F-06 mengikuti specs/F-06-indikator-kartu-dampak.md;
-// teks F-07 mengikuti specs/F-07-tim-waktu-bintang.md.
+// teks F-07 mengikuti specs/F-07-tim-waktu-bintang.md; teks F-08 mengikuti specs/F-08-kuis-peran.md.
 import type { ChoiceId, Tier } from "../engine/types";
 
 export const copy = {
@@ -37,7 +37,6 @@ export const copy = {
     choicePrefix: (id: ChoiceId) => `Pilihan ${id}: `,
     chosenMark: " (dipilih)",
     chosen: (id: ChoiceId) => `Kelas memilih ${id}.`,
-    bridgeNext: "Lanjut",
     stageReaction: (id: ChoiceId) => `Reaksi tokoh atas pilihan ${id}.`,
     endTitle: "Keenam adegan selesai",
     endLead: "Terima kasih sudah menemani Nara sampai malam.",
@@ -98,5 +97,19 @@ export const copy = {
   sound: {
     off: "Suara dimatikan.",
     on: "Suara dinyalakan.",
+  },
+  quiz: {
+    title: "Kuis peran",
+    group: "Peran penegak hukum",
+    closed: "?",
+    answer: (role: string) => `Jawaban kelas: ${role}.`,
+    mark: { tepat: "Jawaban tepat", pilihan: "Pilihan kelas" },
+    verdict: { tepat: "Tepat!", belum: "Belum tepat." },
+    // Menyebut jawaban naskah adegan 5 (roleQuiz.answer, hakim); quiz.test.ts memeriksa nama peran di awal kalimat.
+    reason: "Hakimlah yang memeriksa, mengadili, dan memutus perkara.",
+    closing: "Setiap peran punya tugas sendiri agar perkara diproses dengan adil.",
+    cardName: (n: number, role: string) => `Peran ${n}: ${role}`,
+    choicesIntro: "Pilihannya:",
+    dutiesIntro: "Tugas setiap peran.",
   },
 } as const;
