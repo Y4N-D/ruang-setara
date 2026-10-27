@@ -12,7 +12,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-05 | Selesai (22 Okt 2026) | [F-05-panel-narasi-pilihan.md](specs/F-05-panel-narasi-pilihan.md) | [F-05-hasil.md](tests/F-05-hasil.md) — lulus |
 | F-06 | Selesai (23 Okt 2026) | [F-06-indikator-kartu-dampak.md](specs/F-06-indikator-kartu-dampak.md) | [F-06-hasil.md](tests/F-06-hasil.md), lulus |
 | F-07 | Selesai (26 Okt 2026) | [F-07-tim-waktu-bintang.md](specs/F-07-tim-waktu-bintang.md) | [F-07-hasil.md](tests/F-07-hasil.md), lulus |
-| F-08 | Direncanakan (26 Okt 2026), menunggu `Setuju: F-08` | — | — |
+| F-08 | Disetujui (26 Okt 2026); spesifikasi menunggu `Spesifikasi disetujui: F-08` | [F-08-kuis-peran.md](specs/F-08-kuis-peran.md) | — |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -607,7 +607,7 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
   - Hal baru yang muncul karenanya diajukan untuk Gerbang 2 sebagai butir S-1 sampai S-8 spesifikasi: format WAV, kapan klik berbunyi, kerapatan bunyi teks, `M` untuk mematikan suara, tik pelan sepuluh detik terakhir, asal dan lisensi bunyi, durasi 60 detik, serta status bunyi di `Daftar_Aset.md`.
 
 ## F-08 — Kuis peran penegak hukum
-- Status: Direncanakan (26 Okt 2026). Menunggu balasan `Setuju: F-08`. Diperiksa sebelum Plan: entri F-07 berstatus Selesai dan `tests/F-07-hasil.md` berkeputusan Lulus.
+- Status: Spesifikasi (27 Okt 2026). Riwayat 26 Okt 2026: direncanakan; disetujui (balasan `Setuju: F-08`; saran usulan 1–7, 9, dan 10 diterima; usulan 6: Temuan 1 F-07 dibiarkan; usulan 8 tetap terbuka untuk Plan F-09). Riwayat 27 Okt 2026: spesifikasi ditulis ([F-08-kuis-peran.md](specs/F-08-kuis-peran.md)), menunggu balasan `Spesifikasi disetujui: F-08`. Diperiksa sebelum Plan: entri F-07 berstatus Selesai dan `tests/F-07-hasil.md` berkeputusan Lulus.
 - Memenuhi:
   - FR-11: kuis peran penegak hukum di adegan 5, dengan empat peran dan satu jawaban. Sisi mesin (fase `quiz`, `JAWAB_KUIS`, `quizAnswer`, dan `isQuizCorrect`) sudah ada sejak F-02, dan sisi naskah (pertanyaan, jawaban hakim, dan tugas keempat peran di `roles.ts`) sejak F-03. F-08 menampilkannya.
   - PRD bagian 5, TP 4 (membedakan peran polisi, jaksa, hakim, dan advokat), dan PRD bagian 8 adegan 5: kuis sesudah kartu dampak; sesudah dijawab, tampil kartu empat peran; kuis tidak memengaruhi indikator.
@@ -664,7 +664,7 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
 - Temuan F-07 yang menunggu keputusan dan menyangkut F-08:
   - Temuan 1 (klik ganda pada "Lanjut" kartu memindahkan fokus dari ajakan bintang): dibawa ke usulan 6, karena "Lanjut" kuis juga membuka fase bintang.
   - Tidak dibawa: Temuan 8 (asal dan lisensi bunyi, butir S-6) tidak mengubah F-08, karena F-08 hanya memakai bunyi klik yang sudah ada; jawabannya tetap diperlukan sebelum rilis (catatan Plan F-11). Temuan 9 dan butir daftar periksa manual F-07 adalah pengecekan oleh pemilik proyek, bukan keputusan.
-- Usulan untuk Gerbang 1. Balasan `Setuju: F-08` berarti saran di setiap usulan diterima, kecuali usulan 8 yang tidak memuat saran. Sebutkan nomornya bila memilih alternatif. Maket dikirim lewat percakapan dan tidak disimpan di repositori:
+- Keputusan Gerbang 1 (26 Okt 2026, balasan `Setuju: F-08` tanpa alternatif): saran setiap usulan diterima, dan alternatifnya tidak dipilih. Usulan 6: Temuan 1 F-07 dibiarkan (pilihan a). Usulan 8 tidak memuat saran dan tidak dipilih, sehingga tetap terbuka dan dibawa ke Plan F-09. Teks usulan di bawah dipertahankan sebagai catatan. Maket dikirim lewat percakapan dan tidak disimpan di repositori:
   1. **Kuis sebagai dialog lebar di kotak kartu dampak.**
      - Kapan: langsung sesudah "Lanjut" kartu dampak adegan 5, tanpa sapuan. Sesudah "Lanjut" kuis, fase bintang dimulai (F-07).
      - Di mana: kotak yang sama dengan kartu dampak (kiri di tepi kiri bingkai panggung, atas 9,2u, kanan 2u, bawah 1,2u), dengan bingkai piksel F-05. Bilah atas dan panel indikator tetap terlihat; panggung, papan tim, dan panel bawah tertutup. Selama kuis, panggung disembunyikan dan panel bawah kosong (risiko "Pita panggung" dan "Fokus"). Papan tim tertutup sesuai bacaan FR-09, "selalu terlihat, kecuali saat sebuah dialog terbuka" (keputusan Gerbang 1 F-06 nomor 1).
