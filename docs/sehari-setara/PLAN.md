@@ -13,7 +13,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-06 | Selesai (23 Okt 2026) | [F-06-indikator-kartu-dampak.md](specs/F-06-indikator-kartu-dampak.md) | [F-06-hasil.md](tests/F-06-hasil.md), lulus |
 | F-07 | Selesai (26 Okt 2026) | [F-07-tim-waktu-bintang.md](specs/F-07-tim-waktu-bintang.md) | [F-07-hasil.md](tests/F-07-hasil.md), lulus |
 | F-08 | Selesai (27 Okt 2026) | [F-08-kuis-peran.md](specs/F-08-kuis-peran.md) | [F-08-hasil.md](tests/F-08-hasil.md), lulus |
-| F-09 | Direncanakan (27 Okt 2026), menunggu Gerbang 1 | — | — |
+| F-09 | Spesifikasi ditulis (27 Okt 2026), menunggu Gerbang 2 | [F-09-akhir-rekap-refleksi.md](specs/F-09-akhir-rekap-refleksi.md) | — |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -26,6 +26,7 @@ Dicatat 21 Okt 2026 atas permintaan pemilik proyek agar tidak terlewat. Setiap p
 | `@playwright/test` | Dependensi pengembangan | F-04 (ditambahkan 22 Okt 2026, versi 1.56.1) | Skrip `test:e2e`, `playwright.config.ts`, `e2e/sehari-setara.spec.ts`, dan folder hasil Playwright di `.gitignore`. Versi 1.56, agar cocok dengan browser di lingkungan agen. |
 | `@fontsource/press-start-2p`, `@fontsource/pixelify-sans` | Dependensi aplikasi | F-04 (ditambahkan 22 Okt 2026, versi 5.3.0) | Impor di `github-pages/sehari-setara/main.tsx`, lalu uji keterbacaan di proyektor (PRD bagian 14). Keterbacaan di proyektor menunggu pengecekan pemilik proyek. |
 | Skrip `assets:build` | Skrip | F-12 (ditambahkan 21 Okt 2026) | `python scripts/game/art/build_assets.py` (Architecture bagian 4); `__pycache__/` di `.gitignore` |
+| `modern-screenshot` | Dependensi aplikasi | F-09 (diizinkan 27 Okt 2026 di Gerbang 1, versi 4.7.0) | Hanya dipakai modul unduhan rekap untuk menggambar lembar rekap menjadi PNG. Lisensi MIT, tanpa pustaka turunan, terbit 16 Apr 2026 (lebih dari 7 hari, `minimumReleaseAge`). PDF dibuat kode sendiri, tanpa pustaka PDF. |
 
 Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur pertama sesudah F-01 yang menampilkan antarmuka permainan, sehingga uji ujung ke ujung, tangkapan layar, dan huruf final mulai berguna di sana.
 
@@ -770,13 +771,14 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
       - Tidak ada dependensi baru.
 
 ## F-09 — Layar akhir, rekap, refleksi
-- Status: Direncanakan (27 Okt 2026), menunggu Gerbang 1. Diperiksa sebelum Plan: entri F-08 berstatus Selesai dan `tests/F-08-hasil.md` berkeputusan Lulus (ZIP `main` 27 Okt 2026, sesudah F-08).
+- Status: Spesifikasi (27 Okt 2026), menunggu Gerbang 2. Riwayat 27 Okt 2026: direncanakan; disetujui (balasan `Setuju: F-09`; saran setiap usulan diterima; usulan 4, 6, dan 12 dijawab lewat pertanyaan pilihan: 4a, 6b dengan 6e, dan 12d; izin dependensi `modern-screenshot` 4.7.0; unduhan PNG dan PDF A4 dikerjakan di F-09); spesifikasi ditulis ([F-09-akhir-rekap-refleksi.md](specs/F-09-akhir-rekap-refleksi.md); rincian baru A-1 sampai A-9 menunggu tinjauan). Diperiksa sebelum Plan: entri F-08 berstatus Selesai dan `tests/F-08-hasil.md` berkeputusan Lulus (ZIP `main` 27 Okt 2026, sesudah F-08).
 - Memenuhi:
   - FR-12: tiga akhir menurut `endingFor` (PRD bagian 9) tampil sebagai layar akhir: ilustrasi C-02 sampai C-04, judul akhir, dua kalimat pesan, posisi akhir kedua indikator, dan timbangan D-10 yang bergerak ke posisi akhirnya (Design System bagian 7 dan 8, "momen utama"). Sisi mesin (`endingFor` dan fase `ending`) sudah ada sejak F-02.
   - FR-13: rekap keenam adegan berisi pilihan kelas, tanda tingkat, pilihan yang paling menjaga keseimbangan, dan rujukannya (usulan 3 sampai 5).
   - FR-14: layar refleksi dengan kalimat pemantik untuk ditulis siswa di buku (usulan 7).
   - FR-15 sebagian: tombol "Main lagi" dan "Kembali ke galeri" di layar refleksi (usulan 8). Tautan dari galeri tetap milik F-11.
   - FR-16 sebagian: `Spasi` dan `Enter` di layar akhir dan rekap (usulan 9).
+  - FR-20 (P2, dimajukan ke F-09 atas keputusan pemilik proyek di Gerbang 1, 27 Okt 2026): rekap kelas bisa diunduh sebagai gambar PNG dan PDF A4 dari layar refleksi (tambahan Gerbang 1 di akhir entri ini). PRD bagian 16 nomor 4 terjawab.
   - PRD bagian 5 (TP 2 dan TP 5), bagian 6 (alur "Akhir hari → Rekap pilihan → Refleksi tertulis → Main lagi / kembali ke galeri"), dan bagian 9 ("Tidak ada kalah. Setiap akhir langsung diikuti rekap yang menunjukkan alternatif yang lebih baik").
   - Architecture bagian 3 (`Ending.tsx`, `Recap.tsx`, `Reflection.tsx`), bagian 6 (fase `ending`, `recap`, `reflection`, dan `MAIN_LAGI`), dan bagian 10.
   - Catatan "Plan F-06 sampai F-10" dan "Plan F-09": layar akhir sementara diganti (usulan 11), jumlah bintang akhir (usulan 6), dan hasil kuis di rekap (usulan 5).
@@ -788,6 +790,7 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
   - Ketiga nama berkas itu sudah tercantum di Architecture bagian 3.
   - Baru `app/sehari-setara/ui/closing.ts`: fungsi murni ketiga layar penutup, yaitu bingkai akhir dan urutan gerak timbangan, baris rekap dari `history`, pilihan yang paling menjaga keseimbangan, pembagian halaman, dan kalimat pengumuman. Diuji di `__tests__/closing.test.ts` (baru). Namanya sengaja bukan `ending.ts` atau `recap.ts`: nama itu hanya berbeda huruf besar dengan `Ending.tsx` dan `Recap.tsx`, sehingga bisa tertukar saat diimpor di Windows dan macOS (pelajaran F-07, `turn.ts`).
   - Baru `e2e/akhir-rekap-refleksi.spec.ts`.
+  - Tambahan Gerbang 1 (unduhan rekap): baru `ui/RecapSheet.tsx` (lembar unduhan), `ui/download.ts` (gambar PNG lewat `modern-screenshot`, nama berkas, dan alur unduh), dan `ui/pdf.ts` (PDF A4 satu halaman tanpa pustaka), dengan uji `__tests__/pdf.test.ts` dan `__tests__/download.test.ts`; uji ujung ke ujung unduhan di `e2e/akhir-rekap-refleksi.spec.ts`. Diubah `package.json` dan `pnpm-lock.yaml` (izin tertulis Gerbang 1).
   - Diubah `ui/PlayScreen.tsx`: layar akhir sementara diganti (usulan 11); ketiga layar penutup menurut fase; halaman rekap; masa tunggu; "Main lagi"; fokus dan pengumuman; pramuat ilustrasi akhir.
   - Diubah `ui/controls.ts` dan `__tests__/controls.test.ts`: `keyCommand` untuk fase `ending`, `recap`, dan `reflection`; `restartActions` diganti `replayActions` (usulan 8).
   - Diubah `ui/preload.ts`: ketiga ilustrasi akhir dan strip timbangan dimuat saat adegan 6 dimulai.
@@ -796,9 +799,9 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
   - Diubah `styles/game.css`: kelas layar akhir, timbangan, rekap, dan refleksi; animasi timbangan; blok mode warna paksa ditulis sesudah aturannya (pelajaran laporan F-08, Temuan 1); aturan `.ss-play-end` dihapus. Warna hanya dari token dan warna langit yang sudah ada; tidak ada token `:root` baru.
   - Bila usulan 5 pilihan (c): `engine/types.ts`, `engine/reducer.ts`, dan `__tests__/reducer.test.ts`.
   - Diubah `e2e/bantuan.ts` dan 27 uji lama di `alur-permainan.spec.ts`, `kartu-dampak.spec.ts`, `tim-waktu-bintang.spec.ts`, `suara.spec.ts`, dan `kuis-peran.spec.ts` (risiko "Uji lama").
-  - Diubah `docs/sehari-setara/Design_System.md` (bagian 3, 7, dan 8), `Architecture.md` (bagian 3, 7, 8, 9, 10, dan 12; bagian 5 dan 6 bila usulan 5 pilihan c), dan `PRD.md` bagian 17 (jawaban PRD bagian 16 nomor 4, usulan 12).
+  - Diubah `docs/sehari-setara/Design_System.md` (bagian 3, 7, dan 8), `Architecture.md` (bagian 3, 7, 8, 9, 10, dan 12; bagian 5 dan 6 bila usulan 5 pilihan c; bagian 4 untuk dependensi baru), dan `PRD.md` bagian 13 dan 17 (FR-20 dimajukan dan jawaban PRD bagian 16 nomor 4, usulan 12).
   - Dokumen: `specs/F-09-akhir-rekap-refleksi.md`, `tests/F-09-hasil.md`, tangkapan layar di `tests/F-09/`, dan entri ini.
-  - Tidak disentuh: naskah (`scenes.ts`, `roles.ts`, `references.ts`), `Verifikasi_Rujukan.md`, `content.test.ts`, aset dan kit gambar, `manifest.ts`, `CREDITS.md`, `Daftar_Aset.md`, `Meters.tsx`, `Teams.tsx`, `ImpactCard.tsx`, `RoleQuiz.tsx`, `Timer.tsx`, `StarsAward.tsx`, `NarrationBox.tsx`, `ChoicePanel.tsx`, `Stage.tsx`, `Sprite.tsx`, `StagePreview.tsx`, `Game.tsx`, `layout.ts`, file galeri, `vite.pages.config.ts`, `playwright.config.ts`, `package.json`, `pnpm-lock.yaml`, dan workflow. `engine/` tidak berubah, kecuali bila usulan 5 pilihan (c) dipilih.
+  - Tidak disentuh: naskah (`scenes.ts`, `roles.ts`, `references.ts`), `Verifikasi_Rujukan.md`, `content.test.ts`, aset dan kit gambar, `manifest.ts`, `CREDITS.md`, `Daftar_Aset.md`, `Meters.tsx`, `Teams.tsx`, `ImpactCard.tsx`, `RoleQuiz.tsx`, `Timer.tsx`, `StarsAward.tsx`, `NarrationBox.tsx`, `ChoicePanel.tsx`, `Stage.tsx`, `Sprite.tsx`, `StagePreview.tsx`, `Game.tsx`, `layout.ts`, file galeri, `vite.pages.config.ts`, `playwright.config.ts`, dan workflow. `engine/` tidak berubah, kecuali bila usulan 5 pilihan (c) dipilih. (`package.json` dan `pnpm-lock.yaml` semula tidak disentuh; sejak Gerbang 1 keduanya berubah untuk `modern-screenshot`.)
 - Aset yang dibutuhkan: tidak ada aset baru, dan placeholder tidak diperlukan. Semua sudah Disetujui (21 Okt 2026) dan terdaftar di manifest F-12:
   - ilustrasi akhir C-02 sampai C-04 (`endings.setara`, `endings.hampir`, `endings.berat`; 320×180; 4,2 KB, 3,9 KB, dan 4,0 KB). Ketiganya menyisakan bidang langit tenang `END_SCALE_ZONE` (x 220–292, y 8–56) untuk timbangan, yang diperiksa `build_assets.py`;
   - timbangan D-10 (`iconStrips.timbangan`; 5 bingkai 48×32: miring kiri, sedikit kiri, seimbang, sedikit kanan, miring kanan; 1,3 KB). Piring kiri Hak (hati `teal`), piring kanan Kewajiban (centang `sky-d`);
@@ -844,13 +847,18 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
   - **Keputusan pedagogis di luar PRD** (AGENTS bagian 12): kalimat pesan, arah timbangan, aturan pilihan terbaik, hasil kuis di rekap, papan tim di akhir, dan kalimat pemantik. Semua teks baru bertanda "draf baru" (keputusan Gerbang 1 F-03 nomor 2).
   - **Tailwind galeri** (catatan "Semua fitur"): sesudah entri ini ditulis, `build:pages` diulang, dan keempat berkas galeri (`index.html`, `main-Bp-7VtNx.css`, `main-CC47J1DW.js`, `jsx-runtime-CmKW-gyo.js`) tetap identik byte dengan build `main`. Pemeriksaan yang sama diulang di tahap Test.
   - **Anggaran:** JS permainan sekarang 20,10 KB gzip ditambah React 60,18 KB gzip, sekitar 80 KB dari 150 KB. F-09 diperkirakan menambah 3–4 KB gzip. Aset tidak bertambah (65,2 KB dari 4 MB).
-- Ukuran: M menurut backlog; perkiraan sekarang L (batas bawah): tiga layar, satu modul murni, penggantian layar akhir sementara, dan penyesuaian 27 uji lama. Bertambah bila usulan 5 pilihan (c) atau usulan 12 pilihan (b) dipilih.
+- Ukuran: M menurut backlog; perkiraan sekarang L (batas bawah): tiga layar, satu modul murni, penggantian layar akhir sementara, dan penyesuaian 27 uji lama. Bertambah bila usulan 5 pilihan (c) atau usulan 12 pilihan (b) dipilih. Sesudah Gerbang 1: L penuh, karena perubahan mesin (usulan 5c) dan unduhan rekap (usulan 12d) masuk F-09.
 - Temuan F-07 dan F-08 yang menunggu keputusan dan menyangkut F-09:
   - F-08 usulan 8 (hasil kuis di rekap), yang dibiarkan terbuka di Gerbang 1 F-08 untuk Plan F-09: dibawa ke usulan 5.
   - Catatan Plan F-09 dari F-07 (jumlah bintang akhir setiap tim tidak terlihat): dibawa ke usulan 6.
   - F-07 Temuan 1 sudah diputuskan di F-08 (usulan 6a: dibiarkan, dicatat untuk F-13). Variannya di adegan 6 dicatat di risiko "Klik ganda pada tombol bintang adegan 6", tanpa keputusan baru.
   - Tidak dibawa: F-08 Temuan 1 (mode warna paksa kartu dampak) sudah dijadwalkan untuk F-13 dan tidak menyangkut layar penutup, walaupun pelajarannya dipakai di CSS F-09. F-07 Temuan 8 (asal dan lisensi bunyi) menunggu jawaban untuk F-11, dan F-09 tidak menambah bunyi. Pengecekan warna ikon D-08, keterbacaan di proyektor, dan kelancaran di laptop kelas bawah adalah pengecekan oleh pemilik proyek, bukan keputusan.
-- Usulan untuk Gerbang 1. Sebutkan nomor dan huruf pilihan bila memilih alternatif. Usulan 4, 6, dan 12 perlu jawaban tegas: usulan 4 memuat usulan agen yang belum menjadi keputusan, sedangkan usulan 6 dan 12 tidak memuat saran agen. Maket dikirim lewat percakapan dan tidak disimpan di repositori.
+- Keputusan Gerbang 1 (27 Okt 2026, balasan `Setuju: F-09` tanpa alternatif, lalu jawaban pertanyaan pilihan untuk usulan 4, 6, dan 12): saran setiap usulan diterima, dan alternatifnya tidak dipilih. Jadi: bilah atas menulis "Akhir hari" (usulan 1); arah timbangan (a) dengan gerak ayunan (usulan 2); rekap 4 halaman menurut waktu (usulan 3); hasil kuis di rekap pilihan (c), dengan jawaban kuis disimpan di `history` (usulan 5); refleksi di layar sendiri dengan tiga kalimat pemantik (usulan 7); "Main lagi" sementara langsung memulai lagi dari adegan 1 (usulan 8); dan masa tunggu 600 ms (usulan 9). Jawaban pilihan:
+  - usulan 4: (a) pilihan bertingkat "Tepat";
+  - usulan 6: (b) papan tim tanpa peringkat di layar akhir, ditambah tanda "Bintang terbanyak", dan (e) tim serta bintangnya di setiap kotak adegan rekap;
+  - usulan 12: (d) unduh langsung, dengan izin tertulis "Izinkan dependensi: modern-screenshot 4.7.0", format PNG dan PDF A4, dikerjakan di F-09 (tambahan Gerbang 1 di akhir entri ini).
+
+  Semua teks baru tetap "draf baru" sampai Gerbang 2. Teks usulan di bawah dipertahankan sebagai catatan. Maket dikirim lewat percakapan dan tidak disimpan di repositori:
   1. **Layar akhir.**
      - Kapan: langsung sesudah bintang alasan adegan 6, tanpa sapuan, seperti sekarang (fase `ending`).
      - Susunan: tata letak layar permainan tetap (bilah atas 8u, area panggung 52u, panel bawah 40u), sehingga panel indikator tetap di tempat yang dikenal kelas:
@@ -1030,4 +1038,29 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
       - Tangkapan layar di 1280×720, 1024×768, dan 1920×1080: layar akhir untuk ketiga akhir, setiap halaman rekap, dan refleksi; ditambah timbangan di tengah gerak, layar akhir dengan kurangi gerak, dan fokus pada "Main lagi" di 1280×720.
       - `tsc --noEmit` dan ESLint `--max-warnings 0` pada berkas kode baru dan yang diubah.
       - Daftar periksa manual AGENTS bagian 9 yang berlaku. Keterbacaan rekap dan kalimat pemantik dari bangku belakang dicek pemilik proyek.
-      - Tidak ada dependensi baru.
+      - Tidak ada dependensi baru. (Diubah di Gerbang 1: `modern-screenshot` 4.7.0 diizinkan untuk unduhan rekap; lihat tambahan di bawah.)
+- Tambahan Gerbang 1 (27 Okt 2026): unduhan rekap, usulan 12 pilihan (d). Rinciannya ditulis di spesifikasi.
+  - Percobaan di luar repositori (27 Okt 2026). Lembar rekap berupa DOM selebar 1.240 px (A4 pada 150 dpi) berisi keenam adegan jalur B-B-B-C-C-C dengan dua tim. Lembar itu digambar ulang oleh tiga pustaka, lalu dibandingkan dengan tangkapan layar Chromium 153 atas lembar yang sama:
+
+    | Cara | Versi dan lisensi | Tambahan kode (gzip) | Hasil |
+    |---|---|---|---|
+    | `modern-screenshot` (dipilih) | 4.7.0, MIT, tanpa pustaka turunan, terbit 16 Apr 2026 | 9,6 KB | Sama dengan tampilan layar; 0,31–0,40 detik pada pemanggilan pertama |
+    | `html-to-image` | 1.11.13, MIT, terbit Feb 2025 | 5,3 KB | Pemenggalan baris rujukan dan pilihan berbeda dari layar di beberapa adegan |
+    | `html2canvas` | 1.4.1, MIT, terbit Jan 2022, dua pustaka turunan | 47,3 KB | Ikon piksel menjadi kabur |
+    | `jspdf` (untuk PDF) | 4.2.1, MIT | 134,2 KB | Melampaui anggaran kode 150 KB, jadi tidak dipakai |
+    | PDF buatan sendiri | — | 0,9 KB | PDF 1.4 satu halaman A4, lolos `qpdf --check`, gambar tanpa kompresi yang menurunkan mutu, 152,6 KB |
+
+    Selama gambar dibuat, halaman hanya meminta berkas dari situsnya sendiri (dua huruf dan beberapa ikon), dan tidak ada galat konsol. PNG lembar contoh berukuran 1.240 × 1.761 px dan 286,8 KB.
+  - Tinggi isi lembar pada lebar 1.240 px adalah 1.719–1.815 px dengan dua tim dan 1.781–1.877 px dengan empat tim (jalur semua A, semua B, semua C, B-B-B-C-C-C, dan C-C-C-A-A-A). A4 pada 150 dpi setinggi 1.754 px. Jadi susunan lembar diatur di spesifikasi agar muat; bila tidak, PDF mengecilkan gambar paling banyak 7%.
+  - Usulan susunan (dirinci di spesifikasi):
+    - dua tombol, "Unduh gambar" dan "Unduh PDF", di kanan bawah layar refleksi, terpisah dari "Main lagi" dan "Kembali ke galeri" di kiri bawah, dengan masa tunggu 600 ms yang sama;
+    - lembar berisi judul dan tanggal, akhir hari dan nilai kedua indikator, papan tim dengan "Bintang terbanyak", keenam kotak adegan seperti rekap (termasuk tim, bintang, dan baris kuis), kalimat pemantik refleksi, serta baris kaki;
+    - nama berkas `rekap-sehari-setara-{tanggal}.png` dan `.pdf`;
+    - lembar hanya dipasang di luar layar selama gambar dibuat, dan disembunyikan dari pembaca layar.
+  - Risiko:
+    - Rujukan di lembar tampil apa adanya, sama seperti di rekap sampai F-11. Bedanya, lembar bisa dibagikan ke luar kelas. Rilis tetap diblokir sampai semua kotak `Verifikasi_Rujukan.md` dicentang pemilik proyek, dan sampai F-11 permainan belum ditautkan dari galeri.
+    - Dukungan peramban: PDF memakai `CompressionStream`, yang tersedia di Chrome dan Edge 80 ke atas, Firefox 113 ke atas, dan Safari 16.4 ke atas. Percobaan hanya dijalankan di Chromium, jadi peramban lain dicek pemilik proyek.
+    - Kecepatan: 0,3–0,4 detik di komputer percobaan. Di laptop kelas bawah bisa lebih lama, sehingga tombol menampilkan keadaan "sedang disiapkan".
+    - Galeri tidak mengimpor dependensi baru. Keempat berkas galeri tetap diperiksa identik byte di tahap Test.
+    - Anggaran: kode game sekarang sekitar 80 KB gzip. Dengan F-09 (3–4 KB) dan unduhan (sekitar 12 KB), totalnya tetap di bawah 100 KB dari 150 KB.
+  - Uji tambahan: `pdf.test.ts` (struktur PDF, tabel xref, ukuran halaman A4, dan isi gambar diurai ulang) dan `download.test.ts` (nama berkas dan tanggal); uji ujung ke ujung untuk kedua tombol (peristiwa unduh, ukuran PNG, isi PDF, masa tunggu, klik ganda, keadaan "sedang disiapkan", galat, dan tanpa permintaan ke luar situs).
