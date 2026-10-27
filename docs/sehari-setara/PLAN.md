@@ -13,6 +13,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-06 | Selesai (23 Okt 2026) | [F-06-indikator-kartu-dampak.md](specs/F-06-indikator-kartu-dampak.md) | [F-06-hasil.md](tests/F-06-hasil.md), lulus |
 | F-07 | Selesai (26 Okt 2026) | [F-07-tim-waktu-bintang.md](specs/F-07-tim-waktu-bintang.md) | [F-07-hasil.md](tests/F-07-hasil.md), lulus |
 | F-08 | Selesai (27 Okt 2026) | [F-08-kuis-peran.md](specs/F-08-kuis-peran.md) | [F-08-hasil.md](tests/F-08-hasil.md), lulus |
+| F-09 | Direncanakan (27 Okt 2026), menunggu Gerbang 1 | — | — |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -37,11 +38,11 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
 - Plan F-05: pratinjau panggung F-04 (`#adegan-N`) adalah layar sementara. Putuskan apakah tetap dipertahankan sebagai alat tinjau setelah alur permainan dibuat. Lihat usulan 5 entri F-05.
 - Semua fitur: Tailwind galeri membaca seluruh repositori, termasuk dokumen. Kata lepas yang sama dengan nama kelas Tailwind di kode atau dokumen baru bisa menambah aturan CSS galeri. Uji build membandingkan berkas galeri (F-04, Temuan 2).
 - Plan F-05: Design System bagian 7 menyebut bingkai piksel "garis ink 2 px". F-01 membacanya sebagai px CSS. Sebelum panel dibangun, perlu dipastikan apakah yang dimaksud adalah piksel logis panggung. Lihat usulan 1 entri F-05.
-- Plan F-06 sampai F-10: jembatan sementara dan pintu masuk `#main` dari F-05 diganti fitur pemiliknya (keputusan Gerbang 1 F-05 nomor 3 dan 4). Kartu dampak (F-06), bintang (F-07), dan kuis (F-08) menggantikan bagiannya masing-masing di `bridgeActions` dan `PlayScreen.tsx`. Selesai di F-08 (27 Okt 2026): `bridgeActions` dan tombol jembatan baris status sudah dihapus. Layar akhir (F-09) menggantikan layar akhir sementara. Layar judul (F-10) menggantikan layar kerangka dan `#main`, dan memutuskan nasib tautan pratinjau.
+- Plan F-06 sampai F-10: jembatan sementara dan pintu masuk `#main` dari F-05 diganti fitur pemiliknya (keputusan Gerbang 1 F-05 nomor 3 dan 4). Kartu dampak (F-06), bintang (F-07), dan kuis (F-08) menggantikan bagiannya masing-masing di `bridgeActions` dan `PlayScreen.tsx`. Selesai di F-08 (27 Okt 2026): `bridgeActions` dan tombol jembatan baris status sudah dihapus. Layar akhir (F-09) menggantikan layar akhir sementara; masuk rencana F-09, usulan 11 (27 Okt 2026). Layar judul (F-10) menggantikan layar kerangka dan `#main`, dan memutuskan nasib tautan pratinjau.
 - Plan F-06 dan seterusnya: di layar pilihan terpanjang, panel bawah 40u hanya menyisakan 3,05–3,3u, kurang dari satu baris pilihan (F-05, Temuan 2). Unsur baru di panel bawah perlu diukur ulang.
 - Plan F-07: kartu dampak menutupi panel kanan selama kartu tampil, karena FR-09 dibaca "papan tim selalu terlihat, kecuali saat sebuah dialog terbuka" (keputusan Gerbang 1 F-06 nomor 1). Bagian bintang di `bridgeActions` (`BERI_BINTANG` 0) diganti F-07. Dikerjakan di F-07.
 - Plan F-08: bagian kuis di `bridgeActions` (jawaban dari naskah) diganti F-08. Fase `quiz` datang sesudah tombol "Lanjut" kartu dampak adegan 5. Sejak F-07, `bridgeActions` berhenti di fase `stars`, sehingga kuis F-08 berada di antara kartu dampak adegan 5 dan fase bintang; tombol jembatan baris status (pengaman fase `quiz`) bisa dihapus bersama kuis. Dikerjakan di F-08 (27 Okt 2026).
-- Plan F-09: jumlah bintang akhir setiap tim perlu tampil di layar akhir atau rekap. Sesudah bintang adegan 6, layar akhir sementara langsung tampil, sehingga pop dan jumlah terakhir di papan tidak terlihat (F-07). Hasil kuis di rekap masih harus diputuskan pemilik proyek (usulan 8 entri F-08). `quizAnswer` dikosongkan saat adegan 6 dimulai (F-02), sehingga rekap yang menampilkan hasil kuis perlu menyimpan jawabannya sebelum itu.
+- Plan F-09: jumlah bintang akhir setiap tim perlu tampil di layar akhir atau rekap. Sesudah bintang adegan 6, layar akhir sementara langsung tampil, sehingga pop dan jumlah terakhir di papan tidak terlihat (F-07). Hasil kuis di rekap masih harus diputuskan pemilik proyek (usulan 8 entri F-08). `quizAnswer` dikosongkan saat adegan 6 dimulai (F-02), sehingga rekap yang menampilkan hasil kuis perlu menyimpan jawabannya sebelum itu. Masuk rencana F-09, usulan 5 dan 6 (27 Okt 2026).
 - Plan F-10: (1) nama tim paling lebar 18,6u agar muat di papan pada 1024×768; "Tim Mentari" selebar 17,8u, sedangkan "Tim Kupu-kupu" (20,7u) atau "Tim Jalak Bali" (19,3u) tidak muat (F-07); (2) pengaturan suara di layar pengaturan memakai `settings.sound` yang sama dengan tombol `M` (F-07); (3) durasi diskusi 30, 60, atau 90 detik per kelas, dengan bawaan 60 detik (keputusan 26 Okt 2026); (4) alamat uji `#main-3` dan `#main-4` diganti layar judul, seperti `#main`; (5) arti `Esc` selama dialog kartu dampak dan kuis peran (F-08).
 - Plan F-11: asal dan lisensi bunyi klik dan bunyi teks (butir S-6 spesifikasi F-07) masih menunggu jawaban pemilik proyek. `CREDITS.md` dan Design System bagian 13 perlu dilengkapi sebelum rilis.
 - Plan F-13: sisa FR-19, yaitu bunyi konfirmasi, dampak tepat dan berisiko, tik pelan sepuluh detik terakhir, dan jingle akhir hari, serta ikon suara D-05 di bilah atas (alternatif S-4a tidak dipilih di F-07) dan pengatur volume. Pertimbangkan juga laporan F-07 Temuan 1: klik ganda pada "Lanjut" kartu memindahkan fokus dari ajakan bintang ke halaman. Temuan yang sama berlaku untuk "Lanjut" kuis peran (F-08, usulan 6). Laporan F-08 Temuan 1: dalam mode warna paksa, sudut terpotong kartu dampak tidak dimatikan.
@@ -766,4 +767,267 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
       - Tangkapan layar di 1280×720, 1024×768, dan 1920×1080: kuis tertutup, jawaban tepat, jawaban belum tepat, dan fase bintang sesudah kuis.
       - `tsc --noEmit` dan ESLint `--max-warnings 0` pada berkas kode baru dan yang diubah.
       - Daftar periksa manual AGENTS bagian 9 yang berlaku. Keterbacaan kartu peran dari bangku belakang dicek pemilik proyek.
+      - Tidak ada dependensi baru.
+
+## F-09 — Layar akhir, rekap, refleksi
+- Status: Direncanakan (27 Okt 2026), menunggu Gerbang 1. Diperiksa sebelum Plan: entri F-08 berstatus Selesai dan `tests/F-08-hasil.md` berkeputusan Lulus (ZIP `main` 27 Okt 2026, sesudah F-08).
+- Memenuhi:
+  - FR-12: tiga akhir menurut `endingFor` (PRD bagian 9) tampil sebagai layar akhir: ilustrasi C-02 sampai C-04, judul akhir, dua kalimat pesan, posisi akhir kedua indikator, dan timbangan D-10 yang bergerak ke posisi akhirnya (Design System bagian 7 dan 8, "momen utama"). Sisi mesin (`endingFor` dan fase `ending`) sudah ada sejak F-02.
+  - FR-13: rekap keenam adegan berisi pilihan kelas, tanda tingkat, pilihan yang paling menjaga keseimbangan, dan rujukannya (usulan 3 sampai 5).
+  - FR-14: layar refleksi dengan kalimat pemantik untuk ditulis siswa di buku (usulan 7).
+  - FR-15 sebagian: tombol "Main lagi" dan "Kembali ke galeri" di layar refleksi (usulan 8). Tautan dari galeri tetap milik F-11.
+  - FR-16 sebagian: `Spasi` dan `Enter` di layar akhir dan rekap (usulan 9).
+  - PRD bagian 5 (TP 2 dan TP 5), bagian 6 (alur "Akhir hari → Rekap pilihan → Refleksi tertulis → Main lagi / kembali ke galeri"), dan bagian 9 ("Tidak ada kalah. Setiap akhir langsung diikuti rekap yang menunjukkan alternatif yang lebih baik").
+  - Architecture bagian 3 (`Ending.tsx`, `Recap.tsx`, `Reflection.tsx`), bagian 6 (fase `ending`, `recap`, `reflection`, dan `MAIN_LAGI`), dan bagian 10.
+  - Catatan "Plan F-06 sampai F-10" dan "Plan F-09": layar akhir sementara diganti (usulan 11), jumlah bintang akhir (usulan 6), dan hasil kuis di rekap (usulan 5).
+- Bergantung pada: F-06 dan F-07 (selesai). Memakai mesin F-02, naskah F-03, manifest F-12, tata letak F-04 dan F-05, panel indikator F-06, papan tim F-07, dan kuis F-08.
+- File yang dibuat/diubah:
+  - Baru `app/sehari-setara/ui/Ending.tsx`: layar akhir di dalam tata letak layar permainan (usulan 1 dan 2).
+  - Baru `app/sehari-setara/ui/Recap.tsx`: rekap per halaman (usulan 3 sampai 5).
+  - Baru `app/sehari-setara/ui/Reflection.tsx`: refleksi, "Main lagi", dan "Kembali ke galeri" (usulan 7 dan 8).
+  - Ketiga nama berkas itu sudah tercantum di Architecture bagian 3.
+  - Baru `app/sehari-setara/ui/closing.ts`: fungsi murni ketiga layar penutup, yaitu bingkai akhir dan urutan gerak timbangan, baris rekap dari `history`, pilihan yang paling menjaga keseimbangan, pembagian halaman, dan kalimat pengumuman. Diuji di `__tests__/closing.test.ts` (baru). Namanya sengaja bukan `ending.ts` atau `recap.ts`: nama itu hanya berbeda huruf besar dengan `Ending.tsx` dan `Recap.tsx`, sehingga bisa tertukar saat diimpor di Windows dan macOS (pelajaran F-07, `turn.ts`).
+  - Baru `e2e/akhir-rekap-refleksi.spec.ts`.
+  - Diubah `ui/PlayScreen.tsx`: layar akhir sementara diganti (usulan 11); ketiga layar penutup menurut fase; halaman rekap; masa tunggu; "Main lagi"; fokus dan pengumuman; pramuat ilustrasi akhir.
+  - Diubah `ui/controls.ts` dan `__tests__/controls.test.ts`: `keyCommand` untuk fase `ending`, `recap`, dan `reflection`; `restartActions` diganti `replayActions` (usulan 8).
+  - Diubah `ui/preload.ts`: ketiga ilustrasi akhir dan strip timbangan dimuat saat adegan 6 dimulai.
+  - Diubah `ui/DayArc.tsx`, bila usulan 1 butir "Bilah atas" disetujui.
+  - Diubah `content/copy.ts`: teks baru (usulan 1, 2, 3, 7, 8, dan 9); teks layar akhir sementara dihapus.
+  - Diubah `styles/game.css`: kelas layar akhir, timbangan, rekap, dan refleksi; animasi timbangan; blok mode warna paksa ditulis sesudah aturannya (pelajaran laporan F-08, Temuan 1); aturan `.ss-play-end` dihapus. Warna hanya dari token dan warna langit yang sudah ada; tidak ada token `:root` baru.
+  - Bila usulan 5 pilihan (c): `engine/types.ts`, `engine/reducer.ts`, dan `__tests__/reducer.test.ts`.
+  - Diubah `e2e/bantuan.ts` dan 27 uji lama di `alur-permainan.spec.ts`, `kartu-dampak.spec.ts`, `tim-waktu-bintang.spec.ts`, `suara.spec.ts`, dan `kuis-peran.spec.ts` (risiko "Uji lama").
+  - Diubah `docs/sehari-setara/Design_System.md` (bagian 3, 7, dan 8), `Architecture.md` (bagian 3, 7, 8, 9, 10, dan 12; bagian 5 dan 6 bila usulan 5 pilihan c), dan `PRD.md` bagian 17 (jawaban PRD bagian 16 nomor 4, usulan 12).
+  - Dokumen: `specs/F-09-akhir-rekap-refleksi.md`, `tests/F-09-hasil.md`, tangkapan layar di `tests/F-09/`, dan entri ini.
+  - Tidak disentuh: naskah (`scenes.ts`, `roles.ts`, `references.ts`), `Verifikasi_Rujukan.md`, `content.test.ts`, aset dan kit gambar, `manifest.ts`, `CREDITS.md`, `Daftar_Aset.md`, `Meters.tsx`, `Teams.tsx`, `ImpactCard.tsx`, `RoleQuiz.tsx`, `Timer.tsx`, `StarsAward.tsx`, `NarrationBox.tsx`, `ChoicePanel.tsx`, `Stage.tsx`, `Sprite.tsx`, `StagePreview.tsx`, `Game.tsx`, `layout.ts`, file galeri, `vite.pages.config.ts`, `playwright.config.ts`, `package.json`, `pnpm-lock.yaml`, dan workflow. `engine/` tidak berubah, kecuali bila usulan 5 pilihan (c) dipilih.
+- Aset yang dibutuhkan: tidak ada aset baru, dan placeholder tidak diperlukan. Semua sudah Disetujui (21 Okt 2026) dan terdaftar di manifest F-12:
+  - ilustrasi akhir C-02 sampai C-04 (`endings.setara`, `endings.hampir`, `endings.berat`; 320×180; 4,2 KB, 3,9 KB, dan 4,0 KB). Ketiganya menyisakan bidang langit tenang `END_SCALE_ZONE` (x 220–292, y 8–56) untuk timbangan, yang diperiksa `build_assets.py`;
+  - timbangan D-10 (`iconStrips.timbangan`; 5 bingkai 48×32: miring kiri, sedikit kiri, seimbang, sedikit kanan, miring kanan; 1,3 KB). Piring kiri Hak (hati `teal`), piring kanan Kewajiban (centang `sky-d`);
+  - ikon emosi D-09 untuk tanda tingkat di rekap, dengan aturan yang sama dengan kartu dampak F-06 (hati, keringat, seru);
+  - bentuk tim D-07 dan bintang D-03, hanya bila usulan 6 memilih papan atau tim per baris.
+
+  F-09 adalah fitur pertama yang menampilkan ilustrasi akhir dan timbangan.
+- Risiko (angka dari percobaan di luar repositori, 27 Okt 2026: salinan ZIP `main` sesudah F-08; maket disuntikkan ke hasil build di `/ruang-setara/sehari-setara/`, yaitu layar akhir ke layar permainan `#main` di fase bintang adegan 6, serta rekap dan refleksi ke layar kerangka, lalu diukur dengan huruf asli di Chromium 153 pada empat ukuran):
+  - **Jangkauan ketiga akhir.** Dari 729 jalur naskah (3 pilihan × 6 adegan), dengan reducer dan naskah asli: Hari yang Berat 390, Hampir Seimbang 254, dan Warga Setara 85. Banyaknya pilihan bukan B: Warga Setara 0–3 (misalnya B-B-B-B-B-A menjadi 80/85), Hampir Seimbang 2–5, dan Hari yang Berat 3–6. Jalur uji: semua B menjadi Warga Setara (100/100), B-B-B-C-C-C Hampir Seimbang (65/80), semua A Hari yang Berat (0/0), dan semua C Hari yang Berat (25/35). Semuanya bisa dimainkan dengan keyboard, dan uji lama sudah memakai jalur yang sama.
+  - **Ruang layar akhir** (susunan usulan 1):
+    - judul Press Start 2P 4,4u selalu satu baris: 52,8u ("Warga Setara") dan 66u ("Hampir Seimbang", "Hari yang Berat");
+    - dua kalimat Pixelify Sans 3,6u menjadi 2 baris, atau 3 baris untuk Hari yang Berat;
+    - sisa di panel bawah 11,2–11,5u, atau 6,3–6,7u untuk Hari yang Berat;
+    - timbangan 96 × 64 px di 1280×720 dan 1366×768, 144 × 96 px di 1920×1080, dan 80 × 53 px di 1024×768.
+  - **Ruang rekap.** Sisa terkecil di bawah baris terakhir setiap halaman, dari empat jalur (semua A, semua B, B-B-B-C-C-C, dan C-C-C-A-A-A, yaitu teks pilihan kelas terpanjang tanpa B) di empat ukuran. Angka negatif berarti meluap:
+
+    | Susunan | Huruf teks pilihan / rujukan | Sisa terkecil |
+    |---|---|---|
+    | 1 layar, enam adegan | 2,5u / 2,5u | −68,0 sampai −84,6u |
+    | 2 halaman, tiga adegan per halaman | 2,5u–3,1u / 2,5u | −4,5 sampai −22,3u |
+    | 3 halaman (pagi; siang; sore dan malam) | 3,1u / 2,5u | 5,5–6,9u |
+    | 3 halaman | 3,1u / 2,8u | 2,0–3,4u |
+    | 3 halaman | 3,1u / 3,1u | −8,2 sampai −9,6u |
+    | **4 halaman menurut waktu (pagi; siang; sore; malam), usulan 3** | **3,1u / 3,1u** | **8,1–16,0u** |
+    | 4 halaman menurut waktu | 3,6u / 3,1u | −3,1 sampai 6,8u |
+    | 6 halaman, satu adegan per halaman | 3,6u / 3,6u | 8,1–8,8u |
+    | Satu daftar bergulir | 3,1u / 3,1u | isinya 2,4–2,8 kali tinggi area |
+
+    - Baris adegan 5 (enam rujukan, 330 huruf) paling tinggi: 38,7–39,1u dengan rujukan 2,5u, 42,2–42,5u dengan 2,8u, dan 53,8–54,1u dengan 3,1u, dari area isi 83u. Karena itu adegan 5 tidak muat sehalaman dengan adegan 6 bila rujukan memakai ukuran kartu dampak (3,1u).
+    - Pada susunan usulan 3, tim per baris (usulan 6e) mengubah sisa menjadi 5,0–15,7u, sedangkan baris kuis (usulan 5b atau 5c) tidak mengubahnya, karena kolom pilihan adegan 5 lebih pendek daripada kolom rujukannya. Pada 3 halaman dengan rujukan 2,5u, keduanya bersama membuat isi meluap 2,0u.
+    - Tidak ada teks yang meluap ke samping pada semua susunan.
+  - **Arah timbangan dan nilai seri.** Besar kemiringan sudah ditetapkan Daftar_Aset C-02 sampai C-04 (seimbang, sedikit miring, miring), tetapi arahnya belum. Dari 729 jalur: Hampir Seimbang H > K 102, H < K 115, H = K 37; Hari yang Berat H > K 100, H < K 217, H = K 73 (46 di antaranya 0/0). Nilai seri cukup sering, jadi aturan arah perlu aturan seri (usulan 2).
+  - **Hasil kuis dan mesin.** `quizAnswer` dikosongkan saat adegan 6 dimulai, sehingga rekap tidak bisa membacanya. Percobaan usulan 5 pilihan (c), yaitu jawaban disimpan di entri `history` adegan 5 saat `JAWAB_KUIS`: `types.ts` berubah 1 baris dan `reducer.ts` 4 baris. Semua uji unit tetap lulus kecuali 1 uji F-08 di `controls.test.ts` yang memeriksa bahwa `history` tidak berubah karena kuis; uji itu memang harus disesuaikan. Indikator, bendera, dan bintang tetap tidak berubah karena kuis.
+  - **Uji lama.** Dalam salinan percobaan, layar akhir sementara diganti tiga layar sederhana (akhir, rekap, dan refleksi, masing-masing dengan tombol maju, lalu "Main lagi"). Hasilnya, 27 dari 80 uji ujung ke ujung gagal karena memakai `.ss-play-end` atau "Main lagi dari adegan 1": 13 di `kartu-dampak.spec.ts`, 6 di `alur-permainan.spec.ts`, 5 di `tim-waktu-bintang.spec.ts`, 2 di `suara.spec.ts`, dan 1 di `kuis-peran.spec.ts`. Ke-53 uji lain lulus. Di uji unit, satu uji `controls.test.ts` memakai `restartActions`. Langkah penutup akan dibuat sebagai fungsi bersama di `e2e/bantuan.ts`, seperti langkah bintang F-07 dan kuis F-08.
+  - **Tekanan ganda dan tombol yang menghapus permainan.** "Berikutnya" dan "Lanjut ke refleksi" berada di kanan bawah. Bila "Main lagi" berada di tempat yang sama, klik ganda atau `Enter` kedua bisa langsung menghapus permainan; "Kembali ke galeri" bisa langsung meninggalkan halaman. Lihat usulan 8 dan 9.
+  - **Klik ganda pada tombol bintang adegan 6**, mirip Temuan 1 F-07: klik kedua jatuh di layar akhir, di tempat panel kanan. Karena di sana tidak ada tombol, fokus bisa pindah dari judul ke halaman. Ini mengikuti keputusan F-08 usulan 6a (dibiarkan dan dicatat untuk F-13); `Spasi` dan `Enter` tetap berarti "Lihat rekap".
+  - **Pengumuman bintang adegan 6.** Sekarang pengumuman itu hilang, karena layar akhir sementara tidak memuat wilayah `role="status"`. Layar akhir F-09 memuat wilayah itu, sehingga pengumuman bintang terakhir tetap terbaca (laporan F-07, Temuan 2).
+  - **Pramuat.** Ilustrasi akhir belum pernah dimuat sebelum layar akhir. Dengan wifi lambat, ilustrasi bisa kosong sesaat saat timbangan bergerak. Ketiga ilustrasi (12,0 KB) dan strip timbangan (1,3 KB) dimuat saat adegan 6 dimulai, karena akhirnya baru diketahui sesudah pilihan adegan 6.
+  - **Huruf.** Press Start 2P tidak memuat tanda minus, ▶, dan ★ (U+2212, U+25B6, U+2605). Kedua huruf memuat tanda pisah (–), titik tengah (·), elipsis (…), dan tanda kutip lengkung. Judul layar penutup tidak memakai ketiga tanda itu, dan bintang memakai ikon D-03.
+  - **Halaman yang terbit berubah.** Alamat `#main` kini berakhir di layar akhir, rekap, dan refleksi. Permainan belum ditautkan dari galeri (F-11). Rujukan di rekap tampil apa adanya, tanpa tanda "perlu verifikasi", sampai F-11 (keputusan Gerbang 1 F-06 nomor 7). `Verifikasi_Rujukan.md` tidak diubah, dan tidak ada kotak yang dicentang.
+  - **Lingkungan uji.** Chromium 141 tetap tidak tersedia. Dengan berkas konfigurasi pengganti di luar repositori yang hanya menambah jalur Chromium 153 (keputusan Gerbang 1 F-07 nomor 10), ke-80 uji ujung ke ujung `main` lulus dalam dua bagian: 37 uji dalam 1,5 menit dan 43 uji dalam 2,8 menit. Uji dasar lain: `test` 10 berkas, 230 lulus, 1 dilewati; `content:check` 36 lulus, 1 dilewati.
+  - **Jam uji.** Masa tunggu (usulan 9) dihitung sejak layar atau halaman tampil, jadi berlaku aturan di "Catatan untuk Plan berikutnya": `pauseAt` sebelum halaman dimuat, waktu hanya dimajukan dengan `runFor`, dan dua langkah sesudah unsur tampil. Gerak timbangan berupa animasi CSS, jadi diuji lewat Web Animations API seperti pop bintang (laporan F-07, Temuan 4).
+  - **Keputusan pedagogis di luar PRD** (AGENTS bagian 12): kalimat pesan, arah timbangan, aturan pilihan terbaik, hasil kuis di rekap, papan tim di akhir, dan kalimat pemantik. Semua teks baru bertanda "draf baru" (keputusan Gerbang 1 F-03 nomor 2).
+  - **Tailwind galeri** (catatan "Semua fitur"): sesudah entri ini ditulis, `build:pages` diulang, dan keempat berkas galeri (`index.html`, `main-Bp-7VtNx.css`, `main-CC47J1DW.js`, `jsx-runtime-CmKW-gyo.js`) tetap identik byte dengan build `main`. Pemeriksaan yang sama diulang di tahap Test.
+  - **Anggaran:** JS permainan sekarang 20,10 KB gzip ditambah React 60,18 KB gzip, sekitar 80 KB dari 150 KB. F-09 diperkirakan menambah 3–4 KB gzip. Aset tidak bertambah (65,2 KB dari 4 MB).
+- Ukuran: M menurut backlog; perkiraan sekarang L (batas bawah): tiga layar, satu modul murni, penggantian layar akhir sementara, dan penyesuaian 27 uji lama. Bertambah bila usulan 5 pilihan (c) atau usulan 12 pilihan (b) dipilih.
+- Temuan F-07 dan F-08 yang menunggu keputusan dan menyangkut F-09:
+  - F-08 usulan 8 (hasil kuis di rekap), yang dibiarkan terbuka di Gerbang 1 F-08 untuk Plan F-09: dibawa ke usulan 5.
+  - Catatan Plan F-09 dari F-07 (jumlah bintang akhir setiap tim tidak terlihat): dibawa ke usulan 6.
+  - F-07 Temuan 1 sudah diputuskan di F-08 (usulan 6a: dibiarkan, dicatat untuk F-13). Variannya di adegan 6 dicatat di risiko "Klik ganda pada tombol bintang adegan 6", tanpa keputusan baru.
+  - Tidak dibawa: F-08 Temuan 1 (mode warna paksa kartu dampak) sudah dijadwalkan untuk F-13 dan tidak menyangkut layar penutup, walaupun pelajarannya dipakai di CSS F-09. F-07 Temuan 8 (asal dan lisensi bunyi) menunggu jawaban untuk F-11, dan F-09 tidak menambah bunyi. Pengecekan warna ikon D-08, keterbacaan di proyektor, dan kelancaran di laptop kelas bawah adalah pengecekan oleh pemilik proyek, bukan keputusan.
+- Usulan untuk Gerbang 1. Sebutkan nomor dan huruf pilihan bila memilih alternatif. Usulan 4, 6, dan 12 perlu jawaban tegas: usulan 4 memuat usulan agen yang belum menjadi keputusan, sedangkan usulan 6 dan 12 tidak memuat saran agen. Maket dikirim lewat percakapan dan tidak disimpan di repositori.
+  1. **Layar akhir.**
+     - Kapan: langsung sesudah bintang alasan adegan 6, tanpa sapuan, seperti sekarang (fase `ending`).
+     - Susunan: tata letak layar permainan tetap (bilah atas 8u, area panggung 52u, panel bawah 40u), sehingga panel indikator tetap di tempat yang dikenal kelas:
+       - Bilah atas: tetap pukul 20.00 dengan bulan di titik terakhir. Tulisan kanan "Akhir hari" menggantikan "Adegan 6/6", dan label pembaca layarnya "Pukul 20.00, akhir hari" (draf baru). Alternatif: tetap "Adegan 6/6", sehingga `DayArc.tsx` tidak berubah;
+       - area panggung: ilustrasi `endings[endingFor(meters)]` 320 × 180 berskala k, dengan garis pindai dan vinyet seperti panggung, tanpa tokoh dan ikon emosi. Timbangan berada di tengah `END_SCALE_ZONE`: kotak 48 × 32 piksel panggung di x 232, y 16 (usulan 2). Ilustrasi memakai `role="img"` dengan teks alternatif di bawah;
+       - panel kiri: indikator F-06 dengan nilai akhir `meters`, tanpa angka melayang;
+       - panel kanan: menurut usulan 6;
+       - panel bawah, rata tengah (Design System bagian 3): judul akhir (Press Start 2P 4,4u, "Judul layar" Design System bagian 5), dua kalimat (Pixelify Sans 3,6u, lebar paling banyak 150u), dan tombol lanjut F-05 "Lihat rekap" (draf baru) di kanan bawah.
+     - Teks (judul dari PRD bagian 9; kalimat draf baru):
+
+       | Akhir (syarat) | Judul | Kalimat 1 | Kalimat 2 |
+       |---|---|---|---|
+       | Warga Setara (H ≥ 75 dan K ≥ 75) | Warga Setara | Hak orang lain terjaga dan kewajiban dijalankan, sehingga timbangan Nara seimbang. | Mari lihat rekap untuk mengingat alasan di balik setiap pilihan. |
+       | Hampir Seimbang (selain dua lainnya) | Hampir Seimbang | Banyak pilihan kelas sudah baik, tetapi ada yang masih bisa diperbaiki. | Mari lihat rekap untuk menemukan pilihan yang lebih menjaga keseimbangan. |
+       | Hari yang Berat (H < 40 atau K < 40) | Hari yang Berat | Pilihan kecil ternyata berdampak besar bagi orang-orang di sekitar Nara. | Ini kesempatan untuk belajar: mari lihat rekap untuk menemukan pilihan yang lebih menjaga keseimbangan. |
+
+       Kalimat 1 bersumber dari pesan inti PRD bagian 9, dan kalimat 2 selalu mengajak ke rekap. Tidak ada kata "kalah", "gagal", atau "salah", dan tidak ada yang disalahkan (Design System bagian 2 nomor 3; AGENTS bagian 8).
+     - Teks alternatif ilustrasi (draf baru, dari uraian Daftar_Aset C-02 sampai C-04):
+       - Warga Setara: "Nara duduk tersenyum di bangku teras sambil menggenggam teh hangat. Malam cerah, bulan dan banyak bintang bersinar."
+       - Hampir Seimbang: "Nara duduk merenung di bangku teras sambil bertopang dagu. Sebagian langit berawan, dan bulan setengah tertutup."
+       - Hari yang Berat: "Nara duduk di bangku teras dan menatap langit yang berawan. Ada bintang jatuh, dan Nara tersenyum kecil penuh harapan."
+     - Hasil ukur: risiko "Ruang layar akhir".
+     - Alternatif: (a) ilustrasi diperbesar memenuhi layar dengan judul dan kalimat di atasnya, padahal teks menutupi ilustrasi dan panel indikator hilang; (b) layar akhir sebagai kartu di kotak kartu dampak F-06, sehingga ilustrasi hanya sebagian terlihat. Keduanya tidak diusulkan, karena posisi akhir kedua indikator wajib tampil.
+  2. **Timbangan: posisi akhir, gerak, dan kurangi gerak.**
+     - Besar kemiringan mengikuti akhir (Daftar_Aset C-02 sampai C-04): Warga Setara seimbang (bingkai 2), Hampir Seimbang sedikit miring (bingkai 1 atau 3), dan Hari yang Berat miring (bingkai 0 atau 4).
+     - Arah:
+       - (a, saran) seperti timbangan sungguhan: sisi indikator yang nilainya lebih tinggi turun (Hak di kiri, Kewajiban di kanan), sehingga sisi yang terangkat menunjukkan indikator yang perlu diperkuat. Bila nilainya sama, timbangan miring ke kanan, sehingga sisi Hak orang lain yang terangkat, sesuai pesan utama permainan. Contoh: B-B-B-C-C-C (65/80) sedikit miring ke kanan, dan semua A (0/0) miring ke kanan;
+       - (b) sama dengan (a), tetapi nilai seri miring ke kiri;
+       - (c) sisi yang nilainya lebih rendah turun, dibaca "sisi yang bermasalah";
+       - (d) arah tetap untuk semua permainan (misalnya selalu ke kanan), tidak bergantung nilai.
+     - Gerak (saran): timbangan mulai seimbang, berayun satu langkah ke sisi berlawanan, satu langkah ke sisi akhir, lalu berhenti di posisi akhir. Setiap bingkai 200 ms (`steps`), dimulai 300 ms sesudah layar tampil, sehingga totalnya 0,9–1,1 detik, lalu diam di bingkai akhir:
+
+       | Posisi akhir | Urutan bingkai |
+       |---|---|
+       | Seimbang | 2, 1, 3, 2 |
+       | Sedikit kanan / sedikit kiri | 2, 1, 3 / 2, 3, 1 |
+       | Miring kanan / miring kiri | 2, 1, 3, 4 / 2, 3, 1, 0 |
+
+       Alternatif: (e) satu langkah langsung dari seimbang ke posisi akhir, tanpa ayunan, sehingga Warga Setara tidak bergerak; (f) tanpa gerak.
+     - Kurangi gerak (`prefers-reduced-motion` atau pengaturan): tanpa animasi. Timbangan langsung tampil di bingkai akhir, bukan bingkai pertama strip, dan `getAnimations()` kosong. Maknanya tetap tersampaikan lewat nilai indikator dan kalimat timbangan bagi pembaca layar.
+     - Kalimat timbangan bagi pembaca layar (draf baru): "Timbangan seimbang.", "Timbangan sedikit miring ke sisi Kewajiban dijalankan.", "Timbangan miring ke sisi Hak orang lain terjaga.", dan seterusnya. Untuk nilai seri: "Timbangan sedikit miring." atau "Timbangan miring.", tanpa menyebut sisi.
+  3. **Rekap: susunan dan halaman.**
+     - (saran) 4 halaman menurut waktu adegan: pagi (adegan 1 dan 2), siang (3 dan 4), sore (5), dan malam (6). Pembagian ini mengikuti `timeOfDay` naskah dan warna langit Design System bagian 4, sehingga adegan 5 dengan enam rujukannya mendapat halaman sendiri. Ukuran huruf sama dengan tombol pilihan F-05 (3,1u) dan rujukan kartu dampak F-06 (3,1u). Sisa 8,1–16,0u (risiko "Ruang rekap") cukup untuk dua baris tambahan bila pemenggalan baris di komputer lain berbeda.
+     - Isi setiap halaman:
+       - kepala 8u berwarna langit waktu itu (pagi `#FFD9A8`, siang `#6EC6F2`, dan sore `#FFC27A` dengan teks `ink`; malam `#4A4F9C` dengan teks `cream`, sama dengan bilah atas), berisi "Rekap pilihan kelas" (Press Start 2P 2,8u) dan, misalnya, "Pagi · halaman 1 dari 4" (Pixelify Sans 2,5u);
+       - judul kolom sekali per halaman: "Pilihan kelas", "Pilihan yang paling menjaga keseimbangan", dan "Rujukan" (2,5u, `dusk`);
+       - satu kotak berbingkai piksel per adegan, berisi kotak nomor (seperti kotak A/B/C), judul adegan, "Pukul 06.15" (2,5u, `dusk`), lalu tiga kolom berbanding 1 : 1 : 1,3:
+         - pilihan kelas: kotak huruf, teks pilihan (`choiceText` dengan bendera akhir, sehingga varian adegan 6 ikut), dan tanda tingkat F-06 (ikon emosi dan tulisan "Tepat", "Kurang tepat", atau "Berisiko" di atas warna tingkat, teks `ink`);
+         - pilihan yang paling menjaga keseimbangan: kotak huruf dan teksnya, atau "Sama dengan pilihan kelas." dengan ikon hati bila kelas sudah memilihnya;
+         - rujukan pilihan itu, berurutan dan apa adanya, dengan butir seperti kartu dampak;
+       - kaki: "Sebelumnya" (mulai halaman 2) dan "Berikutnya", atau "Lanjut ke refleksi" di halaman terakhir, di kanan bawah.
+
+       Teks baru (draf baru): "Rekap pilihan kelas", "Pagi · halaman 1 dari 4" (begitu pula Siang, Sore, Malam), ketiga judul kolom, "Pukul {jam}", "Sama dengan pilihan kelas.", "Sebelumnya", "Berikutnya", dan "Lanjut ke refleksi".
+     - Nomor halaman adalah keadaan tampilan di `PlayScreen`, seperti nomor layar narasi, bukan keadaan mesin: `LANJUT` (`recap` ke `reflection`) baru dikirim dari halaman terakhir.
+     - Alternatif:
+       - (a) 3 halaman (pagi; siang; sore dan malam) dengan rujukan 2,5u, batas minimum Design System bagian 5: sisa 5,5–6,9u. Bila tim per baris dan baris kuis ditambahkan, isi meluap 2,0u;
+       - (b) 6 halaman, satu adegan per halaman, semua teks 3,6u: sisa 8,1–8,8u. Paling mudah dibaca, tetapi guru menekan "Berikutnya" lima kali dan kelas tidak pernah melihat dua adegan sekaligus;
+       - (c) satu daftar bergulir (3,1u): isinya 2,4–2,8 kali tinggi area, sehingga guru harus menggulir dan sebagian adegan selalu tersembunyi;
+       - tidak diusulkan karena meluap, bahkan dengan huruf minimum 2,5u: satu layar untuk enam adegan dan dua halaman tiga adegan.
+  4. **Aturan "pilihan yang paling menjaga keseimbangan" (perlu keputusan pemilik proyek).**
+     - Fakta naskah: setiap adegan punya tepat satu pilihan bertingkat tepat, yaitu B, dan B juga punya efek H dan efek K terbesar. Keempat aturan di bawah memilih B di keenam adegan. Jadi pilihan aturan hanya menentukan perilaku bila naskah kelak berubah, dan cara guru menjelaskannya.
+     - (a, usulan agen) pilihan bertingkat "tepat". Sama dengan kepala hijau "Tepat" di kartu dampak, sehingga mudah dijelaskan. Uji unit memastikan setiap adegan punya tepat satu pilihan tepat; bila kelak ada dua, uji gagal dan pemilik proyek memutuskan.
+     - (b) pilihan dengan jumlah efek H + K terbesar.
+     - (c) pilihan yang efek terkecilnya (H atau K) paling besar, yaitu yang paling "seimbang" menurut angka.
+     - (d) ditandai langsung di naskah, sehingga `scenes.ts`, skema, dan tipe `Scene` berubah. Paling luwes, tetapi mengubah naskah dan skema F-03.
+     - Fungsinya murni di `ui/closing.ts`. Alternatif: di `engine/rules.ts`, bersama `endingFor` dan `isQuizCorrect`.
+  5. **Hasil kuis di rekap (usulan 8 F-08).**
+     - (c, saran) satu baris kecil di kolom pilihan kelas adegan 5, misalnya "Kuis peran: jawaban kelas Advokat, jawaban tepat Hakim." atau, bila tepat, "Kuis peran: jawaban kelas Hakim, tepat." (draf baru). Alasannya: rekap memperlihatkan semua keputusan kelas hari itu, dan setiap keputusan berdampingan dengan jawaban yang lebih baik.
+       - Mesin menyimpan jawaban di entri `history` adegan 5 saat `JAWAB_KUIS` (`HistoryEntry.quizAnswer`, opsional), sehingga "ulangi adegan" F-13 ikut menghapusnya. `quizAnswer` di `GameState` tetap bekerja seperti F-02.
+       - Yang berubah: `types.ts`, `reducer.ts`, uji reducer baru, satu uji F-08 di `controls.test.ts`, dan Architecture bagian 5 dan 6 (risiko "Hasil kuis dan mesin").
+       - Indikator, bendera, dan bintang tetap tidak berubah karena kuis, dan rekap tetap enam kotak adegan.
+     - (b) satu baris tetap tanpa jawaban kelas: "Kuis peran: hakimlah yang memeriksa, mengadili, dan memutus perkara." Mesin tidak berubah.
+     - (a) tidak tampil. Mesin tidak berubah, dan rekap persis seperti FR-13 dan Design System bagian 7.
+     - Baris kuis tidak menambah tinggi halaman sore pada susunan usulan 3.
+  6. **Papan tim dan jumlah bintang di akhir (keputusan pemilik proyek; agen tidak memberi saran).**
+     - Fakta: menurut PRD bagian 9, bintang alasan adalah satu-satunya unsur kompetitif; FR-09 meminta papan skor tim selalu terlihat; PRD bagian 3 tidak memasukkan papan skor daring atau papan peringkat antarkelas. PRD tidak mengatur papan di akhir permainan. Sekarang pop dan jumlah bintang adegan 6 tidak pernah terlihat.
+     - Pilihan:
+       - (a) papan tim tetap di panel kanan layar akhir, dengan urutan seperti pengaturan, tanpa ▶ dan "Giliran", dan dengan jumlah bintang akhir. Pop bintang adegan 6 diputar di sana. Tanpa peringkat. Rekap dan refleksi tanpa papan;
+       - (b) seperti (a), ditambah tanda "Bintang terbanyak" pada tim dengan jumlah tertinggi, bisa lebih dari satu tim bila seri. Ada unsur pemenang;
+       - (c) papan di layar akhir diurutkan dari bintang terbanyak, dengan nomor peringkat;
+       - (d) tidak menampilkan papan maupun jumlah bintang di layar akhir dan rekap. Panel kanan layar akhir kosong, dan jumlah terakhir hanya terdengar lewat pengumuman bintang;
+       - (e) setiap kotak adegan di rekap menyebut tim yang bergiliran dan bintang yang diterimanya di adegan itu, misalnya "Tim Mangga, 2 bintang", tanpa jumlah total. Bisa digabung dengan (a) atau (d).
+     - "Tidak menampilkan peringkat tim" terpenuhi oleh (a), (d), dan (e).
+  7. **Refleksi (FR-14).**
+     - Layar sendiri sesudah halaman rekap terakhir (fase `reflection`; PRD bagian 6), berisi:
+       - kepala 8u berwarna malam dengan "Refleksi" (Press Start 2P 2,8u);
+       - "Tulis jawabanmu di buku catatan." (Pixelify Sans 3,6u);
+       - tiga kalimat pemantik bernomor dalam kotak berbingkai piksel (Pixelify Sans 3,6u, sama dengan narasi);
+       - "Main lagi" dan "Kembali ke galeri" di kiri bawah (usulan 8).
+     - Kalimat pemantik (draf baru), sama untuk ketiga akhir:
+       1. Pilihan mana yang paling sulit diputuskan kelasmu hari ini, dan mengapa? (TP 2)
+       2. Hak siapa yang terdampak oleh pilihan itu, dan pasal mana di rekap yang berkaitan dengannya? (TP 1 dan TP 3)
+       3. Bila kamu mengalami situasi serupa, apa yang akan kamu lakukan agar hak orang lain terjaga dan kewajibanmu tetap dijalankan? (TP 5)
+     - Hasil ukur: setiap kalimat 1–2 baris, dan sisa ruang 35,5–36,1u (atau 24,1–24,8u bila kalimat memakai 4,4u).
+     - Alternatif:
+       - (a) kalimat rumpang untuk dilengkapi siswa: "Pilihan yang paling sulit hari ini adalah …, karena …", "Pilihan itu berdampak pada hak … dan berkaitan dengan pasal …", dan "Bila mengalami situasi serupa, aku akan … agar hak orang lain terjaga dan kewajibanku tetap dijalankan.";
+       - (b) satu atau dua kalimat saja;
+       - (c) kalimat pertama berbeda untuk setiap akhir;
+       - (d) kalimat pemantik 4,4u, agar lebih terbaca dari bangku belakang;
+       - tidak diusulkan: kalimat pemantik di halaman rekap terakhir tanpa layar refleksi sendiri, karena halaman itu sudah berisi adegan 6.
+  8. **"Main lagi" dan "Kembali ke galeri" (FR-15 sebagian).**
+     - Keduanya hanya ada di layar refleksi, di akhir alur PRD bagian 6, di kiri bawah, jauh dari tempat "Lanjut ke refleksi" di kanan bawah.
+     - "Main lagi" sementara sampai F-10 (saran):
+       - mengirim `MAIN_LAGI` (reducer kembali ke fase `title` dan menyimpan `settings` serta tim), lalu `startActions` dengan tim yang sama;
+       - permainan langsung mulai lagi di narasi adegan 1, dengan jumlah tim yang sama (`#main`, `#main-3`, atau `#main-4`) dan pengaturan suara yang sama, dan fokus pindah ke tombol lanjut kotak narasi;
+       - `restartActions` (`LANJUT`, `LANJUT`, `MAIN_LAGI`, lalu `startActions`) diganti `replayActions` (`MAIN_LAGI`, lalu `startActions`), karena tombol itu kini hanya ada di fase `reflection`. Di F-10, bagian `startActions` dibuang agar "Main lagi" berhenti di layar judul;
+       - tulisannya "Main lagi" (FR-15).
+     - Alternatif:
+       - (a) "Main lagi" membuka layar kerangka (alamat tanpa `#main`), sebagai pengganti layar judul sampai F-10. Jumlah tim `#main-3` dan `#main-4` hilang, dan guru perlu satu klik lagi;
+       - (b) layar judul sementara di fase `title` dengan tombol "Mulai", yang dibuang lagi di F-10;
+       - (c) tulisan tetap "Main lagi dari adegan 1" sampai F-10.
+     - "Kembali ke galeri": tautan `href="../"` (Architecture bagian 11), tanpa bunyi klik karena halaman berpindah (F-07). Alternatif: tautan itu juga ada di layar akhir dan di setiap halaman rekap.
+  9. **Keyboard, masa tunggu, fokus, pembaca layar, dan kontras.**
+     - Tombol:
+
+       | Tombol | Fase | Fungsi |
+       |---|---|---|
+       | `Spasi`, `Enter` | `ending` | "Lihat rekap" |
+       | `Spasi`, `Enter` | `recap` | "Berikutnya", atau "Lanjut ke refleksi" di halaman terakhir |
+       | `Spasi`, `Enter` | `reflection` | Bukan pintasan; hanya menekan tombol yang sedang berfokus, agar "Main lagi" tidak tertekan tanpa sengaja |
+       | `M` | `ending`, `recap`, `reflection` | Suara mati atau nyala (F-07), karena klik tetap berbunyi di ketiga layar |
+
+       Aturan F-05 tetap berlaku: tekanan bersama Ctrl, Alt, atau Meta, tombol yang ditahan, dan `Spasi` atau `Enter` pada tombol yang berfokus ditangani seperti sekarang. Angka, huruf lain, `P` `T` `S`, dan `Esc` tidak berpengaruh (arti `Esc` di F-10). Alternatif: `←` dan `→` untuk pindah halaman rekap.
+     - Masa tunggu (saran): 600 ms sesudah layar akhir, setiap halaman rekap, dan layar refleksi tampil, tombol maju ("Lihat rekap", "Berikutnya", "Lanjut ke refleksi", "Main lagi", dan "Kembali ke galeri") beserta pintasannya belum bekerja. Selama itu tombol tampil biasa dengan `aria-disabled="true"`, seperti kartu dampak, sehingga klik ganda atau `Enter` kedua tidak melewati halaman, memulai ulang, atau meninggalkan halaman. "Sebelumnya" tanpa masa tunggu. Alternatif: masa tunggu hanya untuk "Main lagi" dan "Kembali ke galeri".
+     - Fokus:
+       - setiap kali layar atau halaman berganti, fokus pindah ke judulnya (`tabIndex=-1`, garis fokus 2 px `ink` berjarak 4 px saat `:focus-visible`), seperti kartu dampak dan kuis;
+       - urutan Tab: layar akhir: "Lihat rekap"; rekap: "Sebelumnya" (mulai halaman 2), lalu "Berikutnya" atau "Lanjut ke refleksi"; refleksi: "Main lagi", lalu "Kembali ke galeri";
+       - ketiga layar bukan dialog, jadi fokus tidak dikunci.
+     - Pembaca layar: pengumuman di wilayah `aria-live="polite"`, satu kali saat layar atau halaman tampil (draf baru):
+       - layar akhir: "Akhir hari: {judul}. {kalimat 1} {kalimat 2} Hak orang lain terjaga {H}. Kewajiban dijalankan {K}. {kalimat timbangan}";
+       - setiap halaman rekap: "Rekap pilihan kelas, {pagi}, halaman {p} dari 4.", lalu untuk setiap adegan: "Adegan {n}, {judul}. Pilihan kelas {X}: {teks}. {Tingkat}. Pilihan yang paling menjaga keseimbangan: {Y}: {teks}." (atau "sama dengan pilihan kelas") "Rujukan: {…}." Susunannya meniru pengumuman kartu dampak, yang juga membacakan rujukan;
+       - refleksi: "Refleksi. Tulis jawabanmu di buku catatan.", lalu ketiga kalimat pemantik bernomor.
+
+       Wilayah `role="status"` F-07 tetap ada di layar akhir, untuk pengumuman bintang adegan 6 dan `M`. Isi rekap berupa daftar bernama "Rekap pilihan kelas", satu butir per adegan; ikon, kotak nomor, dan kotak huruf disembunyikan dari pembaca layar. Alternatif: pengumuman rekap ringkas, hanya huruf pilihan, tingkat, dan huruf pilihan terbaik.
+     - Makna tidak hanya lewat warna: tingkat ditandai ikon dan tulisan; "Sama dengan pilihan kelas." memakai ikon hati dan tulisan; arah timbangan juga ada di kalimat timbangan; jenis akhir ditandai judul dan kalimat; warna kepala halaman rekap hanya penanda tambahan, karena nama waktunya juga tertulis.
+     - Kontras ≥ 4,5:1, semuanya pasangan yang sudah ada di Design System bagian 4: `ink` di atas `cream` 13,3:1; `ink` di atas kepala pagi, siang, dan sore 10,7, 7,5, dan 9,0:1; `cream` di atas kepala malam 6,8:1; `ink` di atas `leaf`, `mango`, dan `coral` 8,3, 6,9, dan 5,1:1; `dusk` di atas `cream` 8,2:1; `cream` di atas `ink` 13,3:1 (kebalikan `ink` di atas `cream`, sudah dipakai kotak A/B/C F-05). Tidak ada token atau pasangan warna baru.
+  10. **Mesin (`engine/`).**
+      - Tidak perlu berubah untuk layar akhir, rekap, refleksi, dan "Main lagi". Fase `ending`, `recap`, dan `reflection`, `LANJUT` di antaranya, `MAIN_LAGI`, `endingFor`, `metersFromHistory`, `flagsFromHistory`, `starsByTeam`, dan `choiceText` sudah ada sejak F-02. Nomor halaman rekap, masa tunggu, dan gerak timbangan adalah keadaan tampilan.
+      - Berubah hanya bila usulan 5 pilihan (c) dipilih: jawaban kuis disimpan di `history`, karena `quizAnswer` dikosongkan saat adegan 6 dimulai, dan antarmuka tidak boleh menyimpan keadaan permainan sendiri (Architecture bagian 14).
+      - Aturan pilihan terbaik (usulan 4) dan bingkai timbangan (usulan 2) adalah fungsi murni yang membaca naskah dan `history`, di `ui/closing.ts`. Alternatif: keduanya di `engine/rules.ts`.
+  11. **Layar akhir sementara dan sisa jembatan: yang diganti, dihapus, dan tetap.**
+      - Diganti: layar akhir sementara F-05 di `PlayScreen.tsx`, yaitu `END_PHASES`, `ended`, blok `ss-play-end`, `restart()`, efek yang memfokuskan judulnya, dan komentar kepala berkas.
+      - Dihapus:
+        - `restartActions` di `ui/controls.ts`, diganti `replayActions` (usulan 8);
+        - `copy.play.endTitle`, `endLead`, `endStatus`, dan `playAgain`;
+        - aturan CSS `.ss-play-end .ss-placeholder-title:focus` dan `:focus-visible`;
+        - uji "main lagi dari layar akhir" di `controls.test.ts`, diganti uji `replayActions`;
+        - pemilih `.ss-play-end` dan tulisan "Main lagi dari adegan 1" di 27 uji ujung ke ujung (risiko "Uji lama");
+        - uraian "Layar akhir sementara" di Architecture bagian 7.
+      - Tetap, karena milik F-10: `startActions` dan keadaan awal yang melewati judul, pengaturan, dan prolog; alamat `#main`, `#main-3`, dan `#main-4`; layar kerangka; dan pratinjau panggung `#adegan-N`.
+      - Jembatan sementara F-05 sampai F-07 sudah dihapus seluruhnya di F-08 (F-08 AC-20), jadi tidak ada sisa jembatan lain di `PlayScreen.tsx`.
+  12. **Cetak atau unduh rekap (FR-20, P2; PRD bagian 16 nomor 4). Keputusan pemilik proyek; agen hanya memberi pertimbangan.**
+      - Pertimbangan:
+        - PRD bagian 13 menempatkan P2 sesudah versi 1.0 ("Nanti: rekap yang bisa diunduh"), dan tenggatnya 20 November (PRD bagian 15).
+        - Rekap tidak berisi data siswa: hanya pilihan kelas dan nama tim dari daftar. Mencetaknya tidak melanggar aturan privasi (AGENTS bagian 7).
+        - Bila rekap berhalaman (usulan 3), layar hanya memuat satu halaman, jadi cetak butuh lembar cetak tersendiri berisi keenam adegan.
+        - Unduh gambar atau PDF langsung butuh pustaka baru, misalnya pengubah HTML ke gambar, atau kode gambar sendiri yang cukup besar. Dependensi baru perlu izin tertulis (AGENTS bagian 7, aturan 8).
+      - Pilihan:
+        - (a) tidak di F-09; FR-20 tetap P2. PRD bagian 16 nomor 4 dijawab "tidak sejak versi 1.0" di PRD bagian 17. Guru tetap bisa memakai tangkapan layar sistem;
+        - (b) cetak lewat peramban di F-09, tanpa dependensi: tombol "Cetak rekap" di layar refleksi membuka dialog cetak (`window.print()`), dengan lembar cetak A4 berisi keenam adegan sekaligus (`@media print`). Dari dialog itu guru juga bisa menyimpan PDF. Ukuran F-09 menjadi L penuh, dan uji memakai `emulateMedia({ media: "print" })` atau `page.pdf()`;
+        - (c) seperti (b), tetapi sebagai fitur kecil tersendiri sesudah F-11, sehingga F-09 tidak bertambah;
+        - (d) unduh gambar atau PDF langsung, dengan dependensi baru yang perlu izin tertulis.
+  13. **Cara uji.**
+      - `content:check`; naskah tidak berubah.
+      - `test`:
+        - baru `closing.test.ts`: bingkai akhir dan arah timbangan untuk ketiga akhir dan nilai seri; urutan gerak; baris rekap dari `history` pada jalur naskah asli, termasuk varian teks B adegan 6; pilihan terbaik di keenam adegan, dan tepat satu pilihan tepat per adegan bila usulan 4a; pembagian halaman; serta kalimat pengumuman;
+        - `controls.test.ts` disesuaikan: `Spasi` dan `Enter` di fase `ending` dan `recap` tetapi tidak di `reflection`; `M` di ketiga fase; `replayActions` dari fase `reflection` kembali ke `intro` adegan 1 dengan `history` kosong, tim yang sama, dan pengaturan tetap; uji `restartActions` diganti;
+        - bila usulan 5c: `reducer.test.ts` (jawaban kuis di `history` adegan 5, jawaban kedua ditolak, dan `MAIN_LAGI` mengosongkannya) dan satu uji F-08 di `controls.test.ts` disesuaikan;
+        - uji lain tidak berubah, termasuk F-02 AC-14 untuk seluruh `engine/`.
+      - `build:pages`: keempat berkas galeri identik byte dengan build sebelum F-09, juga sesudah semua dokumen F-09 ditulis; JS permainan ≤ 150 KB gzip tanpa penanda `__THREE__`; `src` dan `href` HTML permainan relatif.
+      - `test:e2e`:
+        - memakai Chromium 153 lewat berkas konfigurasi pengganti di luar repositori, seperti F-07 dan F-08, sehingga `playwright.config.ts`, `package.json`, dan lockfile tidak berubah;
+        - aturan jam uji di "Catatan untuk Plan berikutnya": `pauseAt` sebelum halaman dimuat, waktu hanya dimajukan dengan `runFor`, dan dua langkah sesudah unsur tampil (masa tunggu dihitung sejak layar atau halaman tampil). Gerak timbangan dijeda dan diatur lewat Web Animations API;
+        - uji baru `akhir-rekap-refleksi.spec.ts`: ketiga akhir dengan keyboard saja (semua B, B-B-B-C-C-C, semua A, dan semua C), dengan ilustrasi, judul, kalimat, nilai indikator, dan bingkai akhir timbangan yang benar; urutan bingkai gerak; kurangi gerak tanpa animasi; letak, ukuran huruf, dan tanpa luapan di empat ukuran untuk layar akhir, setiap halaman rekap pada jalur terburuk dan semua B, serta refleksi; isi rekap sama dengan `history` dan naskah, termasuk rujukan apa adanya; tanda tingkat dengan ikon dan tulisan; kontras; fokus dan urutan Tab; masa tunggu pada 599 dan 600 ms; klik ganda dan `Enter` kedua tidak melewati halaman dan tidak memulai ulang; `Spasi` dan `Enter` tanpa pengaruh di refleksi; "Main lagi" kembali ke adegan 1 dengan tim dan pengaturan suara yang sama, juga untuk `#main-3` dan `#main-4`; "Kembali ke galeri" ber-`href="../"`; pengumuman; bunyi klik hanya untuk tekanan yang diterima; pramuat ilustrasi akhir; ilustrasi atau timbangan yang gagal dimuat; serta 0 galat konsol dan 0 respons 4xx/5xx;
+        - 27 uji lama disesuaikan lewat fungsi bersama di `e2e/bantuan.ts`;
+        - bila satu perintah terlalu lama, uji dijalankan dalam beberapa bagian dengan konfigurasi yang sama, dan tangkapan layar disalin sesudah bagian yang membuatnya.
+      - Tangkapan layar di 1280×720, 1024×768, dan 1920×1080: layar akhir untuk ketiga akhir, setiap halaman rekap, dan refleksi; ditambah timbangan di tengah gerak, layar akhir dengan kurangi gerak, dan fokus pada "Main lagi" di 1280×720.
+      - `tsc --noEmit` dan ESLint `--max-warnings 0` pada berkas kode baru dan yang diubah.
+      - Daftar periksa manual AGENTS bagian 9 yang berlaku. Keterbacaan rekap dan kalimat pemantik dari bangku belakang dicek pemilik proyek.
       - Tidak ada dependensi baru.
