@@ -248,9 +248,9 @@ Semua aset gambar **digambar dengan kode oleh Claude** dan disetujui pengembang.
 
 ## 13. Ruang lingkup rilis
 
-- **Versi 1.0 (MVP):** semua kebutuhan P0.
+- **Versi 1.0 (MVP):** semua kebutuhan P0, ditambah FR-20 (rekap yang bisa diunduh sebagai gambar PNG atau PDF A4; keputusan pemilik proyek 27 Okt 2026, F-09).
 - **Versi 1.1:** P1 (layar penuh, kurangi gerak, ulangi adegan, efek suara).
-- **Nanti:** P2 (rekap yang bisa diunduh, adegan lingkungan).
+- **Nanti:** P2 lainnya (adegan lingkungan).
 
 ## 14. Risiko dan mitigasi
 
@@ -295,3 +295,6 @@ Semua aset gambar **digambar dengan kode oleh Claude** dan disetujui pengembang.
 | 21 Okt 2026 | Verifikasi rujukan dicatat pemilik proyek di daftar centang `docs/sehari-setara/Verifikasi_Rujukan.md` |
 | 26 Okt 2026 | Durasi diskusi bawaan tetap 60 detik (balasan `Setuju: F-07`, usulan 7 rencana F-07), menjawab pertanyaan terbuka bagian 16 nomor 3; pilihan 30, 60, atau 90 detik tetap dibuat di pengaturan kelas (F-10) |
 | 26 Okt 2026 | Bunyi klik (gaya A) dan bunyi teks per huruf (gaya B, setiap 2 huruf, nada tinggi, volume 60%) dikerjakan lebih awal di F-07 atas pilihan pemilik proyek lewat halaman uji suara. Sisa efek suara FR-19 tetap di F-13 |
+| 27 Okt 2026 | FR-20 dikerjakan sejak versi 1.0, di F-09: rekap kelas diunduh dari layar refleksi sebagai gambar PNG atau PDF A4, dibuat di peramban tanpa server dan tanpa data siswa (balasan `Setuju: F-09`, usulan 12 pilihan d, dengan izin tertulis "Izinkan dependensi: modern-screenshot 4.7.0"). Ini menjawab pertanyaan terbuka bagian 16 nomor 4 |
+| 27 Okt 2026 | "Pilihan yang paling menjaga keseimbangan" di rekap (FR-13) adalah pilihan bertingkat "Tepat" di adegan itu (usulan 4 pilihan a rencana F-09) |
+| 27 Okt 2026 | Papan tim di layar akhir menampilkan jumlah bintang akhir tanpa peringkat, dengan tanda "Bintang terbanyak" pada tim yang bintangnya terbanyak (beberapa tim bila seri, tanpa tanda bila semua 0), dan setiap kotak adegan di rekap menyebut tim yang bergiliran dan bintangnya (usulan 6 pilihan b dan e rencana F-09). Bintang alasan tetap satu-satunya unsur kompetitif |

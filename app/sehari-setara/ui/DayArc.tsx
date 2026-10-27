@@ -1,5 +1,6 @@
 // Bilah atas dengan busur hari (Design System bagian 1 dan 7; spesifikasi F-04).
 // Busur adalah gambar logis 136×22 yang diskalakan dengan k panggung agar pikselnya sama tajam.
+// Di layar akhir (F-09) busur tetap pada adegan 6, dan tulisan kanan menjadi "Akhir hari".
 import { icons } from "../assets/manifest";
 import { copy } from "../content/copy";
 import type { Scene } from "../engine/types";
@@ -34,9 +35,11 @@ interface DayArcProps {
   sceneIndex: number;
   scale: number;
   animate: boolean;
+  /** Layar akhir (F-09): tulisan "Akhir hari" dan label "Pukul {jam}, akhir hari". */
+  ending?: boolean;
 }
 
-export function DayArc({ scenes, sceneIndex, scale, animate }: DayArcProps) {
+export function DayArc({ scenes, sceneIndex, scale, animate, ending = false }: DayArcProps) {
   const scene = scenes[sceneIndex];
   const states = arcPointStates(sceneIndex);
   const current = ARC.points[sceneIndex];
@@ -47,7 +50,7 @@ export function DayArc({ scenes, sceneIndex, scale, animate }: DayArcProps) {
       className="ss-topbar"
       data-time={scene.timeOfDay}
       role="img"
-      aria-label={copy.topBar.label(scene.clock, sceneIndex + 1, scenes.length)}
+      aria-label={ending ? copy.topBar.endingLabel(scene.clock) : copy.topBar.label(scene.clock, sceneIndex + 1, scenes.length)}
     >
       <span className="ss-topbar-clock" aria-hidden="true">
         {scene.clock}
@@ -84,7 +87,7 @@ export function DayArc({ scenes, sceneIndex, scale, animate }: DayArcProps) {
         />
       </svg>
       <span className="ss-topbar-counter" aria-hidden="true">
-        {copy.topBar.counter(sceneIndex + 1, scenes.length)}
+        {ending ? copy.topBar.ending : copy.topBar.counter(sceneIndex + 1, scenes.length)}
       </span>
     </div>
   );

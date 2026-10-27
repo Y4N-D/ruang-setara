@@ -1,21 +1,41 @@
-// Layar permainan Sehari Setara (spesifikasi F-05 sampai F-08), dibuka lewat #main sampai layar judul dibuat di F-10.
+// Layar permainan Sehari Setara (spesifikasi F-05 sampai F-09), dibuka lewat #main sampai layar judul dibuat di F-10.
 // Menjalankan mesin F-02 dengan naskah F-03: narasi, pertanyaan, pilihan, pengatur waktu, reaksi, indikator, kartu
-// dampak, kuis peran di adegan 5 (F-08), bintang alasan, pergantian adegan, dan layar akhir sementara, ditambah papan tim
-// dan bunyi (F-07). Logika permainan tetap di engine/; layar ini hanya mengirim aksi.
-import { useEffect, useEffectEvent, useReducer, useRef, useState, type ReactNode } from "react";
+// dampak, kuis peran di adegan 5 (F-08), bintang alasan, pergantian adegan, papan tim dan bunyi (F-07), lalu layar
+// akhir, rekap, refleksi, dan unduh rekap (F-09). Logika permainan tetap di engine/; layar ini hanya mengirim aksi.
+import {
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { copy } from "../content/copy";
 import { ROLES } from "../content/roles";
 import { SCENES } from "../content/scenes";
 import { DEFAULT_TEAMS } from "../content/teams";
 import { createInitialState, createReducer } from "../engine/reducer";
-import { activeTeam, activeTeamIndex, isQuizCorrect, narrationFor } from "../engine/rules";
+import { activeTeam, activeTeamIndex, endingFor, isQuizCorrect, narrationFor } from "../engine/rules";
 import type { ChoiceId, GameAction, GameState, Phase, RoleId, Stars, TeamSetup, TimeOfDay } from "../engine/types";
 import { ChoicePanel } from "./ChoicePanel";
 import {
+  CLOSING_GUARD_MS,
+  endingAnnouncement,
+  recapPageAnnouncement,
+  recapPages,
+  recapRows,
+  reflectionAnnouncement,
+  scaleView,
+  topTeamIds,
+} from "./closing";
+import {
+  CLOSING_PHASES,
   FADE_MS,
   keyCommand,
   REACTION_MS,
-  restartActions,
+  replayActions,
   runActions,
   shouldHandleKey,
   startActions,
@@ -25,14 +45,28 @@ import {
   type TimerActionType,
 } from "./controls";
 import { DayArc } from "./DayArc";
+import {
+  canvasToPng,
+  DOWNLOAD_TIMEOUT_MS,
+  downloadFileName,
+  renderSheet,
+  saveBlob,
+  withTimeout,
+  type DownloadKind,
+} from "./download";
+import { EndingPanel, EndingStage } from "./Ending";
 import { usePrefersReducedMotion } from "./hooks";
 import { ImpactCard } from "./ImpactCard";
 import { IMPACT_GUARD_MS, impactAnnouncement, METER_STEP_MS, meterValueAt, metersBefore } from "./impact";
 import { STAGE, type TeamCount } from "./layout";
 import { Meters } from "./Meters";
 import { NarrationBox, type NarrationHandle } from "./NarrationBox";
-import { preloadScene } from "./preload";
+import { canvasToPdf } from "./pdf";
+import { preloadEnding, preloadScene } from "./preload";
 import { QUIZ_GUARD_MS, quizResultAnnouncement, quizStartAnnouncement, roleForNumber } from "./quiz";
+import { Recap } from "./Recap";
+import { RecapSheet } from "./RecapSheet";
+import { Reflection } from "./Reflection";
 import { RoleQuiz } from "./RoleQuiz";
 import { SceneWipe } from "./SceneWipe";
 import { CLICK_RATE, soundPlayer, TEXT_BLIP_RATE } from "./sound";
@@ -43,17 +77,15 @@ import { Timer } from "./Timer";
 import { canAddTime, starsAnnouncement, timerAnnouncement, type TimerCause } from "./turn";
 import { useTimer } from "./useTimer";
 
-// Relatif terhadap /ruang-setara/sehari-setara/ (Architecture bagian 11).
-const GALLERY_HREF = "../";
-
 const reducer = createReducer(SCENES);
+
+/** Halaman rekap menurut waktu adegan: [[0, 1], [2, 3], [4], [5]] (F-09). */
+const RECAP_PAGES = recapPages(SCENES);
 
 /** Fase yang menampilkan pertanyaan dan tiga pilihan di panel bawah; di fase impact dan quiz panel bawah kosong (F-06, F-08). */
 const CHOICE_PHASES: ReadonlySet<Phase> = new Set<Phase>(["discuss", "reaction", "stars"]);
 /** Fase saat panggung menampilkan reaksi pilihan adegan berjalan. */
 const REACTING_PHASES: ReadonlySet<Phase> = new Set<Phase>(["reaction", "impact", "quiz", "stars", "transition"]);
-/** Fase yang memakai layar akhir sementara, sampai layar akhir dibuat di F-09. */
-const END_PHASES: ReadonlySet<Phase> = new Set<Phase>(["ending", "recap", "reflection"]);
 
 /** Interaksi yang membuat atau melanjutkan konteks audio (Architecture bagian 8: bunyi dimuat sesudah interaksi pertama). */
 const UNLOCK_EVENTS = ["keydown", "pointerdown", "pointerup"] as const;
@@ -68,6 +100,22 @@ interface SceneChange {
   kind: "sapuan" | "pudar";
   nextTime: TimeOfDay;
 }
+
+/** Halaman rekap yang tampil; visit naik setiap kali halaman tampil, agar masa tunggunya dihitung lagi (F-09). */
+interface RecapView {
+  page: number;
+  visit: number;
+}
+
+/** Keadaan unduh rekap (F-09): run naik setiap kali penyiapan dimulai atau dibatalkan "Main lagi". */
+interface DownloadState {
+  run: number;
+  kind: DownloadKind | null;
+  status: "idle" | "menyiapkan" | "selesai" | "gagal";
+  date: Date | null;
+}
+
+const DOWNLOAD_IDLE: DownloadState = { run: 0, kind: null, status: "idle", date: null };
 
 /** Tim bawaan pertama sebanyak alamat layar: dua untuk #main, tiga dan empat untuk alamat uji (F-07). */
 const teamsFor = (count: TeamCount): TeamSetup[] => DEFAULT_TEAMS.slice(0, count);
@@ -85,6 +133,9 @@ function targetKind(target: EventTarget | null): KeyContext["target"] {
   return "lain";
 }
 
+/** Menunggu satu bingkai gambar, agar lembar unduhan sudah tergambar sebelum dibaca. */
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
 export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: TeamCount }) {
   const prefersReduced = usePrefersReducedMotion();
   const [state, dispatch] = useReducer(reducer, teamCount, initialPlayState);
@@ -95,7 +146,6 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   const [status, setStatus] = useState({ round: 0, text: "" });
   const [pop, setPop] = useState<StarPop | null>(null);
   const narrationRef = useRef<NarrationHandle>(null);
-  const endTitleRef = useRef<HTMLHeadingElement>(null);
   const cardUsed = useRef("");
   const quizUsed = useRef("");
   const starsUsed = useRef("");
@@ -105,6 +155,20 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   // Masa tunggu Lanjut kuis (F-08): ref waktu mulai untuk pengaman tekanan, state hanya untuk tampilan tombol.
   const quizStart = useRef({ key: "", at: 0 });
   const [quizReady, setQuizReady] = useState("");
+  // Layar penutup (F-09): halaman rekap, masa tunggu (ref waktu mulai dan state tampilan), dan tekanan yang sudah diterima.
+  const [recap, setRecap] = useState<RecapView>({ page: 1, visit: 0 });
+  const closingStart = useRef({ key: "", at: 0 });
+  const [closingReady, setClosingReady] = useState("");
+  const closingUsed = useRef("");
+  const prevUsed = useRef("");
+  // Enter atau Spasi yang masih ditahan sesudah "Main lagi" dibatalkan sampai tombol dilepas (F-09).
+  const holdKeys = useRef(false);
+  // Unduh rekap (F-09): lembar unduhan, dan pelepas URL blob yang dipanggil saat layar ditutup.
+  const [download, setDownload] = useState<DownloadState>(DOWNLOAD_IDLE);
+  const sheetRef = useRef<HTMLElement>(null);
+  const releases = useRef<Array<() => void>>([]);
+  // Pembatal penyiapan yang sedang berjalan, agar "Kembali ke galeri" bisa membatalkannya sebelum halaman berpindah.
+  const downloadAbort = useRef<AbortController | null>(null);
 
   const reduced = prefersReduced || state.settings.reducedMotion;
   const soundOn = state.settings.sound;
@@ -114,10 +178,27 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   const entry = state.history.find((item) => item.sceneId === scene.id);
   const chosen = entry ? scene.choices.find((choice) => choice.id === entry.choiceId) : undefined;
   const reaction = chosen && REACTING_PHASES.has(state.phase) ? chosen : undefined;
-  const ended = END_PHASES.has(state.phase);
   const sceneKey = `${round}-${state.sceneIndex}`;
   const impactElapsed = state.phase === "impact" && impactTime.key === sceneKey ? impactTime.ms : 0;
   const team = activeTeam(state);
+
+  // Layar penutup (F-09).
+  const closing = CLOSING_PHASES.has(state.phase);
+  const ending = state.phase === "ending";
+  const endingId = endingFor(state.meters);
+  const view = scaleView(state.meters);
+  const topIds = topTeamIds(state.teams);
+  const rows = useMemo(() => recapRows(state.history, SCENES, state.teams, state.flags), [state.history, state.teams, state.flags]);
+  const closingKey =
+    state.phase === "ending"
+      ? `${round}-akhir`
+      : state.phase === "recap"
+        ? `${round}-rekap-${recap.visit}`
+        : state.phase === "reflection"
+          ? `${round}-refleksi`
+          : "";
+  const closingReadyShown = closingKey !== "" && closingReady === closingKey;
+  const busy = download.status === "menyiapkan" ? download.kind : null;
 
   const send = (actions: readonly GameAction[]) => {
     for (const action of actions) dispatch(action);
@@ -217,7 +298,7 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     click();
   };
 
-  /** Bintang alasan untuk tim aktif, sekali per adegan; lalu sapuan atau pudar ke adegan berikutnya. */
+  /** Bintang alasan untuk tim aktif, sekali per adegan; lalu sapuan atau pudar ke adegan berikutnya, atau layar akhir. */
   const giveStars = (stars: Stars) => {
     if (state.phase !== "stars" || change || starsUsed.current === sceneKey || !team) return;
     starsUsed.current = sceneKey;
@@ -241,12 +322,87 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     }
   };
 
-  const restart = () => {
-    send(restartActions(teamsFor(teamCount)));
-    setRound((value) => value + 1);
-    setPop(null);
+  /* ---------------- Layar penutup (F-09) ---------------- */
+
+  /** Benar bila layar atau halaman penutup ini sudah tampil 600 ms; waktu diperiksa saat tekanan diterima. */
+  const closingGuardPassed = () =>
+    closingKey !== "" &&
+    closingStart.current.key === closingKey &&
+    performance.now() - closingStart.current.at >= CLOSING_GUARD_MS;
+
+  /** Tombol maju layar penutup: sesudah masa tunggu dan sekali per layar atau halaman. */
+  const acceptForward = () => {
+    if (!closingGuardPassed() || closingUsed.current === closingKey) return false;
+    closingUsed.current = closingKey;
+    return true;
+  };
+
+  /** "Lihat rekap" atau Spasi/Enter di layar akhir: LANJUT ke rekap halaman 1. */
+  const seeRecap = () => {
+    if (state.phase !== "ending" || !acceptForward()) return;
+    dispatch({ type: "LANJUT" });
+    setRecap((current) => ({ page: 1, visit: current.visit + 1 }));
     click();
   };
+
+  /** "Berikutnya" atau Spasi/Enter di rekap; di halaman terakhir "Lanjut ke refleksi" (LANJUT). */
+  const recapNext = () => {
+    if (state.phase !== "recap" || !acceptForward()) return;
+    click();
+    if (recap.page < RECAP_PAGES.length) setRecap({ page: recap.page + 1, visit: recap.visit + 1 });
+    else dispatch({ type: "LANJUT" });
+  };
+
+  /** "Sebelumnya": tanpa masa tunggu; klik kedua dan seterusnya dari satu klik ganda diabaikan (DRAF A-9). */
+  const recapPrev = (event: MouseEvent<HTMLButtonElement>) => {
+    if (state.phase !== "recap" || recap.page <= 1 || event.detail > 1 || prevUsed.current === closingKey) return;
+    prevUsed.current = closingKey;
+    click();
+    setRecap({ page: recap.page - 1, visit: recap.visit + 1 });
+  };
+
+  /** "Main lagi": permainan baru dengan tim dan pengaturan yang sama; penyiapan unduhan dibatalkan (DRAF A-6). */
+  const replay = () => {
+    if (state.phase !== "reflection" || !acceptForward()) return;
+    send(replayActions(teamsFor(teamCount)));
+    setRound((value) => value + 1);
+    setPop(null);
+    setRecap({ page: 1, visit: 0 });
+    setDownload((current) => ({ ...DOWNLOAD_IDLE, run: current.run + 1 }));
+    holdKeys.current = true;
+    click();
+  };
+
+  /**
+   * "Kembali ke galeri": selama masa tunggu klik dan Enter dibatalkan; tanpa bunyi karena halaman berpindah (F-07).
+   * Bila halaman berpindah di tab ini, penyiapan unduhan dibatalkan lebih dulu, karena layar refleksi ditinggalkan
+   * (DRAF A-6): tanpa berkas dan tanpa kabar, juga bila halaman lama sempat berjalan sebelum galeri tampil.
+   */
+  const galleryClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!closingGuardPassed()) {
+      event.preventDefault();
+      return;
+    }
+    const sameTab = event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
+    if (sameTab && download.status === "menyiapkan") {
+      downloadAbort.current?.abort();
+      setDownload((current) => ({ ...DOWNLOAD_IDLE, run: current.run + 1 }));
+    }
+  };
+
+  /** "Unduh gambar" dan "Unduh PDF": sesudah masa tunggu dan bila tidak ada unduhan yang sedang disiapkan. */
+  const startDownload = (kind: DownloadKind) => {
+    if (state.phase !== "reflection" || download.status === "menyiapkan" || !closingGuardPassed()) return;
+    click();
+    setDownload((current) => ({ run: current.run + 1, kind, status: "menyiapkan", date: new Date() }));
+    announce(copy.closing.download.preparing[kind]);
+  };
+
+  /** Hasil penyiapan: kabar di baris kabar dan wilayah status, lalu lembar dilepas. */
+  const settleDownload = useEffectEvent((result: "selesai" | "gagal", kind: DownloadKind) => {
+    setDownload((current) => ({ ...current, status: result }));
+    announce(result === "selesai" ? copy.closing.download.done[kind] : copy.closing.download.failed);
+  });
 
   // Reaksi tokoh tampil 1,2 detik, lalu REAKSI_SELESAI.
   useEffect(() => {
@@ -278,6 +434,67 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     return () => clearTimeout(timer);
   }, [state.phase, state.quizAnswer, sceneKey]);
 
+  // Layar penutup: masa tunggu 600 ms sejak layar atau halaman pertama kali digambar (F-09). Satu pengatur waktu hanya
+  // memperbarui aria-disabled, dan dibersihkan saat layar atau halaman berganti atau layar ditutup.
+  useEffect(() => {
+    if (!closingKey) return;
+    closingStart.current = { key: closingKey, at: performance.now() };
+    const timer = setTimeout(() => setClosingReady(closingKey), CLOSING_GUARD_MS);
+    return () => clearTimeout(timer);
+  }, [closingKey]);
+
+  // Unduh rekap: sesudah lembar tergambar dan huruf siap, lembar digambar menjadi kanvas, lalu PNG atau PDF diserahkan
+  // ke peramban. Penyiapan dibatalkan bila "Main lagi" ditekan atau layar ditutup; batas waktunya 15 detik (DRAF A-7).
+  useEffect(() => {
+    const { kind, date } = download;
+    if (download.status !== "menyiapkan" || !kind || !date) return;
+    const controller = new AbortController();
+    downloadAbort.current = controller;
+    const aborted = new Promise<never>((_, reject) => {
+      controller.signal.addEventListener("abort", () => reject(new Error("Penyiapan dibatalkan")), { once: true });
+    });
+    // Penyiapan yang dibatalkan berhenti di langkah berikutnya, agar tidak terus menggambar atau menyusun PDF.
+    const stopIfAborted = () => {
+      if (controller.signal.aborted) throw new Error("Penyiapan dibatalkan");
+    };
+    const prepare = async (): Promise<Blob> => {
+      await nextFrame();
+      stopIfAborted();
+      await document.fonts.ready;
+      stopIfAborted();
+      const node = sheetRef.current;
+      if (!node) throw new Error("Lembar belum terpasang");
+      const canvas = await renderSheet(node);
+      stopIfAborted();
+      return kind === "png" ? canvasToPng(canvas) : canvasToPdf(canvas);
+    };
+    withTimeout(Promise.race([prepare(), aborted]), DOWNLOAD_TIMEOUT_MS).then(
+      (blob) => {
+        if (controller.signal.aborted) return;
+        try {
+          releases.current.push(saveBlob(blob, downloadFileName(kind, date)));
+        } catch {
+          // Berkas tidak bisa diserahkan ke peramban: diperlakukan seperti penyiapan yang gagal.
+          settleDownload("gagal", kind);
+          return;
+        }
+        settleDownload("selesai", kind);
+      },
+      () => {
+        if (!controller.signal.aborted) settleDownload("gagal", kind);
+      },
+    );
+    return () => controller.abort();
+  }, [download]);
+
+  // URL blob yang belum dilepas dilepas saat layar ditutup, sehingga tidak ada pengatur waktu yang tertinggal.
+  useEffect(() => {
+    const pending = releases.current;
+    return () => {
+      for (const release of pending.splice(0)) release();
+    };
+  }, []);
+
   // Pergantian adegan: LANJUT di tengah sapuan (200 ms) atau sesudah pudar keluar (75 ms); lapisan dibuang di akhir.
   useEffect(() => {
     if (!change) return;
@@ -291,19 +508,23 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     };
   }, [change]);
 
-  // Gambar adegan berikutnya dimuat lebih dulu (Architecture bagian 8).
+  // Gambar adegan berikutnya dimuat lebih dulu (Architecture bagian 8); saat adegan 6 dimulai, ilustrasi akhir dan
+  // strip timbangan (F-09).
   useEffect(() => {
     const next = SCENES[state.sceneIndex + 1];
     if (next) preloadScene(next);
+    else preloadEnding();
   }, [state.sceneIndex]);
 
-  // Layar akhir sementara: fokus ke judulnya.
-  useEffect(() => {
-    if (ended) endTitleRef.current?.focus();
-  }, [ended]);
-
-  // Pintasan keyboard (Architecture bagian 9; spesifikasi F-05, F-07, dan F-08), hanya aktif di layar permainan.
+  // Pintasan keyboard (Architecture bagian 9; spesifikasi F-05, F-07, F-08, dan F-09), hanya aktif di layar permainan.
   const onKey = useEffectEvent((event: KeyboardEvent) => {
+    // Tombol yang ditahan: peramban mengubah setiap pengulangan Enter pada tombol berfokus menjadi klik. Di ketiga
+    // layar penutup, dan sesudah "Main lagi" sampai tombol dilepas, pengulangan Enter dan Spasi dibatalkan (F-09).
+    if (event.repeat && (event.key === "Enter" || event.key === " ") && (CLOSING_PHASES.has(state.phase) || holdKeys.current)) {
+      event.preventDefault();
+      return;
+    }
+    if (!event.repeat) holdKeys.current = false;
     if (change) return;
     const context: KeyContext = {
       key: event.key,
@@ -328,12 +549,21 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     } else if (state.phase === "intro") narrationRef.current?.activate();
     else if (state.phase === "impact") continueFromCard();
     else if (state.phase === "quiz") continueFromQuiz();
+    else if (state.phase === "ending") seeRecap();
+    else if (state.phase === "recap") recapNext();
   });
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => onKey(event);
+    const release = () => {
+      holdKeys.current = false;
+    };
     window.addEventListener("keydown", listener);
-    return () => window.removeEventListener("keydown", listener);
+    window.addEventListener("keyup", release);
+    return () => {
+      window.removeEventListener("keydown", listener);
+      window.removeEventListener("keyup", release);
+    };
   }, []);
 
   // Konteks audio dibuat pada interaksi pertama di layar permainan, dan dilanjutkan bila peramban menangguhkannya.
@@ -348,26 +578,6 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
       for (const type of UNLOCK_EVENTS) window.removeEventListener(type, listener, true);
     };
   }, []);
-
-  if (ended) {
-    return (
-      <main className="ss-placeholder ss-play-end" aria-labelledby="ss-play-end-title">
-        <h1 id="ss-play-end-title" ref={endTitleRef} tabIndex={-1} className="ss-placeholder-title">
-          {copy.play.endTitle}
-        </h1>
-        <p className="ss-placeholder-lead">{copy.play.endLead}</p>
-        <p className="ss-placeholder-status">{copy.play.endStatus}</p>
-        <div className="ss-placeholder-actions">
-          <button type="button" className="ss-button" onClick={restart}>
-            {copy.play.playAgain}
-          </button>
-          <a className="ss-button" href={GALLERY_HREF}>
-            {copy.backToGallery}
-          </a>
-        </div>
-      </main>
-    );
-  }
 
   const stageLabel = reaction ? `${scene.altText} ${copy.play.stageReaction(reaction.id)}` : scene.altText;
   const fade = change?.kind === "pudar" ? (state.phase === "transition" ? "keluar" : "masuk") : undefined;
@@ -392,7 +602,10 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   const quiz = state.phase === "quiz" && !change ? scene.roleQuiz : undefined;
 
   let live = "";
-  if (!change && state.phase === "intro") live = screens[screen];
+  if (state.phase === "ending") live = endingAnnouncement(endingId, state.meters, view);
+  else if (state.phase === "recap") live = recapPageAnnouncement(rows, RECAP_PAGES, recap.page);
+  else if (state.phase === "reflection") live = reflectionAnnouncement();
+  else if (!change && state.phase === "intro") live = screens[screen];
   else if (showingImpact && chosen) live = impactAnnouncement(chosen, before, state.meters);
   else if (quiz) {
     live =
@@ -401,8 +614,23 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
         : quizResultAnnouncement(ROLES, state.quizAnswer, isQuizCorrect(scene, state.quizAnswer));
   }
 
+  let heading: string = copy.play.heading(state.sceneIndex + 1, scene.title);
+  if (state.phase === "ending") heading = copy.closing.heading.ending;
+  else if (state.phase === "recap") heading = copy.closing.heading.recap;
+  else if (state.phase === "reflection") heading = copy.closing.heading.reflection;
+
+  let downloadStatus = "";
+  if (download.kind && download.status !== "idle") {
+    const text = copy.closing.download;
+    if (download.status === "menyiapkan") downloadStatus = text.preparing[download.kind];
+    else if (download.status === "selesai") downloadStatus = text.done[download.kind];
+    else downloadStatus = text.failed;
+  }
+
   let panel: ReactNode = null;
-  if (!change && state.phase === "intro") {
+  if (ending) {
+    panel = <EndingPanel id={endingId} ready={closingReadyShown} onNext={seeRecap} />;
+  } else if (!change && state.phase === "intro") {
     panel = (
       <NarrationBox
         key={`${sceneKey}-${screen}`}
@@ -430,77 +658,127 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     );
   }
 
+  let content: ReactNode;
+  if (state.phase === "recap") {
+    // Rekap dan refleksi menutupi seluruh layar; bilah atas, indikator, panggung, dan kedua panel tidak dipasang.
+    content = (
+      <Recap
+        rows={rows}
+        pages={RECAP_PAGES}
+        page={recap.page}
+        ready={closingReadyShown}
+        onPrev={recapPrev}
+        onNext={recapNext}
+      />
+    );
+  } else if (state.phase === "reflection") {
+    content = (
+      <Reflection
+        ready={closingReadyShown}
+        busy={busy}
+        status={downloadStatus}
+        onReplay={replay}
+        onGallery={galleryClick}
+        onDownload={startDownload}
+      />
+    );
+  } else {
+    content = (
+      <>
+        <DayArc scenes={SCENES} sceneIndex={state.sceneIndex} scale={scale} animate={!reduced} ending={ending} />
+        <Meters values={shownMeters} effects={meterEffects} scale={scale} />
+        <div className="ss-stage-area">
+          <div className="ss-stage-holder" data-fade={fade} style={{ width: STAGE.w * scale, height: STAGE.h * scale }}>
+            {ending ? (
+              <EndingStage id={endingId} view={view} scale={scale} animate={!reduced} />
+            ) : (
+              <Stage
+                scene={scene}
+                cast={reaction ? reaction.reaction : scene.cast}
+                emote={reaction?.emote}
+                scale={scale}
+                animate={!reduced}
+                label={stageLabel}
+              />
+            )}
+            {change?.kind === "sapuan" && <SceneWipe timeOfDay={change.nextTime} scale={scale} />}
+          </div>
+        </div>
+        <div className="ss-play-panel">{panel}</div>
+        {/* Panel kanan sesudah panel bawah, agar urutan Tab tetap pertanyaan, A, B, C, lalu tombol pengatur waktu (F-07). */}
+        <div className="ss-side" style={{ width: `calc(50% - ${160 * scale}px)` }}>
+          <Teams
+            teams={state.teams}
+            activeIndex={ending ? -1 : activeTeamIndex(state.sceneIndex, state.teams.length)}
+            pop={reduced ? null : pop}
+            topIds={ending ? topIds : undefined}
+          />
+          {!change && state.phase === "discuss" && (
+            <Timer
+              timer={state.timer}
+              onPause={() => timerAction("JEDA_WAKTU")}
+              onAdd={() => timerAction("TAMBAH_30")}
+              onSkip={() => timerAction("LEWATI_DISKUSI")}
+            />
+          )}
+          {!change && state.phase === "stars" && team && (
+            <StarsAward key={sceneKey} teamName={team.name} onGive={giveStars} />
+          )}
+        </div>
+        {showingImpact && chosen && (
+          <ImpactCard
+            key={sceneKey}
+            choice={chosen}
+            scale={scale}
+            ready={impactElapsed >= IMPACT_GUARD_MS}
+            onNext={continueFromCard}
+          />
+        )}
+        {quiz && (
+          <RoleQuiz
+            key={sceneKey}
+            question={quiz.question}
+            roles={ROLES}
+            answer={state.quizAnswer}
+            correctId={quiz.answer}
+            scale={scale}
+            ready={quizReady === sceneKey}
+            onAnswer={answerQuiz}
+            onNext={continueFromQuiz}
+          />
+        )}
+      </>
+    );
+  }
+
   return (
     <main
       className="ss-play"
       aria-labelledby="ss-play-title"
       data-kartu={showingImpact ? "" : undefined}
       data-kuis={quiz ? "" : undefined}
+      data-akhir={ending ? "" : undefined}
     >
       <h1 id="ss-play-title" className="ss-sr">
-        {copy.play.heading(state.sceneIndex + 1, scene.title)}
+        {heading}
       </h1>
+      {/* Kedua wilayah pengumuman dipasang sekali dan tetap elemen yang sama sejak adegan 1 sampai refleksi (F-09). */}
       <div className="ss-sr" aria-live="polite">
         {live}
       </div>
       <div className="ss-sr" role="status">
         {status.round === round ? status.text : ""}
       </div>
-      <DayArc scenes={SCENES} sceneIndex={state.sceneIndex} scale={scale} animate={!reduced} />
-      <Meters values={shownMeters} effects={meterEffects} scale={scale} />
-      <div className="ss-stage-area">
-        <div className="ss-stage-holder" data-fade={fade} style={{ width: STAGE.w * scale, height: STAGE.h * scale }}>
-          <Stage
-            scene={scene}
-            cast={reaction ? reaction.reaction : scene.cast}
-            emote={reaction?.emote}
-            scale={scale}
-            animate={!reduced}
-            label={stageLabel}
-          />
-          {change?.kind === "sapuan" && <SceneWipe timeOfDay={change.nextTime} scale={scale} />}
-        </div>
-      </div>
-      <div className="ss-play-panel">{panel}</div>
-      {/* Panel kanan sesudah panel bawah, agar urutan Tab tetap pertanyaan, A, B, C, lalu tombol pengatur waktu (F-07). */}
-      <div className="ss-side" style={{ width: `calc(50% - ${160 * scale}px)` }}>
-        <Teams
+      {content}
+      {closing && busy && download.date && (
+        <RecapSheet
+          ref={sheetRef}
+          id={endingId}
+          meters={state.meters}
           teams={state.teams}
-          activeIndex={activeTeamIndex(state.sceneIndex, state.teams.length)}
-          pop={reduced ? null : pop}
-        />
-        {!change && state.phase === "discuss" && (
-          <Timer
-            timer={state.timer}
-            onPause={() => timerAction("JEDA_WAKTU")}
-            onAdd={() => timerAction("TAMBAH_30")}
-            onSkip={() => timerAction("LEWATI_DISKUSI")}
-          />
-        )}
-        {!change && state.phase === "stars" && team && (
-          <StarsAward key={sceneKey} teamName={team.name} onGive={giveStars} />
-        )}
-      </div>
-      {showingImpact && chosen && (
-        <ImpactCard
-          key={sceneKey}
-          choice={chosen}
-          scale={scale}
-          ready={impactElapsed >= IMPACT_GUARD_MS}
-          onNext={continueFromCard}
-        />
-      )}
-      {quiz && (
-        <RoleQuiz
-          key={sceneKey}
-          question={quiz.question}
-          roles={ROLES}
-          answer={state.quizAnswer}
-          correctId={quiz.answer}
-          scale={scale}
-          ready={quizReady === sceneKey}
-          onAnswer={answerQuiz}
-          onNext={continueFromQuiz}
+          topIds={topIds}
+          rows={rows}
+          date={download.date}
         />
       )}
     </main>

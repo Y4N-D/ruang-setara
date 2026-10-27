@@ -1,6 +1,7 @@
 // Uji ujung ke ujung panel indikator dan kartu dampak (spesifikasi F-06, Rencana uji langkah 3 sampai 5).
 // Disesuaikan di F-07: sesudah kartu dampak, bintang alasan diberikan sebelum adegan berganti (giveStars).
 // Disesuaikan di F-08: sesudah kartu dampak adegan 5, kuis peran dijawab sebelum bintang alasan (answerQuiz).
+// Disesuaikan di F-09: sesudah bintang adegan 6, layar akhir menggantikan layar akhir sementara (finishDay, playAgain).
 // Membuka hasil build di /ruang-setara/sehari-setara/#main lewat serve-subpath.mjs, seperti alamat GitHub Pages.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
@@ -22,10 +23,13 @@ import {
   cardNext,
   contrast,
   CREAM,
+  endingTitle,
   expectClean,
+  finishDay,
   giveStars,
   impactCard,
   INK,
+  playAgain,
   SHOTS,
   statusRowButtons,
   VIEWPORTS,
@@ -338,16 +342,18 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
         await expect(page.locator(".ss-meter-delta")).toHaveCount(0);
         if (SCENES[i].roleQuiz) await answerQuiz(page, true);
         await giveStars(page);
-        // Adegan 6 langsung ke layar akhir sementara; adegan lain berganti lewat sapuan dengan nilai sesudah.
+        // Adegan 6 langsung ke layar akhir; adegan lain berganti lewat sapuan dengan nilai sesudah.
         if (i < SCENES.length - 1) await expectMeters(page, after, `jalur ${id}, pergantian sesudah adegan ${i + 1}`);
         await page.clock.runFor(400);
       }
-      const end = page.locator(".ss-play-end");
-      await expect(end.locator("h1")).toBeFocused();
+      // Layar akhir (F-09): indikator tetap tampil dengan nilai akhir dan tanpa angka melayang; rekap dan refleksi
+      // menutupi layar tanpa panel indikator.
+      await expect(endingTitle(page)).toBeFocused();
+      await expectMeters(page, metersFromHistory(historyOf(path, SCENES.length), SCENES), "layar akhir");
+      await expect(page.locator(".ss-meter-delta")).toHaveCount(0);
+      await finishDay(page, true);
       await expect(page.locator(".ss-meters")).toHaveCount(0);
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Enter");
-      await expect(page.locator(".ss-narration .ss-next")).toBeFocused();
+      await playAgain(page, true);
       await expectMeters(page, { hak: 50, kewajiban: 50 }, "main lagi");
     }
     expectClean(log);
@@ -458,7 +464,7 @@ test("fokus, dialog, keyboard, dan pengaman tekanan ganda (AC-8, AC-9, AC-10)", 
   await expect(counter(page)).toHaveText("Adegan 4/6");
 
   // Adegan 4 sampai 6: selama kartu, kuis belum tampil dan baris status tanpa tombol. Kuis peran tampil sesudah Lanjut
-  // kartu adegan 5 (F-08), lalu layar akhir sementara.
+  // kartu adegan 5 (F-08), lalu layar akhir (F-09).
   for (let i = 3; i < SCENES.length; i++) {
     await toQuestion(page);
     await page.keyboard.press("B");
@@ -476,7 +482,7 @@ test("fokus, dialog, keyboard, dan pengaman tekanan ganda (AC-8, AC-9, AC-10)", 
     await giveStars(page);
     await page.clock.runFor(150);
   }
-  await expect(page.locator(".ss-play-end h1")).toBeFocused();
+  await expect(endingTitle(page)).toBeFocused();
   expectClean(log);
 });
 

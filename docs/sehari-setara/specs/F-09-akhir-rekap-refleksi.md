@@ -216,7 +216,7 @@ Usulan Gerbang 1 sudah diputuskan. Daftar ini hanya memuat rincian baru dari tah
   1. bunyi klik diputar satu kali;
   2. kedua tombol unduh menjadi nonaktif (`aria-disabled="true"`, latar `mist`, teks `dusk`), dan kelompok unduh (`.ss-download`) diberi `data-sibuk` bernilai `png` atau `pdf`;
   3. kabar "Menyiapkan gambar rekap…" atau "Menyiapkan PDF rekap…" tampil di baris kabar dan ditulis ke wilayah `role="status"`;
-  4. lembar unduhan dipasang di luar layar (bagian "Lembar unduhan"). Sesudah lembar tergambar dan `document.fonts.ready` selesai, lembar digambar menjadi kanvas 1.240 px dengan `domToCanvas` dari `modern-screenshot` (`scale: 1`, `timeout: 10000`, `font: { preferredFormat: "woff2" }`), yang memuat sendiri huruf dan ikon dari situs;
+  4. lembar unduhan dipasang di luar layar (bagian "Lembar unduhan"). Sesudah lembar tergambar dan `document.fonts.ready` selesai, lembar digambar menjadi kanvas 1.240 px dengan `domToCanvas` dari `modern-screenshot` (`scale: 1`, `timeout: 10000`), yang memuat sendiri huruf dan ikon dari situs. [Diubah di Build, 27 Okt 2026: pilihan `font: { preferredFormat: "woff2" }` dibuang, karena di versi 4.7.0 pilihan itu menghapus sumber huruf kedua (Pixelify Sans) sehingga lembar memakai huruf pengganti. Percobaan [Coba] di bagian "Lembar unduhan" memang dijalankan tanpa pilihan itu. Laporan uji F-09, Temuan 1];
   5. untuk gambar, kanvas disimpan sebagai PNG (`toBlob("image/png")`). Untuk PDF, isi kanvas dijadikan PDF A4 oleh `ui/pdf.ts`;
   6. berkas diserahkan ke peramban lewat tautan `blob:` sementara dengan atribut `download`, bernama `rekap-sehari-setara-{YYYY-MM-DD}.png` atau `.pdf` menurut tanggal komputer. URL blob dilepas sesudahnya;
   7. lembar dilepas, kedua tombol aktif lagi, dan kabar menjadi "Gambar rekap siap. Periksa folder unduhan." atau "PDF rekap siap. Periksa folder unduhan.", juga di wilayah `role="status"`.
@@ -630,7 +630,7 @@ Klik dan pengumuman hanya diputar atau ditulis bila tekanan itu diterima (aturan
 | `downloadFileName(kind, date)` | `rekap-sehari-setara-{YYYY-MM-DD}.{kind}`, dengan tanggal waktu setempat dan bulan serta tanggal dua angka |
 | `sheetDate(date)` | Tanggal panjang Indonesia, misalnya "Selasa, 27 Oktober 2026" |
 | `withTimeout(promise, ms)` | Promise yang ditolak bila `promise` belum selesai sesudah `ms` |
-| `renderSheet(node)` | `domToCanvas(node, { scale: 1, timeout: 10000, font: { preferredFormat: "woff2" } })` |
+| `renderSheet(node)` | `domToCanvas(node, { scale: 1, timeout: 10000 })` (diubah di Build; lihat Alur langkah 4) |
 | `saveBlob(blob, name)` | Tautan `blob:` sementara dengan atribut `download`; URL dilepas sesudah klik |
 
 `app/sehari-setara/ui/pdf.ts`: PDF tanpa pustaka, diuji di `__tests__/pdf.test.ts`.
@@ -789,7 +789,7 @@ Tidak ada aset baru, dan tidak ada PNG yang berubah. F-09 memakai aset yang suda
   - berkas berawalan tanda tangan PNG, 1.240 × 1.754 px; titik (10, 10) berwarna `cream`, dan titik (45, 30), di jarak dalam kepala lembar, berwarna malam `#4A4F9C`;
   - kabar "Menyiapkan gambar rekap…" lalu "Gambar rekap siap. Periksa folder unduhan." di baris kabar dan wilayah `role="status"`; selama disiapkan, kedua tombol unduh ber-`aria-disabled="true"` dan `.ss-download` ber-`data-sibuk="png"`, lalu keduanya aktif lagi. Keadaan sementara ini diperiksa dari catatan perekam `MutationObserver` (bagian "Rencana uji"), bukan dengan menunggu keadaannya tampil;
   - klik ganda hanya menghasilkan satu unduhan dan satu klik bunyi;
-  - selama unduhan, permintaan hanya ke `127.0.0.1` (huruf `woff2` dan ikon) dan tidak ada galat konsol.
+  - selama unduhan, permintaan hanya ke `127.0.0.1` (berkas huruf dan ikon) dan tidak ada galat konsol.
 - [ ] AC-18 **Unduh PDF:** satu peristiwa unduhan bernama `rekap-sehari-setara-{tanggal}.pdf`; berkas berawalan `%PDF-1.4` dan berakhir `%%EOF`; tepat satu `/Type /Page`, `/MediaBox [0 0 595.28 841.89]`, gambar `/Width 1240 /Height 1754` dengan `/FlateDecode`; setiap posisi di tabel `xref` menunjuk awal objeknya. Di tahap Test, berkas yang sama juga diperiksa `qpdf --check` dan `pdfinfo` di luar repositori.
 - [ ] AC-19 **Galat dan pembatalan unduhan:**
   - tanpa `CompressionStream`, "Unduh PDF" menghasilkan kabar "Rekap gagal dibuat. Coba lagi.", tanpa berkas dan tanpa galat halaman, sedangkan "Unduh gambar" tetap berhasil;

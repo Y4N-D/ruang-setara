@@ -3,6 +3,7 @@
 // Jam uji dijeda sebelum halaman dimuat, sehingga teks per huruf, pengatur waktu, kartu, dan pergantian adegan hanya
 // maju lewat page.clock.runFor, dalam dua langkah sesudah unsur tampil (catatan PLAN F-05, F-06, dan F-07).
 // Disesuaikan di F-08: sesudah kartu dampak adegan 5, kuis peran dijawab sebelum bintang alasan (answerQuiz di toStars).
+// Disesuaikan di F-09: sesudah bintang adegan 6, layar akhir menampilkan papan tim dengan jumlah akhir tanpa giliran.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
 import { DEFAULT_TEAMS } from "../app/sehari-setara/content/teams";
@@ -12,10 +13,13 @@ import {
   answerQuiz,
   awardPrompt,
   contrast,
+  endingTitle,
   expectClean,
+  finishDay,
   giveStars,
   impactCard,
   INK,
+  playAgain,
   sceneNumber,
   SHOTS,
   statusRowButtons,
@@ -533,10 +537,11 @@ test("giliran dengan 2, 3, dan 4 tim di keenam adegan, dan jumlah bintang di pap
       await page.clock.runFor(half);
       await expect(narrationNext(page)).toBeFocused();
     }
-    // Sesudah bintang adegan 6, layar akhir sementara langsung tampil tanpa panel kanan.
-    await expect(page.locator(".ss-play-end h1")).toBeFocused();
+    // Sesudah bintang adegan 6, layar akhir langsung tampil tanpa sapuan; papan tim berisi jumlah akhir tanpa giliran.
+    await expect(endingTitle(page)).toBeFocused();
     await expect(page.locator(".ss-wipe")).toHaveCount(0);
-    await expect(page.locator(".ss-side")).toHaveCount(0);
+    await expect(counts(page)).toHaveText(totals.map(String));
+    await expect(page.locator(".ss-team[data-giliran]")).toHaveCount(0);
   }
   expectClean(log);
 });
@@ -820,12 +825,13 @@ test("bintang alasan: fokus, tombol, pintasan, dan tekanan ganda (AC-5)", async 
   await expect(counts(page)).toHaveText(["4", "2"]);
   await page.clock.runFor(400);
 
-  // Adegan 6: layar akhir sementara langsung tampil, tanpa sapuan, dengan fokus di judulnya.
+  // Adegan 6: layar akhir langsung tampil, tanpa sapuan, dengan fokus di judulnya dan bintang adegan 6 di papan.
   await toQuestion(page);
   await toStars(page, "B");
   await page.keyboard.press("2");
-  await expect(page.locator(".ss-play-end h1")).toBeFocused();
+  await expect(endingTitle(page)).toBeFocused();
   await expect(page.locator(".ss-wipe")).toHaveCount(0);
+  await expect(counts(page)).toHaveText(["4", "4"]);
   expectClean(log);
 });
 
@@ -1118,10 +1124,8 @@ for (const plan of [
     await openPlay(page, "1280x720", plan.teams);
     for (const [round, choice] of plan.paths.entries()) {
       if (round > 0) {
-        await page.keyboard.press("Tab");
-        await expect(page.locator(".ss-play-end button")).toBeFocused();
-        await page.keyboard.press("Enter");
-        await expect(narrationNext(page)).toBeFocused();
+        await finishDay(page, true);
+        await playAgain(page, true);
         await expect(counts(page)).toHaveText(Array.from({ length: plan.teams }, () => "0"));
       }
       const totals: number[] = Array.from({ length: plan.teams }, () => 0);
@@ -1138,8 +1142,10 @@ for (const plan of [
           await page.clock.runFor(400);
         }
       }
-      await expect(page.locator(".ss-play-end h1")).toBeFocused();
-      await expect(page.locator(".ss-side")).toHaveCount(0);
+      // Layar akhir (F-09): papan tim dengan jumlah akhir, tanpa giliran.
+      await expect(endingTitle(page)).toBeFocused();
+      await expect(counts(page)).toHaveText(totals.map(String));
+      await expect(page.locator(".ss-team[data-giliran]")).toHaveCount(0);
     }
     expectClean(log);
   });

@@ -147,7 +147,15 @@ export function createReducer(scenes: readonly Scene[]) {
 
       case "quiz":
         if (action.type === "JAWAB_KUIS") {
-          return state.quizAnswer === null ? { ...state, quizAnswer: action.role } : state;
+          if (state.quizAnswer !== null) return state;
+          // Jawaban juga dicatat di entri history adegan berjalan, agar rekap bisa menampilkannya (F-09, usulan 5c).
+          const sceneId = scenes[state.sceneIndex]?.id;
+          const index = state.history.findIndex((entry) => entry.sceneId === sceneId);
+          const history =
+            index === -1
+              ? state.history
+              : state.history.map((entry, i) => (i === index ? { ...entry, quizAnswer: action.role } : entry));
+          return { ...state, quizAnswer: action.role, history };
         }
         if (action.type === "LANJUT") {
           return state.quizAnswer !== null ? { ...state, phase: "stars" } : state;

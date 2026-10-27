@@ -4,10 +4,24 @@
 // waktu jam uji, laju, panjang bunyi, keadaan konteks, dan sambungan. Bunyi dibedakan dari panjangnya: klik 45 ms dan
 // teks 32 ms. Jam uji dijeda sebelum halaman dimuat, sehingga teks per huruf hanya maju lewat page.clock.runFor.
 // Disesuaikan di F-08: playScene menjawab kuis peran di adegan 5; uji baru menghitung klik di kuis (spesifikasi F-08, AC-14).
+// Disesuaikan di F-09: sesudah adegan 6, layar akhir, rekap, dan refleksi dilewati dengan finishDay dan playAgain.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
 import { typedLength } from "../app/sehari-setara/ui/controls";
-import { answerQuiz, awardPrompt, cardNext, expectClean, quizCard, quizDialog, quizNext, sceneNumber, VIEWPORTS, watch } from "./bantuan";
+import {
+  answerQuiz,
+  awardPrompt,
+  cardNext,
+  expectClean,
+  finishDay,
+  playAgain,
+  quizCard,
+  quizDialog,
+  quizNext,
+  sceneNumber,
+  VIEWPORTS,
+  watch,
+} from "./bantuan";
 
 const T0 = new Date("2026-10-26T09:00:00+08:00").getTime();
 
@@ -471,7 +485,7 @@ test("volume 60% dan tombol M, juga sesudah main lagi (AC-15)", async ({ page })
   expect(await plays()).toBe(muted + 1);
   expect(clicks(await soundLog(page)).at(-1)?.rate).toBe(1);
 
-  // Mati lagi, main sampai akhir, lalu "Main lagi dari adegan 1": suara tetap mati.
+  // Mati lagi, main sampai akhir, lewat rekap dan refleksi, lalu "Main lagi": suara tetap mati.
   await page.keyboard.press("m");
   await expect(status(page)).toHaveText("Suara dimatikan.");
   const silent = await plays();
@@ -484,10 +498,8 @@ test("volume 60% dan tombol M, juga sesudah main lagi (AC-15)", async ({ page })
   await page.keyboard.press("1");
   await page.clock.runFor(400);
   for (let i = 1; i < SCENES.length; i++) await playScene(page);
-  await expect(page.locator(".ss-play-end h1")).toBeFocused();
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Enter");
-  await expect(narrationNext(page)).toBeFocused();
+  await finishDay(page, true);
+  await playAgain(page, true);
   await page.clock.runFor(1000);
   for (let i = 0; i < 4; i++) await page.keyboard.press("Space");
   await expect(page.locator(".ss-question")).toBeFocused();
@@ -518,10 +530,8 @@ test("bunyi gagal dimuat: permainan tetap bisa dimainkan sampai akhir tanpa gala
   await page.keyboard.press("x");
   await expect.poll(() => log.failed.filter((line) => line.includes(".wav")).length).toBe(2);
   for (let i = 0; i < SCENES.length; i++) await playScene(page);
-  await expect(page.locator(".ss-play-end h1")).toBeFocused();
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Enter");
-  await expect(narrationNext(page)).toBeFocused();
+  await finishDay(page, true);
+  await playAgain(page, true);
 
   const sounds = await soundLog(page);
   expect(sounds.plays).toEqual([]);

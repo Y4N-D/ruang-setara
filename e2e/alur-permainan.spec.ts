@@ -2,6 +2,7 @@
 // Disesuaikan di F-06: sesudah reaksi, kartu dampak menggantikan tombol jembatan (spesifikasi F-06, Rencana uji).
 // Disesuaikan di F-07: sesudah kartu dampak, bintang alasan diberikan sebelum adegan berganti (giveStars).
 // Disesuaikan di F-08: sesudah kartu dampak adegan 5, kuis peran dijawab sebelum bintang alasan (answerQuiz).
+// Disesuaikan di F-09: sesudah adegan 6, layar akhir menggantikan layar akhir sementara (finishDay, playAgain).
 // Membuka hasil build di /ruang-setara/sehari-setara/#main lewat serve-subpath.mjs, seperti alamat GitHub Pages.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
@@ -15,10 +16,14 @@ import {
   contrast,
   CREAM,
   EMOTES,
+  endingScreen,
+  endingTitle,
   expectClean,
+  finishDay,
   giveStars,
   INK,
   measureStage,
+  playAgain,
   SHOTS,
   statusRowButtons,
   SUN,
@@ -132,7 +137,7 @@ async function checkChosen(page: Page, sceneIndex: number, choiceId: ChoiceId) {
   expect(stage.label).toBe(`${scene.altText} Reaksi tokoh atas pilihan ${choiceId}.`);
 }
 
-/** Main dari adegan yang sedang tampil sampai layar akhir sementara, hanya dengan keyboard. */
+/** Main dari adegan yang sedang tampil sampai layar akhir (F-09), hanya dengan keyboard. */
 async function playPath(page: Page, path: ChoiceId[], shots?: { discussS5?: string }) {
   const flags: Flag[] = [];
   for (let i = 0; i < SCENES.length; i++) {
@@ -162,7 +167,8 @@ async function playPath(page: Page, path: ChoiceId[], shots?: { discussS5?: stri
     if (scene.roleQuiz) await answerQuiz(page);
     await giveStars(page);
   }
-  await expect(page.locator(".ss-play-end h1")).toHaveText("Keenam adegan selesai");
+  await expect(endingScreen(page)).toBeVisible();
+  await expect(endingTitle(page)).toBeFocused();
 }
 
 /** Dari layar pertama adegan 1 ke pertanyaannya (kurangi gerak aktif). */
@@ -539,7 +545,7 @@ test("sapuan tepat waktu dan tanpa sapuan sesudah adegan 6 (AC-7)", async ({ pag
       run.ssMuncul = 0;
       window.addEventListener("keydown", () => (run.ssTekan = performance.now()), { capture: true, once: true });
       const observer = new MutationObserver(() => {
-        if (!run.ssMuncul && document.querySelector(".ss-narration, .ss-play-end")) {
+        if (!run.ssMuncul && document.querySelector(".ss-narration, .ss-ending")) {
           run.ssMuncul = performance.now();
           observer.disconnect();
         }
@@ -558,7 +564,7 @@ test("sapuan tepat waktu dan tanpa sapuan sesudah adegan 6 (AC-7)", async ({ pag
       expect(waited).toBeGreaterThanOrEqual(390);
       expect(waited).toBeLessThanOrEqual(600);
     } else {
-      await expect(page.locator(".ss-play-end")).toBeVisible();
+      await expect(endingScreen(page)).toBeVisible();
       await expect(page.locator(".ss-wipe")).toHaveCount(0);
     }
   }
@@ -602,29 +608,18 @@ test("kurangi gerak: teks langsung lengkap, pudar 75 + 75 ms, tanpa animasi lain
   expectClean(log);
 });
 
-test("tiga jalur sampai akhir dengan keyboard, layar akhir sementara, dan main lagi (AC-9, AC-13, AC-14)", async ({ page }) => {
+test("tiga jalur sampai akhir dengan keyboard, layar akhir, rekap, refleksi, dan main lagi (AC-9, AC-13, AC-14)", async ({ page }) => {
   const log = watch(page);
   await openPlay(page);
   await waitImages(page);
   await page.screenshot({ path: `${SHOTS}/adegan_1_narasi_1280x720.png` });
   await playPath(page, ["B", "B", "B", "B", "B", "B"]);
 
-  // Layar akhir sementara.
-  const end = page.locator(".ss-play-end");
-  await expect(end.locator("h1")).toBeFocused();
-  await expect(end.locator(".ss-placeholder-lead")).toHaveText("Terima kasih sudah menemani Nara sampai malam.");
-  await expect(end.locator(".ss-placeholder-status")).toHaveText("Layar akhir, rekap, dan refleksi sedang dibuat.");
-  await expect(end.locator("button")).toHaveText("Main lagi dari adegan 1");
-  await expect(end.locator("a")).toHaveText("Kembali ke galeri");
-  await expect(end.locator("a")).toHaveAttribute("href", "../");
-  await page.screenshot({ path: `${SHOTS}/akhir_sementara_1280x720.png` });
-
-  // Main lagi: permainan baru mulai bersih, sehingga varian adegan 6 mengikuti pilihan adegan 4 yang baru.
+  // Main lagi dari refleksi (F-09): permainan baru mulai bersih, sehingga varian adegan 6 mengikuti pilihan adegan 4 yang
+  // baru.
   for (const path of [["A", "A", "A", "A", "A", "A"], ["B", "B", "B", "C", "C", "C"]] as ChoiceId[][]) {
-    await page.keyboard.press("Tab");
-    await expect(end.locator("button")).toBeFocused();
-    await page.keyboard.press("Enter");
-    await expect(narrationNext(page)).toBeFocused();
+    await finishDay(page);
+    await playAgain(page);
     await expect(live(page)).toHaveText(SCENES[0].narration[0]);
     await playPath(page, path);
   }
@@ -755,10 +750,8 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
         await giveStars(page);
         await page.clock.runFor(150);
       }
-      await expect(page.locator(".ss-play-end")).toBeVisible();
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Enter");
-      await expect(narrationNext(page)).toBeFocused();
+      await finishDay(page, true);
+      await playAgain(page, true);
     }
     expectClean(log);
   });

@@ -97,7 +97,7 @@ export function starsAnnouncement(name: string, stars: number, total: number): s
   return copy.stars.announce(name, stars, total);
 }
 
-/** Kalimat satu butir papan tim bagi pembaca layar. */
-export function teamSentence(name: string, active: boolean, stars: number): string {
-  return copy.teams.sentence(name, active, stars);
+/** Kalimat satu butir papan tim bagi pembaca layar; top menandai tim dengan bintang terbanyak di layar akhir (F-09). */
+export function teamSentence(name: string, active: boolean, stars: number, top = false): string {
+  return copy.teams.sentence(name, active, stars, top);
 }

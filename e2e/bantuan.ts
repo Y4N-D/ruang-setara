@@ -1,4 +1,4 @@
-// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05; ditambah di F-06 sampai F-08).
+// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05; ditambah di F-06 sampai F-09).
 // Dipakai semua berkas e2e/*.spec.ts. Berkas ini bukan berkas uji.
 import { mkdirSync } from "node:fs";
 import { expect, type Page } from "@playwright/test";
@@ -197,6 +197,47 @@ export const quizNext = (page: Page) => page.locator(".ss-quiz .ss-next");
 /** Nomor adegan yang sedang tampil, dari bilah atas ("Adegan 5/6" menjadi 5). */
 export async function sceneNumber(page: Page): Promise<number> {
   return Number(/\d+/.exec((await page.locator(".ss-topbar-counter").textContent()) ?? "")?.[0]);
+}
+
+/** Layar penutup F-09: layar akhir, halaman rekap, dan refleksi. */
+export const endingScreen = (page: Page) => page.locator(".ss-play[data-akhir]");
+export const endingTitle = (page: Page) => page.locator(".ss-ending-title");
+export const endingNext = (page: Page) => page.locator(".ss-ending .ss-next");
+export const recapTitle = (page: Page) => page.locator(".ss-recap-title");
+export const recapNext = (page: Page) => page.locator(".ss-recap-foot .ss-next").last();
+export const reflectionTitle = (page: Page) => page.locator(".ss-reflection-title");
+export const playAgainButton = (page: Page) => page.getByRole("button", { name: "Main lagi", exact: true });
+
+/**
+ * Langkah penutup bersama (spesifikasi F-09): dari layar akhir, menunggu judul berfokus, menunggu masa tunggu (waktu
+ * sebenarnya, atau page.clock.runFor(600) sesudah layar tampil bila jam dijeda), lalu Enter; empat kali hal yang sama di
+ * rekap; berhenti di refleksi dengan judul berfokus.
+ */
+export async function finishDay(page: Page, paused = false) {
+  await expect(endingScreen(page)).toBeVisible();
+  await expect(endingTitle(page)).toBeFocused();
+  if (paused) await page.clock.runFor(600);
+  else await expect(endingNext(page)).not.toHaveAttribute("aria-disabled", /.*/);
+  await page.keyboard.press("Enter");
+  for (let p = 1; p <= 4; p++) {
+    await expect(page.locator(`.ss-recap[data-halaman="${p}"]`)).toBeVisible();
+    await expect(recapTitle(page)).toBeFocused();
+    if (paused) await page.clock.runFor(600);
+    else await expect(recapNext(page)).not.toHaveAttribute("aria-disabled", /.*/);
+    await page.keyboard.press("Enter");
+  }
+  await expect(reflectionTitle(page)).toBeFocused();
+}
+
+/** Di refleksi: menunggu masa tunggu, Tab ke "Main lagi", lalu Enter, dan menunggu tombol lanjut narasi berfokus. */
+export async function playAgain(page: Page, paused = false) {
+  await expect(reflectionTitle(page)).toBeFocused();
+  if (paused) await page.clock.runFor(600);
+  else await expect(playAgainButton(page)).not.toHaveAttribute("aria-disabled", /.*/);
+  await page.keyboard.press("Tab");
+  await expect(playAgainButton(page)).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".ss-narration .ss-next")).toBeFocused();
 }
 
 /**

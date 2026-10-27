@@ -61,8 +61,11 @@ export type EndingId = "setara" | "hampir" | "berat";
 
 export interface Settings { sound: boolean; reducedMotion: boolean; typewriter: boolean; discussSeconds: 30 | 60 | 90 }
 
-/** Satu pilihan kelas. history adalah sumber kebenaran untuk indikator, bendera, dan bintang. */
-export interface HistoryEntry { sceneId: Scene["id"]; choiceId: ChoiceId; teamId: string; stars: Stars }
+/**
+ * Satu pilihan kelas. history adalah sumber kebenaran untuk indikator, bendera, dan bintang.
+ * quizAnswer: jawaban kuis peran di adegan itu, untuk rekap (spesifikasi F-09, usulan 5c).
+ */
+export interface HistoryEntry { sceneId: Scene["id"]; choiceId: ChoiceId; teamId: string; stars: Stars; quizAnswer?: RoleId }
 
 export interface GameState {
   phase: Phase;

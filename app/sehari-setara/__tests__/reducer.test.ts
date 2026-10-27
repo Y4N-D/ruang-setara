@@ -306,6 +306,60 @@ describe("kuis peran (AC-9)", () => {
   });
 });
 
+describe("jawaban kuis di history (F-09, usulan 5c)", () => {
+  /** Keadaan kuis adegan 5 sesudah PILIH C, sebelum dijawab. */
+  function atQuiz(): GameState {
+    const state = run(
+      play(["B", "B", "B", "B"]),
+      { type: "NARASI_SELESAI" },
+      { type: "PILIH", choice: "C" },
+      { type: "REAKSI_SELESAI" },
+      { type: "LANJUT" },
+    );
+    expect(state.phase).toBe("quiz");
+    return state;
+  }
+
+  it("JAWAB_KUIS mengisi entri history adegan berjalan dengan objek baru; entri lain tetap", () => {
+    const before = atQuiz();
+    const sceneId = SCENES[before.sceneIndex].id;
+    const index = before.history.findIndex((entry) => entry.sceneId === sceneId);
+    const answered = run(before, { type: "JAWAB_KUIS", role: "advokat" });
+    expect(answered.quizAnswer).toBe("advokat");
+    expect(answered.history[index]).toEqual({ ...before.history[index], quizAnswer: "advokat" });
+    expect(answered.history).not.toBe(before.history);
+    expect(answered.history[index]).not.toBe(before.history[index]);
+    expect(before.history[index]).not.toHaveProperty("quizAnswer");
+    answered.history.forEach((entry, i) => {
+      if (i !== index) expect(entry).toBe(before.history[i]);
+    });
+    expect([answered.meters, answered.flags, answered.teams]).toEqual([before.meters, before.flags, before.teams]);
+  });
+
+  it("jawaban kedua ditolak, jawaban tetap sampai akhir hari, dan MAIN_LAGI mengosongkannya", () => {
+    const answered = run(atQuiz(), { type: "JAWAB_KUIS", role: "polisi" });
+    expect(reduce(answered, { type: "JAWAB_KUIS", role: "hakim" })).toBe(answered);
+    const end = run(answered, { type: "LANJUT" }, { type: "BERI_BINTANG", stars: 2 }, { type: "LANJUT" }, ...sceneActions(5, "B"));
+    expect(end.phase).toBe("ending");
+    expect(end.quizAnswer).toBeNull();
+    const quizEntries = end.history.filter((entry) => entry.quizAnswer !== undefined);
+    expect(quizEntries).toHaveLength(1);
+    expect(quizEntries[0]).toMatchObject({ sceneId: SCENES[4].id, choiceId: "C", stars: 2, quizAnswer: "polisi" });
+    const again = run(end, { type: "LANJUT" }, { type: "LANJUT" }, { type: "MAIN_LAGI" });
+    expect(again.history).toEqual([]);
+    expect(again.quizAnswer).toBeNull();
+  });
+
+  it("tanpa entri adegan berjalan, hanya state.quizAnswer yang diisi", () => {
+    const state = atQuiz();
+    const sceneId = SCENES[state.sceneIndex].id;
+    const without: GameState = { ...state, history: state.history.filter((entry) => entry.sceneId !== sceneId) };
+    const next = reduce(without, { type: "JAWAB_KUIS", role: "hakim" });
+    expect(next.quizAnswer).toBe("hakim");
+    expect(next.history).toBe(without.history);
+  });
+});
+
 describe("pengatur waktu (AC-10)", () => {
   const diskusi = (seconds: Settings["discussSeconds"] = 60) =>
     run(startGame(3, { discussSeconds: seconds }), { type: "NARASI_SELESAI" });

@@ -3,6 +3,7 @@
 // Jam uji dijeda sebelum halaman dimuat, sehingga kartu, masa tunggu, dan pergantian adegan hanya maju lewat
 // page.clock.runFor, dalam dua langkah sesudah unsur tampil (catatan PLAN "Semua fitur dengan jam uji").
 // Bunyi klik di kuis diuji di suara.spec.ts, yang memiliki perekam bunyi (AC-14).
+// Disesuaikan di F-09: sesudah bintang adegan 6, layar akhir menggantikan layar akhir sementara.
 import { expect, test, type Page } from "@playwright/test";
 import { ROLES } from "../app/sehari-setara/content/roles";
 import { SCENES } from "../app/sehari-setara/content/scenes";
@@ -20,6 +21,7 @@ import {
   cardNext,
   contrast,
   CREAM,
+  endingTitle,
   expectClean,
   INK,
   quizCard,
@@ -507,8 +509,8 @@ test("kapan kuis tampil: hanya di adegan 5 sesudah Lanjut kartu, tanpa sapuan; b
     await page.keyboard.press("1");
     await page.clock.runFor(400);
   }
-  // Layar akhir sementara, layar kerangka, dan pratinjau panggung tidak menampilkan kuis.
-  await expect(page.locator(".ss-play-end h1")).toBeFocused();
+  // Layar akhir, layar kerangka, dan pratinjau panggung tidak menampilkan kuis.
+  await expect(endingTitle(page)).toBeFocused();
   await expect(quizDialog(page)).toHaveCount(0);
   await setHash(page, "");
   await expect(page.locator(".ss-placeholder")).toBeVisible();

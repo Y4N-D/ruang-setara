@@ -1,5 +1,6 @@
 // Kontrol layar permainan Sehari Setara (spesifikasi F-05; tombol pengatur waktu, bintang, dan suara: F-07;
-// pintasan kuis peran: F-08). Semua fungsi di sini murni dan diuji di controls.test.ts. Waktu dan pengatur waktu
+// pintasan kuis peran: F-08; layar penutup dan "Main lagi": F-09). Semua fungsi di sini murni dan diuji di
+// controls.test.ts. Waktu dan pengatur waktu
 // dijalankan oleh PlayScreen.tsx dan useTimer.ts; reducer di engine/ tetap tanpa setTimeout (spesifikasi F-02, AC-14).
 import type { ChoiceId, GameAction, GameState, Phase, Stars, TeamSetup } from "../engine/types";
 import type { QuizNumber } from "./quiz";
@@ -62,13 +63,19 @@ const STAR_KEYS: Readonly<Record<string, Stars>> = { "0": 0, "1": 1, "2": 2 };
 const QUIZ_KEYS: Readonly<Record<string, QuizNumber>> = { "1": 1, "2": 2, "3": 3, "4": 4 };
 
 /**
- * Fase tempat Spasi dan Enter berarti lanjut: narasi, kartu dampak, dan kuis peran. Sejak F-07 tidak lagi di fase
- * stars, sehingga tekanan kedua dari tekanan ganda pada Lanjut kartu tidak memberi bintang.
+ * Fase tempat Spasi dan Enter berarti lanjut: narasi, kartu dampak, kuis peran, layar akhir, dan rekap (F-09). Sejak
+ * F-07 tidak lagi di fase stars, sehingga tekanan kedua dari tekanan ganda pada Lanjut kartu tidak memberi bintang.
+ * Di fase reflection keduanya bukan pintasan, agar "Main lagi" tidak tertekan tanpa sengaja (F-09).
  */
-const NEXT_PHASES: ReadonlySet<Phase> = new Set<Phase>(["intro", "impact", "quiz"]);
+const NEXT_PHASES: ReadonlySet<Phase> = new Set<Phase>(["intro", "impact", "quiz", "ending", "recap"]);
 
-/** Fase adegan, tempat M mematikan atau menyalakan suara (F-07). */
-const SOUND_PHASES: ReadonlySet<Phase> = new Set<Phase>(["intro", "discuss", "reaction", "impact", "quiz", "stars", "transition"]);
+/** Fase adegan dan ketiga layar penutup, tempat M mematikan atau menyalakan suara (F-07, F-09). */
+const SOUND_PHASES: ReadonlySet<Phase> = new Set<Phase>([
+  "intro", "discuss", "reaction", "impact", "quiz", "stars", "transition", "ending", "recap", "reflection",
+]);
+
+/** Ketiga layar penutup (F-09). */
+export const CLOSING_PHASES: ReadonlySet<Phase> = new Set<Phase>(["ending", "recap", "reflection"]);
 
 /** Membaca properti milik objek saja, sehingga kunci seperti "constructor" tidak terbaca dari prototipe. */
 function own<T>(table: Readonly<Record<string, T>>, key: string): T | undefined {
@@ -159,9 +166,12 @@ export function startActions(teams: readonly TeamSetup[]): GameAction[] {
   return [{ type: "MULAI" }, { type: "SIMPAN_PENGATURAN", teams: [...teams], settings: {} }, { type: "LANJUT" }];
 }
 
-/** Dari layar akhir sementara (fase ending, recap, atau reflection) kembali ke fase intro adegan 1. */
-export function restartActions(teams: readonly TeamSetup[]): GameAction[] {
-  return [{ type: "LANJUT" }, { type: "LANJUT" }, { type: "MAIN_LAGI" }, ...startActions(teams)];
+/**
+ * "Main lagi" dari fase reflection: MAIN_LAGI ke layar judul dengan pengaturan tetap (F-02), lalu startActions ke
+ * narasi adegan 1 dengan tim yang sama. Di F-10 bagian startActions dibuang agar berhenti di layar judul.
+ */
+export function replayActions(teams: readonly TeamSetup[]): GameAction[] {
+  return [{ type: "MAIN_LAGI" }, ...startActions(teams)];
 }
 
 /** Menjalankan aksi berurutan dengan reducer, misalnya untuk keadaan awal layar permainan. */
