@@ -14,7 +14,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-07 | Selesai (26 Okt 2026) | [F-07-tim-waktu-bintang.md](specs/F-07-tim-waktu-bintang.md) | [F-07-hasil.md](tests/F-07-hasil.md), lulus |
 | F-08 | Selesai (27 Okt 2026) | [F-08-kuis-peran.md](specs/F-08-kuis-peran.md) | [F-08-hasil.md](tests/F-08-hasil.md), lulus |
 | F-09 | Selesai (27 Okt 2026) | [F-09-akhir-rekap-refleksi.md](specs/F-09-akhir-rekap-refleksi.md) | [F-09-hasil.md](tests/F-09-hasil.md), lulus |
-| F-10 | Direncanakan (4 Nov 2026) | — | — |
+| F-10 | Spesifikasi (4 Nov 2026), menunggu Gerbang 2 | [F-10-judul-pengaturan-prolog.md](specs/F-10-judul-pengaturan-prolog.md) | — |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -1070,7 +1070,7 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
   - Uji tambahan: `pdf.test.ts` (struktur PDF, tabel xref, ukuran halaman A4, dan isi gambar diurai ulang) dan `download.test.ts` (nama berkas dan tanggal); uji ujung ke ujung untuk kedua tombol (peristiwa unduh, ukuran PNG, isi PDF, masa tunggu, klik ganda, keadaan "sedang disiapkan", galat, dan tanpa permintaan ke luar situs).
 
 ## F-10 — Layar judul, pengaturan, prolog
-- Status: Direncanakan (4 Nov 2026). Diperiksa sebelum Plan: entri F-09 berstatus Selesai dan `tests/F-09-hasil.md` berkeputusan Lulus (ZIP `main` yang diterima 1 Nov 2026, commit `efb80c5`, sesudah F-09).
+- Status: Spesifikasi (4 Nov 2026), menunggu Gerbang 2. Riwayat 4 Nov 2026: direncanakan; disetujui (balasan `Setuju: F-10`; saran setiap usulan diterima); spesifikasi ditulis ([F-10-judul-pengaturan-prolog.md](specs/F-10-judul-pengaturan-prolog.md)), dengan rincian baru J-1 sampai J-11 untuk Gerbang 2. Diperiksa sebelum Specify: ZIP `main` yang diterima 4 Nov 2026 (commit `d9212ad`) sudah memuat entri ini. Diperiksa sebelum Plan: entri F-09 berstatus Selesai dan `tests/F-09-hasil.md` berkeputusan Lulus (ZIP `main` yang diterima 1 Nov 2026, commit `efb80c5`, sesudah F-09).
 - Memenuhi:
   - FR-01: layar judul dengan tombol "Mulai" dan "Cara bermain" (usulan 1 dan 2). Layar ini menggantikan layar kerangka F-01.
   - FR-02: pengaturan kelas, yaitu jumlah tim 2–4 dengan nama, warna, dan bentuk dari `content/teams.ts`, durasi diskusi 30, 60, atau 90 detik (bawaan 60, keputusan 26 Okt 2026), dan suara nyala atau mati (usulan 3). Sisi mesin (`MULAI`, `SIMPAN_PENGATURAN`, dan syarat 2–4 tim) sudah ada sejak F-02.
@@ -1149,7 +1149,7 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
   - F-07 Temuan 8 (asal dan lisensi bunyi, butir S-6): menyangkut F-10 hanya bila layar "Tentang" dikerjakan di F-10. Dibawa ke usulan 6b.
   - Arti `Esc` selama kartu dampak dan kuis peran (F-08 usulan 4, dicatat untuk Plan F-10), dan di layar akhir, rekap, dan refleksi (F-09): spesifikasi F-09 menyebut F-10 di bagian "Keyboard", tetapi F-13 di bagian "Perubahan dokumen (Build)" dan "Di luar cakupan", dan catatan "Plan F-13" ikut menyebutnya. Dibawa ke usulan 5, sehingga arti `Esc` diputuskan sekaligus di F-10.
   - Tidak dibawa: F-07 Temuan 1 dan F-09 Temuan 2 (fokus sesudah klik ganda) tetap untuk F-13 menurut keputusan F-08 usulan 6a, tetapi pelajarannya dipakai di usulan 9. F-08 Temuan 1 (mode warna paksa kartu dampak) tetap untuk F-13; pelajarannya dipakai di CSS F-10. F-09 Temuan 7 (rujukan di lembar unduhan) untuk F-11. Pengecekan keterbacaan di proyektor, laptop kelas bawah, warna ikon D-08, dan peramban lain adalah pengecekan pemilik proyek, bukan keputusan.
-- Usulan untuk Gerbang 1. Setiap usulan memuat saran agen dan alternatifnya; sebutkan nomor dan huruf bila memilih alternatif. Semua teks baru berstatus draf baru sampai Gerbang 2. Maket dikirim lewat percakapan dan tidak disimpan di repositori:
+- Keputusan Gerbang 1 (4 Nov 2026, balasan `Setuju: F-10` tanpa alternatif): saran setiap usulan diterima, dan alternatifnya tidak dipilih. Jadi: judul 7u dan "Kembali ke galeri" di layar judul (usulan 1a); cara bermain berupa dialog, dan panduan guru dibuat sesudah F-10 (2a); tim diambil berurutan dengan bawaan 3 tim, jadwal giliran tampil, suara tampil dengan keterangan, dan "Kembali" memakai aksi mesin baru (usulan 3, saran setiap butir); prolog dengan sprite dan ikon yang sudah ada (4a); pengatur waktu berhenti selama dialog pengaturan, dan `Esc` berlaku di prolog, narasi, diskusi, dan fase bintang (5a); kurangi gerak di F-10 dan layar "Tentang" di F-11 (6a1 dan 6b1); layar kerangka dan `#main` dihapus, pratinjau dipertahankan, dan "Main lagi" ke layar judul (7a); pengaturan tidak disimpan (8a); dan masa tunggu 600 ms (9a). Semua teks baru tetap "draf baru" sampai Gerbang 2. Teks usulan di bawah dipertahankan sebagai catatan. Maket dikirim lewat percakapan dan tidak disimpan di repositori:
   1. **Layar judul.**
      - Latar: `bg_title` memenuhi layar 16:9 dengan k = tinggi layar ÷ 180, dengan garis pindai dan vinyet seperti panggung. Di layar 4:3, sisa ruang tetap bingkai `ink` di atas dan bawah layar 16:9, seperti sekarang.
      - Nara berjalan (`walk`, 4 bingkai, 8 fps) di x 96, berdiri di garis lantai, sama dengan pratinjau `judul` yang disetujui. Kurangi gerak: diam di bingkai pertama.
