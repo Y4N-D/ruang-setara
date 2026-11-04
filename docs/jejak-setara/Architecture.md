@@ -1,0 +1,757 @@
+# Architecture — Jejak Setara
+
+| | |
+|---|---|
+| Versi | 0.1 (draf) |
+| Tanggal | 4 November 2026 |
+| Repositori | `ruang-setara` (akun GitHub Y4N-D) |
+| Hosting | Cloudflare Workers paket berbayar: aset statis, API, Durable Objects, D1 |
+| Dokumen terkait | `PRD.md`, `Design_System.md`, `AGENTS.md` (di `docs/jejak-setara/`) |
+
+Catatan: nama kunci konfigurasi Cloudflare dan perintah `wrangler` di dokumen ini adalah contoh. Agen wajib mencocokkannya dengan dokumentasi resmi terbaru (developers.cloudflare.com) dan versi `wrangler` di `package.json` saat tahap Plan, lalu mencatat bila ada yang berbeda.
+
+---
+
+## 1. Keputusan utama
+
+| # | Keputusan | Alasan |
+|---|---|---|
+| JA-01 | Jejak Setara **dihosting terpisah di Cloudflare Workers**: halaman pemain, konsol admin, API, ruang real-time, dan basis data dalam satu Worker. Galeri dan Sehari Setara tetap di GitHub Pages | GitHub Pages hanya menyajikan berkas statis, sedangkan mode ini butuh server real-time. Satu asal (*origin*) untuk halaman, API, dan WebSocket membuat cookie sesi menjadi pihak pertama dan tidak memerlukan CORS |
+| JA-02 | **Satu ruang = satu Durable Object** (`RuangJejak`), satu-satunya sumber kebenaran selama sesi | Durable Object menjamin satu instans per ruang, punya penyimpanan SQLite sendiri, dan bisa melayani banyak WebSocket sekaligus |
+| JA-03 | **D1** (SQLite) untuk data tetap: akun, sesi login, bank kejadian dan versinya, rujukan, paket, ruang, peserta, jawaban, pengaturan, dan log audit | Termasuk dalam paket berbayar, ada pemulihan titik waktu (*Time Travel*) 30 hari, dan SQL memudahkan statistik |
+| JA-04 | **Server berwenang** atas waktu, kejadian, kunci jawaban, skor, peringkat, skill, dan kotak. **Klien berwenang atas gerak**, tetapi setiap laporan posisi diperiksa server (kecepatan dan tabrakan) | Cukup aman untuk kelas, sederhana, dan terasa responsif di HP walaupun jaringan lambat |
+| JA-05 | Kunci jawaban, umpan balik, dan isi Langkah 2 **baru dikirim sesudah pemain mengunci jawaban** | Jawaban tidak bisa diintip dari lalu lintas jaringan. Bank awal tetap terbaca di repositori publik; risiko ini diterima (bagian 12) |
+| JA-06 | **Autentikasi sendiri**: email dan sandi, hash PBKDF2 lewat WebCrypto, sesi di D1, cookie `HttpOnly`. Tanpa layanan login pihak ketiga | Tidak memerlukan penyiapan tambahan dan sesuai skala. Cloudflare Access bisa ditambahkan kemudian sebagai lapisan kedua untuk konsol |
+| JA-07 | **Protokol JSON lewat WebSocket**, berversi, divalidasi `zod`, dengan tipe yang sama di klien dan server (`app/jejak-setara/inti/`) | `zod` sudah ada di proyek; satu sumber tipe mencegah klien dan server berbeda paham |
+| JA-08 | **Dunia digambar dengan Canvas 2D** pada 320×180 piksel logis; HUD, dialog, layar kelas, dan konsol memakai **React** (HTML) | Tanpa mesin game baru; teks tetap tajam dan bisa dibaca pembaca layar |
+| JA-09 | **Peta ditulis sebagai teks** (ASCII + daftar objek) lalu dibangun skrip menjadi JSON; ubin digambar kode dengan tukar palet per masa | Perubahan peta mudah ditinjau dalam *diff*, sejalan dengan kit aset Sehari Setara |
+| JA-10 | **Bank awal disemai dari repositori ke D1.** Sesudah itu konsol adalah tempat menyunting. Setiap terbitan menjadi versi tetap, dan ruang memakai salinan versi saat ruang dibuat | Guru tidak perlu menunggu deploy untuk memperbaiki soal; statistik tetap konsisten |
+| JA-11 | **Inti ruang ditulis sebagai modul murni** (tanpa API Workers) dan Durable Object hanya pembungkus tipis | Logika ruang bisa diuji cepat dengan Vitest biasa, termasuk dengan jam tiruan |
+| JA-12 | **Dua lingkungan:** `uji` (otomatis setiap ada perubahan di `main`) dan `produksi` (dijalankan pemilik proyek lewat tombol alur kerja) | Kelas yang sedang berjalan tidak terganggu perubahan yang belum dicoba |
+| JA-13 | Durable Object diberi **petunjuk lokasi `apac-se`** (Asia Tenggara) | Dekat dengan Indonesia; petunjuk bersifat *best-effort* |
+| JA-14 | **Paket Cloudflare Workers Paid** (US$5 per bulan) | Kuota termasuk jauh di atas pemakaian kelas (bagian 13) |
+
+Dependensi yang mungkin diperlukan dan **wajib izin tertulis** pemilik proyek: alat uji Worker (misalnya `@cloudflare/vitest-pool-workers`) dan pembuat kode QR. Semua kebutuhan lain memakai paket yang sudah ada: `react`, `zod`, `wrangler`, `@cloudflare/workers-types`, `@cloudflare/vite-plugin`, `vite`, `vitest`, `@playwright/test`, `@fontsource/*`, dan primitif `radix-ui` untuk komponen konsol.
+
+## 2. Konteks sistem
+
+```mermaid
+flowchart LR
+  Dev["Pemilik proyek<br>dan agen AI"] -->|"push ke main"| Repo[("GitHub<br>ruang-setara")]
+  Repo --> CIP["GitHub Actions<br>build:pages"]
+  CIP --> GP["GitHub Pages<br>galeri dan Sehari Setara"]
+  Repo --> CIJ["GitHub Actions<br>uji, build:jejak, migrasi, deploy"]
+  CIJ --> CF["Cloudflare Worker<br>Jejak Setara"]
+  CF --- DO[("Durable Objects<br>satu per ruang")]
+  CF --- DB[("D1<br>akun, bank, hasil")]
+  Siswa["HP atau laptop siswa"] -->|"HTTPS dan WebSocket"| CF
+  Guru["Laptop guru<br>konsol dan layar kelas"] -->|"HTTPS dan WebSocket"| CF
+  GP -->|"tautan Main Jejak Setara"| CF
+```
+
+- Sesudah WebSocket tersambung, pesan mengalir langsung antara perangkat dan Durable Object ruang; Worker hanya meneruskan permintaan sambungan pertama.
+- Durable Object tidak bisa dihubungi langsung dari internet. Hanya Worker yang meneruskan permintaan ke sana, sehingga tajuk internal dari Worker bisa dipercaya.
+
+## 3. Struktur folder
+
+```
+ruang-setara/
+├─ AGENTS.md                         # akar: Sehari Setara, ditambah penunjuk ke Jejak Setara
+├─ docs/jejak-setara/
+│  ├─ PRD.md · Design_System.md · Architecture.md · AGENTS.md
+│  ├─ PLAN.md                        # backlog dan status JS-xx (dibuat di Plan pertama)
+│  ├─ Daftar_Aset.md                 # status aset tampak atas
+│  ├─ specs/JS-xx-nama.md            # spesifikasi per fitur
+│  ├─ tests/JS-xx-hasil.md           # laporan uji per fitur
+│  └─ preview/                       # pratinjau peta dan aset
+├─ app/jejak-setara/                 # kode klien (React) dan kode bersama
+│  ├─ inti/                          # MURNI: dipakai klien dan server; tanpa DOM dan tanpa API Workers
+│  │  ├─ tipe.ts · protokol.ts       # tipe data; skema zod pesan dan PROTOKOL_VERSI
+│  │  ├─ aturan.ts                   # skor, peringkat, skill, kotak, masa, batas
+│  │  ├─ gerak.ts · peta.ts          # gerak, tabrakan, pemeriksaan kecepatan; pembaca peta
+│  │  ├─ acak.ts                     # pembangkit acak berbenih
+│  │  └─ konten/skema.ts             # skema zod kejadian, rujukan, paket
+│  ├─ pemain/                        # layar pemain
+│  │  ├─ App.tsx · Gabung.tsx · Lobi.tsx · Dunia.tsx · Hud.tsx · Rekap.tsx
+│  │  ├─ mesin/                      # loop, kamera, render kanvas, input, interpolasi
+│  │  └─ jaringan.ts                 # klien WebSocket, sambung ulang, sinkron jam
+│  ├─ admin/                         # konsol admin
+│  │  ├─ App.tsx · rute.ts · api.ts
+│  │  ├─ halaman/                    # Dasbor, Ruang, Riwayat, Kejadian, Penyunting, Paket, Rujukan, Statistik, Akun, Pengaturan, Log
+│  │  └─ kelas/                      # layar kelas: Lobi, Langsung, Podium, Pembahasan
+│  ├─ bersama/                       # komponen untuk pemain dan konsol: bingkai, tombol pilihan, dialog kejadian, kartu dampak
+│  ├─ peta/kampung.json              # hasil build_peta.py; jangan disunting manual
+│  ├─ assets/                        # manifest.ts, CREDITS.md, ubin/, obj/, ava/, npc/, ikon/, sfx/
+│  ├─ styles/jejak.css               # token --js-, bingkai piksel
+│  └─ __tests__/                     # uji unit, konten, peta, dan aset
+├─ web/jejak-setara/                 # titik masuk Vite
+│  ├─ index.html · main.tsx          # layar pemain di "/"
+│  └─ admin/index.html · main.tsx    # konsol admin di "/admin/"
+├─ server/jejak-setara/              # Cloudflare Worker
+│  ├─ wrangler.jsonc
+│  ├─ src/
+│  │  ├─ index.ts                    # router: aset, /api/*, /ws/*, tajuk keamanan
+│  │  ├─ ruang/RuangJejak.ts         # Durable Object (pembungkus tipis)
+│  │  ├─ ruang/inti-ruang.ts         # logika ruang murni (JA-11)
+│  │  ├─ api/                        # masuk, akun, kejadian, rujukan, paket, ruang, statistik, ekspor, pengaturan, log
+│  │  ├─ auth/                       # sandi, sesi, izin, tiket, pembatas percobaan
+│  │  └─ db/                         # kueri D1
+│  ├─ migrations/0001_awal.sql …     # migrasi D1, hanya maju
+│  └─ seed/bank-awal.json            # bank kejadian awal (hasil fitur konten)
+├─ scripts/game/art/                 # kit gambar bersama + atas_*.py dan build_jejak.py
+├─ scripts/jejak-setara/
+│  ├─ peta/kampung.txt · objek.json · build_peta.py   # sumber peta
+│  ├─ simulasi-beban.mjs             # 50 bot WebSocket
+│  └─ semai.mjs                      # menyemai bank awal ke D1
+├─ e2e/jejak-setara/                 # uji Playwright multi-konteks
+├─ vite.jejak.config.ts
+└─ .github/workflows/
+   ├─ jejak-uji.yml                  # push ke main: uji, build, migrasi, deploy ke lingkungan uji
+   ├─ jejak-produksi.yml             # tombol "Run workflow": deploy ke produksi
+   └─ jejak-admin-awal.yml           # tombol: buat atau pulihkan akun admin
+```
+
+- Kelas CSS memakai awalan `js-`. Kode di `inti/` tidak boleh mengimpor apa pun dari `pemain/`, `admin/`, React, DOM, atau API Workers.
+- Kode Sehari Setara (`app/sehari-setara/`) dan galeri tidak disentuh, kecuali satu titik integrasi (bagian 16).
+
+## 4. Build, konfigurasi, dan lingkungan
+
+### 4.1 Vite
+
+`vite.jejak.config.ts` terpisah dari `vite.config.ts` (Vinext) dan `vite.pages.config.ts` (GitHub Pages):
+
+```ts
+// Contoh; disesuaikan di Plan JS-01.
+export default defineConfig({
+  root: "web/jejak-setara",
+  base: "/",                       // Worker menyajikan halaman dari akar domain
+  plugins: [react()],
+  build: {
+    outDir: "../../dist-jejak",
+    emptyOutDir: true,
+    rolldownOptions: {
+      input: {
+        pemain: root + "web/jejak-setara/index.html",
+        admin: root + "web/jejak-setara/admin/index.html",
+      },
+    },
+  },
+});
+```
+
+Plan JS-01 menimbang apakah `@cloudflare/vite-plugin` (sudah ada) dipakai untuk menjalankan Worker dan halaman bersama saat pengembangan, atau `wrangler dev` dan Vite dijalankan terpisah. Pilihan dicatat sebagai keputusan baru.
+
+### 4.2 Wrangler
+
+```jsonc
+// server/jejak-setara/wrangler.jsonc (contoh)
+{
+  "name": "jejak-setara",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "../../dist-jejak", "binding": "ASSETS" },
+  "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RuangJejak"] }],
+  "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara", "database_id": "<diisi>", "migrations_dir": "migrations" }],
+  "triggers": { "crons": ["0 19 * * *"] },   // 03.00 WITA: pembersihan harian
+  "vars": { "LINGKUNGAN": "produksi" },
+  "env": { "uji": { "name": "jejak-setara-uji", "vars": { "LINGKUNGAN": "uji" } /* D1 dan DO tersendiri */ } }
+}
+```
+
+- Permintaan `/api/*` dan `/ws/*` selalu ditangani Worker. Selain itu, aset statis disajikan langsung (gratis dan tidak dihitung kuota).
+- Stub ruang diambil dengan `env.RUANG.get(id, { locationHint: "apac-se" })` (JA-13).
+
+### 4.3 Skrip `package.json` (tambahan)
+
+| Skrip | Kegunaan |
+|---|---|
+| `dev:jejak` | Halaman pemain dan konsol dengan Worker lokal (Durable Object dan D1 lokal) |
+| `build:jejak` | Build halaman ke `dist-jejak/` |
+| `content:check:jejak` | Validasi bank awal, peta, dan kecocokan rujukan |
+| `test:jejak` | Uji unit `inti/`, inti ruang, dan klien |
+| `test:jejak:server` | Uji Worker dan D1 (alat diputuskan di Plan JS-03) |
+| `test:e2e:jejak` | Uji Playwright multi-konteks terhadap Worker lokal |
+| `sim:beban` | Simulasi 50 bot pada Worker lokal atau lingkungan uji |
+| `peta:build` | `python scripts/jejak-setara/peta/build_peta.py` |
+| `assets:build:jejak` | `python scripts/game/art/build_jejak.py` |
+| `db:migrasi:lokal` | Menerapkan migrasi D1 ke basis data lokal |
+
+Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, agar alur terbit GitHub Pages yang sudah ada tetap lulus tanpa Cloudflare.
+
+### 4.4 GitHub Actions
+
+| Berkas | Nama di tab Actions | Pemicu | Langkah |
+|---|---|---|---|
+| `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara | Pasang → `content:check:jejak` → `test:jejak` → `build:jejak` → migrasi D1 lingkungan uji → deploy `--env uji` |
+| `jejak-produksi.yml` | Jejak: produksi | Tombol "Run workflow" oleh pemilik proyek | Sama, untuk produksi; berhenti bila ada ruang produksi berstatus `main` atau `jeda` (dicek lewat API) |
+| `jejak-admin-awal.yml` | Jejak: admin awal | Tombol "Run workflow" | Membuat akun admin pertama, atau mengatur ulang sandi admin dengan sandi sementara dari rahasia GitHub |
+
+`deploy-pages.yml` yang sudah ada tidak diubah.
+
+### 4.5 Rahasia dan variabel
+
+| Nama | Tempat | Isi |
+|---|---|---|
+| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | Rahasia GitHub | Untuk deploy dan migrasi |
+| `JEJAK_ADMIN_EMAIL`, `JEJAK_ADMIN_SANDI_SEMENTARA` | Rahasia GitHub | Untuk `jejak-admin-awal.yml` |
+| `KUNCI_TIKET` | Rahasia Worker (`wrangler secret`) | Kunci HMAC tiket layar kelas |
+| `KUNCI_SANDI` | Rahasia Worker | Kunci tambahan (*pepper*) hash sandi |
+| `KUNCI_IP` | Rahasia Worker | Garam harian untuk hash IP pada pembatas percobaan masuk |
+| `LINGKUNGAN` | Variabel Worker | `uji` atau `produksi` |
+
+Rahasia tidak pernah ditulis di repositori, log, atau pesan galat.
+
+Ketiga kunci Worker dibuat **sekali** oleh alur kerja deploy dengan nilai acak bila belum ada, dan tidak pernah diganti otomatis. Mengganti `KUNCI_SANDI` membuat semua sandi tidak berlaku, sehingga penggantiannya hanya lewat keputusan pemilik proyek dan diikuti pengaturan ulang sandi semua akun.
+
+## 5. Model data
+
+### 5.1 Tipe bersama (ringkas)
+
+```ts
+// app/jejak-setara/inti/tipe.ts
+export type ZonaId = "z1" | "z2" | "z3" | "z4" | "z5" | "z6" | "z7" | "z8";
+export type Masa = "pagi" | "siang" | "sore";
+export type Tingkat = "tepat" | "kurang" | "berisiko";
+export type SkillId = "lari" | "kompas" | "petunjuk" | "teropong" | "angkot";
+export type Arah = "bawah" | "atas" | "kanan" | "kiri";
+export type StatusRuang = "lobi" | "hitung_mundur" | "main" | "jeda" | "selesai" | "pembahasan" | "ditutup";
+
+export interface Opsi1 { id: string; teks: string; benar: boolean; umpanBalik: string }
+export interface Opsi2 { id: string; teks: string; tingkat: Tingkat; terjadi: string }
+
+export interface IsiKejadian {               // satu versi kejadian
+  kode: string;                              // "K-13"
+  judul: string;
+  zona: ZonaId;
+  setTokoh: string[];                        // kunci tokoh dan properti dari manifest
+  situasi: string;                           // ≤ 3 kalimat
+  langkah1: { pertanyaan: string; opsi: [Opsi1, Opsi1, Opsi1, Opsi1]; petunjuk: string };
+  langkah2: { pertanyaan: string; opsi: [Opsi2, Opsi2, Opsi2] };
+  kartu: { hak: string; kewajiban: string; rujukan: string[] };   // id rujukan JR-xx
+  topik: string;                             // misalnya "Hak atas kesehatan"
+  jenis: "pelanggaran_hak" | "pengabaian_kewajiban" | "keduanya";
+}
+
+export interface PengaturanRuang {
+  durasiMenit: 10 | 15 | 20;
+  batasPemain: number;                       // 2–50, bawaan 40
+  batasTerlambatMenit: number;               // 0–10, bawaan 5
+  skillAktif: SkillId[];
+  modeNomorAbsen: boolean;
+  uji: boolean;                              // ruang uji: tidak masuk statistik
+}
+```
+
+### 5.2 Skema D1
+
+| Tabel | Kolom utama | Catatan |
+|---|---|---|
+| `pengguna` | `id`, `email` (unik), `nama_tampilan`, `peran` (`admin`/`guru`), `peninjau`, `hash_sandi`, `garam`, `iterasi`, `wajib_ganti_sandi`, `aktif`, `dibuat_pada`, `masuk_terakhir` | Email disimpan huruf kecil |
+| `sesi` | `hash_token`, `pengguna_id`, `dibuat_pada`, `terakhir_dipakai`, `kedaluwarsa` | Yang disimpan hanya hash SHA-256 token |
+| `batas_masuk` | `kunci`, `jumlah`, `jendela_mulai`, `terkunci_sampai` | Kunci berupa hash email atau hash IP harian |
+| `rujukan` | `id` (`JR-01` …), `teks`, `sumber`, `status` (`belum`/`terverifikasi`), `diverifikasi_oleh`, `diverifikasi_pada`, `catatan`, `kode_sehari` (misalnya `R-03`) | Mengubah `teks` mengembalikan `status` ke `belum` |
+| `kejadian` | `id`, `kode` (unik), `status` (`draf`/`tinjau`/`terbit`/`arsip`), `versi_terbit_id`, `pemilik_id`, `diubah_pada` | |
+| `kejadian_versi` | `id`, `kejadian_id`, `nomor`, `isi_json`, `jenis` (`kerja`/`terbit`), `dibuat_oleh`, `dibuat_pada`, `catatan_perubahan` | Satu versi `kerja` yang bisa disunting; versi `terbit` tidak pernah berubah |
+| `paket` · `paket_kejadian` | `id`, `nama`, `deskripsi`, `aktif` · `paket_id`, `kejadian_id`, `urutan` | |
+| `ruang` | `id`, `kode`, `pemilik_id`, `label_kelas`, `paket_id`, `pengaturan_json`, `benih`, `status`, `uji`, `do_id`, `dibuat_pada`, `mulai_pada`, `selesai_pada`, `ringkasan_json` | `kode` unik di antara ruang yang belum `ditutup` |
+| `peserta` | `id`, `ruang_id`, `nama_samaran`, `avatar`, `warna_tas`, `nomor_absen`, `skor`, `waktu_skor_ms`, `langkah1_benar`, `jumlah_kejadian`, `gabung_pada`, `peringkat_akhir` | `nomor_absen` kosong bila mode nomor absen mati |
+| `jawaban` | `id`, `ruang_id`, `peserta_id`, `kejadian_versi_id`, `urutan_opsi_json`, `langkah1_opsi`, `langkah1_benar`, `petunjuk_dipakai`, `langkah2_opsi`, `tingkat`, `poin`, `dibuka_pada`, `langkah1_pada`, `langkah2_pada` | Satu baris per pemain per kejadian |
+| `pengaturan` | `kunci`, `nilai_json` | Nilai bawaan ruang, daftar nama samaran, masa simpan data, mode pemeliharaan |
+| `log_audit` | `id`, `pengguna_id`, `aksi`, `sasaran`, `rincian_json`, `waktu` | Tanpa sandi dan tanpa token |
+
+```mermaid
+erDiagram
+  PENGGUNA ||--o{ SESI : punya
+  PENGGUNA ||--o{ RUANG : membuat
+  PAKET ||--o{ RUANG : dipakai
+  PAKET ||--o{ PAKET_KEJADIAN : berisi
+  KEJADIAN ||--o{ PAKET_KEJADIAN : masuk
+  KEJADIAN ||--|{ KEJADIAN_VERSI : punya
+  RUANG ||--o{ PESERTA : berisi
+  PESERTA ||--o{ JAWABAN : memberi
+  KEJADIAN_VERSI ||--o{ JAWABAN : dijawab
+```
+
+### 5.3 Status di Durable Object ruang
+
+Disimpan di SQLite milik Durable Object, sehingga tetap ada bila objek dikeluarkan dari memori:
+
+| Tabel | Isi |
+|---|---|
+| `meta` | Status ruang, pengaturan, benih, `mulaiPada`, `berakhirPada`, `jedaSejak`, salinan isi versi kejadian, dan penempatan kejadian di titik |
+| `pemain` | Token (hash), nama samaran, avatar, posisi terakhir, skor, waktu skor, muatan skill, waktu skill aktif, status sambungan, `dikeluarkan` |
+| `jawaban` | Seperti tabel D1, ditambah status per pemain per kejadian (`belum`, `langkah1`, `langkah2`, `selesai`) |
+| `kotak` | Waktu terakhir setiap pemain mengambil setiap kotak |
+| `kiriman` | Antrean baris yang belum terkirim ke D1 |
+| `tiket_terpakai` | Tiket layar kelas yang sudah dipakai (dibersihkan sesudah kedaluwarsa) |
+
+Isi kejadian **disalin saat ruang dibuat**, sehingga penyuntingan di konsol tidak mengubah ruang yang sedang berjalan.
+
+### 5.4 Aturan validasi konten
+
+Diperiksa skema `zod` yang sama untuk bank awal (`content:check:jejak`) dan untuk isian konsol (server menolak simpan bila gagal).
+
+| Bagian | Aturan |
+|---|---|
+| Judul | ≤ 32 karakter |
+| Situasi | 1–3 kalimat, ≤ 280 karakter |
+| Pertanyaan Langkah 1 dan 2 | ≤ 100 karakter |
+| Opsi Langkah 1 | Tepat 4, masing-masing ≤ 90 karakter, tepat satu `benar` |
+| Umpan balik Langkah 1 | ≤ 160 karakter per opsi |
+| Petunjuk | ≤ 120 karakter; tidak boleh menyalin teks opsi yang benar |
+| Opsi Langkah 2 | Tepat 3, masing-masing ≤ 140 karakter, sedikitnya satu `tepat` |
+| "Yang terjadi" | ≤ 160 karakter per opsi |
+| Hak dan kewajiban kartu | ≤ 120 karakter masing-masing |
+| Rujukan | 1–4 id yang ada di pustaka |
+| Teks | Teks polos: tanpa HTML, tanpa Markdown, tanpa tautan; huruf kapital hanya di awal kalimat diperiksa sebagai peringatan, bukan galat |
+| Set tokoh | Hanya kunci yang ada di manifest; paling banyak 4 tokoh |
+| Paket | Jumlah kejadian per zona tidak melebihi jumlah titik zona itu |
+
+## 6. Protokol real-time
+
+### 6.1 Alamat dan sambungan
+
+| Alamat | Untuk | Syarat |
+|---|---|---|
+| `wss://{host}/ws/ruang/{KODE}` | Pemain | Kode ruang aktif; pesan pertama harus `halo` |
+| `wss://{host}/ws/kelas/{ruangId}?tiket={tiket}` | Layar kelas | Tiket dari `POST /api/ruang/{id}/tiket`: HMAC, berlaku 60 detik, sekali pakai |
+
+Worker memeriksa tajuk `Origin` (hanya domain Jejak Setara sendiri dan `localhost` saat pengembangan), mencari ruang lewat D1, lalu meneruskan permintaan ke Durable Object dengan tajuk internal `X-Jejak-Peran` (`pemain` atau `guru`) dan `X-Jejak-Pengguna`.
+
+### 6.2 Amplop pesan
+
+Setiap pesan adalah objek JSON `{ "v": 1, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/protokol.ts`. Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
+
+### 6.3 Pesan pemain
+
+**Dari pemain ke server**
+
+| `t` | Isi | Kapan |
+|---|---|---|
+| `halo` | `peran: "pemain"`, `token?`, `nomorAbsen?` | Pesan pertama; `token` dipakai untuk menyambung ulang |
+| `pilih_identitas` | `nama`, `avatar` | Di layar gabung; `nama` harus salah satu saran server |
+| `gerak` | `x`, `y`, `arah`, `jalan` (boolean), `seq` | Paling banyak 10 per detik saat bergerak, 1 per detik saat diam |
+| `periksa` | `kejadianId` | Membuka dialog |
+| `kunci_1` | `kejadianId`, `opsiId` | Mengunci Langkah 1 |
+| `kunci_2` | `kejadianId`, `opsiId` | Mengunci Langkah 2 |
+| `tutup_dialog` | `kejadianId` | Menutup dialog |
+| `pakai_skill` | `skill`, `kejadianId?` | `kejadianId` hanya untuk Petunjuk |
+| `ambil_kotak` | `kotakId` | Saat avatar melewati kotak |
+| `ping` | `tKlien` | Setiap 5 detik |
+
+**Dari server ke pemain**
+
+| `t` | Isi |
+|---|---|
+| `selamat_datang` | `pemainId`, `token`, status dan pengaturan ruang, `waktuServer`, versi peta, tiga saran nama samaran, avatar yang tersedia |
+| `status_ruang` | `status`, `mulaiPada`, `berakhirPada`, `jedaSejak` |
+| `dunia` | `w` (waktu server), `p`: larik `[id, x, y, arah, jalan]` untuk pemain yang berubah di sekitar pemain ini, `n` (jumlah pemain) |
+| `pemain_baru` · `pemain_pergi` | `id`, `nama`, `avatar`, `warnaTas` · `id` |
+| `pribadi` | `skor`, `peringkat`, `selesai` (id kejadian), `terlihat`, muatan skill, skill aktif, kotak yang belum muncul lagi |
+| `kejadian_terlihat` | `kejadianId`, `x`, `y` — posisi kejadian yang baru masuk pandangan pemain (atau terungkap Teropong) |
+| `kompas` | `x`, `y`, `berakhirPada` — sasaran panah Kompas; dikirim ulang bila sasaran selesai sebelum waktunya habis |
+| `kejadian_terbuka` | `kejadianId`, `judul`, `situasi`, `setTokoh`, `pertanyaan1`, `opsi1` (id dan teks, sudah diacak), `langkah` (1 atau 2) |
+| `petunjuk` | `kejadianId`, `kalimat`, `opsiDicoret` |
+| `hasil_1` | `benar`, `opsiBenar`, umpan balik pilihan pemain dan pilihan benar, `poin`, `pertanyaan2`, `opsi2` (diacak) |
+| `hasil_2` | `tingkat`, `poin`, `terjadi`, `opsiTepat`, kartu (`hak`, `kewajiban`, `rujukan` berupa teks) |
+| `koreksi` | `x`, `y`, `seq` — posisi dari server bila laporan gerak ditolak |
+| `pemberitahuan` | `kode` (misalnya `dua_menit`) |
+| `selesai` | `skor`, `peringkat`, `jumlahPemain`, rekap pribadi |
+| `galat` | `kode`, `pesan` (bagian 6.7) |
+| `pong` | `tKlien`, `waktuServer` |
+
+### 6.4 Pesan layar kelas
+
+| Arah | `t` | Isi |
+|---|---|---|
+| Kelas → server | `halo` | `peran: "guru"` (tiket sudah diperiksa Worker) |
+| Kelas → server | `mulai` · `jeda` · `lanjut` · `tambah_waktu` · `akhiri` | `tambah_waktu` berisi `detik` (120) |
+| Kelas → server | `kunci_ruang` · `keluarkan` · `kode_masuk_ulang` | `kunci` (boolean) · `pemainId` · `pemainId` (P1) |
+| Kelas → server | `pembahasan` · `tutup_ruang` | `kejadianId` |
+| Server → kelas | `lobi` | Daftar pemain (nama, avatar, warna tas, terhubung) |
+| Server → kelas | `dunia_kelas` | Semua posisi pemain, 4 kali per detik |
+| Server → kelas | `papan` | Peringkat lengkap, paling sering 1 kali per detik; layar kelas hanya menampilkan 10 besar |
+| Server → kelas | `kemajuan` | Jumlah jawaban dan kemungkinan |
+| Server → kelas | `data_pembahasan` | Isi kejadian, sebaran pilihan Langkah 1 dan 2, kartu dampak |
+| Server → kelas | `status_ruang` · `galat` | Seperti di atas |
+
+### 6.5 Frekuensi dan ukuran
+
+| Aliran | Frekuensi | Ukuran perkiraan |
+|---|---|---|
+| `gerak` dari pemain | ≤ 10 per detik saat bergerak | ±60 byte |
+| `dunia` ke pemain | 10 per detik, hanya pemain yang berubah dalam radius 1,5 pandangan (480 × 270 piksel logis) | ±200 byte |
+| `dunia_kelas` | 4 per detik, semua pemain | ±1 KB untuk 40 pemain |
+| `papan` | ≤ 1 per detik, hanya bila berubah | ±1,5 KB |
+
+Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 MB naik, di bawah anggaran 3 MB (PRD bagian 12). Bila uji beban melampaui anggaran, `dunia` diturunkan ke 5 per detik.
+
+### 6.6 Validasi dan pembatasan
+
+- Ukuran pesan masuk paling besar 2 KB.
+- Batas per sambungan: 20 pesan per detik rata-rata dengan lonjakan sampai 40. Pesan berlebih dibuang; 3 pelanggaran dalam 10 detik mengirim `galat TERLALU_CEPAT`, dan 10 pelanggaran menutup sambungan.
+- `nama` harus dari saran server; `avatar` dari daftar; `nomorAbsen` bilangan 1–50.
+- Pesan pemain diabaikan bila tidak sesuai status ruang (misalnya `gerak` saat `jeda`).
+
+### 6.7 Kode galat
+
+| Kode | Arti | Tampil ke pemain |
+|---|---|---|
+| `RUANG_TIDAK_ADA` | Kode salah atau ruang sudah ditutup | "Kode ruang tidak ditemukan. Periksa lagi kodenya." |
+| `RUANG_PENUH` | Batas pemain tercapai | "Ruang sudah penuh. Beri tahu gurumu." |
+| `RUANG_TERKUNCI` | Guru mengunci ruang | "Ruang sudah dikunci guru." |
+| `TERLAMBAT` | Melewati batas bergabung terlambat | "Ronde sudah berjalan terlalu lama untuk bergabung." |
+| `NAMA_DIPAKAI` | Nama samaran baru saja dipakai pemain lain | Saran nama baru langsung dikirim |
+| `VERSI_BERBEDA` | Versi protokol klien lama | "Ada pembaruan. Muat ulang halaman." |
+| `TERLALU_CEPAT` | Batas pesan terlampaui | Tidak ditampilkan; dicatat |
+| `DIKELUARKAN` | Dikeluarkan guru | "Kamu dikeluarkan dari ruang oleh guru." |
+| `BUKAN_JANGKAUAN` | Memeriksa kejadian dari tempat yang terlalu jauh | Tidak ditampilkan; posisi dikoreksi |
+
+Teks akhir ditetapkan di spesifikasi fitur.
+
+### 6.8 Jam dan sambung ulang
+
+- Semua hitungan waktu berpatokan pada `waktuServer`. Klien menaksir selisih jam dari median lima `pong` terakhir.
+- Bila sambungan putus, klien mencoba lagi dengan jeda 0,5, 1, 2, 4, lalu 8 detik (paling lama 10 detik), sambil menampilkan "Menyambung ulang…".
+- `token` acak 128 bit disimpan di `sessionStorage` tab itu. Server menyimpan hash token dan seluruh status pemain selama ruang belum ditutup.
+- Avatar pemain yang terputus lebih dari 10 detik tampil pucat bagi pemain lain dan di layar kelas.
+- Layar kelas yang tertutup tidak menghentikan ronde. Guru membuka lagi layar kelas dari konsol (tiket baru).
+- Klien meminta *Screen Wake Lock* saat ronde dimulai (bila didukung), agar HP tidak terkunci di tengah ronde (JFR-14).
+
+### 6.9 Urutan menjawab kejadian
+
+```mermaid
+sequenceDiagram
+  participant P as Layar pemain
+  participant R as Ruang (Durable Object)
+  participant D as D1
+  P->>R: periksa(kejadianId)
+  R-->>P: kejadian_terbuka(situasi, opsi Langkah 1 teracak)
+  P->>R: kunci_1(opsiId)
+  R-->>P: hasil_1(benar, umpan balik, opsi Langkah 2 teracak)
+  P->>R: kunci_2(opsiId)
+  R-->>P: hasil_2(tingkat, poin, kartu dampak)
+  R-->>P: pribadi(skor, peringkat)
+  R->>D: kiriman berkala (idempoten)
+```
+
+## 7. Siklus ruang
+
+```mermaid
+stateDiagram-v2
+  [*] --> lobi: ruang dibuat
+  lobi --> hitung_mundur: MULAI
+  hitung_mundur --> main: sesudah 3 detik
+  main --> jeda: JEDA
+  jeda --> main: LANJUT
+  main --> selesai: waktu habis atau AKHIRI
+  jeda --> selesai: AKHIRI
+  selesai --> pembahasan: PEMBAHASAN
+  pembahasan --> ditutup: TUTUP
+  selesai --> ditutup: TUTUP
+  ditutup --> [*]
+```
+
+- **Pembuatan:** `POST /api/ruang` memeriksa izin, memilih versi terbit setiap kejadian di paket (semua rujukannya harus terverifikasi, kecuali ruang uji), membuat kode, membuat baris `ruang` di D1, lalu memanggil Durable Object baru dengan salinan isi, pengaturan, dan benih.
+- **Penempatan kejadian:** setiap kejadian diberi satu titik dari titik-titik zonanya dengan pengacakan berbenih; satu titik untuk satu kejadian.
+- **Lobi dan jeda:** tanpa pengatur waktu berkala, sehingga Durable Object boleh beristirahat (*hibernate*). Sambungan memakai WebSocket Hibernation API; identitas sambungan disimpan dengan `serializeAttachment`.
+- **Main:** pengatur waktu 100 ms menyusun dan mengirim `dunia`, `pribadi`, dan `papan`. Alarm dipasang pada `berakhirPada`.
+- **Jeda:** jam berhenti; `berakhirPada` digeser sebesar lama jeda saat dilanjutkan.
+- **Selesai:** peringkat akhir dihitung, `selesai` dikirim ke setiap pemain, seluruh `kiriman` dikirim ke D1, dan `ringkasan_json` ditulis.
+- **Ditutup otomatis:** 3 jam tanpa sambungan apa pun, atau 6 jam sejak dibuat. Penyimpanan Durable Object dihapus 24 jam sesudah ditutup, setelah kiriman ke D1 dipastikan lengkap.
+
+## 8. Aturan permainan di server
+
+### 8.1 Inti ruang murni
+
+`server/jejak-setara/src/ruang/inti-ruang.ts` berisi kelas tanpa API Workers. Ia menerima pesan, jam, dan pembangkit acak dari luar, lalu mengembalikan daftar pesan keluar dan perubahan penyimpanan. `RuangJejak.ts` hanya menyambungkannya dengan WebSocket, SQLite Durable Object, alarm, dan D1. Fungsi hitungan (skor, peringkat, skill, masa) ada di `app/jejak-setara/inti/aturan.ts` dan dipakai juga oleh klien untuk tampilan.
+
+### 8.2 Gerak
+
+- Kecepatan dasar 72 piksel logis per detik; ×1,6 saat Lari cepat aktif. Diagonal dinormalisasi.
+- Untuk setiap `gerak`, server menghitung jarak dari posisi terakhir yang diterima. Batasnya: kecepatan saat itu × selang waktu × 1,25 + 4 piksel.
+- Posisi juga ditolak bila berada di sel padat peta, di luar peta, atau saat status bukan `main`, atau saat dialog terbuka.
+- Posisi yang ditolak tidak dipakai; server mengirim `koreksi` dengan posisi terakhir yang sah, dan klien langsung berpindah ke sana.
+- Hitungan tabrakan memakai `inti/gerak.ts` dan grid tabrakan yang sama dengan klien.
+
+### 8.3 Kejadian
+
+- **Posisi kejadian tidak dikirim di awal.** Klien hanya tahu titik-titik calon dari peta, bukan titik yang dipakai ruang itu. Server menganggap kejadian terlihat bila titiknya masuk kotak pandangan 320 × 180 yang berpusat di posisi pemain (dijepit ke tepi peta), lalu mengirim `kejadian_terlihat` sekali. Dengan begitu, klien yang diubah pun tidak bisa membaca semua lokasi kejadian.
+- `periksa` diterima bila kejadian ada di ruang, belum `selesai` untuk pemain itu, tidak ada dialog lain yang terbuka, dan jarak pemain ke titik ≤ 24 + 8 piksel (1,5 ubin ditambah toleransi).
+- Urutan opsi diacak per pemain per kejadian dengan benih (benih ruang, id pemain, id kejadian), lalu disimpan agar statistik bisa memetakan pilihan ke opsi aslinya.
+- Id opsi yang dikirim ke pemain adalah id acak per pemain, bukan id asli, sehingga id tidak membocorkan jawaban yang benar.
+- Langkah 1 dan Langkah 2 hanya bisa dikunci sekali. Pesan kunci kedua diabaikan.
+- Waktu `dibuka_pada`, `langkah1_pada`, dan `langkah2_pada` dicatat dengan jam server.
+
+### 8.4 Skor dan peringkat
+
+```ts
+// app/jejak-setara/inti/aturan.ts
+export const POIN = { langkah1Benar: 40, tepat: 60, kurang: 25, berisiko: 0 } as const;
+
+export function bandingkanPeringkat(a: Pemain, b: Pemain): number {
+  return (b.skor - a.skor)                        // 1) skor lebih tinggi
+      || (a.waktuSkorMs - b.waktuSkorMs)          // 2) lebih dulu mencapai skor itu
+      || (b.langkah1Benar - a.langkah1Benar)      // 3) lebih banyak Langkah 1 benar
+      || (a.urutanGabung - b.urutanGabung);       // 4) lebih dulu bergabung
+}
+```
+
+- `waktuSkorMs` adalah waktu ronde (tanpa lama jeda) saat skor terakhir bertambah.
+- Peringkat dihitung ulang setiap skor berubah. Pemain menerima peringkatnya sendiri; layar kelas menerima seluruh daftar.
+
+### 8.5 Skill dan kotak
+
+- Muatan, lama, dan jeda pemakaian mengikuti PRD bagian 8.5 dan disimpan sebagai konstanta di `inti/aturan.ts`.
+- Kotak diambil bila jarak avatar ke kotak ≤ 12 piksel dan kotak itu sudah muncul lagi untuk pemain itu. Server mencatat waktu ambil per pemain per kotak.
+- Kompas: server memilih kejadian terdekat yang belum selesai (jarak lurus dari posisi pemain) dan mengirim posisinya lewat `kompas`. Klien menggambar panahnya di tepi pandangan.
+- Petunjuk: server memilih satu opsi keliru secara acak berbenih untuk dicoret dan mengirim kalimat petunjuk.
+
+### 8.6 Penyimpanan dan kiriman ke D1
+
+- Setiap perubahan penting (bergabung, jawaban, skor) ditulis lebih dulu ke SQLite Durable Object, lalu dimasukkan ke `kiriman`.
+- Setiap 30 detik dan saat ronde selesai, `kiriman` dikirim ke D1 dalam satu *batch* dengan `INSERT … ON CONFLICT DO UPDATE` berdasarkan id, sehingga pengiriman ulang aman.
+- Bila D1 gagal, kiriman dicoba lagi lewat alarm dengan jeda yang makin panjang, dan ruang tidak ditutup sebelum kiriman habis.
+
+## 9. Klien pemain
+
+- **Loop:** `requestAnimationFrame`; gerak pemain sendiri dihitung dengan langkah tetap 60 Hz memakai `inti/gerak.ts` (langsung terasa tanpa menunggu server).
+- **Pemain lain:** digambar 120 ms di belakang waktu server, dengan interpolasi di antara dua `dunia` terakhir.
+- **Kanvas:** ukuran *backing store* = 320 × k dan 180 × k piksel perangkat dengan k bilangan bulat terbesar yang muat (Design System bagian 3.2). Peta digambar dari potongan 256 × 256 yang disiapkan di kanvas luar layar per masa.
+- **Urutan gambar:** lapisan Design System bagian 7; tokoh diurutkan menurut y kaki; siluet pemain sendiri digambar di atas objek atas.
+- **Input:** keyboard (`keydown`/`keyup` dengan peta tombol), joystick sentuh (*pointer events*, satu penunjuk di separuh kiri), dan tombol HTML untuk Periksa serta skill.
+- **HUD dan dialog:** komponen React di atas kanvas. Dialog dibuka dari `kejadian_terbuka` dan memakai komponen `bersama/` yang juga dipakai pratinjau konsol.
+- **Label nama:** kanvas lapisan kedua dengan resolusi perangkat, agar teks tajam; paling banyak 8 label.
+- **Pramuat:** aset pemain dimuat sebelum tombol "Masuk" aktif; lembar ubin masa berikutnya dimuat di latar belakang.
+- **Tanpa penyimpanan lain:** hanya `token` di `sessionStorage` dan pengaturan pemain di memori.
+
+## 10. Konsol admin dan layar kelas
+
+### 10.1 Rute konsol
+
+Satu halaman di `/admin/` dengan rute *hash*: `#/dasbor`, `#/ruang`, `#/ruang/{id}` (hasil), `#/kelas/{id}` (layar kelas, dibuka di tab baru), `#/kejadian`, `#/kejadian/{id}`, `#/paket`, `#/rujukan`, `#/statistik`, `#/akun`, `#/pengaturan`, `#/log`, dan `#/masuk`. Router kecil ditulis sendiri, tanpa dependensi baru.
+
+### 10.2 API
+
+Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": "..." } }`. Daftar memakai `?batas=` dan `?mulai=`.
+
+| Metode dan jalur | Fungsi | Izin |
+|---|---|---|
+| `POST /api/masuk` · `POST /api/keluar` · `GET /api/saya` | Masuk, keluar, akun saat ini | Umum · masuk · masuk |
+| `POST /api/sandi` | Ganti sandi sendiri | Masuk |
+| `GET` · `POST /api/akun`; `PATCH /api/akun/{id}` | Daftar, buat, ubah, nonaktifkan, atur ulang sandi | Admin |
+| `GET` · `POST /api/kejadian`; `GET` · `PATCH /api/kejadian/{id}` | Daftar, buat draf, baca, simpan versi kerja | Admin, guru |
+| `POST /api/kejadian/{id}/ajukan` · `/terbitkan` · `/arsipkan` | Ubah status | Admin, guru · admin · admin |
+| `GET /api/kejadian/{id}/versi` | Riwayat versi | Admin, guru |
+| `GET` · `POST /api/rujukan`; `PATCH /api/rujukan/{id}`; `POST /api/rujukan/{id}/verifikasi` | Pustaka rujukan; verifikasi | Admin, guru; verifikasi hanya Peninjau |
+| `GET` · `POST /api/paket`; `PATCH /api/paket/{id}` | Paket kejadian | Admin |
+| `POST /api/ruang`; `GET /api/ruang`; `GET /api/ruang/{id}`; `DELETE /api/ruang/{id}` | Buat, daftar, hasil, hapus data | Admin, guru (miliknya) |
+| `POST /api/ruang/{id}/tiket` | Tiket layar kelas | Pemilik ruang, admin |
+| `GET /api/ruang/{id}/ekspor?jenis=peserta\|jawaban` | CSV | Pemilik ruang, admin |
+| `GET /api/statistik/kejadian` · `/kelas` · `/siswa` | Statistik | Admin (semua), guru (miliknya) |
+| `GET` · `PUT /api/pengaturan` | Pengaturan umum | Admin |
+| `GET /api/log` | Log audit | Admin |
+| `GET /api/bank/ekspor`; `POST /api/bank/impor` | Ekspor dan impor JSON bank | Admin |
+| `GET /api/publik/ruang/{KODE}` | Apakah kode ada dan masih bisa dimasuki (tanpa rincian lain) | Umum, dibatasi frekuensinya |
+
+### 10.3 Autentikasi dan sesi
+
+- **Hash sandi:** PBKDF2-HMAC-SHA256 lewat WebCrypto dengan garam acak 16 byte dan kunci tambahan `KUNCI_SANDI`. Jumlah iterasi setinggi yang diizinkan runtime Workers (sumber komunitas menyebut batas 100.000; diukur ulang di Plan fitur autentikasi), disimpan per akun agar bisa dinaikkan. Pembandingan memakai waktu konstan. Bila pemilik proyek ingin hash yang lebih kuat, Argon2id lewat pustaka WASM bisa dipakai dengan izin dependensi.
+- **Sandi:** minimal 12 karakter; sandi sementara wajib diganti saat masuk pertama.
+- **Pembatas percobaan:** 5 kali gagal dalam 15 menit per email, atau 20 kali per hash IP harian, mengunci percobaan selama 15 menit. Pesan galat selalu sama ("Email atau sandi salah"), agar tidak membocorkan email mana yang terdaftar.
+- **Sesi:** token acak 32 byte di cookie `__Host-jejak_sesi` dengan `HttpOnly`, `Secure`, `SameSite=Lax`, dan `Path=/`. D1 hanya menyimpan hash-nya. Sesi berakhir sesudah 8 jam tidak dipakai, dan paling lama 7 hari. Keluar dan ganti sandi menghapus sesi.
+- **CSRF:** permintaan yang mengubah data wajib membawa tajuk `X-Jejak: 1` dan `Origin` yang sama dengan domain sendiri.
+- **Pemulihan admin:** alur kerja `jejak-admin-awal.yml` (bagian 15).
+
+### 10.4 Izin
+
+Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.ts` yang dipanggil setiap rute API. Guru hanya bisa mengakses ruang miliknya. Setiap perubahan konten, akun, pengaturan, dan penghapusan data dicatat di `log_audit`.
+
+### 10.5 Bank kejadian dan versi
+
+- Kejadian baru mendapat kode berikutnya (`K-17`, `K-18`, …) dan satu versi `kerja`.
+- **Simpan** memperbarui versi `kerja` sesudah validasi bagian 5.4.
+- **Ajukan** mengubah status menjadi `tinjau`.
+- **Terbitkan** (Admin) menyalin versi `kerja` menjadi versi `terbit` bernomor baru, bila validasi lulus dan semua rujukannya `terverifikasi`.
+- **Arsipkan** mengeluarkan kejadian dari paket dan ruang baru. Kejadian yang pernah dipakai di ruang tidak bisa dihapus, hanya diarsipkan, agar statistik tetap utuh. Draf yang belum pernah terbit boleh dihapus.
+- Bila teks sebuah rujukan diubah, statusnya kembali `belum`, dan kejadian yang memakainya tidak bisa dipakai untuk ruang baru sampai rujukan itu diverifikasi ulang.
+
+### 10.6 Pustaka rujukan
+
+- Setiap rujukan punya id `JR-xx`, teks, sumber JDIH, status, dan catatan. Kolom `kode_sehari` mencatat padanannya di `docs/sehari-setara/Verifikasi_Rujukan.md` (misalnya `R-03`) sebagai bantuan pemeriksa.
+- Bank awal disemai dengan semua rujukan berstatus `belum`. **Agen dan skrip tidak pernah menyemai status `terverifikasi`.**
+- Hanya akun bertanda Peninjau yang dapat menandai `terverifikasi`; nama dan tanggal dicatat otomatis.
+
+### 10.7 Statistik
+
+- Dihitung dengan SQL dari `jawaban`, `peserta`, dan `ruang` (ruang uji dikecualikan), dikelompokkan per `kejadian_versi_id`.
+- Rumus mengikuti PRD bagian 11.2. Median waktu dihitung di Worker dari hasil kueri.
+- Saringan: rentang tanggal, guru, label kelas, paket, dan kejadian.
+- Statistik per siswa lintas sesi mengelompokkan `label_kelas` (dinormalkan: huruf besar, tanpa spasi ganda) dan `nomor_absen`, hanya untuk ruang dengan mode nomor absen.
+
+### 10.8 Ekspor
+
+- CSV memakai **titik koma** sebagai pemisah, koma sebagai tanda desimal, dan diawali BOM UTF-8, agar langsung rapi di Excel berbahasa Indonesia.
+- Nama berkas: `jejak-setara_{label-kelas}_{tanggal}_{jenis}.csv`.
+- Ringkasan ruang dicetak lewat fitur cetak peramban dengan gaya cetak khusus (P1).
+
+### 10.9 Layar kelas
+
+- Dibuka dari halaman hasil ruang dengan tombol "Buka layar kelas". Konsol meminta tiket, lalu membuka `#/kelas/{id}` di tab baru yang langsung tersambung ke Durable Object.
+- Pintasan keyboard: `Spasi` mulai atau jeda/lanjut, `T` tambah 2 menit, `A` akhiri (dengan konfirmasi), `L` kunci ruang, `←` `→` berpindah kejadian di pembahasan, `F` layar penuh, `M` suara.
+- Halaman ini tidak menampilkan lokasi kejadian selama ronde (JFR-28).
+
+## 11. Peta, aset, dan anggaran
+
+### 11.1 Peta
+
+- Sumber: `scripts/jejak-setara/peta/kampung.txt` (satu karakter per ubin untuk tanah dan tabrakan) dan `objek.json` (bangunan, pohon, titik kejadian per zona, kotak, halte, gerbang lobi, dan titik munculnya pemain).
+- `build_peta.py` menghasilkan `app/jejak-setara/peta/kampung.json` (lapisan ubin, grid tabrakan sebagai bit, daftar objek, batas zona) dan pratinjau di `docs/jejak-setara/preview/`.
+- Uji peta (`content:check:jejak`): semua titik kejadian, kotak, dan halte bisa dicapai dari titik muncul (pencarian lebar); setiap titik punya ruang kosong 3 × 3 ubin; jarak antartitik kejadian ≥ 6 ubin; setiap zona punya sedikitnya 4 titik kejadian; dan jumlah titik cukup untuk Paket inti.
+
+### 11.2 Manifest aset
+
+`app/jejak-setara/assets/manifest.ts` menjadi satu-satunya pintu masuk aset, dengan pola Sehari Setara. Kelompoknya: `ubin` (per masa), `objek`, `avatar`, `npc`, `ikon`, `tanda`, dan `suara`. Aset selalu menjadi berkas berhash, bukan data URI.
+
+### 11.3 Anggaran
+
+| Item | Anggaran |
+|---|---|
+| Kode layar pemain (gzip) | ≤ 200 KB |
+| Kode konsol admin (gzip, dimuat terpisah) | ≤ 350 KB |
+| Seluruh aset layar pemain | ≤ 2 MB |
+| Satu lembar ubin per masa | ≤ 60 KB |
+| Satu strip avatar atau tokoh | ≤ 6 KB |
+| Peta JSON (gzip) | ≤ 60 KB |
+| Satu efek suara | ≤ 30 KB |
+
+## 12. Keamanan dan privasi
+
+### 12.1 Ancaman dan penanganan
+
+| Ancaman | Penanganan |
+|---|---|
+| Menebak kode ruang | 5 karakter dari 31 huruf dan angka (±28 juta kemungkinan); `GET /api/publik/ruang` dan sambungan dibatasi frekuensinya; guru bisa mengunci ruang |
+| Menyamar sebagai layar kelas | Tiket HMAC 60 detik, sekali pakai, dan hanya diberikan kepada pemilik ruang atau admin yang sudah masuk |
+| Kecurangan gerak | Pemeriksaan kecepatan dan tabrakan di server (bagian 8.2) |
+| Membaca semua lokasi kejadian dari klien | Lokasi dikirim hanya saat kejadian masuk pandangan atau lewat skill (bagian 8.3) |
+| Mengintip kunci jawaban | Kunci dan umpan balik dikirim sesudah jawaban dikunci (JA-05). Bank awal di repositori publik adalah risiko yang diterima |
+| Menjawab dua kali atau jawaban ulang | Kunci sekali per langkah; id jawaban unik per pemain per kejadian |
+| Membanjiri server | Batas ukuran dan frekuensi pesan (bagian 6.6); batas pemain per ruang; satu ruang aktif per guru (bisa diubah admin) |
+| XSS lewat isi kejadian | Konten teks polos; React menolak HTML; CSP ketat |
+| CSRF | `SameSite=Lax`, tajuk `X-Jejak`, dan pemeriksaan `Origin` |
+| Menebak sandi | Pembatas percobaan, sandi minimal 12 karakter, hash berkunci tambahan |
+| Kebocoran basis data | Hanya hash sandi dan hash token yang tersimpan; tidak ada nama asli siswa |
+
+### 12.2 Tajuk keamanan
+
+Worker menambahkan pada setiap halaman: `Content-Security-Policy` (`default-src 'self'`, `connect-src 'self'` dan `wss:` ke domain sendiri, `img-src 'self' data: blob:`, `frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, dan `Permissions-Policy` yang menolak kamera, mikrofon, dan lokasi.
+
+### 12.3 Data yang disimpan
+
+Rincian di PRD bagian 13. Ketentuan teknisnya:
+
+- Tidak ada analitik, pelacak, CDN pihak ketiga, atau huruf dari luar. Huruf dari `@fontsource` ikut terbit bersama halaman.
+- Alamat IP tidak disimpan. Pembatas percobaan memakai hash IP dengan garam yang berganti setiap hari.
+- Log Workers hanya mencatat galat dan hitungan, tanpa token, sandi, atau isi jawaban.
+- Pemicu harian menghapus ruang, peserta, dan jawaban yang melewati masa simpan (bawaan 12 bulan), juga sesi dan catatan pembatas yang kedaluwarsa.
+
+## 13. Kinerja, kapasitas, dan biaya
+
+### 13.1 Sasaran
+
+| Ukuran | Sasaran |
+|---|---|
+| Pemain per ruang | 50 |
+| Ruang serentak | ≥ 10 tanpa penurunan layanan |
+| Waktu pulang-pergi pesan p95 | ≤ 250 ms di wifi sekolah |
+| Waktu tangani satu `gerak` di server | ≤ 1 ms |
+| Satu putaran kirim 100 ms untuk 50 pemain | ≤ 5 ms waktu CPU |
+| Layar pemain | ≥ 30 fps di HP kelas bawah; sasaran 60 fps |
+
+### 13.2 Perkiraan pemakaian dan biaya
+
+Paket Workers Paid berharga US$5 per bulan dan sudah termasuk: 10 juta permintaan Worker; 1 juta permintaan dan 400.000 GB-detik durasi Durable Objects; serta 25 miliar baris baca, 50 juta baris tulis, dan 5 GB penyimpanan D1. Permintaan aset statis gratis. Pesan WebSocket masuk ke Durable Object ditagih dengan rasio 20 : 1, sedangkan pesan keluar tidak ditagih.
+
+Perkiraan satu sesi (40 pemain, ronde 15 menit, sekitar 20 menit objek aktif):
+
+| Pemakaian | Hitungan | Hasil |
+|---|---|---|
+| Pesan masuk | 40 pemain × ±6,3 pesan/detik × 900 detik ≈ 225.000 pesan | ±11.300 permintaan Durable Object |
+| Durasi Durable Object | 1.200 detik × ±0,125 GB | ±150 GB-detik |
+| Baris tulis D1 | ±700 baris data, termasuk indeks ±2.100 | Sangat kecil |
+
+| Pemakaian per bulan | 100 sesi | 1.000 sesi |
+|---|---|---|
+| Permintaan Durable Object | ±1,13 juta (lebih ±0,13 juta, sekitar US$0,02) | ±11,3 juta (lebih ±10,3 juta, sekitar US$1,55) |
+| Durasi Durable Object | ±15.000 GB-detik (dalam kuota) | ±150.000 GB-detik (dalam kuota) |
+| D1 | Dalam kuota | Dalam kuota |
+| **Perkiraan tagihan** | **±US$5 (±Rp 91.000)** | **±US$6,6 (±Rp 120.000)** |
+
+Kurs yang dipakai sekitar Rp 18.150 per dolar AS (3 November 2026). Pajak dan biaya kartu belum termasuk. Kedua angka masih jauh di bawah anggaran Rp 500.000 per bulan. Angka ini diperiksa ulang dengan hasil simulasi beban (bagian 14).
+
+### 13.3 Alternatif yang ditimbang
+
+| Pilihan | Mengapa tidak dipilih |
+|---|---|
+| VPS (Jakarta atau Singapura) dengan Node.js dan basis data sendiri | Perlu pemeliharaan server (pembaruan keamanan, sertifikat, cadangan, pemantauan) yang berat untuk pemilik proyek yang bukan programmer |
+| Supabase (Realtime + Postgres + Auth) | Pesan *broadcast* dihitung per penerima, sehingga posisi 40 pemain 10 kali per detik cepat menghabiskan kuota; logika skor yang berwenang tetap butuh fungsi server terpisah |
+| Firebase | Aturan keamanan basis datanya sulit menjamin skor tidak dimanipulasi, sehingga logika skor berwenang tetap perlu Cloud Functions; biaya mengikuti lalu lintas unduh |
+| Cloudflare paket gratis | Bisa untuk uji coba, tetapi kuota harian (100.000 permintaan Durable Object per hari) bisa habis bila beberapa kelas bermain pada hari yang sama, dan permintaan yang melewati kuota gagal |
+
+## 14. Pengujian
+
+| Lapisan | Alat | Cakupan |
+|---|---|---|
+| Unit | Vitest | `inti/` (skor, peringkat dan seri, skill, kotak, masa, gerak dan tabrakan, pemeriksaan kecepatan, pengacakan berbenih, skema protokol), inti ruang dengan jam tiruan (siklus ruang, jeda, sambung ulang, kunci sekali, batas pesan, penempatan kejadian), klien (kamera, skala, interpolasi) |
+| Konten dan peta | Vitest + zod | Bank awal (bagian 5.4), kecocokan rujukan dengan pustaka awal, keterjangkauan peta, jarak antartitik, kecukupan titik per zona |
+| Worker dan D1 | Alat yang disetujui di Plan JS-03 | Rute API, izin per peran, autentikasi, pembatas percobaan, migrasi, versi dan status kejadian, statistik, CSV |
+| Ujung ke ujung | Playwright, beberapa konteks peramban | Guru masuk, membuat ruang, dan membuka layar kelas; tiga pemain bergabung (satu dengan emulasi HP Android dan sentuhan); mulai; bergerak lewat kait uji; memeriksa dan menjawab kejadian; papan skor berubah; jeda dan lanjut; sambungan diputus lalu tersambung kembali; dikeluarkan; ronde berakhir; podium; pembahasan; rekap pribadi; ekspor CSV |
+| Jaringan | Playwright + pembatas jaringan | Jaringan lambat dan terputus-putus; latensi 300 ms; sambung ulang |
+| Beban | `sim:beban` (Node 22, WebSocket bawaan) | 50 bot per ruang dan 10 ruang serentak selama 15 menit: CPU per putaran, ukuran dan jumlah pesan, lalu lintas per pemain, p95 waktu pulang-pergi, dan perkiraan biaya |
+| Manual | Daftar periksa AGENTS | HP kelas bawah, proyektor dari 8 m, wifi sekolah, kurangi gerak, keyboard saja, uji coba kelas |
+
+Tangkapan layar uji: HP 731 × 411 (emulasi Android), laptop 1280 × 720, dan layar kelas 1024 × 768 serta 1920 × 1080.
+
+## 15. Operasional
+
+- **Rilis:** push ke `main` memperbarui lingkungan **uji** secara otomatis. Sesudah dicoba, pemilik proyek menekan "Run workflow" pada `jejak-produksi.yml`. Alur itu menolak berjalan bila ada ruang produksi yang sedang `main` atau `jeda`.
+- **Migrasi D1:** hanya maju dan tidak merusak. Perubahan yang menghapus kolom dilakukan dalam dua rilis (berhenti memakai dulu, baru menghapus).
+- **Kembali ke versi sebelumnya:** versi Worker sebelumnya dipulihkan dengan fitur *rollback* Workers. Data D1 dapat dipulihkan ke titik waktu sampai 30 hari ke belakang (*Time Travel*).
+- **Cadangan konten:** admin mengunduh ekspor bank (JSON) setiap akhir bulan; agen juga boleh menyimpannya ke repositori atas permintaan pemilik proyek.
+- **Pemulihan akun admin:** isi rahasia `JEJAK_ADMIN_SANDI_SEMENTARA` dengan sandi baru, jalankan `jejak-admin-awal.yml`, masuk, lalu ganti sandi.
+- **Pemantauan:** pemakaian dan tagihan dicek di dasbor Cloudflare setiap bulan; aktifkan pemberitahuan penagihan bila tersedia di akun.
+- **Sebelum kelas:** buat ruang uji, masuk dengan satu HP lewat wifi sekolah, lalu tutup ruang uji.
+
+## 16. Integrasi dengan Ruang Setara
+
+- Galeri mendapat satu tautan "Main Jejak Setara" ke alamat Jejak Setara. Ini satu-satunya perubahan pada kode galeri dan memerlukan persetujuan pemilik proyek (keputusan terbuka KT-08 PRD).
+- Karena alamatnya berbeda situs, tautan ini menjadi pengecualian dari aturan "path relatif" Sehari Setara. Alamatnya disimpan di satu konstanta.
+- Sehari Setara tidak diubah. Tautan dari layar judulnya diputuskan sesudah F-11.
+
+## 17. Konvensi kode
+
+- TypeScript mode ketat, komponen fungsi, tanpa `any`.
+- `inti/` murni: tanpa DOM, React, `Date.now()` langsung, atau API Workers. Waktu dan acak selalu masuk sebagai parameter.
+- Semua teks yang tampil ke pengguna berasal dari berkas teks (`app/jejak-setara/teks.ts`) atau dari konten, bukan ditulis langsung di komponen.
+- Semua akses D1 lewat `server/jejak-setara/src/db/` dengan kueri berparameter, tanpa menyambung string SQL.
+- Setiap pesan protokol baru menambah skema di `inti/protokol.ts` dan ujinya.
+- Dependensi baru memerlukan izin tertulis pemilik proyek dan dicatat sebagai keputusan baru di bagian 1.
+
+## 18. Panduan penyiapan server untuk pemilik proyek
+
+Langkah ini dikerjakan pemilik proyek sekali saja, sebelum fitur server dibangun. Agen mendampingi dengan bahasa sederhana.
+
+1. **Buat akun Cloudflare** di cloudflare.com dengan email Anda.
+2. **Aktifkan paket Workers Paid** (US$5 per bulan) di menu Workers & Pages → Plans. Siapkan kartu yang bisa dipakai untuk pembayaran internasional, atau metode lain yang ditawarkan Cloudflare.
+3. **Buat dua basis data D1** di menu Storage & Databases → D1: `jejak-setara` dan `jejak-setara-uji`. Salin **Database ID** keduanya dan kirimkan kepada agen. ID ini bukan rahasia.
+4. **Buat token API** di My Profile → API Tokens → Create Token. Pakai templat "Edit Cloudflare Workers", lalu tambahkan izin D1 Edit. Salin tokennya; token hanya tampil sekali.
+5. **Catat Account ID** yang tampil di halaman Workers & Pages.
+6. **Simpan rahasia di GitHub:** buka repositori `ruang-setara` → Settings → Secrets and variables → Actions → New repository secret. Isi `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `JEJAK_ADMIN_EMAIL`, dan `JEJAK_ADMIN_SANDI_SEMENTARA` (minimal 12 karakter).
+7. **(Disarankan) Domain sendiri:** beli domain, tambahkan ke Cloudflare (paket gratis cukup untuk DNS), ganti *nameserver* di tempat membeli domain, lalu sambungkan domain ke Worker `jejak-setara` lewat Settings → Domains & Routes.
+8. **Deploy pertama** terjadi otomatis sesudah perubahan fitur server di-push ke `main`. Agen memberi tahu alamat lingkungan uji.
+9. **Buat akun admin pertama:** buka tab Actions di GitHub → "Jejak: admin awal" → Run workflow. Masuk ke `/admin/`, lalu ganti sandi.
+10. **Terbitkan ke produksi:** Actions → "Jejak: produksi" → Run workflow.
+
+Kunci rahasia Worker (`KUNCI_TIKET`, `KUNCI_SANDI`, `KUNCI_IP`) dibuat oleh alur kerja deploy pertama dengan nilai acak, sehingga pemilik proyek tidak perlu mengetiknya (bagian 4.5).
