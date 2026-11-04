@@ -1,5 +1,5 @@
 // Uji ujung ke ujung layar akhir, rekap, refleksi, dan unduh rekap Sehari Setara (spesifikasi F-09, Rencana uji langkah 3
-// sampai 9). Membuka hasil build di /ruang-setara/sehari-setara/#main, #main-3, dan #main-4 lewat serve-subpath.mjs.
+// sampai 9). Membuka hasil build di /ruang-setara/sehari-setara/ lewat serve-subpath.mjs; sejak F-10 lewat layar judul.
 // Jam uji dijeda sebelum halaman dimuat, sehingga kartu, kuis, pergantian adegan, dan masa tunggu hanya maju lewat
 // page.clock.runFor, dalam dua langkah sesudah unsur tampil. Uji unduhan tidak memasang jam uji, karena jam palsu juga
 // menghentikan requestAnimationFrame dan pewaktu modern-screenshot (Rencana uji langkah 7). Gerak timbangan dan pop
@@ -16,7 +16,7 @@ import { ROLES } from "../app/sehari-setara/content/roles";
 import { SCENES } from "../app/sehari-setara/content/scenes";
 import { DEFAULT_TEAMS } from "../app/sehari-setara/content/teams";
 import { createInitialState, createReducer } from "../app/sehari-setara/engine/reducer";
-import { activeTeamIndex, endingFor, narrationFor, starsByTeam } from "../app/sehari-setara/engine/rules";
+import { activeTeamIndex, endingFor, starsByTeam } from "../app/sehari-setara/engine/rules";
 import type { ChoiceId, EndingId, GameAction, GameState, RoleId, Stars, Tier } from "../app/sehari-setara/engine/types";
 import {
   endingAnnouncement,
@@ -31,7 +31,8 @@ import {
   type RecapRow,
   type ScaleMotion,
 } from "../app/sehari-setara/ui/closing";
-import { runActions, startActions } from "../app/sehari-setara/ui/controls";
+import { runActions } from "../app/sehari-setara/ui/controls";
+import { setupActions } from "../app/sehari-setara/ui/opening";
 import { starsAnnouncement, teamSentence } from "../app/sehari-setara/ui/turn";
 import {
   awardPrompt,
@@ -59,6 +60,8 @@ import {
   VIEWPORTS,
   watch,
   type ViewportName,
+  startGame,
+  titleStart,
 } from "./bantuan";
 
 type TeamCount = 2 | 3 | 4;
@@ -66,7 +69,6 @@ type Kind = "png" | "pdf";
 
 const T0 = new Date("2026-10-27T08:00:00+08:00").getTime();
 const SIZES = Object.keys(VIEWPORTS) as ViewportName[];
-const ROUTES: Record<TeamCount, string> = { 2: "#main", 3: "#main-3", 4: "#main-4" };
 const PAGES = recapPages(SCENES);
 const reducer = createReducer(SCENES);
 const text = copy.closing;
@@ -143,7 +145,7 @@ function day(path: string, options: Partial<Omit<Day, "path">> = {}): Day {
 
 /** Keadaan mesin sesudah satu hari dengan aksi yang sama dengan layar permainan (seperti closing.test.ts). */
 function model(d: Day): GameState {
-  let state = runActions(reducer, createInitialState(), startActions(DEFAULT_TEAMS.slice(0, d.teams)));
+  let state = runActions(reducer, createInitialState(), [{ type: "MULAI" }, ...setupActions({ count: d.teams, seconds: 60 }, DEFAULT_TEAMS), { type: "LANJUT" }]);
   [...d.path].forEach((id, i) => {
     const actions: GameAction[] = [
       { type: "NARASI_SELESAI" },
@@ -219,7 +221,6 @@ const prevButton = (page: Page) => page.getByRole("button", { name: text.recap.p
 const galleryLink = (page: Page) => page.getByRole("link", { name: copy.backToGallery, exact: true });
 const downloadButton = (page: Page, kind: Kind) => page.locator(`.ss-download [data-unduh="${kind}"]`);
 const downloadLine = (page: Page) => page.locator(".ss-download-status");
-const narrationText = (page: Page) => page.locator(".ss-narration-text");
 
 /** Layar yang sedang tampil: akhir, rekap-{p}, refleksi, narasi, atau lain. */
 const where = (page: Page) =>
@@ -228,6 +229,7 @@ const where = (page: Page) =>
     const recap = document.querySelector(".ss-recap");
     if (recap) return `rekap-${recap.getAttribute("data-halaman")}`;
     if (document.querySelector(".ss-reflection")) return "refleksi";
+    if (document.querySelector(".ss-title")) return "judul";
     if (document.querySelector(".ss-narration")) return "narasi";
     return "lain";
   });
@@ -250,9 +252,18 @@ async function openPlay(page: Page, { size = "1280x720", teams = 2, reduce = fal
     await page.clock.install({ time: T0 });
     await page.clock.pauseAt(T0 + 60_000);
   }
-  await page.goto(`sehari-setara/${ROUTES[teams]}`);
+  await page.goto("sehari-setara/");
   await page.evaluate(() => document.fonts.ready);
+  await startGame(page, { teams, paused });
   await expect(page.locator(".ss-narration")).toBeVisible();
+  if (recorder) {
+    // Bunyi dihitung sejak adegan 1: catatan perekam dikosongkan sesudah langkah pembuka (F-10).
+    await page.evaluate(() => {
+      const record = (window as unknown as { ssBunyi: { plays: unknown[]; links?: string[] } }).ssBunyi;
+      record.plays.length = 0;
+      if (record.links) record.links = record.links.filter((link) => !link.startsWith("sumber"));
+    });
+  }
 }
 
 /** Mengubah ukuran jendela dan menunggu layar 16:9, satu piksel antarmuka, dan bingkai panggung (bila ada) mengikutinya. */
@@ -1584,7 +1595,7 @@ test("masa tunggu 600 ms, tekanan ganda, dan bunyi klik di ketiga layar (AC-10, 
   for (const kind of ["png", "pdf"] as const) await downloadButton(page, kind).click({ force: true });
   await expect(downloadLine(page)).toHaveText("");
   await expect(page.locator(".ss-download[data-sibuk]")).toHaveCount(0);
-  expect(page.url()).toMatch(/#main$/);
+  expect(page.url()).toMatch(/sehari-setara\/$/);
   await expectClicks(0, "refleksi pada 599 ms");
 
   await page.clock.runFor(1);
@@ -1593,12 +1604,14 @@ test("masa tunggu 600 ms, tekanan ganda, dan bunyi klik di ketiga layar (AC-10, 
   await page.keyboard.press("Space");
   await page.keyboard.press("Enter");
   expect(await gallery(), "galeri pada 600 ms: klik dan Enter diterima, Spasi tanpa klik").toEqual([true, true, false, false]);
-  expect(page.url()).toMatch(/#main$/);
+  expect(page.url()).toMatch(/sehari-setara\/$/);
   await expectClicks(0, "Kembali ke galeri tanpa bunyi");
   await playAgainButton(page).focus();
   await page.keyboard.press("Enter");
-  expect(await where(page)).toBe("narasi");
+  expect(await where(page)).toBe("judul");
   await expectClicks(1, "Main lagi");
+  // Sejak F-10 "Main lagi" berhenti di layar judul; permainan kedua dimulai lewat pengaturan kelas dan prolog.
+  await startGame(page, { paused: true });
 
   // Permainan kedua: klik ganda "Lihat rekap", "Berikutnya", dan "Lanjut ke refleksi" hanya maju satu langkah.
   await playDay(page, day("BBBBBB"));
@@ -1634,7 +1647,8 @@ test("fokus: judul berfokus, garis fokus, urutan Tab, tombol berfokus, dan ukura
   await openPlay(page, { reduce: true });
   await playDay(page, day("BBBBBB"));
   await expectTitleFocus(page, endingTitle(page), INK);
-  expect(await tabStops(page)).toEqual([text.ending.next]);
+  // Tombol "Pengaturan" yang nonaktif di bilah atas tetap bisa difokus (F-10, usulan 5a).
+  expect(await tabStops(page)).toEqual([text.ending.next, "Pengaturan"]);
   await page.keyboard.press("Tab");
   await expectFocusedControl(page, text.ending.next);
   await resize(page, "1024x768");
@@ -1756,23 +1770,21 @@ test("keyboard: Spasi, Enter, M, tombol lain, pengubah, tekanan berulang, dan to
   await ignoredKeys("refleksi");
   await toggleSound("refleksi");
 
-  // Enter yang ditahan pada "Main lagi": satu permainan baru, pengulangan tidak melewati layar narasi pertama.
-  const screens = narrationFor(SCENES[0], []);
-  expect(screens.length).toBeGreaterThan(1);
+  // Enter yang ditahan pada "Main lagi": satu permainan baru dari layar judul; pengulangan tidak menekan "Mulai" (F-10).
   await page.keyboard.press("Tab");
   await expect(playAgainButton(page)).toBeFocused();
   await page.keyboard.down("Enter");
-  expect(await where(page)).toBe("narasi");
-  await expect(narrationText(page)).toHaveText(screens[0]);
+  expect(await where(page)).toBe("judul");
+  await expect(titleStart(page)).toBeFocused();
   await expectClicks(1, "Main lagi");
+  await page.clock.runFor(600);
   for (let i = 0; i < 3; i++) await page.keyboard.down("Enter");
-  await expect(narrationText(page)).toHaveText(screens[0]);
-  await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 1/6");
+  expect(await where(page)).toBe("judul");
   await expectClicks(0, "Enter yang ditahan sesudah Main lagi");
   await page.keyboard.up("Enter");
   await page.keyboard.press("Enter");
-  await expect(narrationText(page)).toHaveText(screens[1]);
-  await expectClicks(1, "Enter baru di narasi");
+  await expect(page.locator(".ss-setup")).toBeVisible();
+  await expectClicks(1, "Enter baru di layar judul");
   expectClean(log);
 });
 
@@ -2005,7 +2017,7 @@ test("unduhan gagal dan dibatalkan: tanpa CompressionStream, toBlob null, dan Ma
   await expect(page.locator("body > .ss-sheet")).toHaveCount(1);
   await expect(page.locator(".ss-download[data-sibuk]")).toHaveCount(1);
   await playAgainButton(page).click();
-  await expect(page.locator(".ss-narration .ss-next")).toBeFocused();
+  await expect(titleStart(page)).toBeFocused();
   await expect(page.locator(".ss-sheet")).toHaveCount(0);
   await page.waitForTimeout(4000);
   expect(downloads).toBe(2);
@@ -2135,7 +2147,7 @@ test("kontras teks di ketiga layar dan keempat ukuran, dan mode warna paksa (AC-
   expect(busy).toEqual({ bg: MIST, color: DUSK, outline: `solid 2px ${INK}`, cursor: "visible" });
   await allSizes("refleksi unduhan disiapkan");
   await playAgainButton(page).click();
-  await expect(page.locator(".ss-narration .ss-next")).toBeFocused();
+  await expect(titleStart(page)).toBeFocused();
   await expect(page.locator(".ss-sheet")).toHaveCount(0);
   expectClean(log);
 });

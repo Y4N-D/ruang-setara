@@ -1,5 +1,5 @@
 // Uji ujung ke ujung papan tim, giliran, pengatur waktu, dan bintang alasan Sehari Setara (spesifikasi F-07, Rencana
-// uji langkah 3 sampai 5 dan 7). Membuka hasil build di /ruang-setara/sehari-setara/#main, #main-3, dan #main-4.
+// uji langkah 3 sampai 5 dan 7). Membuka hasil build di /ruang-setara/sehari-setara/; sejak F-10 jumlah tim dipilih di pengaturan kelas.
 // Jam uji dijeda sebelum halaman dimuat, sehingga teks per huruf, pengatur waktu, kartu, dan pergantian adegan hanya
 // maju lewat page.clock.runFor, dalam dua langkah sesudah unsur tampil (catatan PLAN F-05, F-06, dan F-07).
 // Disesuaikan di F-08: sesudah kartu dampak adegan 5, kuis peran dijawab sebelum bintang alasan (answerQuiz di toStars).
@@ -27,6 +27,7 @@ import {
   VIEWPORTS,
   watch,
   type ViewportName,
+  startGame,
 } from "./bantuan";
 
 type TeamCount = 2 | 3 | 4;
@@ -37,7 +38,12 @@ const SKY_D = "rgb(58, 134, 217)";
 const MANGO = "rgb(255, 159, 28)";
 const MIST = "rgb(201, 212, 229)";
 const DUSK = "rgb(58, 74, 107)";
-const ROUTES: Record<TeamCount, string> = { 2: "#main", 3: "#main-3", 4: "#main-4" };
+/** Permainan baru dengan jumlah tim lain: halaman dimuat lagi, lalu layar judul sampai narasi adegan 1 (F-10). */
+async function restartWith(page: Page, teams: TeamCount) {
+  await page.goto("sehari-setara/");
+  await page.evaluate(() => document.fonts.ready);
+  await startGame(page, { teams, paused: true });
+}
 const IDS = DEFAULT_TEAMS.map((team) => team.id);
 const NAMES = DEFAULT_TEAMS.map((team) => team.name);
 const ROLES = ["Polisi", "Jaksa", "Advokat", "Hakim"];
@@ -65,8 +71,9 @@ async function openPlay(page: Page, size: ViewportName = "1280x720", teams: Team
   await page.emulateMedia({ reducedMotion: reduce ? "reduce" : "no-preference" });
   await page.clock.install({ time: T0 });
   await page.clock.pauseAt(T0 + 60_000);
-  await page.goto(`sehari-setara/${ROUTES[teams]}`);
+  await page.goto("sehari-setara/");
   await page.evaluate(() => document.fonts.ready);
+  await startGame(page, { teams, paused: true });
   await expect(page.locator(".ss-narration")).toBeVisible();
 }
 
@@ -451,8 +458,8 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
       await page.clock.runFor(400);
     }
 
-    // Empat tim: alamat baru memulai permainan baru; adegan 4 milik Tim Mentari.
-    await setHash(page, "#main-4");
+    // Empat tim: permainan baru dari layar judul; adegan 4 milik Tim Mentari.
+    await restartWith(page, 4);
     await expect(counter(page)).toHaveText("Adegan 1/6");
     await expect(counts(page)).toHaveText(["0", "0", "0", "0"]);
     for (let i = 0; i < 3; i++) await playScene(page, "B", 1);
@@ -486,9 +493,9 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
     await page.keyboard.press("1");
     await expect(counts(page)).toHaveText(["1", "1", "1", "1"]);
 
-    // Layar kerangka dan pratinjau tidak menampilkan panel kanan.
+    // Layar judul dan pratinjau tidak menampilkan panel kanan.
     await page.goto("sehari-setara/");
-    await expect(page.locator(".ss-placeholder")).toBeVisible();
+    await expect(page.locator(".ss-title")).toBeVisible();
     await expect(page.locator(".ss-side")).toHaveCount(0);
     await setHash(page, "#adegan-1");
     await expect(page.locator("#ss-preview-title")).toBeVisible();
@@ -507,7 +514,7 @@ test("giliran dengan 2, 3, dan 4 tim di keenam adegan, dan jumlah bintang di pap
   await openPlay(page, "1280x720", 2);
   for (const plan of plans) {
     await page.emulateMedia({ reducedMotion: plan.reduce ? "reduce" : "no-preference" });
-    if (plan.teams !== 2) await setHash(page, ROUTES[plan.teams]);
+    if (plan.teams !== 2) await restartWith(page, plan.teams);
     await expect(counter(page)).toHaveText("Adegan 1/6");
     await expect(page.locator(".ss-team")).toHaveCount(plan.teams);
     const totals: number[] = Array.from({ length: plan.teams }, () => 0);
@@ -1067,7 +1074,7 @@ test("pembaca layar: papan, pengatur waktu, bintang, dan pengumuman per peristiw
   expectClean(log);
 });
 
-test("alamat uji tiga dan empat tim, dan kembali ke layar kerangka (AC-11)", async ({ page }) => {
+test("jumlah tim dari pengaturan kelas, dan kembali ke layar judul (AC-11; F-10)", async ({ page }) => {
   const log = watch(page);
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -1075,13 +1082,15 @@ test("alamat uji tiga dan empat tim, dan kembali ke layar kerangka (AC-11)", asy
   await page.clock.pauseAt(T0 + 60_000);
   await page.goto("sehari-setara/");
   await page.evaluate(() => document.fonts.ready);
-  const links = page.locator(".ss-placeholder-actions a");
-  expect(await links.evaluateAll((all) => all.map((a) => a.getAttribute("href")))).toEqual(["../", "#adegan-1", "#main"]);
-  await expect(page.locator('a[href*="#main-"]')).toHaveCount(0);
+  await expect(page.locator('a[href*="#main"]')).toHaveCount(0);
 
-  // Pindah alamat selalu memulai permainan baru dari adegan 1 dengan semua jumlah bintang 0.
+  // Setiap jumlah tim dari pengaturan kelas memulai permainan baru dari adegan 1 dengan semua jumlah bintang 0.
   for (const teams of [4, 3, 2] as const) {
-    await setHash(page, ROUTES[teams]);
+    if (teams !== 4) {
+      await page.goto("sehari-setara/");
+      await page.evaluate(() => document.fonts.ready);
+    }
+    await startGame(page, { teams, paused: true });
     await expect(counter(page)).toHaveText("Adegan 1/6");
     await expect(page.locator(".ss-narration-tab")).toHaveText(SCENES[0].title);
     await expect(page.locator('.ss-play [aria-live="polite"]')).toHaveText(SCENES[0].narration[0]);
@@ -1095,19 +1104,17 @@ test("alamat uji tiga dan empat tim, dan kembali ke layar kerangka (AC-11)", asy
     await expect(counts(page)).toHaveText(["2", ...Array.from({ length: teams - 1 }, () => "0")]);
   }
 
-  // Kembali ke layar kerangka dari ketiga alamat: fokus di tautan "Coba alur permainan".
-  for (const teams of [2, 3, 4] as const) {
-    await setHash(page, ROUTES[teams]);
-    await expect(page.locator(".ss-side")).toBeVisible();
-    await setHash(page, "");
-    await expect(page.locator(".ss-placeholder")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Coba alur permainan" })).toBeFocused();
-  }
+  // Dari pratinjau kembali ke layar judul: fokus di "Mulai".
+  await setHash(page, "#adegan-1");
+  await expect(page.locator("#ss-preview-title")).toBeVisible();
+  await setHash(page, "");
+  await expect(page.locator('.ss-play[data-fase="title"]')).toBeVisible();
+  await expect(page.getByRole("button", { name: "Mulai", exact: true })).toBeFocused();
 
-  // Alamat lain membuka layar kerangka.
-  for (const hash of ["#main-1", "#main-2", "#main-5", "#main-4x", "#main-03"]) {
-    await setHash(page, hash);
-    await expect(page.locator(".ss-placeholder")).toBeVisible();
+  // Alamat uji lama dan alamat lain membuka layar judul.
+  for (const hash of ["#main", "#main-3", "#main-4", "#main-1", "#main-5", "#main-4x"]) {
+    await page.goto(`sehari-setara/${hash}`);
+    await expect(page.locator(".ss-title")).toBeVisible();
     await expect(page.locator(".ss-side")).toHaveCount(0);
   }
   expectClean(log);

@@ -519,3 +519,21 @@ describe("kemurnian (AC-14)", () => {
     }
   });
 });
+
+describe("BATAL_PENGATURAN (spesifikasi F-10)", () => {
+  it("membawa fase setup kembali ke title tanpa mengubah tim, pengaturan, dan pengatur waktu", () => {
+    const atSetup = run(createInitialState({ discussSeconds: 90 }), { type: "MULAI" });
+    expect(atSetup.phase).toBe("setup");
+    expect(run(atSetup, { type: "BATAL_PENGATURAN" })).toEqual({ ...atSetup, phase: "title" });
+    // Sesudah "Main lagi", tim permainan sebelumnya tetap tersimpan.
+    const withTeams: GameState = { ...atSetup, teams: TEAMS.slice(0, 2).map((team) => ({ ...team, stars: 0 })) };
+    const back = run(withTeams, { type: "BATAL_PENGATURAN" });
+    expect(back).toEqual({ ...withTeams, phase: "title" });
+    expect(run(back, { type: "MULAI" }).phase).toBe("setup");
+  });
+
+  it("mengembalikan objek yang sama di fase lain", () => {
+    const states = [createInitialState(), run(createInitialState(), { type: "MULAI" }, simpan(3)), startGame(3), run(startGame(3), { type: "NARASI_SELESAI" })];
+    for (const state of states) expect(reduce(state, { type: "BATAL_PENGATURAN" })).toBe(state);
+  });
+});

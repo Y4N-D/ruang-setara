@@ -1,7 +1,8 @@
-// Layar permainan Sehari Setara (spesifikasi F-05 sampai F-09), dibuka lewat #main sampai layar judul dibuat di F-10.
-// Menjalankan mesin F-02 dengan naskah F-03: narasi, pertanyaan, pilihan, pengatur waktu, reaksi, indikator, kartu
-// dampak, kuis peran di adegan 5 (F-08), bintang alasan, pergantian adegan, papan tim dan bunyi (F-07), lalu layar
-// akhir, rekap, refleksi, dan unduh rekap (F-09). Logika permainan tetap di engine/; layar ini hanya mengirim aksi.
+// Layar permainan Sehari Setara (spesifikasi F-05 sampai F-10). Sejak F-10 dimulai dari layar judul, pengaturan kelas,
+// dan prolog. Menjalankan mesin F-02 dengan naskah F-03: narasi, pertanyaan, pilihan, pengatur waktu, reaksi, indikator,
+// kartu dampak, kuis peran di adegan 5 (F-08), bintang alasan, pergantian adegan, papan tim dan bunyi (F-07), layar
+// akhir, rekap, refleksi, dan unduh rekap (F-09), serta dialog pengaturan (F-10). Logika permainan tetap di engine/;
+// layar ini hanya mengirim aksi.
 import {
   useEffect,
   useEffectEvent,
@@ -13,12 +14,12 @@ import {
   type ReactNode,
 } from "react";
 import { copy } from "../content/copy";
+import { PROLOG } from "../content/prolog";
 import { ROLES } from "../content/roles";
 import { SCENES } from "../content/scenes";
-import { DEFAULT_TEAMS } from "../content/teams";
 import { createInitialState, createReducer } from "../engine/reducer";
 import { activeTeam, activeTeamIndex, endingFor, isQuizCorrect, narrationFor } from "../engine/rules";
-import type { ChoiceId, GameAction, GameState, Phase, RoleId, Stars, TeamSetup, TimeOfDay } from "../engine/types";
+import type { ChoiceId, GameAction, Phase, RoleId, Settings, Stars, TimeOfDay } from "../engine/types";
 import { ChoicePanel } from "./ChoicePanel";
 import {
   CLOSING_GUARD_MS,
@@ -38,7 +39,6 @@ import {
   replayActions,
   runActions,
   shouldHandleKey,
-  startActions,
   WIPE_COVER_MS,
   WIPE_MS,
   type KeyContext,
@@ -58,9 +58,24 @@ import { EndingPanel, EndingStage } from "./Ending";
 import { usePrefersReducedMotion } from "./hooks";
 import { ImpactCard } from "./ImpactCard";
 import { IMPACT_GUARD_MS, impactAnnouncement, METER_STEP_MS, meterValueAt, metersBefore } from "./impact";
-import { STAGE, type TeamCount } from "./layout";
+import { STAGE } from "./layout";
 import { Meters } from "./Meters";
 import { NarrationBox, type NarrationHandle } from "./NarrationBox";
+import {
+  OPENING_GUARD_MS,
+  OPENING_PHASES,
+  openingScene,
+  PROLOG_NARA_X,
+  settingsOpenable,
+  settingsView,
+  setupActions,
+  setupDraftFrom,
+  teamCountAnnouncement,
+  teamsForCount,
+  TITLE_NARA_X,
+  type SetupDraft,
+  type TeamCount,
+} from "./opening";
 import { canvasToPdf } from "./pdf";
 import { preloadEnding, preloadScene } from "./preload";
 import { QUIZ_GUARD_MS, quizResultAnnouncement, quizStartAnnouncement, roleForNumber } from "./quiz";
@@ -69,11 +84,14 @@ import { RecapSheet } from "./RecapSheet";
 import { Reflection } from "./Reflection";
 import { RoleQuiz } from "./RoleQuiz";
 import { SceneWipe } from "./SceneWipe";
+import { SettingsButton, SettingsDialog, SettingsLayer } from "./Settings";
+import { SetupScreen } from "./Setup";
 import { CLICK_RATE, soundPlayer, TEXT_BLIP_RATE } from "./sound";
 import { Stage } from "./Stage";
 import { StarsAward } from "./StarsAward";
 import { Teams, type StarPop } from "./Teams";
 import { Timer } from "./Timer";
+import { TitleScreen, type TitleFocus } from "./Title";
 import { canAddTime, starsAnnouncement, timerAnnouncement, type TimerCause } from "./turn";
 import { useTimer } from "./useTimer";
 
@@ -117,13 +135,12 @@ interface DownloadState {
 
 const DOWNLOAD_IDLE: DownloadState = { run: 0, kind: null, status: "idle", date: null };
 
-/** Tim bawaan pertama sebanyak alamat layar: dua untuk #main, tiga dan empat untuk alamat uji (F-07). */
-const teamsFor = (count: TeamCount): TeamSetup[] => DEFAULT_TEAMS.slice(0, count);
+/** Adegan semu layar judul dan prolog (F-10): latar bg_title dengan Nara; Stage tidak berubah. */
+const TITLE_SCENE = openingScene(SCENES[0], "walk", TITLE_NARA_X, "");
+const PROLOG_SCENES = PROLOG.map((screen) => openingScene(SCENES[0], screen.pose, PROLOG_NARA_X, screen.altText));
 
-/** Keadaan awal: judul, pengaturan, dan prolog dilewati dengan tim bawaan (F-10 belum ada). */
-function initialPlayState(count: TeamCount): GameState {
-  return runActions(reducer, createInitialState(), startActions(teamsFor(count)));
-}
+/** Lapisan bening tetap terpasang 600 ms sesudah dialog pengaturan ditutup (DRAF J-1). */
+const SETTINGS_LAYER_MS = 600;
 
 /** Jenis elemen yang menerima tekanan tombol, untuk aturan pengabaian pintasan. */
 function targetKind(target: EventTarget | null): KeyContext["target"] {
@@ -136,9 +153,9 @@ function targetKind(target: EventTarget | null): KeyContext["target"] {
 /** Menunggu satu bingkai gambar, agar lembar unduhan sudah tergambar sebelum dibaca. */
 const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: TeamCount }) {
+export function PlayScreen({ scale, titleScale }: { scale: number; titleScale: number }) {
   const prefersReduced = usePrefersReducedMotion();
-  const [state, dispatch] = useReducer(reducer, teamCount, initialPlayState);
+  const [state, dispatch] = useReducer(reducer, undefined, () => createInitialState());
   const [round, setRound] = useState(0);
   const [narration, setNarration] = useState({ round: 0, scene: 0, screen: 0 });
   const [change, setChange] = useState<SceneChange | null>(null);
@@ -169,6 +186,21 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   const releases = useRef<Array<() => void>>([]);
   // Pembatal penyiapan yang sedang berjalan, agar "Kembali ke galeri" bisa membatalkannya sebelum halaman berpindah.
   const downloadAbort = useRef<AbortController | null>(null);
+  // Layar pembuka (F-10): visit naik setiap kali layar judul atau pengaturan kelas tampil lagi, agar masa tunggunya
+  // dihitung lagi; pilihan sementara pengaturan kelas dan layar prolog berlaku untuk satu permainan (round).
+  const [visit, setVisit] = useState(0);
+  const [howTo, setHowTo] = useState(false);
+  const [titleFocus, setTitleFocus] = useState<TitleFocus>({ key: 0, target: "mulai" });
+  const [draft, setDraft] = useState<{ round: number; value: SetupDraft } | null>(null);
+  const [prolog, setProlog] = useState({ round: 0, screen: 0 });
+  const openingStart = useRef({ key: "", at: 0 });
+  const [openingReady, setOpeningReady] = useState("");
+  // Dialog pengaturan (F-10): pemicu untuk fokus kembali, dan lapisan bening yang tetap 600 ms sesudah ditutup.
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [layerAfter, setLayerAfter] = useState(0);
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const settingsReturn = useRef<HTMLElement | null>(null);
+  const pendingFocus = useRef<HTMLElement | null>(null);
 
   const reduced = prefersReduced || state.settings.reducedMotion;
   const soundOn = state.settings.sound;
@@ -199,6 +231,21 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
           : "";
   const closingReadyShown = closingKey !== "" && closingReady === closingKey;
   const busy = download.status === "menyiapkan" ? download.kind : null;
+
+  // Layar pembuka (F-10).
+  const setupDraft = draft && draft.round === round ? draft.value : setupDraftFrom(state);
+  const prologScreen = prolog.round === round ? prolog.screen : 0;
+  const prologStage = state.phase === "prolog" ? PROLOG_SCENES[prologScreen] : null;
+  const openingKey =
+    state.phase === "title" && !howTo
+      ? `${round}-judul-${visit}`
+      : state.phase === "setup"
+        ? `${round}-kelas-${visit}`
+        : state.phase === "prolog" && !change
+          ? `${round}-prolog-${prologScreen}`
+          : "";
+  const openingReadyShown = openingKey !== "" && openingReady === openingKey;
+  const canOpenSettings = settingsOpenable(state.phase, change !== null);
 
   const send = (actions: readonly GameAction[]) => {
     for (const action of actions) dispatch(action);
@@ -261,7 +308,8 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     announce(timerAnnouncement(state.timer, next.timer, "tick"));
   };
 
-  useTimer(state.phase === "discuss" && state.timer.running && state.timer.remaining > 0 && change === null, onTicks);
+  // Pengatur waktu berhenti selama dialog pengaturan terbuka, tanpa mengubah keadaan mesin (F-10, usulan 5a).
+  useTimer(state.phase === "discuss" && state.timer.running && state.timer.remaining > 0 && change === null && !settingsOpen, onTicks);
 
   /** Masa tunggu 600 ms dihitung dari waktu sebenarnya, sehingga tidak bergantung pada render terakhir. */
   const cardReady = () =>
@@ -311,15 +359,152 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     else dispatch({ type: "LANJUT" });
   };
 
-  /** M: suara mati atau nyala lewat UBAH_PENGATURAN; saat dinyalakan, satu klik sebagai tanda. */
-  const toggleSound = () => {
-    const on = !soundOn;
+  /** Suara nyala atau mati lewat UBAH_PENGATURAN; saat dinyalakan, satu klik sebagai tanda (F-07). Salah bila tidak berubah. */
+  const setSound = (on: boolean): boolean => {
+    if (on === soundOn) return false;
     dispatch({ type: "UBAH_PENGATURAN", settings: { sound: on } });
-    announce(on ? copy.sound.on : copy.sound.off);
     if (on) {
       soundPlayer.unlock();
       soundPlayer.play("klik", CLICK_RATE);
     }
+    return true;
+  };
+
+  /** M: suara mati atau nyala, dengan pengumuman di wilayah status. */
+  const toggleSound = () => {
+    const on = !soundOn;
+    setSound(on);
+    announce(on ? copy.sound.on : copy.sound.off);
+  };
+
+  /* ---------------- Layar pembuka (F-10) ---------------- */
+
+  /** Benar bila layar judul, pengaturan kelas, atau layar prolog ini sudah tampil 600 ms; diperiksa saat tekanan diterima. */
+  const openingGuardPassed = () =>
+    openingKey !== "" &&
+    openingStart.current.key === openingKey &&
+    performance.now() - openingStart.current.at >= OPENING_GUARD_MS;
+
+  /** "Mulai": MULAI ke pengaturan kelas. */
+  const startSetup = () => {
+    if (state.phase !== "title" || howTo || !openingGuardPassed()) return;
+    dispatch({ type: "MULAI" });
+    setVisit((value) => value + 1);
+    click();
+  };
+
+  /** "Cara bermain": dialog di atas layar judul; fase tetap title. */
+  const openHowTo = () => {
+    if (state.phase !== "title" || howTo || !openingGuardPassed()) return;
+    setHowTo(true);
+    click();
+  };
+
+  /** "Tutup" atau Esc di dialog "Cara bermain": fokus kembali ke "Cara bermain", dan masa tunggu dihitung lagi. */
+  const closeHowTo = () => {
+    if (!howTo) return;
+    setHowTo(false);
+    setVisit((value) => value + 1);
+    setTitleFocus((current) => ({ key: current.key + 1, target: "cara" }));
+    holdKeys.current = true;
+    click();
+  };
+
+  /** "Kembali ke galeri" di layar judul: dibatalkan selama masa tunggu; tanpa bunyi karena halaman berpindah. */
+  const titleGallery = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!openingGuardPassed()) event.preventDefault();
+  };
+
+  /** Jumlah tim di pengaturan kelas: pilihan sementara, dengan pengumuman daftar tim (DRAF J-3 dan J-7). */
+  const chooseCount = (count: TeamCount) => {
+    if (state.phase !== "setup" || !openingGuardPassed() || setupDraft.count === count) return;
+    setDraft({ round, value: { ...setupDraft, count } });
+    click();
+    announce(teamCountAnnouncement(teamsForCount(count)));
+  };
+
+  /** Durasi diskusi di pengaturan kelas: pilihan sementara sampai "Mulai permainan". */
+  const chooseSeconds = (seconds: Settings["discussSeconds"]) => {
+    if (state.phase !== "setup" || !openingGuardPassed() || setupDraft.seconds === seconds) return;
+    setDraft({ round, value: { ...setupDraft, seconds } });
+    click();
+  };
+
+  /** Suara di pengaturan kelas: langsung berlaku, agar klik "Mulai permainan" sudah mengikutinya. */
+  const chooseSetupSound = (on: boolean) => {
+    if (state.phase !== "setup" || !openingGuardPassed()) return;
+    setSound(on);
+  };
+
+  /** "Kembali": BATAL_PENGATURAN ke layar judul; pilihan sementara tetap (DRAF J-3). */
+  const backToTitle = () => {
+    if (state.phase !== "setup" || !openingGuardPassed()) return;
+    dispatch({ type: "BATAL_PENGATURAN" });
+    setVisit((value) => value + 1);
+    setTitleFocus((current) => ({ key: current.key + 1, target: "mulai" }));
+    click();
+  };
+
+  /** "Mulai permainan": SIMPAN_PENGATURAN dengan tim dan durasi pilihan; wilayah status dikosongkan (DRAF J-7). */
+  const startPlay = () => {
+    if (state.phase !== "setup" || !openingGuardPassed()) return;
+    const actions = setupActions(setupDraft);
+    if (runActions(reducer, state, actions) === state) return;
+    send(actions);
+    setProlog({ round, screen: 0 });
+    setStatus({ round, text: "" });
+    click();
+  };
+
+  /** Layar prolog berikutnya, atau sapuan ke adegan 1 sesudah layar terakhir. Tekanan ganda tidak melewati layar. */
+  const prologNext = (from: number) => {
+    if (state.phase !== "prolog" || change) return;
+    if (from >= PROLOG.length - 1) {
+      setChange({ kind: reduced ? "pudar" : "sapuan", nextTime: SCENES[0].timeOfDay });
+      return;
+    }
+    setProlog((current) => {
+      const at = current.round === round ? current.screen : 0;
+      return at === from ? { round, screen: from + 1 } : current;
+    });
+  };
+
+  /* ---------------- Dialog pengaturan (F-10) ---------------- */
+
+  /** Esc atau tombol "Pengaturan": pemicu dicatat agar fokus kembali ke sana; tanpa unsur berfokus, ke tombol (DRAF J-4). */
+  const openSettings = (from: "tombol" | "esc") => {
+    if (settingsOpen || !canOpenSettings) return;
+    const active = document.activeElement;
+    settingsReturn.current =
+      from === "esc" && active instanceof HTMLElement && active !== document.body ? active : settingsButtonRef.current;
+    setSettingsOpen(true);
+    click();
+  };
+
+  /** "Tutup" atau Esc: lapisan bening tetap 600 ms, dan Enter yang masih ditahan tidak menekan unsur yang kembali berfokus. */
+  const closeSettings = () => {
+    if (!settingsOpen) return;
+    pendingFocus.current = settingsReturn.current;
+    setSettingsOpen(false);
+    setLayerAfter((value) => value + 1);
+    holdKeys.current = true;
+    click();
+  };
+
+  /** Pilihan dialog yang berubah langsung berlaku lewat UBAH_PENGATURAN; pilihan yang sudah aktif tidak berbunyi (DRAF J-6). */
+  const changeSetting = (patch: Partial<Settings>) => {
+    if (!settingsOpen || reducer(state, { type: "UBAH_PENGATURAN", settings: patch }) === state) return;
+    dispatch({ type: "UBAH_PENGATURAN", settings: patch });
+    click();
+  };
+
+  const settingsSound = (on: boolean) => {
+    if (settingsOpen) setSound(on);
+  };
+
+  /** Kurangi gerak dari komputer tidak bisa dibatalkan dari game (usulan 6a1). */
+  const settingsMotion = (on: boolean) => {
+    if (!prefersReduced) changeSetting({ reducedMotion: on });
   };
 
   /* ---------------- Layar penutup (F-09) ---------------- */
@@ -361,14 +546,17 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     setRecap({ page: recap.page - 1, visit: recap.visit + 1 });
   };
 
-  /** "Main lagi": permainan baru dengan tim dan pengaturan yang sama; penyiapan unduhan dibatalkan (DRAF A-6). */
+  /** "Main lagi": layar judul dengan tim dan pengaturan yang sama (F-10); penyiapan unduhan dibatalkan (DRAF A-6). */
   const replay = () => {
     if (state.phase !== "reflection" || !acceptForward()) return;
-    send(replayActions(teamsFor(teamCount)));
+    send(replayActions());
     setRound((value) => value + 1);
     setPop(null);
     setRecap({ page: 1, visit: 0 });
     setDownload((current) => ({ ...DOWNLOAD_IDLE, run: current.run + 1 }));
+    setVisit((value) => value + 1);
+    setHowTo(false);
+    setTitleFocus((current) => ({ key: current.key + 1, target: "mulai" }));
     holdKeys.current = true;
     click();
   };
@@ -433,6 +621,31 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     const timer = setTimeout(() => setQuizReady(sceneKey), QUIZ_GUARD_MS);
     return () => clearTimeout(timer);
   }, [state.phase, state.quizAnswer, sceneKey]);
+
+  // Layar pembuka: masa tunggu 600 ms sejak layar judul, pengaturan kelas, atau layar prolog pertama kali digambar (F-10).
+  // Satu pengatur waktu hanya memperbarui aria-disabled, dan dibersihkan saat layar berganti atau ditutup.
+  useEffect(() => {
+    if (!openingKey) return;
+    openingStart.current = { key: openingKey, at: performance.now() };
+    const timer = setTimeout(() => setOpeningReady(openingKey), OPENING_GUARD_MS);
+    return () => clearTimeout(timer);
+  }, [openingKey]);
+
+  // Lapisan bening sesudah dialog pengaturan ditutup (DRAF J-1).
+  useEffect(() => {
+    if (layerAfter === 0) return;
+    const timer = setTimeout(() => setLayerAfter(0), SETTINGS_LAYER_MS);
+    return () => clearTimeout(timer);
+  }, [layerAfter]);
+
+  // Sesudah dialog pengaturan ditutup, fokus kembali ke pemicunya, atau ke tombol "Pengaturan" (DRAF J-4).
+  useEffect(() => {
+    if (settingsOpen) return;
+    const target = pendingFocus.current;
+    if (!target) return;
+    pendingFocus.current = null;
+    (target.isConnected ? target : settingsButtonRef.current)?.focus();
+  }, [settingsOpen]);
 
   // Layar penutup: masa tunggu 600 ms sejak layar atau halaman pertama kali digambar (F-09). Satu pengatur waktu hanya
   // memperbarui aria-disabled, dan dibersihkan saat layar atau halaman berganti atau layar ditutup.
@@ -516,15 +729,26 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     else preloadEnding();
   }, [state.sceneIndex]);
 
-  // Pintasan keyboard (Architecture bagian 9; spesifikasi F-05, F-07, F-08, dan F-09), hanya aktif di layar permainan.
+  // Pintasan keyboard (Architecture bagian 9; spesifikasi F-05, F-07, F-08, F-09, dan F-10), hanya aktif di layar permainan.
   const onKey = useEffectEvent((event: KeyboardEvent) => {
-    // Tombol yang ditahan: peramban mengubah setiap pengulangan Enter pada tombol berfokus menjadi klik. Di ketiga
-    // layar penutup, dan sesudah "Main lagi" sampai tombol dilepas, pengulangan Enter dan Spasi dibatalkan (F-09).
-    if (event.repeat && (event.key === "Enter" || event.key === " ") && (CLOSING_PHASES.has(state.phase) || holdKeys.current)) {
+    // Tombol yang ditahan: peramban mengubah setiap pengulangan Enter pada tombol berfokus menjadi klik. Di layar pembuka
+    // dan penutup, selama dialog pengaturan terbuka, dan sesudah "Main lagi" atau dialog ditutup sampai tombol dilepas,
+    // pengulangan Enter dan Spasi dibatalkan (F-09; F-10, DRAF J-11).
+    const enterOrSpace = event.key === "Enter" || event.key === " ";
+    const holdPhase = CLOSING_PHASES.has(state.phase) || OPENING_PHASES.has(state.phase);
+    if (event.repeat && enterOrSpace && (holdPhase || settingsOpen || holdKeys.current)) {
       event.preventDefault();
       return;
     }
     if (!event.repeat) holdKeys.current = false;
+    // Selama dialog pengaturan terbuka hanya Esc yang berlaku, untuk menutupnya; pintasan lain tidak berlaku (F-10).
+    if (settingsOpen) {
+      if (event.key === "Escape" && !event.repeat && !event.ctrlKey && !event.altKey && !event.metaKey) {
+        event.preventDefault();
+        closeSettings();
+      }
+      return;
+    }
     if (change) return;
     const context: KeyContext = {
       key: event.key,
@@ -539,14 +763,15 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     const command = keyCommand(state.phase, event.key);
     if (!command) return;
     event.preventDefault();
-    if (command.type === "pilih") choose(command.choice);
+    if (command.type === "pengaturan") openSettings("esc");
+    else if (command.type === "pilih") choose(command.choice);
     else if (command.type === "waktu") timerAction(command.action);
     else if (command.type === "bintang") giveStars(command.stars);
     else if (command.type === "suara") toggleSound();
     else if (command.type === "jawab") {
       const role = roleForNumber(command.nomor, ROLES);
       if (role) answerQuiz(role.id);
-    } else if (state.phase === "intro") narrationRef.current?.activate();
+    } else if (state.phase === "intro" || state.phase === "prolog") narrationRef.current?.activate();
     else if (state.phase === "impact") continueFromCard();
     else if (state.phase === "quiz") continueFromQuiz();
     else if (state.phase === "ending") seeRecap();
@@ -580,7 +805,7 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   }, []);
 
   const stageLabel = reaction ? `${scene.altText} ${copy.play.stageReaction(reaction.id)}` : scene.altText;
-  const fade = change?.kind === "pudar" ? (state.phase === "transition" ? "keluar" : "masuk") : undefined;
+  const fade = change?.kind === "pudar" ? (state.phase === "transition" || state.phase === "prolog" ? "keluar" : "masuk") : undefined;
   // Indikator: nilai sebelum memilih selama reaksi, bergerak saat kartu dampak tampil, lalu nilai sesudah (F-06).
   const showingImpact = state.phase === "impact" && chosen !== undefined && !change;
   const before =
@@ -605,6 +830,7 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   if (state.phase === "ending") live = endingAnnouncement(endingId, state.meters, view);
   else if (state.phase === "recap") live = recapPageAnnouncement(rows, RECAP_PAGES, recap.page);
   else if (state.phase === "reflection") live = reflectionAnnouncement();
+  else if (!change && state.phase === "prolog") live = PROLOG[prologScreen].text;
   else if (!change && state.phase === "intro") live = screens[screen];
   else if (showingImpact && chosen) live = impactAnnouncement(chosen, before, state.meters);
   else if (quiz) {
@@ -615,7 +841,9 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   }
 
   let heading: string = copy.play.heading(state.sceneIndex + 1, scene.title);
-  if (state.phase === "ending") heading = copy.closing.heading.ending;
+  if (state.phase === "setup") heading = copy.setup.title;
+  else if (state.phase === "prolog") heading = copy.prolog.title;
+  else if (state.phase === "ending") heading = copy.closing.heading.ending;
   else if (state.phase === "recap") heading = copy.closing.heading.recap;
   else if (state.phase === "reflection") heading = copy.closing.heading.reflection;
 
@@ -630,6 +858,25 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   let panel: ReactNode = null;
   if (ending) {
     panel = <EndingPanel id={endingId} ready={closingReadyShown} onNext={seeRecap} />;
+  } else if (!change && state.phase === "prolog") {
+    const last = prologScreen === PROLOG.length - 1;
+    panel = (
+      <NarrationBox
+        key={`${round}-prolog-${prologScreen}`}
+        ref={narrationRef}
+        title={copy.prolog.title}
+        text={PROLOG[prologScreen].text}
+        isLast={last}
+        nextLabel={last ? copy.prolog.start : copy.play.next}
+        typewriter={state.settings.typewriter && !reduced}
+        paused={settingsOpen}
+        ready={openingReadyShown}
+        canPress={openingGuardPassed}
+        onNext={() => prologNext(prologScreen)}
+        onTypeSound={typeSound}
+        onPress={click}
+      />
+    );
   } else if (!change && state.phase === "intro") {
     panel = (
       <NarrationBox
@@ -639,6 +886,7 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
         text={screens[screen]}
         isLast={screen === screens.length - 1}
         typewriter={state.settings.typewriter && !reduced}
+        paused={settingsOpen}
         onNext={() => nextNarration(screen)}
         onTypeSound={typeSound}
         onPress={click}
@@ -659,7 +907,38 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   }
 
   let content: ReactNode;
-  if (state.phase === "recap") {
+  if (state.phase === "title") {
+    // Layar judul dan pengaturan kelas menutupi seluruh layar; bilah atas, indikator, panggung, dan panel tidak dipasang.
+    content = (
+      <TitleScreen
+        scene={TITLE_SCENE}
+        scale={titleScale}
+        animate={!reduced}
+        ready={openingReadyShown}
+        focus={titleFocus}
+        howTo={howTo}
+        onStart={startSetup}
+        onHowTo={openHowTo}
+        onGallery={titleGallery}
+        onCloseHowTo={closeHowTo}
+      />
+    );
+  } else if (state.phase === "setup") {
+    content = (
+      <SetupScreen
+        draft={setupDraft}
+        teams={teamsForCount(setupDraft.count)}
+        sceneCount={SCENES.length}
+        sound={soundOn}
+        ready={openingReadyShown}
+        onCount={chooseCount}
+        onSeconds={chooseSeconds}
+        onSound={chooseSetupSound}
+        onBack={backToTitle}
+        onStart={startPlay}
+      />
+    );
+  } else if (state.phase === "recap") {
     // Rekap dan refleksi menutupi seluruh layar; bilah atas, indikator, panggung, dan kedua panel tidak dipasang.
     content = (
       <Recap
@@ -685,7 +964,14 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
   } else {
     content = (
       <>
-        <DayArc scenes={SCENES} sceneIndex={state.sceneIndex} scale={scale} animate={!reduced} ending={ending} />
+        <DayArc
+          scenes={SCENES}
+          sceneIndex={state.sceneIndex}
+          scale={scale}
+          animate={!reduced}
+          ending={ending}
+          prolog={state.phase === "prolog"}
+        />
         <Meters values={shownMeters} effects={meterEffects} scale={scale} />
         <div className="ss-stage-area">
           <div className="ss-stage-holder" data-fade={fade} style={{ width: STAGE.w * scale, height: STAGE.h * scale }}>
@@ -693,12 +979,12 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
               <EndingStage id={endingId} view={view} scale={scale} animate={!reduced} />
             ) : (
               <Stage
-                scene={scene}
-                cast={reaction ? reaction.reaction : scene.cast}
-                emote={reaction?.emote}
+                scene={prologStage ?? scene}
+                cast={prologStage ? prologStage.cast : reaction ? reaction.reaction : scene.cast}
+                emote={prologStage ? undefined : reaction?.emote}
                 scale={scale}
                 animate={!reduced}
-                label={stageLabel}
+                label={prologStage ? prologStage.altText : stageLabel}
               />
             )}
             {change?.kind === "sapuan" && <SceneWipe timeOfDay={change.nextTime} scale={scale} />}
@@ -725,6 +1011,8 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
             <StarsAward key={sceneKey} teamName={team.name} onGive={giveStars} />
           )}
         </div>
+        {/* Di DOM sesudah panel kanan, agar urutan Tab F-05 dan F-07 tidak berubah (F-10, usulan 5). */}
+        <SettingsButton ref={settingsButtonRef} disabled={!canOpenSettings} onOpen={() => openSettings("tombol")} />
         {showingImpact && chosen && (
           <ImpactCard
             key={sceneKey}
@@ -755,14 +1043,20 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
     <main
       className="ss-play"
       aria-labelledby="ss-play-title"
+      data-fase={state.phase}
+      data-prolog={state.phase === "prolog" ? "" : undefined}
+      data-kurangi-gerak={state.settings.reducedMotion ? "" : undefined}
       data-kartu={showingImpact ? "" : undefined}
       data-kuis={quiz ? "" : undefined}
       data-akhir={ending ? "" : undefined}
     >
-      <h1 id="ss-play-title" className="ss-sr">
-        {heading}
-      </h1>
-      {/* Kedua wilayah pengumuman dipasang sekali dan tetap elemen yang sama sejak adegan 1 sampai refleksi (F-09). */}
+      {/* Di layar judul, <h1> yang terlihat dipasang TitleScreen dengan id yang sama (F-10). */}
+      {state.phase !== "title" && (
+        <h1 id="ss-play-title" className="ss-sr">
+          {heading}
+        </h1>
+      )}
+      {/* Kedua wilayah pengumuman dipasang sekali dan tetap elemen yang sama sejak layar judul sampai refleksi (F-09, F-10). */}
       <div className="ss-sr" aria-live="polite">
         {live}
       </div>
@@ -770,6 +1064,17 @@ export function PlayScreen({ scale, teamCount }: { scale: number; teamCount: Tea
         {status.round === round ? status.text : ""}
       </div>
       {content}
+      {(settingsOpen || layerAfter > 0) && <SettingsLayer />}
+      {settingsOpen && (
+        <SettingsDialog
+          view={settingsView(state.settings, prefersReduced)}
+          onSound={settingsSound}
+          onMotion={settingsMotion}
+          onTypewriter={(on) => changeSetting({ typewriter: on })}
+          onSeconds={(seconds) => changeSetting({ discussSeconds: seconds })}
+          onClose={closeSettings}
+        />
+      )}
       {closing && busy && download.date && (
         <RecapSheet
           ref={sheetRef}

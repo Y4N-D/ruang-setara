@@ -26,14 +26,17 @@ import {
   topTeamIds,
   type ScaleView,
 } from "../ui/closing";
-import { runActions, startActions } from "../ui/controls";
+import { runActions } from "../ui/controls";
+import { setupActions, type TeamCount } from "../ui/opening";
 import { teamSentence } from "../ui/turn";
 
 const reducer = createReducer(SCENES);
 
 /** Satu hari penuh dengan aksi layar permainan: jalur pilihan, bintang per adegan, dan jawaban kuis adegan 5. */
-function playDay(path: string, stars: readonly Stars[] = [1, 1, 1, 1, 1, 1], role: RoleId = "hakim", teamCount = 2): GameState {
-  let state = runActions(reducer, createInitialState(), startActions(DEFAULT_TEAMS.slice(0, teamCount)));
+function playDay(path: string, stars: readonly Stars[] = [1, 1, 1, 1, 1, 1], role: RoleId = "hakim", teamCount: TeamCount = 2): GameState {
+  // Aksi layar pembuka F-10: "Mulai", "Mulai permainan", lalu "Mulai adegan 1" di prolog.
+  const opening: GameAction[] = [{ type: "MULAI" }, ...setupActions({ count: teamCount, seconds: 60 }, DEFAULT_TEAMS), { type: "LANJUT" }];
+  let state = runActions(reducer, createInitialState(), opening);
   [...path].forEach((id, i) => {
     const actions: GameAction[] = [{ type: "NARASI_SELESAI" }, { type: "PILIH", choice: id as ChoiceId }, { type: "REAKSI_SELESAI" }, { type: "LANJUT" }];
     if (SCENES[i].roleQuiz) actions.push({ type: "JAWAB_KUIS", role }, { type: "LANJUT" });

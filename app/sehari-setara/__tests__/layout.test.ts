@@ -11,13 +11,15 @@ import {
   LAYOUT,
   parsePreviewHash,
   parseRoute,
-  PLAY_HASH,
   previewHash,
   routeCast,
   shadowBox,
   spriteBox,
   stageScale,
   stageScaleForScreen,
+  TITLE_BAND,
+  TITLE_ZONE,
+  titleScaleForScreen,
   uiPixel,
 } from "../ui/layout";
 
@@ -148,14 +150,17 @@ describe("alamat pratinjau", () => {
     }
   });
 
-  it("#main membuka layar permainan dengan dua tim; #main-3 dan #main-4 dengan tiga dan empat tim (F-05, F-07)", () => {
-    expect(PLAY_HASH).toBe("#main");
-    expect(parseRoute("#main", 6)).toEqual({ kind: "main", teams: 2 });
-    expect(parseRoute("#main-3", 6)).toEqual({ kind: "main", teams: 3 });
-    expect(parseRoute("#main-4", 6)).toEqual({ kind: "main", teams: 4 });
+  it("hanya #adegan-N yang punya rute; alamat lain, termasuk #main, membuka permainan dari layar judul (F-10)", () => {
     expect(parseRoute("#adegan-2-b", 6)).toEqual({ kind: "pratinjau", preview: { sceneIndex: 1, view: "B" } });
-    const rejected = ["", "#", "#Main", "#main-1", "#main-2", "#main-5", "#main-4x", "#main-03", "#mainkan", "main", "#adegan-7", "#lain", "#constructor"];
-    for (const hash of rejected) expect(parseRoute(hash, 6)).toBeNull();
+    expect(parseRoute("#adegan-6", 6)).toEqual({ kind: "pratinjau", preview: { sceneIndex: 5, view: "situasi" } });
+    const play = ["", "#", "#main", "#main-3", "#main-4", "#Main", "#main-1", "#mainkan", "main", "#adegan-7", "#lain", "#constructor"];
+    for (const hash of play) expect(parseRoute(hash, 6)).toBeNull();
+  });
+
+  it("bidang judul, pita tombol, dan skala layar judul (F-10)", () => {
+    expect(TITLE_ZONE).toEqual({ x0: 64, y0: 6, x1: 256, y1: 56 });
+    expect(TITLE_BAND).toEqual({ top: 157, bottom: 180 });
+    expect([720, 768, 1080, 576].map(titleScaleForScreen)).toEqual([4, 768 / 180, 6, 3.2]);
   });
 
   it("tampilan situasi memakai pemeran adegan; tampilan reaksi memakai susunan dan ikon emosi pilihannya", () => {

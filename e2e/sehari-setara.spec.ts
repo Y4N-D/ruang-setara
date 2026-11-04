@@ -32,17 +32,21 @@ function routes() {
 
 test.describe.configure({ mode: "serial" });
 
-test("layar kerangka: teks, tombol pratinjau, urutan Tab, tanpa animasi, huruf (AC-2, AC-3)", async ({ page }) => {
+test("layar judul menggantikan layar kerangka: teks, tombol, urutan Tab, tanpa animasi, huruf (AC-2, AC-3; F-10)", async ({ page }) => {
   const log = watch(page);
   await page.setViewportSize({ width: 1280, height: 720 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("sehari-setara/");
   await page.evaluate(() => document.fonts.ready);
   await expect(page.locator("h1")).toHaveText("Sehari Setara");
-  await expect(page.locator(".ss-placeholder-lead")).toHaveText("Temani Nara menjalani satu hari dan pilih tindakannya bersama kelas.");
-  await expect(page.locator(".ss-placeholder-status")).toHaveText("Permainan ini sedang dibuat.");
-  const links = page.locator(".ss-placeholder-actions a");
-  await expect(links).toHaveText(["Kembali ke galeri", "Lihat pratinjau panggung", "Coba alur permainan"]);
-  expect(await links.evaluateAll((all) => all.map((a) => a.getAttribute("href")))).toEqual(["../", "#adegan-1", "#main"]);
+  await expect(page.locator(".ss-title-lead")).toHaveText("Temani Nara menjalani satu hari dan pilih tindakannya bersama kelas.");
+  await expect(page.locator(".ss-placeholder")).toHaveCount(0);
+  await expect(page.locator(".ss-title-actions > *")).toHaveText(["Mulai", "Cara bermain", "Kembali ke galeri"]);
+  await expect(page.getByRole("link", { name: "Kembali ke galeri" })).toHaveAttribute("href", "../");
+  await expect(page.locator('a[href*="#"]')).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Mulai", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.locator(":focus")).toHaveText("Cara bermain");
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus")).toHaveText("Kembali ke galeri");
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
@@ -52,23 +56,22 @@ test("layar kerangka: teks, tombol pratinjau, urutan Tab, tanpa animasi, huruf (
   );
   expect(fontFiles.length).toBeGreaterThanOrEqual(2);
   for (const name of fontFiles) expect(name).toMatch(/^http:\/\/127\.0\.0\.1:4180\/ruang-setara\/assets\/(press-start-2p|pixelify-sans)-latin-400-normal-/);
-  await page.screenshot({ path: `${SHOTS}/kerangka_1280x720.png` });
   expectClean(log);
 });
 
-test("alamat pratinjau: sah, tidak dikenal, tanpa muat ulang, dan fokus (AC-4)", async ({ page }) => {
+test("alamat pratinjau: sah, tidak dikenal, tanpa muat ulang, dan fokus (AC-4; F-10: alamat lain membuka layar judul)", async ({ page }) => {
   const log = watch(page);
   await page.setViewportSize({ width: 1280, height: 720 });
-  for (const hash of ["", "#adegan-0", "#adegan-7", "#adegan-1-d", "#lain"]) {
+  for (const hash of ["", "#adegan-0", "#adegan-7", "#adegan-1-d", "#lain", "#main"]) {
     await page.goto(`sehari-setara/${hash}`);
-    await expect(page.locator(".ss-placeholder")).toBeVisible();
+    await expect(page.locator(".ss-title")).toBeVisible();
     await expect(page.locator(".ss-preview")).toHaveCount(0);
   }
   await page.goto("sehari-setara/");
   await page.evaluate(() => {
     (window as unknown as { ssPenanda: number }).ssPenanda = 1;
   });
-  await page.getByRole("link", { name: "Lihat pratinjau panggung" }).click();
+  await goHash(page, "#adegan-1");
   await expect(page).toHaveURL(/#adegan-1$/);
   await expect(page.locator("#ss-preview-title")).toHaveText(SCENES[0].title);
   await expect(page.locator("#ss-preview-title")).toBeFocused();
@@ -80,8 +83,8 @@ test("alamat pratinjau: sah, tidak dikenal, tanpa muat ulang, dan fokus (AC-4)",
   }
   expect(await page.evaluate(() => (window as unknown as { ssPenanda?: number }).ssPenanda)).toBe(1);
   await page.getByRole("link", { name: "Tutup pratinjau" }).click();
-  await expect(page.locator(".ss-placeholder")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Lihat pratinjau panggung" })).toBeFocused();
+  await expect(page.locator(".ss-title")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Mulai", exact: true })).toBeFocused();
   await page.goBack();
   await expect(page.locator(".ss-preview")).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { ssPenanda?: number }).ssPenanda)).toBe(1);

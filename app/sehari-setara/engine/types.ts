@@ -85,6 +85,7 @@ export type TeamSetup = Omit<Team, "stars">;
 export type GameAction =
   | { type: "MULAI" }
   | { type: "SIMPAN_PENGATURAN"; teams: TeamSetup[]; settings: Partial<Settings> }
+  | { type: "BATAL_PENGATURAN" } // "Kembali" dari pengaturan kelas ke layar judul (F-10)
   | { type: "LANJUT" }
   | { type: "NARASI_SELESAI" }
   | { type: "PILIH"; choice: ChoiceId }

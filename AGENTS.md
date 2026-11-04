@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan game **Sehari Setara** di repositori `ruang-setara`. Baca seluruh file ini sebelum mengubah apa pun.
 
+Versi 0.5 (4 November 2026): FR-17 dibagi, kurangi gerak di F-10 dan layar penuh di F-13; layar "Tentang" (kredit aset dan huruf) masuk F-11.
 Versi 0.4 (21 Oktober 2026): verifikasi rujukan dicatat di `docs/sehari-setara/Verifikasi_Rujukan.md`, bukan di kode.
 Versi 0.3 (21 Oktober 2026): FR-18 (ulangi adegan dan kembali ke adegan sebelumnya) masuk ke F-13 atas keputusan pemilik proyek.
 Versi 0.2 (19 Oktober 2026): aset gambar kini digambar dengan kode di `scripts/game/art/`, bukan dibuat dengan Gemini.
@@ -118,10 +119,10 @@ flowchart TD
 | F-07 | Tim, giliran, bintang alasan, pengatur waktu, serta bunyi klik dan bunyi teks | FR-02, 05, 06, 09; FR-19 sebagian (klik dan bunyi teks, keputusan pemilik proyek 26 Okt 2026) | M | F-05 |
 | F-08 | Kuis peran penegak hukum | FR-11 | S | F-06 |
 | F-09 | Layar akhir, rekap, refleksi | FR-12, 13, 14 | M | F-06, F-07 |
-| F-10 | Layar judul, pengaturan, prolog | FR-01, 02, 03 | S | F-07 |
-| F-11 | Integrasi dengan galeri Ruang Setara | FR-15 | S | F-09 |
+| F-10 | Layar judul, pengaturan, prolog | FR-01, 02, 03; FR-17 sebagian (kurangi gerak) | S | F-07 |
+| F-11 | Integrasi dengan galeri Ruang Setara, dan layar "Tentang" (kredit aset dan huruf) | FR-15 | S | F-09 |
 | F-12 | Integrasi aset: `manifest.ts`, uji palet CSS vs `palette.json`, uji kelengkapan manifest | Architecture §8, §12 | S | F-01 |
-| F-13 | Suara (sisa FR-19: bunyi konfirmasi, dampak, tik pelan, akhir hari, dan ikon suara), layar penuh, kurangi gerak, ulangi dan kembali adegan | FR-17, 18; sisa FR-19 | M | F-10 (P1) |
+| F-13 | Suara (sisa FR-19: bunyi konfirmasi, dampak, tik pelan, akhir hari, dan ikon suara), layar penuh, ulangi dan kembali adegan | FR-17 (layar penuh), 18; sisa FR-19 | M | F-10 (P1) |
 
 Pembuatan aset gambar berjalan **paralel** dan dilacak di `Daftar_Aset.md`, bukan di backlog fitur ini. Selama sebuah aset belum berstatus "Disetujui", fitur memakai **placeholder**: kotak warna dari palet dengan label kunci aset. Placeholder wajib diganti sebelum rilis; `content:check` melaporkan placeholder yang tersisa.
 

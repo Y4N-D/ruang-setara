@@ -119,6 +119,8 @@ export function createReducer(scenes: readonly Scene[]) {
         return action.type === "MULAI" ? { ...state, phase: "setup" } : state;
 
       case "setup":
+        // "Kembali" ke layar judul tanpa mengubah tim dan pengaturan (spesifikasi F-10).
+        if (action.type === "BATAL_PENGATURAN") return { ...state, phase: "title" };
         if (action.type !== "SIMPAN_PENGATURAN" || !validTeams(action.teams)) return state;
         return {
           ...state,

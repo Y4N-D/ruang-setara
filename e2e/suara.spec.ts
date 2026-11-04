@@ -21,6 +21,7 @@ import {
   sceneNumber,
   VIEWPORTS,
   watch,
+  startGame,
 } from "./bantuan";
 
 const T0 = new Date("2026-10-26T09:00:00+08:00").getTime();
@@ -119,7 +120,7 @@ const setHash = (page: Page, hash: string) =>
     window.location.hash = target;
   }, hash);
 
-/** Membuka #main dengan perekam bunyi dan jam uji yang dijeda sejak sebelum halaman dimuat. */
+/** Membuka permainan dari layar judul dengan perekam bunyi dan jam uji yang dijeda sejak sebelum halaman dimuat. */
 async function openPlay(page: Page, reduce = false) {
   const { width, height } = VIEWPORTS["1280x720"];
   await page.addInitScript(installRecorder);
@@ -127,9 +128,16 @@ async function openPlay(page: Page, reduce = false) {
   await page.emulateMedia({ reducedMotion: reduce ? "reduce" : "no-preference" });
   await page.clock.install({ time: T0 });
   await page.clock.pauseAt(T0 + 60_000);
-  await page.goto("sehari-setara/#main");
+  await page.goto("sehari-setara/");
   await page.evaluate(() => document.fonts.ready);
+  await startGame(page, { teams: 2, paused: true });
   await expect(page.locator(".ss-narration")).toBeVisible();
+  // Bunyi dihitung sejak adegan 1: catatan perekam dikosongkan sesudah langkah pembuka (F-10).
+  await page.evaluate(() => {
+    const record = (window as unknown as { ssBunyi: { plays: unknown[]; links?: string[] } }).ssBunyi;
+    record.plays.length = 0;
+    if (record.links) record.links = record.links.filter((link) => !link.startsWith("sumber"));
+  });
 }
 
 /** Tekanan pembuka x (tidak berpengaruh pada permainan), lalu menunggu konteks berjalan dan kedua berkas siap. */
@@ -201,22 +209,19 @@ test("pemuatan bunyi: tanpa konteks sebelum tekanan pertama, satu konteks dan du
   });
   await page.addInitScript(installRecorder);
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto("sehari-setara/");
+  await page.goto("sehari-setara/#adegan-1");
   await page.evaluate(() => document.fonts.ready);
 
-  // Layar kerangka dan pratinjau: tekanan dan klik tidak membuat konteks.
-  for (const key of ["x", "m", "Tab"]) await page.keyboard.press(key);
-  await page.mouse.click(5, 5);
-  await setHash(page, "#adegan-1");
+  // Pratinjau panggung: tekanan dan klik tidak membuat konteks.
   await expect(page.locator("#ss-preview-title")).toBeVisible();
-  for (const key of ["x", "m", "Space"]) await page.keyboard.press(key);
+  for (const key of ["x", "m", "Space", "Tab"]) await page.keyboard.press(key);
   await page.mouse.click(5, 5);
   expect((await soundLog(page)).contexts).toBe(0);
   expect(wav).toEqual([]);
 
-  // #main sebelum tekanan pertama: tidak ada konteks dan tidak ada permintaan .wav.
-  await setHash(page, "#main");
-  await expect(page.locator(".ss-narration")).toBeVisible();
+  // Layar judul sebelum tekanan pertama: tidak ada konteks dan tidak ada permintaan .wav (F-10).
+  await setHash(page, "");
+  await expect(page.locator(".ss-title")).toBeVisible();
   await page.waitForTimeout(500);
   expect((await soundLog(page)).contexts).toBe(0);
   expect(wav).toEqual([]);
@@ -228,14 +233,18 @@ test("pemuatan bunyi: tanpa konteks sebelum tekanan pertama, satu konteks dan du
     expect.stringMatching(/^200 \/ruang-setara\/assets\/sfx_klik-[\w-]+\.wav$/),
     expect.stringMatching(/^200 \/ruang-setara\/assets\/sfx_teks-[\w-]+\.wav$/),
   ]);
+  // "Mulai" sesudah masa tunggu: satu bunyi klik.
+  await expect(page.getByRole("button", { name: "Mulai", exact: true })).not.toHaveAttribute("aria-disabled", /.*/);
   await page.keyboard.press("Space");
+  await expect(page.locator(".ss-setup")).toBeVisible();
   await expect.poll(async () => clicks(await soundLog(page)).length).toBeGreaterThanOrEqual(1);
 
-  // Kembali ke layar kerangka lalu membuka #main lagi: konteks dan berkas tidak bertambah, bunyi tetap siap.
+  // Pratinjau lalu layar judul lagi: konteks dan berkas tidak bertambah, bunyi tetap siap.
+  await setHash(page, "#adegan-1");
+  await expect(page.locator("#ss-preview-title")).toBeVisible();
   await setHash(page, "");
-  await expect(page.locator(".ss-placeholder")).toBeVisible();
-  await setHash(page, "#main");
-  await expect(page.locator(".ss-narration")).toBeVisible();
+  await expect(page.locator(".ss-title")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Mulai", exact: true })).not.toHaveAttribute("aria-disabled", /.*/);
   const before = clicks(await soundLog(page)).length;
   await page.keyboard.press("Space");
   await expect.poll(async () => clicks(await soundLog(page)).length).toBe(before + 1);

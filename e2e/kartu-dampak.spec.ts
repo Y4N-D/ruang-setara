@@ -2,7 +2,8 @@
 // Disesuaikan di F-07: sesudah kartu dampak, bintang alasan diberikan sebelum adegan berganti (giveStars).
 // Disesuaikan di F-08: sesudah kartu dampak adegan 5, kuis peran dijawab sebelum bintang alasan (answerQuiz).
 // Disesuaikan di F-09: sesudah bintang adegan 6, layar akhir menggantikan layar akhir sementara (finishDay, playAgain).
-// Membuka hasil build di /ruang-setara/sehari-setara/#main lewat serve-subpath.mjs, seperti alamat GitHub Pages.
+// Membuka hasil build di /ruang-setara/sehari-setara/ lewat serve-subpath.mjs, seperti alamat GitHub Pages; sejak F-10
+// permainan dimulai dari layar judul lewat startGame.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
 import { metersFromHistory } from "../app/sehari-setara/engine/rules";
@@ -35,6 +36,7 @@ import {
   VIEWPORTS,
   watch,
   type ViewportName,
+  startGame,
 } from "./bantuan";
 
 const T0 = new Date("2026-10-23T08:00:00+08:00").getTime();
@@ -63,8 +65,9 @@ async function openPlay(page: Page, size: ViewportName, reduce: boolean) {
   await page.setViewportSize({ width, height });
   await page.emulateMedia({ reducedMotion: reduce ? "reduce" : "no-preference" });
   await page.clock.install({ time: T0 });
-  await page.goto("sehari-setara/#main");
+  await page.goto("sehari-setara/");
   await page.evaluate(() => document.fonts.ready);
+  await startGame(page, { teams: 2 });
   await expect(page.locator(".ss-narration")).toBeVisible();
   await page.clock.pauseAt(T0 + 60_000);
 }
@@ -252,10 +255,10 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
     const log = watch(page);
     const { px } = VIEWPORTS[size];
 
-    // Panel indikator tidak tampil di layar kerangka dan pratinjau.
+    // Panel indikator tidak tampil di layar judul dan pratinjau.
     await page.setViewportSize({ width: VIEWPORTS[size].width, height: VIEWPORTS[size].height });
     await page.goto("sehari-setara/");
-    await expect(page.locator(".ss-placeholder")).toBeVisible();
+    await expect(page.locator(".ss-title")).toBeVisible();
     await expect(page.locator(".ss-meters")).toHaveCount(0);
     await page.goto("sehari-setara/#adegan-1");
     await expect(page.locator("#ss-preview-title")).toBeVisible();

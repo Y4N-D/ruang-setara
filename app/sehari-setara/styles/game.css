@@ -58,45 +58,6 @@ body {
   --ss-px: 2px;
 }
 
-/* Layar kerangka F-01. Digantikan layar judul di F-10. */
-.ss-placeholder {
-  box-sizing: border-box;
-  height: 100%;
-  padding: 0 calc(var(--u) * 8);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.ss-placeholder-title {
-  margin: 0 0 calc(var(--u) * 3);
-  font-family: "Press Start 2P", monospace;
-  font-size: calc(var(--u) * 4.4);
-  font-weight: 400;
-  line-height: 1.2;
-}
-
-.ss-placeholder-lead,
-.ss-placeholder-status {
-  max-width: 60ch;
-  text-wrap: balance;
-}
-
-.ss-placeholder-lead {
-  margin: 0 0 calc(var(--u) * 1.5);
-  font-size: calc(var(--u) * 3.6);
-  line-height: 1.35;
-}
-
-.ss-placeholder-status {
-  margin: 0 0 calc(var(--u) * 5);
-  color: var(--ss-text-2);
-  font-size: calc(var(--u) * 3.1);
-  line-height: 1.3;
-}
-
 /*
   Tombol berbingkai piksel (Design System bagian 7): garis ink 2 piksel antarmuka, sudut terpotong 1,
   sorotan white 1 di sisi atas-dalam. Satu piksel antarmuka (--ss-px) = skala panggung yang dibulatkan (F-05).
@@ -188,14 +149,6 @@ body {
   .ss-team[data-giliran] {
     clip-path: none;
   }
-}
-
-/* Layar kerangka: baris tombol (F-04 menambah tombol pratinjau panggung). */
-.ss-placeholder-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: calc(var(--u) * 3);
 }
 
 /* ------------------------------------------------------------------ */
@@ -503,6 +456,12 @@ body {
   .ss-dayarc-icon {
     animation: none !important;
   }
+}
+
+/* Pasangan untuk pengaturan kurangi gerak di dalam game (F-10, usulan 6a1). */
+.ss-play[data-kurangi-gerak] .ss-sprite,
+.ss-play[data-kurangi-gerak] .ss-dayarc-icon {
+  animation: none !important;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1108,6 +1067,11 @@ body {
   }
 }
 
+/* Pasangan untuk pengaturan kurangi gerak di dalam game (F-10, usulan 6a1). */
+.ss-play[data-kurangi-gerak] .ss-meter-delta {
+  animation: none !important;
+}
+
 /* ------------------------------------------------------------------ */
 /* Panel kanan (F-07): papan tim, pengatur waktu, dan bintang alasan. Ukuran mengikuti specs/F-07-tim-waktu-bintang.md;
    p = --ss-px (satu piksel antarmuka). Lebar panel diberikan lewat style dari skala panggung, seperti panel indikator. */
@@ -1417,6 +1381,11 @@ body {
   .ss-team-star {
     animation: none !important;
   }
+}
+
+/* Pasangan untuk pengaturan kurangi gerak di dalam game (F-10, usulan 6a1). */
+.ss-play[data-kurangi-gerak] .ss-team-star {
+  animation: none !important;
 }
 
 /* ------------------------------------------------------------------ */
@@ -2442,6 +2411,11 @@ body {
   }
 }
 
+/* Pasangan untuk pengaturan kurangi gerak di dalam game (F-10, usulan 6a1). */
+.ss-play[data-kurangi-gerak] .ss-scale {
+  animation: none !important;
+}
+
 /* Mode warna paksa: sudut terpotong kotak adegan, kotak kalimat pemantik, dan bingkai lembar dimatikan seperti F-05.
    Ditulis sesudah aturan clip-path di atas (pelajaran laporan F-08, Temuan 1); tombol sudah diatur aturan F-05. */
 @media (forced-colors: active) {
@@ -2449,6 +2423,416 @@ body {
   .ss-reflection-prompts,
   .ss-sheet-summary,
   .ss-sheet-reflection {
+    clip-path: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Layar pembuka (F-10): layar judul, cara bermain, pengaturan kelas, dan dialog pengaturan. Ukuran mengikuti
+   specs/F-10-judul-pengaturan-prolog.md; p = --ss-px (satu piksel antarmuka). Letak bidang judul dan pita tombol
+   diberikan lewat style dari skala layar judul kj (tinggi layar ÷ 180). */
+/* ------------------------------------------------------------------ */
+
+/* Layar judul; latar mist bila gambar gagal dimuat (ink di atas mist 9,5:1). */
+.ss-title {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: var(--ss-mist);
+  color: var(--ss-ink);
+}
+
+.ss-title-backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.ss-title-zone {
+  position: absolute;
+  z-index: 50;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 1.2);
+  text-align: center;
+}
+
+.ss-title-name {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 7);
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.ss-title-lead {
+  margin: 0;
+  max-width: 100%;
+  font-size: calc(var(--u) * 3.1);
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.ss-title-actions {
+  position: absolute;
+  z-index: 50;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 3);
+}
+
+/* Cara bermain dan pengaturan kelas menutupi seluruh layar 16:9. */
+.ss-howto,
+.ss-setup {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--ss-cream);
+  color: var(--ss-ink);
+}
+
+.ss-setup {
+  z-index: 100;
+}
+
+.ss-howto {
+  z-index: 110;
+}
+
+.ss-howto:focus,
+.ss-settings:focus {
+  outline: none;
+}
+
+.ss-howto-head,
+.ss-setup-head {
+  flex: none;
+  box-sizing: border-box;
+  height: calc(var(--u) * 8);
+  padding: 0 calc(var(--u) * 4);
+  display: flex;
+  align-items: center;
+  background: #FFD9A8;
+  color: var(--ss-ink);
+}
+
+.ss-howto-title,
+.ss-setup-title,
+.ss-settings-title {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 2.8);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.ss-howto-title:focus,
+.ss-setup-title:focus,
+.ss-settings-title:focus {
+  outline: none;
+}
+
+.ss-howto-title:focus-visible,
+.ss-setup-title:focus-visible,
+.ss-settings-title:focus-visible {
+  outline: 2px solid var(--ss-ink);
+  outline-offset: 4px;
+}
+
+.ss-howto-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: calc(var(--u) * 3) calc(var(--u) * 8) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: calc(var(--u) * 6);
+  align-content: start;
+}
+
+.ss-howto-label {
+  margin: 0 0 calc(var(--u) * 1.6);
+  color: var(--ss-dusk);
+  font-size: calc(var(--u) * 2.5);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.ss-howto-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 1.6);
+}
+
+.ss-howto-step {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--u) * 1.6);
+  font-size: calc(var(--u) * 3.1);
+  line-height: 1.3;
+}
+
+.ss-howto-keys {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: calc(var(--u) * 1.2) calc(var(--u) * 2);
+  align-items: center;
+}
+
+.ss-howto-keys dt,
+.ss-howto-keys dd {
+  margin: 0;
+}
+
+.ss-howto-keys dd {
+  font-size: calc(var(--u) * 3.1);
+  line-height: 1.3;
+}
+
+/* Kotak tombol keyboard: garis ink satu piksel antarmuka dengan sudut terpotong. */
+.ss-key {
+  display: inline-block;
+  padding: calc(var(--u) * 0.5) calc(var(--u) * 1);
+  border: var(--ss-px) solid var(--ss-ink);
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(var(--u) * 2.5);
+  line-height: 1.3;
+  white-space: nowrap;
+  clip-path: polygon(
+    var(--ss-px) 0, calc(100% - var(--ss-px)) 0, calc(100% - var(--ss-px)) var(--ss-px), 100% var(--ss-px),
+    100% calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) 100%, var(--ss-px) 100%,
+    var(--ss-px) calc(100% - var(--ss-px)), 0 calc(100% - var(--ss-px)), 0 var(--ss-px), var(--ss-px) var(--ss-px)
+  );
+}
+
+.ss-howto-foot {
+  flex: none;
+  box-sizing: border-box;
+  padding: calc(var(--u) * 1.2) calc(var(--u) * 8) calc(var(--u) * 3);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Pengaturan kelas: kolom label 30u dan kolom pilihan. */
+.ss-setup-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: calc(var(--u) * 4) calc(var(--u) * 8) 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 3);
+}
+
+.ss-setup-row {
+  display: grid;
+  grid-template-columns: calc(var(--u) * 30) minmax(0, 1fr);
+  column-gap: calc(var(--u) * 2);
+  align-items: start;
+}
+
+/* Label setinggi satu tombol ss-button (3,1u × 1,3 + 2 × 1,5u + garis 4p). */
+.ss-setup-label,
+.ss-settings-label {
+  margin: 0;
+  box-sizing: border-box;
+  min-height: calc(var(--u) * 7.03 + var(--ss-px) * 4);
+  display: flex;
+  align-items: center;
+  font-size: calc(var(--u) * 3.1);
+  line-height: 1.3;
+}
+
+.ss-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--u) * 2);
+}
+
+/* Pilihan aktif: latar sun dengan cincin dalam ink 2p, seperti "Jeda" yang ditekan (F-07). */
+.ss-option[aria-pressed="true"] {
+  background: var(--ss-focus);
+  box-shadow: inset 0 0 0 calc(var(--ss-px) * 2) var(--ss-ink);
+}
+
+/* Terkunci (kurangi gerak dari komputer): latar mist dan teks dusk; bila berfokus, garis fokus ink tetap terlihat. */
+.ss-option[data-nonaktif],
+.ss-option[data-nonaktif]:focus-visible {
+  background: var(--ss-mist);
+  color: var(--ss-dusk);
+  cursor: default;
+}
+
+.ss-option[data-nonaktif]:focus-visible {
+  outline: 2px solid var(--ss-ink);
+}
+
+.ss-setup-teams {
+  margin: calc(var(--u) * 1.6) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: calc(var(--u) * 1.2) calc(var(--u) * 6);
+}
+
+.ss-setup-team {
+  display: grid;
+  grid-template-columns: calc(var(--ss-px) * 16) auto;
+  column-gap: calc(var(--u) * 1);
+  align-items: center;
+}
+
+.ss-setup-team-icon {
+  width: calc(var(--ss-px) * 16);
+  height: calc(var(--ss-px) * 16);
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+}
+
+.ss-setup-team-name {
+  font-size: calc(var(--u) * 3.1);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.ss-setup-turns {
+  grid-column: 2;
+  color: var(--ss-dusk);
+  font-size: calc(var(--u) * 2.5);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.ss-setup-note,
+.ss-settings-note {
+  margin: calc(var(--u) * 0.8) 0 0;
+  color: var(--ss-dusk);
+  font-size: calc(var(--u) * 2.5);
+  line-height: 1.3;
+}
+
+.ss-setup-foot {
+  flex: none;
+  box-sizing: border-box;
+  padding: calc(var(--u) * 1.2) calc(var(--u) * 8) calc(var(--u) * 4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Tombol "Pengaturan" di bilah atas: letaknya tetap 22u dari tepi kanan layar (DRAF J-5). */
+.ss-settings-button {
+  position: absolute;
+  z-index: 60;
+  top: calc(var(--u) * 1);
+  right: calc(var(--u) * 22);
+  padding: calc(var(--u) * 0.8) calc(var(--u) * 3);
+  font-size: calc(var(--u) * 2.5);
+}
+
+.ss-settings-button[data-nonaktif],
+.ss-settings-button[data-nonaktif]:focus-visible {
+  background: var(--ss-mist);
+  color: var(--ss-dusk);
+  cursor: default;
+}
+
+.ss-settings-button[data-nonaktif]:focus-visible {
+  outline: 2px solid var(--ss-ink);
+}
+
+/* Lapisan bening di bawah dialog pengaturan, dan 600 ms sesudah ditutup (DRAF J-1 dan J-2). */
+.ss-settings-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 119;
+}
+
+/* Dialog pengaturan: bingkai piksel F-05 di tengah layar, tanpa lapisan gelap. */
+.ss-settings {
+  position: absolute;
+  z-index: 120;
+  inset: 0;
+  margin: auto;
+  width: max-content;
+  height: max-content;
+  max-width: calc(100% - var(--u) * 8);
+  box-sizing: border-box;
+  padding: calc(var(--u) * 2.4) calc(var(--u) * 4);
+  border: calc(var(--ss-px) * 2) solid var(--ss-ink);
+  background: var(--ss-cream);
+  box-shadow: inset 0 var(--ss-px) 0 0 var(--ss-white);
+  color: var(--ss-ink);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--u) * 2);
+  clip-path: polygon(
+    var(--ss-px) 0, calc(100% - var(--ss-px)) 0, calc(100% - var(--ss-px)) var(--ss-px), 100% var(--ss-px),
+    100% calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) calc(100% - var(--ss-px)), calc(100% - var(--ss-px)) 100%, var(--ss-px) 100%,
+    var(--ss-px) calc(100% - var(--ss-px)), 0 calc(100% - var(--ss-px)), 0 var(--ss-px), var(--ss-px) var(--ss-px)
+  );
+}
+
+.ss-settings-rows {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content max-content;
+  gap: calc(var(--u) * 1.6) calc(var(--u) * 3);
+  align-items: start;
+}
+
+.ss-settings-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.ss-settings-foot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Selama masa tunggu, dan pada tombol nonaktif, warna tidak berubah saat diarahkan tetikus (seperti layar penutup F-09). */
+@media (hover: hover) {
+  .ss-title-actions .ss-button[aria-disabled="true"]:not(:focus-visible):hover,
+  .ss-setup .ss-button[aria-disabled="true"]:not([aria-pressed="true"]):not(:focus-visible):hover,
+  .ss-narration .ss-next[aria-disabled="true"]:not(:focus-visible):hover {
+    background: var(--ss-surface);
+  }
+
+  .ss-option[data-nonaktif]:not(:focus-visible):hover,
+  .ss-settings-button[data-nonaktif]:not(:focus-visible):hover {
+    background: var(--ss-mist);
+  }
+
+  .ss-title-actions .ss-button[aria-disabled="true"]:not(:focus-visible):hover::before,
+  .ss-setup .ss-button[aria-disabled="true"]:not(:focus-visible):hover::before,
+  .ss-narration .ss-next[aria-disabled="true"]:not(:focus-visible):hover::before,
+  .ss-option[data-nonaktif]:not(:focus-visible):hover::before,
+  .ss-settings-button[data-nonaktif]:not(:focus-visible):hover::before {
+    visibility: hidden;
+  }
+}
+
+/* Mode warna paksa: sudut terpotong dialog pengaturan dan kotak tombol keyboard dimatikan seperti F-05. Ditulis sesudah
+   aturan clip-path di atas (pelajaran laporan F-08, Temuan 1); tombol pilihan sudah diatur aturan ss-button F-05. */
+@media (forced-colors: active) {
+  .ss-settings,
+  .ss-key {
     clip-path: none;
   }
 }

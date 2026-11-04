@@ -3,23 +3,89 @@
 // Teks F-01 mengikuti docs/sehari-setara/specs/F-01-kerangka-halaman.md; teks F-04 mengikuti specs/F-04-panggung.md;
 // teks F-05 mengikuti specs/F-05-panel-narasi-pilihan.md; teks F-06 mengikuti specs/F-06-indikator-kartu-dampak.md;
 // teks F-07 mengikuti specs/F-07-tim-waktu-bintang.md; teks F-08 mengikuti specs/F-08-kuis-peran.md;
-// teks F-09 mengikuti specs/F-09-akhir-rekap-refleksi.md (judul, pesan, dan teks alternatif akhir ada di endings.ts).
+// teks F-09 mengikuti specs/F-09-akhir-rekap-refleksi.md (judul, pesan, dan teks alternatif akhir ada di endings.ts);
+// teks F-10 mengikuti specs/F-10-judul-pengaturan-prolog.md (teks dan teks alternatif prolog ada di prolog.ts).
 import type { ChoiceId, Tier, TimeOfDay } from "../engine/types";
 
 export const copy = {
   gameName: "Sehari Setara",
   backToGallery: "Kembali ke galeri",
-  placeholder: {
+  // Layar judul, cara bermain, pengaturan kelas, prolog, dan dialog pengaturan (F-10).
+  title: {
     lead: "Temani Nara menjalani satu hari dan pilih tindakannya bersama kelas.",
-    status: "Permainan ini sedang dibuat.",
-    previewLink: "Lihat pratinjau panggung",
-    playLink: "Coba alur permainan",
+    start: "Mulai",
+    howTo: "Cara bermain",
+  },
+  howTo: {
+    title: "Cara bermain",
+    stepsLabel: "Langkah bermain",
+    steps: [
+      "Kelas dibagi menjadi 2 sampai 4 tim. Setiap adegan, satu tim mendapat giliran.",
+      "Bacalah situasinya bersama, lalu diskusikan pilihan sebelum waktu habis.",
+      "Tim yang mendapat giliran menyebutkan pilihan A, B, atau C beserta alasannya.",
+      "Kartu dampak menjelaskan hak, kewajiban, dan pasal yang berkaitan.",
+      "Guru memberi 0, 1, atau 2 bintang untuk alasan tim, bukan untuk tebakan cepat.",
+      "Tidak ada yang kalah. Di akhir hari, kelas melihat rekap dan menulis refleksi.",
+    ],
+    keysLabel: "Tombol keyboard untuk guru",
+    keys: [
+      { keys: "Spasi / Enter", spoken: "Spasi atau Enter", text: "Lanjut" },
+      { keys: "1 2 3 / A B C", spoken: "1, 2, 3, atau A, B, C", text: "Memilih" },
+      { keys: "P", spoken: "P", text: "Jeda atau lanjutkan waktu" },
+      { keys: "T", spoken: "T", text: "Tambah 30 detik" },
+      { keys: "S", spoken: "S", text: "Lewati diskusi" },
+      { keys: "0 1 2", spoken: "0, 1, atau 2", text: "Memberi bintang alasan" },
+      { keys: "1 2 3 4", spoken: "1, 2, 3, atau 4", text: "Menjawab kuis peran" },
+      { keys: "M", spoken: "M", text: "Suara nyala atau mati" },
+      { keys: "Esc", spoken: "Esc", text: "Pengaturan" },
+    ],
+    close: "Tutup",
+  },
+  setup: {
+    title: "Pengaturan kelas",
+    count: "Jumlah tim",
+    countOption: (n: number) => `${n} tim`,
+    teamList: "Tim yang bermain",
+    turns: (scenes: string) => `Adegan ${scenes}`,
+    turnSentence: (name: string, scenes: string) => `${name}, giliran adegan ${scenes}.`,
+    countAnnounce: (n: number, names: string) => `${n} tim: ${names}.`,
+    seconds: "Durasi diskusi",
+    sound: "Suara",
+    soundNote: "Bunyi klik dan bunyi teks.",
+    back: "Kembali",
+    start: "Mulai permainan",
+  },
+  options: {
+    on: "Nyala",
+    off: "Mati",
+    seconds: (n: number) => `${n} detik`,
+  },
+  list: { and: "dan" },
+  prolog: {
+    title: "Prolog",
+    start: "Mulai adegan 1",
+  },
+  settings: {
+    open: "Pengaturan",
+    title: "Pengaturan",
+    sound: "Suara",
+    motion: "Kurangi gerak",
+    typewriter: "Teks muncul per huruf",
+    seconds: "Durasi diskusi",
+    notes: {
+      seconds: "Berlaku mulai diskusi berikutnya.",
+      motionSystem: "Menyala karena komputer meminta gerak dikurangi.",
+      typewriterReduced: "Teks langsung lengkap selama kurangi gerak menyala.",
+    },
+    close: "Tutup",
   },
   topBar: {
     counter: (n: number, total: number) => `Adegan ${n}/${total}`,
     label: (clock: string, n: number, total: number) => `Pukul ${clock}, adegan ${n} dari ${total}`,
     ending: "Akhir hari",
     endingLabel: (clock: string) => `Pukul ${clock}, akhir hari`,
+    prolog: "Prolog",
+    prologLabel: (clock: string) => `Pukul ${clock}, prolog`,
   },
   preview: {
     statusSituation: "Pratinjau panggung: situasi awal.",

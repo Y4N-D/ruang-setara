@@ -1,11 +1,11 @@
 // Uji unit kontrol layar permainan Sehari Setara (spesifikasi F-05, AC-15; tombol F-07, AC-18; kuis peran F-08, AC-16;
-// layar penutup dan "Main lagi" F-09, AC-24).
+// layar penutup dan "Main lagi" F-09, AC-24; prolog, Esc, dan aksi layar pembuka F-10, AC-27).
 import { describe, expect, it } from "vitest";
 import { SCENES } from "../content/scenes";
-import { DEFAULT_TEAMS, PLAY_TEAMS } from "../content/teams";
+import { DEFAULT_TEAMS } from "../content/teams";
 import { createInitialState, createReducer } from "../engine/reducer";
 import { choiceText, endingFor, narrationFor } from "../engine/rules";
-import type { ChoiceId, GameAction, GameState, Phase, RoleId, Stars } from "../engine/types";
+import type { ChoiceId, GameAction, GameState, Phase, RoleId, Settings, Stars } from "../engine/types";
 import {
   FADE_MS,
   keyCommand,
@@ -13,7 +13,6 @@ import {
   replayActions,
   runActions,
   shouldHandleKey,
-  startActions,
   TYPE_CPS,
   typedLength,
   WIPE,
@@ -22,13 +21,21 @@ import {
   wipeSchedule,
   type KeyContext,
 } from "../ui/controls";
+import { setupActions, type TeamCount } from "../ui/opening";
 
 const reducer = createReducer(SCENES);
 const ALL_PHASES: Phase[] = [
   "title", "setup", "prolog", "intro", "discuss", "reaction", "impact", "quiz", "stars", "transition", "ending", "recap", "reflection",
 ];
 
-const start = () => runActions(reducer, createInitialState(), startActions(PLAY_TEAMS));
+/** Aksi layar pembuka (F-10): "Mulai", "Mulai permainan" dengan tim dan durasi pilihan, lalu "Mulai adegan 1" di prolog. */
+const opening = (count: TeamCount = 2, seconds: Settings["discussSeconds"] = 60): GameAction[] => [
+  { type: "MULAI" },
+  ...setupActions({ count, seconds }),
+  { type: "LANJUT" },
+];
+
+const start = (count: TeamCount = 2) => runActions(reducer, createInitialState(), opening(count));
 
 /**
  * Aksi layar permainan dari "Lanjut" kartu dampak sampai fase bintang (F-08): LANJUT, lalu di adegan berkuis
@@ -79,10 +86,10 @@ describe("perintah keyboard", () => {
     }
   });
 
-  it("Spasi dan Enter berarti lanjut di narasi, kartu dampak, kuis peran, layar akhir, dan rekap; tidak di fase bintang dan refleksi (F-07, F-09)", () => {
+  it("Spasi dan Enter berarti lanjut di prolog, narasi, kartu dampak, kuis peran, layar akhir, dan rekap; tidak di layar judul, pengaturan kelas, fase bintang, dan refleksi (F-07, F-09, F-10)", () => {
     for (const key of [" ", "Enter"]) {
       for (const phase of ALL_PHASES) {
-        const lanjut = ["intro", "impact", "quiz", "ending", "recap"].includes(phase);
+        const lanjut = ["prolog", "intro", "impact", "quiz", "ending", "recap"].includes(phase);
         expect(keyCommand(phase, key)).toEqual(lanjut ? { type: "lanjut" } : null);
       }
     }
@@ -110,16 +117,31 @@ describe("perintah keyboard", () => {
     for (const key of ["3", "a", "b", "p"]) expect(keyCommand("stars", key)).toBeNull();
   });
 
-  it("M mematikan atau menyalakan suara di fase intro sampai transition dan di ketiga layar penutup (F-07, F-09)", () => {
-    const scenePhases = ["intro", "discuss", "reaction", "impact", "quiz", "stars", "transition", "ending", "recap", "reflection"];
+  it("M mematikan atau menyalakan suara di prolog, fase intro sampai transition, dan ketiga layar penutup; tidak di layar judul dan pengaturan kelas (F-07, F-09, F-10)", () => {
+    const scenePhases = ["prolog", "intro", "discuss", "reaction", "impact", "quiz", "stars", "transition", "ending", "recap", "reflection"];
     for (const key of ["m", "M"]) {
       for (const phase of ALL_PHASES) expect(keyCommand(phase, key)).toEqual(scenePhases.includes(phase) ? { type: "suara" } : null);
     }
   });
 
   it("tombol lain dan nama properti bawaan objek tidak berpengaruh (4 menjawab kuis sejak F-08)", () => {
-    for (const key of ["4", "d", "D", "x", "Escape", "Tab", "f", "constructor", "toString", "__proto__", "hasOwnProperty", ""]) {
+    for (const key of ["4", "d", "D", "x", "Esc", "Tab", "f", "constructor", "toString", "__proto__", "hasOwnProperty", ""]) {
       for (const phase of ALL_PHASES.filter((p) => !(key === "4" && p === "quiz"))) expect(keyCommand(phase, key)).toBeNull();
+    }
+  });
+});
+
+describe("Esc (spesifikasi F-10)", () => {
+  it("membuka pengaturan hanya di fase prolog, intro, discuss, dan stars", () => {
+    for (const phase of ALL_PHASES) {
+      const open = ["prolog", "intro", "discuss", "stars"].includes(phase);
+      expect(keyCommand(phase, "Escape")).toEqual(open ? { type: "pengaturan" } : null);
+    }
+  });
+
+  it("layar judul dan pengaturan kelas tidak punya pintasan permainan", () => {
+    for (const phase of ["title", "setup"] as const) {
+      for (const key of [" ", "Enter", "m", "M", "Escape", "1", "2", "a", "p", "t", "s", "0", "ArrowRight"]) expect(keyCommand(phase, key)).toBeNull();
     }
   });
 });
@@ -210,26 +232,30 @@ describe("jadwal sapuan", () => {
 });
 
 describe("tim bawaan", () => {
-  it("empat tim Design System bagian 7, dan layar permainan memakai dua yang pertama", () => {
+  it("empat tim Design System bagian 7", () => {
     expect(DEFAULT_TEAMS).toEqual([
       { id: "mangga", name: "Tim Mangga", color: "mango", shape: "lingkaran" },
       { id: "laut", name: "Tim Laut", color: "sky-d", shape: "segitiga" },
       { id: "daun", name: "Tim Daun", color: "leaf", shape: "persegi" },
       { id: "mentari", name: "Tim Mentari", color: "sun", shape: "bintang" },
     ]);
-    expect(PLAY_TEAMS).toEqual(DEFAULT_TEAMS.slice(0, 2));
   });
 });
 
 describe("urutan aksi layar permainan", () => {
-  it("aksi awal membawa ke intro adegan 1 dengan dua tim bawaan", () => {
-    expect(startActions(PLAY_TEAMS).map((a) => a.type)).toEqual(["MULAI", "SIMPAN_PENGATURAN", "LANJUT"]);
-    const state = start();
-    expect(state.phase).toBe("intro");
-    expect(state.sceneIndex).toBe(0);
-    expect(state.teams.map((t) => [t.id, t.stars])).toEqual([["mangga", 0], ["laut", 0]]);
-    expect(state.meters).toEqual({ hak: 50, kewajiban: 50 });
-    expect(state.history).toEqual([]);
+  it("aksi layar pembuka membawa ke intro adegan 1 dengan tim dan durasi pilihan (F-10)", () => {
+    expect(opening().map((a) => a.type)).toEqual(["MULAI", "SIMPAN_PENGATURAN", "LANJUT"]);
+    for (const count of [2, 3, 4] as const) {
+      for (const seconds of [30, 60, 90] as const) {
+        const state = runActions(reducer, createInitialState(), opening(count, seconds));
+        expect([state.phase, state.sceneIndex]).toEqual(["intro", 0]);
+        expect(state.teams.map((t) => [t.id, t.stars])).toEqual(DEFAULT_TEAMS.slice(0, count).map((t) => [t.id, 0]));
+        expect(state.meters).toEqual({ hak: 50, kewajiban: 50 });
+        expect(state.history).toEqual([]);
+        const discuss = reducer(state, { type: "NARASI_SELESAI" });
+        expect(discuss.timer).toEqual({ duration: seconds, remaining: seconds, running: true });
+      }
+    }
   });
 
   it("LANJUT dari fase impact membuka quiz di adegan 5 dan stars di adegan lain (F-08)", () => {
@@ -284,10 +310,11 @@ describe("urutan aksi layar permainan", () => {
     expect(state.teams.map((t) => t.stars)).toEqual([3, 3]);
   });
 
-  it("main lagi dari fase reflection kembali ke intro adegan 1 dengan history kosong, tim yang sama, dan pengaturan tetap (F-09)", () => {
-    expect(replayActions(PLAY_TEAMS).map((a) => a.type)).toEqual(["MAIN_LAGI", "MULAI", "SIMPAN_PENGATURAN", "LANJUT"]);
-    for (const teams of [PLAY_TEAMS, DEFAULT_TEAMS.slice(0, 3), DEFAULT_TEAMS]) {
-      let state = runActions(reducer, createInitialState(), startActions(teams));
+  it("main lagi dari fase reflection kembali ke layar judul dengan tim dan pengaturan tetap, lalu ke intro adegan 1 (F-09, F-10)", () => {
+    expect(replayActions()).toEqual([{ type: "MAIN_LAGI" }]);
+    for (const count of [2, 3, 4] as const) {
+      const teams = DEFAULT_TEAMS.slice(0, count);
+      let state = start(count);
       state = reducer(state, { type: "UBAH_PENGATURAN", settings: { sound: false } });
       for (let i = 0; i < SCENES.length; i++) state = playScene(state, "B", 2);
       expect(state.phase).toBe("ending");
@@ -299,7 +326,10 @@ describe("urutan aksi layar permainan", () => {
       }
       const reflection = runActions(reducer, state, [{ type: "LANJUT" }, { type: "LANJUT" }]);
       expect(reflection.phase).toBe("reflection");
-      const again = runActions(reducer, reflection, replayActions(teams));
+      const title = runActions(reducer, reflection, replayActions());
+      expect(title.phase).toBe("title");
+      expect(title.teams.map((t) => [t.id, t.stars])).toEqual(teams.map((t) => [t.id, 0]));
+      const again = runActions(reducer, title, opening(count));
       expect([again.phase, again.sceneIndex, again.quizAnswer]).toEqual(["intro", 0, null]);
       expect(again.history).toEqual([]);
       expect(again.flags).toEqual([]);

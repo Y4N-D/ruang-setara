@@ -1,7 +1,7 @@
 // Kait React bersama untuk layar game Sehari Setara.
 // Dipindahkan dari StagePreview.tsx di F-05 tanpa perubahan perilaku, agar dipakai Game.tsx dan layar permainan.
 import { useEffect, useLayoutEffect, useState, type RefObject } from "react";
-import { stageScaleForScreen } from "./layout";
+import { stageScaleForScreen, titleScaleForScreen } from "./layout";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
@@ -25,6 +25,21 @@ export function useStageScale(ref: RefObject<HTMLElement | null>): number {
     const element = ref.current;
     if (!element) return;
     const update = () => setScale(stageScaleForScreen(element.getBoundingClientRect().height));
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [ref]);
+  return scale;
+}
+
+/** Skala layar judul kj = tinggi layar 16:9 ÷ 180 (spesifikasi F-10), dihitung ulang setiap kali ukurannya berubah. */
+export function useTitleScale(ref: RefObject<HTMLElement | null>): number {
+  const [scale, setScale] = useState(1);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const update = () => setScale(titleScaleForScreen(element.getBoundingClientRect().height));
     update();
     const observer = new ResizeObserver(update);
     observer.observe(element);

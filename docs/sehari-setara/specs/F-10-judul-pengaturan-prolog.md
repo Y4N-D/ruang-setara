@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Ditulis 4 November 2026, menunggu Gerbang 2 (balasan `Spesifikasi disetujui: F-10`) |
+| Status | Disetujui 4 November 2026 (balasan `Spesifikasi disetujui: F-10`; saran J-1 sampai J-11 dipakai). Dibangun dan diuji 4 November 2026, keputusan Lulus ([laporan uji](../tests/F-10-hasil.md)). Satu perubahan kecil dari spesifikasi: `__tests__/closing.test.ts` ikut disesuaikan, karena memakai `startActions` yang dihapus (laporan, Temuan 3) |
 | Tanggal | 4 November 2026 |
 | Rencana | `docs/sehari-setara/PLAN.md`, entri F-10 (disetujui 4 November 2026 dengan balasan `Setuju: F-10`; saran setiap usulan diterima, alternatifnya tidak dipilih) |
 | Dasar | ZIP `main` 4 November 2026, commit `d9212ad`, yang sudah memuat entri rencana F-10 |

@@ -1,4 +1,4 @@
-// Tata letak panggung Sehari Setara (spesifikasi F-04 dan F-05; alamat uji tim F-07). Semua fungsi murni dan diuji di layout.test.ts.
+// Tata letak panggung Sehari Setara (spesifikasi F-04 dan F-05; layar judul dan alamat F-10). Semua fungsi murni dan diuji di layout.test.ts.
 // Satuan: piksel logis panggung (320×180), kecuali disebut lain.
 import type { SpriteStrip } from "../assets/manifest";
 import type { CastSlot, ChoiceId, Scene } from "../engine/types";
@@ -146,27 +146,31 @@ export function previewHash(route: PreviewRoute): string {
 }
 
 /* ------------------------------------------------------------------ */
-/* Layar menurut tanda pagar (spesifikasi F-05)                          */
+/* Layar menurut tanda pagar (spesifikasi F-05; F-10)                    */
 /* ------------------------------------------------------------------ */
 
-/** Alamat layar permainan sementara, sampai layar judul dibuat di F-10. */
-export const PLAY_HASH = "#main";
+/** Sejak F-10 hanya pratinjau panggung yang punya alamat sendiri; alamat lain membuka permainan dari layar judul. */
+export type ScreenRoute = { readonly kind: "pratinjau"; readonly preview: PreviewRoute };
 
-/** Jumlah tim di layar permainan sementara: dua tim bawaan, atau tiga dan empat lewat alamat uji (F-07). */
-export type TeamCount = 2 | 3 | 4;
-
-/** #main memakai dua tim bawaan; #main-3 dan #main-4 alamat uji tiga dan empat tim, tidak ditautkan (F-07). */
-const PLAY_HASHES: Readonly<Record<string, TeamCount>> = { [PLAY_HASH]: 2, "#main-3": 3, "#main-4": 4 };
-
-export type ScreenRoute =
-  | { readonly kind: "main"; readonly teams: TeamCount }
-  | { readonly kind: "pratinjau"; readonly preview: PreviewRoute };
-
-/** #main, #main-3, dan #main-4 untuk layar permainan, #adegan-N[-a|b|c] untuk pratinjau panggung, selain itu null. */
+/** #adegan-N[-a|b|c] untuk pratinjau panggung, selain itu null (permainan dari layar judul). */
 export function parseRoute(hash: string, sceneCount: number): ScreenRoute | null {
-  if (Object.prototype.hasOwnProperty.call(PLAY_HASHES, hash)) return { kind: "main", teams: PLAY_HASHES[hash] };
   const preview = parsePreviewHash(hash, sceneCount);
   return preview ? { kind: "pratinjau", preview } : null;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layar judul (spesifikasi F-10)                                        */
+/* ------------------------------------------------------------------ */
+
+/** Bidang langit tenang untuk judul di bg_title (piksel logis), sama dengan TITLE_ZONE di latar.py. */
+export const TITLE_ZONE = { x0: 64, y0: 6, x1: 256, y1: 56 } as const;
+
+/** Pita jalan kampung di bawah kaki Nara, tempat tombol layar judul (piksel logis). */
+export const TITLE_BAND = { top: 157, bottom: 180 } as const;
+
+/** Skala layar judul: bg_title memenuhi layar 16:9, jadi kj = tinggi layar ÷ 180 (boleh pecahan). */
+export function titleScaleForScreen(screenHeightPx: number): number {
+  return screenHeightPx / STAGE.h;
 }
 
 /** Pemeran dan ikon emosi yang tampil di panggung untuk satu tampilan pratinjau. */

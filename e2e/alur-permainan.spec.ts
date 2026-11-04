@@ -3,7 +3,8 @@
 // Disesuaikan di F-07: sesudah kartu dampak, bintang alasan diberikan sebelum adegan berganti (giveStars).
 // Disesuaikan di F-08: sesudah kartu dampak adegan 5, kuis peran dijawab sebelum bintang alasan (answerQuiz).
 // Disesuaikan di F-09: sesudah adegan 6, layar akhir menggantikan layar akhir sementara (finishDay, playAgain).
-// Membuka hasil build di /ruang-setara/sehari-setara/#main lewat serve-subpath.mjs, seperti alamat GitHub Pages.
+// Membuka hasil build di /ruang-setara/sehari-setara/ lewat serve-subpath.mjs, seperti alamat GitHub Pages; sejak F-10
+// permainan dimulai dari layar judul lewat startGame.
 import { expect, test, type Page } from "@playwright/test";
 import { SCENES } from "../app/sehari-setara/content/scenes";
 import { choiceText, narrationFor } from "../app/sehari-setara/engine/rules";
@@ -31,6 +32,7 @@ import {
   waitCardReady,
   watch,
   type ViewportName,
+  startGame,
 } from "./bantuan";
 
 const MIST = "rgb(201, 212, 229)";
@@ -60,8 +62,9 @@ async function openPlay(page: Page, size: ViewportName = "1280x720", reduce = tr
   const { width, height } = VIEWPORTS[size];
   await page.setViewportSize({ width, height });
   await page.emulateMedia({ reducedMotion: reduce ? "reduce" : "no-preference" });
-  await page.goto("sehari-setara/#main");
+  await page.goto("sehari-setara/");
   await page.evaluate(() => document.fonts.ready);
+  await startGame(page, { teams: 2 });
   await expect(page.locator(".ss-narration")).toBeVisible();
 }
 
@@ -178,7 +181,7 @@ async function toQuestion(page: Page) {
   await expect(page.locator(".ss-question")).toBeFocused();
 }
 
-test("layar kerangka: tombol ketiga, masuk dan keluar layar permainan (AC-1)", async ({ page }) => {
+test("layar judul: masuk ke adegan 1, memuat ulang, pratinjau, dan alamat lain (AC-1; F-10)", async ({ page }) => {
   const log = watch(page);
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -187,45 +190,31 @@ test("layar kerangka: tombol ketiga, masuk dan keluar layar permainan (AC-1)", a
   await page.evaluate(() => {
     (window as unknown as { ssPenanda: number }).ssPenanda = 1;
   });
-  const links = page.locator(".ss-placeholder-actions a");
-  await expect(links).toHaveText(["Kembali ke galeri", "Lihat pratinjau panggung", "Coba alur permainan"]);
-  expect(await links.evaluateAll((all) => all.map((a) => a.getAttribute("href")))).toEqual(["../", "#adegan-1", "#main"]);
-  await page.keyboard.press("Tab");
-  await expect(page.locator(":focus")).toHaveText("Kembali ke galeri");
-
-  await page.getByRole("link", { name: "Coba alur permainan" }).click();
-  await expect(page).toHaveURL(/#main$/);
+  await expect(page.locator(".ss-title-actions > *")).toHaveText(["Mulai", "Cara bermain", "Kembali ke galeri"]);
+  await startGame(page, { teams: 2 });
   await expect(page.locator(".ss-narration-tab")).toHaveText(SCENES[0].title);
   await expect(live(page)).toHaveText(SCENES[0].narration[0]);
   await expect(narrationNext(page)).toBeFocused();
   await toQuestion(page);
-
-  await page.goBack();
-  await expect(page.locator(".ss-placeholder")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Coba alur permainan" })).toBeFocused();
   expect(await page.evaluate(() => (window as unknown as { ssPenanda?: number }).ssPenanda)).toBe(1);
 
-  // Membuka #main lagi dan memuat ulang halaman selalu mulai dari layar narasi 1 adegan 1.
-  await page.goForward();
-  await expect(live(page)).toHaveText(SCENES[0].narration[0]);
-  await expect(page.locator(".ss-narration .ss-next")).toHaveText("Lanjut");
-  await toQuestion(page);
+  // Memuat ulang halaman selalu mulai dari layar judul.
   await page.reload();
   await page.evaluate(() => document.fonts.ready);
-  await expect(live(page)).toHaveText(SCENES[0].narration[0]);
-  await expect(narrationNext(page)).toBeFocused();
+  await expect(page.locator('.ss-play[data-fase="title"]')).toBeVisible();
+  await expect(page.getByRole("button", { name: "Mulai", exact: true })).toBeFocused();
 
-  // Pratinjau dan alamat lain tetap seperti F-04.
+  // Pratinjau tetap seperti F-04; alamat lain membuka layar judul.
   await page.evaluate(() => {
     window.location.hash = "#adegan-2";
   });
   await expect(page.locator("#ss-preview-title")).toHaveText(SCENES[1].title);
   await expect(page.locator("#ss-preview-title")).toBeFocused();
-  for (const hash of ["#lain", "#mainkan", "#Main", ""]) {
+  for (const hash of ["#lain", "#mainkan", "#Main", "#main", ""]) {
     await page.evaluate((target) => {
       window.location.hash = target;
     }, hash);
-    await expect(page.locator(".ss-placeholder")).toBeVisible();
+    await expect(page.locator(".ss-title")).toBeVisible();
   }
   expectClean(log);
 });
@@ -260,6 +249,8 @@ test("kotak narasi: teks per huruf, Spasi, Enter, klik, dan wilayah aria-live (A
 
   // Klik pada tombol lanjut di dalam kotak dihitung sekali: dari layar 1 ke layar 2, bukan ke pertanyaan.
   await page.reload();
+  // Sejak F-10 memuat ulang membuka layar judul; permainan dimulai lagi lewat pengaturan kelas dan prolog.
+  await startGame(page, { teams: 2 });
   await page.evaluate(() => document.fonts.ready);
   await expect(rest).toHaveText("", { timeout: 5000 });
   await narrationNext(page).click();
@@ -302,8 +293,9 @@ test("pilihan: teks, fokus, status tombol, dan aturan keyboard (AC-3, AC-4, AC-1
   expect((await style("A")).cursor).toBe("hidden");
   expect(focusedB.width).toBe(plainB.width);
 
-  // Kombinasi Ctrl/Alt/Meta, tekanan berulang, dan tombol lain tidak memilih.
-  for (const combo of ["Control+2", "Alt+2", "Meta+2", "4", "d", "Escape"]) await page.keyboard.press(combo);
+  // Kombinasi Ctrl/Alt/Meta, tekanan berulang, dan tombol lain tidak memilih. Esc membuka dialog pengaturan sejak F-10,
+  // sehingga diuji di judul-pengaturan-prolog.spec.ts.
+  for (const combo of ["Control+2", "Alt+2", "Meta+2", "4", "d"]) await page.keyboard.press(combo);
   await page.evaluate(() => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "2", repeat: true, bubbles: true }));
   });
@@ -340,6 +332,8 @@ test("pilihan: teks, fokus, status tombol, dan aturan keyboard (AC-3, AC-4, AC-1
   ];
   for (const [way, expected] of ways) {
     await page.reload();
+  // Sejak F-10 memuat ulang membuka layar judul; permainan dimulai lagi lewat pengaturan kelas dan prolog.
+  await startGame(page, { teams: 2 });
     await page.evaluate(() => document.fonts.ready);
     await toQuestion(page);
     if (way === "klik") await choice("A").click();
@@ -651,10 +645,11 @@ for (const size of Object.keys(VIEWPORTS) as ViewportName[]) {
       `${INK} 0px 0px 0px ${2 * px}px inset`,
     );
 
-    // Layar permainan, dua kali main agar kedua varian adegan 6 ikut diperiksa.
+    // Layar permainan dari layar judul (F-10), dua kali main agar kedua varian adegan 6 ikut diperiksa.
     await page.evaluate(() => {
-      window.location.hash = "#main";
+      window.location.hash = "";
     });
+    await startGame(page, { teams: 2, paused: true });
     for (const path of [["B", "B", "B", "B", "B", "B"], ["A", "A", "A", "A", "A", "A"]] as ChoiceId[][]) {
       for (let i = 0; i < SCENES.length; i++) {
         const box = await page.evaluate(() => {

@@ -1,7 +1,8 @@
-// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05; ditambah di F-06 sampai F-09).
+// Fungsi dan data bersama uji ujung ke ujung Sehari Setara (spesifikasi F-04; dipisahkan di F-05; ditambah di F-06 sampai F-10).
 // Dipakai semua berkas e2e/*.spec.ts. Berkas ini bukan berkas uji.
 import { mkdirSync } from "node:fs";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
+import { PROLOG } from "../app/sehari-setara/content/prolog";
 
 export const SHOTS = "test-results/tangkapan";
 mkdirSync(SHOTS, { recursive: true });
@@ -229,15 +230,71 @@ export async function finishDay(page: Page, paused = false) {
   await expect(reflectionTitle(page)).toBeFocused();
 }
 
-/** Di refleksi: menunggu masa tunggu, Tab ke "Main lagi", lalu Enter, dan menunggu tombol lanjut narasi berfokus. */
-export async function playAgain(page: Page, paused = false) {
+/** Pilihan layar pembuka F-10; teams dan seconds yang tidak diisi dibiarkan seperti yang tampil di pengaturan kelas. */
+export interface StartOptions {
+  teams?: 2 | 3 | 4;
+  seconds?: 30 | 60 | 90;
+  /** Benar bila jam uji sudah dijeda: masa tunggu dan pergantian dimajukan dengan page.clock.runFor. */
+  paused?: boolean;
+}
+
+/** Tombol "Mulai" layar judul F-10. */
+export const titleStart = (page: Page) => page.getByRole("button", { name: "Mulai", exact: true });
+
+/**
+ * Langkah pembuka bersama (spesifikasi F-10, Rencana uji): dari layar judul lewat pengaturan kelas dan ketiga layar prolog
+ * sampai narasi adegan 1, dengan keyboard saja. Dengan jam dijeda, masa tunggu 600 ms dimajukan sesudah layar tampil
+ * (aturan dua langkah); tanpa itu, uji menunggu tombol siap.
+ */
+export async function startGame(page: Page, { teams, seconds, paused = false }: StartOptions = {}) {
+  const ready = async (control: Locator) => {
+    if (paused) await page.clock.runFor(600);
+    else await expect(control).not.toHaveAttribute("aria-disabled", /.*/);
+  };
+  await expect(titleStart(page)).toBeFocused();
+  await ready(titleStart(page));
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".ss-setup-title")).toBeFocused();
+  const launch = page.getByRole("button", { name: "Mulai permainan", exact: true });
+  await ready(launch);
+  for (const name of [teams && `${teams} tim`, seconds && `${seconds} detik`]) {
+    if (!name) continue;
+    const option = page.getByRole("button", { name, exact: true });
+    if ((await option.getAttribute("aria-pressed")) === "true") continue;
+    await option.focus();
+    await page.keyboard.press("Enter");
+    await expect(option).toHaveAttribute("aria-pressed", "true");
+  }
+  await launch.focus();
+  await page.keyboard.press("Enter");
+  const next = page.locator(".ss-narration .ss-next");
+  for (const screen of PROLOG) {
+    await expect(page.locator(".ss-play[data-prolog] .ss-narration-text")).toHaveText(screen.text);
+    await expect(next).toBeFocused();
+    await ready(next);
+    // Enter pertama menampilkan teks sekaligus bila teks per huruf masih berjalan.
+    if ((await page.locator(".ss-narration-rest").textContent()) !== "") await page.keyboard.press("Enter");
+    await page.keyboard.press("Enter");
+  }
+  if (paused) await page.clock.runFor(400);
+  await expect(page.locator(".ss-play[data-fase=\"intro\"]")).toBeVisible();
+  await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 1/6");
+  await expect(next).toBeFocused();
+}
+
+/**
+ * Di refleksi: menunggu masa tunggu, Tab ke "Main lagi", lalu Enter. Layar judul tampil dengan "Mulai" berfokus, lalu
+ * startGame sampai narasi adegan 1 (F-10), sehingga uji yang memanggilnya tetap berakhir di narasi adegan 1.
+ */
+export async function playAgain(page: Page, paused = false, options: StartOptions = {}) {
   await expect(reflectionTitle(page)).toBeFocused();
   if (paused) await page.clock.runFor(600);
   else await expect(playAgainButton(page)).not.toHaveAttribute("aria-disabled", /.*/);
   await page.keyboard.press("Tab");
   await expect(playAgainButton(page)).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page.locator(".ss-narration .ss-next")).toBeFocused();
+  await expect(page.locator(".ss-play[data-fase=\"title\"]")).toBeVisible();
+  await startGame(page, { ...options, paused });
 }
 
 /**

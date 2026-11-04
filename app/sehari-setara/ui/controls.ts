@@ -1,8 +1,9 @@
 // Kontrol layar permainan Sehari Setara (spesifikasi F-05; tombol pengatur waktu, bintang, dan suara: F-07;
-// pintasan kuis peran: F-08; layar penutup dan "Main lagi": F-09). Semua fungsi di sini murni dan diuji di
+// pintasan kuis peran: F-08; layar penutup dan "Main lagi": F-09; prolog dan Esc: F-10). Semua fungsi di sini murni dan diuji di
 // controls.test.ts. Waktu dan pengatur waktu
 // dijalankan oleh PlayScreen.tsx dan useTimer.ts; reducer di engine/ tetap tanpa setTimeout (spesifikasi F-02, AC-14).
-import type { ChoiceId, GameAction, GameState, Phase, Stars, TeamSetup } from "../engine/types";
+import type { ChoiceId, GameAction, GameState, Phase, Stars } from "../engine/types";
+import { SETTINGS_PHASES } from "./opening";
 import type { QuizNumber } from "./quiz";
 
 /** Lama tampil reaksi tokoh sebelum REAKSI_SELESAI (Design System bagian 8: 1–1,5 detik). */
@@ -34,7 +35,8 @@ export type PlayCommand =
   | { readonly type: "waktu"; readonly action: TimerActionType }
   | { readonly type: "bintang"; readonly stars: Stars }
   | { readonly type: "suara" }
-  | { readonly type: "jawab"; readonly nomor: QuizNumber };
+  | { readonly type: "jawab"; readonly nomor: QuizNumber }
+  | { readonly type: "pengaturan" };
 
 const CHOICE_KEYS: Readonly<Record<string, ChoiceId>> = {
   "1": "A",
@@ -63,15 +65,15 @@ const STAR_KEYS: Readonly<Record<string, Stars>> = { "0": 0, "1": 1, "2": 2 };
 const QUIZ_KEYS: Readonly<Record<string, QuizNumber>> = { "1": 1, "2": 2, "3": 3, "4": 4 };
 
 /**
- * Fase tempat Spasi dan Enter berarti lanjut: narasi, kartu dampak, kuis peran, layar akhir, dan rekap (F-09). Sejak
+ * Fase tempat Spasi dan Enter berarti lanjut: prolog (F-10), narasi, kartu dampak, kuis peran, layar akhir, dan rekap (F-09). Sejak
  * F-07 tidak lagi di fase stars, sehingga tekanan kedua dari tekanan ganda pada Lanjut kartu tidak memberi bintang.
  * Di fase reflection keduanya bukan pintasan, agar "Main lagi" tidak tertekan tanpa sengaja (F-09).
  */
-const NEXT_PHASES: ReadonlySet<Phase> = new Set<Phase>(["intro", "impact", "quiz", "ending", "recap"]);
+const NEXT_PHASES: ReadonlySet<Phase> = new Set<Phase>(["prolog", "intro", "impact", "quiz", "ending", "recap"]);
 
-/** Fase adegan dan ketiga layar penutup, tempat M mematikan atau menyalakan suara (F-07, F-09). */
+/** Prolog, fase adegan, dan ketiga layar penutup, tempat M mematikan atau menyalakan suara (F-07, F-09, F-10). */
 const SOUND_PHASES: ReadonlySet<Phase> = new Set<Phase>([
-  "intro", "discuss", "reaction", "impact", "quiz", "stars", "transition", "ending", "recap", "reflection",
+  "prolog", "intro", "discuss", "reaction", "impact", "quiz", "stars", "transition", "ending", "recap", "reflection",
 ]);
 
 /** Ketiga layar penutup (F-09). */
@@ -86,6 +88,8 @@ function own<T>(table: Readonly<Record<string, T>>, key: string): T | undefined 
 export function keyCommand(phase: Phase, key: string): PlayCommand | null {
   if (key === " " || key === "Enter") return NEXT_PHASES.has(phase) ? { type: "lanjut" } : null;
   if (key === "m" || key === "M") return SOUND_PHASES.has(phase) ? { type: "suara" } : null;
+  // Esc membuka dialog pengaturan di prolog, narasi, diskusi, dan fase bintang (F-10, usulan 5a).
+  if (key === "Escape") return SETTINGS_PHASES.has(phase) ? { type: "pengaturan" } : null;
   if (phase === "discuss") {
     const choice = own(CHOICE_KEYS, key);
     if (choice) return { type: "pilih", choice };
@@ -161,17 +165,12 @@ export function wipeSchedule(): WipeBlock[] {
 /* Urutan aksi layar permainan                                           */
 /* ------------------------------------------------------------------ */
 
-/** Dari keadaan awal sampai fase intro adegan 1: judul, pengaturan, dan prolog dilewati (F-10 belum ada). */
-export function startActions(teams: readonly TeamSetup[]): GameAction[] {
-  return [{ type: "MULAI" }, { type: "SIMPAN_PENGATURAN", teams: [...teams], settings: {} }, { type: "LANJUT" }];
-}
-
 /**
- * "Main lagi" dari fase reflection: MAIN_LAGI ke layar judul dengan pengaturan tetap (F-02), lalu startActions ke
- * narasi adegan 1 dengan tim yang sama. Di F-10 bagian startActions dibuang agar berhenti di layar judul.
+ * "Main lagi" dari fase reflection: MAIN_LAGI ke layar judul dengan tim dan pengaturan tetap (F-02). Sejak F-10 permainan
+ * baru dimulai dari layar judul, pengaturan kelas, dan prolog.
  */
-export function replayActions(teams: readonly TeamSetup[]): GameAction[] {
-  return [{ type: "MAIN_LAGI" }, ...startActions(teams)];
+export function replayActions(): GameAction[] {
+  return [{ type: "MAIN_LAGI" }];
 }
 
 /** Menjalankan aksi berurutan dengan reducer, misalnya untuk keadaan awal layar permainan. */

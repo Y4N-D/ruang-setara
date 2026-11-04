@@ -1,5 +1,6 @@
 // Uji ujung ke ujung kuis peran penegak hukum Sehari Setara (spesifikasi F-08, Rencana uji langkah 3, 4, 6, dan 7).
-// Membuka hasil build di /ruang-setara/sehari-setara/#main lewat serve-subpath.mjs, seperti alamat GitHub Pages.
+// Membuka hasil build di /ruang-setara/sehari-setara/ lewat serve-subpath.mjs, seperti alamat GitHub Pages; sejak F-10
+// permainan dimulai dari layar judul lewat startGame.
 // Jam uji dijeda sebelum halaman dimuat, sehingga kartu, masa tunggu, dan pergantian adegan hanya maju lewat
 // page.clock.runFor, dalam dua langkah sesudah unsur tampil (catatan PLAN "Semua fitur dengan jam uji").
 // Bunyi klik di kuis diuji di suara.spec.ts, yang memiliki perekam bunyi (AC-14).
@@ -34,6 +35,7 @@ import {
   VIEWPORTS,
   watch,
   type ViewportName,
+  startGame,
 } from "./bantuan";
 
 const T0 = new Date("2026-10-27T08:00:00+08:00").getTime();
@@ -75,17 +77,17 @@ async function openPlay(page: Page, size: ViewportName = "1280x720", reduce = tr
   await page.emulateMedia({ reducedMotion: reduce ? "reduce" : "no-preference" });
   await page.clock.install({ time: T0 });
   await page.clock.pauseAt(T0 + 60_000);
-  await page.goto("sehari-setara/#main");
+  await page.goto("sehari-setara/");
   await page.evaluate(() => document.fonts.ready);
+  await startGame(page, { teams: 2, paused: true });
   await expect(page.locator(".ss-narration")).toBeVisible();
 }
 
-/** Permainan baru dari adegan 1 tanpa memuat ulang halaman: layar kerangka, lalu #main lagi (F-07 AC-11). */
+/** Permainan baru dari adegan 1: halaman dimuat lagi, lalu layar judul sampai narasi adegan 1 (F-10). */
 async function restart(page: Page) {
-  await setHash(page, "");
-  await expect(page.locator(".ss-placeholder")).toBeVisible();
-  await setHash(page, "#main");
-  await expect(page.locator(".ss-narration")).toBeVisible();
+  await page.goto("sehari-setara/");
+  await page.evaluate(() => document.fonts.ready);
+  await startGame(page, { teams: 2, paused: true });
   await expect(counter(page)).toHaveText("Adegan 1/6");
 }
 
@@ -512,8 +514,9 @@ test("kapan kuis tampil: hanya di adegan 5 sesudah Lanjut kartu, tanpa sapuan; b
   // Layar akhir, layar kerangka, dan pratinjau panggung tidak menampilkan kuis.
   await expect(endingTitle(page)).toBeFocused();
   await expect(quizDialog(page)).toHaveCount(0);
+  await setHash(page, "#adegan-1");
   await setHash(page, "");
-  await expect(page.locator(".ss-placeholder")).toBeVisible();
+  await expect(page.locator(".ss-title")).toBeVisible();
   await expect(quizDialog(page)).toHaveCount(0);
   await setHash(page, "#adegan-5");
   await expect(page.locator("#ss-preview-title")).toHaveText(QUIZ_SCENE.title);
