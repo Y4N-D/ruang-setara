@@ -22,7 +22,7 @@ Versi 0.1 (4 November 2026): dokumen pertama.
 - Aturan "tanpa jaringan luar" dan "tanpa server" milik Sehari Setara **tidak** berlaku untuk Jejak Setara, karena pemilik proyek memilih mode real-time dengan server berbayar (PRD bagian 21). Aturan pengganti ada di bagian 7.
 - Bila satu pekerjaan menyentuh keduanya (misalnya kit gambar bersama atau tautan galeri), kedua panduan berlaku. Bila bertentangan, **berhenti dan tanyakan**.
 - Jejak Setara dimulai sesudah F-10 dan F-11 berstatus "Selesai" di `docs/sehari-setara/PLAN.md`, kecuali pemilik proyek memutuskan lain.
-- Sampai JS-01 menambahkan penunjuk ke dokumen ini di `AGENTS.md` akar, setiap sesi Jejak Setara dimulai dengan perintah di bagian 14, yang langsung menyebut dokumen ini.
+- Sejak JS-01, `AGENTS.md` akar memuat penunjuk ke dokumen ini.
 
 ## 1. Konteks singkat
 

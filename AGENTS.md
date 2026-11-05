@@ -2,6 +2,8 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan game **Sehari Setara** di repositori `ruang-setara`. Baca seluruh file ini sebelum mengubah apa pun.
 
+**Jejak Setara.** Repositori ini juga memuat game kedua, Jejak Setara. Panduan agennya ada di `docs/jejak-setara/AGENTS.md`, dan saat mengerjakan Jejak Setara panduan itu menggantikan dokumen ini. Dokumen ini tetap berlaku penuh untuk Sehari Setara dan galeri. Bila satu pekerjaan menyentuh keduanya, kedua panduan berlaku; bila bertentangan, berhenti dan tanyakan.
+
 Versi 0.5 (4 November 2026): FR-17 dibagi, kurangi gerak di F-10 dan layar penuh di F-13; layar "Tentang" (kredit aset dan huruf) masuk F-11.
 Versi 0.4 (21 Oktober 2026): verifikasi rujukan dicatat di `docs/sehari-setara/Verifikasi_Rujukan.md`, bukan di kode.
 Versi 0.3 (21 Oktober 2026): FR-18 (ulangi adegan dan kembali ke adegan sebelumnya) masuk ke F-13 atas keputusan pemilik proyek.

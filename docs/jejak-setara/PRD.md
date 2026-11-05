@@ -538,3 +538,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 4 Nov 2026 | Dikerjakan sesudah Sehari Setara F-10 dan F-11 selesai (jawaban pemilik proyek) |
 | 4 Nov 2026 | Akun admin untuk membuat dan menjalankan ruang, menambah dan menyunting soal serta jawaban, melihat papan skor dan peringkat, serta statistik pemain (permintaan pemilik proyek) |
 | 4 Nov 2026 | Server berbayar dengan anggaran di bawah Rp 500.000 per bulan; rekomendasi Cloudflare Workers Paid, sekitar US$5 per bulan |
+| 5 Nov 2026 | Nama produk tetap "Jejak Setara" (KT-01, Gerbang 1 JS-01) |

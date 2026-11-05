@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Ditulis 5 November 2026; menunggu `Spesifikasi disetujui: JS-01` |
+| Status | Disetujui 5 November 2026 (balasan `Spesifikasi disetujui: JS-01`; saran D-1 sampai D-4 dipakai). Dibangun dan diuji 5 November 2026 tanpa perubahan dari spesifikasi; keputusan Lulus ([laporan](../tests/JS-01-hasil.md)) |
 | Rencana | `docs/jejak-setara/PLAN.md`, entri JS-01 |
 | Keputusan Gerbang 1 | Balasan `Setuju: JS-01` (5 Nov 2026): saran setiap usulan diterima (1a sampai 13a), dan KT-01 dijawab "Jejak Setara" |
 
@@ -338,7 +338,7 @@ Baris JA-15 di Architecture bagian 1:
 - [ ] AC-12 **Skrip belum tersedia.** Keenam skrip P-16 dan P-17 mencetak teks persis dan selesai dengan kode 0. Di salinan, satu uji contoh di `app/jejak-setara/__tests__/konten/` membuat `content:check:jejak` menjalankannya, dan uji yang sengaja gagal membuatnya keluar dengan kode bukan 0.
 - [ ] AC-13 **Alur kerja.** `jejak-uji.yml` terbaca sebagai YAML yang sah, dengan nama, pemicu, izin, dan langkah persis spesifikasi; tidak ada langkah deploy atau rahasia. Keempat langkahnya, dijalankan berurutan di salinan bersih, lulus. `deploy-pages.yml` tidak berubah.
 - [ ] AC-14 **Git.** Keempat pola `.gitignore` ada, dan P-21 terpenuhi (`git status --ignored`).
-- [ ] AC-15 **Dokumen.** Semua perubahan di bagian "Perubahan dokumen" ada dengan teks persis. Kata "Finder" dan "klik dua kali" tidak lagi ada di `docs/jejak-setara/`.
+- [ ] AC-15 **Dokumen.** Semua perubahan di bagian "Perubahan dokumen" ada dengan teks persis. Kata "Finder" dan "klik dua kali" tidak lagi ada di `docs/jejak-setara/`. **[Build]** Yang dimaksud adalah petunjuk kerja: kedua kata itu masih disebut di spesifikasi ini dan di riwayat usulan 11 `PLAN.md`, yang menjelaskan perubahannya, tetapi tidak lagi ada di `AGENTS.md` Jejak Setara (laporan uji, Temuan 1).
 - [ ] AC-16 **Galeri dan Sehari Setara tidak berubah.** `build:pages` lulus, dan ke-178 berkas `dist-pages/` identik byte dengan build `main`, sekali sesudah kode dan sekali sesudah semua dokumen, termasuk laporan uji. `git diff --name-status` hanya memuat berkas di bagian "Berkas yang dibuat dan diubah".
 - [ ] AC-17 **Pemeriksaan kode.** `tsc --noEmit -p tsconfig.json --incremental false` 0 galat, di salinan tanpa `next-env.d.ts`. ESLint `--max-warnings 0` pada semua berkas Jejak Setara: 0 masalah, tanpa `any`.
 - [ ] AC-18 **Anggaran.** Kode layar pemain ≤ 200 KB gzip dan konsol ≤ 350 KB gzip, dicatat di laporan bersama ukuran huruf.

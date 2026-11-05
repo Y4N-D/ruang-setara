@@ -10,6 +10,8 @@
 
 Catatan: nama kunci konfigurasi Cloudflare dan perintah `wrangler` di dokumen ini adalah contoh. Agen wajib mencocokkannya dengan dokumentasi resmi terbaru (developers.cloudflare.com) dan versi `wrangler` di `package.json` saat tahap Plan, lalu mencatat bila ada yang berbeda.
 
+Pemeriksaan pertama dilakukan di Plan JS-01 (5 November 2026) terhadap `wrangler` 4.92.0 dan `@cloudflare/vite-plugin` 1.37.1. Perbedaannya sudah dimasukkan ke bagian 1 (JA-15), 4.1, 4.2, 4.4, dan 12.2; rinciannya ada di entri JS-01 `PLAN.md`.
+
 ---
 
 ## 1. Keputusan utama
@@ -30,6 +32,7 @@ Catatan: nama kunci konfigurasi Cloudflare dan perintah `wrangler` di dokumen in
 | JA-12 | **Dua lingkungan:** `uji` (otomatis setiap ada perubahan di `main`) dan `produksi` (dijalankan pemilik proyek lewat tombol alur kerja) | Kelas yang sedang berjalan tidak terganggu perubahan yang belum dicoba |
 | JA-13 | Durable Object diberi **petunjuk lokasi `apac-se`** (Asia Tenggara) | Dekat dengan Indonesia; petunjuk bersifat *best-effort* |
 | JA-14 | **Paket Cloudflare Workers Paid** (US$5 per bulan) | Kuota termasuk jauh di atas pemakaian kelas (bagian 13) |
+| JA-15 | Pengembangan, build, dan uji ujung ke ujung memakai **plugin Cloudflare untuk Vite** (`@cloudflare/vite-plugin`): `dev:jejak` menjalankan halaman dan Worker di satu alamat; `build:jejak` menghasilkan `dist-jejak/client/` dan `dist-jejak/worker/`; uji ujung ke ujung memakai `vite preview`. Lingkungan Cloudflare dipilih saat build lewat `CLOUDFLARE_ENV` | Satu perintah dan satu alamat seperti di server sungguhan; cara yang dianjurkan dokumentasi Cloudflare untuk proyek Vite; paket sudah terpasang. Diputuskan di Gerbang 1 JS-01 (5 Nov 2026) |
 
 Dependensi yang mungkin diperlukan dan **wajib izin tertulis** pemilik proyek: alat uji Worker (misalnya `@cloudflare/vitest-pool-workers`) dan pembuat kode QR. Semua kebutuhan lain memakai paket yang sudah ada: `react`, `zod`, `wrangler`, `@cloudflare/workers-types`, `@cloudflare/vite-plugin`, `vite`, `vitest`, `@playwright/test`, `@fontsource/*`, dan primitif `radix-ui` untuk komponen konsol.
 
@@ -79,14 +82,16 @@ ruang-setara/
 │  │  ├─ App.tsx · rute.ts · api.ts
 │  │  ├─ halaman/                    # Dasbor, Ruang, Riwayat, Kejadian, Penyunting, Paket, Rujukan, Statistik, Akun, Pengaturan, Log
 │  │  └─ kelas/                      # layar kelas: Lobi, Langsung, Podium, Pembahasan
-│  ├─ bersama/                       # komponen untuk pemain dan konsol: bingkai, tombol pilihan, dialog kejadian, kartu dampak
+│  ├─ bersama/                       # komponen untuk pemain dan konsol: bingkai, tombol pilihan, dialog kejadian, kartu dampak; HalamanKerangka (halaman kosong JS-01)
+│  ├─ teks.ts                        # semua teks yang tampil (bagian 17)
 │  ├─ peta/kampung.json              # hasil build_peta.py; jangan disunting manual
 │  ├─ assets/                        # manifest.ts, CREDITS.md, ubin/, obj/, ava/, npc/, ikon/, sfx/
 │  ├─ styles/jejak.css               # token --js-, bingkai piksel
 │  └─ __tests__/                     # uji unit, konten, peta, dan aset
 ├─ web/jejak-setara/                 # titik masuk Vite
 │  ├─ index.html · main.tsx          # layar pemain di "/"
-│  └─ admin/index.html · main.tsx    # konsol admin di "/admin/"
+│  ├─ admin/index.html · main.tsx    # konsol admin di "/admin/"
+│  └─ public/_headers                # tajuk keamanan halaman (bagian 12.2)
 ├─ server/jejak-setara/              # Cloudflare Worker
 │  ├─ wrangler.jsonc
 │  ├─ src/
@@ -100,13 +105,15 @@ ruang-setara/
 │  └─ seed/bank-awal.json            # bank kejadian awal (hasil fitur konten)
 ├─ scripts/game/art/                 # kit gambar bersama + atas_*.py dan build_jejak.py
 ├─ scripts/jejak-setara/
+│  ├─ bila-ada.mjs                   # penjalan skrip yang berkasnya belum ada (bagian 4.3)
 │  ├─ peta/kampung.txt · objek.json · build_peta.py   # sumber peta
 │  ├─ simulasi-beban.mjs             # 50 bot WebSocket
 │  └─ semai.mjs                      # menyemai bank awal ke D1
 ├─ e2e/jejak-setara/                 # uji Playwright multi-konteks
-├─ vite.jejak.config.ts
+├─ vite.jejak.config.ts            # Vite dan plugin Cloudflare (JA-15)
+├─ vitest.jejak.config.ts · playwright.jejak.config.ts   # uji unit dan uji ujung ke ujung Jejak Setara
 └─ .github/workflows/
-   ├─ jejak-uji.yml                  # push ke main: uji, build, migrasi, deploy ke lingkungan uji
+   ├─ jejak-uji.yml                  # push ke main: uji dan build (JS-01); migrasi dan deploy ke lingkungan uji sejak JS-03
    ├─ jejak-produksi.yml             # tombol "Run workflow": deploy ke produksi
    └─ jejak-admin-awal.yml           # tombol: buat atau pulihkan akun admin
 ```
@@ -118,64 +125,87 @@ ruang-setara/
 
 ### 4.1 Vite
 
-`vite.jejak.config.ts` terpisah dari `vite.config.ts` (Vinext) dan `vite.pages.config.ts` (GitHub Pages):
+`vite.jejak.config.ts` terpisah dari `vite.config.ts` (Vinext) dan `vite.pages.config.ts` (GitHub Pages), dan memakai plugin Cloudflare untuk Vite (JA-15, diputuskan di Gerbang 1 JS-01):
 
 ```ts
-// Contoh; disesuaikan di Plan JS-01.
-export default defineConfig({
-  root: "web/jejak-setara",
-  base: "/",                       // Worker menyajikan halaman dari akar domain
-  plugins: [react()],
-  build: {
-    outDir: "../../dist-jejak",
-    emptyOutDir: true,
-    rolldownOptions: {
-      input: {
-        pemain: root + "web/jejak-setara/index.html",
-        admin: root + "web/jejak-setara/admin/index.html",
-      },
+// Ringkasan; isi lengkap di vite.jejak.config.ts.
+export default defineConfig(async () => {
+  process.env.WRANGLER_SEND_METRICS ??= "false";        // tanpa telemetri Wrangler
+  process.env.CLOUDFLARE_CF_FETCH_ENABLED ??= "false";  // tanpa mengambil data Request.cf dari Cloudflare
+  const { cloudflare } = await import("@cloudflare/vite-plugin");
+  return {
+    root: "web/jejak-setara",
+    base: "/",                       // Worker menyajikan halaman dari akar domain
+    plugins: [react(), cloudflare({ configPath: akar + "server/jejak-setara/wrangler.jsonc", viteEnvironment: { name: "worker" }, inspectorPort: false })],
+    build: { outDir: akar + "dist-jejak", emptyOutDir: true },
+    environments: {
+      client: { build: { rolldownOptions: { input: { pemain: "…/index.html", admin: "…/admin/index.html" } } } },
     },
-  },
+  };
 });
 ```
 
-Plan JS-01 menimbang apakah `@cloudflare/vite-plugin` (sudah ada) dipakai untuk menjalankan Worker dan halaman bersama saat pengembangan, atau `wrangler dev` dan Vite dijalankan terpisah. Pilihan dicatat sebagai keputusan baru.
+- `dev:jejak` menjalankan halaman (dengan muat ulang otomatis) dan Worker di satu alamat. `build:jejak` menghasilkan `dist-jejak/client/` (halaman, aset berhash, dan `_headers`) dan `dist-jejak/worker/` (Worker dan `wrangler.json` hasil build), ditambah `web/jejak-setara/.wrangler/deploy/config.json` yang menunjuk ke `wrangler.json` itu. `vite preview` menjalankan hasil build di runtime Workers lokal dan dipakai uji ujung ke ujung.
+- Masukan dua halaman wajib ditulis di `environments.client`. Bila ditulis di `build` teratas, build Worker ikut membacanya dan gagal.
+- Uji unit memakai `vitest.jejak.config.ts`, agar Vitest tidak memuat plugin ini.
 
 ### 4.2 Wrangler
 
-```jsonc
-// server/jejak-setara/wrangler.jsonc (contoh)
+JS-01, hanya lingkungan lokal:
+
+```json
 {
-  "name": "jejak-setara",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "jejak-setara-lokal",
   "main": "src/index.ts",
-  "compatibility_date": "2026-11-01",
-  "assets": { "directory": "../../dist-jejak", "binding": "ASSETS" },
+  "compatibility_date": "2026-05-15",
+  "assets": { "binding": "ASSETS", "run_worker_first": ["/api/*", "/ws/*"] },
+  "vars": { "LINGKUNGAN": "lokal" }
+}
+```
+
+Rencana JS-03 (contoh; ditetapkan di Plan JS-03):
+
+```jsonc
+{
+  "name": "jejak-setara-lokal",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-15",
+  "assets": { "binding": "ASSETS", "run_worker_first": ["/api/*", "/ws/*"] },
   "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RuangJejak"] }],
   "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara", "database_id": "<diisi>", "migrations_dir": "migrations" }],
   "triggers": { "crons": ["0 19 * * *"] },   // 03.00 WITA: pembersihan harian
-  "vars": { "LINGKUNGAN": "produksi" },
-  "env": { "uji": { "name": "jejak-setara-uji", "vars": { "LINGKUNGAN": "uji" } /* D1 dan DO tersendiri */ } }
+  "vars": { "LINGKUNGAN": "lokal" },
+  "env": {
+    "uji": { "name": "jejak-setara-uji", "vars": { "LINGKUNGAN": "uji" } /* D1 dan DO tersendiri */ },
+    "produksi": { "name": "jejak-setara", "vars": { "LINGKUNGAN": "produksi" } /* D1 dan DO tersendiri */ }
+  }
 }
 ```
 
+- Lingkungan teratas hanya untuk pengembangan lokal. Dengan plugin Vite, lingkungan dipilih saat build lewat `CLOUDFLARE_ENV` (misalnya `CLOUDFLARE_ENV=uji`), dan `--env` saat deploy tidak berpengaruh. Build yang lupa memilih lingkungan menghasilkan Worker lokal, jadi tidak pernah menyentuh produksi.
+- `compatibility_date` mengikuti runtime `workerd` yang terpasang (kini 1.20260515, batas 22 Mei 2026). Tanggal yang lebih baru membuat `wrangler dev` dan uji lokal berhenti dengan galat, jadi tanggal dinaikkan bersama `wrangler` dengan izin dependensi.
+- Plugin Vite mengabaikan `assets.directory`; folder aset adalah hasil build halaman (`dist-jejak/client/`).
 - Permintaan `/api/*` dan `/ws/*` selalu ditangani Worker. Selain itu, aset statis disajikan langsung (gratis dan tidak dihitung kuota).
 - Stub ruang diambil dengan `env.RUANG.get(id, { locationHint: "apac-se" })` (JA-13).
 
 ### 4.3 Skrip `package.json` (tambahan)
 
-| Skrip | Kegunaan |
-|---|---|
-| `dev:jejak` | Halaman pemain dan konsol dengan Worker lokal (Durable Object dan D1 lokal) |
-| `build:jejak` | Build halaman ke `dist-jejak/` |
-| `content:check:jejak` | Validasi bank awal, peta, dan kecocokan rujukan |
-| `test:jejak` | Uji unit `inti/`, inti ruang, dan klien |
-| `test:jejak:server` | Uji Worker dan D1 (alat diputuskan di Plan JS-03) |
-| `test:e2e:jejak` | Uji Playwright multi-konteks terhadap Worker lokal |
-| `sim:beban` | Simulasi 50 bot pada Worker lokal atau lingkungan uji |
-| `peta:build` | `python scripts/jejak-setara/peta/build_peta.py` |
-| `assets:build:jejak` | `python scripts/game/art/build_jejak.py` |
-| `db:migrasi:lokal` | Menerapkan migrasi D1 ke basis data lokal |
+| Skrip | Kegunaan | Aktif sejak |
+|---|---|---|
+| `dev:jejak` | Halaman pemain dan konsol dengan Worker lokal di satu alamat (plugin Vite) | JS-01 |
+| `build:jejak` | Build halaman ke `dist-jejak/client/` dan Worker ke `dist-jejak/worker/` | JS-01 |
+| `content:check:jejak` | Validasi bank awal, peta, dan kecocokan rujukan: semua uji di `app/jejak-setara/__tests__/konten/` | JS-05 dan JS-06 |
+| `test:jejak` | Uji unit `inti/`, inti ruang, klien, dan konten (Vitest di Node) | JS-01 |
+| `test:jejak:server` | Uji Worker dan D1 (alat diputuskan di Plan JS-03) | JS-03 |
+| `test:e2e:jejak` | Uji Playwright multi-konteks terhadap `vite preview` (berkas `e2e/jejak-setara/*.uji.ts`) | JS-01 |
+| `sim:beban` | Simulasi 50 bot pada Worker lokal atau lingkungan uji | JS-03 |
+| `peta:build` | `python scripts/jejak-setara/peta/build_peta.py` | JS-06 |
+| `assets:build:jejak` | `python scripts/game/art/build_jejak.py` | Aset pertama Sesi C |
+| `db:migrasi:lokal` | Menerapkan migrasi D1 ke basis data lokal | JS-03 |
+
+Skrip yang berkas atau fiturnya belum ada dijalankan lewat `scripts/jejak-setara/bila-ada.mjs`, yang mencetak "Belum tersedia: …" lalu selesai tanpa galat. Bila berkasnya sudah ada, perintah sungguhan dijalankan, sehingga Sesi B dan C tidak perlu mengubah `package.json` (spesifikasi JS-01).
 
 Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, agar alur terbit GitHub Pages yang sudah ada tetap lulus tanpa Cloudflare.
 
@@ -183,8 +213,8 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 
 | Berkas | Nama di tab Actions | Pemicu | Langkah |
 |---|---|---|---|
-| `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara | Pasang → `content:check:jejak` → `test:jejak` → `build:jejak` → migrasi D1 lingkungan uji → deploy `--env uji` |
-| `jejak-produksi.yml` | Jejak: produksi | Tombol "Run workflow" oleh pemilik proyek | Sama, untuk produksi; berhenti bila ada ruang produksi berstatus `main` atau `jeda` (dicek lewat API) |
+| `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara (daftar jalur di berkasnya), atau tombol "Run workflow" | Sejak JS-01: pasang → `content:check:jejak` → `test:jejak` → `build:jejak`. Sejak JS-03 ditambah migrasi D1 lingkungan uji dan deploy: build dengan `CLOUDFLARE_ENV=uji`, lalu `wrangler deploy` |
+| `jejak-produksi.yml` | Jejak: produksi | Tombol "Run workflow" oleh pemilik proyek | Sama, untuk produksi (build dengan `CLOUDFLARE_ENV=produksi`); berhenti bila ada ruang produksi berstatus `main` atau `jeda` (dicek lewat API) |
 | `jejak-admin-awal.yml` | Jejak: admin awal | Tombol "Run workflow" | Membuat akun admin pertama, atau mengatur ulang sandi admin dengan sandi sementara dari rahasia GitHub |
 
 `deploy-pages.yml` yang sudah ada tidak diubah.
@@ -198,7 +228,7 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 | `KUNCI_TIKET` | Rahasia Worker (`wrangler secret`) | Kunci HMAC tiket layar kelas |
 | `KUNCI_SANDI` | Rahasia Worker | Kunci tambahan (*pepper*) hash sandi |
 | `KUNCI_IP` | Rahasia Worker | Garam harian untuk hash IP pada pembatas percobaan masuk |
-| `LINGKUNGAN` | Variabel Worker | `uji` atau `produksi` |
+| `LINGKUNGAN` | Variabel Worker | `lokal` (pengembangan dan uji di mesin agen), `uji`, atau `produksi` |
 
 Rahasia tidak pernah ditulis di repositori, log, atau pesan galat.
 
@@ -646,7 +676,9 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 
 ### 12.2 Tajuk keamanan
 
-Worker menambahkan pada setiap halaman: `Content-Security-Policy` (`default-src 'self'`, `connect-src 'self'` dan `wss:` ke domain sendiri, `img-src 'self' data: blob:`, `frame-ancestors 'none'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, dan `Permissions-Policy` yang menolak kamera, mikrofon, dan lokasi.
+Halaman statis mendapat tajuk dari `web/jejak-setara/public/_headers` (aturan `/*`), karena aset disajikan langsung tanpa melewati Worker: `Content-Security-Policy` (`default-src 'self'`; `connect-src 'self'`, yang juga mencakup WebSocket ke alamat sendiri; `img-src 'self' data: blob:`; `frame-ancestors 'none'`; `base-uri 'self'`; `form-action 'self'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, dan `Permissions-Policy` yang menolak kamera, mikrofon, dan lokasi.
+
+Tajuk `_headers` tidak berlaku untuk jawaban buatan Worker (dokumentasi Cloudflare). Karena itu setiap jawaban API membawa tajuknya sendiri: `Content-Type: application/json; charset=utf-8`, `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, dan `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`. Saat `vite` dev, `_headers` tidak dipakai, sehingga muat ulang otomatis tidak terhalang.
 
 ### 12.3 Data yang disimpan
 
@@ -707,7 +739,7 @@ Kurs yang dipakai sekitar Rp 18.150 per dolar AS (3 November 2026). Pajak dan bi
 | Unit | Vitest | `inti/` (skor, peringkat dan seri, skill, kotak, masa, gerak dan tabrakan, pemeriksaan kecepatan, pengacakan berbenih, skema protokol), inti ruang dengan jam tiruan (siklus ruang, jeda, sambung ulang, kunci sekali, batas pesan, penempatan kejadian), klien (kamera, skala, interpolasi) |
 | Konten dan peta | Vitest + zod | Bank awal (bagian 5.4), kecocokan rujukan dengan pustaka awal, keterjangkauan peta, jarak antartitik, kecukupan titik per zona |
 | Worker dan D1 | Alat yang disetujui di Plan JS-03 | Rute API, izin per peran, autentikasi, pembatas percobaan, migrasi, versi dan status kejadian, statistik, CSV |
-| Ujung ke ujung | Playwright, beberapa konteks peramban | Guru masuk, membuat ruang, dan membuka layar kelas; tiga pemain bergabung (satu dengan emulasi HP Android dan sentuhan); mulai; bergerak lewat kait uji; memeriksa dan menjawab kejadian; papan skor berubah; jeda dan lanjut; sambungan diputus lalu tersambung kembali; dikeluarkan; ronde berakhir; podium; pembahasan; rekap pribadi; ekspor CSV |
+| Ujung ke ujung | Playwright, beberapa konteks peramban, terhadap `vite preview` (berkas `e2e/jejak-setara/*.uji.ts`) | Guru masuk, membuat ruang, dan membuka layar kelas; tiga pemain bergabung (satu dengan emulasi HP Android dan sentuhan); mulai; bergerak lewat kait uji; memeriksa dan menjawab kejadian; papan skor berubah; jeda dan lanjut; sambungan diputus lalu tersambung kembali; dikeluarkan; ronde berakhir; podium; pembahasan; rekap pribadi; ekspor CSV |
 | Jaringan | Playwright + pembatas jaringan | Jaringan lambat dan terputus-putus; latensi 300 ms; sambung ulang |
 | Beban | `sim:beban` (Node 22, WebSocket bawaan) | 50 bot per ruang dan 10 ruang serentak selama 15 menit: CPU per putaran, ukuran dan jumlah pesan, lalu lintas per pemain, p95 waktu pulang-pergi, dan perkiraan biaya |
 | Manual | Daftar periksa AGENTS | HP kelas bawah, proyektor dari 8 m, wifi sekolah, kurangi gerak, keyboard saja, uji coba kelas |

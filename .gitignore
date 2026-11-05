@@ -52,3 +52,9 @@ __pycache__/
 # hasil uji ujung ke ujung (Playwright)
 /test-results/
 /playwright-report/
+
+# Jejak Setara (JS-01)
+/dist-jejak/
+.wrangler/
+.dev.vars*
+/test-results-jejak/

@@ -1,0 +1,52 @@
+# Menguji Jejak Setara setiap ada perubahan berkas Jejak Setara yang di-push ke branch "main".
+# Belum ada deploy: migrasi dan deploy ke lingkungan uji ditambahkan di JS-03.
+name: "Jejak: uji"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/jejak-setara/**"
+      - "web/jejak-setara/**"
+      - "server/jejak-setara/**"
+      - "scripts/jejak-setara/**"
+      - "scripts/game/art/**"
+      - "e2e/jejak-setara/**"
+      - "docs/jejak-setara/**"
+      - "vite.jejak.config.ts"
+      - "vitest.jejak.config.ts"
+      - "playwright.jejak.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/jejak-uji.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jejak-uji
+  cancel-in-progress: true
+
+jobs:
+  uji:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Pasang dependensi
+        run: npx -y pnpm@11.25.0 install --frozen-lockfile
+
+      - name: Periksa konten Jejak
+        run: npx -y pnpm@11.25.0 content:check:jejak
+
+      - name: Uji Jejak
+        run: npx -y pnpm@11.25.0 test:jejak
+
+      - name: Build Jejak
+        run: npx -y pnpm@11.25.0 build:jejak
