@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Tahap saat ini | Naskah Giliran 1 (Z7: K-13 dan K-14), menunggu balasan "Setuju: naskah Z7" |
+| Tahap saat ini | Naskah Giliran 2 (Z1: K-01 dan K-02), menunggu balasan "Setuju: naskah Z1" beserta pilihan versi K-02 |
 | Pekerjaan | Naskah final 16 kejadian dan daftar rujukannya (bagian naskah dari JS-05) |
 | Tanggal | 5 November 2026 |
 | Acuan | ZIP repositori 5 November 2026 (JS-01 selesai) |
@@ -16,12 +16,14 @@
 | 5 Nov 2026 | Plan | Usulan diperiksa ulang terhadap ZIP repositori terbaru dan diperbaiki (lihat "Perubahan dari usulan pertama"); tetap menunggu "Setuju: naskah" |
 | 5 Nov 2026 | Plan | Pemilik proyek membalas "Setuju: naskah": semua saran diterima (usulan 1a sampai 7a) |
 | 5 Nov 2026 | Naskah | Giliran 1: `K-13.md`, `K-14.md`, dan `NASKAH.md` diserahkan untuk dinilai, menunggu "Setuju: naskah Z7" |
+| 5 Nov 2026 | Naskah | Pemilik proyek membalas "Setuju: naskah Z7": K-13 dan K-14 disetujui |
+| 5 Nov 2026 | Naskah | Giliran 2: `K-01.md` dan `K-02.md` (dua versi situasi untuk KT-10) diserahkan, menunggu "Setuju: naskah Z1" |
 
 ## Ringkasan rencana (templat AGENTS 12.1)
 
 | | |
 |---|---|
-| Status | Disetujui 5 Nov 2026 ("Setuju: naskah"); Giliran 1 diserahkan |
+| Status | Disetujui 5 Nov 2026 ("Setuju: naskah"); Giliran 1 disetujui; Giliran 2 diserahkan |
 | Memenuhi | Bagian naskah JS-05: 16 kejadian dan rujukannya (PRD bagian 10), sebagai data untuk JFR-15, JFR-16, dan JFR-45 |
 | Bergantung pada | PRD bagian 10 serta Architecture bagian 5.1 dan 5.4. Tidak menunggu JS-02; JS-02 baru diperlukan untuk bagian kode JS-05 |
 | Berkas yang dibuat atau diubah | Sekarang: `naskah/STATUS.md`. Sesudah disetujui: `naskah/NASKAH.md` dan `naskah/K-01.md` sampai `naskah/K-16.md` |
@@ -176,6 +178,7 @@ Semua rujukan berstatus **perlu verifikasi**. Daftar ini persis rujukan usulan P
 - **12 rujukan baru** (ditandai **baru**) perlu dibaca penuh.
 - Pemeriksaan sekarang dipakai untuk menyetujui naskah. Tanda "Terverifikasi" resmi tetap diberikan akun Peninjau di pustaka rujukan konsol (JFR-45, dibangun di JS-12). Bank awal disemai dengan semua rujukan berstatus `belum`, dan agen tidak pernah menandai rujukan terverifikasi.
 - Hasil pra-pemeriksaan agen (usulan 7a) dicatat per giliran di berkas `K-xx.md` dan di pustaka rujukan `NASKAH.md`.
+- Untuk Pasal 28A–28J, cocokkan bunyi pasal dengan naskah Perubahan Kedua di peraturan.go.id. Naskah gabungan UUD 1945 di JDIH Kemenkeu memuat beberapa salah ketik di Bab XA (misalnya Pasal 28H ayat (2) dan 28I ayat (2)), jadi naskah itu hanya dipakai untuk melihat pasal mana yang pernah diubah.
 - Kolom "Teks rujukan" mengikuti usulan 4a. Kolom "Yang dibutuhkan kejadian" adalah isi yang harus ada di pasal itu agar cocok, bukan kutipan bunyi pasal.
 - Bila sebuah tautan tidak terbuka, buka https://peraturan.bpk.go.id (Database Peraturan JDIH BPK), lalu ketik jenis, nomor, dan tahunnya di kotak pencarian, misalnya "UU 32 Tahun 2009".
 
@@ -288,12 +291,12 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 - JS-05 baru dimulai sesudah pemilik proyek mengabarkan bahwa JS-02 selesai.
 - `content:check:jejak` menjalankan uji di `app/jejak-setara/__tests__/konten/` (AGENTS bagian 6). Folder itu belum termasuk izin JS-05 dari pemilik proyek (5 Nov 2026), jadi izinnya akan saya minta di Plan JS-05.
 
-## Cara membalas (Giliran 1)
+## Cara membalas (Giliran 2)
 
-- **"Setuju: naskah Z7"** berarti K-13 dan K-14 disetujui apa adanya.
-- Bila ada yang perlu diubah, tulis bebas, misalnya "K-14: ganti gerobak dagangan dengan lapak di pasar". Saya memperbaikinya, lalu menyerahkannya lagi.
+- **"Setuju: naskah Z1, K-02 versi A"** (atau **versi B**) berarti K-01 dan K-02 disetujui dengan versi situasi K-02 yang dipilih peninjau konten (KT-10).
+- Bila ada yang perlu diubah, tulis bebas, misalnya "K-01: teman Nara diganti Sinta". Saya memperbaikinya, lalu menyerahkannya lagi.
 
-## Langkah berikutnya sesudah "Setuju: naskah Z7"
+## Langkah berikutnya sesudah "Setuju: naskah Z1"
 
-1. Menandai K-13 dan K-14 "Disetujui" di `NASKAH.md`.
-2. Menulis Giliran 2: K-01 dan K-02 (Z1 Rumah dan gang). K-02 dikirim dalam dua versi situasi (umum dan bernuansa Bali) untuk KT-10, lengkap dengan catatan peninjauan khusus dan pra-pemeriksaan JR-02 (Pasal 28E ayat (1)), JR-03 (Pasal 29 ayat (2)), dan JR-16 sebagai padanan R-02.
+1. Menandai K-01 dan K-02 "Disetujui" di `NASKAH.md`, menghapus versi situasi K-02 yang tidak dipilih, dan mencatat keputusan KT-10 di tabel keputusan.
+2. Menulis Giliran 3: K-03 dan K-04 (Z2 Sekolah). K-04 mendapat peninjauan khusus (disabilitas) dan pra-pemeriksaan JR-07 (Pasal 28H ayat (2)). K-03 hanya memakai rujukan padanan (JR-01, JR-05, JR-04), jadi cukup dicek kecocokannya.

@@ -8,8 +8,8 @@ Semua rujukan berstatus **perlu verifikasi**. Tanda "Terverifikasi" hanya diberi
 
 | Kode | Zona | Judul | Giliran | Status | Berkas |
 |---|---|---|---|---|---|
-| K-01 | Z1 | Menjaga adik | 2 | Belum ditulis | — |
-| K-02 | Z1 | Hari suci tetangga | 2 | Belum ditulis | — |
+| K-01 | Z1 | Menjaga adik | 2 | Menunggu penilaian | [K-01.md](K-01.md) |
+| K-02 | Z1 | Hari suci tetangga | 2 | Menunggu penilaian | [K-02.md](K-02.md) |
 | K-03 | Z2 | Bekal yang diejek | 3 | Belum ditulis | — |
 | K-04 | Z2 | Kelas di lantai dua | 3 | Belum ditulis | — |
 | K-05 | Z3 | Bonceng tanpa helm | 4 | Belum ditulis | — |
@@ -20,8 +20,8 @@ Semua rujukan berstatus **perlu verifikasi**. Tanda "Terverifikasi" hanya diberi
 | K-10 | Z5 | Logat yang diejek | 6 | Belum ditulis | — |
 | K-11 | Z6 | Sampah di sungai | 7 | Belum ditulis | — |
 | K-12 | Z6 | Lapangan untuk semua | 7 | Belum ditulis | — |
-| K-13 | Z7 | Antrean puskesmas | 1 | Menunggu penilaian | [K-13.md](K-13.md) |
-| K-14 | Z7 | Berhenti sekolah? | 1 | Menunggu penilaian | [K-14.md](K-14.md) |
+| K-13 | Z7 | Antrean puskesmas | 1 | Disetujui 5 Nov 2026 | [K-13.md](K-13.md) |
+| K-14 | Z7 | Berhenti sekolah? | 1 | Disetujui 5 Nov 2026 | [K-14.md](K-14.md) |
 | K-15 | Z8 | Video yang disebar | 8 | Belum ditulis | — |
 | K-16 | Z8 | Kabar menakutkan | 8 | Belum ditulis | — |
 
@@ -31,10 +31,12 @@ Sasaran: selisih pilihan terpanjang dan terpendek paling banyak 20 karakter di L
 
 | Kejadian | Selisih Langkah 1 | Pilihan benar terpanjang? | Selisih Langkah 2 | Pilihan tepat terpanjang? |
 |---|---|---|---|---|
+| K-01 | 8 | Tidak | 5 | Tidak |
+| K-02 | 4 | Tidak | 6 | Ya |
 | K-13 | 9 | Tidak | 14 | Tidak |
 | K-14 | 5 | Tidak | 5 | Ya |
 
-Sejauh ini pilihan benar menjadi yang terpanjang di 0 dari 2 kejadian (Langkah 1), dan pilihan tepat di 1 dari 2 kejadian (Langkah 2).
+Sejauh ini pilihan benar menjadi yang terpanjang di 0 dari 4 kejadian (Langkah 1), dan pilihan tepat di 2 dari 4 kejadian (Langkah 2).
 
 ## Pustaka rujukan
 
@@ -43,8 +45,8 @@ Teks mengikuti usulan 4a: rujukan yang berpadanan R-xx sama persis dengan `app/s
 | JR | Teks rujukan | Dokumen sumber | Padanan Sehari | Dipakai di | Pra-pemeriksaan agen | Status |
 |---|---|---|---|---|---|---|
 | JR-01 | Pasal 28B ayat (2) UUD NRI 1945 | UUD Perubahan Kedua | R-01 | K-01, K-03 | — | Perlu verifikasi |
-| JR-02 | Pasal 28E ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-02 | — | Perlu verifikasi |
-| JR-03 | Pasal 29 ayat (2) UUD NRI 1945 | UUD naskah asli | Baru | K-02 | — | Perlu verifikasi |
+| JR-02 | Pasal 28E ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-02 | 5 Nov 2026 (K-02.md) | Perlu verifikasi |
+| JR-03 | Pasal 29 ayat (2) UUD NRI 1945 | UUD naskah asli | Baru | K-02 | 5 Nov 2026 (K-02.md) | Perlu verifikasi |
 | JR-04 | Pasal 28J ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-08 | K-02, K-03, K-06, K-08, K-09, K-10, K-12, K-13, K-15, K-16 | — | Perlu verifikasi |
 | JR-05 | Pasal 28G ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-03 | K-03, K-07, K-15 | — | Perlu verifikasi |
 | JR-06 | Pasal 31 ayat (1) UUD NRI 1945 | UUD Perubahan Keempat | R-04 | K-04, K-14 | — | Perlu verifikasi |
