@@ -113,7 +113,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 ## 8. Konten adegan (draf naskah)
 
 Keterangan efek: **H** = Hak orang lain terjaga, **K** = Kewajiban dijalankan. Tingkat dampak: *tepat*, *kurang tepat*, *berisiko*.
-Semua rujukan berstatus **perlu verifikasi** sampai dicocokkan dengan naskah resmi di JDIH (lihat aturan di `AGENTS.md`).
+Setiap rujukan dicocokkan dengan naskah resmi di JDIH, dan status verifikasinya dicatat di `Verifikasi_Rujukan.md` (lihat aturan di `AGENTS.md`).
 
 ### Adegan 1 — Pagi di rumah (06.15)
 
@@ -126,7 +126,7 @@ Ibu harus berangkat lebih awal ke pasar. Gita, adik Nara yang kelas 3 SD, belum 
 | C | Mengantar Gita sambil menggerutu dan memarahinya sepanjang jalan | −5 | +5 | kurang tepat |
 
 Hak dan kewajiban: hak anak atas pengasuhan dan perlindungan; kewajiban anak menghormati orang tua dan menyayangi keluarga.
-Rujukan: Pasal 28B ayat (2) UUD NRI 1945; UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19.
+Rujukan: Pasal 28B ayat (2) UUD NRI 1945; UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 14 ayat (1); UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19.
 
 ### Adegan 2 — Perjalanan ke sekolah (06.50)
 
@@ -139,7 +139,7 @@ Dimas, teman sekelas, berhenti dengan motor. Ia belum punya SIM dan tidak membaw
 | C | Ikut setelah meminjam helm di warung | 0 | −5 | kurang tepat |
 
 Hak dan kewajiban: hak atas pendidikan dan rasa aman; kewajiban menaati aturan lalu lintas.
-Rujukan: Pasal 28G ayat (1), Pasal 31 ayat (1), Pasal 27 ayat (1) UUD NRI 1945; UU No. 22 Tahun 2009 tentang LLAJ, Pasal 77 ayat (1) dan Pasal 106 ayat (8).
+Rujukan: Pasal 28G ayat (1) UUD NRI 1945; Pasal 31 ayat (1) UUD NRI 1945; Pasal 27 ayat (1) UUD NRI 1945; UU No. 22 Tahun 2009 tentang LLAJ, Pasal 77 ayat (1) dan Pasal 106 ayat (8).
 
 ### Adegan 3 — Diskusi kelompok di kelas (09.00)
 
@@ -152,7 +152,7 @@ Kelompok merencanakan proyek "Kelas Ramah". Nara mengusulkan pojok baca, tetapi 
 | C | Diam dan mengalah walau punya alasan kuat | 0 | −5 | kurang tepat |
 
 Hak dan kewajiban: kebebasan menyampaikan pendapat; kewajiban menghormati hak orang lain dalam musyawarah.
-Rujukan: Pasal 28E ayat (3) dan Pasal 28J ayat (1) UUD NRI 1945.
+Rujukan: Pasal 28E ayat (3) UUD NRI 1945; Pasal 28J ayat (1) UUD NRI 1945.
 
 ### Adegan 4 — Jam istirahat (10.15)
 
@@ -165,7 +165,7 @@ Komang, adik kelas VII, ditertawakan sekelompok siswa karena sepatunya robek. Sa
 | C | Pura-pura tidak melihat | −10 | −5 | kurang tepat | — |
 
 Hak dan kewajiban: hak anak atas perlindungan dari kekerasan dan diskriminasi; kewajiban tidak merendahkan orang lain.
-Rujukan: Pasal 28B ayat (2), Pasal 28G ayat (1), Pasal 28J ayat (1) UUD NRI 1945.
+Rujukan: Pasal 28B ayat (2) UUD NRI 1945; Pasal 28G ayat (1) UUD NRI 1945; Pasal 28J ayat (1) UUD NRI 1945.
 
 ### Adegan 5 — Sore di lingkungan rumah (16.30)
 
@@ -180,7 +180,7 @@ Sepeda Pak Made hilang dari depan warung. Beberapa warga langsung menuduh Bayu, 
 **Kuis peran (setelah kartu dampak):** "Jika perkara ini sampai ke pengadilan, siapa yang memeriksa, mengadili, dan memutusnya?" Pilihan: Polisi, Jaksa, Advokat, Hakim. Jawaban: Hakim. Setelah dijawab, tampil kartu empat peran: polisi menerima laporan dan menyidik, jaksa menuntut, advokat mendampingi, hakim memutus. Kuis tidak memengaruhi indikator.
 
 Hak dan kewajiban: hak atas kepastian hukum yang adil dan perlakuan yang sama di hadapan hukum; kewajiban menghormati proses hukum.
-Rujukan: Pasal 28D ayat (1), Pasal 28G ayat (1), Pasal 24 UUD NRI 1945; UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g; UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah).
+Rujukan: Pasal 28D ayat (1) UUD NRI 1945; Pasal 28G ayat (1) UUD NRI 1945; Pasal 24 ayat (1) dan ayat (2) UUD NRI 1945; UU No. 48 Tahun 2009, Pasal 11 ayat (1); UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g; UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah).
 
 ### Adegan 6 — Malam, media sosial (20.00)
 
@@ -196,7 +196,7 @@ Video Komang tadi siang beredar di grup kelas dengan stiker ejekan. Banyak yang 
 | C | Keluar dari grup tanpa berbuat apa-apa | −5 | 0 | kurang tepat |
 
 Hak dan kewajiban: hak atas rasa aman, kehormatan, dan martabat; kewajiban menghormati privasi dan tidak merendahkan orang lain.
-Rujukan: Pasal 28E ayat (3), Pasal 28G ayat (1), Pasal 28J ayat (1) UUD NRI 1945.
+Rujukan: Pasal 28G ayat (1) UUD NRI 1945; Pasal 28J ayat (1) UUD NRI 1945.
 
 ## 9. Aturan permainan
 
@@ -293,6 +293,7 @@ Semua aset gambar **digambar dengan kode oleh Claude** dan disetujui pengembang.
 | 19 Okt 2026 | **Aset digambar dengan kode oleh Claude**, bukan dengan Gemini; contoh adegan 1 (Nara, Ibu, Gita, dapur pagi) disetujui sebagai acuan gaya |
 | 21 Okt 2026 | Rujukan adegan 5 menjadi UU No. 2 Tahun 2002, Pasal 13 dan Pasal 14 ayat (1) huruf g; rujukan Pasal 28J di adegan 6 menjadi Pasal 28J ayat (1). Keduanya tetap perlu verifikasi |
 | 21 Okt 2026 | Verifikasi rujukan dicatat pemilik proyek di daftar centang `docs/sehari-setara/Verifikasi_Rujukan.md` |
+| 22 Okt 2026 | Rujukan disesuaikan atas keputusan pemilik proyek: R-07 (Pasal 28E ayat (3) UUD NRI 1945) dilepas dari adegan 6; R-10 menjadi Pasal 24 ayat (1) dan ayat (2) UUD NRI 1945; R-11 menjadi UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g; R-13 (UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 14 ayat (1)) ditambahkan di adegan 1; dan R-14 (UU No. 48 Tahun 2009, Pasal 11 ayat (1)) ditambahkan di adegan 5. Semuanya tetap perlu verifikasi; riwayatnya di `Verifikasi_Rujukan.md` |
 | 26 Okt 2026 | Durasi diskusi bawaan tetap 60 detik (balasan `Setuju: F-07`, usulan 7 rencana F-07), menjawab pertanyaan terbuka bagian 16 nomor 3; pilihan 30, 60, atau 90 detik tetap dibuat di pengaturan kelas (F-10) |
 | 26 Okt 2026 | Bunyi klik (gaya A) dan bunyi teks per huruf (gaya B, setiap 2 huruf, nada tinggi, volume 60%) dikerjakan lebih awal di F-07 atas pilihan pemilik proyek lewat halaman uji suara. Sisa efek suara FR-19 tetap di F-13 |
 | 27 Okt 2026 | FR-20 dikerjakan sejak versi 1.0, di F-09: rekap kelas diunduh dari layar refleksi sebagai gambar PNG atau PDF A4, dibuat di peramban tanpa server dan tanpa data siswa (balasan `Setuju: F-09`, usulan 12 pilihan d, dengan izin tertulis "Izinkan dependensi: modern-screenshot 4.7.0"). Ini menjawab pertanyaan terbuka bagian 16 nomor 4 |
@@ -302,3 +303,4 @@ Semua aset gambar **digambar dengan kode oleh Claude** dan disetujui pengembang.
 | 4 Nov 2026 | Teks "Cara bermain" menjadi dasar panduan guru satu halaman (bagian 12), yang dibuat sebagai dokumen tersendiri sesudah F-10 (usulan 2a) |
 | 4 Nov 2026 | Pengaturan "kurangi gerak" di dalam game dikerjakan di F-10 (FR-17 sebagian); tombol layar penuh tetap di F-13. Layar "Tentang" untuk kredit aset dan huruf dikerjakan di F-11 (usulan 6a1 dan 6b1) |
 | 4 Nov 2026 | Pengaturan tidak disimpan antarsesi: memuat ulang halaman mengembalikan pengaturan bawaan (usulan 8a) |
+| 5 Nov 2026 | Rencana F-11 disetujui (balasan `Setuju: F-11`): game ditautkan dari dua titik galeri, yaitu tombol "Main Sehari Setara" di galeri Refleksi dan tautan di menu "Daftar materi", menjawab pertanyaan terbuka bagian 16 nomor 2; layar "Tentang" dikerjakan di F-11; pemeriksaan ketat rujukan dijalankan di CI sebelum build; dan tautan dari galeri baru terbit sesudah semua rujukan di `Verifikasi_Rujukan.md` dicentang pemilik proyek |

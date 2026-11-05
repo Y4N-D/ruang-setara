@@ -6,7 +6,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 |---|---|---|---|
 | F-01 | Selesai (21 Okt 2026) | [F-01-kerangka-halaman.md](specs/F-01-kerangka-halaman.md) | [F-01-hasil.md](tests/F-01-hasil.md) — lulus |
 | F-02 | Selesai (21 Okt 2026) | [F-02-mesin-permainan.md](specs/F-02-mesin-permainan.md) | [F-02-hasil.md](tests/F-02-hasil.md) — lulus |
-| F-03 | Selesai (21 Okt 2026); uji rujukan disesuaikan 22 Okt 2026 | [F-03-konten-adegan.md](specs/F-03-konten-adegan.md) | [F-03-hasil.md](tests/F-03-hasil.md) — lulus |
+| F-03 | Selesai (21 Okt 2026); uji rujukan disesuaikan 22 Okt 2026; uji daftar centang disesuaikan 5 Nov 2026 (F-11 bagian A) | [F-03-konten-adegan.md](specs/F-03-konten-adegan.md) | [F-03-hasil.md](tests/F-03-hasil.md) — lulus |
 | F-12 | Selesai (21 Okt 2026) | [F-12-integrasi-aset.md](specs/F-12-integrasi-aset.md) | [F-12-hasil.md](tests/F-12-hasil.md) — lulus |
 | F-04 | Selesai (22 Okt 2026) | [F-04-panggung.md](specs/F-04-panggung.md) | [F-04-hasil.md](tests/F-04-hasil.md) — lulus |
 | F-05 | Selesai (22 Okt 2026) | [F-05-panel-narasi-pilihan.md](specs/F-05-panel-narasi-pilihan.md) | [F-05-hasil.md](tests/F-05-hasil.md) — lulus |
@@ -15,6 +15,7 @@ Status fitur dari backlog di `AGENTS.md` bagian 5. Setiap entri melewati Plan �
 | F-08 | Selesai (27 Okt 2026) | [F-08-kuis-peran.md](specs/F-08-kuis-peran.md) | [F-08-hasil.md](tests/F-08-hasil.md), lulus |
 | F-09 | Selesai (27 Okt 2026) | [F-09-akhir-rekap-refleksi.md](specs/F-09-akhir-rekap-refleksi.md) | [F-09-hasil.md](tests/F-09-hasil.md), lulus |
 | F-10 | Selesai (4 Nov 2026) | [F-10-judul-pengaturan-prolog.md](specs/F-10-judul-pengaturan-prolog.md) | [F-10-hasil.md](tests/F-10-hasil.md), lulus |
+| F-11 | Bagian A selesai (5 Nov 2026); bagian B belum | [F-11-integrasi-galeri-rilis.md](specs/F-11-integrasi-galeri-rilis.md) | [F-11-hasil.md](tests/F-11-hasil.md), bagian A lulus |
 
 ## Dependensi dan skrip yang ditunda
 
@@ -35,10 +36,10 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
 
 - Plan F-04: F-04 sudah menampilkan latar dan sprite, sedangkan `manifest.ts` baru dibuat di F-12. Diputuskan 21 Okt 2026 (Gerbang 1 F-12): F-12 dikerjakan lebih dulu. F-04 cukup memakai kunci manifest dan fungsi `spriteFor` serta `sceneAssets` dari F-12, termasuk untuk pramuat gambar adegan berikutnya (Architecture bagian 8). Rencana F-04 ditulis 21 Okt 2026 (entri F-04).
 - Plan F-13: F-13 kini juga memuat FR-18, ulangi adegan dan kembali ke adegan sebelumnya (keputusan 21 Okt 2026). Reducer F-02 menjadikan `history` sumber kebenaran, sehingga pembatalan pilihan cukup memotong `history` lalu menghitung ulang.
-- Plan F-11: aktifkan pemeriksaan ketat rujukan (`RILIS=1 npx pnpm@11.25.0 content:check`) di CI sebelum permainan ditautkan dari galeri. Rilis hanya bila semua kotak di `Verifikasi_Rujukan.md` sudah dicentang pemilik proyek.
+- Plan F-11: aktifkan pemeriksaan ketat rujukan (`RILIS=1 npx pnpm@11.25.0 content:check`) di CI sebelum permainan ditautkan dari galeri. Rilis hanya bila semua kotak di `Verifikasi_Rujukan.md` sudah dicentang pemilik proyek. Masuk rencana F-11 (5 Nov 2026), usulan 5 dan 6.
 - Plan F-05: sapuan blok piksel saat pergantian adegan (Design System bagian 8) dikerjakan di F-05, fitur pertama yang menjalankan fase transition (keputusan Gerbang 1 F-04 nomor 5). Masuk rencana F-05 (22 Okt 2026).
 - Plan F-05: pratinjau panggung F-04 (`#adegan-N`) adalah layar sementara. Putuskan apakah tetap dipertahankan sebagai alat tinjau setelah alur permainan dibuat. Lihat usulan 5 entri F-05. Ditinjau lagi di rencana F-10, usulan 7 (4 Nov 2026). Selesai di F-10 (4 Nov 2026): pratinjau dipertahankan sebagai alat tinjau tak bertaut (usulan 7a).
-- Semua fitur: Tailwind galeri membaca seluruh repositori, termasuk dokumen. Kata lepas yang sama dengan nama kelas Tailwind di kode atau dokumen baru bisa menambah aturan CSS galeri. Uji build membandingkan berkas galeri (F-04, Temuan 2).
+- Semua fitur: Tailwind galeri membaca seluruh repositori, termasuk dokumen. Kata lepas yang sama dengan nama kelas Tailwind di kode atau dokumen baru bisa menambah aturan CSS galeri. Uji build membandingkan berkas galeri (F-04, Temuan 2). Sejak F-11 berkas galeri sengaja berubah di dua titik; cara membuktikannya ada di rencana F-11, usulan 7.
 - Plan F-05: Design System bagian 7 menyebut bingkai piksel "garis ink 2 px". F-01 membacanya sebagai px CSS. Sebelum panel dibangun, perlu dipastikan apakah yang dimaksud adalah piksel logis panggung. Lihat usulan 1 entri F-05.
 - Plan F-06 sampai F-10: jembatan sementara dan pintu masuk `#main` dari F-05 diganti fitur pemiliknya (keputusan Gerbang 1 F-05 nomor 3 dan 4). Kartu dampak (F-06), bintang (F-07), dan kuis (F-08) menggantikan bagiannya masing-masing di `bridgeActions` dan `PlayScreen.tsx`. Selesai di F-08 (27 Okt 2026): `bridgeActions` dan tombol jembatan baris status sudah dihapus. Layar akhir (F-09) menggantikan layar akhir sementara; masuk rencana F-09, usulan 11, dan selesai di F-09 (27 Okt 2026). Layar judul (F-10) menggantikan layar kerangka dan `#main`, dan memutuskan nasib tautan pratinjau; masuk rencana F-10, usulan 7 (4 Nov 2026). Selesai di F-10 (4 Nov 2026): layar kerangka, `#main`, `#main-3`, dan `#main-4` dihapus, dan permainan dimulai dari layar judul.
 - Plan F-06 dan seterusnya: di layar pilihan terpanjang, panel bawah 40u hanya menyisakan 3,05–3,3u, kurang dari satu baris pilihan (F-05, Temuan 2). Unsur baru di panel bawah perlu diukur ulang.
@@ -46,8 +47,8 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
 - Plan F-08: bagian kuis di `bridgeActions` (jawaban dari naskah) diganti F-08. Fase `quiz` datang sesudah tombol "Lanjut" kartu dampak adegan 5. Sejak F-07, `bridgeActions` berhenti di fase `stars`, sehingga kuis F-08 berada di antara kartu dampak adegan 5 dan fase bintang; tombol jembatan baris status (pengaman fase `quiz`) bisa dihapus bersama kuis. Dikerjakan di F-08 (27 Okt 2026).
 - Plan F-09: jumlah bintang akhir setiap tim perlu tampil di layar akhir atau rekap. Sesudah bintang adegan 6, layar akhir sementara langsung tampil, sehingga pop dan jumlah terakhir di papan tidak terlihat (F-07). Hasil kuis di rekap masih harus diputuskan pemilik proyek (usulan 8 entri F-08). `quizAnswer` dikosongkan saat adegan 6 dimulai (F-02), sehingga rekap yang menampilkan hasil kuis perlu menyimpan jawabannya sebelum itu. Masuk rencana F-09, usulan 5 dan 6 (27 Okt 2026). Selesai di F-09 (27 Okt 2026): papan tim di layar akhir dengan jumlah bintang akhir dan tanda "Bintang terbanyak", tim dan bintang di setiap kotak rekap, serta jawaban kuis yang disimpan di entri `history` adegan 5.
 - Plan F-10: (1) nama tim paling lebar 18,6u agar muat di papan pada 1024×768; "Tim Mentari" selebar 17,8u, sedangkan "Tim Kupu-kupu" (20,7u) atau "Tim Jalak Bali" (19,3u) tidak muat (F-07); (2) pengaturan suara di layar pengaturan memakai `settings.sound` yang sama dengan tombol `M` (F-07); (3) durasi diskusi 30, 60, atau 90 detik per kelas, dengan bawaan 60 detik (keputusan 26 Okt 2026); (4) alamat uji `#main-3` dan `#main-4` diganti layar judul, seperti `#main`; (5) arti `Esc` selama dialog kartu dampak dan kuis peran (F-08); (6) "Main lagi" di layar refleksi sementara memanggil `startActions` lewat `replayActions` di `ui/controls.ts`, sehingga permainan langsung mulai lagi di adegan 1. F-10 membuang bagian `startActions` itu agar "Main lagi" berhenti di layar judul (F-09). Masuk rencana F-10 (4 Nov 2026): butir (1) di usulan 3, butir (2) dan (3) di usulan 3 dan 5, butir (4) dan (6) di usulan 7, dan butir (5) di usulan 5. Selesai di F-10 (4 Nov 2026).
-- Plan F-11: asal dan lisensi bunyi klik dan bunyi teks (butir S-6 spesifikasi F-07) masih menunggu jawaban pemilik proyek. `CREDITS.md` dan Design System bagian 13 perlu dilengkapi sebelum rilis. Rencana F-10 (usulan 6b) mengusulkan layar "Tentang" ikut dibuat di F-11. Diputuskan 4 Nov 2026 (usulan 6b1): layar "Tentang" dibuat di F-11. Ruang untuk tombol keempat di layar judul sudah diukur (baris selebar 129,9–131,3u). Tombol itu perlu masa tunggu layar judul, karena klik kedua dari klik ganda pada "Tutup" cara bermain bisa jatuh di sana (spesifikasi F-10, bagian Masa tunggu dan klik ganda).
-- Plan F-11: rekap dan lembar unduhan rekap (F-09) menampilkan rujukan apa adanya, tanpa tanda "perlu verifikasi". Lembar unduhan bisa dibagikan ke luar kelas, jadi pemeriksaan ketat rujukan sebelum rilis berlaku juga untuknya.
+- Plan F-11: asal dan lisensi bunyi klik dan bunyi teks (butir S-6 spesifikasi F-07) masih menunggu jawaban pemilik proyek. `CREDITS.md` dan Design System bagian 13 perlu dilengkapi sebelum rilis. Rencana F-10 (usulan 6b) mengusulkan layar "Tentang" ikut dibuat di F-11. Diputuskan 4 Nov 2026 (usulan 6b1): layar "Tentang" dibuat di F-11. Ruang untuk tombol keempat di layar judul sudah diukur (baris selebar 129,9–131,3u). Tombol itu perlu masa tunggu layar judul, karena klik kedua dari klik ganda pada "Tutup" cara bermain bisa jatuh di sana (spesifikasi F-10, bagian Masa tunggu dan klik ganda). Masuk rencana F-11 (5 Nov 2026), usulan 2.
+- Plan F-11: rekap dan lembar unduhan rekap (F-09) menampilkan rujukan apa adanya, tanpa tanda "perlu verifikasi". Lembar unduhan bisa dibagikan ke luar kelas, jadi pemeriksaan ketat rujukan sebelum rilis berlaku juga untuknya. Masuk rencana F-11 (5 Nov 2026), usulan 6.
 - Plan F-13: sisa FR-19, yaitu bunyi konfirmasi, dampak tepat dan berisiko, tik pelan sepuluh detik terakhir, dan jingle akhir hari, serta ikon suara D-05 di bilah atas (alternatif S-4a tidak dipilih di F-07) dan pengatur volume. Pertimbangkan juga laporan F-07 Temuan 1: klik ganda pada "Lanjut" kartu memindahkan fokus dari ajakan bintang ke halaman. Temuan yang sama berlaku untuk "Lanjut" kuis peran (F-08, usulan 6). Laporan F-08 Temuan 1: dalam mode warna paksa, sudut terpotong kartu dampak tidak dimatikan. Dari F-09: jingle akhir hari (sisa FR-19) diputar di layar akhir; arti `Esc` di layar akhir, rekap, dan refleksi; klik ganda pada tombol bintang adegan 6 memindahkan fokus dari judul layar akhir ke halaman (varian Temuan 1 F-07, dibiarkan seperti keputusan F-08 usulan 6a); dan klik ganda "Sebelumnya" meninggalkan fokus di tombol "Sebelumnya" halaman berikutnya, sehingga `Enter` sesudahnya mundur satu halaman lagi (laporan F-09, Temuan 2). Arti `Esc` di layar akhir, rekap, dan refleksi diusulkan diputuskan di F-10 (rencana F-10, usulan 5). Dari rencana F-10: peramban biasanya memakai `Esc` untuk keluar dari layar penuh, sehingga `Esc` untuk pengaturan perlu dicek bersama tombol layar penuh. Sejak F-10 dialog pengaturan sudah ada, jadi pengatur volume bisa ditambahkan di sana, dan baris `F` (layar penuh) ditambahkan di dialog "Cara bermain" (spesifikasi F-10, Di luar cakupan).
 - Semua fitur dengan jam uji: waktu yang dihitung sejak sebuah elemen tampil baru mulai sesudah React menggambarnya. Majukan jam dalam dua langkah, misalnya `runFor(1200)`, tunggu kartu tampil, lalu `runFor(600)` (F-06, Temuan 3). Aturan yang sama berlaku untuk pengatur waktu diskusi dan teks per huruf sesudah sapuan (F-07, Temuan 3), dan untuk masa tunggu "Lanjut" kuis: jawab, tunggu kartu terbuka, lalu `runFor(600)` (F-08).
 - Semua fitur: uji ujung ke ujung yang memakai `page.clock` harus menjeda jam dengan `pauseAt` sebelum mengatur waktu, karena jam palsu Playwright tetap berjalan sampai dijeda (F-05, Temuan 1). Sejak F-07, pengatur waktu diskusi berjalan dari jam itu: `pauseAt` yang melompat saat diskusi berjalan langsung menghabiskan waktu diskusi. Panggil `pauseAt` sebelum diskusi dimulai, paling aman sebelum halaman dimuat, dan majukan waktu diskusi hanya dengan `runFor`.
@@ -59,6 +60,8 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
 - Panduan guru satu halaman (PRD bagian 12): dibuat sebagai dokumen tersendiri sesudah F-10, sebelum uji coba M3, dari teks dialog "Cara bermain" (usulan 2a F-10).
 - Semua fitur dengan uji ujung ke ujung: sejak F-10 permainan dimulai dari layar judul. Uji memakai `startGame` di `e2e/bantuan.ts`, yang menunggu masa tunggu 600 ms di layar judul, pengaturan kelas, dan setiap layar prolog. Uji yang menghitung bunyi sejak adegan 1 mengosongkan catatan perekam sesudah langkah pembuka (F-10).
 - Semua fitur: di lingkungan agen, satu perintah dibatasi 300 detik dan proses latar belakang bisa berhenti. Uji ujung ke ujung dijalankan per berkas atau per kelompok `-g` dengan konfigurasi pengganti yang sama, dan tangkapan layar disalin sesudah jalan terakhir (laporan F-10, Temuan 5).
+- Semua fitur: menjalankan versi Vinext (`pnpm dev` atau `pnpm build`) membuat `next-env.d.ts`, yang diabaikan git. Selama berkas itu ada, `tsc` gagal di `app/sehari-setara/ui/preload.ts` karena tipe gambar Next.js. Jalankan `tsc` di salinan tanpa berkas itu (rencana F-11, risiko "`tsc` sesudah Vinext dijalankan").
+- Semua fitur dengan uji galeri: di browser uji tanpa GPU, galeri 3D di 1920×1080 butuh 20–30 detik per klik. Uji galeri dibuat ringkas dan dijalankan per ukuran (rencana F-11).
 
 ## F-01 — Kerangka halaman game dan build dua halaman
 - Status: Selesai (21 Okt 2026). Riwayat 21 Okt 2026: direncanakan dan disetujui; spesifikasi disetujui; dibangun; diuji dan lulus semua kriteria ([laporan](tests/F-01-hasil.md)); digabung ke `main` dan terbit di GitHub Pages (dikonfirmasi pemilik proyek).
@@ -1305,4 +1308,240 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
       - Tangkapan layar di 1280×720, 1024×768, dan 1920×1080: layar judul (termasuk "Mulai" berfokus), cara bermain, pengaturan kelas dengan 2 dan 4 tim, ketiga layar prolog, dialog pengaturan (biasa, dan dengan kurangi gerak dari komputer), serta tombol "Pengaturan" yang nonaktif selama kartu dampak.
       - `tsc --noEmit` dan ESLint `--max-warnings 0` pada berkas kode baru dan yang diubah.
       - Daftar periksa manual AGENTS bagian 9 yang berlaku. Keterbacaan layar judul, pengaturan kelas, dan cara bermain dari bangku belakang, serta kenyamanan teks cara bermain dan prolog bagi guru dan siswa, dicek pemilik proyek.
+      - Tidak ada dependensi baru.
+
+## F-11 — Integrasi dengan galeri Ruang Setara, layar "Tentang", dan rilis 1.0
+- Status: Bagian A selesai, Lulus (5 Nov 2026); bagian B belum ditulis. Riwayat 5 Nov 2026: direncanakan; disetujui (balasan `Setuju: F-11`; saran setiap usulan diterima); spesifikasi bagian A ditulis dan disetujui ([F-11-integrasi-galeri-rilis.md](specs/F-11-integrasi-galeri-rilis.md); balasan `Spesifikasi disetujui: F-11 bagian A`; saran V-1 sampai V-4 dipakai); bagian A dibangun di cabang `fitur/F-11-integrasi-galeri-rilis` tanpa perubahan dari spesifikasi, lalu diuji dengan keputusan Lulus ([laporan](tests/F-11-hasil.md)); ZIP A diserahkan untuk di-commit sebelum pemilik proyek mencentang. Diperiksa sebelum Plan: entri F-10 berstatus Selesai dan `tests/F-10-hasil.md` berkeputusan Lulus (ZIP `main` yang diterima 5 Nov 2026, commit `4778284`, sesudah F-10). Nama berkas hasil build dari ZIP itu sama dengan laporan F-10, jadi ZIP itu versi terbaru. `content:check` lulus (36 lulus, 1 dilewati) dengan laporan "Verifikasi rujukan: 0 dari 14 terverifikasi."; `RILIS=1 content:check` gagal dengan "Rilis diblokir: 14 rujukan belum terverifikasi.".
+- Memenuhi:
+  - FR-15 (sisa): pintu masuk dari galeri ke game. "Kembali ke galeri" (`../`) sudah ada di refleksi (F-09) dan di layar judul (F-10).
+  - PRD bagian 3 tujuan 4 ("sekali klik dari Ruang Setara") dan bagian 16 nomor 2 (pintu masuk), lewat usulan 3.
+  - PRD bagian 13 (versi 1.0) dan bagian 10 (pemeriksaan rilis), lewat usulan 8 sampai 11.
+  - PRD bagian 14 ("Rujukan pasal keliru") dan AGENTS bagian 8 ("Rilis diblokir selama masih ada kotak yang kosong"), lewat usulan 1, 5, dan 6.
+  - Architecture bagian 11 (dua titik integrasi) dan bagian 4 (langkah CI).
+  - Design System bagian 13 dan keputusan 4 Nov 2026 (usulan 6b1 rencana F-10): layar "Tentang", bila usulan 2a disetujui.
+  - Catatan "Plan F-11" di atas: pemeriksaan ketat `RILIS=1` di CI, rujukan di rekap dan lembar unduhan, serta S-6, `CREDITS.md`, dan Design System bagian 13. Laporan F-06 Temuan 8 (uji AC-5 F-03 dan PRD bagian 8), lewat usulan 1.
+- Bergantung pada: F-09 (selesai). Memakai juga layar judul F-10 untuk tombol "Tentang".
+- File yang dibuat/diubah, dibagi dua paket (usulan 6):
+  - Paket A, perbaikan pendahuluan, boleh di-commit sebelum pemilik proyek mencentang:
+    - Diubah `app/sehari-setara/__tests__/content.test.ts`: uji AC-5 (usulan 1) dan, bila usulan 1 butir PRD pilihan (a), uji baris rujukan PRD.
+    - Diubah `app/sehari-setara/content/schema.ts`, hanya bila usulan 1 butir PRD pilihan (a): `prdProblems` ikut membandingkan baris "Rujukan:".
+    - Diubah `docs/sehari-setara/PRD.md`: bagian 8 (kalimat status dan keenam baris "Rujukan:") dan bagian 17 (keputusan 22 Okt 2026).
+    - Diubah `docs/sehari-setara/specs/F-03-konten-adegan.md`: AC-5 dan "Riwayat perubahan", seperti revisi 22 Okt 2026.
+    - Dokumen: bagian A spesifikasi F-11, bagian A `tests/F-11-hasil.md`, dan entri ini.
+  - Paket B, rilis, di-commit hanya sesudah pemilik proyek menyatakan verifikasi selesai:
+    - Diubah `app/page.tsx` (galeri): dua tautan dan satu nama ikon di baris impor (usulan 3). Berkas galeri lain tidak disentuh.
+    - Diubah `.github/workflows/deploy-pages.yml`: langkah pemeriksaan ketat (usulan 5).
+    - Bila usulan 2a: baru `app/sehari-setara/ui/About.tsx` (dialog "Tentang"); diubah `ui/Title.tsx` (tombol keempat), `ui/PlayScreen.tsx` (dialog, fokus, dan pengumuman), `ui/opening.ts` dan `__tests__/opening.test.ts` (fungsi murni dan teks), `content/copy.ts` (teks), `styles/game.css` (hanya bila gaya dialog "Cara bermain" tidak cukup), dan `assets/CREDITS.md` (jawaban S-6).
+    - Baru `e2e/galeri-integrasi.spec.ts` (usulan 12). Diubah `e2e/bantuan.ts` dan uji lama yang memeriksa tombol layar judul, bila usulan 2a.
+    - Diubah dokumen: `Architecture.md` (bagian 4, 11, dan 12; bagian 3, 7, dan 10 bila 2a), `Design_System.md` (bagian 7 dan 13, bila 2a), `PRD.md` (bagian 13 dan 17; pertanyaan bagian 16 nomor 2 dijawab), `AGENTS.md` (bagian 6: perintah `RILIS=1`), `Daftar_Aset.md` (S-01 dan S-02, bila S-6 dijawab), dan `PANDUAN_GITHUB_PAGES.md` (bagian "Memperbarui isi website": terbitan tertahan selama ada kotak kosong).
+    - Dokumen: bagian B spesifikasi, `tests/F-11-hasil.md`, tangkapan layar di `tests/F-11/`, dan entri ini.
+  - Tidak disentuh di kedua paket: berkas galeri selain `app/page.tsx` (`globals.css`, `gallery.css`, `story.css`, `lessons.css`, `lessons.tsx`, `content.ts`, adegan 3D, dan `public/`), `github-pages/`, `vite.pages.config.ts`, `vite.config.ts`, `package.json`, `pnpm-lock.yaml`, naskah (`scenes.ts`, `references.ts`, `roles.ts`, `endings.ts`, `prolog.ts`), `Verifikasi_Rujukan.md`, `engine/`, aset dan kit gambar, serta `manifest.ts`.
+- Aset yang dibutuhkan: tidak ada aset game baru, dan placeholder tidak diperlukan. Ikon stik permainan di tombol galeri adalah `Gamepad2` dari `lucide-react`, pustaka ikon yang sudah dipakai galeri, jadi tidak ada dependensi baru. Layar "Tentang" (bila 2a) tidak memakai gambar baru.
+- Risiko (angka dari percobaan di luar repositori, 5 Nov 2026: salinan ZIP `main` commit `4778284`; prototipe kedua tautan dipasang di `app/page.tsx` salinan itu; diukur di Chromium 153 lewat `serve-subpath.mjs` di `/ruang-setara/`):
+  - **Uji AC-5 menahan rilis.** Satu kotak dicentang membuat `test` gagal, sehingga langkah "Uji game" di CI gagal dan situs tidak terbit. Dengan ke-14 kotak dicentang, `content:check` dan `RILIS=1 content:check` tetap gagal (kode 1) karena uji yang sama. Tanpa perbaikan, permainan tidak pernah bisa terbit lewat CI. Dua cara perbaikan dicoba pada empat keadaan daftar centang:
+
+    | Keadaan daftar | Pilihan (a): uji biasa hanya melaporkan | Pilihan (b): kode dan teks tetap dicocokkan |
+    |---|---|---|
+    | 0 kotak dicentang | Biasa lulus; rilis diblokir (14) | Sama |
+    | 5 kotak dicentang | Biasa lulus; rilis diblokir (9) | Sama |
+    | 14 kotak dicentang | Biasa dan rilis lulus | Sama |
+    | 14 kotak, baris R-04 rusak | Biasa lulus (13 dari 14); rilis diblokir (1) | Biasa gagal, situs tidak terbit |
+
+  - **PRD bagian 8 masih memuat baris rujukan lama.** Adegan 1 tanpa R-13; adegan 5 tanpa R-14, dengan teks lama R-10 ("Pasal 24") dan R-11 (tanpa UU No. 5 Tahun 2026); adegan 6 masih memuat Pasal 28E ayat (3), yang dilepas 22 Okt 2026. PRD bagian 17 belum mencatat keputusan 22 Okt 2026. `prdProblems` tidak membandingkan baris rujukan, jadi selisih ini tidak tertangkap uji.
+  - **Urutan yang melingkar.** Perbaikan uji harus masuk sebelum pemilik proyek mencentang, sedangkan hasil F-11 baru boleh di-commit sesudah verifikasi selesai. Karena itu F-11 dibagi dua paket (usulan 6).
+  - **Ruang galeri.** Galeri Refleksi adalah galeri ke-6 (`latihan`).
+    - Panel galeri Refleksi: tautan bergaya tombol "Main Sehari Setara" (198,5 × 48 px) muat di bawah "Mulai tantangan" di 1024×768, 1280×720, dan 1920×1080. Jarak panel ke garis kepala halaman 20–25 px dan ke kaki halaman paling sedikit 27 px.
+    - Menu "Daftar materi" di 1280×720 dan 1024×768: tautan di bawah "Lihat materi dan sumber belajar" (y 908 px) dan baris ketujuh daftar tujuan (y 840–923 px) baru terlihat sesudah isi dialog digulir (batas terlihat 684 dan 733 px). Tautan di bawah kalimat pembuka (y 331–370 px) langsung terlihat di ketiga ukuran.
+    - Baris ketujuh juga perlu aturan CSS galeri baru, karena gaya baris tujuan hanya berlaku untuk tombol (`.destination-list>button`).
+  - **Build galeri.** Dengan kedua tautan usulan 3a, dari 178 berkas `dist-pages/` hanya 2 yang berubah: `index.html` (nama JS galeri) dan `main-*.js` (+772 byte, +286 byte gzip). CSS galeri `main-Bp-7VtNx.css` tetap identik byte, jadi Tailwind tidak menambah aturan. Semua berkas game, termasuk potongan React bersama `jsx-runtime-CmKW-gyo.js`, tetap identik. JS galeri hasil minifikasi berganti nama variabel di banyak tempat, sehingga perbandingan byte JS galeri tidak bisa dipakai sebagai bukti (usulan 7). Bukti tingkat kode sudah dicoba: `app/page.tsx` baru dikurangi tepat tiga potongan identik byte dengan berkas lama (+193 byte).
+  - **Keyboard dan galat galeri.**
+    - Lewat menu, dari layar sambutan galeri: 5 kali Tab ke "Daftar materi", Enter, 1 kali Tab ke "Main Sehari Setara", Enter. Layar judul game terbuka dengan "Mulai" berfokus, lalu 2 kali Tab ke "Kembali ke galeri", Enter, dan galeri terbuka lagi di `/ruang-setara/`.
+    - Lewat panel: 6 kali Tab ke "Galeri sebelumnya", Enter, 2 kali Tab ke "Masuk galeri", Enter, lalu 2 kali Tab ke "Main Sehari Setara". Garis fokus galeri (3 px, `#a7652f`) terlihat di tautan baru.
+    - Sepanjang galeri, galeri Refleksi, menu, game, lalu kembali ke galeri di ketiga ukuran: galat konsol 0, galat halaman 0, respons 4xx 0, dan permintaan ke situs lain 0. Yang muncul hanya peringatan grafis 3D dari browser uji tanpa GPU.
+    - "Kembali ke galeri" (`../`) membuka galeri dari layar sambutan (Atrium), bukan dari galeri Refleksi.
+  - **Versi Vinext.** `pnpm dev` berjalan; alamat `/sehari-setara/` dialihkan (308) ke `/sehari-setara`, lalu menampilkan 404 berbahasa Inggris "This page could not be found.". `pnpm build` (Vinext) lulus dengan satu rute `/`. Jadi di versi Vinext kedua tautan berakhir di halaman 404. GitHub Pages tidak terdampak.
+  - **`tsc` sesudah Vinext dijalankan.** Vinext membuat `next-env.d.ts` (diabaikan git) yang memuat tipe gambar Next.js. Akibatnya `tsc` gagal dengan 5 galat di `app/sehari-setara/ui/preload.ts` (`StaticImageData` lawan `string` dari `png.d.ts`). Tanpa berkas itu, `tsc` 0 galat. Masalah ini sudah ada sebelum F-11 dan tidak memengaruhi CI, yang tidak menjalankan Vinext maupun `tsc`.
+  - **ESLint galeri.** `app/page.tsx` sudah bermasalah sebelum F-11: 4 galat `react-hooks/refs` (baris 33, 35, dan dua di 37) dan 1 peringatan `react-hooks/exhaustive-deps` (baris 56), semuanya di kode galeri lama. ESLint `--max-warnings 0` pada berkas itu tidak bisa lulus tanpa menyentuh galeri di luar dua titik (usulan 12).
+  - **Situs yang sedang tayang.** Game F-10 sudah terbit di `/ruang-setara/sehari-setara/` tanpa tautan dari galeri, dengan rujukan yang belum diverifikasi. Selama terbitan tertahan (usulan 5), versi itu tetap tayang.
+  - **Waktu siap.** Cache kosong, 10 Mbps, latensi 40 ms, 1280×720, dua kali per keadaan; diukur sampai kedua huruf dan semua gambar layar selesai dimuat:
+
+    | Layar | Prosesor biasa | Prosesor diperlambat 4× |
+    |---|---|---|
+    | Layar judul | 0,8 detik (jalan pertama 4,0 detik) | 1,18–1,24 detik |
+    | Adegan 1 (pratinjau `#adegan-1`) | 0,61 detik | 1,34–1,40 detik |
+
+    Setiap pemuatan memindahkan 385–388 KB. Jalan pertama 4,0 detik terjadi saat browser dan berkas uji pertama kali dibuka di lingkungan agen; jalan berikutnya 0,8 detik. Usulan 8 mengatur cara mengulang pengukuran di tahap Test. Di layar judul, game memuat gambar adegan 2 lebih dulu; gambar adegan 1 (latar 2,6 KB) baru diminta saat adegan 1 tampil.
+  - **Anggaran.** Kode game: JS game 38,4 KB gzip ditambah React bersama 59,5 KB gzip, sekitar 98 KB dari 150 KB; CSS game 6,7 KB gzip. Aset game: gambar dan bunyi 66,8 KB, huruf 36,8 KB (woff2 yang dipakai browser 20,2 KB), sekitar 0,1 MB dari 4 MB. Tautan galeri tidak menambah apa pun ke game.
+  - **Placeholder.** Mekanisme placeholder tidak pernah dibuat, karena semua aset sudah Disetujui (keputusan Gerbang 1 F-12 nomor 5). Akibatnya `content:check` belum punya laporan placeholder, walaupun AGENTS bagian 5 menyebutnya. Teks sementara yang tersisa ada di dokumen: "[nama pengembang]" dan "[nama alat], [lisensi]" di Design System bagian 13 (usulan 2 dan 8).
+  - **Lisensi huruf.** Metadata kedua berkas huruf memuat pemberitahuan hak cipta dan alamat lisensi OFL, tetapi tidak memuat teks lisensi lengkap. Paket `@fontsource` memuat berkas LICENSE, tetapi berkas itu tidak ikut terbit (usulan 2).
+  - **Uji lama (bila 2a).** Sedikitnya dua uji memeriksa daftar tiga tombol layar judul (`sehari-setara.spec.ts` dan `alur-permainan.spec.ts`), dan keempat uji tata letak layar judul F-10 memeriksa letaknya. Ruang untuk tombol keempat sudah diukur di F-10 (baris 129,9–131,3u dari 168,9u). Masa tunggu 600 ms layar judul tetap berlaku untuk "Tentang", karena klik kedua dari klik ganda pada "Tutup" dialog "Cara bermain" atau pada "Main lagi" bisa jatuh di baris tombol (risiko "Klik ganda antarlayar" rencana F-10).
+  - **Lingkungan uji.** Galeri 3D di browser uji tanpa GPU lambat: di 1920×1080 setiap klik butuh 20–30 detik, dan satu jalan untuk ketiga ukuran melewati batas 300 detik per perintah. Uji galeri dibuat ringkas dan dijalankan per ukuran.
+  - **Tailwind galeri** (catatan "Semua fitur"): sesudah entri ini ditulis, `build:pages` diulang; keempat berkas galeri (`index.html`, `main-Bp-7VtNx.css`, `main-CC47J1DW.js`, `jsx-runtime-CmKW-gyo.js`) tetap identik byte dengan build `main`. Pemeriksaan yang sama diulang di tahap Test, dengan kedua tautan.
+- Ukuran: S menurut backlog; perkiraan sekarang M: dua paket dengan dua bagian spesifikasi, perbaikan uji AC-5 dan PRD, dua tautan galeri, langkah CI, uji galeri baru, pemeriksaan rilis, dan (bila 2a) dialog "Tentang" dengan penyesuaian uji layar judul. Tanpa layar "Tentang" (2b atau 2c): S.
+- Temuan F-09 dan F-10 yang menunggu keputusan dan menyangkut F-11:
+  - F-09 Temuan 7 (rujukan di rekap dan lembar unduhan tanpa tanda "perlu verifikasi"): dibawa ke usulan 6.
+  - F-07 Temuan 8 (asal dan lisensi bunyi, butir S-6), yang dijadwalkan untuk F-11 di catatan "Plan F-11": dibawa ke usulan 2.
+  - Laporan F-06 Temuan 8 (uji AC-5 dan PRD bagian 8), yang diminta pemilik proyek menjadi usulan pertama: usulan 1.
+  - Pengecekan pemilik proyek di laporan F-09 dan F-10 (proyektor, laptop kelas bawah, Edge, Firefox, Safari iPad, dan cetak A4): masuk daftar periksa rilis, usulan 9.
+  - Tidak dibawa: F-10 Temuan 1 sampai 7 dan F-09 Temuan 1 serta 3 sampai 6 berisi keterangan atau perbaikan yang sudah selesai. F-09 Temuan 2 sudah diputuskan untuk F-13. Panduan guru satu halaman bukan bagian F-11 (keputusan 2a F-10); statusnya di usulan 9.
+- Keputusan Gerbang 1 (5 Nov 2026, balasan `Setuju: F-11` tanpa alternatif): saran setiap usulan diterima, dan alternatifnya tidak dipilih. Jadi: uji AC-5 hanya melaporkan di mode biasa, keenam baris rujukan PRD ditulis persis dan ikut diuji, dan spesifikasi ditulis dua bagian dengan bagian A lebih dulu (usulan 1a); layar "Tentang" dikerjakan di F-11 (2a); kedua titik galeri (3a); versi Vinext dibiarkan dan dicatat, dan `tsc` dijalankan di salinan bersih (4a); langkah pemeriksaan ketat masuk paket B (5a); urutan rilis enam langkah, dan rujukan di rekap serta lembar unduhan tampil apa adanya (6a); bukti tiga lapis sekali di tahap Test (7a); waktu siap dan placeholder sesuai usulan 8a; pencatatan rilis dengan tag `v1.0` (10a); dan revert lewat GitHub Desktop (11a). Teks usulan di bawah dipertahankan sebagai catatan.
+- Usulan untuk Gerbang 1. Semua teks baru berstatus "draf baru" sampai Gerbang 2. Maket dikirim lewat percakapan dan tidak disimpan di repositori:
+  1. **Perbaikan uji AC-5 dan baris rujukan PRD (paket A, sebelum Anda mencentang).**
+     - Uji AC-5:
+       - (a, saran) uji biasa tidak pernah gagal karena isi `Verifikasi_Rujukan.md`. Status setiap rujukan hanya dilaporkan (AC-7), dan butir yang hilang, berbeda teks, atau rusak dihitung belum terverifikasi. Pemblokiran hanya di mode rilis. Ini sesuai kalimat di `Verifikasi_Rujukan.md`: "Mengubah file ini tidak pernah membuat situs gagal terbit." Uji AC-4 (teks lengkap R-01 sampai R-14 di `references.ts`) tetap menjaga agar rujukan tidak ditambah atau diubah diam-diam. Larangan agen mencentang tetap aturan kerja (AGENTS bagian 8), diperiksa lewat daftar berkas yang berubah di setiap laporan;
+       - (b) uji tetap mencocokkan kode dan teks setiap butir, tanpa memeriksa centang. Baris yang tak sengaja rusak saat mencentang membuat situs berhenti terbit, sehingga kalimat di `Verifikasi_Rujukan.md` itu harus diubah;
+       - tidak diusulkan: membiarkan uji seperti sekarang, karena permainan tidak akan pernah terbit.
+     - Baris rujukan PRD bagian 8:
+       - (a, saran) keenam baris "Rujukan:" ditulis persis dengan teks `references.ts`, berurutan seperti di kartu dampak, dipisah titik koma. `prdProblems` ikut membandingkannya, sehingga perubahan rujukan berikutnya harus mengubah PRD, `references.ts`, dan `Verifikasi_Rujukan.md` bersama-sama. Tidak ada rujukan baru dan tidak ada teks rujukan yang berubah:
+         - Adegan 1: Pasal 28B ayat (2) UUD NRI 1945; UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 14 ayat (1); UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19.
+         - Adegan 2: Pasal 28G ayat (1) UUD NRI 1945; Pasal 31 ayat (1) UUD NRI 1945; Pasal 27 ayat (1) UUD NRI 1945; UU No. 22 Tahun 2009 tentang LLAJ, Pasal 77 ayat (1) dan Pasal 106 ayat (8).
+         - Adegan 3: Pasal 28E ayat (3) UUD NRI 1945; Pasal 28J ayat (1) UUD NRI 1945.
+         - Adegan 4: Pasal 28B ayat (2) UUD NRI 1945; Pasal 28G ayat (1) UUD NRI 1945; Pasal 28J ayat (1) UUD NRI 1945.
+         - Adegan 5: Pasal 28D ayat (1) UUD NRI 1945; Pasal 28G ayat (1) UUD NRI 1945; Pasal 24 ayat (1) dan ayat (2) UUD NRI 1945; UU No. 48 Tahun 2009, Pasal 11 ayat (1); UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g; UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah).
+         - Adegan 6: Pasal 28G ayat (1) UUD NRI 1945; Pasal 28J ayat (1) UUD NRI 1945.
+       - (b) hanya baris adegan 1, 5, dan 6 diperbarui dengan gaya ringkas sekarang, tanpa pemeriksaan otomatis;
+       - (c) baris rujukan berisi kode saja, misalnya "Rujukan: R-01, R-13, R-02 (teksnya di `Verifikasi_Rujukan.md`)".
+     - Kalimat status di awal PRD bagian 8 ("Semua rujukan berstatus perlu verifikasi …") diganti "Status verifikasi setiap rujukan dicatat di `Verifikasi_Rujukan.md` (lihat aturan di `AGENTS.md`).", agar tetap benar sesudah verifikasi.
+     - PRD bagian 17: baris 22 Okt 2026 (R-07 dilepas dari adegan 6; teks baru R-10 dan R-11; R-13 dan R-14 baru; semuanya perlu verifikasi) dan baris keputusan Gerbang 1 F-11.
+     - Waktu pengerjaan:
+       - (a, saran) spesifikasi F-11 ditulis dalam dua bagian. Bagian A disetujui sendiri dengan balasan `Spesifikasi disetujui: F-11 bagian A`, lalu dibangun, diuji, dan diserahkan sebagai ZIP A sebelum bagian B ditulis;
+       - (b) dikerjakan langsung sesudah `Setuju: F-11` sebagai revisi F-03, seperti 22 Okt 2026, tanpa Gerbang 2 tersendiri. Lebih cepat satu langkah, tetapi melewati gerbang spesifikasi untuk bagian ini;
+       - tidak diusulkan: satu spesifikasi dan satu ZIP untuk seluruh F-11, karena ZIP itu baru boleh di-commit sesudah verifikasi, padahal verifikasi menunggu perbaikan ini.
+     - Catatan: pemeriksaan di JDIH bisa dimulai sekarang, dan hasilnya boleh ditulis di baris "Catatan". Mencentang sebelum ZIP A masuk pun tidak merusak apa-apa: GitHub hanya menandai terbitan gagal, dan situs tetap seperti sekarang.
+  2. **Layar "Tentang" (cakupan F-11).**
+     - Fakta: AGENTS bagian 5 dan keputusan 4 Nov 2026 (usulan 6b1 rencana F-10) memasukkannya ke F-11, tetapi pesan Plan ini tidak menyebutnya. Design System bagian 13 dan `CREDITS.md` meminta atribusi di layar itu.
+     - (a, saran) tetap di F-11, di paket B:
+       - tombol keempat di layar judul, berurutan "Mulai", "Cara bermain", "Tentang", "Kembali ke galeri", dengan masa tunggu 600 ms yang sama;
+       - dialog seperti "Cara bermain": kepala pagi, tombol "Tutup", `Esc` menutup, dan fokus kembali ke tombol "Tentang";
+       - draf isi:
+         - "Sehari Setara adalah permainan Pendidikan Pancasila kelas IX di Ruang Setara."
+         - "Gambar: digambar dengan kode oleh Claude (Anthropic) dengan arahan dan persetujuan {nama}."
+         - "Huruf: Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.", disusul pemberitahuan hak cipta kedua huruf persis seperti di metadatanya, dan alamat lisensinya sebagai teks, bukan tautan.
+         - "Bunyi: {jawaban S-6}."
+         - "Permainan ini tidak menyimpan data siswa."
+         - "Versi 1.0, November 2026."
+       - yang perlu Anda jawab paling lambat di Gerbang 2 bagian B:
+         - nama yang ditampilkan sebagai {nama}. `CREDITS.md` memakai "YAN", sedangkan Design System bagian 13 masih "[nama pengembang]";
+         - S-6: siapa atau alat apa yang membuat bunyi klik dan bunyi teks di halaman uji suara, dan lisensinya. Bila bunyi itu dibuat Claude dengan kode, tulisannya "Dibuat dengan kode oleh Claude (Anthropic)".
+       - pilihan tambahan: teks lisensi OFL lengkap ikut tampil di dialog dan bisa digulir. Lebih lengkap, tetapi panjang;
+     - (b) dipisah menjadi fitur kecil sesudah rilis 1.0. Atribusi untuk sementara hanya di `CREDITS.md`, dan AGENTS bagian 5 baris F-11 diubah;
+     - (c) tanpa layar "Tentang": atribusi di `README.md` dan flipbook, dan Design System bagian 13 diubah.
+  3. **Pintu masuk dari galeri: titik, teks, letak, dan tampilan (PRD bagian 16 nomor 2).**
+     - (a, saran) kedua titik, tanpa CSS baru:
+       - titik 1, panel galeri Refleksi: tautan `<a href="sehari-setara/">` berkelas `journey-cta`, sama dengan tombol "Mulai tantangan", dengan ikon `Gamepad2` 18 px dan teks "Main Sehari Setara". Tautan ini hanya ada di galeri Refleksi, di bawah "Mulai tantangan" dan di atas "Kembali ke atrium". Panel itu menutup jelajah galeri dengan "Sekarang, tentukan sikap.", sehingga game menjadi langkah berikutnya;
+       - titik 2, menu "Daftar materi" (dialog "Pilih tujuan perjalanan"): tautan teks berkelas `text-control`, sama dengan "Lihat materi dan sumber belajar", bertuliskan "Main Sehari Setara", tepat di bawah kalimat pembuka dan di atas daftar galeri. Daftar galeri tetap enam, karena kode galeri menganggap jumlahnya tetap (Architecture keputusan A1);
+       - keduanya tautan biasa di tab yang sama: tanpa JavaScript, tanpa `target`, dan tanpa garis miring di depan. Fokus keyboard memakai garis fokus galeri yang sudah ada;
+       - dengan dua titik, guru bisa membuka game dari menu di awal pelajaran, atau dari galeri Refleksi sesudah menjelajah.
+     - Alternatif:
+       - (b) hanya titik 1; (c) hanya titik 2;
+       - (d) titik 1 berupa tautan teks bergaya "Kembali ke atrium". Lebih tenang, tetapi kurang menonjol dari bangku belakang;
+       - (e) titik 2 di bawah "Lihat materi dan sumber belajar": perlu menggulir di 1280×720 dan 1024×768;
+       - (f) titik 2 sebagai baris ketujuh daftar tujuan: perlu aturan CSS galeri baru, dan tetap perlu menggulir;
+       - (g) ikon `Play` yang sudah diimpor galeri, atau tanpa ikon;
+       - (h) membuka game di tab baru: galeri tetap terbuka, tetapi "Kembali ke galeri" membuka galeri kedua.
+     - "Kembali ke galeri" tetap `../` dan membuka galeri dari layar sambutan. Kembali langsung ke galeri Refleksi memerlukan kode galeri di luar dua titik, jadi tidak diusulkan.
+  4. **Versi Vinext (`pnpm dev`, `pnpm build`, dan `pnpm start`).**
+     - (a, saran) dibiarkan dan dicatat di Architecture bagian 4 dan 11: di versi Vinext kedua tautan berakhir di halaman 404 Vinext. Versi itu tidak diterbitkan, dan alur galeri ke game diuji lewat `build:pages` dan `dev:pages`;
+     - (b) tautan hanya tampil di build GitHub Pages lewat penanda build (`define` di `vite.pages.config.ts`). Vinext tidak menampilkan tautan, tetapi berkas build berubah dan galeri mendapat percabangan kode tambahan;
+     - (c) rute Vinext untuk game: di luar cakupan F-11.
+     - `tsc` sesudah Vinext: (a, saran) di tahap Test `tsc` dijalankan di salinan bersih tanpa `next-env.d.ts`, dan konflik tipe gambar dicatat di Architecture bagian 4 dan di catatan "Semua fitur". Perbaikannya, misalnya menyamakan tipe impor PNG game, bukan bagian F-11.
+  5. **Pemeriksaan ketat rujukan di CI.**
+     - (a, saran) langkah baru di `.github/workflows/deploy-pages.yml`, sesudah "Uji game" dan sebelum "Build versi statis":
+
+       ```yaml
+             - name: Periksa verifikasi rujukan
+               env:
+                 RILIS: "1"
+               run: npx -y pnpm@11.25.0 content:check
+       ```
+
+     - Akibatnya:
+       - selama masih ada kotak kosong atau baris rusak, langkah ini gagal. Build, unggah, dan terbit tidak dijalankan, sehingga perubahan apa pun, baik di galeri maupun di game, tidak terbit. GitHub menandai setiap push dengan silang merah dan mengirim surel bahwa alur terbit gagal;
+       - situs yang sedang tayang tetap seperti terbitan terakhir. Tidak ada yang dihapus;
+       - commit tetap tersimpan di GitHub. Begitu semua kotak tercentang, push berikutnya, atau "Run workflow" di tab Actions, menerbitkan semuanya sekaligus;
+       - langkah ini masuk paket B bersama kedua tautan, jadi tautan hanya bisa terbit bila pemeriksaan ketat lulus. Paket B baru di-commit sesudah 14 kotak tercentang, sehingga langkah itu langsung lulus. Sesudahnya, setiap rujukan yang berubah (kotaknya dikosongkan agen) menahan terbitan sampai diverifikasi ulang.
+     - (b) langkah ini masuk paket A. Setiap push selama masa verifikasi bertanda silang merah, dan perbaikan mendesak di galeri pun tidak bisa terbit;
+     - (c) pemeriksaan ketat hanya dijalankan agen sebelum rilis, tanpa langkah CI: tidak sesuai catatan "Plan F-11".
+  6. **Urutan rilis, dua paket, dan rujukan di layar.**
+     - (a, saran) urutan:
+       1. Gerbang 1: ZIP berisi `PLAN.md` ini.
+       2. Spesifikasi bagian A, Gerbang 2 bagian A, Build dan Test bagian A, lalu ZIP A. Anda meng-commit ZIP A dan menunggu tanda centang hijau di tab Actions.
+       3. Anda mencentang di `Verifikasi_Rujukan.md`, boleh bersamaan dengan langkah 4.
+       4. Spesifikasi bagian B, Gerbang 2 bagian B, Build, dan Test. Bila saat Test masih ada kotak kosong, laporan dan balasan menyebutnya dengan jelas, ZIP B hanya diserahkan untuk ditinjau, dan agen tidak menyarankan commit.
+       5. Sesudah Anda memberi tahu bahwa verifikasi selesai dan mengirim ZIP `main` terbaru, agen menjalankan `RILIS=1 content:check` pada berkas Anda. Bila hasilnya 14 dari 14, agen menyerahkan ZIP B final dan pesan commit-nya.
+       6. Commit dan push ZIP B, tunggu centang hijau, jalankan daftar periksa usulan 9, lalu buka tautan untuk siswa.
+     - ZIP dari agen tidak pernah memuat `Verifikasi_Rujukan.md`, sehingga centang Anda tidak tertimpa.
+     - Rujukan di rekap dan lembar unduhan (F-09, Temuan 7):
+       - (a, saran) tetap tampil apa adanya, tanpa tanda "perlu verifikasi", karena tautan dari galeri dan setiap terbitan sesudah paket B hanya terjadi bila 14 kotak tercentang. Sampai saat itu, halaman game F-10 yang sudah tayang tetap bisa dibuka lewat alamat langsung, seperti sejak F-01;
+       - (b) label "Versi uji" di layar judul dan lembar unduhan sampai verifikasi selesai. Label itu harus terbit lewat paket A lalu dihapus di paket B, sehingga kode game berubah dua kali.
+  7. **Bukti bahwa galeri hanya berubah di dua titik.**
+     - (a, saran) tiga lapis bukti, sekali di tahap Test, dicatat di laporan:
+       - kode: `app/page.tsx` baru dikurangi tepat tiga potongan (nama ikon di baris impor, tautan panel, dan tautan menu) identik byte dengan berkas sebelum F-11, dan semua berkas galeri lain identik byte. Diff per baris tidak cukup, karena menu galeri ditulis dalam satu baris panjang;
+       - build: dibanding build sebelum F-11, hanya `index.html` (nama JS galeri) dan `main-*.js` yang berubah. CSS galeri identik byte, jadi Tailwind tidak menambah aturan, dan semua berkas game serta potongan React bersama identik. Pemeriksaan diulang sesudah semua dokumen F-11 ditulis, karena Tailwind ikut membaca dokumen;
+       - tampilan: tangkapan layar galeri sebelum dan sesudah F-11 di tiga ukuran, yang hanya berbeda di kedua tautan.
+     - (b) uji Vitest permanen berisi sidik jari berkas galeri. Penjagaannya lebih lama, tetapi uji itu menahan terbitan setiap kali galeri sengaja diubah kelak, misalnya materi di `app/content.ts`. Tidak disarankan;
+     - (c) seperti (a), ditambah uji ujung ke ujung untuk kedua tautan. Uji ini sudah masuk usulan 12.
+  8. **Pemeriksaan rilis 1.0 (AGENTS bagian 10, PRD bagian 10).**
+     - Anggaran: aset game ≤ 4 MB dan kode game ≤ 150 KB gzip, dihitung dari `dist-pages/` (angka sekarang di risiko "Anggaran").
+     - Waktu siap:
+       - (a, saran) "siap" berarti kedua huruf dan semua gambar layar sudah dimuat. Diukur dengan cache kosong pada 10 Mbps dan latensi 40 ms, untuk layar judul dan adegan 1 (pratinjau `#adegan-1`), dengan prosesor biasa dan diperlambat 4×. Satu jalan pemanasan, lalu lima jalan; syaratnya setiap jalan sesudah pemanasan ≤ 3 detik;
+       - (b) hanya layar judul;
+       - (c) diukur dari klik di galeri, saat potongan React bersama sudah ada di cache.
+     - Galat: 0 galat konsol, 0 galat halaman, 0 respons 4xx/5xx, dan 0 permintaan ke situs lain, di galeri (layar sambutan, galeri Refleksi, dan menu) dan di game. Peringatan grafis 3D dari browser uji tanpa GPU dicatat, bukan dihitung sebagai galat.
+     - Placeholder:
+       - (a, saran) pemeriksaan sekali di tahap Test: semua aset di `Daftar_Aset.md` berstatus Disetujui; uji aset (manifest, berkas, dan `CREDITS.md`) lulus; tidak ada teks berkurung siku, "sementara", "sedang dibuat", atau "draf" di teks yang tampil (`content/*.ts` dan teks semua layar); dan teks layar "Tentang" lengkap. Laporan placeholder di `content:check` tetap menunggu fitur pertama yang memakai aset belum disetujui (keputusan Gerbang 1 F-12 nomor 5);
+       - (b) laporan placeholder dibuat sekarang di mode rilis `content:check`.
+     - Keyboard: main penuh dengan keyboard saja dari galeri ke game, lalu kembali ke galeri, lewat kedua titik (usulan 12).
+     - Rujukan: `RILIS=1 content:check` lulus pada `Verifikasi_Rujukan.md` milik Anda (usulan 6 langkah 5).
+  9. **Daftar periksa rilis untuk Anda.** Dilakukan di situs yang sudah terbit, sesudah ZIP B di-commit dan tab Actions bertanda centang hijau, sebelum tautan dibuka untuk siswa. Di setiap perangkat, buka situs lalu tekan Ctrl+F5 agar versi terbaru yang tampil.
+     - Laptop kelas (Edge):
+       1. Menu "Daftar materi" menampilkan "Main Sehari Setara" tanpa perlu menggulir.
+       2. Galeri Refleksi menampilkan tombol "Main Sehari Setara", dan tombol itu membuka layar judul game.
+       3. Satu permainan penuh hanya dengan keyboard, dengan suara nyala, lalu `M` untuk mematikannya.
+       4. "Unduh gambar" dan "Unduh PDF" di layar refleksi, lalu kedua berkas dibuka.
+       5. "Kembali ke galeri" membuka galeri lagi.
+       6. Layar "Tentang" (bila usulan 2a): nama dan keterangan bunyi benar.
+       7. Bila laptop itu laptop kelas bawah: permainan berjalan lancar dengan suara mati.
+     - Proyektor:
+       1. Pada resolusi proyektor (1024×768 atau 1280×720), tidak ada bagian yang terpotong.
+       2. Dari bangku paling belakang (sekitar 8 meter), narasi, pilihan, kartu dampak, rekap, refleksi, layar judul, pengaturan kelas, dan cara bermain terbaca.
+       3. Di kelas yang terang, warna tim dan tanda tingkat bisa dibedakan.
+       4. Bunyi klik dan bunyi teks terdengar wajar di pengeras suara kelas.
+     - iPad (Safari), bila ada:
+       1. Galeri dan kedua tautan bisa disentuh.
+       2. Beberapa adegan bisa dimainkan dengan sentuhan.
+       3. "Unduh gambar" berhasil. "Unduh PDF" hanya bekerja di iPadOS 16.4 ke atas.
+       4. "Kembali ke galeri" berfungsi.
+     - Bila sempat: Chrome dan Firefox di laptop yang sama, dan hasil cetak lembar unduhan di kertas A4.
+     - Panduan guru satu halaman (PRD bagian 12) belum ada. Menurut keputusan 2a F-10, panduan itu dokumen tersendiri sebelum uji coba M3 (9–13 Nov), bukan bagian F-11.
+  10. **Pencatatan rilis 1.0.**
+      - (a, saran) dicatat di tiga tempat, dalam paket B:
+        - PRD bagian 17: baris "Rilis 1.0" berisi tanggal, isi versi, dan jawaban pertanyaan terbuka bagian 16 nomor 2. PRD bagian 13 disesuaikan: versi 1.0 berisi semua P0, FR-20, FR-17 sebagian (kurangi gerak), dan FR-19 sebagian (bunyi klik dan bunyi teks); versi 1.1 berisi sisanya (layar penuh, ulangi adegan, dan sisa efek suara). Tanggalnya ditulis saat ZIP B final disiapkan;
+        - `PLAN.md`: status F-11, dan satu baris "Rilis 1.0" berisi tanggal di bawah tabel status;
+        - tag `v1.0` di GitHub Desktop pada commit ZIP B, sesudah situs dicek: buka tab History, klik kanan commit itu, pilih Create Tag, isi `v1.0`, lalu klik Push origin. Tag tidak memicu terbitan ulang, karena alur terbit hanya berjalan untuk push ke `main`.
+      - (b) tanpa tag;
+      - (c) seperti (a), ditambah halaman Releases di situs GitHub.
+  11. **Cara membatalkan (revert) bila ada masalah sesudah terbit.**
+      - (a, saran) di GitHub Desktop:
+        1. Buka tab History.
+        2. Klik kanan commit ZIP B (pesannya berawalan "F-11: rilis 1.0").
+        3. Pilih "Revert Changes in Commit". GitHub Desktop membuat commit baru yang membalik isinya; riwayat lama tidak hilang.
+        4. Klik Push origin.
+        5. Tunggu centang hijau di tab Actions (2–4 menit), lalu buka situs dan tekan Ctrl+F5.
+      - Akibatnya: kedua tautan galeri, langkah pemeriksaan ketat, dan layar "Tentang" hilang lagi, dan galeri kembali seperti sebelum F-11. Game F-10 tetap bisa dibuka lewat alamat langsung. Paket A tidak ikut terbalik, karena commit-nya terpisah.
+      - Bila GitHub Desktop menyebut ada konflik (biasanya karena commit sesudahnya mengubah berkas yang sama), batalkan dan kirim tangkapan layarnya kepada agen.
+      - (b) bila hanya satu tautan yang bermasalah, agen menyiapkan perbaikan kecil di paket baru, dan situs tetap tayang selama perbaikan disiapkan.
+  12. **Cara uji.**
+      - `content:check` dan `RILIS=1 content:check`, dengan keadaan daftar centang saat itu. Sebelum verifikasi selesai: biasa lulus dan rilis gagal dengan jumlah kotak kosong yang benar. Sesudahnya: keduanya lulus pada berkas milik Anda. Di salinan percobaan, keempat keadaan di risiko "Uji AC-5" diulang tanpa mengubah `Verifikasi_Rujukan.md` repositori.
+      - `test`: `content.test.ts` (AC-5 baru dan, bila 1a, baris rujukan PRD, termasuk satu perubahan yang sengaja tertangkap); `opening.test.ts` bila 2a; uji lain tanpa perubahan.
+      - `build:pages`: tiga lapis bukti usulan 7, anggaran, serta `src` dan `href` HTML yang relatif.
+      - `test:e2e`, dengan Chromium 153 lewat berkas konfigurasi pengganti di luar repositori, seperti F-07 sampai F-10:
+        - baru `galeri-integrasi.spec.ts`, dari `/ruang-setara/`: kedua tautan ada dengan `href="sehari-setara/"`, teks, dan letak tanpa tumpang tindih di tiga ukuran; klik, serta Tab dan Enter, membuka `/ruang-setara/sehari-setara/` dengan "Mulai" berfokus; main penuh dengan keyboard sampai refleksi, lalu "Kembali ke galeri" kembali ke `/ruang-setara/`; "Kembali ke galeri" dari layar judul; serta 0 galat konsol, galat halaman, respons 4xx/5xx, dan permintaan ke situs lain di galeri dan game;
+        - uji F-04 "galeri tetap terbuka tanpa galat dan tanpa huruf game" tetap lulus;
+        - bila 2a: layar "Tentang" (isi, fokus, `Esc`, masa tunggu, dan letak di empat ukuran), dan uji lama yang memeriksa tombol layar judul disesuaikan;
+        - dijalankan per berkas dan per ukuran, karena batas 300 detik dan galeri yang lambat di browser tanpa GPU.
+      - Waktu siap dan anggaran: cara usulan 8.
+      - Tangkapan layar di 1280×720, 1024×768, dan 1920×1080: galeri Refleksi dengan tombol baru (biasa dan berfokus), menu "Daftar materi", layar judul game, dan dialog "Tentang" bila 2a.
+      - `tsc --noEmit` di salinan bersih tanpa `next-env.d.ts` (usulan 4). ESLint `--max-warnings 0` pada berkas game dan uji yang baru atau diubah. Untuk `app/page.tsx`: masalah ESLint sesudah F-11 sama persis dengan sebelum F-11 (4 galat dan 1 peringatan di baris yang sama), dan tidak ada masalah di baris baru.
+      - Daftar periksa manual AGENTS bagian 9 dan daftar usulan 9.
       - Tidak ada dependensi baru.

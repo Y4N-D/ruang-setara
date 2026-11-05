@@ -5,7 +5,7 @@
 | Status | Disetujui 21 Oktober 2026 (`Spesifikasi disetujui: F-03`) |
 | Tanggal | 21 Oktober 2026 |
 | Rencana | `docs/sehari-setara/PLAN.md`, entri F-03 (disetujui 21 Oktober 2026) |
-| Revisi | 22 Oktober 2026: rujukan mengikuti keputusan pemilik proyek (R-07 dilepas dari adegan 6; R-10 dan R-11 diganti; R-13 dan R-14 ditambahkan), dan uji konten disesuaikan. Lihat bagian "Riwayat perubahan" |
+| Revisi | 22 Oktober 2026: rujukan mengikuti keputusan pemilik proyek (R-07 dilepas dari adegan 6; R-10 dan R-11 diganti; R-13 dan R-14 ditambahkan), dan uji konten disesuaikan. 5 November 2026: isi daftar centang tidak lagi menggagalkan uji biasa, dan baris rujukan PRD ikut dibandingkan (F-11 bagian A). Lihat bagian "Riwayat perubahan" |
 
 ## Ringkasan
 
@@ -304,7 +304,7 @@ Aturan tambahan F-03:
 9. Tokoh pada ikon emosi ada di susunan reaksinya. Posisi x berada di 0–320.
 10. Hanya adegan 5 yang punya kuis, dan jawabannya `hakim`. `ROLES` memuat keempat peran tepat sekali.
 11. Kode rujukan unik dan berurutan, dan setiap rujukan dipakai minimal satu adegan. Uji pelanggarannya memakai kode sesudah rujukan terakhir (kini R-15) sebagai contoh rujukan yang tidak dipakai, sehingga contoh itu tetap sah bila rujukan bertambah.
-12. Teks pilihan (termasuk varian adegan 6), efek, tingkat, bendera, situasi, pertanyaan kuis, serta baris hak dan kewajiban sama dengan PRD bagian 8. Perbandingan mengabaikan perbedaan tanda petik lurus dan “ ”, huruf kapital di awal, dan titik di akhir.
+12. Teks pilihan (termasuk varian adegan 6), efek, tingkat, bendera, situasi, pertanyaan kuis, serta baris hak dan kewajiban, dan sejak 5 November 2026 baris rujukan, sama dengan PRD bagian 8. Perbandingan mengabaikan perbedaan tanda petik lurus dan “ ”, huruf kapital di awal, dan titik di akhir.
 13. Naskah asli dimainkan dengan reducer F-02 sampai ketiga akhir tercapai, dan varian adegan 6 aktif bila pilihan B adegan 4 diambil.
 
 Laporan verifikasi:
@@ -366,7 +366,7 @@ Tidak ada aset baru. Naskah merujuk aset yang sudah Disetujui: enam latar `bg_s1
 - [ ] AC-2 Uji membandingkan naskah dengan PRD bagian 8 (aturan 12) dan lulus. Uji ini juga gagal bila satu teks pilihan, efek, atau tingkat sengaja diubah dalam salinan uji.
 - [ ] AC-3 Aturan 1–11 lulus untuk naskah asli. Setiap aturan punya minimal satu uji yang membuktikan pelanggarannya tertangkap.
 - [ ] AC-4 `references.ts` memuat R-01 sampai R-14 sesuai tabel rujukan. Setiap pilihan merujuk kode adegannya, dan R-07 (adegan 6), R-08, R-10, R-11, R-13, serta R-14 mengikuti keputusan pemilik.
-- [ ] AC-5 `Verifikasi_Rujukan.md` memuat satu butir untuk setiap rujukan di `references.ts` (kini 14) dengan kotak kosong, berformat seperti di atas, dan teksnya sama dengan `references.ts`.
+- [ ] AC-5 `Verifikasi_Rujukan.md` dibuat dengan satu butir untuk setiap rujukan di `references.ts` (kini 14), berkotak kosong, berformat seperti di atas, dan teksnya sama dengan `references.ts`. Isi daftar sesudahnya, yaitu kotak yang dicentang, baris yang rusak, atau berkas yang hilang, tidak pernah membuat uji biasa gagal; daftar yang belum lengkap atau belum dicentang hanya diblokir mode rilis (AC-7). [Diubah 5 November 2026, F-11 bagian A]
 - [ ] AC-6 Pembaca daftar centang diuji dengan contoh: `[x]` dengan teks sama menghasilkan terverifikasi; `[ ]`, teks berbeda, kode hilang, dan baris rusak menghasilkan belum terverifikasi dengan alasan yang benar, tanpa membuat uji gagal.
 - [ ] AC-7 `npx pnpm@11.25.0 content:check` lulus dan mencetak "Verifikasi rujukan: 0 dari 14 terverifikasi." beserta 14 baris. Dengan `RILIS=1`, perintah yang sama gagal dengan pesan "Rilis diblokir: 14 rujukan belum terverifikasi." Angka 14 adalah banyaknya rujukan di `references.ts`; uji menghitungnya dari `REFERENCES`.
 - [ ] AC-8 `ROLES` sesuai tabel peran, dan kuis adegan 5 menjawab `hakim`.
@@ -420,3 +420,17 @@ Belum diubah dan menunggu keputusan pemilik proyek:
 
 - PRD bagian 8 masih memuat baris rujukan lama untuk adegan 1, 5, dan 6, dan bagian 17 belum mencatat keputusan 22 Oktober 2026. Uji tidak membandingkan rujukan dengan PRD, sehingga selisih ini tidak menggagalkan CI.
 - Uji AC-5 mewajibkan semua kotak di `Verifikasi_Rujukan.md` kosong. Begitu pemilik proyek mencentang satu kotak, `test` gagal dan terbitan tertahan. Hal ini bertentangan dengan perilaku "Uji biasa tetap lulus, sehingga situs tetap terbit" dan dengan kalimat di `Verifikasi_Rujukan.md` bahwa mengubah file itu tidak pernah membuat situs gagal terbit. Masalah ini sudah ada sejak F-03 dan tidak disebabkan revisi ini.
+
+### 5 November 2026: uji daftar centang dan rujukan PRD (F-11 bagian A)
+
+Pemicu: laporan F-06 Temuan 8, dan percobaan Plan F-11 (5 November 2026). Satu kotak yang dicentang membuat `test` gagal, sehingga terbitan tertahan, dan dengan ke-14 kotak dicentang `content:check` serta `RILIS=1 content:check` tetap gagal karena uji AC-5. Rinciannya ada di spesifikasi F-11 bagian A.
+
+Perubahan uji (`app/sehari-setara/__tests__/content.test.ts`) dan pemeriksa (`content/schema.ts`):
+
+- Uji AC-5 lama, yang mewajibkan semua kotak kosong, diganti uji contoh yang tidak membaca berkas milik pemilik proyek. Lima daftar buatan dari `REFERENCES` menghasilkan jumlah rujukan belum terverifikasi dan pesan pemblokiran yang sesuai. Isi daftar asli kini hanya mengubah laporan (aturan 14), dan daftar yang belum lengkap diblokir mode rilis.
+- `Verifikasi_Rujukan.md` yang tidak ada dibaca sebagai teks kosong.
+- Aturan 12 kini juga membandingkan baris "Rujukan:" PRD bagian 8 dengan teks rujukan setiap pilihan.
+
+Perubahan PRD: kalimat status di awal bagian 8 dan keenam baris "Rujukan:" ditulis persis dengan teks `references.ts`, dan bagian 17 mencatat keputusan 22 Oktober 2026. `scenes.ts`, `references.ts`, dan `Verifikasi_Rujukan.md` tidak diubah, dan tidak ada kotak yang dicentang.
+
+Kedua butir "Belum diubah dan menunggu keputusan pemilik proyek" di riwayat 22 Oktober 2026 kini selesai.

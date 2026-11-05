@@ -320,6 +320,17 @@ export function prdProblems(scenes: readonly Scene[], roles: readonly RoleInfo[]
       }
     }
 
+    // Sejak F-11 bagian A: baris "Rujukan:" sama dengan teks rujukan setiap pilihan, berurutan dan dipisah "; ".
+    const refLine = body.match(/^Rujukan: (.+)$/m);
+    if (!refLine) add(where, "baris rujukan PRD tidak terbaca");
+    else {
+      for (const choice of scene.choices) {
+        if (loose(choice.impact.rujukan.map((reference) => reference.text).join("; ")) !== loose(refLine[1])) {
+          add(`${where}, pilihan ${choice.id}`, "rujukan berbeda dengan PRD");
+        }
+      }
+    }
+
     const present = body.match(/\*\*Jika `(\w+)`:\*\* (.+?) Pilihan B berbunyi "(.+?)"\s*$/m);
     const absent = body.match(/\*\*Jika tidak:\*\* narasi menambahkan, "(.+?)"\s*$/m);
     if (present || absent || scene.narrationIfFlag) {

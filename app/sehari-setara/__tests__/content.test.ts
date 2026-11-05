@@ -22,7 +22,9 @@ const ROOT = new URL("../../../", import.meta.url);
 const read = (path: string) => readFileSync(new URL(path, ROOT), "utf8");
 const assetExists = (path: string) => existsSync(new URL(`app/sehari-setara/assets/${path}`, ROOT));
 const PRD = read("docs/sehari-setara/PRD.md");
-const CHECKLIST = read("docs/sehari-setara/Verifikasi_Rujukan.md");
+/** Daftar centang milik pemilik proyek. Berkas yang hilang dibaca kosong, sehingga hanya laporan yang berubah (F-11, V-1). */
+const CHECKLIST_PATH = "docs/sehari-setara/Verifikasi_Rujukan.md";
+const CHECKLIST = existsSync(new URL(CHECKLIST_PATH, ROOT)) ? read(CHECKLIST_PATH) : "";
 
 /** Salinan naskah yang boleh diubah untuk uji pelanggaran. */
 const copy = (): Scene[] => structuredClone([...SCENES]);
@@ -87,7 +89,7 @@ describe("naskah memenuhi aturan (AC-3)", () => {
 });
 
 describe("sama dengan PRD bagian 8 (AC-2)", () => {
-  it("teks pilihan, efek, tingkat, bendera, situasi, kuis, serta hak dan kewajiban sama dengan PRD", () => {
+  it("teks pilihan, efek, tingkat, bendera, situasi, kuis, hak dan kewajiban, serta rujukan sama dengan PRD", () => {
     expect(prdProblems(SCENES, ROLES, PRD)).toEqual([]);
   });
 
@@ -97,7 +99,16 @@ describe("sama dengan PRD bagian 8 (AC-2)", () => {
     ["tingkat", (s) => { s[1].choices[0].tier = "kurang"; }, "tingkat kurang berbeda"],
     ["situasi", (s) => { s[0].narration[1] = "Nara berangkat sendiri."; }, "narasi berbeda"],
     ["varian adegan 6", (s) => { s[5].narrationIfFlag = undefined; }, "varian narasi tidak sama"],
+    ["urutan rujukan", (s) => { s[4].choices[0].impact.rujukan.reverse(); }, "Adegan s5, pilihan A: rujukan berbeda dengan PRD"],
   ];
+
+  it("baris rujukan PRD yang berbeda atau hilang tertangkap (F-11 bagian A)", () => {
+    const changed = PRD.replace("Pasal 14 ayat (1); UU No. 23", "Pasal 15 ayat (1); UU No. 23");
+    expect(changed, "contoh perubahan harus mengenai PRD").not.toBe(PRD);
+    expect(prdProblems(SCENES, ROLES, changed).join("\n")).toContain("Adegan s1, pilihan A: rujukan berbeda dengan PRD");
+    const missing = PRD.replace(/^Rujukan: .*$/m, "");
+    expect(prdProblems(SCENES, ROLES, missing).join("\n")).toContain("Adegan s1: baris rujukan PRD tidak terbaca");
+  });
 
   it.each(prdMutations)("perubahan %s tertangkap", (_, mutate, expected) => {
     const scenes = copy();
@@ -144,9 +155,21 @@ describe("rujukan (AC-4, AC-5)", () => {
     }
   });
 
-  it(`Verifikasi_Rujukan.md memuat ${REFERENCE_COUNT} butir berkotak kosong dengan teks yang sama`, () => {
-    const entries = parseChecklist(CHECKLIST);
-    expect(entries.map((e) => [e.id, e.text, e.checked])).toEqual(REFERENCES.map((r) => [r.id, r.text, false]));
+  // AC-5 (diubah di F-11 bagian A): isi daftar milik pemilik proyek tidak pernah menggagalkan uji biasa. Uji ini memakai
+  // daftar buatan, bukan berkas asli; daftar asli yang belum lengkap atau belum dicentang diblokir di mode rilis (AC-7).
+  const entryLine = (reference: Reference, mark: " " | "x", text = reference.text) => `- [${mark}] **${reference.id}** ${text}`;
+  const checklists: [string, string, number][] = [
+    ["semua kotak kosong", REFERENCES.map((r) => entryLine(r, " ")).join("\n"), REFERENCE_COUNT],
+    ["lima kotak pertama dicentang", REFERENCES.map((r, i) => entryLine(r, i < 5 ? "x" : " ")).join("\n"), REFERENCE_COUNT - 5],
+    ["semua kotak dicentang", REFERENCES.map((r) => entryLine(r, "x")).join("\n"), 0],
+    ["semua dicentang, teks R-04 rusak", REFERENCES.map((r) => entryLine(r, "x", r.id === "R-04" ? r.text.replace("NRI ", "") : r.text)).join("\n"), 1],
+    ["kosong atau hilang", "", REFERENCE_COUNT],
+  ];
+
+  it.each(checklists)("daftar %s hanya mengubah laporan (AC-5)", (_, markdown, pending) => {
+    const statuses = verificationReport(REFERENCES, parseChecklist(markdown));
+    expect(statuses.filter((status) => !status.verified)).toHaveLength(pending);
+    expect(releaseBlockedMessage(statuses)).toBe(pending ? `Rilis diblokir: ${pending} rujukan belum terverifikasi.` : null);
   });
 });
 
