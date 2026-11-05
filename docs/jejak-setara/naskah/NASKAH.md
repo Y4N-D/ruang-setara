@@ -8,10 +8,10 @@ Semua rujukan berstatus **perlu verifikasi**. Tanda "Terverifikasi" hanya diberi
 
 | Kode | Zona | Judul | Giliran | Status | Berkas |
 |---|---|---|---|---|---|
-| K-01 | Z1 | Menjaga adik | 2 | Menunggu penilaian | [K-01.md](K-01.md) |
-| K-02 | Z1 | Hari suci tetangga | 2 | Menunggu penilaian | [K-02.md](K-02.md) |
-| K-03 | Z2 | Bekal yang diejek | 3 | Belum ditulis | — |
-| K-04 | Z2 | Kelas di lantai dua | 3 | Belum ditulis | — |
+| K-01 | Z1 | Menjaga adik | 2 | Disetujui 5 Nov 2026 | [K-01.md](K-01.md) |
+| K-02 | Z1 | Hari suci tetangga | 2 | Disetujui 5 Nov 2026; versi situasi menunggu pilihan (KT-10) | [K-02.md](K-02.md) |
+| K-03 | Z2 | Bekal yang diejek | 3 | Menunggu penilaian | [K-03.md](K-03.md) |
+| K-04 | Z2 | Kelas di lantai dua | 3 | Menunggu penilaian | [K-04.md](K-04.md) |
 | K-05 | Z3 | Bonceng tanpa helm | 4 | Belum ditulis | — |
 | K-06 | Z3 | Zebra cross | 4 | Belum ditulis | — |
 | K-07 | Z4 | Tuduhan di pasar | 5 | Belum ditulis | — |
@@ -33,10 +33,12 @@ Sasaran: selisih pilihan terpanjang dan terpendek paling banyak 20 karakter di L
 |---|---|---|---|---|
 | K-01 | 8 | Tidak | 5 | Tidak |
 | K-02 | 4 | Tidak | 6 | Ya |
+| K-03 | 6 | Tidak | 16 | Tidak |
+| K-04 | 6 | Tidak | 5 | Ya |
 | K-13 | 9 | Tidak | 14 | Tidak |
 | K-14 | 5 | Tidak | 5 | Ya |
 
-Sejauh ini pilihan benar menjadi yang terpanjang di 0 dari 4 kejadian (Langkah 1), dan pilihan tepat di 2 dari 4 kejadian (Langkah 2).
+Sejauh ini pilihan benar menjadi yang terpanjang di 0 dari 6 kejadian (Langkah 1), dan pilihan tepat di 3 dari 6 kejadian (Langkah 2).
 
 ## Pustaka rujukan
 
@@ -47,10 +49,10 @@ Teks mengikuti usulan 4a: rujukan yang berpadanan R-xx sama persis dengan `app/s
 | JR-01 | Pasal 28B ayat (2) UUD NRI 1945 | UUD Perubahan Kedua | R-01 | K-01, K-03 | — | Perlu verifikasi |
 | JR-02 | Pasal 28E ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-02 | 5 Nov 2026 (K-02.md) | Perlu verifikasi |
 | JR-03 | Pasal 29 ayat (2) UUD NRI 1945 | UUD naskah asli | Baru | K-02 | 5 Nov 2026 (K-02.md) | Perlu verifikasi |
-| JR-04 | Pasal 28J ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-08 | K-02, K-03, K-06, K-08, K-09, K-10, K-12, K-13, K-15, K-16 | — | Perlu verifikasi |
+| JR-04 | Pasal 28J ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-08 | K-02, K-03, K-04 (usulan, Permintaan A-3), K-06, K-08, K-09, K-10, K-12, K-13, K-15, K-16 | — | Perlu verifikasi |
 | JR-05 | Pasal 28G ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-03 | K-03, K-07, K-15 | — | Perlu verifikasi |
 | JR-06 | Pasal 31 ayat (1) UUD NRI 1945 | UUD Perubahan Keempat | R-04 | K-04, K-14 | — | Perlu verifikasi |
-| JR-07 | Pasal 28H ayat (2) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-04 | — | Perlu verifikasi |
+| JR-07 | Pasal 28H ayat (2) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-04 | 5 Nov 2026 (K-04.md) | Perlu verifikasi |
 | JR-08 | Pasal 27 ayat (1) UUD NRI 1945 | UUD naskah asli | R-05 | K-05 | — | Perlu verifikasi |
 | JR-09 | Pasal 28D ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-09 | K-07 | — | Perlu verifikasi |
 | JR-10 | Pasal 28H ayat (4) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-08 | — | Perlu verifikasi |
