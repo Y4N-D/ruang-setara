@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan **Jejak Setara** di repositori `ruang-setara`. Baca seluruh file ini, lalu PRD, Design System, dan Architecture Jejak Setara, sebelum mengubah apa pun.
 
+Versi 0.2 (5 November 2026): langkah Windows di bagian 11.4, daftar skrip final di bagian 6, dan tempat rencana Sesi B dan C di bagian 4.1 (Gerbang 1 JS-01).
 Versi 0.1 (4 November 2026): dokumen pertama.
 
 ---
@@ -88,7 +89,7 @@ flowchart TD
 | Tujuan | Memilih **satu** fitur terkecil yang bernilai dan siap dikerjakan, lalu mengukur risikonya sebelum ada kode |
 | Masukan | Backlog di bagian 5, `docs/jejak-setara/PLAN.md`, PRD bagian 7 dan 20 (keputusan terbuka), ZIP repositori terbaru dari pemilik proyek |
 | Langkah | 1) Pastikan fitur sebelumnya berstatus "Selesai" dan laporannya "Lulus". 2) Pilih fitur pertama yang semua dependensinya selesai. 3) Sebutkan kebutuhan PRD yang dipenuhi (JFR-xx). 4) Daftar file yang akan dibuat atau diubah. 5) Daftar aset dan statusnya. 6) Ukur risiko dengan percobaan **di luar repositori** (maket di empat ukuran layar, prototipe kecil, ukuran bundel, simulasi beban kecil, uji jaringan) dan laporkan angkanya. 7) Tulis usulan bernomor, masing-masing dengan alternatif dan saran. 8) Sebut keputusan terbuka (KT-xx) yang perlu dijawab di gerbang ini. 9) Bila perlu dependensi baru, minta izin dengan frasa `Izinkan dependensi: nama versi`. 10) Perkirakan ukuran (S/M/L) |
-| Keluaran | Entri baru di `PLAN.md` (templat 12.1). Plan pertama sekaligus membuat `PLAN.md` berisi backlog bagian 5 |
+| Keluaran | Entri baru di `PLAN.md` (templat 12.1). Plan pertama sekaligus membuat `PLAN.md` berisi backlog bagian 5. Untuk fitur Sesi B dan C (JS-05 dan JS-06), entri ditulis di berkas status sesi itu (`naskah/STATUS.md` atau `Daftar_Aset.md`), karena `PLAN.md` hanya diubah Sesi A. Permintaan perubahan pada berkas Sesi A ditulis di berkas status yang sama di bawah judul "Permintaan untuk Sesi A" (`PLAN.md`, bagian "Pembagian kerja tiga sesi") |
 | Selesai bila | Manusia membalas `Setuju: JS-xx` (boleh dengan pilihan untuk usulan tertentu) |
 | Dilarang | Menulis kode produk; merencanakan lebih dari satu fitur sekaligus |
 
@@ -166,15 +167,15 @@ npx pnpm@11.25.0 dev:jejak               # pengembangan: pemain di "/", konsol d
 npx pnpm@11.25.0 content:check:jejak     # bank awal, peta, dan rujukan
 npx pnpm@11.25.0 test:jejak              # uji unit inti, inti ruang, dan klien
 npx pnpm@11.25.0 test:jejak:server       # uji Worker dan D1
-npx pnpm@11.25.0 build:jejak             # build halaman ke dist-jejak/
+npx pnpm@11.25.0 build:jejak             # build halaman dan Worker ke dist-jejak/
 npx pnpm@11.25.0 test:e2e:jejak          # uji Playwright multi-konteks
 npx pnpm@11.25.0 sim:beban               # 50 bot per ruang
 npx pnpm@11.25.0 db:migrasi:lokal        # migrasi D1 lokal
-python scripts/jejak-setara/peta/build_peta.py   # bangun ulang peta + pemeriksaan
-python scripts/game/art/build_jejak.py           # bangun ulang aset Jejak Setara + pemeriksaan
+npx pnpm@11.25.0 peta:build              # python scripts/jejak-setara/peta/build_peta.py: bangun ulang peta + pemeriksaan
+npx pnpm@11.25.0 assets:build:jejak      # python scripts/game/art/build_jejak.py: bangun ulang aset + pemeriksaan
 ```
 
-Nama skrip ditetapkan di JS-01. Untuk Playwright, ikuti catatan versi peramban yang berlaku di repositori (lihat laporan uji Sehari Setara terbaru).
+Nama skrip ditetapkan di JS-01 dan terdaftar di `package.json` sejak ZIP akhir JS-01 di-commit. Skrip yang berkas atau fiturnya belum ada mencetak "Belum tersedia: …" dan selesai tanpa galat. Sesi B dan C tidak perlu mengubah `package.json`; cukup membuat berkas di jalurnya: uji konten di `app/jejak-setara/__tests__/konten/`, `scripts/jejak-setara/peta/build_peta.py`, dan `scripts/game/art/build_jejak.py`. Untuk Playwright, ikuti catatan versi peramban yang berlaku di repositori (lihat laporan uji Sehari Setara terbaru). Di lingkungan agen, jalur Chromium diberikan lewat variabel `JEJAK_CHROMIUM`.
 
 ## 7. Aturan wajib
 
@@ -261,10 +262,10 @@ Bandingkan hasil kerja dengan **ZIP repositori terbaru** yang dilampirkan pemili
 
 ### 11.4 Contoh langkah di GitHub Desktop
 
-1. Klik dua kali `JS-xx-nama.zip` di folder Unduhan sampai muncul folder `JS-xx-nama`.
+1. Di folder **Downloads** (Unduhan), klik kanan `JS-xx-nama.zip`, pilih **Extract All…**, lalu klik **Extract**. Folder `JS-xx-nama` muncul.
 2. Buka GitHub Desktop dan pilih repositori **ruang-setara**. Pastikan **Current Branch: main**, klik **Fetch origin**, lalu **Pull origin** bila tombol itu muncul.
-3. Klik **Repository → Show in Finder** untuk membuka folder repositori.
-4. Salin **berkas**, bukan folder: buka setiap folder di dalam `JS-xx-nama`, lalu salin berkasnya ke folder yang sama di repositori. Menempel satu folder ke folder bernama sama bisa membuat Finder mengganti seluruh isinya dan menghapus berkas lama. Bila Finder bertanya, pilih **Replace** untuk berkas.
+3. Klik **Repository → Show in Explorer** untuk membuka folder repositori.
+4. Buka folder `JS-xx-nama`, tekan `Ctrl+A` lalu `Ctrl+C`. Pindah ke folder repositori, lalu tekan `Ctrl+V`. Windows menggabungkan folder yang bernama sama dan hanya mengganti berkas yang bernama sama, jadi berkas lain di repositori tidak terhapus. Bila muncul kotak **Replace or Skip Files** (Ganti atau Lewati), pilih **Replace the files in the destination** (Ganti berkas di tujuan). Jangan menyalin folder `JS-xx-nama` itu sendiri ke dalam repositori.
 5. Kembali ke GitHub Desktop. Cocokkan daftar di tab **Changes** dengan daftar berkas dari agen.
 6. Tempel isi **Summary** dan **Description**, lalu klik **Commit to main**.
 7. Klik **Push origin**.
