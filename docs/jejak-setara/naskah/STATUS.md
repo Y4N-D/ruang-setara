@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Tahap saat ini | Naskah Giliran 3 (Z2: K-03 dan K-04), menunggu balasan "Setuju: naskah Z2"; versi situasi K-02 masih menunggu pilihan (KT-10) |
+| Tahap saat ini | Naskah Giliran 4 (Z3: K-05 dan K-06), menunggu balasan "Setuju: naskah Z3"; versi situasi K-02 menunggu pilihan (KT-10), paling lambat sebelum JS-05 |
 | Pekerjaan | Naskah final 16 kejadian dan daftar rujukannya (bagian naskah dari JS-05) |
 | Tanggal | 5 November 2026 |
 | Acuan | ZIP repositori 5 November 2026 (JS-01 selesai) |
@@ -20,12 +20,14 @@
 | 5 Nov 2026 | Naskah | Giliran 2: `K-01.md` dan `K-02.md` (dua versi situasi untuk KT-10) diserahkan, menunggu "Setuju: naskah Z1" |
 | 5 Nov 2026 | Naskah | Pemilik proyek membalas "Setuju: naskah Z1" tanpa menyebut versi K-02: K-01 disetujui; K-02 disetujui, dan kedua versi situasinya tetap disimpan sampai KT-10 diputuskan |
 | 5 Nov 2026 | Naskah | Giliran 3: `K-03.md` dan `K-04.md` diserahkan, menunggu "Setuju: naskah Z2" |
+| 5 Nov 2026 | Naskah | Pemilik proyek membalas "Setuju: naskah Z2": K-03 dan K-04 disetujui, termasuk tambahan JR-04 di K-04 (Permintaan A-3 aktif) |
+| 5 Nov 2026 | Naskah | Giliran 4: `K-05.md` dan `K-06.md` diserahkan, menunggu "Setuju: naskah Z3" |
 
 ## Ringkasan rencana (templat AGENTS 12.1)
 
 | | |
 |---|---|
-| Status | Disetujui 5 Nov 2026 ("Setuju: naskah"); Giliran 1 dan 2 disetujui (versi situasi K-02 menunggu KT-10); Giliran 3 diserahkan |
+| Status | Disetujui 5 Nov 2026 ("Setuju: naskah"); Giliran 1–3 disetujui (versi situasi K-02 menunggu KT-10); Giliran 4 diserahkan |
 | Memenuhi | Bagian naskah JS-05: 16 kejadian dan rujukannya (PRD bagian 10), sebagai data untuk JFR-15, JFR-16, dan JFR-45 |
 | Bergantung pada | PRD bagian 10 serta Architecture bagian 5.1 dan 5.4. Tidak menunggu JS-02; JS-02 baru diperlukan untuk bagian kode JS-05 |
 | Berkas yang dibuat atau diubah | Sekarang: `naskah/STATUS.md`. Sesudah disetujui: `naskah/NASKAH.md` dan `naskah/K-01.md` sampai `naskah/K-16.md` |
@@ -69,7 +71,7 @@ Percobaan dijalankan dengan skrip kecil di luar repositori.
 | KT-B5 | 5a: penyerobot di K-13 menjadi teman sekelas tanpa nama; Raka hanya di K-04 |
 | KT-B6 | 6a: selisih pilihan paling banyak 20 karakter (Langkah 1) dan 35 karakter (Langkah 2); pilihan benar atau tepat tidak selalu terpanjang |
 | KT-B7 | 7a: rujukan baru dipra-periksa di sumber resmi setiap giliran |
-| KT-10 PRD | Menunggu pilihan peninjau konten: versi A (umum, saran) atau versi B (bernuansa Bali) situasi K-02; kedua versi tetap di `K-02.md` |
+| KT-10 PRD | Menunggu pilihan peninjau konten: versi A (umum, saran) atau versi B (bernuansa Bali) situasi K-02; kedua versi tetap di `K-02.md`. Diperlukan paling lambat sebelum JS-05 (semai bank awal) |
 
 ## Usulan Plan (disetujui 5 November 2026)
 
@@ -287,20 +289,21 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 |---|---|---|---|---|
 | A-1 | `docs/jejak-setara/Design_System.md` bagian 8 dan `docs/jejak-setara/PRD.md` bagian 15 | Tambahkan ke daftar tokoh bukan pemain: Raka (teman sekelas berkursi roda, K-04), Wayan (teman sekelas, K-14), dan siswa SMP umum untuk K-03, K-10, K-11, K-12, K-13, dan K-16. Ciri visualnya ditetapkan pemilik proyek bersama Sesi C | Garis besar PRD bagian 10 dan naskah K-13 serta K-14 memakai tokoh-tokoh ini, tetapi kedua daftar belum memuatnya | Diajukan |
 | A-2 | `docs/jejak-setara/PRD.md` bagian 10 | Samakan teks rujukan di baris K-05 dan K-06 menjadi "UU No. 22 Tahun 2009 tentang LLAJ, …", dan di baris K-07 menjadi "UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah)" | Agar PRD dan pustaka rujukan memakai teks yang sama (KT-B4 dijawab a) | Diajukan |
-| A-3 | `docs/jejak-setara/PRD.md` bagian 10 | Tambahkan "Pasal 28J ayat (1) UUD NRI 1945 (R-08)" ke rujukan usulan baris K-04 | Kewajiban di kartu dampak K-04 perlu rujukan; usulan ada di `K-04.md`, bagian catatan peninjauan | Menunggu "Setuju: naskah Z2" |
+| A-3 | `docs/jejak-setara/PRD.md` bagian 10 | Tambahkan "Pasal 28J ayat (1) UUD NRI 1945 (R-08)" ke rujukan usulan baris K-04 | Kewajiban di kartu dampak K-04 perlu rujukan; usulan ada di `K-04.md`, bagian catatan peninjauan | Diajukan (disetujui pemilik proyek, 5 Nov 2026) |
+| A-4 | `docs/jejak-setara/PRD.md` bagian 10 | Tambahkan "Pasal 28G ayat (1) UUD NRI 1945 (R-03)" ke rujukan usulan baris K-05 | Hak di kartu dampak K-05 perlu rujukan; adegan 2 Sehari Setara memakai R-03 untuk hak yang sama (lihat `K-05.md`) | Menunggu "Setuju: naskah Z3" |
 
 ## Catatan untuk JS-05
 
 - JS-05 baru dimulai sesudah pemilik proyek mengabarkan bahwa JS-02 selesai.
 - `content:check:jejak` menjalankan uji di `app/jejak-setara/__tests__/konten/` (AGENTS bagian 6). Folder itu belum termasuk izin JS-05 dari pemilik proyek (5 Nov 2026), jadi izinnya akan saya minta di Plan JS-05.
 
-## Cara membalas (Giliran 3)
+## Cara membalas (Giliran 4)
 
-- **"Setuju: naskah Z2"** berarti K-03 dan K-04 disetujui, termasuk usulan menambahkan JR-04 di K-04 (Permintaan A-3). Bila JR-04 tidak perlu, balas "Setuju: naskah Z2, tanpa JR-04".
-- Versi situasi K-02 masih ditunggu: cukup tambahkan "K-02 versi A" atau "K-02 versi B" di balasan.
+- **"Setuju: naskah Z3"** berarti K-05 dan K-06 disetujui, termasuk usulan menambahkan JR-05 di K-05 (Permintaan A-4). Bila JR-05 tidak perlu, balas "Setuju: naskah Z3, tanpa JR-05".
+- Versi situasi K-02 (KT-10) boleh dijawab kapan saja sebelum JS-05, misalnya dengan menambahkan "K-02 versi A" di balasan.
 - Bila ada yang perlu diubah, tulis bebas. Saya memperbaikinya, lalu menyerahkannya lagi.
 
-## Langkah berikutnya sesudah "Setuju: naskah Z2"
+## Langkah berikutnya sesudah "Setuju: naskah Z3"
 
-1. Menandai K-03 dan K-04 "Disetujui" di `NASKAH.md`, lalu mengaktifkan atau menghapus Permintaan A-3 sesuai jawaban. Bila versi K-02 sudah dipilih, versi lainnya dihapus dan keputusan KT-10 dicatat.
-2. Menulis Giliran 4: K-05 dan K-06 (Z3 Jalan dan halte). K-05 hanya memakai rujukan padanan (JR-08 dan JR-18). K-06 memakai JR-19 (UU No. 22 Tahun 2009 tentang LLAJ, Pasal 131 ayat (2)), yang dipra-periksa di naskah resmi UU LLAJ.
+1. Menandai K-05 dan K-06 "Disetujui" di `NASKAH.md`, lalu mengaktifkan atau menghapus Permintaan A-4 sesuai jawaban.
+2. Menulis Giliran 5: K-07 dan K-08 (Z4 Pasar). K-07 menanyakan peran lembaga dan memakai empat rujukan padanan (JR-09, JR-05, JR-20, JR-21), dengan watak Bayu yang sama seperti di Sehari Setara. K-08 memakai JR-10 (Pasal 28H ayat (4)), yang dipra-periksa di naskah Perubahan Kedua.

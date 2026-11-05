@@ -10,10 +10,10 @@ Semua rujukan berstatus **perlu verifikasi**. Tanda "Terverifikasi" hanya diberi
 |---|---|---|---|---|---|
 | K-01 | Z1 | Menjaga adik | 2 | Disetujui 5 Nov 2026 | [K-01.md](K-01.md) |
 | K-02 | Z1 | Hari suci tetangga | 2 | Disetujui 5 Nov 2026; versi situasi menunggu pilihan (KT-10) | [K-02.md](K-02.md) |
-| K-03 | Z2 | Bekal yang diejek | 3 | Menunggu penilaian | [K-03.md](K-03.md) |
-| K-04 | Z2 | Kelas di lantai dua | 3 | Menunggu penilaian | [K-04.md](K-04.md) |
-| K-05 | Z3 | Bonceng tanpa helm | 4 | Belum ditulis | — |
-| K-06 | Z3 | Zebra cross | 4 | Belum ditulis | — |
+| K-03 | Z2 | Bekal yang diejek | 3 | Disetujui 5 Nov 2026 | [K-03.md](K-03.md) |
+| K-04 | Z2 | Kelas di lantai dua | 3 | Disetujui 5 Nov 2026 | [K-04.md](K-04.md) |
+| K-05 | Z3 | Bonceng tanpa helm | 4 | Menunggu penilaian | [K-05.md](K-05.md) |
+| K-06 | Z3 | Zebra cross | 4 | Menunggu penilaian | [K-06.md](K-06.md) |
 | K-07 | Z4 | Tuduhan di pasar | 5 | Belum ditulis | — |
 | K-08 | Z4 | Dompet tertinggal | 5 | Belum ditulis | — |
 | K-09 | Z5 | Rapat lomba | 6 | Belum ditulis | — |
@@ -35,10 +35,12 @@ Sasaran: selisih pilihan terpanjang dan terpendek paling banyak 20 karakter di L
 | K-02 | 4 | Tidak | 6 | Ya |
 | K-03 | 6 | Tidak | 16 | Tidak |
 | K-04 | 6 | Tidak | 5 | Ya |
+| K-05 | 12 | Tidak | 10 | Tidak |
+| K-06 | 7 | Tidak | 5 | Tidak |
 | K-13 | 9 | Tidak | 14 | Tidak |
 | K-14 | 5 | Tidak | 5 | Ya |
 
-Sejauh ini pilihan benar menjadi yang terpanjang di 0 dari 6 kejadian (Langkah 1), dan pilihan tepat di 3 dari 6 kejadian (Langkah 2).
+Sejauh ini pilihan benar menjadi yang terpanjang di 0 dari 8 kejadian (Langkah 1), dan pilihan tepat di 3 dari 8 kejadian (Langkah 2).
 
 ## Pustaka rujukan
 
@@ -49,8 +51,8 @@ Teks mengikuti usulan 4a: rujukan yang berpadanan R-xx sama persis dengan `app/s
 | JR-01 | Pasal 28B ayat (2) UUD NRI 1945 | UUD Perubahan Kedua | R-01 | K-01, K-03 | — | Perlu verifikasi |
 | JR-02 | Pasal 28E ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-02 | 5 Nov 2026 (K-02.md) | Perlu verifikasi |
 | JR-03 | Pasal 29 ayat (2) UUD NRI 1945 | UUD naskah asli | Baru | K-02 | 5 Nov 2026 (K-02.md) | Perlu verifikasi |
-| JR-04 | Pasal 28J ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-08 | K-02, K-03, K-04 (usulan, Permintaan A-3), K-06, K-08, K-09, K-10, K-12, K-13, K-15, K-16 | — | Perlu verifikasi |
-| JR-05 | Pasal 28G ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-03 | K-03, K-07, K-15 | — | Perlu verifikasi |
+| JR-04 | Pasal 28J ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-08 | K-02, K-03, K-04, K-06, K-08, K-09, K-10, K-12, K-13, K-15, K-16 | — | Perlu verifikasi |
+| JR-05 | Pasal 28G ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | R-03 | K-03, K-05 (usulan, Permintaan A-4), K-07, K-15 | — | Perlu verifikasi |
 | JR-06 | Pasal 31 ayat (1) UUD NRI 1945 | UUD Perubahan Keempat | R-04 | K-04, K-14 | — | Perlu verifikasi |
 | JR-07 | Pasal 28H ayat (2) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-04 | 5 Nov 2026 (K-04.md) | Perlu verifikasi |
 | JR-08 | Pasal 27 ayat (1) UUD NRI 1945 | UUD naskah asli | R-05 | K-05 | — | Perlu verifikasi |
@@ -64,7 +66,7 @@ Teks mengikuti usulan 4a: rujukan yang berpadanan R-xx sama persis dengan `app/s
 | JR-16 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19 | UU 23/2002 dan UU 35/2014 | R-02 | K-01 | — | Perlu verifikasi |
 | JR-17 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 11 | UU 23/2002 dan UU 35/2014 | Baru | K-12 | — | Perlu verifikasi |
 | JR-18 | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 77 ayat (1) dan Pasal 106 ayat (8) | UU 22/2009 | R-06 | K-05 | — | Perlu verifikasi |
-| JR-19 | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 131 ayat (2) | UU 22/2009 | Baru | K-06 | — | Perlu verifikasi |
+| JR-19 | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 131 ayat (2) | UU 22/2009 | Baru | K-06 | 5 Nov 2026, sumber sekunder (K-06.md) | Perlu verifikasi |
 | JR-20 | UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah) | UU 48/2009 | R-12 | K-07 | — | Perlu verifikasi |
 | JR-21 | UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g | UU 2/2002 dan UU 5/2026 | R-11 | K-07 | — | Perlu verifikasi |
 | JR-22 | UU No. 32 Tahun 2009, Pasal 67 | UU 32/2009 | Baru | K-11 | — | Perlu verifikasi |
