@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Bagian A: disetujui 5 November 2026 (`Spesifikasi disetujui: F-11 bagian A`; saran V-1 sampai V-4 dipakai), dibangun tanpa perubahan dari spesifikasi, dan diuji dengan keputusan Lulus ([laporan](../tests/F-11-hasil.md)). Bagian B: disetujui 5 November 2026 (`Spesifikasi disetujui: F-11 bagian B`; saran B-1 sampai B-6 dipakai, dan B-2 memakai kalimat sementara karena S-6 belum dijawab), dibangun, dan diuji dengan keputusan Lulus untuk ditinjau ([laporan](../tests/F-11-hasil.md)). ZIP B final menunggu verifikasi ke-14 rujukan |
+| Status | Bagian A: disetujui 5 November 2026 (`Spesifikasi disetujui: F-11 bagian A`; saran V-1 sampai V-4 dipakai), dibangun tanpa perubahan dari spesifikasi, dan diuji dengan keputusan Lulus ([laporan](../tests/F-11-hasil.md)). Bagian B: disetujui 5 November 2026 (`Spesifikasi disetujui: F-11 bagian B`; saran B-1 sampai B-6 dipakai, dan B-2 memakai kalimat sementara karena S-6 belum dijawab), dibangun, dan diuji dengan keputusan Lulus ([laporan](../tests/F-11-hasil.md)). Rilis 1.0 tercatat 5 November 2026, sesudah ke-14 rujukan diverifikasi pemilik proyek |
 | Tanggal | 5 November 2026 |
 | Rencana | `docs/sehari-setara/PLAN.md`, entri F-11 (disetujui 5 November 2026, balasan `Setuju: F-11`; saran setiap usulan diterima) |
 | Isi bagian A | Perbaikan uji daftar centang (AC-5 F-03) dan penyelarasan baris rujukan PRD bagian 8, sebagai paket pendahuluan yang boleh di-commit sebelum pemilik proyek mencentang |

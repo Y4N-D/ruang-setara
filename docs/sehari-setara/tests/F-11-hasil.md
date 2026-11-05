@@ -1,6 +1,6 @@
 # Hasil uji F-11 — 5 November 2026
 
-Fitur: integrasi dengan galeri Ruang Setara, layar "Tentang", dan rilis 1.0 ([spesifikasi](../specs/F-11-integrasi-galeri-rilis.md)). Laporan ini memuat **bagian A** (uji daftar centang dan baris rujukan PRD) dan **bagian B** (tautan galeri, pemeriksaan ketat di CI, layar "Tentang", dan pemeriksaan rilis 1.0). Bagian B diuji untuk ditinjau; ZIP B final menunggu verifikasi ke-14 rujukan.
+Fitur: integrasi dengan galeri Ruang Setara, layar "Tentang", dan rilis 1.0 ([spesifikasi](../specs/F-11-integrasi-galeri-rilis.md)). Laporan ini memuat **bagian A** (uji daftar centang dan baris rujukan PRD) dan **bagian B** (tautan galeri, pemeriksaan ketat di CI, layar "Tentang", dan pemeriksaan rilis 1.0). Bagian B lulus; ke-14 rujukan diverifikasi pemilik proyek pada 5 November 2026.
 
 Lingkungan: Node 22.23.4 dan pnpm 11.25.0, di salinan repositori dari ZIP `main` 5 November 2026 (commit `4778284`, ditambah dokumen Gerbang 1 dan Gerbang 2 bagian A), cabang `fitur/F-11-integrasi-galeri-rilis`. Uji ujung ke ujung tidak dijalankan untuk bagian A (keputusan V-4), karena ke-178 berkas yang terbit identik byte (AC-A9).
 
@@ -72,7 +72,7 @@ Lingkungan: sama dengan bagian A, cabang `fitur/F-11-integrasi-galeri-rilis`. Uj
 | AC-B6 Layar judul empat tombol | Lulus | `judul-pengaturan-prolog.spec.ts`: 4 uji "layar judul di {ukuran}" dengan tabel empat tombol (±0,5u) dan `href="../"` di tombol keempat; uji masa tunggu (AC-3, AC-4) dengan "Tentang", termasuk sesudah dialog "Tentang" ditutup; urutan Tab empat tombol di uji AC-22 dan di `sehari-setara.spec.ts` |
 | AC-B7 Dialog "Tentang" | Lulus | 4 uji "dialog Tentang di {ukuran}": `aria-modal="true"`, fokus di judul, kelima belas teks sama dengan tabel, Tab dan Shift+Tab hanya antara judul dan "Tutup", pintasan tanpa akibat, "Cara bermain" tidak terbuka di bawahnya (satu dialog), tanpa teks meluap, sisa kolom kanan ≥ 10u, "Tutup" di kanan 169,8u, `Esc` menutup dan fokus kembali ke "Tentang". Uji bunyi AC-24: membuka "Tentang" dan menutupnya dengan `Esc` masing-masing tepat satu klik. Tangkapan `tentang-*.png` dan `judul-*.png` |
 | AC-B8 Teks "Tentang" | Lulus | `opening.test.ts`, 2 uji "teks dialog Tentang": tanpa kurung siku, kurawal, "TBD", "draf", "sementara", atau "sedang dibuat"; lisensi huruf dan kedua pemberitahuan hak cipta persis |
-| AC-B9 Langkah CI | Sebagian (menunggu verifikasi) | Langkah "Periksa verifikasi rujukan" sama persis dengan spesifikasi, di antara "Uji game" dan "Build versi statis". `RILIS=1 content:check` pada daftar saat ini gagal dengan "Rilis diblokir: 14 rujukan belum terverifikasi." Lulus pada berkas pemilik proyek baru bisa diperiksa sesudah verifikasi selesai |
+| AC-B9 Langkah CI | Lulus | Langkah "Periksa verifikasi rujukan" sama persis dengan spesifikasi, di antara "Uji game" dan "Build versi statis". Sebelum verifikasi, `RILIS=1 content:check` gagal dengan "Rilis diblokir: 14 rujukan belum terverifikasi.", dan langkah CI menahan terbitan seperti dirancang. Berkas pemilik proyek yang pertama tetap terbaca 0 dari 14, karena editor Markdown menulis ulang baris butir menjadi `* \[x]`. Sesudah formatnya dibetulkan, tanpa mengubah centang, nama, dan tanggal, pemeriksaan biasa dan `RILIS=1` lulus dengan 14 dari 14 |
 | AC-B10 Dokumen | Lulus, kecuali B-5 | Architecture (0.13: bagian 3, 4, 7, 9, 10, 11, dan 12), Design System (bagian 3, 7, dan 13), PRD bagian 13, AGENTS bagian 6, `PANDUAN_GITHUB_PAGES.md`, spesifikasi, dan `PLAN.md`. Baris "Rilis 1.0" di PRD bagian 17 dan `PLAN.md` ditulis di ZIP B final (B-5). `CREDITS.md` dan `Daftar_Aset.md` tidak berubah, karena S-6 belum dijawab (B-2) |
 | AC-B11 Pemeriksaan rilis | Lulus | Tabel "Pemeriksaan rilis 1.0" di bawah |
 | AC-B12 Pemeriksaan kode | Lulus | `test` 296 lulus, 1 dilewati; `content:check` 42 lulus, 1 dilewati; `build:pages` lulus; `test:e2e` 160 lulus; `tsc` 0 galat tanpa `next-env.d.ts`; ESLint `--max-warnings 0` 0 masalah pada `app/sehari-setara` dan `e2e`; `app/page.tsx` tetap 4 galat `react-hooks/refs` (baris 33, 35, 37, 37) dan 1 peringatan `react-hooks/exhaustive-deps` (baris 56), sama dengan sebelum F-11; `package.json` dan `pnpm-lock.yaml` tidak berubah |
@@ -89,7 +89,7 @@ Lingkungan: sama dengan bagian A, cabang `fitur/F-11-integrasi-galeri-rilis`. Uj
 | Data per pemuatan | 380–391 KB, dengan cache kosong, 10 Mbps, latensi 40 ms |
 | Galat | 0 di semua uji ujung ke ujung, termasuk galeri (layar sambutan, galeri Refleksi, menu) dan main penuh |
 | Placeholder | `Daftar_Aset.md` 50 dari 50 baris Disetujui; uji aset lulus; tanpa kurung siku, kurawal, "TBD", atau "draf" di teks `content/*.ts`. Dua kecocokan kata "sementara" adalah kata sambung di teks alternatif adegan 1 dan 5 ("…, sementara Gita …", "…, sementara Pak Made …"), bukan penanda teks sementara |
-| Rujukan | 0 dari 14 terverifikasi pada salinan agen; mode rilis memblokir (AC-B9) |
+| Rujukan | 14 dari 14 terverifikasi pada berkas pemilik proyek; mode rilis lulus (AC-B9) |
 
 ### Perintah yang dijalankan dan hasilnya
 
@@ -107,7 +107,7 @@ Lingkungan: sama dengan bagian A, cabang `fitur/F-11-integrasi-galeri-rilis`. Uj
 
 ### Temuan
 
-1. **Verifikasi rujukan belum selesai.** Daftar di salinan agen masih 0 dari 14, sehingga langkah baru di CI pasti gagal bila ZIP B di-commit sekarang. ZIP B ini hanya untuk ditinjau. Sesudah ke-14 kotak dicentang, kirim ZIP `main` terbaru; agen menjalankan `RILIS=1 content:check` pada berkas itu, lalu menyiapkan ZIP B final beserta baris "Rilis 1.0" (B-5).
+1. **Verifikasi rujukan selesai (5 Nov 2026).** Pemilik proyek mencentang ke-14 rujukan. Berkas pertama tidak terbaca karena editor Markdown menulis ulang baris butir (`* \[x]`); formatnya dibetulkan tanpa mengubah centang, nama, dan tanggal. Ke depan, berkas itu disunting dengan Notepad (catatan "Semua fitur" di `PLAN.md`).
 2. **Dua penyesuaian uji, bukan perbaikan permainan.** Uji baru "dialog Tentang" semula menekan `Spasi` saat "Tutup" berfokus, sehingga dialog memang tertutup; urutannya diperbaiki. Uji urutan Tab lama di `sehari-setara.spec.ts` ditambah "Tentang".
 3. **Fungsi keyboard bersama.** `tabTo`, `openByKeyboard`, `toQuestion`, dan `playScene` dipindah dari uji F-10 ke `e2e/bantuan.ts`, agar dipakai juga oleh uji galeri.
 4. **Tangkapan layar.** Playwright mengosongkan `test-results/` di setiap jalan, jadi tangkapan F-11 diambil ulang dan langsung disalin ke folder laporan.
@@ -116,6 +116,6 @@ Lingkungan: sama dengan bagian A, cabang `fitur/F-11-integrasi-galeri-rilis`. Uj
 
 Daftar periksa manual (AGENTS bagian 9) dan daftar periksa rilis untuk pemilik proyek ada di rencana F-11, usulan 9: laptop kelas dengan Edge, proyektor, dan iPad bila ada, sesudah ZIP B final terbit dan sebelum tautan dibuka untuk siswa.
 
-### Keputusan bagian B: Lulus untuk ditinjau
+### Keputusan bagian B: Lulus
 
-Semua kriteria lulus, kecuali dua hal yang menunggu verifikasi ke-14 rujukan: AC-B9 (mode rilis lulus pada berkas pemilik proyek) dan baris "Rilis 1.0" (B-5). ZIP B tidak untuk di-commit sebelum verifikasi selesai.
+Semua kriteria lulus. Rilis 1.0 dicatat di PRD bagian 17 dan `PLAN.md` (B-5). Daftar periksa perangkat dan tag `v1.0` dikerjakan pemilik proyek (rencana F-11, usulan 9 dan 10).
