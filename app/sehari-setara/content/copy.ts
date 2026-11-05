@@ -4,7 +4,8 @@
 // teks F-05 mengikuti specs/F-05-panel-narasi-pilihan.md; teks F-06 mengikuti specs/F-06-indikator-kartu-dampak.md;
 // teks F-07 mengikuti specs/F-07-tim-waktu-bintang.md; teks F-08 mengikuti specs/F-08-kuis-peran.md;
 // teks F-09 mengikuti specs/F-09-akhir-rekap-refleksi.md (judul, pesan, dan teks alternatif akhir ada di endings.ts);
-// teks F-10 mengikuti specs/F-10-judul-pengaturan-prolog.md (teks dan teks alternatif prolog ada di prolog.ts).
+// teks F-10 mengikuti specs/F-10-judul-pengaturan-prolog.md (teks dan teks alternatif prolog ada di prolog.ts);
+// teks dialog "Tentang" mengikuti specs/F-11-integrasi-galeri-rilis.md, bagian B.
 import type { ChoiceId, Tier, TimeOfDay } from "../engine/types";
 
 export const copy = {
@@ -15,6 +16,7 @@ export const copy = {
     lead: "Temani Nara menjalani satu hari dan pilih tindakannya bersama kelas.",
     start: "Mulai",
     howTo: "Cara bermain",
+    about: "Tentang",
   },
   howTo: {
     title: "Cara bermain",
@@ -38,6 +40,32 @@ export const copy = {
       { keys: "1 2 3 4", spoken: "1, 2, 3, atau 4", text: "Menjawab kuis peran" },
       { keys: "M", spoken: "M", text: "Suara nyala atau mati" },
       { keys: "Esc", spoken: "Esc", text: "Pengaturan" },
+    ],
+    close: "Tutup",
+  },
+  // Dialog "Tentang" (F-11 bagian B): nama YAN (B-1); baris bunyi menunggu jawaban S-6 (B-2).
+  about: {
+    title: "Tentang",
+    aboutLabel: "Tentang permainan",
+    aboutLines: [
+      "Sehari Setara adalah permainan Pendidikan Pancasila kelas IX di Ruang Setara.",
+      "Permainan ini tidak menyimpan data siswa.",
+      "Versi 1.0, November 2026.",
+    ],
+    creditsLabel: "Kredit",
+    credits: [
+      { label: "Gambar", text: "Digambar dengan kode oleh Claude (Anthropic) dengan arahan dan persetujuan YAN.", notes: [] },
+      {
+        label: "Huruf",
+        text: "Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.",
+        // Disalin persis dari metadata berkas huruf (nama 0), dengan titik di akhir.
+        notes: [
+          'Copyright 2012 The Press Start 2P Project Authors (cody@zone38.net), with Reserved Font Name "Press Start 2P".',
+          "Copyright 2021 The Pixelify Sans Project Authors (https://github.com/eifetx/Pixelify-Sans).",
+          "Lisensi: scripts.sil.org/OFL",
+        ],
+      },
+      { label: "Bunyi", text: "Bunyi klik dan bunyi teks dipilih YAN dari halaman uji suara Sehari Setara.", notes: [] },
     ],
     close: "Tutup",
   },

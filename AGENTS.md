@@ -132,6 +132,7 @@ Pembuatan aset gambar berjalan **paralel** dan dilacak di `Daftar_Aset.md`, buka
 npx pnpm@11.25.0 install              # pasang dependensi
 npx pnpm@11.25.0 dev:pages            # pengembangan; buka /sehari-setara/
 npx pnpm@11.25.0 content:check        # validasi naskah dan rujukan
+RILIS=1 npx pnpm@11.25.0 content:check  # pemeriksaan ketat sebelum rilis (di CI sejak F-11)
 npx pnpm@11.25.0 test                 # uji unit dan konten
 npx pnpm@11.25.0 build:pages          # build statis ke dist-pages/
 npx pnpm@11.25.0 test:e2e             # uji Playwright di /ruang-setara/

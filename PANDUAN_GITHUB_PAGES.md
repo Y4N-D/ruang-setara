@@ -55,6 +55,11 @@ berkas diubah, `SHA256SUMS.txt` tidak lagi cocok untuk berkas-berkas tersebut.
 Edit berkas (mis. `app/content.ts`), lalu commit dan push ke `main` (di GitHub
 Desktop: Commit to main → Push origin). Website akan diperbarui otomatis.
 
+Sejak rilis 1.0 (F-11), website hanya diperbarui bila semua kotak di
+`docs/sehari-setara/Verifikasi_Rujukan.md` sudah dicentang dan setiap baris pertamanya utuh.
+Bila masih ada yang kosong atau rusak, langkah "Periksa verifikasi rujukan" di tab Actions gagal
+(tanda silang merah), dan website yang sedang tayang tetap seperti terbitan terakhir.
+
 ## Menguji versi statis di komputer
 
 ```sh

@@ -2,6 +2,7 @@
 // "Mulai permainan", dialog pengaturan, adegan semu layar judul dan prolog, teks prolog, dan TITLE_ZONE.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { copy } from "../content/copy";
 import { PROLOG } from "../content/prolog";
 import { SCENES } from "../content/scenes";
 import { countSentences } from "../content/schema";
@@ -182,5 +183,34 @@ describe("adegan semu dan teks prolog", () => {
     const source = readFileSync(new URL("../../../scripts/game/art/latar.py", import.meta.url), "utf8");
     const match = /^TITLE_ZONE = \((\d+), (\d+), (\d+), (\d+)\)/m.exec(source);
     expect(match?.slice(1).map(Number)).toEqual([TITLE_ZONE.x0, TITLE_ZONE.y0, TITLE_ZONE.x1, TITLE_ZONE.y1]);
+  });
+});
+
+describe("teks dialog Tentang (F-11 bagian B, AC-B8)", () => {
+  const about = copy.about;
+  const texts: string[] = [
+    about.title,
+    about.aboutLabel,
+    ...about.aboutLines,
+    about.creditsLabel,
+    ...about.credits.flatMap((credit) => [credit.label, credit.text, ...credit.notes]),
+    about.close,
+  ];
+
+  it("lengkap, tanpa tanda teks sementara", () => {
+    for (const text of texts) {
+      expect(text.trim(), "teks kosong").not.toBe("");
+      expect(text, text).not.toMatch(/[[\]{}]|TBD|draf|sementara|sedang dibuat/i);
+    }
+  });
+
+  it("memuat lisensi huruf dan kedua pemberitahuan hak cipta persis", () => {
+    const notes = about.credits.flatMap((credit) => [...credit.notes]);
+    expect(texts).toContain("Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.");
+    expect(notes).toEqual([
+      'Copyright 2012 The Press Start 2P Project Authors (cody@zone38.net), with Reserved Font Name "Press Start 2P".',
+      "Copyright 2021 The Pixelify Sans Project Authors (https://github.com/eifetx/Pixelify-Sans).",
+      "Lisensi: scripts.sil.org/OFL",
+    ]);
   });
 });

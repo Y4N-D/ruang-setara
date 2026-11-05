@@ -2626,6 +2626,27 @@ body {
   justify-content: flex-end;
 }
 
+/* Dialog "Tentang" (F-11 bagian B): bingkai, kepala, isi, dan kaki sama dengan "Cara bermain". */
+.ss-about-text,
+.ss-about-note {
+  margin: 0 0 calc(var(--u) * 1.6);
+  color: var(--ss-ink);
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+
+.ss-about-text {
+  font-size: calc(var(--u) * 3.1);
+}
+
+.ss-about-note {
+  font-size: calc(var(--u) * 2.5);
+}
+
+.ss-about-label {
+  margin-bottom: calc(var(--u) * 0.5);
+}
+
 /* Pengaturan kelas: kolom label 30u dan kolom pilihan. */
 .ss-setup-body {
   flex: 1;

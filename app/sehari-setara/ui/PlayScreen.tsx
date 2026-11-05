@@ -190,6 +190,7 @@ export function PlayScreen({ scale, titleScale }: { scale: number; titleScale: n
   // dihitung lagi; pilihan sementara pengaturan kelas dan layar prolog berlaku untuk satu permainan (round).
   const [visit, setVisit] = useState(0);
   const [howTo, setHowTo] = useState(false);
+  const [about, setAbout] = useState(false);
   const [titleFocus, setTitleFocus] = useState<TitleFocus>({ key: 0, target: "mulai" });
   const [draft, setDraft] = useState<{ round: number; value: SetupDraft } | null>(null);
   const [prolog, setProlog] = useState({ round: 0, screen: 0 });
@@ -237,7 +238,7 @@ export function PlayScreen({ scale, titleScale }: { scale: number; titleScale: n
   const prologScreen = prolog.round === round ? prolog.screen : 0;
   const prologStage = state.phase === "prolog" ? PROLOG_SCENES[prologScreen] : null;
   const openingKey =
-    state.phase === "title" && !howTo
+    state.phase === "title" && !howTo && !about
       ? `${round}-judul-${visit}`
       : state.phase === "setup"
         ? `${round}-kelas-${visit}`
@@ -387,7 +388,7 @@ export function PlayScreen({ scale, titleScale }: { scale: number; titleScale: n
 
   /** "Mulai": MULAI ke pengaturan kelas. */
   const startSetup = () => {
-    if (state.phase !== "title" || howTo || !openingGuardPassed()) return;
+    if (state.phase !== "title" || howTo || about || !openingGuardPassed()) return;
     dispatch({ type: "MULAI" });
     setVisit((value) => value + 1);
     click();
@@ -395,7 +396,7 @@ export function PlayScreen({ scale, titleScale }: { scale: number; titleScale: n
 
   /** "Cara bermain": dialog di atas layar judul; fase tetap title. */
   const openHowTo = () => {
-    if (state.phase !== "title" || howTo || !openingGuardPassed()) return;
+    if (state.phase !== "title" || howTo || about || !openingGuardPassed()) return;
     setHowTo(true);
     click();
   };
@@ -406,6 +407,23 @@ export function PlayScreen({ scale, titleScale }: { scale: number; titleScale: n
     setHowTo(false);
     setVisit((value) => value + 1);
     setTitleFocus((current) => ({ key: current.key + 1, target: "cara" }));
+    holdKeys.current = true;
+    click();
+  };
+
+  /** "Tentang": dialog di atas layar judul; fase tetap title (F-11 bagian B). */
+  const openAbout = () => {
+    if (state.phase !== "title" || howTo || about || !openingGuardPassed()) return;
+    setAbout(true);
+    click();
+  };
+
+  /** "Tutup" atau Esc di dialog "Tentang": fokus kembali ke "Tentang", dan masa tunggu dihitung lagi. */
+  const closeAbout = () => {
+    if (!about) return;
+    setAbout(false);
+    setVisit((value) => value + 1);
+    setTitleFocus((current) => ({ key: current.key + 1, target: "tentang" }));
     holdKeys.current = true;
     click();
   };
@@ -556,6 +574,7 @@ export function PlayScreen({ scale, titleScale }: { scale: number; titleScale: n
     setDownload((current) => ({ ...DOWNLOAD_IDLE, run: current.run + 1 }));
     setVisit((value) => value + 1);
     setHowTo(false);
+    setAbout(false);
     setTitleFocus((current) => ({ key: current.key + 1, target: "mulai" }));
     holdKeys.current = true;
     click();
@@ -917,10 +936,13 @@ export function PlayScreen({ scale, titleScale }: { scale: number; titleScale: n
         ready={openingReadyShown}
         focus={titleFocus}
         howTo={howTo}
+        about={about}
         onStart={startSetup}
         onHowTo={openHowTo}
+        onAbout={openAbout}
         onGallery={titleGallery}
         onCloseHowTo={closeHowTo}
+        onCloseAbout={closeAbout}
       />
     );
   } else if (state.phase === "setup") {

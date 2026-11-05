@@ -3,6 +3,7 @@
 import { mkdirSync } from "node:fs";
 import { expect, type Locator, type Page } from "@playwright/test";
 import { PROLOG } from "../app/sehari-setara/content/prolog";
+import { SCENES } from "../app/sehari-setara/content/scenes";
 
 export const SHOTS = "test-results/tangkapan";
 mkdirSync(SHOTS, { recursive: true });
@@ -314,4 +315,65 @@ export async function answerQuiz(page: Page, paused = false) {
   else await expect(quizNext(page)).not.toHaveAttribute("aria-disabled", /.*/);
   await page.keyboard.press("Enter");
   await expect(quizDialog(page)).toHaveCount(0);
+}
+
+/* ---------------- Langkah keyboard bersama (dipindah dari uji F-10 di F-11 bagian B) ---------------- */
+
+export async function tabTo(page: Page, name: string) {
+  for (let i = 0; i < 16; i++) {
+    const focused = await page.evaluate(() => document.activeElement?.textContent?.trim() ?? "");
+    if (focused === name) return;
+    await page.keyboard.press("Tab");
+  }
+  throw new Error(`Tab tidak sampai ke "${name}"`);
+}
+
+/** Langkah pembuka dengan keyboard saja (AC-1, AC-20): Tab, Enter, dan Spasi; jam uji dijeda. */
+export async function openByKeyboard(page: Page, teams: 2 | 3 | 4, seconds: 30 | 60 | 90) {
+  await expect(titleStart(page)).toBeFocused();
+  await page.clock.runFor(600);
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".ss-setup-title")).toBeFocused();
+  await page.clock.runFor(600);
+  for (const name of [`${teams} tim`, `${seconds} detik`]) {
+    await tabTo(page, name);
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("button", { name, exact: true })).toHaveAttribute("aria-pressed", "true");
+  }
+  await tabTo(page, "Mulai permainan");
+  await page.keyboard.press("Space");
+  for (const screen of PROLOG) {
+    await expect(page.locator(".ss-narration-text")).toHaveText(screen.text);
+    await page.clock.runFor(600);
+    if ((await page.locator(".ss-narration-rest").textContent()) !== "") await page.keyboard.press("Enter");
+    await page.keyboard.press("Enter");
+  }
+  await page.clock.runFor(400);
+  await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 1/6");
+  await expect(page.locator(".ss-narration .ss-next")).toBeFocused();
+}
+
+/** Narasi sampai pertanyaan dengan Spasi (teks per huruf menyala: tampilkan sekaligus, lalu lanjut). */
+export async function toQuestion(page: Page) {
+  for (let i = 0; i < 12 && (await page.locator(".ss-question").count()) === 0; i++) await page.keyboard.press("Space");
+  await expect(page.locator(".ss-question")).toBeFocused();
+}
+
+/** Satu adegan dengan keyboard sampai pergantian selesai; jam uji dijeda. */
+export async function playScene(page: Page, choice: "A" | "B" | "C", runOut = 0) {
+  const index = Number((await page.locator(".ss-topbar-counter").textContent())?.match(/\d/)?.[0] ?? "1") - 1;
+  await toQuestion(page);
+  if (runOut > 0) {
+    await page.clock.runFor(runOut * 1000);
+    await expect(page.locator(".ss-timer-text")).toHaveText("Waktunya memilih");
+  }
+  await page.keyboard.press(choice);
+  await page.clock.runFor(1200);
+  await expect(page.locator("#ss-impact-title")).toBeFocused();
+  await page.clock.runFor(600);
+  await page.keyboard.press("Enter");
+  if (SCENES[index].roleQuiz) await answerQuiz(page, true);
+  await expect(awardPrompt(page)).toBeFocused();
+  await page.keyboard.press("1");
+  await page.clock.runFor(400);
 }

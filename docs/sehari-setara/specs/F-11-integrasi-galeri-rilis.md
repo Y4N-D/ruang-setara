@@ -2,10 +2,11 @@
 
 | | |
 |---|---|
-| Status | Bagian A: disetujui 5 November 2026 (`Spesifikasi disetujui: F-11 bagian A`; saran V-1 sampai V-4 dipakai), dibangun tanpa perubahan dari spesifikasi, dan diuji dengan keputusan Lulus ([laporan](../tests/F-11-hasil.md)). Bagian B: belum ditulis; disusun sesudah ZIP A diserahkan (keputusan Gerbang 1, usulan 1a dan 6a) |
+| Status | Bagian A: disetujui 5 November 2026 (`Spesifikasi disetujui: F-11 bagian A`; saran V-1 sampai V-4 dipakai), dibangun tanpa perubahan dari spesifikasi, dan diuji dengan keputusan Lulus ([laporan](../tests/F-11-hasil.md)). Bagian B: disetujui 5 November 2026 (`Spesifikasi disetujui: F-11 bagian B`; saran B-1 sampai B-6 dipakai, dan B-2 memakai kalimat sementara karena S-6 belum dijawab), dibangun, dan diuji dengan keputusan Lulus untuk ditinjau ([laporan](../tests/F-11-hasil.md)). ZIP B final menunggu verifikasi ke-14 rujukan |
 | Tanggal | 5 November 2026 |
 | Rencana | `docs/sehari-setara/PLAN.md`, entri F-11 (disetujui 5 November 2026, balasan `Setuju: F-11`; saran setiap usulan diterima) |
 | Isi bagian A | Perbaikan uji daftar centang (AC-5 F-03) dan penyelarasan baris rujukan PRD bagian 8, sebagai paket pendahuluan yang boleh di-commit sebelum pemilik proyek mencentang |
+| Isi bagian B | Dua tautan galeri, langkah pemeriksaan ketat di CI, layar "Tentang", serta pemeriksaan dan pencatatan rilis 1.0. Di-commit hanya sesudah verifikasi ke-14 rujukan selesai |
 
 ## Ringkasan
 
@@ -171,7 +172,261 @@ Hasil ditulis di `docs/sehari-setara/tests/F-11-hasil.md` (templat 11.3), bagian
 
 ## Bagian B
 
-Belum ditulis. Disusun sesudah ZIP A diserahkan, mengikuti usulan 2 sampai 12 rencana F-11. Yang dibutuhkan dari pemilik proyek paling lambat di Gerbang 2 bagian B:
+### Ringkasan bagian B
 
-- nama yang ditampilkan di layar "Tentang" (`CREDITS.md` memakai "YAN", Design System bagian 13 masih "[nama pengembang]");
-- jawaban S-6: siapa atau alat apa yang membuat bunyi klik dan bunyi teks di halaman uji suara, dan lisensinya.
+Bagian B menautkan game dari dua titik galeri, menambah langkah pemeriksaan ketat rujukan di GitHub, menambah layar "Tentang" di layar judul, lalu menjalankan dan mencatat pemeriksaan rilis 1.0. Kode galeri hanya berubah di dua tautan dan satu nama ikon. Hasil bagian B baru boleh di-commit sesudah pemilik proyek menyatakan ke-14 rujukan terverifikasi (usulan 6a rencana).
+
+### Keputusan bagian B (perlu disetujui)
+
+| No. | Hal | Saran | Alternatif |
+|---|---|---|---|
+| B-1 | Nama di layar "Tentang" | "YAN", seperti di `CREDITS.md` dan baris atribusi lain | Nama lengkap; atau tanpa nama ("pemilik proyek") |
+| B-2 | Baris bunyi (S-6) | **Perlu jawaban Anda.** Bila belum ada jawaban sampai Build, dipakai kalimat yang sesuai `CREDITS.md`: "Bunyi klik dan bunyi teks dipilih YAN dari halaman uji suara Sehari Setara.", dan S-6 tetap tercatat terbuka di `CREDITS.md` | "Dibuat dengan kode oleh Claude (Anthropic), dipilih YAN." bila halaman uji itu dibuat Claude; atau "Dibuat dengan {alat}, {lisensi}, dipilih YAN." bila dari alat lain |
+| B-3 | Susunan dialog "Tentang" | Dua kolom seperti "Cara bermain": kiri "Tentang permainan" (tiga kalimat), kanan "Kredit" (Gambar, Huruf beserta dua pemberitahuan hak cipta dan alamat lisensi, lalu Bunyi) | Satu kolom; atau teks lisensi OFL lengkap ikut tampil dan bisa digulir |
+| B-4 | Kalimat lama di `Verifikasi_Rujukan.md` ("Mengubah file ini tidak pernah membuat situs gagal terbit. …") | Pemilik proyek mengganti sendiri kalimat itu saat meng-commit ZIP B, dengan teks pengganti di bagian "Teks yang tampil". ZIP tetap tidak memuat berkas itu | Kalimat dibiarkan, dan penjelasan hanya di `PANDUAN_GITHUB_PAGES.md`, sehingga kalimat lama tidak lagi benar; atau agen mengubahnya lewat ZIP, yang bisa menimpa centang (bertentangan dengan usulan 6a) |
+| B-5 | Tanggal rilis di PRD bagian 17 dan `PLAN.md` | Tanggal saat ZIP B final disiapkan, sesudah verifikasi selesai | Tanggal push oleh pemilik proyek, ditulis menyusul |
+| B-6 | Ukuran layar untuk uji galeri yang lambat di browser uji tanpa GPU | Alur dan keyboard diuji di 1280×720; letak dan keterlihatan kedua tautan diperiksa juga di 1024×768 dan 1920×1080; tangkapan layar di ketiga ukuran | Semua uji galeri di ketiga ukuran, dengan risiko melewati batas 300 detik per perintah |
+
+### Perilaku bagian B
+
+**Galeri** (Architecture bagian 11)
+
+- Diberikan galeri Refleksi (galeri ke-6) tampil, maka panel naratifnya memuat tautan bergaya tombol "Main Sehari Setara" di bawah "Mulai tantangan" dan di atas "Kembali ke atrium". Galeri lain tidak memuatnya.
+- Diberikan menu "Daftar materi" dibuka, maka tautan teks "Main Sehari Setara" tampil tepat di bawah kalimat pembuka dan di atas daftar enam galeri, dan terlihat tanpa menggulir di 1024×768, 1280×720, dan 1920×1080.
+- Ketika salah satu tautan diklik, atau berfokus lalu `Enter` ditekan, maka browser membuka `sehari-setara/` relatif terhadap alamat galeri, yaitu `/ruang-setara/sehari-setara/` di GitHub Pages, di tab yang sama. Layar judul game tampil dengan "Mulai" berfokus.
+- Bagian galeri lain tidak berubah. "Kembali ke galeri" di game tetap `../` dan membuka galeri dari layar sambutan.
+- Di versi Vinext (`pnpm dev`, `pnpm build`, dan `pnpm start`), kedua tautan berakhir di halaman 404 Vinext. Hal ini dicatat dan dibiarkan (usulan 4a).
+
+**Layar judul dan dialog "Tentang"**
+
+- Tombol keempat "Tentang" berada di baris tombol layar judul, berurutan "Mulai", "Cara bermain", "Tentang", "Kembali ke galeri". Gayanya `ss-button`, sama dengan tombol lain.
+- "Tentang" membuka dialog "Tentang" dengan satu bunyi klik. Fase tetap `title`.
+- Keempat tombol baru bekerja 600 ms sesudah layar judul tampil, termasuk sesudah dialog "Tentang" ditutup (spesifikasi F-10, bagian "Masa tunggu dan klik ganda").
+- Dialog "Tentang" berperilaku sama dengan dialog "Cara bermain":
+  - menutupi seluruh layar 16:9, dengan `role="dialog"`, `aria-modal="true"`, dan nama "Tentang" dari judulnya;
+  - saat dibuka, fokus pindah ke judulnya. `Tab` dan `Shift+Tab` hanya beredar antara judul dan "Tutup";
+  - "Tutup" (klik, atau `Enter` dan `Spasi` pada tombol) dan `Esc` menutup dialog dengan satu bunyi klik, lalu fokus kembali ke tombol "Tentang", dan masa tunggu layar judul dihitung lagi. "Tutup" sendiri tidak punya masa tunggu;
+  - selama dialog terbuka, pintasan permainan tidak berlaku dan tidak berbunyi;
+  - isi dialog tidak bergantung pada fase atau pengaturan.
+- "Tentang" dan "Cara bermain" tidak bisa terbuka bersamaan.
+- Sesudah "Main lagi" atau "Kembali", dialog "Tentang" tertutup dan fokus di "Mulai", sama dengan dialog "Cara bermain".
+
+**CI**
+
+- Langkah "Periksa verifikasi rujukan" dijalankan sesudah "Uji game" dan sebelum "Build versi statis". Bila masih ada rujukan yang belum terverifikasi, langkah gagal, build dan terbit tidak dijalankan, dan situs yang sedang tayang tetap seperti terbitan terakhir.
+
+**Rilis**
+
+- Urutan rilis mengikuti usulan 6a rencana. ZIP B yang diserahkan sebelum verifikasi selesai hanya untuk ditinjau, dan agen tidak menyarankan commit.
+
+### Tata letak dan ukuran (bagian B)
+
+**Galeri.** Kedua tautan memakai kelas galeri yang sudah ada, tanpa CSS baru:
+
+| Titik | Kelas | Letak |
+|---|---|---|
+| Panel galeri Refleksi | `journey-cta`, dengan ikon `Gamepad2` 18 px | Sesudah "Mulai tantangan", sebelum "Kembali ke atrium"; hanya bila galeri ke-6 tampil |
+| Menu "Daftar materi" | `text-control` | Sesudah kalimat pembuka, sebelum daftar enam galeri |
+
+Hasil percobaan Plan [Coba]: di ketiga ukuran, tautan panel (198,5 × 48 px) berjarak 20–25 px dari garis kepala halaman dan paling sedikit 27 px dari kaki halaman, dan tautan menu berada pada y 331–370 px, di dalam bidang menu yang terlihat (batas 684 px di 1280×720 dan 733 px di 1024×768).
+
+**Layar judul.** Pita tombol tetap (spesifikasi F-10); baris kini berisi empat tombol. Hasil percobaan [Coba], dengan tombol "Tentang" disuntikkan ke layar judul F-10:
+
+| | 1280×720 | 1366×768 | 1920×1080 | 1024×768 |
+|---|---|---|---|---|
+| Baris (kiri–kanan) | 22,9–154,9u (132,0u) | 23,0–154,8u (131,8u) | 22,9–154,9u (132,0u) | 22,3–155,4u (133,1u) |
+| "Mulai" | 22,9–44,9u | 23,0–45,0u | 22,9–44,9u | 22,3–44,7u |
+| "Cara bermain" | 47,9–82,9u | 48,0–82,9u | 47,9–82,9u | 47,7–82,9u |
+| "Tentang" | 85,9–113,1u | 85,9–113,0u | 85,9–113,1u | 85,9–113,3u |
+| "Kembali ke galeri" | 116,1–154,9u | 116,0–154,8u | 116,1–154,9u | 116,3–155,4u |
+| Atas–bawah tombol | 89,5–97,7u | 89,6–97,6u | 89,5–97,7u | 89,4–97,8u |
+
+Klik ganda yang berubah karena tombol keempat, di 1280×720:
+
+| Klik ganda pada | Klik kedua jatuh di | Pengaman |
+|---|---|---|
+| "Tutup" dialog "Cara bermain" atau "Tentang" (146,2–169,8u × 88,9–97,0u) | "Kembali ke galeri" (116,1–154,9u), tumpang tindih 8,7u | Masa tunggu layar judul: klik dibatalkan (`preventDefault()`) |
+| "Main lagi" di refleksi (12,0–39,1u) | "Mulai" (22,9–44,9u), tumpang tindih 16,2u | Masa tunggu layar judul |
+| "Tentang" (85,9–113,1u) | Teks kolom kanan dialog, bukan tombol | — |
+
+**Dialog "Tentang".** Bingkai, kepala, isi, dan kaki sama dengan dialog "Cara bermain" (spesifikasi F-10, "Tata letak dan ukuran"), dan memakai kelas yang sama (`ss-howto`, `ss-howto-head`, `ss-howto-title`, `ss-howto-body`, `ss-howto-col`, `ss-howto-label`, `ss-howto-foot`). Unsur baru:
+
+| Unsur | Nilai |
+|---|---|
+| Kalimat (`ss-about-text`) | Pixelify Sans 3,1u, tinggi baris 1,3, `ink`, jarak bawah 1,6u |
+| Label kredit (`ss-howto-label`) | Pixelify Sans 2,5u, `dusk`; jarak bawah 0,5u |
+| Pemberitahuan hak cipta dan lisensi (`ss-about-note`) | Pixelify Sans 2,5u, tinggi baris 1,3, `ink`, jarak bawah 1,6u |
+
+Hasil percobaan [Coba], dengan isi dialog "Cara bermain" diganti isi "Tentang" (saran B-1 dan B-2):
+
+| | 1280×720 | 1366×768 | 1920×1080 | 1024×768 |
+|---|---|---|---|---|
+| Sisa di bawah kolom kiri / kanan | 52,5u / 12,2u | 52,6u / 12,2u | 52,5u / 12,2u | 52,2u / 11,9u |
+| Teks yang meluap | Tidak ada | Tidak ada | Tidak ada | Tidak ada |
+| "Tutup" (kiri–kanan; atas–bawah) | 146,2–169,8u; 88,9–97,0u | 146,3–169,8u; 88,9–97,0u | 146,2–169,8u; 88,9–97,0u | 145,9–169,8u; 88,6–97,0u |
+
+Sisa terkecil 11,9u cukup untuk dua baris tambahan, misalnya jawaban S-6 yang lebih panjang.
+
+### Teks yang tampil (final) bagian B
+
+**Galeri**
+
+| Tempat | Teks |
+|---|---|
+| Tautan panel galeri Refleksi | Main Sehari Setara |
+| Tautan menu "Daftar materi" | Main Sehari Setara |
+
+**Layar judul**
+
+| Tempat | Teks |
+|---|---|
+| Tombol keempat | Tentang |
+
+**Dialog "Tentang"** (B-1 dan B-2 memakai saran)
+
+| Tempat | Teks |
+|---|---|
+| Judul dialog | Tentang |
+| Judul kolom kiri | Tentang permainan |
+| Kalimat 1 | Sehari Setara adalah permainan Pendidikan Pancasila kelas IX di Ruang Setara. |
+| Kalimat 2 | Permainan ini tidak menyimpan data siswa. |
+| Kalimat 3 | Versi 1.0, November 2026. |
+| Judul kolom kanan | Kredit |
+| Label | Gambar |
+| Kalimat | Digambar dengan kode oleh Claude (Anthropic) dengan arahan dan persetujuan YAN. |
+| Label | Huruf |
+| Kalimat | Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1. |
+| Pemberitahuan | Copyright 2012 The Press Start 2P Project Authors (cody@zone38.net), with Reserved Font Name "Press Start 2P". |
+| Pemberitahuan | Copyright 2021 The Pixelify Sans Project Authors (https://github.com/eifetx/Pixelify-Sans). |
+| Pemberitahuan | Lisensi: scripts.sil.org/OFL |
+| Label | Bunyi |
+| Kalimat | Bunyi klik dan bunyi teks dipilih YAN dari halaman uji suara Sehari Setara. (B-2) |
+| Tombol | Tutup |
+
+Kedua pemberitahuan hak cipta disalin persis dari metadata berkas huruf (nama 0), dengan titik di akhir. Alamat lisensi ditulis sebagai teks, bukan tautan.
+
+**Teks pengganti untuk `Verifikasi_Rujukan.md` (B-4, diganti pemilik proyek)**
+
+| Lama | Baru |
+|---|---|
+| Mengubah file ini tidak pernah membuat situs gagal terbit. Baris yang rusak hanya membuat rujukannya dianggap belum terverifikasi. | Sejak rilis 1.0, situs hanya terbit bila semua kotak tercentang dan setiap baris pertama utuh. Selama masih ada kotak kosong atau baris yang rusak, situs yang sedang tayang tetap seperti terbitan terakhir. |
+
+### Data dan aksi bagian B
+
+**Galeri (`app/page.tsx`).** Tepat tiga potongan, tanpa perubahan lain:
+
+1. Baris impor `lucide-react`: `Grid2X2}` menjadi `Grid2X2,Gamepad2}`.
+2. Sesudah tombol `journey-cta` "Mulai tantangan": `{current===5&&<a className="journey-cta" href="sehari-setara/"><Gamepad2 size={18}/>Main Sehari Setara</a>}`.
+3. Sesudah kalimat pembuka menu ("Pilih galeri untuk meneruskan perjalanan. …"): `<a className="text-control" href="sehari-setara/">Main Sehari Setara</a>`.
+
+**CI (`.github/workflows/deploy-pages.yml`).** Langkah baru sesudah "Uji game":
+
+```yaml
+      - name: Periksa verifikasi rujukan
+        env:
+          RILIS: "1"
+        run: npx -y pnpm@11.25.0 content:check
+```
+
+**Game**
+
+- `content/copy.ts`: `title.about` ("Tentang") dan `about` (judul, kedua judul kolom, ketiga kalimat kiri, butir kredit berisi label, kalimat, dan pemberitahuan, serta "Tutup").
+- `ui/About.tsx` (baru): `AboutDialog({ onClose })`. Penanganan `Tab`, `Esc`, dan `Enter` atau `Spasi` yang ditahan sama persis dengan `HowToDialog`. Bila memungkinkan, penangan itu dipakai bersama tanpa salinan kode.
+- `ui/Title.tsx`: tombol keempat dan dialog "Tentang". `TitleFocus.target` ditambah `"tentang"`, dan properti ditambah `about`, `onAbout`, dan `onCloseAbout`.
+- `ui/PlayScreen.tsx`: keadaan `about`, beserta `openAbout` dan `closeAbout` yang meniru `openHowTo` dan `closeHowTo`. Setiap pemeriksaan `howTo` di layar judul (kunci masa tunggu, "Mulai", dan kedua pembuka dialog) ikut memeriksa `about`. "Main lagi" dan "Kembali" menutup keduanya.
+- `styles/game.css`: kelas `ss-about-text` dan `ss-about-note` (bagian "Tata letak dan ukuran"). Mode warna paksa mengikuti aturan dialog "Cara bermain".
+- Mesin, reducer, naskah, rujukan, aset, dan `manifest.ts` tidak berubah.
+
+**Uji**
+
+- `__tests__/opening.test.ts`: teks "Tentang" lengkap, yaitu tanpa kurung siku atau kurawal, tanpa "TBD", "draf", "sementara", atau "sedang dibuat"; memuat "SIL Open Font License 1.1" dan kedua pemberitahuan hak cipta persis seperti tabel.
+- `e2e/galeri-integrasi.spec.ts` (baru): kedua tautan, alur galeri → game → galeri dengan klik dan keyboard, main penuh dengan keyboard dari galeri, dan galat (bagian "Rencana uji bagian B").
+- `e2e/judul-pengaturan-prolog.spec.ts`: uji baru dialog "Tentang". Uji lama layar judul (daftar dan letak tombol, masa tunggu, urutan Tab, fokus, dan bunyi) disesuaikan untuk empat tombol. Daftar tombol di `e2e/sehari-setara.spec.ts` dan `e2e/alur-permainan.spec.ts` ditambah "Tentang".
+
+### Pemeriksaan rilis 1.0 (bagian B)
+
+| Pemeriksaan | Cara | Syarat |
+|---|---|---|
+| Anggaran | Jumlah ukuran `dist-pages/assets/` untuk gambar, bunyi, dan huruf game; gzip JS game, React bersama, dan CSS game | Aset ≤ 4 MB; kode JS game ditambah React bersama ≤ 150 KB gzip |
+| Waktu siap | Cache kosong, 10 Mbps, latensi 40 ms, 1280×720; layar judul dan pratinjau `#adegan-1`; prosesor biasa dan diperlambat 4×; satu jalan pemanasan lalu lima jalan | Setiap jalan sesudah pemanasan ≤ 3 detik |
+| Galat | Uji ujung ke ujung di galeri (layar sambutan, galeri Refleksi, menu) dan di game (main penuh) | 0 galat konsol, 0 galat halaman, 0 respons 4xx/5xx, 0 permintaan ke situs lain |
+| Placeholder | `Daftar_Aset.md`; uji aset; pencarian teks di `content/*.ts` dan teks semua layar selama main penuh | Semua aset Disetujui; tanpa kurung siku, kurawal, "TBD", "draf", "sementara", atau "sedang dibuat" |
+| Keyboard | Main penuh dengan keyboard dari galeri ke game, lalu kembali ke galeri | Tanpa tetikus, sampai galeri tampil lagi |
+| Rujukan | `RILIS=1 content:check` pada `Verifikasi_Rujukan.md` milik pemilik proyek | 14 dari 14, kode 0 |
+| Galeri hanya berubah di dua titik | Tiga lapis bukti usulan 7a | Lihat AC-B4 |
+
+### Perubahan dokumen (Build bagian B)
+
+| Berkas | Perubahan |
+|---|---|
+| `docs/sehari-setara/Architecture.md` | Versi 0.13. Bagian 3: `ui/About.tsx`. Bagian 4: langkah "Periksa verifikasi rujukan", catatan Vinext, dan catatan `tsc` dengan `next-env.d.ts`. Bagian 7: dialog "Tentang" di layar judul. Bagian 10: dialog "Tentang". Bagian 11: kedua titik sudah dibuat, beserta letak dan kelasnya. Bagian 12: uji galeri ujung ke ujung |
+| `docs/sehari-setara/Design_System.md` | Bagian 7: dialog "Tentang". Bagian 13: nama, alat, dan lisensi diisi dari B-1 dan B-2 |
+| `docs/sehari-setara/PRD.md` | Bagian 13: isi versi 1.0 dan 1.1 (usulan 10a). Bagian 17: baris "Rilis 1.0" (B-5), yang merujuk baris 5 Nov 2026 untuk jawaban bagian 16 nomor 2 |
+| `AGENTS.md` | Bagian 6: `RILIS=1 npx pnpm@11.25.0 content:check  # pemeriksaan ketat sebelum rilis` |
+| `app/sehari-setara/assets/CREDITS.md` | Bagian "Efek suara": jawaban S-6, atau S-6 tetap terbuka (B-2) |
+| `docs/sehari-setara/Daftar_Aset.md` | S-01 dan S-02: asal bunyi, bila S-6 dijawab |
+| `PANDUAN_GITHUB_PAGES.md` | Bagian "Memperbarui isi website": situs hanya terbit bila semua kotak di `Verifikasi_Rujukan.md` tercentang; bila tertahan, situs yang sedang tayang tetap seperti terbitan terakhir |
+| `docs/sehari-setara/PLAN.md` | Status F-11 dan satu baris "Rilis 1.0" berisi tanggal (B-5) |
+| `docs/sehari-setara/specs/F-11-integrasi-galeri-rilis.md` | Status bagian B dan catatan Build |
+| `docs/sehari-setara/tests/F-11-hasil.md` | Bagian B, dan tangkapan layar di `tests/F-11/` |
+
+### Di luar cakupan (bagian B)
+
+- Panduan guru satu halaman (keputusan 2a F-10).
+- Kembali dari game langsung ke galeri Refleksi, rute Vinext untuk game, dan penanda build untuk menyembunyikan tautan.
+- Memperbaiki masalah ESLint lama di `app/page.tsx` dan konflik tipe gambar `next-env.d.ts`.
+- Mengubah berkas galeri lain, `github-pages/`, konfigurasi build, dan dependensi.
+- Mencentang atau mengubah `Verifikasi_Rujukan.md` oleh agen (B-4).
+- Fitur F-13 (layar penuh, ulangi adegan, dan sisa efek suara).
+
+### Kriteria penerimaan (bagian B)
+
+- [ ] AC-B1 Tautan panel: hanya di galeri ke-6, berkelas `journey-cta` dengan ikon `Gamepad2`, bertuliskan "Main Sehari Setara", ber-`href="sehari-setara/"`, di antara "Mulai tantangan" dan "Kembali ke atrium", tanpa tumpang tindih dengan kepala dan kaki halaman di tiga ukuran.
+- [ ] AC-B2 Tautan menu: berkelas `text-control`, bertuliskan "Main Sehari Setara", ber-`href="sehari-setara/"`, di antara kalimat pembuka dan daftar galeri, dan terlihat tanpa menggulir di tiga ukuran.
+- [ ] AC-B3 Klik pada kedua tautan, serta `Tab` lalu `Enter`, membuka `/ruang-setara/sehari-setara/` dengan "Mulai" berfokus. "Kembali ke galeri" dari layar judul dan dari refleksi membuka `/ruang-setara/`.
+- [ ] AC-B4 Galeri hanya berubah di dua titik:
+  - kode: `app/page.tsx` dikurangi ketiga potongan identik byte dengan berkas sebelum F-11, dan berkas galeri lain identik byte;
+  - build: dibanding build sebelum bagian B, berkas galeri yang berubah hanya `index.html` dan `main-*.js`; CSS galeri dan potongan React bersama identik byte; berkas game yang berubah hanya `sehari-setara/index.html`, JS game, dan CSS game; semua aset identik. Diperiksa lagi sesudah semua dokumen bagian B ditulis;
+  - tampilan: tangkapan layar galeri sebelum dan sesudah, di tiga ukuran, hanya berbeda di kedua tautan.
+- [ ] AC-B5 Main penuh dengan keyboard dari galeri ke game, lalu kembali ke galeri, tanpa tetikus, dengan 0 galat konsol, 0 galat halaman, 0 respons 4xx/5xx, dan 0 permintaan ke situs lain.
+- [ ] AC-B6 Layar judul: empat tombol berurutan, dengan letak dalam ±0,5u dari tabel di empat ukuran; keempatnya ber-`aria-disabled` selama masa tunggu 600 ms; urutan Tab "Mulai", "Cara bermain", "Tentang", "Kembali ke galeri".
+- [ ] AC-B7 Dialog "Tentang":
+  - peran, nama, dan fokus awal benar; `Tab` hanya beredar antara judul dan "Tutup";
+  - `Esc` dan "Tutup" menutup dengan satu bunyi klik, lalu fokus kembali ke "Tentang", dan masa tunggu dihitung lagi;
+  - pintasan tidak berlaku dan tidak berbunyi selama dialog terbuka;
+  - "Tentang" dan "Cara bermain" tidak terbuka bersamaan;
+  - teks sama persis dengan tabel, tanpa teks yang meluap, dengan sisa kolom kanan paling sedikit 10u di empat ukuran.
+- [ ] AC-B8 Uji teks "Tentang" di `opening.test.ts` lulus, dan semua butir tabel "Teks yang tampil" bagian B ada di layar.
+- [ ] AC-B9 Langkah CI sama persis dengan bagian "Data dan aksi" dan berada di antara "Uji game" dan "Build versi statis". Selama verifikasi belum selesai, `RILIS=1 content:check` gagal dengan jumlah kotak kosong yang benar. Pada berkas pemilik proyek sesudah verifikasi, perintah itu lulus.
+- [ ] AC-B10 Dokumen di bagian "Perubahan dokumen" diperbarui.
+- [ ] AC-B11 Pemeriksaan rilis 1.0 memenuhi syarat di tabelnya, dan angkanya dicatat di laporan.
+- [ ] AC-B12 Pemeriksaan kode:
+  - `test`, `content:check`, `build:pages`, dan `test:e2e` lulus;
+  - `tsc --noEmit` 0 galat di salinan tanpa `next-env.d.ts`;
+  - ESLint `--max-warnings 0` 0 masalah pada berkas game dan uji yang baru atau diubah;
+  - masalah ESLint di `app/page.tsx` sama persis dengan sebelum F-11 (4 galat dan 1 peringatan di baris yang sama), tanpa masalah di baris baru;
+  - tanpa dependensi baru.
+- [ ] AC-B13 Di versi Vinext, alamat `sehari-setara/` diperiksa sekali dan berakhir di halaman 404, sesuai catatan Architecture.
+
+### Rencana uji (bagian B)
+
+| Langkah | Cara | Kriteria |
+|---|---|---|
+| 1 | `install --frozen-lockfile`, `test`, `content:check`, dan `RILIS=1 content:check` | AC-B8, AC-B9, AC-B12 |
+| 2 | `build:pages`, sidik jari SHA-256 dibanding build sebelum bagian B, dan bukti potongan `app/page.tsx` | AC-B4 |
+| 3 | `test:e2e` dengan Chromium 153 lewat konfigurasi pengganti di luar repositori, per berkas; `galeri-integrasi.spec.ts` di 1280×720, dan letak tautan di tiga ukuran (B-6) | AC-B1, AC-B2, AC-B3, AC-B5, AC-B6, AC-B7 |
+| 4 | Pengukuran anggaran dan waktu siap dengan skrip di luar repositori; pencarian placeholder | AC-B11 |
+| 5 | Tangkapan layar di 1280×720, 1024×768, dan 1920×1080: galeri Refleksi (biasa dan berfokus), menu "Daftar materi", layar judul dengan empat tombol, dan dialog "Tentang"; untuk dialog dan layar judul juga di 1366×768 | AC-B4, AC-B7 |
+| 6 | `tsc` di salinan bersih dan ESLint, termasuk perbandingan `app/page.tsx` sebelum dan sesudah | AC-B12 |
+| 7 | `pnpm dev` sekali, lalu alamat `sehari-setara/` dibuka | AC-B13 |
+| 8 | Daftar periksa manual AGENTS bagian 9, dan daftar periksa usulan 9 diserahkan kepada pemilik proyek | — |
+
+Hasil ditulis di bagian B `tests/F-11-hasil.md`. Bila saat Test masih ada kotak kosong, laporan menyebutnya, dan ZIP B hanya untuk ditinjau. ZIP B final disiapkan sesudah pemilik proyek menyatakan verifikasi selesai dan mengirim ZIP `main` terbaru. Isinya memuat baris "Rilis 1.0" (B-5), dan tidak pernah memuat `Verifikasi_Rujukan.md`.
+
+### Catatan Build bagian B
+
+- **[Build]** Penanganan tombol dialog dipakai bersama lewat `useTitleDialog` di `ui/About.tsx`. `HowToDialog` di `ui/Title.tsx` kini memakainya juga, dengan perilaku yang sama; semua uji dialog "Cara bermain" F-10 lulus.
+- **[Build]** Selain `ss-about-text` dan `ss-about-note`, ditambahkan `ss-about` (penanda dialog) dan `ss-about-label` (jarak bawah label kredit 0,5u).
+- **[Build]** Fungsi uji `tabTo`, `openByKeyboard`, `toQuestion`, dan `playScene` dipindah dari `e2e/judul-pengaturan-prolog.spec.ts` ke `e2e/bantuan.ts`, untuk uji main penuh dari galeri.
+- **[Build]** Uji urutan Tab di `e2e/sehari-setara.spec.ts` ikut disesuaikan dengan tombol keempat.
+- **[Build]** `CREDITS.md` dan `Daftar_Aset.md` tidak berubah, karena S-6 belum dijawab (B-2).

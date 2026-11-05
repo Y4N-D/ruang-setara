@@ -32,6 +32,11 @@ jobs:
       - name: Uji game
         run: npx -y pnpm@11.25.0 test
 
+      - name: Periksa verifikasi rujukan
+        env:
+          RILIS: "1"
+        run: npx -y pnpm@11.25.0 content:check
+
       - name: Build versi statis
         run: npx -y pnpm@11.25.0 build:pages
 

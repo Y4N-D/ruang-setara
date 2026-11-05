@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Versi | 0.12 (draf) |
-| Tanggal | 4 November 2026 |
+| Versi | 0.13 (draf) |
+| Tanggal | 5 November 2026 |
 | Repositori | `ruang-setara` (akun GitHub Y4N-D), diterbitkan lewat GitHub Pages |
 | Perubahan 0.2 | Aset digambar dengan kode (A8, bagian 8); `pixelize.py` diganti kit `scripts/game/art/`; rumus posisi sprite disesuaikan |
 | Perubahan 0.3 | Keputusan A9 (`vitest`); `quizAnswer` di `GameState`; `LANJUT` keluar dari fase `transition`; `history` sebagai sumber kebenaran (F-02) |
@@ -16,6 +16,7 @@
 | Perubahan 0.10 | `RoleQuiz.tsx`, `quiz.ts`, dan `kuis-peran.spec.ts` (bagian 3); kuis peran menggantikan jembatan sementara, dan panel bawah hanya memakai `ChoicePanel` di fase `discuss`, `reaction`, dan `stars` (bagian 7); pramuat ikon kuis (bagian 8); `1` `2` `3` `4` di fase kuis dan tombol yang ditahan di dalam dialog kuis (bagian 9); fokus dan pengumuman kuis (bagian 10); uji kuis (bagian 12) (F-08) |
 | Perubahan 0.11 | Keputusan A12 (`modern-screenshot` 4.7.0 untuk gambar rekap; PDF dari kode sendiri) (bagian 1); `closing.ts`, `RecapSheet.tsx`, `download.ts`, `pdf.ts`, dan `akhir-rekap-refleksi.spec.ts` (bagian 3); dependensi aplikasi `modern-screenshot` (bagian 4); `HistoryEntry.quizAnswer`, dan `JAWAB_KUIS` yang juga mencatat jawaban di `history` (bagian 5 dan 6); layar akhir, rekap, refleksi, dan unduh rekap menggantikan layar akhir sementara (bagian 7); pramuat ilustrasi akhir dan timbangan (bagian 8); `Spasi`, `Enter`, dan `M` di layar penutup, serta pembatalan tombol yang ditahan (bagian 9); fokus, pengumuman, wilayah pengumuman yang tetap, dan kabar unduhan (bagian 10); uji F-09 (bagian 12); unduhan tanpa data siswa dan tanpa permintaan ke luar situs (bagian 13) (F-09) |
 | Perubahan 0.12 | `Title.tsx`, `Setup.tsx`, `Settings.tsx`, `opening.ts`, `content/prolog.ts`, dan `judul-pengaturan-prolog.spec.ts`; `PlayScreen.tsx` dimulai dari layar judul (bagian 3); aksi `BATAL_PENGATURAN` (bagian 6); layar pembuka, skala layar judul, alamat, pratinjau sebagai alat tinjau tak bertaut, dan "Main lagi" ke layar judul (bagian 7); `Esc` dan tombol yang ditahan (bagian 9); fokus dan pengumuman layar pembuka dan dialog pengaturan (bagian 10); cakupan uji F-10 (bagian 12); pengaturan tidak disimpan (bagian 13) (F-10) |
+| Perubahan 0.13 | F-11: tautan dari galeri (bagian 11); dialog "Tentang" di `ui/About.tsx` (bagian 3, 7, dan 10); langkah "Periksa verifikasi rujukan" di CI serta catatan Vinext dan `tsc` (bagian 4); uji galeri ujung ke ujung (bagian 12) |
 | Dokumen terkait | `PRD.md`, `Design_System.md`, `AGENTS.md`, `Daftar_Aset.md` |
 
 ---
@@ -89,7 +90,7 @@ ruang-setara/
 │  │  ├─ RoleQuiz.tsx · quiz.ts  # F-08: dialog kuis peran; quiz.ts: kartu, umpan balik, dan pengumuman
 │  │  ├─ Ending.tsx · Recap.tsx · Reflection.tsx · closing.ts   # F-09: layar penutup; closing.ts: timbangan, baris rekap, pengumuman
 │  │  ├─ RecapSheet.tsx · download.ts · pdf.ts  # F-09: lembar unduhan, unduh PNG (A12), dan PDF A4 tanpa pustaka
-│  │  └─ Title.tsx · Setup.tsx · Settings.tsx · opening.ts  # F-10: layar pembuka dan dialog pengaturan; opening.ts: fungsi murni
+│  │  └─ Title.tsx · About.tsx · Setup.tsx · Settings.tsx · opening.ts  # F-10: layar pembuka dan dialog pengaturan; opening.ts: fungsi murni; About.tsx (F-11): dialog "Tentang"
 │  ├─ assets/
 │  │  ├─ manifest.ts             # satu-satunya pintu masuk aset
 │  │  ├─ png.d.ts · wav.d.ts     # tipe impor *.png dan *.wav untuk TypeScript
@@ -143,7 +144,7 @@ Hasil build: `dist-pages/index.html` (galeri) dan `dist-pages/sehari-setara/inde
 | `test:e2e` | `playwright test` | Uji ujung ke ujung di subfolder |
 | `assets:build` | `python scripts/game/art/build_assets.py` | Membangun ulang semua aset gambar dari kode dan memeriksanya |
 
-Catatan: `pnpm dev` bawaan (Vinext) **tidak** menyajikan halaman game. Gunakan `dev:pages`.
+Catatan: `pnpm dev` bawaan (Vinext) **tidak** menyajikan halaman game. Gunakan `dev:pages`. Sejak F-11, kedua tautan galeri (bagian 11) berakhir di halaman 404 di versi Vinext, karena versi itu tidak memuat game dan tidak diterbitkan. Menjalankan Vinext juga membuat `next-env.d.ts` (diabaikan git) berisi tipe gambar Next.js, sehingga `tsc` gagal di `app/sehari-setara/ui/preload.ts`; jalankan `tsc` di salinan tanpa berkas itu.
 
 Dependensi pengembangan baru: `vitest`, `@playwright/test`. Dependensi aplikasi baru: `@fontsource/pixelify-sans`, `@fontsource/press-start-2p`, dan sejak F-09 `modern-screenshot` 4.7.0 (A12), yang hanya diimpor modul unduhan rekap game. Untuk membangun aset: Python 3 dan Pillow (`pip install pillow`), hanya di komputer pengembang; CI tidak memerlukannya.
 
@@ -155,6 +156,17 @@ Tambahkan langkah uji sebelum build di `.github/workflows/deploy-pages.yml`:
 - name: Uji game
   run: npx -y pnpm@11.25.0 test
 ```
+
+Sejak F-11, pemeriksaan ketat rujukan dijalankan sesudahnya, sebelum build:
+
+```yaml
+- name: Periksa verifikasi rujukan
+  env:
+    RILIS: "1"
+  run: npx -y pnpm@11.25.0 content:check
+```
+
+Selama masih ada rujukan yang belum terverifikasi di `Verifikasi_Rujukan.md`, langkah ini gagal. Build dan terbit tidak dijalankan, dan situs yang sedang tayang tetap seperti terbitan terakhir.
 
 Uji Playwright dijalankan di komputer pengembang sebelum rilis, tidak di CI, agar alur terbit tetap cepat.
 
@@ -388,7 +400,7 @@ Bilah atas, panel samping, dan panel bawah adalah HTML biasa di luar panggung, d
 
 ### Layar pembuka dan dialog pengaturan (F-10)
 
-- **Urutan:** fase `title` (layar judul, `ui/Title.tsx`, dengan dialog "Cara bermain"), `setup` (pengaturan kelas, `ui/Setup.tsx`), lalu `prolog` (tiga layar di tata letak permainan). "Mulai" mengirim `MULAI`, "Kembali" mengirim `BATAL_PENGATURAN`, "Mulai permainan" mengirim `setupActions(draft)` (`SIMPAN_PENGATURAN` dengan tim dan durasi), dan "Mulai adegan 1" memulai sapuan dengan `LANJUT` pada 200 ms. Di `title` dan `setup`, bilah atas, indikator, panggung, panel bawah, dan panel kanan tidak dipasang.
+- **Urutan:** fase `title` (layar judul, `ui/Title.tsx`, dengan dialog "Cara bermain" dan, sejak F-11, dialog "Tentang" di `ui/About.tsx`), `setup` (pengaturan kelas, `ui/Setup.tsx`), lalu `prolog` (tiga layar di tata letak permainan). "Mulai" mengirim `MULAI`, "Kembali" mengirim `BATAL_PENGATURAN`, "Mulai permainan" mengirim `setupActions(draft)` (`SIMPAN_PENGATURAN` dengan tim dan durasi), dan "Mulai adegan 1" memulai sapuan dengan `LANJUT` pada 200 ms. Di `title` dan `setup`, bilah atas, indikator, panggung, panel bawah, dan panel kanan tidak dipasang.
 - **Skala layar judul:** kj = tinggi layar ÷ 180 (`titleScaleForScreen`, kait `useTitleScale`), boleh pecahan. Bidang judul `TITLE_ZONE` dan pita tombol `TITLE_BAND` ada di `ui/layout.ts`, dan `TITLE_ZONE` sama dengan `latar.py`. Layar judul dan prolog memakai `Stage.tsx` dengan adegan semu `openingScene` berlatar `bg_title`.
 - **Keadaan tampilan:** pilihan sementara pengaturan kelas (`setupDraftFrom`), nomor layar prolog, dan dialog terbuka atau tidak disimpan di `PlayScreen.tsx`, bukan di mesin. Jadwal giliran dari `turnScenes` (`ui/opening.ts`) sama dengan `activeTeamIndex`.
 - **Masa tunggu:** 600 ms sejak layar judul, pengaturan kelas, atau layar prolog digambar, dihitung dengan `performance.now()` dan diperiksa saat tekanan diterima, dengan kunci yang memuat nomor kunjungan layar. Satu pengatur waktu hanya memperbarui `aria-disabled`.
@@ -482,7 +494,7 @@ Semua tombol juga bisa diklik atau disentuh. Fokus keyboard selalu terlihat (lat
 
 Sejak F-05, di layar `#main` sudah aktif `1` `2` `3`, `A` `B` `C`, `Spasi`, dan `Enter` (`keyCommand` di `ui/controls.ts`). Tekanan bersama Ctrl, Alt, atau Meta, tekanan berulang karena tombol ditahan, dan tekanan di kolom isian diabaikan. `Spasi` dan `Enter` pada tombol yang berfokus ditangani browser sebagai klik, sehingga satu tekanan tidak menjadi dua aksi. Sejak F-06, `Spasi` dan `Enter` saat kartu dampak tampil sama dengan tombol "Lanjut" kartu, sesudah masa tunggu 600 ms. Sejak F-07, `P` `T` `S` (fase `discuss`), `0` `1` `2` (fase `stars`), dan `M` (fase `intro` sampai `transition`) juga aktif, huruf kecil maupun besar. `T` diabaikan bila sisa waktu 570 detik atau lebih. `Spasi` dan `Enter` tidak berlaku sebagai pintasan di fase `stars`, sehingga tekanan kedua dari tekanan ganda pada "Lanjut" kartu tidak memberi bintang. Sejak F-08, `1` `2` `3` `4` menjawab kuis peran di fase `quiz` (peran ke-n di `ROLES`), dan `Spasi` serta `Enter` di fase itu sama dengan tombol "Lanjut" kuis, sesudah dijawab dan sesudah masa tunggu 600 ms. Di dalam dialog kuis, `keydown` `Enter` dan `Spasi` yang berulang karena tombol ditahan dibatalkan, karena browser mengubah setiap pengulangan `Enter` pada tombol yang berfokus menjadi klik. Sejak F-09, `Spasi` dan `Enter` di layar akhir sama dengan "Lihat rekap", dan di rekap sama dengan "Berikutnya" atau "Lanjut ke refleksi", sesudah masa tunggu 600 ms; di refleksi keduanya bukan pintasan dan hanya menekan tombol yang berfokus. `M` aktif di ketiga layar penutup. Di ketiga layar itu, `keydown` `Enter` dan `Spasi` yang berulang dibatalkan di mana pun fokusnya, dan sesudah "Main lagi" pembatalan yang sama berlaku sampai ada `keyup` atau `keydown` baru yang tidak berulang (pendengar `keyup` di `window`), sehingga tombol yang ditahan tidak menekan tombol lagi. `F` dan `Esc` menyusul (F-10, F-13).
 
-Sejak F-10, permainan dimulai dari layar judul. Di layar judul, dialog "Cara bermain", pengaturan kelas, dan dialog pengaturan, pintasan permainan tidak berlaku; `Spasi`, `Enter`, dan `M` berlaku di prolog. Di fase `title`, `setup`, dan `prolog`, selama dialog pengaturan terbuka, dan sesudah dialog itu ditutup sampai tombol dilepas, pengulangan `Enter` dan `Spasi` dibatalkan, seperti layar penutup F-09. `F` (layar penuh) tetap milik F-13.
+Sejak F-10, permainan dimulai dari layar judul. Di layar judul, dialog "Cara bermain", dialog "Tentang" (F-11), pengaturan kelas, dan dialog pengaturan, pintasan permainan tidak berlaku; `Spasi`, `Enter`, dan `M` berlaku di prolog. Di fase `title`, `setup`, dan `prolog`, selama dialog pengaturan terbuka, dan sesudah dialog itu ditutup sampai tombol dilepas, pengulangan `Enter` dan `Spasi` dibatalkan, seperti layar penutup F-09. `F` (layar penuh) tetap milik F-13.
 
 ## 10. Aksesibilitas
 
@@ -496,6 +508,7 @@ Sejak F-10, permainan dimulai dari layar judul. Di layar judul, dialog "Cara ber
 - Tingkat dampak, tim, hasil kuis, jenis akhir, arah timbangan, waktu halaman rekap, "Bintang terbanyak", dan unduhan yang sedang disiapkan selalu ditandai dengan tulisan, tidak hanya warna.
 - `prefers-reduced-motion` dan pengaturan "Kurangi gerak" mematikan sapuan, angka melayang, animasi sprite, pop bintang (F-07), dan gerak timbangan (F-09); pengaturan di dalam game sejak F-10.
 - Layar pembuka (F-10): `<main>` dinamai `<h1>` yang terlihat di layar judul ("Sehari Setara"), lalu `<h1>` tersembunyi "Pengaturan kelas" dan "Prolog". Wilayah `aria-live` dan `role="status"` tetap elemen yang sama sejak layar judul sampai refleksi. Prolog diumumkan lewat `aria-live` seperti narasi; perubahan jumlah tim diumumkan di `role="status"`, yang dikosongkan saat "Mulai permainan". Pilihan memakai `aria-pressed` di grup bernama, dan catatan dikaitkan dengan `aria-describedby`. Dialog "Cara bermain" dan dialog pengaturan mengunci fokus; fokus kembali ke pemicunya, yaitu tombol "Pengaturan" atau unsur yang berfokus saat `Esc` ditekan.
+- Dialog "Tentang" (F-11) berperilaku sama dengan dialog "Cara bermain": `role="dialog"` dan `aria-modal="true"`, fokus di judul, `Tab` hanya beredar antara judul dan "Tutup", dan `Esc` menutup lalu mengembalikan fokus ke tombol "Tentang". Penanganan tombol kedua dialog dipakai bersama (`useTitleDialog`).
 - `<html lang="id">`.
 
 ## 11. Integrasi dengan galeri Ruang Setara
@@ -507,6 +520,13 @@ Perubahan pada kode galeri dibatasi pada dua titik:
 
 Keduanya berupa tautan biasa `href="sehari-setara/"` (relatif, tanpa garis miring di depan). Di dalam game, tombol "Kembali ke galeri" memakai `href="../"`.
 
+Sejak F-11 keduanya sudah dibuat di `app/page.tsx`, tanpa CSS baru:
+
+1. tautan berkelas `journey-cta` dengan ikon `Gamepad2`, di bawah "Mulai tantangan" dan di atas "Kembali ke atrium", hanya di galeri ke-6;
+2. tautan teks berkelas `text-control`, tepat di bawah kalimat pembuka menu dan di atas daftar enam galeri.
+
+"Kembali ke galeri" membuka galeri dari layar sambutan. Di versi Vinext kedua tautan berakhir di halaman 404 (bagian 4).
+
 ## 12. Pengujian
 
 | Lapisan | Alat | Cakupan |
@@ -514,7 +534,7 @@ Keduanya berupa tautan biasa `href="sehari-setara/"` (relatif, tanpa garis mirin
 | Unit | Vitest | `rules.ts` (clamp, giliran, ambang akhir), reducer (setiap transisi, kunci klik ganda, bendera); sejak F-06 `ui/impact.ts` (segmen, gerak indikator, pengumuman kartu); sejak F-07 `ui/turn.ts` (angka, blok, pengumuman) dan `ui/sound.ts` (bunyi teks pada naskah asli, pemutar dengan konteks tiruan); sejak F-08 `ui/quiz.ts` (kartu, umpan balik, nama kartu, dan pengumuman pada naskah asli); sejak F-09 `ui/closing.ts` (timbangan untuk ke-729 jalur naskah, baris rekap, halaman, baris kuis, tanda bintang terbanyak, dan pengumuman), `ui/pdf.ts` (struktur PDF, tabel `xref`, dan isi gambar), `ui/download.ts` (nama berkas, tanggal, dan batas waktu), serta jawaban kuis di `history` pada reducer; sejak F-10 `ui/opening.ts` (tim, jadwal giliran, pilihan sementara, aksi pembuka, dialog pengaturan, teks prolog, dan `TITLE_ZONE`) |
 | Konten | Vitest + zod | Semua aturan skema di bagian 5; daftar rujukan belum terverifikasi |
 | Aset | `build_assets.py` + Vitest (`assets.test.ts`) | `build_assets.py`: palet per piksel, transparansi, ukuran, dan anggaran total. Vitest: token dan warna `game.css` sesuai Design System bagian 4 dan `palette.json`; manifest cocok dengan berkas (nama, ukuran bingkai, fps), `CREDITS.md`, dan naskah; anggaran per aset dan total; aset game sebagai berkas terpisah. Berkas yang belum terdaftar hanya dilaporkan. Sejak F-07: kelompok `sounds` berupa WAV PCM mono 16 bit, ≤ 1 detik, ≤ 30 KB, tercatat di `CREDITS.md` |
-| Ujung ke ujung | Playwright (A10) | Main penuh dengan keyboard di `/ruang-setara/sehari-setara/`; ketiga jenis akhir bisa dicapai; tidak ada respons 4xx; tidak ada galat konsol; tangkapan layar setiap adegan di 1280×720 dan 1024×768. Sejak F-04: layar kerangka, ke-24 alamat pratinjau (posisi tokoh, bayangan, ikon emosi, bilah atas), skala di empat ukuran, kurangi gerak, pramuat, keyboard, huruf, dan galeri. Sejak F-05: layar `#main` dimainkan sampai akhir dengan keyboard pada tiga jalur naskah, sapuan pada 100 ms dan 300 ms (jam uji), pudar, aturan keyboard, serta panel bawah tanpa luapan di empat ukuran. Sejak F-06: ke-18 kartu dampak (isi, tingkat, letak, luapan, kontras) dan nilai indikator pada tiga jalur di empat ukuran, gerak per 100 ms dan masa tunggu 600 ms dengan jam uji, fokus dialog, keyboard, dan kurangi gerak. Sejak F-07: panel kanan di empat ukuran dengan dua dan empat tim, giliran dua sampai empat tim, pengatur waktu per detik dan tombolnya dengan jam uji yang dijeda sebelum halaman dimuat, bintang alasan, pop lewat Web Animations API, pengumuman, alamat `#main-3` dan `#main-4`, serta bunyi lewat perekam bunyi di skrip awal halaman uji (pemuatan, klik, bunyi teks, `M`, galat bunyi). Sejak F-08: kuis peran di empat ukuran (letak, isi, kontras), keempat jawaban dengan tiga cara, hanya jawaban pertama, tombol yang ditahan, masa tunggu 599 dan 600 ms dengan jam uji, fokus dan urutan Tab, perubahan ukuran jendela, pramuat dan ikon yang gagal dimuat, pengumuman, kurangi gerak, serta bunyi klik di kuis. Sejak F-09 (`akhir-rekap-refleksi.spec.ts`): isi layar akhir pada enam jalur, gerak timbangan lewat Web Animations API, letak di empat ukuran, papan tim dengan tanda "Bintang terbanyak" untuk dua sampai empat tim, isi dan letak rekap pada tujuh kasus, navigasi, refleksi, masa tunggu 599 dan 600 ms, klik ganda dan tombol yang ditahan, fokus dan urutan Tab, pengumuman, bunyi klik, unduh PNG dan PDF tanpa jam uji (berkas dibaca ulang), galat dan pembatalan unduhan, pramuat, ilustrasi yang gagal dimuat, kontras, dan mode warna paksa. Uji lama melewati ketiga layar penutup dengan `finishDay` dan `playAgain` di `e2e/bantuan.ts` Sejak F-10: layar judul, cara bermain, pengaturan kelas, prolog, dan dialog pengaturan di empat ukuran; masa tunggu, tekanan ganda, dan tombol yang ditahan; kesembilan pasangan jumlah tim dan durasi sampai ketiga jenis akhir; dan fungsi bersama `startGame` untuk uji lama |
+| Ujung ke ujung | Playwright (A10) | Main penuh dengan keyboard di `/ruang-setara/sehari-setara/`; ketiga jenis akhir bisa dicapai; tidak ada respons 4xx; tidak ada galat konsol; tangkapan layar setiap adegan di 1280×720 dan 1024×768. Sejak F-04: layar kerangka, ke-24 alamat pratinjau (posisi tokoh, bayangan, ikon emosi, bilah atas), skala di empat ukuran, kurangi gerak, pramuat, keyboard, huruf, dan galeri. Sejak F-05: layar `#main` dimainkan sampai akhir dengan keyboard pada tiga jalur naskah, sapuan pada 100 ms dan 300 ms (jam uji), pudar, aturan keyboard, serta panel bawah tanpa luapan di empat ukuran. Sejak F-06: ke-18 kartu dampak (isi, tingkat, letak, luapan, kontras) dan nilai indikator pada tiga jalur di empat ukuran, gerak per 100 ms dan masa tunggu 600 ms dengan jam uji, fokus dialog, keyboard, dan kurangi gerak. Sejak F-07: panel kanan di empat ukuran dengan dua dan empat tim, giliran dua sampai empat tim, pengatur waktu per detik dan tombolnya dengan jam uji yang dijeda sebelum halaman dimuat, bintang alasan, pop lewat Web Animations API, pengumuman, alamat `#main-3` dan `#main-4`, serta bunyi lewat perekam bunyi di skrip awal halaman uji (pemuatan, klik, bunyi teks, `M`, galat bunyi). Sejak F-08: kuis peran di empat ukuran (letak, isi, kontras), keempat jawaban dengan tiga cara, hanya jawaban pertama, tombol yang ditahan, masa tunggu 599 dan 600 ms dengan jam uji, fokus dan urutan Tab, perubahan ukuran jendela, pramuat dan ikon yang gagal dimuat, pengumuman, kurangi gerak, serta bunyi klik di kuis. Sejak F-09 (`akhir-rekap-refleksi.spec.ts`): isi layar akhir pada enam jalur, gerak timbangan lewat Web Animations API, letak di empat ukuran, papan tim dengan tanda "Bintang terbanyak" untuk dua sampai empat tim, isi dan letak rekap pada tujuh kasus, navigasi, refleksi, masa tunggu 599 dan 600 ms, klik ganda dan tombol yang ditahan, fokus dan urutan Tab, pengumuman, bunyi klik, unduh PNG dan PDF tanpa jam uji (berkas dibaca ulang), galat dan pembatalan unduhan, pramuat, ilustrasi yang gagal dimuat, kontras, dan mode warna paksa. Uji lama melewati ketiga layar penutup dengan `finishDay` dan `playAgain` di `e2e/bantuan.ts` Sejak F-10: layar judul, cara bermain, pengaturan kelas, prolog, dan dialog pengaturan di empat ukuran; masa tunggu, tekanan ganda, dan tombol yang ditahan; kesembilan pasangan jumlah tim dan durasi sampai ketiga jenis akhir; dan fungsi bersama `startGame` untuk uji lama; sejak F-11 `galeri-integrasi.spec.ts`: kedua tautan galeri di tiga ukuran, alur galeri ke game dan kembali dengan klik dan keyboard, dan main penuh dengan keyboard dari galeri (galeri 3D lambat di browser uji tanpa GPU, jadi alur diuji di 1280×720) |
 | Manual | Daftar periksa | Proyektor dan keterbacaan dari bangku belakang; laptop lama; keyboard saja; kurangi gerak; suara mati |
 
 `scripts/game/serve-subpath.mjs` menyajikan `dist-pages/` di bawah `/ruang-setara/` agar uji Playwright meniru alamat GitHub Pages yang sebenarnya. Konfigurasi `webServer` Playwright menjalankan `build:pages` lalu skrip ini.

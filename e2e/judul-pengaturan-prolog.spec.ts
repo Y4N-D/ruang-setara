@@ -6,7 +6,6 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { PROLOG } from "../app/sehari-setara/content/prolog";
 import { SCENES } from "../app/sehari-setara/content/scenes";
 import {
-  answerQuiz,
   awardPrompt,
   contrast,
   endingScreen,
@@ -14,13 +13,17 @@ import {
   expectClean,
   finishDay,
   INK,
+  openByKeyboard,
   playAgainButton,
+  playScene,
   reflectionTitle,
   settle,
   SHOTS,
   startGame,
   SUN,
+  tabTo,
   titleStart,
+  toQuestion,
   VIEWPORTS,
   watch,
   type ViewportName,
@@ -38,10 +41,11 @@ const shot = (page: Page, name: string) => page.screenshot({ path: `${SHOTS}/F-1
 
 type Span = [number, number];
 const TITLE: Record<ViewportName, { rows: Span; buttons: Span[] }> = {
-  "1280x720": { rows: [89.5, 97.7], buttons: [[37.9, 60.0], [63.0, 98.0], [101.0, 139.8]] },
-  "1366x768": { rows: [89.6, 97.6], buttons: [[38.1, 60.0], [63.0, 98.0], [101.0, 139.7]] },
-  "1920x1080": { rows: [89.5, 97.7], buttons: [[37.9, 60.0], [63.0, 98.0], [101.0, 139.8]] },
-  "1024x768": { rows: [89.4, 97.8], buttons: [[37.5, 59.9], [62.9, 98.1], [101.1, 140.2]] },
+  // Empat tombol sejak F-11 bagian B ("Tentang"), dari tabel spesifikasi F-11.
+  "1280x720": { rows: [89.5, 97.7], buttons: [[22.9, 44.9], [47.9, 82.9], [85.9, 113.1], [116.1, 154.9]] },
+  "1366x768": { rows: [89.6, 97.6], buttons: [[23.0, 45.0], [48.0, 82.9], [85.9, 113.0], [116.0, 154.8]] },
+  "1920x1080": { rows: [89.5, 97.7], buttons: [[22.9, 44.9], [47.9, 82.9], [85.9, 113.1], [116.1, 154.9]] },
+  "1024x768": { rows: [89.4, 97.8], buttons: [[22.3, 44.7], [47.7, 82.9], [85.9, 113.3], [116.3, 155.4]] },
 };
 const HOWTO_CLOSE: Record<ViewportName, { rows: Span; cols: Span }> = {
   "1280x720": { rows: [88.9, 97.0], cols: [146.2, 169.8] },
@@ -245,39 +249,6 @@ async function expectContrast(page: Page, root: string, note: string) {
 }
 
 /** Tab sampai unsur bernama name berfokus, lalu berhenti (keyboard saja). */
-async function tabTo(page: Page, name: string) {
-  for (let i = 0; i < 16; i++) {
-    const focused = await page.evaluate(() => document.activeElement?.textContent?.trim() ?? "");
-    if (focused === name) return;
-    await page.keyboard.press("Tab");
-  }
-  throw new Error(`Tab tidak sampai ke "${name}"`);
-}
-
-/** Langkah pembuka dengan keyboard saja (AC-1, AC-20): Tab, Enter, dan Spasi; jam uji dijeda. */
-async function openByKeyboard(page: Page, teams: 2 | 3 | 4, seconds: 30 | 60 | 90) {
-  await expect(titleStart(page)).toBeFocused();
-  await page.clock.runFor(600);
-  await page.keyboard.press("Enter");
-  await expect(page.locator(".ss-setup-title")).toBeFocused();
-  await page.clock.runFor(600);
-  for (const name of [`${teams} tim`, `${seconds} detik`]) {
-    await tabTo(page, name);
-    await page.keyboard.press("Enter");
-    await expect(page.getByRole("button", { name, exact: true })).toHaveAttribute("aria-pressed", "true");
-  }
-  await tabTo(page, "Mulai permainan");
-  await page.keyboard.press("Space");
-  for (const screen of PROLOG) {
-    await expect(page.locator(".ss-narration-text")).toHaveText(screen.text);
-    await page.clock.runFor(600);
-    if ((await page.locator(".ss-narration-rest").textContent()) !== "") await page.keyboard.press("Enter");
-    await page.keyboard.press("Enter");
-  }
-  await page.clock.runFor(400);
-  await expect(page.locator(".ss-topbar-counter")).toHaveText("Adegan 1/6");
-  await expect(page.locator(".ss-narration .ss-next")).toBeFocused();
-}
 
 const settingsButton = (page: Page) => page.locator(".ss-settings-button");
 const dialog = (page: Page) => page.locator(".ss-settings");
@@ -286,31 +257,6 @@ const liveRegion = (page: Page) => page.locator('.ss-play [aria-live="polite"]')
 const timerValue = (page: Page) => page.locator(".ss-timer-value [aria-hidden]");
 const dialogOption = (page: Page, row: string, label: string) =>
   page.locator(".ss-settings-cell").nth(["Suara", "Kurangi gerak", "Teks muncul per huruf", "Durasi diskusi"].indexOf(row)).getByRole("button", { name: label, exact: true });
-
-/** Narasi sampai pertanyaan dengan Spasi (teks per huruf menyala: tampilkan sekaligus, lalu lanjut). */
-async function toQuestion(page: Page) {
-  for (let i = 0; i < 12 && (await page.locator(".ss-question").count()) === 0; i++) await page.keyboard.press("Space");
-  await expect(page.locator(".ss-question")).toBeFocused();
-}
-
-/** Satu adegan dengan keyboard sampai pergantian selesai; jam uji dijeda. */
-async function playScene(page: Page, choice: "A" | "B" | "C", runOut = 0) {
-  const index = Number((await page.locator(".ss-topbar-counter").textContent())?.match(/\d/)?.[0] ?? "1") - 1;
-  await toQuestion(page);
-  if (runOut > 0) {
-    await page.clock.runFor(runOut * 1000);
-    await expect(page.locator(".ss-timer-text")).toHaveText("Waktunya memilih");
-  }
-  await page.keyboard.press(choice);
-  await page.clock.runFor(1200);
-  await expect(page.locator("#ss-impact-title")).toBeFocused();
-  await page.clock.runFor(600);
-  await page.keyboard.press("Enter");
-  if (SCENES[index].roleQuiz) await answerQuiz(page, true);
-  await expect(awardPrompt(page)).toBeFocused();
-  await page.keyboard.press("1");
-  await page.clock.runFor(400);
-}
 
 /* ---------------- AC-1: alur dan alamat ---------------- */
 
@@ -405,9 +351,9 @@ for (const size of SIZES) {
       near((b.l + b.r) / 2, (zone.l + zone.r) / 2, `${size} rata tengah`, 0.1);
     }
     const controls = page.locator(".ss-title-actions > *");
-    await expect(controls).toHaveText(["Mulai", "Cara bermain", "Kembali ke galeri"]);
-    await expect(controls.nth(2)).toHaveAttribute("href", "../");
-    for (let i = 0; i < 3; i++) {
+    await expect(controls).toHaveText(["Mulai", "Cara bermain", "Tentang", "Kembali ke galeri"]);
+    await expect(controls.nth(3)).toHaveAttribute("href", "../");
+    for (let i = 0; i < 4; i++) {
       const b = await box(controls.nth(i));
       near(b.l, t.buttons[i][0], `${size} tombol ${i + 1} kiri`);
       near(b.r, t.buttons[i][1], `${size} tombol ${i + 1} kanan`);
@@ -462,13 +408,15 @@ test("layar judul: kurangi gerak dan masa tunggu 600 ms sesudah dimuat, Kembali,
   });
   const gallery = page.getByRole("link", { name: "Kembali ke galeri" });
   const howTo = page.getByRole("button", { name: "Cara bermain", exact: true });
+  const about = page.getByRole("button", { name: "Tentang", exact: true });
 
   const expectHeld = async (note: string) => {
-    for (const control of [titleStart(page), howTo, gallery]) await expect(control, note).toHaveAttribute("aria-disabled", "true");
+    for (const control of [titleStart(page), howTo, about, gallery]) await expect(control, note).toHaveAttribute("aria-disabled", "true");
     await titleStart(page).focus();
     for (const key of ["Enter", "Space"]) await page.keyboard.press(key);
     await titleStart(page).click({ force: true });
     await howTo.click({ force: true });
+    await about.click({ force: true });
     await gallery.click({ force: true });
     await expect(page.locator('.ss-play[data-fase="title"]'), note).toBeVisible();
     await expect(page.locator(".ss-howto"), note).toHaveCount(0);
@@ -499,6 +447,15 @@ test("layar judul: kurangi gerak dan masa tunggu 600 ms sesudah dimuat, Kembali,
   await expect(howTo).toBeFocused();
   await page.clock.runFor(599);
   await expectHeld("sesudah cara bermain");
+  await page.clock.runFor(1);
+
+  // Sesudah dialog "Tentang" ditutup (F-11 bagian B).
+  await about.click();
+  await expect(page.getByRole("dialog", { name: "Tentang" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(about).toBeFocused();
+  await page.clock.runFor(599);
+  await expectHeld("sesudah Tentang");
   await page.clock.runFor(1);
   await titleStart(page).focus();
   await page.keyboard.press("Enter");
@@ -1383,7 +1340,7 @@ test("fokus terlihat di layar baru, nama main, grup, daftar, dan cuplikan ARIA (
     return look;
   };
   await page.clock.runFor(600);
-  for (const name of ["Mulai", "Cara bermain", "Kembali ke galeri"]) {
+  for (const name of ["Mulai", "Cara bermain", "Tentang", "Kembali ke galeri"]) {
     await tabTo(page, name);
     expect((await focusLook(`judul ${name}`)).bg).toBe(SUN);
   }
@@ -1447,6 +1404,13 @@ test("bunyi klik: satu untuk setiap tekanan yang diterima, nol untuk tekanan yan
   await page.locator(".ss-howto-foot button").click();
   expected += 1;
   await expectClicks("Tutup cara bermain");
+  await page.clock.runFor(600);
+  await page.getByRole("button", { name: "Tentang", exact: true }).click();
+  expected += 1;
+  await expectClicks("Tentang");
+  await page.keyboard.press("Escape");
+  expected += 1;
+  await expectClicks("Tutup Tentang dengan Esc");
   await page.clock.runFor(600);
   await titleStart(page).click();
   expected += 1;
@@ -1598,3 +1562,73 @@ test("pengatur waktu dan pendengar dibersihkan sesudah berpindah ke pratinjau (A
   await toPreview("lapisan bening");
   expectClean(log);
 });
+
+/* ---------------- F-11 bagian B, AC-B6 dan AC-B7: dialog "Tentang" ---------------- */
+
+const ABOUT_TEXT = [
+  "Tentang",
+  "Tentang permainan",
+  "Sehari Setara adalah permainan Pendidikan Pancasila kelas IX di Ruang Setara.",
+  "Permainan ini tidak menyimpan data siswa.",
+  "Versi 1.0, November 2026.",
+  "Kredit",
+  "Gambar",
+  "Digambar dengan kode oleh Claude (Anthropic) dengan arahan dan persetujuan YAN.",
+  "Huruf",
+  "Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.",
+  'Copyright 2012 The Press Start 2P Project Authors (cody@zone38.net), with Reserved Font Name "Press Start 2P".',
+  "Copyright 2021 The Pixelify Sans Project Authors (https://github.com/eifetx/Pixelify-Sans).",
+  "Lisensi: scripts.sil.org/OFL",
+  "Bunyi",
+  "Bunyi klik dan bunyi teks dipilih YAN dari halaman uji suara Sehari Setara.",
+];
+
+for (const size of SIZES) {
+  test(`dialog Tentang di ${size}: isi, fokus terkunci, menutup, letak, dan satu dialog (F-11 AC-B7)`, async ({ page }) => {
+    const log = watch(page);
+    await openTitle(page, { size, paused: true });
+    await page.clock.runFor(600);
+    const about = page.getByRole("button", { name: "Tentang", exact: true });
+    await about.click();
+    const sheet = page.getByRole("dialog", { name: "Tentang" });
+    await expect(sheet).toHaveAttribute("aria-modal", "true");
+    await expect(page.locator("#ss-about-title")).toBeFocused();
+    await expect(sheet.locator("h2, h3, h4, p")).toHaveText(ABOUT_TEXT);
+    const close = sheet.getByRole("button", { name: "Tutup", exact: true });
+    await page.keyboard.press("Tab");
+    await expect(close).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#ss-about-title")).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(close).toBeFocused();
+    // Pintasan tidak berlaku saat judul dialog berfokus, dan "Cara bermain" tidak terbuka di bawahnya.
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#ss-about-title")).toBeFocused();
+    for (const key of ["a", "b", "1", "m", "p"]) await page.keyboard.press(key);
+    await page.getByRole("button", { name: "Cara bermain", exact: true }).click({ force: true });
+    await expect(page.locator(".ss-howto")).toHaveCount(1);
+    await expect(sheet).toBeVisible();
+    const fit = await sheet.evaluate((el) => {
+      const screen = (document.querySelector(".ss-screen") as HTMLElement).getBoundingClientRect();
+      const u = screen.height / 100;
+      const body = el.querySelector(".ss-howto-body")!.getBoundingClientRect();
+      const rest = [...el.querySelectorAll(".ss-howto-col")].map((col) => (body.bottom - col.lastElementChild!.getBoundingClientRect().bottom) / u);
+      const overflow = [...el.querySelectorAll("p, h2, h3, h4")].some((node) => node.scrollWidth > node.clientWidth + 1);
+      return { rest, overflow };
+    });
+    expect(fit.overflow, `${size} teks meluap`).toBe(false);
+    expect(fit.rest[1], `${size} sisa kolom kanan`).toBeGreaterThanOrEqual(10);
+    const b = await box(close);
+    near(b.r, 169.8, `${size} Tutup kanan`);
+    await page.screenshot({ path: `${SHOTS}/F-11/tentang-${size}.png` });
+    await page.keyboard.press("Escape");
+    await expect(sheet).toHaveCount(0);
+    await expect(about).toBeFocused();
+    await expect(page.locator('.ss-play[data-fase="title"]')).toBeVisible();
+    if (size === "1280x720" || size === "1024x768" || size === "1920x1080") {
+      await page.clock.runFor(600);
+      await page.screenshot({ path: `${SHOTS}/F-11/judul-${size}.png` });
+    }
+    expectClean(log);
+  });
+}

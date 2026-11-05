@@ -1,6 +1,6 @@
 # Hasil uji F-11 — 5 November 2026
 
-Fitur: integrasi dengan galeri Ruang Setara, layar "Tentang", dan rilis 1.0 ([spesifikasi](../specs/F-11-integrasi-galeri-rilis.md)). Laporan ini baru memuat **bagian A**, yaitu uji daftar centang dan baris rujukan PRD. Bagian B ditambahkan sesudah spesifikasi bagian B disetujui, dibangun, dan diuji.
+Fitur: integrasi dengan galeri Ruang Setara, layar "Tentang", dan rilis 1.0 ([spesifikasi](../specs/F-11-integrasi-galeri-rilis.md)). Laporan ini memuat **bagian A** (uji daftar centang dan baris rujukan PRD) dan **bagian B** (tautan galeri, pemeriksaan ketat di CI, layar "Tentang", dan pemeriksaan rilis 1.0). Bagian B diuji untuk ditinjau; ZIP B final menunggu verifikasi ke-14 rujukan.
 
 Lingkungan: Node 22.23.4 dan pnpm 11.25.0, di salinan repositori dari ZIP `main` 5 November 2026 (commit `4778284`, ditambah dokumen Gerbang 1 dan Gerbang 2 bagian A), cabang `fitur/F-11-integrasi-galeri-rilis`. Uji ujung ke ujung tidak dijalankan untuk bagian A (keputusan V-4), karena ke-178 berkas yang terbit identik byte (AC-A9).
 
@@ -60,4 +60,62 @@ Daftar periksa manual (AGENTS bagian 9): tidak ada butir yang berlaku, karena ha
 
 ## Bagian B
 
-Belum diuji.
+Lingkungan: sama dengan bagian A, cabang `fitur/F-11-integrasi-galeri-rilis`. Uji ujung ke ujung memakai Chromium 153 lewat berkas konfigurasi pengganti sementara (tidak diserahkan) dan server `serve-subpath.mjs` di `/ruang-setara/`, dijalankan per berkas atau per kelompok karena batas 300 detik per perintah. Tangkapan layar ada di folder [`F-11/`](F-11/); berkas `sebelum-*` diambil dari build `main` sebelum F-11.
+
+| Kriteria | Hasil | Bukti |
+|---|---|---|
+| AC-B1 Tautan panel | Lulus | `galeri-integrasi.spec.ts`, 3 uji "kedua tautan di {ukuran}": tidak ada di layar sambutan; di galeri Refleksi berkelas `journey-cta` dengan satu ikon, bertuliskan "Main Sehari Setara", ber-`href="sehari-setara/"`, berurutan "Mulai tantangan", "Main Sehari Setara", "Kembali ke atrium"; jarak panel ke kepala dan kaki halaman paling sedikit 10 px; garis fokus `solid` saat dipilih dengan Tab. Tangkapan `galeri-refleksi-*.png` dan `galeri-refleksi-fokus-*.png` |
+| AC-B2 Tautan menu | Lulus | Uji yang sama: berkelas `text-control`, teks dan `href` benar, tepat sesudah kalimat pembuka (`P`) dan sebelum `destination-list`, dan berada di dalam bidang menu yang terlihat di 1280×720, 1024×768, dan 1920×1080. Tangkapan `galeri-menu-*.png` |
+| AC-B3 Alamat dan alur | Lulus | Uji "dari galeri ke game dan kembali, dengan klik dari kedua titik": tautan menu membuka `/ruang-setara/sehari-setara/` dengan "Mulai" berfokus; "Kembali ke galeri" membuka `/ruang-setara/`; galeri Atrium tanpa tautan panel; tautan panel membuka game. Jalur keyboard di AC-B5 |
+| AC-B4 Galeri hanya berubah di dua titik | Lulus | Kode: `app/page.tsx` dikurangi ketiga potongan identik byte dengan berkas di ZIP `main` (+193 byte), dan berkas galeri, `github-pages/`, `public/`, konfigurasi build, `package.json`, serta `pnpm-lock.yaml` tidak berubah. Build: dari 178 berkas, yang berubah hanya `index.html` dan `main-*.js` galeri (897.094 byte, 244.660 byte gzip; +772 dan +286 byte), serta `sehari-setara/index.html`, JS game, dan CSS game; `main-Bp-7VtNx.css`, `jsx-runtime-CmKW-gyo.js`, dan ke-170 aset identik byte, juga sesudah semua dokumen ditulis. Tampilan: tangkapan `sebelum-*` dan sesudah di tiga ukuran hanya berbeda di kedua tautan. Panel naik untuk memberi tempat tombol, dan daftar galeri di menu turun satu baris. Kecerahan latar buram di belakang menu berbeda karena saat pengambilan, bukan karena CSS (CSS galeri identik byte) |
+| AC-B5 Main penuh dengan keyboard dari galeri | Lulus | Uji "main penuh dengan keyboard dari galeri ke game, lalu kembali ke galeri": Tab ke "Daftar materi", Enter, Tab ke "Main Sehari Setara", Enter; 3 tim, 60 detik, keenam adegan pilihan B dengan kuis; layar akhir, empat halaman rekap, dan refleksi; Tab ke "Kembali ke galeri", Enter, lalu galeri tampil di `/ruang-setara/`. Galat konsol, galat halaman, respons 4xx/5xx, dan permintaan ke situs lain: 0 |
+| AC-B6 Layar judul empat tombol | Lulus | `judul-pengaturan-prolog.spec.ts`: 4 uji "layar judul di {ukuran}" dengan tabel empat tombol (±0,5u) dan `href="../"` di tombol keempat; uji masa tunggu (AC-3, AC-4) dengan "Tentang", termasuk sesudah dialog "Tentang" ditutup; urutan Tab empat tombol di uji AC-22 dan di `sehari-setara.spec.ts` |
+| AC-B7 Dialog "Tentang" | Lulus | 4 uji "dialog Tentang di {ukuran}": `aria-modal="true"`, fokus di judul, kelima belas teks sama dengan tabel, Tab dan Shift+Tab hanya antara judul dan "Tutup", pintasan tanpa akibat, "Cara bermain" tidak terbuka di bawahnya (satu dialog), tanpa teks meluap, sisa kolom kanan ≥ 10u, "Tutup" di kanan 169,8u, `Esc` menutup dan fokus kembali ke "Tentang". Uji bunyi AC-24: membuka "Tentang" dan menutupnya dengan `Esc` masing-masing tepat satu klik. Tangkapan `tentang-*.png` dan `judul-*.png` |
+| AC-B8 Teks "Tentang" | Lulus | `opening.test.ts`, 2 uji "teks dialog Tentang": tanpa kurung siku, kurawal, "TBD", "draf", "sementara", atau "sedang dibuat"; lisensi huruf dan kedua pemberitahuan hak cipta persis |
+| AC-B9 Langkah CI | Sebagian (menunggu verifikasi) | Langkah "Periksa verifikasi rujukan" sama persis dengan spesifikasi, di antara "Uji game" dan "Build versi statis". `RILIS=1 content:check` pada daftar saat ini gagal dengan "Rilis diblokir: 14 rujukan belum terverifikasi." Lulus pada berkas pemilik proyek baru bisa diperiksa sesudah verifikasi selesai |
+| AC-B10 Dokumen | Lulus, kecuali B-5 | Architecture (0.13: bagian 3, 4, 7, 9, 10, 11, dan 12), Design System (bagian 3, 7, dan 13), PRD bagian 13, AGENTS bagian 6, `PANDUAN_GITHUB_PAGES.md`, spesifikasi, dan `PLAN.md`. Baris "Rilis 1.0" di PRD bagian 17 dan `PLAN.md` ditulis di ZIP B final (B-5). `CREDITS.md` dan `Daftar_Aset.md` tidak berubah, karena S-6 belum dijawab (B-2) |
+| AC-B11 Pemeriksaan rilis | Lulus | Tabel "Pemeriksaan rilis 1.0" di bawah |
+| AC-B12 Pemeriksaan kode | Lulus | `test` 296 lulus, 1 dilewati; `content:check` 42 lulus, 1 dilewati; `build:pages` lulus; `test:e2e` 160 lulus; `tsc` 0 galat tanpa `next-env.d.ts`; ESLint `--max-warnings 0` 0 masalah pada `app/sehari-setara` dan `e2e`; `app/page.tsx` tetap 4 galat `react-hooks/refs` (baris 33, 35, 37, 37) dan 1 peringatan `react-hooks/exhaustive-deps` (baris 56), sama dengan sebelum F-11; `package.json` dan `pnpm-lock.yaml` tidak berubah |
+| AC-B13 Versi Vinext | Lulus | `pnpm dev`: `/` 200; `/sehari-setara/` dialihkan ke `/sehari-setara` lalu 404 "This page could not be found."; berkas sisa Vinext dihapus sesudahnya |
+
+### Pemeriksaan rilis 1.0
+
+| Pemeriksaan | Hasil |
+|---|---|
+| Aset game | 103.570 byte (gambar dan bunyi 66.774, huruf 36.796), 0,10 MB dari 4 MB |
+| Kode game | JS game ditambah React bersama 98.605 byte gzip (96,3 KiB) dari 150 KB; CSS game 6.756 byte gzip |
+| Waktu siap, layar judul | Prosesor biasa: pemanasan 0,55 detik, lima jalan 0,53–0,56 detik. Diperlambat 4×: pemanasan 0,94, lima jalan 0,87–0,94 detik |
+| Waktu siap, adegan 1 (`#adegan-1`) | Prosesor biasa: pemanasan 0,53, lima jalan 0,52–0,54 detik. Diperlambat 4×: pemanasan 0,86, lima jalan 0,88–0,99 detik |
+| Data per pemuatan | 380–391 KB, dengan cache kosong, 10 Mbps, latensi 40 ms |
+| Galat | 0 di semua uji ujung ke ujung, termasuk galeri (layar sambutan, galeri Refleksi, menu) dan main penuh |
+| Placeholder | `Daftar_Aset.md` 50 dari 50 baris Disetujui; uji aset lulus; tanpa kurung siku, kurawal, "TBD", atau "draf" di teks `content/*.ts`. Dua kecocokan kata "sementara" adalah kata sambung di teks alternatif adegan 1 dan 5 ("…, sementara Gita …", "…, sementara Pak Made …"), bukan penanda teks sementara |
+| Rujukan | 0 dari 14 terverifikasi pada salinan agen; mode rilis memblokir (AC-B9) |
+
+### Perintah yang dijalankan dan hasilnya
+
+| Perintah | Hasil |
+|---|---|
+| `npx pnpm@11.25.0 test` | Lulus: 14 berkas, 296 uji, 1 dilewati |
+| `npx pnpm@11.25.0 content:check` | Lulus: 42 uji, 1 dilewati; "0 dari 14 terverifikasi" |
+| `RILIS=1 npx pnpm@11.25.0 content:check` | Gagal sesuai harapan: "Rilis diblokir: 14 rujukan belum terverifikasi." |
+| `npx pnpm@11.25.0 build:pages` dan sidik jari 178 berkas | Lulus; perubahan sesuai AC-B4 |
+| `npx playwright test` (Chromium 153), per kelompok | 160 lulus: `galeri-integrasi` 5, `judul-pengaturan-prolog` 43, `sehari-setara` dan `suara` 24, `kuis-peran` dan `tim-waktu-bintang` 29, `akhir-rekap-refleksi` 32, `alur-permainan` 12, `kartu-dampak` 15 |
+| `npx tsc --noEmit -p tsconfig.json --incremental false` | 0 galat |
+| `npx eslint app/sehari-setara e2e --max-warnings 0` | 0 masalah |
+| `npx eslint app/page.tsx` | 5 masalah lama yang sama, tanpa masalah baru |
+| `npx pnpm@11.25.0 dev`, lalu `curl` | `/sehari-setara/` berakhir di 404 Vinext |
+
+### Temuan
+
+1. **Verifikasi rujukan belum selesai.** Daftar di salinan agen masih 0 dari 14, sehingga langkah baru di CI pasti gagal bila ZIP B di-commit sekarang. ZIP B ini hanya untuk ditinjau. Sesudah ke-14 kotak dicentang, kirim ZIP `main` terbaru; agen menjalankan `RILIS=1 content:check` pada berkas itu, lalu menyiapkan ZIP B final beserta baris "Rilis 1.0" (B-5).
+2. **Dua penyesuaian uji, bukan perbaikan permainan.** Uji baru "dialog Tentang" semula menekan `Spasi` saat "Tutup" berfokus, sehingga dialog memang tertutup; urutannya diperbaiki. Uji urutan Tab lama di `sehari-setara.spec.ts` ditambah "Tentang".
+3. **Fungsi keyboard bersama.** `tabTo`, `openByKeyboard`, `toQuestion`, dan `playScene` dipindah dari uji F-10 ke `e2e/bantuan.ts`, agar dipakai juga oleh uji galeri.
+4. **Tangkapan layar.** Playwright mengosongkan `test-results/` di setiap jalan, jadi tangkapan F-11 diambil ulang dan langsung disalin ke folder laporan.
+5. **B-2 masih terbuka.** Layar "Tentang" memakai "Bunyi klik dan bunyi teks dipilih YAN dari halaman uji suara Sehari Setara." sampai S-6 dijawab.
+6. **Lingkungan uji.** Galeri 3D di browser uji tanpa GPU lambat: satu uji "kedua tautan" butuh sekitar 1 menit di 1280×720 dan 2 menit di 1920×1080.
+
+Daftar periksa manual (AGENTS bagian 9) dan daftar periksa rilis untuk pemilik proyek ada di rencana F-11, usulan 9: laptop kelas dengan Edge, proyektor, dan iPad bila ada, sesudah ZIP B final terbit dan sebelum tautan dibuka untuk siswa.
+
+### Keputusan bagian B: Lulus untuk ditinjau
+
+Semua kriteria lulus, kecuali dua hal yang menunggu verifikasi ke-14 rujukan: AC-B9 (mode rilis lulus pada berkas pemilik proyek) dan baris "Rilis 1.0" (B-5). ZIP B tidak untuk di-commit sebelum verifikasi selesai.

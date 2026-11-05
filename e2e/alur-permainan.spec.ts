@@ -190,7 +190,7 @@ test("layar judul: masuk ke adegan 1, memuat ulang, pratinjau, dan alamat lain (
   await page.evaluate(() => {
     (window as unknown as { ssPenanda: number }).ssPenanda = 1;
   });
-  await expect(page.locator(".ss-title-actions > *")).toHaveText(["Mulai", "Cara bermain", "Kembali ke galeri"]);
+  await expect(page.locator(".ss-title-actions > *")).toHaveText(["Mulai", "Cara bermain", "Tentang", "Kembali ke galeri"]);
   await startGame(page, { teams: 2 });
   await expect(page.locator(".ss-narration-tab")).toHaveText(SCENES[0].title);
   await expect(live(page)).toHaveText(SCENES[0].narration[0]);

@@ -41,12 +41,14 @@ test("layar judul menggantikan layar kerangka: teks, tombol, urutan Tab, tanpa a
   await expect(page.locator("h1")).toHaveText("Sehari Setara");
   await expect(page.locator(".ss-title-lead")).toHaveText("Temani Nara menjalani satu hari dan pilih tindakannya bersama kelas.");
   await expect(page.locator(".ss-placeholder")).toHaveCount(0);
-  await expect(page.locator(".ss-title-actions > *")).toHaveText(["Mulai", "Cara bermain", "Kembali ke galeri"]);
+  await expect(page.locator(".ss-title-actions > *")).toHaveText(["Mulai", "Cara bermain", "Tentang", "Kembali ke galeri"]);
   await expect(page.getByRole("link", { name: "Kembali ke galeri" })).toHaveAttribute("href", "../");
   await expect(page.locator('a[href*="#"]')).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Mulai", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus")).toHaveText("Cara bermain");
+  await page.keyboard.press("Tab");
+  await expect(page.locator(":focus")).toHaveText("Tentang");
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus")).toHaveText("Kembali ke galeri");
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);

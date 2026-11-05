@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useRef,useState} from 'react';
-import {Scale,BookOpen,Compass,MapPin,Pause,Play,RotateCcw,Plus,X,Mouse,GraduationCap,HeartHandshake,Landmark,ShieldCheck,Check,Menu,ChevronLeft,ChevronRight,Grid2X2} from 'lucide-react';
+import {Scale,BookOpen,Compass,MapPin,Pause,Play,RotateCcw,Plus,X,Mouse,GraduationCap,HeartHandshake,Landmark,ShieldCheck,Check,Menu,ChevronLeft,ChevronRight,Grid2X2,Gamepad2} from 'lucide-react';
 import {Dialog,DialogContent,DialogTitle,DialogDescription,DialogClose} from '@/components/ui/dialog';
 import GalleryScene from './gallery-scene';
 import ChoiceScene from './choice-scene';
@@ -86,6 +86,7 @@ export default function Page(){
    <div className="narrative-detail"><p>{chapter.description}</p>
     {current===2&&<div className="scale-interaction"><div role="group" aria-label="Simulasi timbangan hak dan kewajiban"><button aria-pressed={balanced} onClick={()=>setBalanced(true)}>Seimbang</button><button aria-pressed={!balanced} onClick={()=>setBalanced(false)}>Kewajiban diabaikan</button></div><p aria-live="polite">{balanced?'Saling menghormati menjaga hak semua orang.':'Kewajiban yang diabaikan dapat mengganggu hak orang lain.'}</p><small>HAM tetap melekat pada setiap orang.</small></div>}
     <button className="journey-cta" onClick={action}><Icon size={18}/>{chapter.cta}</button>
+    {current===5&&<a className="journey-cta" href="sehari-setara/"><Gamepad2 size={18}/>Main Sehari Setara</a>}
     {current===5&&<button className="text-control" onClick={()=>go(0)}>Kembali ke atrium</button>}
    </div>
   </div>
@@ -98,7 +99,7 @@ export default function Page(){
    <DialogContent className={`study-dialog ${panel==='peta'?'map-dialog':''}`} showCloseButton={false} onCloseAutoFocus={e=>{e.preventDefault();document.querySelector<HTMLButtonElement>(storyRef.current?'.story-room-nav button[aria-current=step]':enteredRef.current?'.journey-cta':'.contents-button')?.focus();}}>
     <div className="study-toolbar"><div><DialogTitle>{panel?titles[panel]:''}</DialogTitle><DialogDescription>Ruang Setara · Pendidikan Pancasila Kelas IX</DialogDescription></div><DialogClose asChild><button className="close-study" aria-label="Tutup materi dan kembali ke galeri"><X size={21}/></button></DialogClose></div>
     <div className="study-scroll">
-     {panel==='peta'?<div className="map-content"><p className="map-heading">Ke mana kita<br/><em>menjelajah hari ini?</em></p><p>Pilih galeri untuk meneruskan perjalanan. Materi dapat dipelajari dengan urutan yang kamu perlukan.</p><div className="destination-list">{stops.map((stop,i)=>{const DestinationIcon=chapters[i].icon;return <button key={stop.id} onClick={()=>go(i)}><span className="destination-number">0{i+1}</span><DestinationIcon size={24}/><div><strong>{stop.label}</strong><span>{i===0?'Awal perjalanan':chapters[i].cta}</span></div>{i===current&&<span className="here-label">Di sini</span>}</button>;})}</div><button className="text-control" onClick={()=>open('sumber')}>Lihat materi dan sumber belajar</button></div>:<Lessons section={panel??''} state={learning} balanced={balanced} onBalance={setBalanced} onNavigate={id=>{if(id==='tantangan'){go(1);return;}open(id);document.querySelector('.study-scroll')?.scrollTo({top:0,behavior:'instant'});}}/>}
+     {panel==='peta'?<div className="map-content"><p className="map-heading">Ke mana kita<br/><em>menjelajah hari ini?</em></p><p>Pilih galeri untuk meneruskan perjalanan. Materi dapat dipelajari dengan urutan yang kamu perlukan.</p><a className="text-control" href="sehari-setara/">Main Sehari Setara</a><div className="destination-list">{stops.map((stop,i)=>{const DestinationIcon=chapters[i].icon;return <button key={stop.id} onClick={()=>go(i)}><span className="destination-number">0{i+1}</span><DestinationIcon size={24}/><div><strong>{stop.label}</strong><span>{i===0?'Awal perjalanan':chapters[i].cta}</span></div>{i===current&&<span className="here-label">Di sini</span>}</button>;})}</div><button className="text-control" onClick={()=>open('sumber')}>Lihat materi dan sumber belajar</button></div>:<Lessons section={panel??''} state={learning} balanced={balanced} onBalance={setBalanced} onNavigate={id=>{if(id==='tantangan'){go(1);return;}open(id);document.querySelector('.study-scroll')?.scrollTo({top:0,behavior:'instant'});}}/>}
     </div>
    </DialogContent>
   </Dialog>

@@ -1,8 +1,9 @@
 // Layar judul dan dialog "Cara bermain" Sehari Setara (spesifikasi F-10). Masa tunggu, bunyi, dan aksi diatur
 // PlayScreen; layar ini menampilkan latar, judul, dan tombol, dan dialog mengunci fokus di dalamnya.
-import { Fragment, useEffect, useRef, type KeyboardEvent, type MouseEvent } from "react";
+import { Fragment, useEffect, useRef, type MouseEvent } from "react";
 import { copy } from "../content/copy";
 import type { Scene } from "../engine/types";
+import { AboutDialog, useTitleDialog } from "./About";
 import { TITLE_BAND, TITLE_ZONE } from "./layout";
 import { Stage } from "./Stage";
 
@@ -14,7 +15,7 @@ const howTo = copy.howTo;
 /** Tombol yang berfokus saat layar judul tampil; key naik setiap kali fokus perlu dipindah lagi. */
 export interface TitleFocus {
   readonly key: number;
-  readonly target: "mulai" | "cara";
+  readonly target: "mulai" | "cara" | "tentang";
 }
 
 interface TitleScreenProps {
@@ -27,20 +28,26 @@ interface TitleScreenProps {
   ready: boolean;
   focus: TitleFocus;
   howTo: boolean;
+  /** Dialog "Tentang" terbuka (F-11 bagian B). */
+  about: boolean;
   onStart(): void;
   onHowTo(): void;
+  onAbout(): void;
   /** Klik "Kembali ke galeri"; PlayScreen membatalkannya selama masa tunggu. */
   onGallery(event: MouseEvent<HTMLAnchorElement>): void;
   onCloseHowTo(): void;
+  onCloseAbout(): void;
 }
 
-export function TitleScreen({ scene, scale, animate, ready, focus, howTo: showHowTo, onStart, onHowTo, onGallery, onCloseHowTo }: TitleScreenProps) {
+export function TitleScreen(props: TitleScreenProps) {
+  const { scene, scale, animate, ready, focus, howTo: showHowTo, about: showAbout, onStart, onHowTo, onAbout, onGallery, onCloseHowTo, onCloseAbout } = props;
   const startRef = useRef<HTMLButtonElement>(null);
   const howToRef = useRef<HTMLButtonElement>(null);
+  const aboutRef = useRef<HTMLButtonElement>(null);
   const waiting = ready ? undefined : true;
 
   useEffect(() => {
-    (focus.target === "cara" ? howToRef : startRef).current?.focus();
+    (focus.target === "cara" ? howToRef : focus.target === "tentang" ? aboutRef : startRef).current?.focus();
   }, [focus.key, focus.target]);
 
   const zone = {
@@ -70,40 +77,23 @@ export function TitleScreen({ scene, scale, animate, ready, focus, howTo: showHo
         <button ref={howToRef} type="button" className="ss-button" aria-disabled={waiting} onClick={onHowTo}>
           {copy.title.howTo}
         </button>
+        <button ref={aboutRef} type="button" className="ss-button" aria-disabled={waiting} onClick={onAbout}>
+          {copy.title.about}
+        </button>
         <a className="ss-button" href={GALLERY_HREF} aria-disabled={waiting} onClick={onGallery}>
           {copy.backToGallery}
         </a>
       </div>
       {showHowTo && <HowToDialog onClose={onCloseHowTo} />}
+      {showAbout && <AboutDialog onClose={onCloseAbout} />}
     </div>
   );
 }
 
 /** Dialog "Cara bermain" (usulan 2): enam langkah dan tombol keyboard untuk guru; Esc dan "Tutup" menutupnya. */
 export function HowToDialog({ onClose }: { onClose(): void }) {
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    titleRef.current?.focus();
-  }, []);
-
-  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      if (!event.repeat && !event.ctrlKey && !event.altKey && !event.metaKey) onClose();
-      return;
-    }
-    if (event.repeat && (event.key === "Enter" || event.key === " ")) {
-      event.preventDefault();
-      return;
-    }
-    if (event.key !== "Tab") return;
-    // Fokus hanya beredar antara judul dan "Tutup".
-    event.preventDefault();
-    if (document.activeElement === closeRef.current) titleRef.current?.focus();
-    else closeRef.current?.focus();
-  };
+  // Penanganan fokus dan tombol dipakai bersama dengan dialog "Tentang" (F-11 bagian B).
+  const { titleRef, closeRef, onKeyDown } = useTitleDialog(onClose);
 
   return (
     <section className="ss-howto" role="dialog" aria-modal="true" aria-labelledby="ss-howto-title" tabIndex={-1} onKeyDown={onKeyDown}>

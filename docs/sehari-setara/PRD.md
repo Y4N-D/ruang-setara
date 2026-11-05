@@ -248,8 +248,8 @@ Semua aset gambar **digambar dengan kode oleh Claude** dan disetujui pengembang.
 
 ## 13. Ruang lingkup rilis
 
-- **Versi 1.0 (MVP):** semua kebutuhan P0, ditambah FR-20 (rekap yang bisa diunduh sebagai gambar PNG atau PDF A4; keputusan pemilik proyek 27 Okt 2026, F-09).
-- **Versi 1.1:** P1 (layar penuh, kurangi gerak, ulangi adegan, efek suara).
+- **Versi 1.0 (MVP):** semua kebutuhan P0, ditambah FR-20 (rekap yang bisa diunduh sebagai gambar PNG atau PDF A4; keputusan pemilik proyek 27 Okt 2026, F-09). Versi ini juga memuat sebagian P1 yang sudah dibuat: bunyi klik dan bunyi teks (FR-19 sebagian, F-07) dan kurangi gerak (FR-17 sebagian, F-10), serta layar "Tentang" (F-11).
+- **Versi 1.1:** P1 sisanya (layar penuh, ulangi adegan, dan sisa efek suara).
 - **Nanti:** P2 lainnya (adegan lingkungan).
 
 ## 14. Risiko dan mitigasi
