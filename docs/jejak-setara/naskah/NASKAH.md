@@ -18,12 +18,12 @@ Semua rujukan berstatus **perlu verifikasi**. Tanda "Terverifikasi" hanya diberi
 | K-08 | Z4 | Dompet tertinggal | 5 | Disetujui 5 Nov 2026 | [K-08.md](K-08.md) |
 | K-09 | Z5 | Rapat lomba | 6 | Disetujui 5 Nov 2026 | [K-09.md](K-09.md) |
 | K-10 | Z5 | Logat yang diejek | 6 | Disetujui 5 Nov 2026 | [K-10.md](K-10.md) |
-| K-11 | Z6 | Sampah di sungai | 7 | Menunggu penilaian | [K-11.md](K-11.md) |
-| K-12 | Z6 | Lapangan untuk semua | 7 | Menunggu penilaian | [K-12.md](K-12.md) |
+| K-11 | Z6 | Sampah di sungai | 7 | Disetujui 5 Nov 2026 | [K-11.md](K-11.md) |
+| K-12 | Z6 | Lapangan untuk semua | 7 | Disetujui 5 Nov 2026 | [K-12.md](K-12.md) |
 | K-13 | Z7 | Antrean puskesmas | 1 | Disetujui 5 Nov 2026 | [K-13.md](K-13.md) |
 | K-14 | Z7 | Berhenti sekolah? | 1 | Disetujui 5 Nov 2026 | [K-14.md](K-14.md) |
-| K-15 | Z8 | Video yang disebar | 8 | Belum ditulis | — |
-| K-16 | Z8 | Kabar menakutkan | 8 | Belum ditulis | — |
+| K-15 | Z8 | Video yang disebar | 8 | Menunggu penilaian | [K-15.md](K-15.md) |
+| K-16 | Z8 | Kabar menakutkan | 8 | Menunggu penilaian | [K-16.md](K-16.md) |
 
 ## Pemantauan panjang pilihan (KT-B6)
 
@@ -45,8 +45,10 @@ Sasaran: selisih pilihan terpanjang dan terpendek paling banyak 20 karakter di L
 | K-12 | 7 | Tidak | 9 | Tidak |
 | K-13 | 9 | Tidak | 14 | Tidak |
 | K-14 | 5 | Tidak | 5 | Ya |
+| K-15 | 2 | Tidak | 11 | Tidak |
+| K-16 | 7 | Tidak | 12 | Tidak |
 
-Sejauh ini pilihan benar menjadi yang terpanjang di 0 dari 14 kejadian (Langkah 1), dan pilihan tepat di 3 dari 14 kejadian (Langkah 2).
+Sejauh ini pilihan benar menjadi yang terpanjang di 0 dari 16 kejadian (Langkah 1), dan pilihan tepat di 3 dari 16 kejadian (Langkah 2).
 
 ## Pustaka rujukan
 
@@ -67,8 +69,8 @@ Teks mengikuti usulan 4a: rujukan yang berpadanan R-xx sama persis dengan `app/s
 | JR-11 | Pasal 28E ayat (3) UUD NRI 1945 | UUD Perubahan Kedua | R-07 | K-09 | — | Perlu verifikasi |
 | JR-12 | Pasal 28I ayat (2) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-10 | 5 Nov 2026 (K-10.md) | Perlu verifikasi |
 | JR-13 | Pasal 28H ayat (1) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-11, K-13 | 5 Nov 2026 (K-13.md) | Perlu verifikasi |
-| JR-14 | Pasal 28F UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-16 | — | Perlu verifikasi |
-| JR-15 | Pasal 28J ayat (2) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-16 | — | Perlu verifikasi |
+| JR-14 | Pasal 28F UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-16 | 5 Nov 2026 (K-16.md) | Perlu verifikasi |
+| JR-15 | Pasal 28J ayat (2) UUD NRI 1945 | UUD Perubahan Kedua | Baru | K-16 | 5 Nov 2026 (K-16.md) | Perlu verifikasi |
 | JR-16 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19 | UU 23/2002 dan UU 35/2014 | R-02 | K-01 | — | Perlu verifikasi |
 | JR-17 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 11 | UU 23/2002 dan UU 35/2014 | Baru | K-12 | 5 Nov 2026 (K-12.md) | Perlu verifikasi |
 | JR-18 | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 77 ayat (1) dan Pasal 106 ayat (8) | UU 22/2009 | R-06 | K-05 | — | Perlu verifikasi |
