@@ -22,8 +22,8 @@ Semua rujukan berstatus **perlu verifikasi**. Tanda "Terverifikasi" hanya diberi
 | K-12 | Z6 | Lapangan untuk semua | 7 | Disetujui 5 Nov 2026 | [K-12.md](K-12.md) |
 | K-13 | Z7 | Antrean puskesmas | 1 | Disetujui 5 Nov 2026 | [K-13.md](K-13.md) |
 | K-14 | Z7 | Berhenti sekolah? | 1 | Disetujui 5 Nov 2026 | [K-14.md](K-14.md) |
-| K-15 | Z8 | Video yang disebar | 8 | Menunggu penilaian | [K-15.md](K-15.md) |
-| K-16 | Z8 | Kabar menakutkan | 8 | Menunggu penilaian | [K-16.md](K-16.md) |
+| K-15 | Z8 | Video yang disebar | 8 | Disetujui 5 Nov 2026 | [K-15.md](K-15.md) |
+| K-16 | Z8 | Kabar menakutkan | 8 | Disetujui 5 Nov 2026 | [K-16.md](K-16.md) |
 
 ## Pemantauan panjang pilihan (KT-B6)
 
@@ -48,7 +48,30 @@ Sasaran: selisih pilihan terpanjang dan terpendek paling banyak 20 karakter di L
 | K-15 | 2 | Tidak | 11 | Tidak |
 | K-16 | 7 | Tidak | 12 | Tidak |
 
-Sejauh ini pilihan benar menjadi yang terpanjang di 0 dari 16 kejadian (Langkah 1), dan pilihan tepat di 3 dari 16 kejadian (Langkah 2).
+Pilihan benar menjadi yang terpanjang di 0 dari 16 kejadian (Langkah 1), dan pilihan tepat di 3 dari 16 kejadian (Langkah 2).
+
+## Tokoh dan properti per kejadian
+
+Diambil dari baris "Set tokoh dan properti" setiap naskah, sebagai masukan bagi Sesi C dan bagi kunci manifest di JS-05. Tokoh yang belum ada di Design System bagian 8 tercakup Permintaan A-1 di `STATUS.md`.
+
+| Kode | Zona | Tokoh | Properti |
+|---|---|---|---|
+| K-01 | Z1 | Nara, Gita, seorang teman (siswa SMP umum) | pagar bambu rumah Nara |
+| K-02 | Z1 | Dimas, Pak Made | pengeras suara (versi B: sanggah keluarga) |
+| K-03 | Z2 | Komang, siswa pengejek (siswa SMP umum), siswa yang memotret (siswa SMP umum) | kotak bekal |
+| K-04 | Z2 | Raka (tokoh baru menurut Permintaan A-1), teman sekelas (siswa SMP umum) | tangga ke lantai dua, kursi roda |
+| K-05 | Z3 | Dimas | sepeda motor, halte angkot |
+| K-06 | Z3 | Nenek bertongkat (warga lansia) | zebra cross, halte angkot, kendaraan yang melintas |
+| K-07 | Z4 | Bayu, pedagang, warga (dewasa) | kamera keamanan di tiang, lapak |
+| K-08 | Z4 | Nara, seorang teman (siswa SMP umum) | dompet, bangku pasar, pos keamanan pasar |
+| K-09 | Z5 | Sinta, anggota panitia (siswa SMP umum) | kertas rencana lomba di bale warga |
+| K-10 | Z5 | Peserta yang baru pindah (siswa SMP umum), panitia remaja (siswa SMP umum), penonton (warga umum) | bale warga, meja panitia |
+| K-11 | Z6 | Teman-teman (dua siswa SMP umum) | tepi sungai, tempat sampah, sisa piknik |
+| K-12 | Z6 | Gita, anak SD (warga umum), teman (siswa SMP umum) | bola, tali lompat, lapangan taman |
+| K-13 | Z7 | Ibu menggendong bayi, teman sekelas (siswa SMP umum), petugas puskesmas | bangku antrean |
+| K-14 | Z7 | Wayan (tokoh baru menurut Permintaan A-1) | gerobak dagangan |
+| K-15 | Z8 | Komang (hanya di dalam video), teman (siswa SMP umum) | HP berisi grup kelas, warung berwifi |
+| K-16 | Z8 | Teman (siswa SMP umum) | HP dengan pesan berantai, warung berwifi |
 
 ## Pustaka rujukan
 

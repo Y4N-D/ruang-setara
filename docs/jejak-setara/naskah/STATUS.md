@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Tahap saat ini | Naskah Giliran 8 (Z8: K-15 dan K-16), giliran terakhir, menunggu balasan "Setuju: naskah Z8"; versi situasi K-02 menunggu pilihan (KT-10), paling lambat sebelum JS-05 |
+| Tahap saat ini | Naskah selesai: 16 kejadian disetujui. Menunggu pilihan versi situasi K-02 (KT-10) dan kabar bahwa JS-02 selesai sebelum JS-05 |
 | Pekerjaan | Naskah final 16 kejadian dan daftar rujukannya (bagian naskah dari JS-05) |
 | Tanggal | 5 November 2026 |
 | Acuan | ZIP repositori 5 November 2026 (JS-01 selesai) |
@@ -30,12 +30,13 @@
 | 5 Nov 2026 | Naskah | Giliran 7: `K-11.md` dan `K-12.md` diserahkan, menunggu "Setuju: naskah Z6" |
 | 5 Nov 2026 | Naskah | Pemilik proyek membalas "Setuju: naskah Z6": K-11 dan K-12 disetujui |
 | 5 Nov 2026 | Naskah | Giliran 8 (terakhir): `K-15.md` dan `K-16.md` diserahkan, menunggu "Setuju: naskah Z8" |
+| 5 Nov 2026 | Naskah | Pemilik proyek membalas "Setuju: naskah Z8": K-15 dan K-16 disetujui. Tahap naskah selesai (16 dari 16) |
 
 ## Ringkasan rencana (templat AGENTS 12.1)
 
 | | |
 |---|---|
-| Status | Disetujui 5 Nov 2026 ("Setuju: naskah"); Giliran 1–7 disetujui (versi situasi K-02 menunggu KT-10); Giliran 8 diserahkan |
+| Status | Selesai 5 Nov 2026: 16 naskah disetujui; versi situasi K-02 menunggu KT-10 |
 | Memenuhi | Bagian naskah JS-05: 16 kejadian dan rujukannya (PRD bagian 10), sebagai data untuk JFR-15, JFR-16, dan JFR-45 |
 | Bergantung pada | PRD bagian 10 serta Architecture bagian 5.1 dan 5.4. Tidak menunggu JS-02; JS-02 baru diperlukan untuk bagian kode JS-05 |
 | Berkas yang dibuat atau diubah | Sekarang: `naskah/STATUS.md`. Sesudah disetujui: `naskah/NASKAH.md` dan `naskah/K-01.md` sampai `naskah/K-16.md` |
@@ -305,18 +306,29 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 - JS-05 baru dimulai sesudah pemilik proyek mengabarkan bahwa JS-02 selesai.
 - `content:check:jejak` menjalankan uji di `app/jejak-setara/__tests__/konten/` (AGENTS bagian 6). Folder itu belum termasuk izin JS-05 dari pemilik proyek (5 Nov 2026), jadi izinnya akan saya minta di Plan JS-05.
 
-## Cara membalas (Giliran 8)
+## Ringkasan akhir tahap naskah (5 November 2026)
 
-- **"Setuju: naskah Z8"** berarti K-15 dan K-16 disetujui. Dengan itu, ke-16 naskah selesai.
-- Versi situasi K-02 (KT-10) boleh dijawab kapan saja sebelum JS-05, misalnya dengan menambahkan "K-02 versi A" di balasan.
-- Bila ada yang perlu diubah, tulis bebas. Saya memperbaikinya, lalu menyerahkannya lagi.
+| | |
+|---|---|
+| Naskah disetujui | 16 dari 16 (K-01 sampai K-16), dalam 8 giliran |
+| Pustaka rujukan | 23 rujukan (JR-01 sampai JR-23), semuanya terpakai dan berstatus perlu verifikasi |
+| Rujukan baru yang dipra-periksa | 12 rujukan: sepuluh dari naskah resmi, dua dari sumber sekunder (JR-19 dan JR-22) |
+| Tambahan rujukan yang disetujui | JR-04 di K-04 (Permintaan A-3) dan JR-05 di K-05 (Permintaan A-4) |
+| Peninjauan khusus | K-02 (agama), K-04 (disabilitas), dan K-10 (suku) disetujui; versi situasi K-02 masih menunggu KT-10 |
+| Panjang pilihan (KT-B6) | Pilihan benar tidak pernah menjadi yang terpanjang di Langkah 1 (0 dari 16). Pilihan tepat menjadi yang terpanjang di Langkah 2 tiga kali, masing-masing selisih satu karakter |
+| Tokoh dan properti | Tabel per kejadian ada di `NASKAH.md`, sebagai masukan bagi Sesi C |
 
-## Langkah berikutnya sesudah "Setuju: naskah Z8"
+## Yang masih ditunggu sebelum JS-05
 
-1. Menandai K-15 dan K-16 "Disetujui" di `NASKAH.md`. Tahap naskah pun selesai.
-2. Menyerahkan ringkasan akhir berisi hal yang masih ditunggu sebelum JS-05:
-   - pilihan versi situasi K-02 (KT-10);
-   - Permintaan A-1 sampai A-4 untuk Sesi A;
-   - pembacaan langsung JR-19 dan JR-22 di naskah resmi, karena pra-pemeriksaannya memakai sumber sekunder;
-   - tanda "Terverifikasi" oleh Peninjau di konsol (JS-12).
-3. JS-05 dimulai sesudah pemilik proyek mengabarkan bahwa JS-02 selesai. Izin untuk folder `app/jejak-setara/__tests__/konten/` diminta di Plan JS-05.
+| No. | Hal | Siapa | Keterangan |
+|---|---|---|---|
+| 1 | Pilihan versi situasi K-02 (KT-10) | Peninjau konten | Saran: versi A. Versi yang tidak dipilih dihapus dari `K-02.md` sebelum disemai |
+| 2 | Permintaan A-1 sampai A-4 | Sesi A | Dibaca Sesi A dari berkas ini pada Plan berikutnya |
+| 3 | Membaca langsung JR-19 dan JR-22 di naskah resmi | Pemilik proyek | Pra-pemeriksaan keduanya memakai sumber sekunder. Pastikan juga keduanya tidak diubah UU Cipta Kerja; catatan R-06 meminta hal yang sama untuk JR-18 |
+| 4 | Tanda "Terverifikasi" untuk 23 rujukan | Peninjau, di konsol (JS-12) | Bank awal disemai dengan semua rujukan berstatus `belum` |
+| 5 | Kabar bahwa JS-02 selesai | Pemilik proyek | JS-05 baru dimulai sesudah itu. Izin untuk folder `app/jejak-setara/__tests__/konten/` diminta di Plan JS-05 |
+
+## Cara membalas
+
+- Pilihan KT-10 cukup ditulis "K-02 versi A" atau "K-02 versi B", kapan saja sebelum JS-05.
+- Untuk memulai JS-05, kabari "JS-02 selesai".
