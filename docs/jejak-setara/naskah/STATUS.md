@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Tahap saat ini | Naskah Giliran 6 (Z5: K-09 dan K-10), menunggu balasan "Setuju: naskah Z5"; versi situasi K-02 menunggu pilihan (KT-10), paling lambat sebelum JS-05 |
+| Tahap saat ini | Naskah Giliran 7 (Z6: K-11 dan K-12), menunggu balasan "Setuju: naskah Z6"; versi situasi K-02 menunggu pilihan (KT-10), paling lambat sebelum JS-05 |
 | Pekerjaan | Naskah final 16 kejadian dan daftar rujukannya (bagian naskah dari JS-05) |
 | Tanggal | 5 November 2026 |
 | Acuan | ZIP repositori 5 November 2026 (JS-01 selesai) |
@@ -26,12 +26,14 @@
 | 5 Nov 2026 | Naskah | Giliran 5: `K-07.md` dan `K-08.md` diserahkan, menunggu "Setuju: naskah Z4" |
 | 5 Nov 2026 | Naskah | Pemilik proyek membalas "Setuju: naskah Z4": K-07 dan K-08 disetujui |
 | 5 Nov 2026 | Naskah | Giliran 6: `K-09.md` dan `K-10.md` diserahkan, menunggu "Setuju: naskah Z5" |
+| 5 Nov 2026 | Naskah | Pemilik proyek membalas "Setuju: naskah Z5": K-09 dan K-10 disetujui |
+| 5 Nov 2026 | Naskah | Giliran 7: `K-11.md` dan `K-12.md` diserahkan, menunggu "Setuju: naskah Z6" |
 
 ## Ringkasan rencana (templat AGENTS 12.1)
 
 | | |
 |---|---|
-| Status | Disetujui 5 Nov 2026 ("Setuju: naskah"); Giliran 1–5 disetujui (versi situasi K-02 menunggu KT-10); Giliran 6 diserahkan |
+| Status | Disetujui 5 Nov 2026 ("Setuju: naskah"); Giliran 1–6 disetujui (versi situasi K-02 menunggu KT-10); Giliran 7 diserahkan |
 | Memenuhi | Bagian naskah JS-05: 16 kejadian dan rujukannya (PRD bagian 10), sebagai data untuk JFR-15, JFR-16, dan JFR-45 |
 | Bergantung pada | PRD bagian 10 serta Architecture bagian 5.1 dan 5.4. Tidak menunggu JS-02; JS-02 baru diperlukan untuk bagian kode JS-05 |
 | Berkas yang dibuat atau diubah | Sekarang: `naskah/STATUS.md`. Sesudah disetujui: `naskah/NASKAH.md` dan `naskah/K-01.md` sampai `naskah/K-16.md` |
@@ -301,16 +303,16 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 - JS-05 baru dimulai sesudah pemilik proyek mengabarkan bahwa JS-02 selesai.
 - `content:check:jejak` menjalankan uji di `app/jejak-setara/__tests__/konten/` (AGENTS bagian 6). Folder itu belum termasuk izin JS-05 dari pemilik proyek (5 Nov 2026), jadi izinnya akan saya minta di Plan JS-05.
 
-## Cara membalas (Giliran 6)
+## Cara membalas (Giliran 7)
 
-- **"Setuju: naskah Z5"** berarti K-09 dan K-10 disetujui. Giliran ini tidak membawa usulan tambahan rujukan.
-- K-10 bertema suku dan wajib ditinjau khusus. Mohon baca bagian catatan peninjauannya sebelum menyetujui.
+- **"Setuju: naskah Z6"** berarti K-11 dan K-12 disetujui. Giliran ini tidak membawa usulan tambahan rujukan.
 - Versi situasi K-02 (KT-10) boleh dijawab kapan saja sebelum JS-05, misalnya dengan menambahkan "K-02 versi A" di balasan.
 - Bila ada yang perlu diubah, tulis bebas. Saya memperbaikinya, lalu menyerahkannya lagi.
 
-## Langkah berikutnya sesudah "Setuju: naskah Z5"
+## Langkah berikutnya sesudah "Setuju: naskah Z6"
 
-1. Menandai K-09 dan K-10 "Disetujui" di `NASKAH.md`.
-2. Menulis Giliran 7: K-11 dan K-12 (Z6 Taman, sungai, dan pantai).
-   - K-11 memakai JR-13 dan JR-22. JR-13 (Pasal 28H ayat (1)) sudah dipra-periksa di K-13; di K-11 yang dipakai adalah unsur lingkungan hidup yang baik dan sehat. JR-22 (UU No. 32 Tahun 2009, Pasal 67) dipra-periksa di naskah resmi.
-   - K-12 memakai JR-17 (UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 11), yang juga dipra-periksa di naskah resmi, serta JR-04.
+1. Menandai K-11 dan K-12 "Disetujui" di `NASKAH.md`.
+2. Menulis Giliran 8, giliran terakhir: K-15 dan K-16 (Z8 Pojok gawai).
+   - K-15 memakai rujukan padanan (JR-05 dan JR-04), dengan watak Komang yang sama seperti di Sehari Setara.
+   - K-16 memakai JR-14 (Pasal 28F), JR-04, dan JR-15 (Pasal 28J ayat (2)). JR-14 dan JR-15 dipra-periksa di naskah Perubahan Kedua.
+3. Sesudah Giliran 8 disetujui, saya menyerahkan ringkasan akhir 16 naskah, termasuk hal yang masih ditunggu sebelum JS-05 (KT-10 dan Permintaan A-1 sampai A-4).
