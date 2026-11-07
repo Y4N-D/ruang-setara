@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Versi | 0.10 |
+| Versi | 0.11 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Kelompok A, U, O1, O2, O3, T, N1, dan N2 disetujui; ukuran peta 160 × 100 ubin. Kelompok O4 (varian untuk peta besar) diserahkan: menunggu "Setuju: aset O4" |
+| Tahap saat ini | Kelompok A, U, O1, O2, O3, O4, T, N1, dan N2 disetujui; ukuran peta 160 × 100 ubin. Kelompok I (ikon), kelompok terakhir, diserahkan: menunggu "Setuju: aset I" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -40,6 +40,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Kelompok O3 | 13 properti kejadian (15 berkas) diserahkan bersama pratinjau set tokoh per kejadian; menunggu "Setuju: aset O3" |
 | 6 Nov 2026 | Kelompok O3 | Pemilik proyek membalas "Setuju: aset O3": O-29 sampai O-41 Disetujui; kredit 15 berkas ditambahkan |
 | 6 Nov 2026 | Kelompok O4 | 9 varian untuk peta 160 × 100 (15 berkas) diserahkan; menunggu "Setuju: aset O4" |
+| 6 Nov 2026 | Kelompok O4 | Pemilik proyek membalas "Setuju: aset O4": O-43 sampai O-51 Disetujui; kredit 15 berkas ditambahkan |
+| 6 Nov 2026 | Kelompok I | Ikon (33 berkas: 22 ikon baru dan 11 ikon Sehari Setara yang dipakai ulang) diserahkan; menunggu "Setuju: aset I" |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -70,7 +72,7 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 
 | | |
 |---|---|
-| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, O2, O3, T, N1, dan N2 Disetujui 6 Nov 2026; kelompok O4 diserahkan, menunggu "Setuju: aset O4" |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, O2, O3, O4, T, N1, dan N2 Disetujui 6 Nov 2026; kelompok I diserahkan, menunggu "Setuju: aset I" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -451,15 +453,15 @@ Ditambahkan sesudah keputusan ukuran peta 160 × 100 ubin, agar kampung yang leb
 
 | ID | Berkas | Ukuran (ubin) | Isi | Zona | Status |
 |---|---|---|---|---|---|
-| O-43 | `obj_rumah_c` | 5 × 4 | Rumah warga memanjang: atap pelana `coral`, dinding peach, teras bertiang dengan bangku, tirai `leaf` | Z1 | Ditinjau (kelompok O4) |
-| O-44 | `obj_rumah_d` | 3 × 3 | Rumah warga kecil: atap limasan `coral`, dinding `mist`, pintu di kanan, tirai `sun` | Z1 | Ditinjau (kelompok O4) |
-| O-45 | `obj_pohon_b` | 3 × 3 (batang 1 ubin) | Pohon rindang gelap: tajuk bulat `grass` dengan lengkung daun `leaf` | Semua | Ditinjau (kelompok O4) |
-| O-46 | `obj_pohon_c` | 3 × 3 (batang 1 ubin) | Pohon berbunga: tajuk `leaf` dengan bunga `rose` dan putih | Semua | Ditinjau (kelompok O4) |
-| O-47 | `obj_pohon_kecil` | 1 × 2 | Pohon muda dengan tajuk kecil | Semua | Ditinjau (kelompok O4) |
-| O-48 | `obj_pisang` | 3 × 3 (batang 1 ubin) | Pohon pisang: batang semu hijau, daun lebar, setandan pisang dan jantungnya | Z1, Z6 | Ditinjau (kelompok O4) |
-| O-49 | `obj_semak_b` | 1 × 1 | Semak berbunga `rose` dan putih | Semua | Ditinjau (kelompok O4) |
-| O-50 | `obj_pot_tanaman` | 1 × 1 | Pot tanaman `coral` di depan rumah | Z1, Z8 | Ditinjau (kelompok O4) |
-| O-51 | `obj_batu` | 1 × 1 | Batu besar di tepi sungai atau taman | Z6 | Ditinjau (kelompok O4) |
+| O-43 | `obj_rumah_c` | 5 × 4 | Rumah warga memanjang: atap pelana `coral`, dinding peach, teras bertiang dengan bangku, tirai `leaf` | Z1 | Disetujui (6 Nov) |
+| O-44 | `obj_rumah_d` | 3 × 3 | Rumah warga kecil: atap limasan `coral`, dinding `mist`, pintu di kanan, tirai `sun` | Z1 | Disetujui (6 Nov) |
+| O-45 | `obj_pohon_b` | 3 × 3 (batang 1 ubin) | Pohon rindang gelap: tajuk bulat `grass` dengan lengkung daun `leaf` | Semua | Disetujui (6 Nov) |
+| O-46 | `obj_pohon_c` | 3 × 3 (batang 1 ubin) | Pohon berbunga: tajuk `leaf` dengan bunga `rose` dan putih | Semua | Disetujui (6 Nov) |
+| O-47 | `obj_pohon_kecil` | 1 × 2 | Pohon muda dengan tajuk kecil | Semua | Disetujui (6 Nov) |
+| O-48 | `obj_pisang` | 3 × 3 (batang 1 ubin) | Pohon pisang: batang semu hijau, daun lebar, setandan pisang dan jantungnya | Z1, Z6 | Disetujui (6 Nov) |
+| O-49 | `obj_semak_b` | 1 × 1 | Semak berbunga `rose` dan putih | Semua | Disetujui (6 Nov) |
+| O-50 | `obj_pot_tanaman` | 1 × 1 | Pot tanaman `coral` di depan rumah | Z1, Z8 | Disetujui (6 Nov) |
+| O-51 | `obj_batu` | 1 × 1 | Batu besar di tepi sungai atau taman | Z6 | Disetujui (6 Nov) |
 
 #### Rincian kelompok O4 (6 November 2026)
 
@@ -582,22 +584,35 @@ Ciri Raka, Wayan, dan siswa umum diusulkan Sesi C dan ditetapkan pemilik proyek 
 
 ## I. Ikon
 
+Ikon 16 × 16 (termasuk margin 1 piksel) bergaris luar `ink`, sejalan dengan ikon antarmuka Sehari Setara.
+
 | ID | Berkas | Ukuran | Isi | Status |
 |---|---|---|---|---|
-| I-01 | `ikon_lari.png` | 16 × 16 | Sepatu (Lari cepat) | Belum |
-| I-02 | `ikon_kompas.png` | 16 × 16 | Kompas (Kompas kejadian) | Belum |
-| I-03 | `ikon_petunjuk.png` | 16 × 16 | Buku terbuka (Petunjuk) | Belum |
-| I-04 | `ikon_teropong.png` | 16 × 16 | Teropong (P1) | Belum |
-| I-05 | `ikon_karcis.png` | 16 × 16 | Karcis angkot (P1) | Belum |
-| I-06 sampai I-13 | `ikon_zona_1.png` sampai `ikon_zona_8.png` | 16 × 16 | Ikon zona: rumah, buku, rambu, keranjang, kentongan, pohon kelapa, hati, gelombang sinyal | Belum |
-| I-14 | `ikon_mini_kejadian.png`, `ikon_mini_selesai.png`, `ikon_mini_halte.png` | 7 × 7 (usulan) | Peta mini: "!" `sun`, ✓ `leaf`, dan halte `teal` (P1); ukuran dipastikan bersama JS-07 | Belum |
-| I-15 | `ikon_menyambung.png` | 2 × 16 × 16 | Jam berputar untuk layar menyambung ulang | Belum |
-| I-16 | `ikon_putar_hp.png` | 32 × 32 | Ajakan memutar HP ke posisi mendatar | Belum |
-| I-17 | `ikon_jejak.png` | 32 × 32 | Ikon tab halaman pemain dan konsol | Belum |
-| I-18 | Ikon status konsol | 16 × 16 | Arsip, rujukan belum diverifikasi, terverifikasi | Belum |
-| I-19 | Ikon Sehari Setara yang dipakai ulang | 16 × 16 dan 8 × 8 | Bintang (3 bingkai), jam, suara nyala dan mati, layar penuh, matahari, bulan, dan empat ikon emosi; dibangun ulang tanpa perubahan dari `ikon.py` dengan nama Jejak Setara (misalnya `ikon_bintang.png`, `ikon_emosi_hati.png`) | Belum (dipakai ulang) |
+| I-01 | `ikon_lari.png` | 16 × 16 | Sepatu `coral` bersol putih dengan garis laju (Lari cepat) | Ditinjau (kelompok I) |
+| I-02 | `ikon_kompas.png` | 16 × 16 | Kompas bermuka putih, jarum `teal` (Kompas kejadian) | Ditinjau (kelompok I) |
+| I-03 | `ikon_petunjuk.png` | 16 × 16 | Buku terbuka bersampul `sky-d` dengan pembatas `coral` (Petunjuk) | Ditinjau (kelompok I) |
+| I-04 | `ikon_teropong.png` | 16 × 16 | Teropong `dusk` (P1) | Ditinjau (kelompok I) |
+| I-05 | `ikon_karcis.png` | 16 × 16 | Karcis `sun` bergambar angkot (Angkot, P1) | Ditinjau (kelompok I) |
+| I-06 sampai I-13 | `ikon_zona_1.png` sampai `ikon_zona_8.png` | 16 × 16 | Ikon zona: rumah, buku, rambu, keranjang, kentongan, pohon kelapa, hati, gelombang sinyal | Ditinjau (kelompok I) |
+| I-14 | `ikon_mini_kejadian.png`, `ikon_mini_selesai.png`, `ikon_mini_halte.png` | 7 × 7 | Peta mini: "!" `sun`, centang `leaf`, dan halte `teal` (P1); ukuran dipastikan bersama JS-07 | Ditinjau (kelompok I) |
+| I-15 | `ikon_menyambung.png` | 2 × 16 × 16 | Jam berputar untuk layar menyambung ulang | Ditinjau (kelompok I) |
+| I-16 | `ikon_putar_hp.png` | 32 × 32 | Panah dari HP tegak ke HP mendatar | Ditinjau (kelompok I) |
+| I-17 | `ikon_jejak.png` | 32 × 32 | Ikon tab: dua jejak kaki `sun` di atas petak `navy` | Ditinjau (kelompok I) |
+| I-18 | `ikon_arsip.png`, `ikon_peringatan.png`, `ikon_centang.png` | 16 × 16 | Konsol: kotak arsip `mist`, segitiga `mango` bertanda seru (rujukan belum diverifikasi), lingkaran `leaf` bercentang (terverifikasi) | Ditinjau (kelompok I) |
+| I-19 | `ikon_bintang.png` (3 bingkai), `ikon_jam.png`, `ikon_suara_nyala.png`, `ikon_suara_mati.png`, `ikon_layar_penuh.png`, `ikon_matahari.png`, `ikon_bulan.png`, `ikon_emosi_hati.png`, `ikon_emosi_keringat.png`, `ikon_emosi_tanya.png`, `ikon_emosi_seru.png` | 16 × 16, emosi 8 × 8 | Dipakai ulang dari Sehari Setara: dibangun dari `ikon.py` tanpa perubahan; piksel sama dengan berkas Sehari Setara | Ditinjau (kelompok I) |
 
-Daftar akhir I-15 sampai I-18 mengikuti spesifikasi JS-07 sampai JS-12.
+### Rincian kelompok I (6 November 2026)
+
+| | |
+|---|---|
+| Kode | `scripts/game/art/atas_ikon.py` (bagian "kelompok I"); ikon I-19 dipanggil dari `ikon.py` Sehari Setara tanpa diubah |
+| Berkas | 33 PNG di `app/jejak-setara/assets/ikon/`: 22 ikon baru dan 11 ikon yang dipakai ulang |
+| Ukuran | Seluruh kelompok I 6,7 KB |
+| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai. Ikon I-19 sama piksel dengan berkas Sehari Setara |
+| Pratinjau | `preview/ikon_lembar.png` (semua ikon) dan `preview/ikon_hud.png` (ikon di tiruan HUD, bukan tata letak akhir) |
+
+- Ikon antarmuka (I-15 sampai I-18) dibuat sekarang agar Sesi A bisa langsung memakainya; bentuk akhirnya bisa disesuaikan ketika spesifikasi JS-07 sampai JS-12 ditulis.
+- Tidak ada tulisan, logo, atau lambang di ikon mana pun. Ikon zona Z7 memakai hati, bukan palang merah.
 
 ## Efek suara
 
@@ -662,5 +677,5 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## Cara membalas
 
-- **"Setuju: aset O4"** berarti kesembilan varian disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok I (ikon skill, ikon zona, ikon peta mini, ikon antarmuka, dan ikon Sehari Setara yang dipakai ulang).
-- Perbaikan cukup ditulis per varian, misalnya "O-48: daun pisang lebih lebar" atau "O-43: dinding rumah c putih". Varian lain yang tidak disebut tetap seperti sekarang.
+- **"Setuju: aset I"** berarti semua ikon disetujui. Dengan begitu seluruh kelompok aset dalam rencana ini selesai. Pekerjaan Sesi C berikutnya adalah JS-06 (peta 160 × 100), yang dimulai sesudah pemilik proyek mengabarkan "JS-02 selesai". `manifest.ts` dibuat sesudah Sesi A menjawab Permintaan C-6.
+- Perbaikan cukup ditulis per ikon, misalnya "I-11: pohon kelapa lebih tinggi" atau "I-17: ikon tab berwarna teal". Ikon lain yang tidak disebut tetap seperti sekarang.

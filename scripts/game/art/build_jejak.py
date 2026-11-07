@@ -33,7 +33,10 @@ from atas_ubin import (MASA, NAMA_MASA, KOLOM, NOMOR, BLOB, WILAYAH, SUSUNAN, UK
                        ubin_rumput, ubin_wilayah, lembar_ubin, nomor_tanah)
 from atas_objek import POTONG_ATAP, OBJEK, KODE_OBJEK, PAGAR, obj_rumah_a, pisah   # noqa: E402
 from atas_ikon import (SKILL, ARAH_KOMPAS, ARAH_DIRI, tanda_kejadian, tanda_dibuka, tanda_selesai,   # noqa: E402
-                       tanda_kotak, tanda_kompas, tanda_diri, tanda_debu, tanda_kilau)
+                       tanda_kotak, tanda_kompas, tanda_diri, tanda_debu, tanda_kilau, ikon_lari, ikon_kompas,
+                       ikon_petunjuk, ikon_teropong, ikon_karcis, ikon_zona, ikon_mini, ikon_menyambung,
+                       ikon_putar_hp, ikon_jejak, ikon_konsol)
+import ikon as IKON_SEHARI   # noqa: E402  ikon Sehari Setara yang dipakai ulang, dibangun tanpa perubahan
 
 if HERE.parts[-3:] == ("scripts", "game", "art"):      # berada di dalam repositori
     REPO = HERE.parents[2]
@@ -102,13 +105,43 @@ for _n, _poses in POSE_NPC2.items():
         ASSETS[f"npc_{_n}_bawah_{_pose}"] = ("npc", lambda n=_n, p=_pose: strip_npc2(n, p),
                                               (UKURAN_NPC[NPC2[_n]["ukuran"]][0][0] * 2, UKURAN_NPC[NPC2[_n]["ukuran"]][0][1]))
 
+# Kelompok I (Ditinjau): ikon, di folder ikon/
+IKON_BARU = {"ikon_lari": ("I-01", ikon_lari, (16, 16)), "ikon_kompas": ("I-02", ikon_kompas, (16, 16)),
+             "ikon_petunjuk": ("I-03", ikon_petunjuk, (16, 16)), "ikon_teropong": ("I-04", ikon_teropong, (16, 16)),
+             "ikon_karcis": ("I-05", ikon_karcis, (16, 16))}
+for _z in range(1, 9):
+    IKON_BARU[f"ikon_zona_{_z}"] = (f"I-{5 + _z:02d}", (lambda z=_z: ikon_zona(z)), (16, 16))
+for _j in ("kejadian", "selesai", "halte"):
+    IKON_BARU[f"ikon_mini_{_j}"] = ("I-14", (lambda j=_j: ikon_mini(j)), (7, 7))
+IKON_BARU["ikon_menyambung"] = ("I-15", lambda: strip([ikon_menyambung(0), ikon_menyambung(1)]), (32, 16))
+IKON_BARU["ikon_putar_hp"] = ("I-16", ikon_putar_hp, (32, 32))
+IKON_BARU["ikon_jejak"] = ("I-17", ikon_jejak, (32, 32))
+for _j in ("arsip", "peringatan", "centang"):
+    IKON_BARU[f"ikon_{_j}"] = ("I-18", (lambda j=_j: ikon_konsol(j)), (16, 16))
+IKON_ULANG = {   # nama Jejak Setara: (fungsi ikon.py, nama berkas Sehari Setara, ukuran)
+    "ikon_bintang": (lambda: strip([IKON_SEHARI.ui_star(0), IKON_SEHARI.ui_star(1), IKON_SEHARI.ui_star(2)]), "ui_star", (48, 16)),
+    "ikon_jam": (lambda: IKON_SEHARI.ui_clock(), "ui_clock", (16, 16)),
+    "ikon_suara_nyala": (lambda: IKON_SEHARI.ui_sound_on(), "ui_sound_on", (16, 16)),
+    "ikon_suara_mati": (lambda: IKON_SEHARI.ui_sound_off(), "ui_sound_off", (16, 16)),
+    "ikon_layar_penuh": (lambda: IKON_SEHARI.ui_fullscreen(), "ui_fullscreen", (16, 16)),
+    "ikon_matahari": (lambda: IKON_SEHARI.ui_matahari(), "ui_matahari", (16, 16)),
+    "ikon_bulan": (lambda: IKON_SEHARI.ui_bulan(), "ui_bulan", (16, 16)),
+}
+for _e in ("hati", "keringat", "tanya", "seru"):
+    IKON_ULANG[f"ikon_emosi_{_e}"] = ((lambda e=_e: IKON_SEHARI.emote(e)), f"emote_{_e}", (8, 8))
+for _n, (_k, _fn, _uk) in IKON_BARU.items():
+    ASSETS[_n] = ("ikon", lambda f=_fn: (lambda r: r.im if isinstance(r, C) else r)(f()), _uk)   # noqa: F405
+for _n, (_fn, _asal, _uk) in IKON_ULANG.items():
+    ASSETS[_n] = ("ikon", lambda f=_fn: (lambda r: r.im if isinstance(r, C) else r)(f()), _uk)   # noqa: F405
+
 # Aset berstatus Disetujui: nama -> tanggal. Hanya aset di sini yang masuk CREDITS.md dan manifest.ts.
 KELOMPOK_O1 = {n for n, kode in KODE_OBJEK.items() if kode <= "O-20"}
 KELOMPOK_O2 = {n for n, kode in KODE_OBJEK.items() if "O-21" <= kode <= "O-28"}
 KELOMPOK_O3 = {n for n, kode in KODE_OBJEK.items() if "O-29" <= kode <= "O-41"}
+KELOMPOK_O4 = {n for n, kode in KODE_OBJEK.items() if "O-43" <= kode <= "O-51"}
 DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              if nama.startswith(("ava_", "ikon_ava_", "ubin_"))                     # kelompok A dan U
-             or NAMA_OBJEK.get(nama) in KELOMPOK_O1 | KELOMPOK_O2 | KELOMPOK_O3         # kelompok O1, O2, O3
+             or NAMA_OBJEK.get(nama) in KELOMPOK_O1 | KELOMPOK_O2 | KELOMPOK_O3 | KELOMPOK_O4   # kelompok O1-O4
              or nama.startswith("tanda_")                                               # kelompok T
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC)                  # kelompok N1
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC2)}                # kelompok N2
@@ -136,6 +169,10 @@ def kode_aset(nama):
         return kode_t[nama]
     if nama.startswith("npc_"):
         return KODE_NPC.get(nama.split("_")[1], "—")
+    if nama in IKON_BARU:
+        return IKON_BARU[nama][0]
+    if nama in IKON_ULANG:
+        return "I-19"
     return "—"
 
 
@@ -1155,7 +1192,7 @@ O4 = ("rumah_c", "rumah_d", "pohon_b", "pohon_c", "pohon_kecil", "pisang", "sema
 
 def pratinjau_obj4_lembar():
     L = Lembar(1440, 700)
-    L.judul("Kelompok O4 — Varian untuk peta besar (×3)", "Sesi C · 6 Nov 2026 · Ditinjau · di atas rumput siang")
+    L.judul("Kelompok O4 — Varian untuk peta besar (×3)", "Sesi C · disetujui 6 Nov 2026 · di atas rumput siang")
     m = MASA["siang"]
     x, y, tinggi_baris = 20, 70, 0
     for nama in O4:
@@ -1205,13 +1242,96 @@ OBJEK_O4 = [("rumah_c", 1, 4), ("rumah_d", 7, 5), ("rumah_a", 11, 4), ("pohon_c"
 
 def pratinjau_obj4_peta():
     L = Lembar(1320, 960)
-    L.judul("Kelompok O4 — Varian rumah dan pohon", "Sesi C · 6 Nov 2026 · Ditinjau · 40×26 ubin, siang (×2)")
+    L.judul("Kelompok O4 — Varian rumah dan pohon", "Sesi C · disetujui 6 Nov 2026 · 40×26 ubin, siang (×2)")
     tokoh = [_pemain(2, 312, 156, "kanan", "jalan", 1, tas="mango"), _pemain(7, 330, 300, "atas", "jalan", 3, tas="leaf"),
              _npc_di("ibu", "diam", 136, 140), _npc2_di("anak1", "diam", 520, 150)]
     L.tempel(besar(render_peta(peta_o4(), "siang", OBJEK_O4, tokoh), 2), 20, 70)
     L.label("Lima bentuk rumah (a, b, c, d, rumah Nara), lima jenis pohon (rindang, gelap, berbunga, muda, pisang) dan kelapa, "
             "semak berbunga, pot tanaman, dan batu", 660, 912)
     L.label("Contoh potongan sekitar seperenam belas peta 160 × 100; peta sungguhan disusun di JS-06", 660, 936)
+    return L.im
+
+
+# ---------------------------------------------------------------------------
+# Pratinjau kelompok I: ikon
+# ---------------------------------------------------------------------------
+NAMA_IKON = {"ikon_lari": "lari cepat", "ikon_kompas": "kompas", "ikon_petunjuk": "petunjuk", "ikon_teropong": "teropong (P1)",
+             "ikon_karcis": "angkot (P1)", "ikon_zona_1": "Z1 rumah", "ikon_zona_2": "Z2 sekolah", "ikon_zona_3": "Z3 jalan",
+             "ikon_zona_4": "Z4 pasar", "ikon_zona_5": "Z5 balai", "ikon_zona_6": "Z6 taman", "ikon_zona_7": "Z7 puskesmas",
+             "ikon_zona_8": "Z8 gawai", "ikon_mini_kejadian": "kejadian", "ikon_mini_selesai": "selesai",
+             "ikon_mini_halte": "halte (P1)", "ikon_menyambung": "menyambung", "ikon_putar_hp": "putar HP",
+             "ikon_jejak": "ikon tab", "ikon_arsip": "arsip", "ikon_peringatan": "belum diverifikasi",
+             "ikon_centang": "terverifikasi"}
+
+
+def pratinjau_ikon_lembar():
+    L = Lembar(1440, 900)
+    L.judul("Kelompok I — Ikon (×6, ikon 32×32 ×4, ikon peta mini ×8)", "Sesi C · 6 Nov 2026 · Ditinjau")
+    baris = [("Skill dan zona", [n for n in IKON_BARU if n.startswith(("ikon_lari", "ikon_kompas", "ikon_petunjuk",
+                                                                       "ikon_teropong", "ikon_karcis"))]
+              + [f"ikon_zona_{z}" for z in range(1, 9)]),
+             ("Peta mini, antarmuka, dan konsol", ["ikon_mini_kejadian", "ikon_mini_selesai", "ikon_mini_halte",
+                                                   "ikon_menyambung", "ikon_putar_hp", "ikon_jejak", "ikon_arsip",
+                                                   "ikon_peringatan", "ikon_centang"])]
+    y = 70
+    for judul, nama in baris:
+        L.d.text((20, y), judul, font=L.f["tebal"], fill=INK[:3])                  # noqa: F405
+        x = 20
+        for n in nama:
+            im = ASSETS[n][1]()
+            k = 8 if im.width <= 7 else 4 if im.height >= 32 or im.width >= 32 else 6
+            g = besar(im, k)
+            lebar = max(g.width, 104)
+            L.tempel(g, x + (lebar - g.width) // 2, y + 30 + (128 - g.height))
+            L.label(f"{IKON_BARU[n][0]}", x + lebar / 2, y + 166, "tebal")
+            L.label(NAMA_IKON[n], x + lebar / 2, y + 186)
+            x += lebar + 12
+        y += 240
+    L.d.text((20, y), "I-19 dipakai ulang dari Sehari Setara (×4): dibangun dari ikon.py tanpa perubahan", font=L.f["tebal"],
+             fill=INK[:3])                                                         # noqa: F405
+    x = 20
+    for n, (fn, asal, _) in IKON_ULANG.items():
+        im = ASSETS[n][1]()
+        k = 8 if im.width == 8 else 4
+        g = besar(im, k)
+        L.tempel(g, x + (max(g.width, 96) - g.width) // 2, y + 30 + (64 - g.height))
+        L.label(n.replace("ikon_", "").replace("_", " "), x + max(g.width, 96) / 2, y + 102)
+        x += max(g.width, 96) + 20
+    return L.im.crop((0, 0, 1440, y + 130))
+
+
+def pratinjau_ikon_hud():
+    """Tiruan sederhana bilah atas, tombol skill, dan peta mini untuk menilai keterbacaan ikon (bukan tata letak akhir)."""
+    g = render_peta(peta_kampung(), "siang", OBJEK_KAMPUNG, _pemain_kampung()).im.crop((96, 120, 416, 300)).convert("RGBA")
+    k = 3
+    im = g.resize((g.width * k, g.height * k), Image.NEAREST).convert("RGB")
+    d = ImageDraw.Draw(im)
+    f = _huruf(20, True)
+    d.rectangle([0, 0, im.width, 44], fill=INK[:3])                                # noqa: F405
+    def tempel(ikon, x, y, skala):
+        ikon = besar(ikon, skala).convert("RGBA")
+        im.paste(ikon, (x, y), ikon)
+    tempel(ikon_zona(2), 10, 6, 2); d.text((48, 10), "Sekolah", font=f, fill=CREAM[:3])   # noqa: F405
+    tempel(IKON_SEHARI.ui_matahari(), 420, 6, 2); d.text((458, 10), "Pagi", font=f, fill=CREAM[:3])   # noqa: F405
+    tempel(IKON_SEHARI.ui_clock(), 600, 6, 2); d.text((638, 10), "12:40", font=f, fill=CREAM[:3])   # noqa: F405
+    tempel(IKON_SEHARI.ui_star(2), 800, 6, 2); d.text((838, 10), "35", font=f, fill=CREAM[:3])   # noqa: F405
+    for i, ikon in enumerate((ikon_lari(), ikon_kompas(), ikon_petunjuk())):
+        x, y = im.width - 80 - i * 76, im.height - 80
+        d.ellipse([x, y, x + 64, y + 64], fill=CREAM[:3], outline=INK[:3], width=3)   # noqa: F405
+        tempel(ikon, x + 16, y + 16, 2)
+    d.rectangle([12, im.height - 132, 12 + 168, im.height - 12], fill=INK[:3])     # noqa: F405
+    d.rectangle([16, im.height - 128, 16 + 160, im.height - 16], fill=LEAF[:3])     # noqa: F405
+    for xx, yy, ikon in ((40, im.height - 110, ikon_mini("kejadian")), (100, im.height - 80, ikon_mini("selesai")),
+                         (130, im.height - 120, ikon_mini("halte"))):
+        tempel(ikon, xx, yy, 3)
+    tempel(tanda_diri("kanan"), 70, im.height - 60, 3)
+    L = Lembar(im.width + 40, im.height + 140)
+    L.judul("Kelompok I — Ikon di tiruan HUD (×3)", "Sesi C · 6 Nov 2026 · Ditinjau")
+    L.tempel(im, 20, 70)
+    L.label("Bilah atas: ikon zona, matahari, jam, bintang. Kanan bawah: tombol Lari cepat, Kompas, Petunjuk.",
+            L.im.width / 2, im.height + 80)
+    L.label("Kiri bawah: peta mini. Tiruan sederhana, bukan tata letak akhir; HUD dibuat Sesi A di JS-07.",
+            L.im.width / 2, im.height + 104)
     return L.im
 
 
@@ -1225,7 +1345,8 @@ PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringk
             "npc1_peta": pratinjau_npc1_peta, "npc2_ringkasan": pratinjau_npc2_ringkasan,
             "npc2_peta": pratinjau_npc2_peta, "obj3_lembar": pratinjau_obj3_lembar,
             "obj3_set": pratinjau_obj3_set, "obj4_lembar": pratinjau_obj4_lembar,
-            "obj4_peta": pratinjau_obj4_peta}
+            "obj4_peta": pratinjau_obj4_peta, "ikon_lembar": pratinjau_ikon_lembar,
+            "ikon_hud": pratinjau_ikon_hud}
 for _n in AVATAR:
     PREVIEWS[f"pose_ava_{_n}"] = (lambda n=_n: pratinjau_pose_avatar(n))
 ANIMASI = {"ava_gerak": pratinjau_ava_gerak, "tanda_gerak": pratinjau_tanda_gerak}
