@@ -9,7 +9,7 @@ Semua rujukan berstatus **perlu verifikasi**. Tanda "Terverifikasi" hanya diberi
 | Kode | Zona | Judul | Giliran | Status | Berkas |
 |---|---|---|---|---|---|
 | K-01 | Z1 | Menjaga adik | 2 | Disetujui 5 Nov 2026 | [K-01.md](K-01.md) |
-| K-02 | Z1 | Hari suci tetangga | 2 | Disetujui 5 Nov 2026; versi situasi menunggu pilihan (KT-10) | [K-02.md](K-02.md) |
+| K-02 | Z1 | Hari suci tetangga | 2 | Disetujui 5 Nov 2026; versi situasi A dipilih 7 Nov 2026 (KT-10) | [K-02.md](K-02.md) |
 | K-03 | Z2 | Bekal yang diejek | 3 | Disetujui 5 Nov 2026 | [K-03.md](K-03.md) |
 | K-04 | Z2 | Kelas di lantai dua | 3 | Disetujui 5 Nov 2026 | [K-04.md](K-04.md) |
 | K-05 | Z3 | Bonceng tanpa helm | 4 | Disetujui 5 Nov 2026 | [K-05.md](K-05.md) |
@@ -57,7 +57,7 @@ Diambil dari baris "Set tokoh dan properti" setiap naskah, sebagai masukan bagi 
 | Kode | Zona | Tokoh | Properti |
 |---|---|---|---|
 | K-01 | Z1 | Nara, Gita, seorang teman (siswa SMP umum) | pagar bambu rumah Nara |
-| K-02 | Z1 | Dimas, Pak Made | pengeras suara (versi B: sanggah keluarga) |
+| K-02 | Z1 | Dimas, Pak Made | pengeras suara |
 | K-03 | Z2 | Komang, siswa pengejek (siswa SMP umum), siswa yang memotret (siswa SMP umum) | kotak bekal |
 | K-04 | Z2 | Raka (tokoh baru menurut Permintaan A-1), teman sekelas (siswa SMP umum) | tangga ke lantai dua, kursi roda |
 | K-05 | Z3 | Dimas | sepeda motor, halte angkot |
