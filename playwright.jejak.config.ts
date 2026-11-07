@@ -1,6 +1,6 @@
 // Uji ujung ke ujung Jejak Setara (spesifikasi JS-01). Terpisah dari playwright.config.ts Sehari Setara:
 // hanya membaca e2e/jejak-setara/**/*.uji.ts, yang tidak dibaca konfigurasi Sehari Setara.
-// Server uji adalah hasil build yang dijalankan vite preview di runtime Workers lokal.
+// Server uji adalah hasil build yang dijalankan vite preview di runtime Workers lokal, dengan D1 lokal yang sudah dimigrasi.
 // Di lingkungan agen, jalur Chromium diberikan lewat variabel JEJAK_CHROMIUM.
 import { defineConfig } from "@playwright/test";
 
@@ -21,7 +21,8 @@ export default defineConfig({
     launchOptions: jalurChromium ? { executablePath: jalurChromium } : {},
   },
   webServer: {
-    command: `npx pnpm@11.25.0 build:jejak && npx vite preview --config vite.jejak.config.ts --port ${PORT} --strictPort --host 127.0.0.1`,
+    // Build, migrasi D1 ke folder keadaan baru, lalu vite preview (spesifikasi JS-03, bagian "Skrip").
+    command: `node scripts/jejak-setara/server-lokal.mjs --port ${PORT}`,
     url: `http://127.0.0.1:${PORT}/api/sehat`,
     reuseExistingServer: false,
     timeout: 180_000,

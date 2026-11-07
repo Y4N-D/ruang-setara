@@ -24,6 +24,9 @@ export default defineConfig(async () => {
         configPath: akar + "server/jejak-setara/wrangler.jsonc",
         viteEnvironment: { name: "worker" },
         inspectorPort: false,
+        // Keadaan lokal (D1, Durable Object) di .wrangler/state, sama dengan db:migrasi:lokal.
+        // Uji memakai folder sendiri lewat JEJAK_KEADAAN (spesifikasi JS-03, bagian "Konfigurasi").
+        persistState: { path: process.env.JEJAK_KEADAAN ?? akar + ".wrangler/state" },
       }),
     ],
     build: { outDir: akar + "dist-jejak", emptyOutDir: true },

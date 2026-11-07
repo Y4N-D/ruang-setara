@@ -11,8 +11,8 @@ const UKURAN = [
   { nama: "1920x1080", width: 1920, height: 1080, hp: false },
 ] as const;
 
+// Sejak JS-03 halaman pemain adalah alur gabung (gabung.uji.ts); uji penanda server di "/" tetap di bawah.
 const HALAMAN = [
-  { jalur: "/", berkas: "pemain", judulTab: "Jejak Setara", atas: null, judul: "Jejak Setara", isi: "Permainan sedang disiapkan." },
   {
     jalur: "/admin/",
     berkas: "konsol",

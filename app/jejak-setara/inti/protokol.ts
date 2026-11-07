@@ -8,7 +8,9 @@
 import { z } from "zod";
 
 // Versi protokol bersama klien dan server (Architecture JA-07); naikkan bila protokol berubah tidak kompatibel.
-export const PROTOKOL_VERSI = 1;
+// Nilainya di versi.ts agar halaman tanpa skema tidak ikut membawa zod (JS-03).
+import { PROTOKOL_VERSI } from "./versi";
+export { PROTOKOL_VERSI };
 
 /** Kode galat protokol (Architecture 6.7). Kalimat yang tampil ditetapkan di JS-03. */
 export const KODE_GALAT = [
@@ -21,12 +23,13 @@ export const KODE_GALAT = [
   "TERLALU_CEPAT",
   "DIKELUARKAN",
   "BUKAN_JANGKAUAN",
+  "NOMOR_ABSEN_DIPAKAI", // JS-03
 ] as const;
 export type KodeGalat = (typeof KODE_GALAT)[number];
 
 /** Batas angka dan larik di dalam pesan (Architecture 5.4 dan 6.6). */
 export const BATAS_PESAN = {
-  pemainMaks: 50, // sama dengan BATAS.pemainMaks
+  pemainMaks: 100, // sama dengan BATAS.pemainMaks (JS-03, Permintaan C-8)
   duniaMaks: 64, // isi `dunia` paling banyak 64 pemain
   kejadianMaks: 64,
   seqMaks: 1_000_000_000,
@@ -114,6 +117,7 @@ const pHalo = /* @__PURE__ */ pesan("halo", () => ({
   nomorAbsen: angkaBulat(BATAS_PESAN.nomorAbsenMin, BATAS_PESAN.nomorAbsenMaks).optional(),
 }));
 const pPilihIdentitas = /* @__PURE__ */ pesan("pilih_identitas", () => ({ nama: nama(), avatar: avatar() }));
+const pMintaNama = /* @__PURE__ */ pesan("minta_nama", () => ({})); // tombol "Acak ulang" (JS-03)
 const pGerak = /* @__PURE__ */ pesan("gerak", () => ({
   x: koordinatPx(),
   y: koordinatPx(),
@@ -132,6 +136,7 @@ const pPing = /* @__PURE__ */ pesan("ping", () => ({ tKlien: waktu() }));
 export const skemaPemain = /* @__PURE__ */ z.discriminatedUnion("t", [
   pHalo,
   pPilihIdentitas,
+  pMintaNama,
   pGerak,
   pPeriksa,
   pKunci1,
@@ -196,7 +201,7 @@ const sStatusRuang = /* @__PURE__ */ pesan("status_ruang", isiStatusRuang);
 const sDunia = /* @__PURE__ */ pesan("dunia", () => ({
   w: waktu(),
   p: z.array(z.tuple([id(), koordinatPx(), koordinatPx(), arah(), z.boolean()])).max(BATAS_PESAN.duniaMaks),
-  n: angkaBulat(0, BATAS_PESAN.duniaMaks),
+  n: angkaBulat(0, BATAS_PESAN.pemainMaks), // jumlah pemain berkeidentitas di ruang
 }));
 const sPemainBaru = /* @__PURE__ */ pesan("pemain_baru", () => ({ id: id(), nama: nama(), avatar: avatar(), warnaTas: warnaTas() }));
 const sPemainPergi = /* @__PURE__ */ pesan("pemain_pergi", () => ({ id: id() }));
@@ -296,6 +301,7 @@ const sSelesai = /* @__PURE__ */ pesan("selesai", () => ({
 }));
 const sGalat = /* @__PURE__ */ pesan("galat", isiGalat);
 const sPong = /* @__PURE__ */ pesan("pong", () => ({ tKlien: waktu(), waktuServer: waktu() }));
+const sSaranNama = /* @__PURE__ */ pesan("saran_nama", () => ({ saranNama: z.array(nama()).max(3) })); // JS-03
 
 export const skemaServerPemain = /* @__PURE__ */ z.discriminatedUnion("t", [
   sSelamatDatang,
@@ -315,6 +321,7 @@ export const skemaServerPemain = /* @__PURE__ */ z.discriminatedUnion("t", [
   sSelesai,
   sGalat,
   sPong,
+  sSaranNama,
 ]);
 
 // ---------------------------------------------------------------------------------------------

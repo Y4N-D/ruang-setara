@@ -4,5 +4,25 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-05-15",
   "assets": { "binding": "ASSETS", "run_worker_first": ["/api/*", "/ws/*"] },
-  "vars": { "LINGKUNGAN": "lokal" }
+  "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RuangJejak"] }],
+  "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-lokal", "database_id": "00000000-0000-4000-8000-000000000000", "migrations_dir": "migrations" }],
+  "ratelimits": [
+    { "name": "BATAS_PUBLIK", "namespace_id": "3001", "simple": { "limit": 300, "period": 60 } },
+    { "name": "BATAS_WS", "namespace_id": "3002", "simple": { "limit": 300, "period": 60 } }
+  ],
+  "triggers": { "crons": ["0 19 * * *"] },
+  "vars": { "LINGKUNGAN": "lokal" },
+  "env": {
+    "uji": {
+      "name": "jejak-setara-uji",
+      "vars": { "LINGKUNGAN": "uji" },
+      "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
+      "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "ISI_DATABASE_ID_UJI", "migrations_dir": "migrations" }],
+      "ratelimits": [
+        { "name": "BATAS_PUBLIK", "namespace_id": "3101", "simple": { "limit": 300, "period": 60 } },
+        { "name": "BATAS_WS", "namespace_id": "3102", "simple": { "limit": 300, "period": 60 } }
+      ]
+    }
+  }
 }

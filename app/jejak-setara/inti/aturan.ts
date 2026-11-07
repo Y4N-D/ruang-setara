@@ -257,9 +257,31 @@ export const BATAS = {
   pelanggaranGalat: 3,
   jendelaPelanggaranMs: 10_000,
   pelanggaranTutup: 10,
-  pemainMaks: 50,
+  pemainMaks: 100, // JS-03, Permintaan C-8 (bawaan tetap 40)
+  pemainMaksNomorAbsen: 50, // mode nomor absen hanya untuk ruang sampai 50 pemain (KT-02)
+  ruangBesarLebihDari: 50, // ruang lebih dari 50 pemain memakai frekuensi gerak lebih rendah
   durasiMenit: [10, 15, 20],
   terlambatMenit: 5,
   nomorAbsenMin: 1,
   nomorAbsenMaks: 50,
+  duniaTerdekat: 24, // isi `dunia` paling banyak 24 pemain terdekat
+  gerakPerDetik: 10,
+  gerakPerDetikRuangBesar: 6,
+  gerakDiamPerDetik: 1,
+  pingMs: 5000,
+  haloMs: 10_000,
 } as const;
+
+/** 31 huruf dan angka kode ruang, tanpa 0, O, 1, I, dan L (spesifikasi JS-03, P-10). */
+export const ABJAD_KODE = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+export const POLA_KODE_RUANG = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{5}$/;
+
+/** Kode yang diketik: huruf kecil menjadi besar; spasi dan tanda hubung dibuang (P-11). */
+export function normalkanKode(masukan: string): string {
+  return masukan.toUpperCase().replace(/[\s-]+/g, "");
+}
+
+/** Frekuensi laporan `gerak` saat bergerak: 10 per detik, atau 6 per detik di ruang lebih dari 50 pemain. */
+export function frekuensiGerak(batasPemain: number): number {
+  return batasPemain > BATAS.ruangBesarLebihDari ? BATAS.gerakPerDetikRuangBesar : BATAS.gerakPerDetik;
+}

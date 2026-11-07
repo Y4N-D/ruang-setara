@@ -1,0 +1,88 @@
+# Membuat satu ruang coba di lingkungan uji, lalu menulis kode dan tautannya di ringkasan alur kerja
+# (spesifikasi JS-03, P-7 dan P-8). Kunci sekali pakai KUNCI_COBA dibuat ulang setiap kali dijalankan
+# dan tidak pernah tampil di log. Dipensiunkan di JS-10.
+name: "Jejak: ruang coba"
+
+on:
+  workflow_dispatch:
+    inputs:
+      batas_pemain:
+        description: "Batas pemain (2–100)"
+        required: true
+        default: "40"
+      mode_nomor_absen:
+        description: "Mode nomor absen"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jejak-cloudflare-uji
+  cancel-in-progress: false
+
+jobs:
+  ruang-coba:
+    name: Buat ruang coba
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: "false"
+      BATAS_PEMAIN: ${{ inputs.batas_pemain }}
+      MODE_NOMOR_ABSEN: ${{ inputs.mode_nomor_absen }}
+      ALAMAT_TETAP: ${{ vars.JEJAK_ALAMAT_UJI }}
+    steps:
+      - name: Periksa rahasia
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Rahasia Cloudflare belum diisi (Architecture bagian 18, langkah 6)."
+            exit 1
+          fi
+          case "$BATAS_PEMAIN" in
+            ''|*[!0-9]*) echo "::error::Batas pemain harus angka 2–100."; exit 1 ;;
+          esac
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Simpan kunci sekali pakai
+        run: |
+          KUNCI=$(openssl rand -hex 32)
+          echo "::add-mask::$KUNCI"
+          echo "KUNCI=$KUNCI" >> "$GITHUB_ENV"
+          printf '%s' "$KUNCI" | npx -y wrangler@4.92.0 secret put KUNCI_COBA --name jejak-setara-uji
+
+      - name: Cari alamat lingkungan uji
+        run: |
+          if [ -n "$ALAMAT_TETAP" ]; then
+            ALAMAT="$ALAMAT_TETAP"
+          else
+            SUB=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
+            ALAMAT="https://jejak-setara-uji.$SUB.workers.dev"
+          fi
+          echo "ALAMAT=$ALAMAT" >> "$GITHUB_ENV"
+
+      - name: Buat ruang
+        run: |
+          ISI=$(jq -cn --argjson b "$BATAS_PEMAIN" --argjson a "$MODE_NOMOR_ABSEN" '{batasPemain: $b, modeNomorAbsen: $a}')
+          STATUS=0
+          for i in $(seq 1 10); do
+            STATUS=$(curl -sS -o jawaban.json -w '%{http_code}' -X POST "$ALAMAT/api/ruang-coba" -H "X-Jejak-Kunci-Coba: $KUNCI" -H "Content-Type: application/json" -d "$ISI" || true)
+            if [ "$STATUS" = "201" ]; then break; fi
+            if [ "$STATUS" = "400" ]; then echo "::error::$(jq -r '.galat.pesan' jawaban.json)"; exit 1; fi
+            sleep 3
+          done
+          if [ "$STATUS" != "201" ]; then echo "::error::Ruang coba gagal dibuat (status $STATUS)."; exit 1; fi
+          KODE=$(jq -r '.kode' jawaban.json)
+          TAUTAN=$(jq -r '.tautan' jawaban.json)
+          {
+            echo "Kode ruang: $KODE"
+            echo
+            echo "Tautan: $TAUTAN"
+            echo
+            echo "Ruang ini tertutup sendiri 6 jam sesudah dibuat, atau 3 jam sesudah tidak ada yang tersambung."
+          } >> "$GITHUB_STEP_SUMMARY"

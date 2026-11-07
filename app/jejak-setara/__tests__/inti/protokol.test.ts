@@ -65,6 +65,7 @@ const PEMAIN_KE_SERVER: Record<string, [Pesan, Pesan]> = {
   pakai_skill: [pesan("pakai_skill", { skill: "petunjuk", kejadianId: "K-13" }), pesan("pakai_skill", { skill: "terbang" })],
   ambil_kotak: [pesan("ambil_kotak", { kotakId: "kotak-z1-1" }), pesan("ambil_kotak", { kotakId: huruf(33) })],
   ping: [pesan("ping", { tKlien: 123456.7 }), pesan("ping", { tKlien: -1 })],
+  minta_nama: [pesan("minta_nama"), pesan("minta_nama", { nama: "Kancil Jingga" })],
 };
 
 const KELAS_KE_SERVER: Record<string, [Pesan, Pesan]> = {
@@ -225,6 +226,10 @@ const SERVER_KE_PEMAIN: Record<string, [Pesan, Pesan]> = {
   ],
   galat: [pesan("galat", GALAT), pesan("galat", { ...GALAT, kode: "RUANG_HILANG" })],
   pong: [pesan("pong", { tKlien: 5, waktuServer: 1762500000000 }), pesan("pong", { tKlien: 5 })],
+  saran_nama: [
+    pesan("saran_nama", { saranNama: ["Kancil Jingga", "Jalak Biru", "Anoa Hijau"] }),
+    pesan("saran_nama", { saranNama: ["a", "b", "c", "d"] }),
+  ],
 };
 
 const SERVER_KE_KELAS: Record<string, [Pesan, Pesan]> = {
@@ -276,7 +281,7 @@ describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
   it("setiap skema memuat tepat pesan Architecture 6.3 dan 6.4", () => {
     const tipe = (s: { optionsMap: Map<unknown, unknown> }) => [...s.optionsMap.keys()].map(String).sort();
     expect(tipe(skemaPemain)).toEqual(
-      ["halo", "pilih_identitas", "gerak", "periksa", "kunci_1", "kunci_2", "tutup_dialog", "pakai_skill", "ambil_kotak", "ping"].sort(),
+      ["halo", "pilih_identitas", "minta_nama", "gerak", "periksa", "kunci_1", "kunci_2", "tutup_dialog", "pakai_skill", "ambil_kotak", "ping"].sort(),
     );
     expect(tipe(skemaKelas)).toEqual(
       ["halo", "mulai", "jeda", "lanjut", "tambah_waktu", "akhiri", "kunci_ruang", "keluarkan", "kode_masuk_ulang", "pembahasan", "tutup_ruang"].sort(),
@@ -300,6 +305,7 @@ describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
         "selesai",
         "galat",
         "pong",
+        "saran_nama",
       ].sort(),
     );
     expect(tipe(skemaServerKelas)).toEqual(["lobi", "dunia_kelas", "papan", "kemajuan", "data_pembahasan", "status_ruang", "galat"].sort());
@@ -317,6 +323,7 @@ describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
       "TERLALU_CEPAT",
       "DIKELUARKAN",
       "BUKAN_JANGKAUAN",
+      "NOMOR_ABSEN_DIPAKAI",
     ]);
   });
 
@@ -395,17 +402,19 @@ describe("batas nilai (P-34 sampai P-38)", () => {
     expect(lolos(skemaKelas, pesan("tambah_waktu", { detik: 601 }))).toBe(false);
   });
 
-  it("dunia paling banyak 64 pemain; lobi, papan, dan dunia kelas paling banyak 50", () => {
+  it("dunia paling banyak 64 pemain dengan n sampai 100; lobi, papan, dan dunia kelas paling banyak 100 (JS-03, C-8)", () => {
     const isiDunia = (n: number) => Array.from({ length: n }, (_, i) => [`p-${i}`, 10, 10, "atas", false]);
     expect(lolos(skemaServerPemain, pesan("dunia", { w: 1, p: isiDunia(64), n: 64 }))).toBe(true);
     expect(lolos(skemaServerPemain, pesan("dunia", { w: 1, p: isiDunia(65), n: 64 }))).toBe(false);
+    expect(lolos(skemaServerPemain, pesan("dunia", { w: 1, p: isiDunia(24), n: 100 }))).toBe(true);
+    expect(lolos(skemaServerPemain, pesan("dunia", { w: 1, p: isiDunia(24), n: 101 }))).toBe(false);
     const banyak = <T>(n: number, x: T) => Array.from({ length: n }, () => x);
-    expect(lolos(skemaServerKelas, pesan("lobi", { pemain: banyak(50, PEMAIN_LOBI) }))).toBe(true);
-    expect(lolos(skemaServerKelas, pesan("lobi", { pemain: banyak(51, PEMAIN_LOBI) }))).toBe(false);
-    expect(lolos(skemaServerKelas, pesan("papan", { pemain: banyak(50, PEMAIN_PAPAN) }))).toBe(true);
-    expect(lolos(skemaServerKelas, pesan("papan", { pemain: banyak(51, PEMAIN_PAPAN) }))).toBe(false);
-    expect(lolos(skemaServerKelas, pesan("dunia_kelas", { w: 1, p: banyak(50, ["p-1", 1, 1, true]) }))).toBe(true);
-    expect(lolos(skemaServerKelas, pesan("dunia_kelas", { w: 1, p: banyak(51, ["p-1", 1, 1, true]) }))).toBe(false);
+    expect(lolos(skemaServerKelas, pesan("lobi", { pemain: banyak(100, PEMAIN_LOBI) }))).toBe(true);
+    expect(lolos(skemaServerKelas, pesan("lobi", { pemain: banyak(101, PEMAIN_LOBI) }))).toBe(false);
+    expect(lolos(skemaServerKelas, pesan("papan", { pemain: banyak(100, PEMAIN_PAPAN) }))).toBe(true);
+    expect(lolos(skemaServerKelas, pesan("papan", { pemain: banyak(101, PEMAIN_PAPAN) }))).toBe(false);
+    expect(lolos(skemaServerKelas, pesan("dunia_kelas", { w: 1, p: banyak(100, ["p-1", 1, 1, true]) }))).toBe(true);
+    expect(lolos(skemaServerKelas, pesan("dunia_kelas", { w: 1, p: banyak(101, ["p-1", 1, 1, true]) }))).toBe(false);
   });
 
   it("panjang teks isi kejadian mengikuti Architecture 5.4", () => {
@@ -431,14 +440,14 @@ describe("batas nilai (P-34 sampai P-38)", () => {
     expect(lolos(skemaServerPemain, kartu({ rujukan: ["a", "b", "c", "d", "e"] }))).toBe(false);
   });
 
-  it("pengaturan ruang: skill tidak ganda, batas pemain 2–50", () => {
+  it("pengaturan ruang: skill tidak ganda, batas pemain 2–100 (JS-03, C-8)", () => {
     const [datang] = SERVER_KE_PEMAIN.selamat_datang;
     const atur = (ubah: Pesan) => dengan(datang, { pengaturan: { ...PENGATURAN, ...ubah } });
     expect(lolos(skemaServerPemain, atur({ skillAktif: [] }))).toBe(true);
     expect(lolos(skemaServerPemain, atur({ skillAktif: ["lari", "lari"] }))).toBe(false);
-    expect(lolos(skemaServerPemain, atur({ batasPemain: 50 }))).toBe(true);
+    expect(lolos(skemaServerPemain, atur({ batasPemain: 100 }))).toBe(true);
     expect(lolos(skemaServerPemain, atur({ batasPemain: 1 }))).toBe(false);
-    expect(lolos(skemaServerPemain, atur({ batasPemain: 51 }))).toBe(false);
+    expect(lolos(skemaServerPemain, atur({ batasPemain: 101 }))).toBe(false);
   });
 
   it("pesan masuk yang sah jauh di bawah batas 2.048 byte", () => {

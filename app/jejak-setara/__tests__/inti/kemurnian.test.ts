@@ -7,6 +7,9 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const FOLDER_INTI = fileURLToPath(new URL("../../inti/", import.meta.url));
+// Berkas server yang juga wajib murni (spesifikasi JS-03, AC-22).
+const FOLDER_RUANG = fileURLToPath(new URL("../../../../server/jejak-setara/src/ruang/", import.meta.url));
+const BERKAS_RUANG_MURNI = ["inti-ruang.ts", "sambungan.ts", "nama-samaran.ts", "peta-uji.ts"].map((n) => join(FOLDER_RUANG, n));
 
 function berkasTs(folder: string): string[] {
   return readdirSync(folder, { withFileTypes: true }).flatMap((isi) => {
@@ -180,6 +183,14 @@ describe("inti/ murni", () => {
 
   for (const jalur of semua) {
     it(`${relative(FOLDER_INTI, jalur).split("\\").join("/")} tanpa impor dan panggilan terlarang`, () => {
+      expect(periksaKemurnian(readFileSync(jalur, "utf8"))).toEqual([]);
+    });
+  }
+});
+
+describe("server/jejak-setara/src/ruang/ murni (JS-03)", () => {
+  for (const jalur of BERKAS_RUANG_MURNI) {
+    it(`${relative(FOLDER_RUANG, jalur)} tanpa impor dan panggilan terlarang`, () => {
       expect(periksaKemurnian(readFileSync(jalur, "utf8"))).toEqual([]);
     });
   }

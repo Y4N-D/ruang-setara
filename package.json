@@ -23,10 +23,10 @@
     "build:jejak": "vite build --config vite.jejak.config.ts",
     "test:jejak": "vitest run --config vitest.jejak.config.ts",
     "content:check:jejak": "node scripts/jejak-setara/bila-ada.mjs app/jejak-setara/__tests__/konten \"dibuat di JS-05 dan JS-06\" -- vitest run --config vitest.jejak.config.ts app/jejak-setara/__tests__/konten/",
-    "test:jejak:server": "node scripts/jejak-setara/bila-ada.mjs - \"dibuat di JS-03\"",
+    "test:jejak:server": "vitest run --config vitest.jejak-server.config.ts",
     "test:e2e:jejak": "playwright test --config playwright.jejak.config.ts",
-    "sim:beban": "node scripts/jejak-setara/bila-ada.mjs - \"dibuat di JS-03\"",
-    "db:migrasi:lokal": "node scripts/jejak-setara/bila-ada.mjs - \"dibuat di JS-03\"",
+    "sim:beban": "node scripts/jejak-setara/simulasi-beban.mjs",
+    "db:migrasi:lokal": "wrangler d1 migrations apply jejak-setara-lokal --local --persist-to .wrangler/state --config server/jejak-setara/wrangler.jsonc",
     "peta:build": "node scripts/jejak-setara/bila-ada.mjs scripts/jejak-setara/peta/build_peta.py \"dibuat di JS-06\" -- python scripts/jejak-setara/peta/build_peta.py",
     "assets:build:jejak": "node scripts/jejak-setara/bila-ada.mjs scripts/game/art/build_jejak.py \"dibuat Sesi C bersama aset tampak atas\" -- python scripts/game/art/build_jejak.py"
   },

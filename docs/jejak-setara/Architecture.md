@@ -32,7 +32,7 @@ Pemeriksaan kedua dilakukan di Plan JS-03 (7 November 2026) terhadap halaman har
 | JA-10 | **Bank awal disemai dari repositori ke D1.** Sesudah itu konsol adalah tempat menyunting. Setiap terbitan menjadi versi tetap, dan ruang memakai salinan versi saat ruang dibuat | Guru tidak perlu menunggu deploy untuk memperbaiki soal; statistik tetap konsisten |
 | JA-11 | **Inti ruang ditulis sebagai modul murni** (tanpa API Workers) dan Durable Object hanya pembungkus tipis | Logika ruang bisa diuji cepat dengan Vitest biasa, termasuk dengan jam tiruan |
 | JA-12 | **Dua lingkungan:** `uji` (otomatis setiap ada perubahan di `main`) dan `produksi` (dijalankan pemilik proyek lewat tombol alur kerja) | Kelas yang sedang berjalan tidak terganggu perubahan yang belum dicoba |
-| JA-13 | Durable Object diberi **petunjuk lokasi `apac-se`** (Asia Tenggara) | Dekat dengan Indonesia; petunjuk bersifat *best-effort* |
+| JA-13 | Durable Object diberi **petunjuk lokasi `apac`** (Asia-Pasifik; `apac-se` ternyata bukan petunjuk yang sah, dikoreksi di Build JS-03) | Dekat dengan Indonesia; petunjuk bersifat *best-effort* |
 | JA-14 | **Paket bertahap:** paket gratis (Workers Free) untuk JS-03 sampai JS-14, lalu **Workers Paid** (US$5 per bulan) diaktifkan sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu | Pengembangan dan lingkungan uji muat dalam kuota harian gratis, sedangkan kelas sungguhan dan uji beban penuh butuh kuota berbayar (bagian 13.2 dan 13.4). Keputusan pemilik proyek, 7 Nov 2026 (Plan JS-03) |
 | JA-15 | Pengembangan, build, dan uji ujung ke ujung memakai **plugin Cloudflare untuk Vite** (`@cloudflare/vite-plugin`): `dev:jejak` menjalankan halaman dan Worker di satu alamat; `build:jejak` menghasilkan `dist-jejak/client/` dan `dist-jejak/worker/`; uji ujung ke ujung memakai `vite preview`. Lingkungan Cloudflare dipilih saat build lewat `CLOUDFLARE_ENV` | Satu perintah dan satu alamat seperti di server sungguhan; cara yang dianjurkan dokumentasi Cloudflare untuk proyek Vite; paket sudah terpasang. Diputuskan di Gerbang 1 JS-01 (5 Nov 2026) |
 
@@ -172,7 +172,7 @@ JS-03 (isi lengkap di spesifikasi JS-03, bagian "Konfigurasi"): Durable Object `
 - `compatibility_date` mengikuti runtime `workerd` yang terpasang (kini 1.20260515, batas 22 Mei 2026). Tanggal yang lebih baru membuat `wrangler dev` dan uji lokal berhenti dengan galat, jadi tanggal dinaikkan bersama `wrangler` dengan izin dependensi.
 - Plugin Vite mengabaikan `assets.directory`; folder aset adalah hasil build halaman (`dist-jejak/client/`).
 - Permintaan `/api/*` dan `/ws/*` selalu ditangani Worker. Selain itu, aset statis disajikan langsung (gratis dan tidak dihitung kuota).
-- Stub ruang diambil dengan `env.RUANG.get(id, { locationHint: "apac-se" })` (JA-13).
+- Stub ruang diambil dengan `env.RUANG.get(id, { locationHint: "apac" })` (JA-13; dikoreksi di Build JS-03).
 
 ### 4.3 Skrip `package.json` (tambahan)
 
@@ -793,6 +793,7 @@ Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* dan *Limits* 
 - Dengan kuota 100.000 permintaan Durable Objects per hari, sekitar tujuh sesi 40 pemain atau tiga sesi 100 pemain muat dalam sehari. Cukup untuk pengembangan dan percobaan pemilik proyek, tetapi tidak cukup untuk beberapa kelas sehari.
 - Dokumentasi menyebut rasio 20 : 1 untuk penagihan pesan masuk. Bila batas harian gratis ternyata menghitung pesan tanpa rasio itu, satu sesi 40 pemain sudah melewatinya. Karena itu percobaan dengan banyak perangkat di lingkungan uji ditunda sampai paket berbayar aktif.
 - `sim:beban` dijalankan terhadap Worker lokal (`vite preview`), yang tidak memakai kuota Cloudflare. Uji beban penuh di lingkungan uji (bagian 14) menunggu paket berbayar: satu kali uji 10 ruang × 50 bot selama 15 menit memakai sekitar 170.000 permintaan, melebihi kuota harian.
+- Ukuran Build JS-03 (`sim:beban` lokal, 50 detik, jeda acak 50 ms): ruang 50 pemain sekitar 7,0 pesan naik per pemain per detik, 1,7 MB turun per 15 menit, dan sekitar 15.900 permintaan Durable Object per sesi; ruang 100 pemain dengan `gerak` 6 per detik sekitar 4,1 pesan naik, 1,9 MB, dan sekitar 18.400 permintaan per sesi (sekitar lima sesi 100 pemain per hari di paket gratis).
 - Satu Durable Object punya batas lunak sekitar 1.000 permintaan per detik. Ruang 100 pemain yang banyak bergerak mendekati batas itu (sekitar 740 pesan per detik di percobaan Plan JS-03).
 - Saat pindah ke paket berbayar, kode dan data tidak berubah; yang berubah hanya kuota (bagian 18, langkah 2).
 

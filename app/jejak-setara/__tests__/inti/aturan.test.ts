@@ -2,7 +2,11 @@
 import { describe, expect, it } from "vitest";
 import { acakBerbenih, benih, bulat } from "../../inti/acak";
 import {
+  ABJAD_KODE,
   BATAS,
+  frekuensiGerak,
+  normalkanKode,
+  POLA_KODE_RUANG,
   bandingkanPeringkat,
   bolehPakaiSkill,
   dapatMemeriksa,
@@ -380,12 +384,32 @@ describe("batas (P-39)", () => {
       pelanggaranGalat: 3,
       jendelaPelanggaranMs: 10000,
       pelanggaranTutup: 10,
-      pemainMaks: 50,
+      pemainMaks: 100,
+      pemainMaksNomorAbsen: 50,
+      ruangBesarLebihDari: 50,
       durasiMenit: [10, 15, 20],
       terlambatMenit: 5,
       nomorAbsenMin: 1,
       nomorAbsenMaks: 50,
+      duniaTerdekat: 24,
+      gerakPerDetik: 10,
+      gerakPerDetikRuangBesar: 6,
+      gerakDiamPerDetik: 1,
+      pingMs: 5000,
+      haloMs: 10000,
     });
+  });
+
+  it("frekuensi gerak 10 per detik, atau 6 per detik di ruang lebih dari 50 pemain (JS-03, P-44)", () => {
+    expect([2, 40, 50, 51, 100].map(frekuensiGerak)).toEqual([10, 10, 10, 6, 6]);
+  });
+
+  it("kode ruang: 31 karakter tanpa 0, O, 1, I, dan L; masukan dinormalkan (JS-03, P-10, P-11)", () => {
+    expect(ABJAD_KODE).toHaveLength(31);
+    for (const c of "0O1IL") expect(ABJAD_KODE).not.toContain(c);
+    expect(normalkanKode(" k7-mpa ")).toBe("K7MPA");
+    expect(POLA_KODE_RUANG.test("K7MPA")).toBe(true);
+    for (const salah of ["K7MP", "K7MPAA", "K7MP0", "K7MPO", "K7MP1", "K7MPI", "K7MPL", "k7mpa"]) expect(POLA_KODE_RUANG.test(salah), salah).toBe(false);
   });
 });
 

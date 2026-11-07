@@ -132,3 +132,262 @@ body {
     font-size: 13px;
   }
 }
+
+/* ---------------------------------------------------------------------------------------------
+   Layar pemain JS-03: gabung, lobi, layar sementara ronde, dan lapisan (spesifikasi JS-03, bagian I). */
+.js-layar {
+  --js-px: 2px;
+  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.js-panel {
+  box-sizing: border-box;
+  width: min(100%, 560px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.js-panel h1 {
+  margin: 0;
+}
+
+.js-formulir,
+.js-kelompok {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.js-label {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--js-text-2);
+}
+
+.js-petunjuk {
+  margin: 0;
+  font-size: 17px;
+  color: var(--js-text-2);
+}
+
+.js-isian {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 4px solid var(--js-ink);
+  border-radius: 0;
+  background: var(--js-white);
+  color: var(--js-ink);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 22px;
+}
+
+.js-isian-kode {
+  font-family: "Press Start 2P", monospace;
+  font-size: 20px;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.js-tombol,
+.js-pilihan {
+  box-sizing: border-box;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 8px 16px;
+  border: 4px solid var(--js-ink);
+  border-radius: 0;
+  background: var(--js-cream);
+  color: var(--js-ink);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 20px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.js-tombol-utama {
+  background: var(--js-sun);
+  font-family: "Press Start 2P", monospace;
+  font-size: 14px;
+  text-align: center;
+}
+
+.js-tombol[aria-disabled="true"] {
+  background: var(--js-mist);
+  color: var(--js-dusk);
+  cursor: not-allowed;
+}
+
+.js-isian:focus-visible,
+.js-tombol:focus-visible,
+.js-pilihan:focus-visible {
+  outline: 4px solid var(--js-sun);
+  outline-offset: 2px;
+}
+
+.js-tombol:focus-visible::before,
+.js-pilihan[aria-checked="true"]::before {
+  content: "▶ ";
+}
+
+.js-pilihan[aria-checked="true"] {
+  background: var(--js-sun);
+  box-shadow: inset 0 0 0 4px var(--js-mango);
+}
+
+.js-daftar-nama {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.js-kisi-avatar {
+  display: grid;
+  grid-template-columns: repeat(4, 64px);
+  gap: 8px;
+}
+
+.js-kisi-avatar .js-pilihan {
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.js-kisi-avatar .js-pilihan[aria-checked="true"]::before {
+  content: none;
+}
+
+.js-kisi-avatar img,
+.js-diri img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+
+.js-identitas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (orientation: landscape) and (min-width: 600px) {
+  .js-identitas {
+    flex-direction: row;
+  }
+
+  .js-identitas > * {
+    flex: 1;
+  }
+}
+
+.js-galat {
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--js-mango);
+  color: var(--js-ink);
+  font-size: 18px;
+}
+
+.js-kode-besar,
+.js-angka-besar {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 28px;
+  letter-spacing: 0.3em;
+  color: var(--js-ink);
+  text-align: center;
+}
+
+.js-angka-besar {
+  font-size: 40px;
+  letter-spacing: 0.1em;
+}
+
+.js-diri {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 22px;
+}
+
+.js-lapisan {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(31 42 68 / 70%);
+}
+
+.js-lapisan-isi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--js-cream);
+  font-size: 20px;
+  text-align: center;
+}
+
+.js-lapisan-isi p {
+  margin: 0;
+}
+
+.js-lapisan-judul {
+  font-family: "Press Start 2P", monospace;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ikon_menyambung.png: dua bingkai 16 × 16 berdampingan, diperbesar ×3. */
+.js-ikon-menyambung {
+  width: 48px;
+  height: 48px;
+  background-image: url("../assets/ikon/ikon_menyambung.png");
+  background-size: 96px 48px;
+  image-rendering: pixelated;
+  animation: js-menyambung 1s steps(2) infinite;
+}
+
+@keyframes js-menyambung {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -96px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-ikon-menyambung {
+    animation: none;
+  }
+}
+
+.js-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

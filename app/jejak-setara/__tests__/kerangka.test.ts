@@ -58,13 +58,42 @@ describe("Worker kerangka", () => {
     ["/api/ruang", {}],
     ["/api/", {}],
     ["/api/sehat/lagi", {}],
-    ["/ws/ruang/K7MPA", {}],
-    ["/ws/ruang/K7MPA", { headers: { Upgrade: "websocket" } }],
+    ["/ws/lain", {}],
   ] as const)("%s %j menjawab 404 BELUM_TERSEDIA (AC-4)", async (jalur, init) => {
     const jawaban = await minta(jalur, init as RequestInit);
     expect(jawaban.status).toBe(404);
     periksaTajukJson(jawaban);
     expect(await jawaban.json()).toEqual({ galat: { kode: "BELUM_TERSEDIA", pesan: "Fitur ini belum tersedia." } });
+  });
+
+  it("JS-03: /ws/ruang tanpa Upgrade 426, tanpa Origin 403; kode tidak sah 404 tanpa menyentuh D1", async () => {
+    const tanpaUpgrade = await minta("/ws/ruang/K7MPA");
+    expect(tanpaUpgrade.status).toBe(426);
+    periksaTajukJson(tanpaUpgrade);
+    expect(await tanpaUpgrade.json()).toEqual({ galat: { kode: "PERLU_WEBSOCKET", pesan: "Alamat ini hanya untuk sambungan permainan." } });
+    const tanpaAsal = await minta("/ws/ruang/K7MPA", { headers: { Upgrade: "websocket" } });
+    expect(tanpaAsal.status).toBe(403);
+    expect(await tanpaAsal.json()).toEqual({ galat: { kode: "ASAL_DITOLAK", pesan: "Permintaan ditolak." } });
+    for (const jalur of ["/api/publik/ruang/K7MP0", "/api/publik/ruang/%E0%A4%A", "/api/publik/ruang/K7MPAA"]) {
+      const jawaban = await minta(jalur);
+      expect(jawaban.status, jalur).toBe(404);
+      expect(await jawaban.json()).toEqual({ galat: { kode: "RUANG_TIDAK_ADA", pesan: "Kode ruang tidak ditemukan. Periksa lagi kodenya." } });
+    }
+  });
+
+  it("JS-03: ruang coba di uji butuh kunci (403) dan tidak ada di produksi (404), tanpa menyentuh D1", async () => {
+    const coba = (lingkungan: string, tajuk: Record<string, string> = {}) =>
+      worker.fetch(new Request("http://127.0.0.1/api/ruang-coba", { method: "POST", headers: tajuk, body: "{}" }), { ...env, LINGKUNGAN: lingkungan, KUNCI_COBA: "kunci-benar" } as typeof env);
+    for (const tajuk of [{}, { "X-Jejak-Kunci-Coba": "kunci-salah" }]) {
+      const jawaban = await coba("uji", tajuk);
+      expect(jawaban.status).toBe(403);
+      expect(await jawaban.json()).toEqual({ galat: { kode: "KUNCI_SALAH", pesan: "Kunci ruang coba tidak cocok." } });
+    }
+    const produksi = await coba("produksi", { "X-Jejak-Kunci-Coba": "kunci-benar" });
+    expect(produksi.status).toBe(404);
+    expect(await produksi.json()).toEqual({ galat: { kode: "BELUM_TERSEDIA", pesan: "Fitur ini belum tersedia." } });
+    const kaitDiUji = await worker.fetch(new Request("http://127.0.0.1/api/ruang-coba/K7MPA/kelas", { method: "POST", body: "{}" }), { ...env, LINGKUNGAN: "uji" } as typeof env);
+    expect(kaitDiUji.status).toBe(404);
   });
 
   it("jalur lain diteruskan ke ASSETS dan jawabannya dikembalikan apa adanya", async () => {
@@ -86,12 +115,11 @@ describe("Worker kerangka", () => {
 });
 
 describe("Teks dan halaman", () => {
-  it("TEKS sama persis dengan tabel Teks yang tampil (final)", () => {
+  it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01 dan JS-03", () => {
     expect(TEKS).toEqual({
       judulTabPemain: "Jejak Setara",
       judulTabKonsol: "Konsol admin · Jejak Setara",
       judul: "Jejak Setara",
-      pemainIsi: "Permainan sedang disiapkan.",
       konsolJudul: "Konsol admin",
       konsolIsi: "Konsol sedang disiapkan.",
       serverMemeriksa: "Memeriksa server…",
@@ -99,17 +127,97 @@ describe("Teks dan halaman", () => {
       serverBelum: "Server belum tersambung",
       tandaSiap: "✓",
       tandaBelum: "!",
+      kode: {
+        label: "Kode ruang",
+        petunjuk: "Ketik 5 huruf atau angka dari layar guru.",
+        tombol: "Masuk",
+        memeriksa: "Memeriksa kode…",
+        galatFormat: "Kode berisi 5 huruf atau angka.",
+        galatJaringan: "Tidak bisa menghubungi server. Periksa wifi atau data selulermu.",
+        galatTerlaluSering: "Terlalu banyak percobaan. Tunggu sebentar.",
+      },
+      absen: {
+        judul: "Nomor absen",
+        label: "Nomor absenmu",
+        petunjuk: "Isi nomor absen dari daftar kelas (1–50).",
+        tombol: "Lanjut",
+        galatRentang: "Nomor absen harus 1 sampai 50.",
+      },
+      menghubungkan: "Menghubungkan ke ruang…",
+      identitas: {
+        judul: "Pilih nama dan avatar",
+        kelompokNama: "Nama samaran",
+        acak: "Acak ulang",
+        kelompokAvatar: "Avatar",
+        avatar: "Avatar {n}",
+        gabung: "Gabung",
+      },
+      lobi: {
+        judul: "Lobi",
+        labelKode: "Kode ruang",
+        jumlah: "{n} pemain di ruang",
+        menunggu: "Menunggu guru memulai…",
+        saran: "Jangan tutup tab ini.",
+      },
+      ronde: {
+        bersiap: "Bersiap",
+        berjalan: "Ronde berjalan",
+        sisaWaktu: "Sisa waktu",
+        dijeda: "Dijeda oleh guru",
+        selesai: "Ronde selesai",
+        selesaiIsi: "Tunggu arahan guru.",
+        ditutup: "Ruang ditutup",
+        ditutupIsi: "Terima kasih sudah bermain.",
+      },
+      menyambung: {
+        judul: "Menyambung ulang…",
+        lama: "Periksa wifi atau data selulermu.",
+      },
+      tombol: { kembali: "Kembali", muatUlang: "Muat ulang" },
+      pengumuman: {
+        lobi: "Kamu sudah masuk lobi.",
+        mulai: "Ronde dimulai.",
+        jeda: "Ronde dijeda.",
+        lanjut: "Ronde dilanjutkan.",
+        selesai: "Ronde selesai.",
+        menyambung: "Menyambung ulang.",
+        tersambung: "Tersambung kembali.",
+      },
+      galat: {
+        RUANG_TIDAK_ADA: "Kode ruang tidak ditemukan. Periksa lagi kodenya.",
+        RUANG_PENUH: "Ruang sudah penuh. Beri tahu gurumu.",
+        RUANG_TERKUNCI: "Ruang sudah dikunci guru.",
+        TERLAMBAT: "Ronde sudah berjalan terlalu lama untuk bergabung.",
+        NAMA_DIPAKAI: "Nama itu baru saja dipakai pemain lain. Pilih nama lain.",
+        VERSI_BERBEDA: "Ada pembaruan. Muat ulang halaman.",
+        TERLALU_CEPAT: "Pesan terlalu cepat.",
+        DIKELUARKAN: "Kamu dikeluarkan dari ruang oleh guru.",
+        BUKAN_JANGKAUAN: "Terlalu jauh dari kejadian.",
+        NOMOR_ABSEN_DIPAKAI: "Nomor absen ini sudah dipakai di ruang ini. Periksa lagi nomormu.",
+      },
+      api: {
+        KUNCI_SALAH: "Kunci ruang coba tidak cocok.",
+        PENGATURAN_SALAH: "Pengaturan ruang tidak sah.",
+        PENGATURAN_ABSEN: "Mode nomor absen hanya untuk ruang sampai 50 pemain.",
+        KODE_HABIS: "Gagal membuat kode ruang. Coba lagi.",
+        RUANG_GAGAL: "Ruang gagal dibuat. Coba lagi.",
+        PERLU_WEBSOCKET: "Alamat ini hanya untuk sambungan permainan.",
+        ASAL_DITOLAK: "Permintaan ditolak.",
+        PESAN_SALAH: "Pesan tidak sah.",
+        TERLALU_SERING: "Terlalu banyak percobaan. Tunggu sebentar.",
+        RUANG_TIDAK_ADA: "Kode ruang tidak ditemukan. Periksa lagi kodenya.",
+      },
     });
   });
 
   it.each([
-    ["web/jejak-setara/index.html", TEKS.judulTabPemain],
-    ["web/jejak-setara/admin/index.html", TEKS.judulTabKonsol],
-  ])("%s: lang id, judul tab, ikon kosong, dan skrip modul", (jalur, judul) => {
+    ["web/jejak-setara/index.html", TEKS.judulTabPemain, "../../app/jejak-setara/assets/ikon/ikon_jejak.png"],
+    ["web/jejak-setara/admin/index.html", TEKS.judulTabKonsol, "../../../app/jejak-setara/assets/ikon/ikon_jejak.png"],
+  ])("%s: lang id, judul tab, ikon ikon_jejak.png (I-17), dan skrip modul", (jalur, judul, ikon) => {
     const html = baca(jalur);
     expect(html).toContain('<html lang="id">');
     expect(html).toContain(`<title>${judul}</title>`);
-    expect(html).toContain('<link rel="icon" href="data:," />');
+    expect(html).toContain(`<link rel="icon" type="image/png" href="${ikon}" />`);
     expect(html).toContain('<script type="module" src="./main.tsx"></script>');
   });
 });
@@ -158,14 +266,34 @@ describe("Token dan tajuk", () => {
     );
   });
 
-  it("wrangler.jsonc persis spesifikasi", () => {
+  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi)", () => {
     expect(JSON.parse(baca("server/jejak-setara/wrangler.jsonc"))).toEqual({
-      $schema: "../../node_modules/wrangler/config-schema.json",
-      name: "jejak-setara-lokal",
-      main: "src/index.ts",
-      compatibility_date: "2026-05-15",
-      assets: { binding: "ASSETS", run_worker_first: ["/api/*", "/ws/*"] },
-      vars: { LINGKUNGAN: "lokal" },
+      "$schema": "../../node_modules/wrangler/config-schema.json",
+      "name": "jejak-setara-lokal",
+      "main": "src/index.ts",
+      "compatibility_date": "2026-05-15",
+      "assets": { "binding": "ASSETS", "run_worker_first": ["/api/*", "/ws/*"] },
+      "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
+      "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RuangJejak"] }],
+      "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-lokal", "database_id": "00000000-0000-4000-8000-000000000000", "migrations_dir": "migrations" }],
+      "ratelimits": [
+        { "name": "BATAS_PUBLIK", "namespace_id": "3001", "simple": { "limit": 300, "period": 60 } },
+        { "name": "BATAS_WS", "namespace_id": "3002", "simple": { "limit": 300, "period": 60 } }
+      ],
+      "triggers": { "crons": ["0 19 * * *"] },
+      "vars": { "LINGKUNGAN": "lokal" },
+      "env": {
+        "uji": {
+          "name": "jejak-setara-uji",
+          "vars": { "LINGKUNGAN": "uji" },
+          "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
+          "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "ISI_DATABASE_ID_UJI", "migrations_dir": "migrations" }],
+          "ratelimits": [
+            { "name": "BATAS_PUBLIK", "namespace_id": "3101", "simple": { "limit": 300, "period": 60 } },
+            { "name": "BATAS_WS", "namespace_id": "3102", "simple": { "limit": 300, "period": 60 } }
+          ]
+        }
+      }
     });
   });
 });
@@ -179,10 +307,10 @@ describe("Skrip", () => {
       "build:jejak": "vite build --config vite.jejak.config.ts",
       "test:jejak": "vitest run --config vitest.jejak.config.ts",
       "content:check:jejak": `${B} app/jejak-setara/__tests__/konten "dibuat di JS-05 dan JS-06" -- vitest run --config vitest.jejak.config.ts app/jejak-setara/__tests__/konten/`,
-      "test:jejak:server": `${B} - "dibuat di JS-03"`,
+      "test:jejak:server": "vitest run --config vitest.jejak-server.config.ts",
       "test:e2e:jejak": "playwright test --config playwright.jejak.config.ts",
-      "sim:beban": `${B} - "dibuat di JS-03"`,
-      "db:migrasi:lokal": `${B} - "dibuat di JS-03"`,
+      "sim:beban": "node scripts/jejak-setara/simulasi-beban.mjs",
+      "db:migrasi:lokal": "wrangler d1 migrations apply jejak-setara-lokal --local --persist-to .wrangler/state --config server/jejak-setara/wrangler.jsonc",
       "peta:build": `${B} scripts/jejak-setara/peta/build_peta.py "dibuat di JS-06" -- python scripts/jejak-setara/peta/build_peta.py`,
       "assets:build:jejak": `${B} scripts/game/art/build_jejak.py "dibuat Sesi C bersama aset tampak atas" -- python scripts/game/art/build_jejak.py`,
     });
