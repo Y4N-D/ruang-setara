@@ -10,6 +10,9 @@
 // Semua rujukan selalu disemai berstatus 'belum'; skrip ini tidak pernah menulis 'terverifikasi'.
 // Bank awal disemai sekali per basis data: setiap pernyataan hanya berlaku selama penanda 'semai_bank_awal'
 // belum ada di tabel pengaturan, jadi menjalankan ulang tidak menimpa suntingan konsol.
+// Tabelnya dari migrasi 0001_awal.sql (JS-03): id kejadian, versi, dan paket berupa UUID teks, yang di sini
+// dihitung tetap dari kode atau nama (Revisi 1 spesifikasi JS-05, P-40).
+import { createHash } from "node:crypto";
 import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -22,6 +25,8 @@ export const JALUR_WRANGLER = "server/jejak-setara/wrangler.jsonc";
 export const BINDING_D1 = "DB";
 export const PENANDA = "semai_bank_awal";
 export const CATATAN_VERSI = "Bank awal dari repositori (JS-05)";
+/** UUID dasar (ruang nama RFC 9562) untuk id bank awal. Jangan diubah: id yang sudah disemai bergantung padanya. */
+export const DASAR_ID = "93b81e4c-d848-4d2b-9c6a-230da39a8daf";
 
 const PESAN_PAKAI = [
   "Pemakaian:",
@@ -72,10 +77,27 @@ export function bacaBank(isiBerkas) {
   return bank;
 }
 
+/** UUID versi 5 (RFC 9562 bagian 5.5): SHA-1 dari 16 byte UUID dasar lalu nama UTF-8, huruf kecil. */
+export function uuid5(dasar, nama) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dasar)) throw new RangeError("uuid5: UUID dasar tidak sah");
+  const hash = createHash("sha1").update(Buffer.from(dasar.replaceAll("-", ""), "hex")).update(nama, "utf8").digest();
+  hash[6] = (hash[6] & 0x0f) | 0x50;
+  hash[8] = (hash[8] & 0x3f) | 0x80;
+  const h = hash.subarray(0, 16).toString("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+/** Id tetap baris bank awal (P-40). */
+export const idKejadian = (kode) => uuid5(DASAR_ID, `kejadian/${kode}`);
+export const idVersiPertama = (kode) => uuid5(DASAR_ID, `kejadian_versi/${kode}/1`);
+export const idPaket = (nama) => uuid5(DASAR_ID, `paket/${nama}`);
+
 const BELUM_DISEMAI = `NOT EXISTS (SELECT 1 FROM pengaturan WHERE kunci = ${kutip(PENANDA)})`;
 const WAKTU = "CAST(strftime('%s', 'now') AS INTEGER) * 1000";
 
-/** Pernyataan SQL semai, satu per baris, tanpa BEGIN dan COMMIT. Setiap INSERT … SELECT punya WHERE. */
+/**
+ * Pernyataan SQL semai, satu per baris, tanpa BEGIN dan COMMIT. Setiap INSERT … SELECT punya WHERE.
+ * Tabrakan pada kunci utama atau kunci unik mana pun diabaikan (ON CONFLICT DO NOTHING).
+ */
 export function sqlSemai(bank) {
   const s = [];
   for (const r of bank.rujukan) {
@@ -85,17 +107,19 @@ export function sqlSemai(bank) {
   }
   for (const k of bank.kejadian) {
     s.push(
-      `INSERT INTO kejadian (kode, status, versi_terbit_id, pemilik_id, diubah_pada) SELECT ${kutip(k.kode)}, 'tinjau', NULL, NULL, ${WAKTU} WHERE ${BELUM_DISEMAI} ON CONFLICT (kode) DO NOTHING;`,
+      `INSERT INTO kejadian (id, kode, status, versi_terbit_id, pemilik_id, diubah_pada) SELECT ${kutip(idKejadian(k.kode))}, ${kutip(k.kode)}, 'tinjau', NULL, NULL, ${WAKTU} WHERE ${BELUM_DISEMAI} ON CONFLICT DO NOTHING;`,
     );
     s.push(
-      `INSERT INTO kejadian_versi (kejadian_id, nomor, isi_json, jenis, dibuat_oleh, dibuat_pada, catatan_perubahan) SELECT k.id, 1, ${kutip(JSON.stringify(k))}, 'kerja', NULL, ${WAKTU}, ${kutip(CATATAN_VERSI)} FROM kejadian k WHERE k.kode = ${kutip(k.kode)} AND ${BELUM_DISEMAI} AND NOT EXISTS (SELECT 1 FROM kejadian_versi v WHERE v.kejadian_id = k.id);`,
+      `INSERT INTO kejadian_versi (id, kejadian_id, nomor, isi_json, jenis, dibuat_oleh, dibuat_pada, catatan_perubahan) SELECT ${kutip(idVersiPertama(k.kode))}, k.id, 1, ${kutip(JSON.stringify(k))}, 'kerja', NULL, ${WAKTU}, ${kutip(CATATAN_VERSI)} FROM kejadian k WHERE k.kode = ${kutip(k.kode)} AND ${BELUM_DISEMAI} AND NOT EXISTS (SELECT 1 FROM kejadian_versi v WHERE v.kejadian_id = k.id) ON CONFLICT DO NOTHING;`,
     );
   }
   for (const p of bank.paket) {
-    s.push(`INSERT INTO paket (nama, deskripsi, aktif) SELECT ${kutip(p.nama)}, ${kutip(p.deskripsi)}, 1 WHERE ${BELUM_DISEMAI} ON CONFLICT (nama) DO NOTHING;`);
+    s.push(
+      `INSERT INTO paket (id, nama, deskripsi, aktif) SELECT ${kutip(idPaket(p.nama))}, ${kutip(p.nama)}, ${kutip(p.deskripsi)}, 1 WHERE ${BELUM_DISEMAI} ON CONFLICT DO NOTHING;`,
+    );
     p.kejadian.forEach((kode, i) => {
       s.push(
-        `INSERT INTO paket_kejadian (paket_id, kejadian_id, urutan) SELECT p.id, k.id, ${i + 1} FROM paket p, kejadian k WHERE p.nama = ${kutip(p.nama)} AND k.kode = ${kutip(kode)} AND ${BELUM_DISEMAI} ON CONFLICT DO NOTHING;`,
+        `INSERT INTO paket_kejadian (paket_id, kejadian_id, urutan) SELECT p.id, k.id, ${i + 1} FROM paket p, kejadian k WHERE p.id = ${kutip(idPaket(p.nama))} AND k.kode = ${kutip(kode)} AND ${BELUM_DISEMAI} ON CONFLICT DO NOTHING;`,
       );
     });
   }

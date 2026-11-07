@@ -1,4 +1,59 @@
-# Hasil uji JS-05 — 7 November 2026
+# Hasil uji JS-05 — 7 November 2026, uji ulang Revisi 1 8 November 2026
+
+## Uji ulang Revisi 1 (8 November 2026)
+
+Spesifikasi: [`specs/JS-05-konten.md`](../specs/JS-05-konten.md), bagian "Revisi 1". Salinan kerja dari ZIP repositori `main` 8 November 2026, yang sudah memuat ZIP akhir JS-05 dan pekerjaan JS-03 (Sesi A). Isi ke-18 berkas JS-05 di ZIP itu sama persis dengan ZIP akhir JS-05.
+
+**Yang terjadi.** Sesudah ZIP akhir JS-05 di-push, alur kerja "Jejak: uji" gagal di langkah "Periksa konten Jejak" (Vitest 5.0.4 sungguhan). 35 dari 43 uji `bank-semai` lulus, tetapi 8 uji SQLite gagal dengan "NOT NULL constraint failed: kejadian_versi.kejadian_id". Uji lain di ketujuh berkas konten lulus, sama dengan hasil penjalan pengganti 7 November 2026. Uji SQLite itu memakai `0001_awal.sql` dari JS-03, yang belum ada di ZIP dasar JS-05. Di migrasi itu, id kejadian, versi, dan paket berupa teks UUID tanpa nilai bawaan, sedangkan semai mengandaikan id terisi otomatis. Kegagalan yang sama terulang di salinan kerja (35 lulus, 8 gagal, pesan sama).
+
+**Dampak.** Tidak ada basis data yang tersentuh. Job "Deploy uji" memerlukan job "Uji" lulus (`needs: uji`), alur kerja belum punya langkah semai, dan `database_id` uji masih berisi tempat isian.
+
+**Keputusan sebelum perbaikan.** Penyebabnya anggapan yang salah di spesifikasi, jadi JS-05 kembali ke Specify (AGENTS 4.4). Spesifikasi mendapat Revisi 1, lalu dibangun dan diuji ulang.
+
+| Kriteria | Hasil | Bukti |
+|---|---|---|
+| AC-9 SQL | Lulus | 73 pernyataan berurutan, sama setiap kali dicetak, tanpa `BEGIN`, `COMMIT`, atau "terverifikasi". Pernyataan terpanjang 3.198 byte. Bentuk pernyataan kejadian, versi, paket, dan isi paket pertama sama huruf demi huruf dengan bagian "SQL semai" |
+| AC-10 Semai pertama | Lulus | Tabel dari `0001_awal.sql`, dengan kunci asing aktif: 23/16/16/1/16/1 baris. Id kejadian, versi, dan paket sama dengan P-40, dan ke-16 versi menunjuk id kejadiannya. Status, isi, waktu, dan penanda sesuai |
+| AC-11 Sekali per basis data | Lulus | Akun peninjau uji dibuat di `pengguna`, JR-04 ditandai terverifikasi olehnya, lalu suntingan dan penghapusan lain dilakukan. Semai ulang tidak mengubah satu baris pun |
+| AC-12 Semai terputus | Lulus | Berhenti sesudah 1, 23, 24, 36, dan 72 pernyataan lalu diulang: isi, termasuk id, sama dengan semai utuh |
+| AC-13 Pengutip | Lulus | Tanda kutip dan potongan perintah SQL tersimpan utuh di tabel migrasi |
+| AC-14 Perintah semai | Lulus | Semua uji perintah lulus seperti sebelumnya. `node scripts/jejak-setara/semai.mjs --sql` keluar 0 dengan 73.724 byte. Kini `wrangler.jsonc` sudah memuat D1, jadi `--jalankan -- --local --persist-to .wrangler/state` di lingkungan agen berhenti di "wrangler belum terpasang" (kode 1), sesuai P-33 langkah 3 |
+| AC-16 Perintah repositori | Lulus (pengganti) | `bila-ada.mjs` dengan penjalan pengganti: 7 berkas konten, 214 uji, 209 lulus dan 5 dilewati (kode 0). Seluruh pola `test:jejak`, kini 20 berkas termasuk uji JS-03: 570 uji, 565 lulus, 5 dilewati |
+| AC-17 Galeri dan batas berkas | Lulus (pengganti) | Pemeriksaan token Tailwind: 0 kelas baru. Daftar berkas di bawah, termasuk `kontrak-d1.sql` yang dihapus |
+| AC-19 Id bank awal | Lulus | `uuid5` sama dengan contoh dokumentasi Python (`886313e1-3b8a-5372-9b90-0c9aee199e5d`) dan dengan modul `uuid` Python untuk ketiga id contoh P-40. Ke-33 id berbentuk UUID versi 5 dan berbeda satu sama lain |
+| AC-1 sampai AC-8, AC-15, AC-18 | Lulus | Berkas yang diuji kriteria ini tidak berubah, dan ujinya lulus lagi di salinan kerja baru |
+
+| Perintah | Hasil |
+|---|---|
+| Penjalan pengganti, `test:jejak` (20 berkas) | 565 lulus, 0 gagal, 5 dilewati. `bank-semai` 47 uji (sebelumnya 43): 1 uji bentuk SQL dan 3 uji id ditambahkan. Penjalan pengganti kini juga mengenal `expect.arrayContaining` dan pencocok sejenis, yang dipakai uji JS-03 `nama-samaran`. Uji dirinya: 13 dari 13 harapan yang sengaja salah dilaporkan gagal |
+| TypeScript 6.0.3, pilihan ketat seperti Test 7 November | 0 galat untuk `inti/**` dan kedelapan berkas `__tests__/konten/` |
+| ESLint 10.1.0, 66 aturan inti | 0 masalah pada `semai.mjs` dan keluaran esbuild `bank-semai.test.ts` |
+| Uji mutasi `semai.mjs` | 13 dari 13 tertangkap, termasuk "id kejadian tidak diisi", yang meniru kegagalan alur kerja persis (9 uji gagal) |
+| Pemeriksaan token Tailwind | 0 kelas baru dari semua berkas yang berubah di Revisi 1 |
+
+`git diff --name-status` terhadap ZIP `main` 8 November 2026:
+
+```
+M  app/jejak-setara/__tests__/konten/bank-semai.test.ts
+M  docs/jejak-setara/naskah/STATUS.md
+M  docs/jejak-setara/specs/JS-05-konten.md
+M  docs/jejak-setara/tests/JS-05-hasil.md
+M  scripts/jejak-setara/semai.mjs
+D  server/jejak-setara/seed/kontrak-d1.sql
+```
+
+**Temuan Revisi 1.**
+1. Uji `bank-semai` bekerja seperti dirancang. Begitu migrasi JS-03 ada, uji itu memakainya dan langsung merah karena tabelnya tidak cocok dengan semai, sebelum semai pernah dijalankan ke D1.
+2. Kegagalan seperti ini bisa berulang bila Sesi A dan Sesi B bekerja dari ZIP yang berbeda. Sesudah `main` berubah, ZIP dasar berikutnya sebaiknya ZIP `main` terbaru (AGENTS 11.3).
+3. Pemeriksaan pengganti tidak bisa menjalankan `test:jejak:server` (Workers) dan `build:jejak`. Revisi 1 tidak mengubah berkas yang dipakai keduanya.
+
+## Keputusan: Lulus (Revisi 1)
+
+Lulus dengan pemeriksaan pengganti untuk AC-16 dan AC-17. Keputusan ini menjadi final bila Revisi 1 disetujui dan "Jejak: uji" hijau sesudah push.
+
+## Uji pertama (7 November 2026)
+
+Bagian di bawah ini laporan uji pertama, sebelum Revisi 1. Keputusannya Lulus di sesi agen, tetapi alur kerja "Jejak: uji" gagal sesudah push (bagian di atas).
 
 Spesifikasi: [`specs/JS-05-konten.md`](../specs/JS-05-konten.md) (disetujui 7 November 2026, D-1 sampai D-5 tanpa perubahan). Sesi B, salinan kerja dari ZIP repositori 7 November 2026 ditambah ZIP Gerbang 1 dan Gerbang 2 JS-05.
 
@@ -116,6 +171,6 @@ Tidak berlaku: JS-05 tidak punya layar. Tangkapan layar tidak dibuat untuk alasa
 5. **Tabel D1 belum ada.** `bank-semai` memakai `kontrak-d1.sql` sampai migrasi JS-03 ada. Begitu migrasi masuk, uji memakai migrasi itu, dan perbedaan kolom akan langsung membuat uji merah (Permintaan A-5).
 6. **Semai sekali per basis data.** Mengubah `bank-awal.json` sesudah sebuah basis data disemai tidak mengubah basis data itu. Hal ini dicatat di `STATUS.md`, bagian "Catatan untuk JS-05".
 
-## Keputusan: Lulus
+## Keputusan uji pertama: Lulus di sesi agen, lalu kembali ke Specify (Revisi 1)
 
 Lulus, dengan pemeriksaan pengganti untuk AC-1, AC-16, dan AC-17. Keputusan ini menjadi final bila alur kerja "Jejak: uji" hijau sesudah push. Bila gagal karena kode JS-05, JS-05 kembali ke Build.

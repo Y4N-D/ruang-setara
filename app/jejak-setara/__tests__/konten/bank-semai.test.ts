@@ -1,7 +1,7 @@
-// Uji semai bank awal (spesifikasi JS-05, P-26 sampai P-36 dan P-39; AC-9 sampai AC-14).
-// SQL dijalankan di SQLite bawaan Node (node:sqlite) dengan tabel dari migrasi JS-03 bila sudah ada, atau
-// dari kontrak-d1.sql sebelum itu. Perintah semai diuji pada salinan sementara, sehingga wrangler tidak
-// pernah dijalankan.
+// Uji semai bank awal (spesifikasi JS-05 Revisi 1, P-26 sampai P-36, P-39, dan P-40; AC-9 sampai AC-14 dan
+// AC-19). SQL dijalankan di SQLite bawaan Node (node:sqlite) dengan tabel dari migrasi D1 di
+// server/jejak-setara/migrations/. Perintah semai diuji pada salinan sementara, sehingga wrangler tidak pernah
+// dijalankan.
 import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -13,11 +13,16 @@ import {
   bacaBank,
   buangKomentar,
   CATATAN_VERSI,
+  DASAR_ID,
+  idKejadian,
+  idPaket,
+  idVersiPertama,
   kutip,
   PENANDA,
   PESAN_BELUM,
   sqlSemai,
   teksSql,
+  uuid5,
 } from "../../../../scripts/jejak-setara/semai.mjs";
 import type { BankAwal } from "../../inti/konten/skema";
 import { AKAR, bacaBankAwal, bacaRepo, jalurRepo } from "./naskah-urai";
@@ -26,6 +31,8 @@ const { teks: teksBank, bank } = bacaBankAwal();
 const pernyataan: string[] = sqlSemai(bank);
 const sql: string = teksSql(bank);
 const BELUM = "NOT EXISTS (SELECT 1 FROM pengaturan WHERE kunci = 'semai_bank_awal')";
+const WAKTU = "CAST(strftime('%s', 'now') AS INTEGER) * 1000";
+const POLA_UUID5 = /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 describe("SQL semai (P-27 sampai P-32, AC-9)", () => {
   it("selalu sama untuk bank yang sama, dengan satu baris keterangan dan 73 pernyataan", () => {
@@ -75,8 +82,43 @@ describe("SQL semai (P-27 sampai P-32, AC-9)", () => {
       );
     });
     expect(pernyataan[23]).toBe(
-      `INSERT INTO kejadian (kode, status, versi_terbit_id, pemilik_id, diubah_pada) SELECT 'K-01', 'tinjau', NULL, NULL, CAST(strftime('%s', 'now') AS INTEGER) * 1000 WHERE ${BELUM} ON CONFLICT (kode) DO NOTHING;`,
+      `INSERT INTO kejadian (id, kode, status, versi_terbit_id, pemilik_id, diubah_pada) SELECT '${idKejadian("K-01")}', 'K-01', 'tinjau', NULL, NULL, ${WAKTU} WHERE ${BELUM} ON CONFLICT DO NOTHING;`,
     );
+  });
+
+  it("versi kerja, paket, dan isi paket memakai id tetap (P-30, P-40)", () => {
+    const k = bank.kejadian[0];
+    expect(pernyataan[24]).toBe(
+      `INSERT INTO kejadian_versi (id, kejadian_id, nomor, isi_json, jenis, dibuat_oleh, dibuat_pada, catatan_perubahan) SELECT '${idVersiPertama("K-01")}', k.id, 1, ${kutip(JSON.stringify(k))}, 'kerja', NULL, ${WAKTU}, 'Bank awal dari repositori (JS-05)' FROM kejadian k WHERE k.kode = 'K-01' AND ${BELUM} AND NOT EXISTS (SELECT 1 FROM kejadian_versi v WHERE v.kejadian_id = k.id) ON CONFLICT DO NOTHING;`,
+    );
+    expect(pernyataan[55]).toBe(
+      `INSERT INTO paket (id, nama, deskripsi, aktif) SELECT '${idPaket("Paket inti 16")}', 'Paket inti 16', 'Enam belas kejadian bank awal, dua di setiap zona.', 1 WHERE ${BELUM} ON CONFLICT DO NOTHING;`,
+    );
+    expect(pernyataan[56]).toBe(
+      `INSERT INTO paket_kejadian (paket_id, kejadian_id, urutan) SELECT p.id, k.id, 1 FROM paket p, kejadian k WHERE p.id = '${idPaket("Paket inti 16")}' AND k.kode = 'K-01' AND ${BELUM} ON CONFLICT DO NOTHING;`,
+    );
+  });
+});
+
+describe("id bank awal (P-40, AC-19)", () => {
+  it("uuid5 sama dengan contoh dokumentasi Python: python.org di ruang nama DNS", () => {
+    expect(uuid5("6ba7b810-9dad-11d1-80b4-00c04fd430c8", "python.org")).toBe("886313e1-3b8a-5372-9b90-0c9aee199e5d");
+    expect(() => uuid5("bukan-uuid", "x")).toThrow(RangeError);
+  });
+
+  it("UUID dasar tetap dan id K-01 serta Paket inti 16 sesuai spesifikasi", () => {
+    expect(DASAR_ID).toBe("93b81e4c-d848-4d2b-9c6a-230da39a8daf");
+    expect(idKejadian("K-01")).toBe("ad912a81-53aa-5152-a119-544836b2500d");
+    expect(idVersiPertama("K-01")).toBe("94f9dcaa-44db-571c-a99c-032ee0af3500");
+    expect(idPaket("Paket inti 16")).toBe("9880c4d5-8294-51c9-971a-e95531a2e039");
+  });
+
+  it("33 id bank awal berbentuk UUID versi 5, berbeda satu sama lain, dan sama bila dihitung ulang", () => {
+    const daftar = [...bank.kejadian.flatMap((k) => [idKejadian(k.kode), idVersiPertama(k.kode)]), ...bank.paket.map((p) => idPaket(p.nama))];
+    expect(daftar).toHaveLength(33);
+    expect(new Set(daftar).size).toBe(33);
+    for (const id of daftar) expect(id).toMatch(POLA_UUID5);
+    expect(sqlSemai(bank)).toEqual(pernyataan);
   });
 });
 
@@ -147,8 +189,8 @@ type Basis = InstanceType<ModulSqlite["DatabaseSync"]>;
 const sqlite = process.getBuiltinModule("node:sqlite") as ModulSqlite | undefined;
 const FOLDER_MIGRASI = "server/jejak-setara/migrations";
 const migrasi = existsSync(jalurRepo(FOLDER_MIGRASI)) ? readdirSync(jalurRepo(FOLDER_MIGRASI)).filter((n) => n.endsWith(".sql")).sort() : [];
-const sumberTabel = migrasi.length > 0 ? `migrasi JS-03 (${migrasi.join(", ")})` : "kontrak-d1.sql";
-const sqlTabel = migrasi.length > 0 ? migrasi.map((n) => bacaRepo(`${FOLDER_MIGRASI}/${n}`)).join("\n") : bacaRepo("server/jejak-setara/seed/kontrak-d1.sql");
+const sqlTabel = migrasi.map((n) => bacaRepo(`${FOLDER_MIGRASI}/${n}`)).join("\n");
+const PENINJAU = "00000000-0000-4000-8000-000000000001";
 
 function basisBaru(): Basis {
   const { DatabaseSync } = sqlite as ModulSqlite;
@@ -163,9 +205,12 @@ const jumlah = (db: Basis) =>
 /** Isi tabel semai tanpa kolom waktu, untuk membandingkan dua basis data. */
 const isi = (db: Basis) => ({
   rujukan: baris(db, "SELECT id, teks, sumber, status, catatan, kode_sehari FROM rujukan ORDER BY id"),
-  kejadian: baris(db, "SELECT kode, status, versi_terbit_id, pemilik_id FROM kejadian ORDER BY kode"),
-  versi: baris(db, "SELECT k.kode, v.nomor, v.isi_json, v.jenis, v.dibuat_oleh, v.catatan_perubahan FROM kejadian_versi v JOIN kejadian k ON k.id = v.kejadian_id ORDER BY k.kode, v.nomor"),
-  paket: baris(db, "SELECT nama, deskripsi, aktif FROM paket ORDER BY nama"),
+  kejadian: baris(db, "SELECT id, kode, status, versi_terbit_id, pemilik_id FROM kejadian ORDER BY kode"),
+  versi: baris(
+    db,
+    "SELECT v.id, k.kode, v.nomor, v.isi_json, v.jenis, v.dibuat_oleh, v.catatan_perubahan FROM kejadian_versi v JOIN kejadian k ON k.id = v.kejadian_id ORDER BY k.kode, v.nomor",
+  ),
+  paket: baris(db, "SELECT id, nama, deskripsi, aktif FROM paket ORDER BY nama"),
   isiPaket: baris(db, "SELECT p.nama, k.kode, pk.urutan FROM paket_kejadian pk JOIN paket p ON p.id = pk.paket_id JOIN kejadian k ON k.id = pk.kejadian_id ORDER BY p.nama, pk.urutan"),
   pengaturan: baris(db, "SELECT kunci, nilai_json FROM pengaturan ORDER BY kunci"),
 });
@@ -178,8 +223,9 @@ const potret = (db: Basis) =>
   );
 
 if (!sqlite) it.skip("Dilewati: node:sqlite tidak tersedia (perlu Node 22.13 atau lebih baru).", () => {});
+if (migrasi.length === 0) it.skip(`Belum tersedia: ${FOLDER_MIGRASI}/ belum berisi migrasi (dibuat di JS-03).`, () => {});
 
-describe.skipIf(!sqlite)(`semai di SQLite, tabel dari ${sumberTabel}`, () => {
+describe.skipIf(!sqlite || migrasi.length === 0)(`semai di SQLite, tabel dari migrasi (${migrasi.join(", ")})`, () => {
   it("semai pertama menulis 23 rujukan belum, 16 kejadian tinjau, 16 versi kerja, paket aktif, dan penanda (AC-10)", () => {
     const db = basisBaru();
     const mulai = Date.now();
@@ -189,12 +235,23 @@ describe.skipIf(!sqlite)(`semai di SQLite, tabel dari ${sumberTabel}`, () => {
     expect(hasil.rujukan).toEqual(
       bank.rujukan.map((r) => ({ id: r.id, teks: r.teks, sumber: r.sumber, status: "belum", catatan: r.catatan, kode_sehari: r.kodeSehari })),
     );
-    expect(hasil.kejadian).toEqual(bank.kejadian.map((k) => ({ kode: k.kode, status: "tinjau", versi_terbit_id: null, pemilik_id: null })));
-    expect(hasil.versi).toEqual(
-      bank.kejadian.map((k) => ({ kode: k.kode, nomor: 1, isi_json: JSON.stringify(k), jenis: "kerja", dibuat_oleh: null, catatan_perubahan: CATATAN_VERSI })),
+    expect(hasil.kejadian).toEqual(
+      bank.kejadian.map((k) => ({ id: idKejadian(k.kode), kode: k.kode, status: "tinjau", versi_terbit_id: null, pemilik_id: null })),
     );
+    expect(hasil.versi).toEqual(
+      bank.kejadian.map((k) => ({
+        id: idVersiPertama(k.kode),
+        kode: k.kode,
+        nomor: 1,
+        isi_json: JSON.stringify(k),
+        jenis: "kerja",
+        dibuat_oleh: null,
+        catatan_perubahan: CATATAN_VERSI,
+      })),
+    );
+    expect(baris(db, "SELECT count(*) AS n FROM kejadian_versi v JOIN kejadian k ON k.id = v.kejadian_id")[0].n).toBe(16);
     expect(CATATAN_VERSI).toBe("Bank awal dari repositori (JS-05)");
-    expect(hasil.paket).toEqual([{ nama: "Paket inti 16", deskripsi: "Enam belas kejadian bank awal, dua di setiap zona.", aktif: 1 }]);
+    expect(hasil.paket).toEqual([{ id: idPaket("Paket inti 16"), nama: "Paket inti 16", deskripsi: "Enam belas kejadian bank awal, dua di setiap zona.", aktif: 1 }]);
     expect(hasil.isiPaket).toEqual(bank.paket[0].kejadian.map((kode, i) => ({ nama: "Paket inti 16", kode, urutan: i + 1 })));
     expect(hasil.pengaturan).toEqual([{ kunci: PENANDA, nilai_json: '{"versi":1,"rujukan":23,"kejadian":16,"paket":1}' }]);
     for (const r of baris(db, "SELECT diubah_pada AS w FROM kejadian UNION ALL SELECT dibuat_pada FROM kejadian_versi")) {
@@ -206,7 +263,10 @@ describe.skipIf(!sqlite)(`semai di SQLite, tabel dari ${sumberTabel}`, () => {
   it("semai ulang sesudah kerja di konsol tidak mengubah satu baris pun (AC-11)", () => {
     const db = basisBaru();
     db.exec(sql);
-    db.exec(`UPDATE rujukan SET status = 'terverifikasi', diverifikasi_oleh = 'peninjau-uji', diverifikasi_pada = 1 WHERE id = 'JR-04';
+    // Akun peninjau uji, karena rujukan.diverifikasi_oleh merujuk tabel pengguna (0001_awal.sql).
+    db.exec(`INSERT INTO pengguna (id, email, nama_tampilan, peran, peninjau, hash_sandi, garam, iterasi, dibuat_pada)
+VALUES ('${PENINJAU}', 'peninjau@contoh.id', 'Peninjau uji', 'guru', 1, 'uji', 'uji', 1, 1);
+UPDATE rujukan SET status = 'terverifikasi', diverifikasi_oleh = '${PENINJAU}', diverifikasi_pada = 1 WHERE id = 'JR-04';
 UPDATE rujukan SET teks = 'Teks disunting' WHERE id = 'JR-02';
 UPDATE kejadian_versi SET isi_json = json_set(isi_json, '$.judul', 'Judul disunting') WHERE kejadian_id = (SELECT id FROM kejadian WHERE kode = 'K-01');
 UPDATE paket SET aktif = 0;

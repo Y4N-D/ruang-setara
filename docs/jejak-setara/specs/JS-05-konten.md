@@ -2,11 +2,21 @@
 
 | | |
 |---|---|
-| Status | Disetujui 7 November 2026; dibangun dan diuji 7 November 2026 ([laporan](../tests/JS-05-hasil.md)) |
+| Status | Disetujui 7 November 2026; dibangun dan diuji 7 November 2026. **Revisi 1** (8 November 2026) dibangun dan diuji ulang, menunggu `Spesifikasi disetujui: JS-05` ([laporan](../tests/JS-05-hasil.md)) |
 | Sesi | B (Naskah dan rujukan). Rencana dan status ada di `docs/jejak-setara/naskah/STATUS.md`, bagian "JS-05 — Konten", bukan di `PLAN.md` (AGENTS bagian 4.1) |
 | Keputusan Gerbang 1 | Balasan `Setuju: JS-05` (7 Nov 2026): semua saran (a) diterima, yaitu usulan 1a sampai 10a |
 | Keputusan Gerbang 2 | Balasan `Spesifikasi disetujui: JS-05` (7 Nov 2026): D-1 sampai D-5 diterima tanpa perubahan |
+| Revisi 1 | 8 November 2026, sesudah alur kerja "Jejak: uji" gagal (bagian "Revisi 1" di bawah) |
 | Batas berkas | `docs/jejak-setara/naskah/`, `app/jejak-setara/inti/konten/`, `server/jejak-setara/seed/`, `scripts/jejak-setara/semai.mjs`, berkas berawalan `naskah-` atau `bank-` di `app/jejak-setara/__tests__/konten/`, serta spesifikasi dan laporan uji ini (usulan 10a). Perubahan berkas lain ditulis sebagai Permintaan untuk Sesi A di `STATUS.md` |
+
+## Revisi 1 (8 November 2026)
+
+| | |
+|---|---|
+| Penyebab | Sesudah ZIP akhir JS-05 di-push, alur kerja "Jejak: uji" gagal di `content:check:jejak`: 8 uji SQLite di `bank-semai` gagal dengan "NOT NULL constraint failed: kejadian_versi.kejadian_id". Uji itu sudah memakai migrasi `server/jejak-setara/migrations/0001_awal.sql` dari JS-03 (P-39 dan Permintaan A-5 butir 4). Migrasi itu masuk `main` sesudah ZIP repositori yang menjadi dasar JS-05 |
+| Akar masalah | Spesifikasi mengandaikan `id` kejadian, versi, dan paket terisi otomatis (kontrak `kontrak-d1.sql`). Di `0001_awal.sql`, ketiganya `TEXT PRIMARY KEY` tanpa nilai bawaan, berisi UUID (spesifikasi JS-03, bagian "Migrasi D1"); `paket.nama` tidak unik; dan `rujukan.diverifikasi_oleh` merujuk tabel `pengguna`. Semai mengisi `kejadian.id` dengan `NULL`, sehingga versi kerja tidak mendapat `kejadian_id` |
+| Dampak | Tidak ada basis data yang tersentuh. Job "Deploy uji" hanya berjalan sesudah job "Uji" lulus, dan alur kerja belum punya langkah semai |
+| Jalan keluar | Kembali ke Specify (AGENTS 4.4). Bagian yang berubah ditandai "(Revisi 1)": tabel berkas, P-30, P-39, P-40 (baru), bagian "SQL semai", ekspor dan contoh pemakaian `semai.mjs`, D-6 (baru), AC-10, AC-11, AC-17, AC-19 (baru), dan rencana uji `bank-semai`. `kontrak-d1.sql` dihapus karena tabelnya kini diambil dari migrasi |
 
 ## Ringkasan
 
@@ -45,10 +55,10 @@ Sesudah JS-05 belum ada layar baru, perubahan server, perubahan protokol, maupun
 | `app/jejak-setara/inti/konten/skema.ts` | Baru | Build | Skema `zod`, batas, dan pola konten |
 | `app/jejak-setara/inti/konten/periksa.ts` | Baru | Build | Aturan konten dan kode temuan |
 | `server/jejak-setara/seed/bank-awal.json` | Baru | Build | Bank awal |
-| `server/jejak-setara/seed/kontrak-d1.sql` | Baru | Build | Kontrak tabel untuk uji semai sebelum migrasi JS-03 ada (bukan migrasi) |
-| `scripts/jejak-setara/semai.mjs` | Baru | Build | Skrip semai |
+| `server/jejak-setara/seed/kontrak-d1.sql` | Baru, lalu **dihapus** di Revisi 1 | Build, Revisi 1 | Kontrak tabel untuk uji semai sebelum migrasi JS-03 ada. Tidak diperlukan lagi sejak `0001_awal.sql` ada |
+| `scripts/jejak-setara/semai.mjs` | Baru; diubah di Revisi 1 | Build, Revisi 1 | Skrip semai; Revisi 1 menambah id tetap (P-40) |
 | `app/jejak-setara/__tests__/konten/naskah-urai.ts` | Baru | Build | Pembantu uji: pengurai naskah dan tabel `NASKAH.md` |
-| `app/jejak-setara/__tests__/konten/bank-skema.test.ts`, `bank-aturan.test.ts`, `bank-protokol.test.ts`, `bank-aset.test.ts`, `bank-semai.test.ts`, `bank-peta.test.ts`, `naskah-cocok.test.ts` | Baru | Build | Tujuh berkas uji (usulan 9a) |
+| `app/jejak-setara/__tests__/konten/bank-skema.test.ts`, `bank-aturan.test.ts`, `bank-protokol.test.ts`, `bank-aset.test.ts`, `bank-semai.test.ts`, `bank-peta.test.ts`, `naskah-cocok.test.ts` | Baru; `bank-semai` diubah di Revisi 1 | Build, Revisi 1 | Tujuh berkas uji (usulan 9a) |
 | `docs/jejak-setara/naskah/NASKAH.md` | Diubah | Gerbang 1, Build | Status dan properti K-02 (KT-10); bagian baru "Set tokoh dan latar titik (bank awal)" (D-1 dan D-2) |
 | `docs/jejak-setara/tests/JS-05-hasil.md` | Baru | Test | Laporan uji |
 
@@ -103,12 +113,12 @@ Tidak disentuh: `package.json`, lockfile, alur kerja, `server/jejak-setara/wrang
 - **P-27** SQL semai selalu sama untuk bank yang sama. Isinya satu baris keterangan, lalu 73 pernyataan berurutan: 23 rujukan; untuk setiap kejadian, satu baris `kejadian` lalu satu versi; satu paket lalu 16 baris isi paket; dan terakhir penanda. Bentuk setiap pernyataan ada di bagian "Data".
 - **P-28** **Sekali per basis data.** Setiap pernyataan, kecuali penanda, hanya berlaku selama baris `pengaturan` berkunci `semai_bank_awal` belum ada, dan setiap sisipan yang bertabrakan dengan baris yang sudah ada tidak melakukan apa pun. Sesudah penanda ada, menjalankan semai lagi tidak mengubah satu baris pun: rujukan yang sudah ditandai Terverifikasi, teks yang disunting di konsol, kejadian yang dihapus, dan paket yang dinonaktifkan tetap seperti itu.
 - **P-29** **Semai terputus.** Bila semai berhenti sebelum penanda tertulis, menjalankannya lagi melengkapi baris yang belum ada tanpa mengubah baris yang sudah ada, lalu menulis penanda.
-- **P-30** Nilai yang ditulis:
+- **P-30 (Revisi 1)** Nilai yang ditulis:
   - rujukan: `status` selalu `'belum'`, ditulis langsung di SQL dan tidak pernah diambil dari bank;
-  - kejadian: `status` `'tinjau'`, `versi_terbit_id` dan `pemilik_id` kosong (`NULL`);
-  - versi: `nomor` 1, `jenis` `'kerja'`, `isi_json` berupa `JSON.stringify` kejadian (padat, urutan kolom seperti di berkas), `dibuat_oleh` kosong, `catatan_perubahan` menurut D-3;
+  - kejadian: `id` menurut P-40, `status` `'tinjau'`, `versi_terbit_id` dan `pemilik_id` kosong (`NULL`);
+  - versi: `id` menurut P-40, `kejadian_id` berupa id kejadian berkode sama di basis data, `nomor` 1, `jenis` `'kerja'`, `isi_json` berupa `JSON.stringify` kejadian (padat, urutan kolom seperti di berkas), `dibuat_oleh` kosong, `catatan_perubahan` menurut D-3;
   - waktu (`diubah_pada`, `dibuat_pada`): milidetik dari jam basis data saat semai, dibulatkan ke detik: `CAST(strftime('%s', 'now') AS INTEGER) * 1000`;
-  - paket: `aktif` 1, `urutan` 1–16 menurut urutan di bank;
+  - paket: `id` menurut P-40 dan `aktif` 1; isi paket mencari paketnya lewat id itu, dengan `urutan` 1–16 menurut urutan di bank;
   - penanda: `{"versi":1,"rujukan":23,"kejadian":16,"paket":1}`.
 - **P-31** Semua teks masuk SQL lewat satu fungsi `kutip`: dibungkus tanda kutip tunggal, tanda kutip tunggal di dalamnya digandakan, dan `null` menjadi `NULL`. Teks berisi karakter NUL ditolak.
 - **P-32** SQL tidak memuat `BEGIN`, `COMMIT`, atau kata "terverifikasi"; setiap `INSERT … SELECT` memiliki `WHERE` (aturan penguraian *upsert* SQLite); setiap pernyataan paling besar 100.000 byte (batas D1).
@@ -126,7 +136,11 @@ Tidak disentuh: `package.json`, lockfile, alur kerja, `server/jejak-setara/wrang
 
 - **P-37** Begitu folder `app/jejak-setara/__tests__/konten/` ada, `content:check:jejak` (lewat `bila-ada.mjs` JS-01) menjalankan semua uji di folder itu, termasuk uji peta Sesi C kelak. `test:jejak` juga menjalankannya.
 - **P-38** Selama `app/jejak-setara/peta/kampung.json` belum ada, uji `bank-peta` dilaporkan dilewati dengan nama "Belum tersedia: app/jejak-setara/peta/kampung.json belum ada (dibuat di JS-06)." Uji lain tetap berjalan.
-- **P-39** Uji `bank-semai` membuat basis data SQLite kosong di memori (`node:sqlite`, bawaan Node 22.13 ke atas). Bila `server/jejak-setara/migrations/` berisi berkas `.sql`, semuanya dijalankan berurutan nama; bila belum, `server/jejak-setara/seed/kontrak-d1.sql` yang dijalankan. Nama uji menyebut sumber tabel yang dipakai. Bila `node:sqlite` tidak tersedia, skenario SQL dilaporkan dilewati dengan nama "Dilewati: node:sqlite tidak tersedia (perlu Node 22.13 atau lebih baru)."
+- **P-39 (Revisi 1)** Uji `bank-semai` membuat basis data SQLite kosong di memori (`node:sqlite`, bawaan Node 22.13 ke atas), lalu menjalankan semua berkas `.sql` di `server/jejak-setara/migrations/` berurutan nama. Nama uji menyebut berkas migrasinya. Bila folder itu belum berisi migrasi, skenario SQL dilaporkan dilewati dengan nama "Belum tersedia: server/jejak-setara/migrations/ belum berisi migrasi (dibuat di JS-03)."; bila `node:sqlite` tidak tersedia, dengan nama "Dilewati: node:sqlite tidak tersedia (perlu Node 22.13 atau lebih baru)."
+
+### Id bank awal (Revisi 1)
+
+- **P-40** Id baris yang dibuat semai berupa UUID versi 5 (RFC 9562 bagian 5.5): SHA-1 dari 16 byte UUID dasar tetap `93b81e4c-d848-4d2b-9c6a-230da39a8daf` (`DASAR_ID` di `semai.mjs`) lalu nama berikut, ditulis huruf kecil 36 karakter. Nama itu `kejadian/{kode}` untuk kejadian, `kejadian_versi/{kode}/1` untuk versi kerja pertama, dan `paket/{nama}` untuk paket. Contoh: K-01 → `ad912a81-53aa-5152-a119-544836b2500d`, versi kerja K-01 → `94f9dcaa-44db-571c-a99c-032ee0af3500`, dan Paket inti 16 → `9880c4d5-8294-51c9-971a-e95531a2e039`. Id ini sama di setiap basis data dan setiap kali dihitung, sehingga semai ulang bertabrakan dengan barisnya sendiri dan tidak melakukan apa pun. `rujukan.id` tetap `JR-xx`. `DASAR_ID` tidak boleh diubah sesudah semai pertama.
 
 ## Beberapa pemain sekaligus
 
@@ -302,73 +316,24 @@ Sebaran: pilihan benar Langkah 1 di 1a 4 kali, 1b 5 kali, 1c 2 kali, dan 1d 5 ka
 
 Bagian berulang: `{belum}` = `NOT EXISTS (SELECT 1 FROM pengaturan WHERE kunci = 'semai_bank_awal')` dan `{waktu}` = `CAST(strftime('%s', 'now') AS INTEGER) * 1000`. Nilai `{…}` lain melewati `kutip`.
 
+Bentuk pernyataan sesudah Revisi 1 (`{idKejadian}`, `{idVersi}`, dan `{idPaket}` menurut P-40):
+
 ```sql
 INSERT INTO rujukan (id, teks, sumber, status, catatan, kode_sehari) SELECT {id}, {teks}, {sumber}, 'belum', {catatan}, {kodeSehari} WHERE {belum} ON CONFLICT (id) DO NOTHING;
-INSERT INTO kejadian (kode, status, versi_terbit_id, pemilik_id, diubah_pada) SELECT {kode}, 'tinjau', NULL, NULL, {waktu} WHERE {belum} ON CONFLICT (kode) DO NOTHING;
-INSERT INTO kejadian_versi (kejadian_id, nomor, isi_json, jenis, dibuat_oleh, dibuat_pada, catatan_perubahan) SELECT k.id, 1, {isi_json}, 'kerja', NULL, {waktu}, 'Bank awal dari repositori (JS-05)' FROM kejadian k WHERE k.kode = {kode} AND {belum} AND NOT EXISTS (SELECT 1 FROM kejadian_versi v WHERE v.kejadian_id = k.id);
-INSERT INTO paket (nama, deskripsi, aktif) SELECT {nama}, {deskripsi}, 1 WHERE {belum} ON CONFLICT (nama) DO NOTHING;
-INSERT INTO paket_kejadian (paket_id, kejadian_id, urutan) SELECT p.id, k.id, {urutan} FROM paket p, kejadian k WHERE p.nama = {nama} AND k.kode = {kode} AND {belum} ON CONFLICT DO NOTHING;
+INSERT INTO kejadian (id, kode, status, versi_terbit_id, pemilik_id, diubah_pada) SELECT {idKejadian}, {kode}, 'tinjau', NULL, NULL, {waktu} WHERE {belum} ON CONFLICT DO NOTHING;
+INSERT INTO kejadian_versi (id, kejadian_id, nomor, isi_json, jenis, dibuat_oleh, dibuat_pada, catatan_perubahan) SELECT {idVersi}, k.id, 1, {isi_json}, 'kerja', NULL, {waktu}, 'Bank awal dari repositori (JS-05)' FROM kejadian k WHERE k.kode = {kode} AND {belum} AND NOT EXISTS (SELECT 1 FROM kejadian_versi v WHERE v.kejadian_id = k.id) ON CONFLICT DO NOTHING;
+INSERT INTO paket (id, nama, deskripsi, aktif) SELECT {idPaket}, {nama}, {deskripsi}, 1 WHERE {belum} ON CONFLICT DO NOTHING;
+INSERT INTO paket_kejadian (paket_id, kejadian_id, urutan) SELECT p.id, k.id, {urutan} FROM paket p, kejadian k WHERE p.id = {idPaket} AND k.kode = {kode} AND {belum} ON CONFLICT DO NOTHING;
 INSERT INTO pengaturan (kunci, nilai_json) VALUES ('semai_bank_awal', '{"versi":1,"rujukan":23,"kejadian":16,"paket":1}') ON CONFLICT (kunci) DO NOTHING;
 ```
 
-Agar `ON CONFLICT` berfungsi, tabel D1 memerlukan kunci unik pada `rujukan.id`, `kejadian.kode`, `paket.nama`, `pengaturan.kunci`, dan pasangan `(paket_id, kejadian_id)`, sedangkan `kejadian.id`, `kejadian_versi.id`, dan `paket.id` terisi otomatis. Kontraknya ada di `kontrak-d1.sql` (Permintaan A-5).
+Tabelnya dari `0001_awal.sql` (JS-03). `ON CONFLICT DO NOTHING` tanpa sasaran mengabaikan tabrakan pada kunci mana pun: kunci utama dan kode unik di `kejadian`, kunci utama dan indeks satu versi kerja per kejadian di `kejadian_versi`, kunci utama di `paket`, dan pasangan `(paket_id, kejadian_id)`. Karena `paket.nama` tidak unik, isi paket mencari paketnya lewat id tetap (P-40), bukan lewat nama. Semua kunci asing terpenuhi: versi dan isi paket hanya menunjuk baris yang sudah ada, dan kolom akun (`pemilik_id`, `dibuat_oleh`, `diverifikasi_oleh`) dibiarkan kosong.
 
 Penyusunan SQL sebagai teks adalah pengecualian dari Architecture 17 ("tanpa menyambung string SQL"), sama seperti berkas migrasi: isinya berasal dari berkas di repositori, bukan dari pengguna, dan semua teks lewat satu fungsi `kutip` yang diuji (Permintaan A-7).
 
-### `server/jejak-setara/seed/kontrak-d1.sql`
+### `server/jejak-setara/seed/kontrak-d1.sql` (dihapus di Revisi 1)
 
-```sql
--- Kontrak tabel D1 untuk semai bank awal (spesifikasi JS-05; Permintaan A-5 di docs/jejak-setara/naskah/STATUS.md).
--- BUKAN migrasi: jangan dijalankan ke D1. Berkas ini hanya dipakai uji bank-semai selama
--- server/jejak-setara/migrations/ belum berisi migrasi. Sesudah migrasi JS-03 ada, uji memakai migrasi itu.
--- Isinya hanya tabel dan kolom yang disentuh semai (Architecture 5.2).
-CREATE TABLE rujukan (
-  id TEXT PRIMARY KEY,
-  teks TEXT NOT NULL,
-  sumber TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'belum' CHECK (status IN ('belum', 'terverifikasi')),
-  diverifikasi_oleh TEXT,
-  diverifikasi_pada INTEGER,
-  catatan TEXT,
-  kode_sehari TEXT
-);
-CREATE TABLE kejadian (
-  id INTEGER PRIMARY KEY,
-  kode TEXT NOT NULL UNIQUE,
-  status TEXT NOT NULL CHECK (status IN ('draf', 'tinjau', 'terbit', 'arsip')),
-  versi_terbit_id INTEGER,
-  pemilik_id TEXT,
-  diubah_pada INTEGER NOT NULL
-);
-CREATE TABLE kejadian_versi (
-  id INTEGER PRIMARY KEY,
-  kejadian_id INTEGER NOT NULL REFERENCES kejadian (id),
-  nomor INTEGER NOT NULL,
-  isi_json TEXT NOT NULL CHECK (json_valid(isi_json)),
-  jenis TEXT NOT NULL CHECK (jenis IN ('kerja', 'terbit')),
-  dibuat_oleh TEXT,
-  dibuat_pada INTEGER NOT NULL,
-  catatan_perubahan TEXT
-);
-CREATE TABLE paket (
-  id INTEGER PRIMARY KEY,
-  nama TEXT NOT NULL UNIQUE,
-  deskripsi TEXT,
-  aktif INTEGER NOT NULL DEFAULT 1
-);
-CREATE TABLE paket_kejadian (
-  paket_id INTEGER NOT NULL REFERENCES paket (id),
-  kejadian_id INTEGER NOT NULL REFERENCES kejadian (id),
-  urutan INTEGER NOT NULL,
-  PRIMARY KEY (paket_id, kejadian_id)
-);
-CREATE TABLE pengaturan (
-  kunci TEXT PRIMARY KEY,
-  nilai_json TEXT NOT NULL
-);
-```
-
-Kata "terverifikasi" di berkas ini hanya nilai yang diizinkan kolom `status` (Architecture 5.2), bukan data yang disemai.
+Berkas ini berisi kontrak tabel untuk uji selama migrasi belum ada. Sejak `0001_awal.sql` masuk `main`, uji memakai migrasi itu (P-39), jadi kontrak dihapus agar tidak ada dua sumber skema.
 
 ### `scripts/jejak-setara/semai.mjs`
 
@@ -382,16 +347,17 @@ Kata "terverifikasi" di berkas ini hanya nilai yang diizinkan kolom `status` (Ar
 | `buangKomentar(jsonc)`, `adaD1(isiWrangler)` | Pemeriksa `d1_databases` di luar komentar `//` dan `/* … */`; teks berkutip dibiarkan utuh |
 | `argumenWrangler(berkasSql, bendera)` | Argumen `wrangler` (P-33 langkah 4) |
 | `utama(argumen)` | Titik masuk; mengembalikan kode keluar |
+| `DASAR_ID`, `uuid5(dasar, nama)`, `idKejadian(kode)`, `idVersiPertama(kode)`, `idPaket(nama)` | Id tetap P-40 (Revisi 1) |
 
-Skrip memakai modul bawaan Node saja (`node:fs`, `node:os`, `node:path`, `node:child_process`, `node:url`).
+Skrip memakai modul bawaan Node saja (`node:crypto`, `node:fs`, `node:os`, `node:path`, `node:child_process`, `node:url`).
 
-Contoh pemakaian untuk Sesi A (Permintaan A-5): `db:semai:lokal` = `node scripts/jejak-setara/semai.mjs --jalankan -- --local`; langkah alur kerja uji = `node scripts/jejak-setara/semai.mjs --jalankan -- --remote --env uji`; produksi = `… --remote --env produksi`.
+Contoh pemakaian untuk Sesi A (Permintaan A-5, Revisi 1): `db:semai:lokal` = `node scripts/jejak-setara/semai.mjs --jalankan -- --local --persist-to .wrangler/state`, dengan folder yang sama seperti `db:migrasi:lokal`. Di job "Deploy uji", sesudah langkah "Migrasi D1 uji" dan dengan syarat yang sama: `node scripts/jejak-setara/semai.mjs --jalankan -- --remote --env uji`. Produksi: `… --remote --env produksi`.
 
 ### Protokol, API, dan migrasi
 
 - **Protokol:** tidak ada pesan baru atau berubah. Isi bank diperiksa terhadap skema pesan JS-02 yang sudah ada: `kejadian_terbuka`, `petunjuk`, `hasil_1`, `hasil_2`, `selesai` (pemain) dan `data_pembahasan` (layar kelas). Teks rujukan di kartu dampak berasal dari `teks` pustaka (≤ 160 karakter).
 - **API:** tidak ada.
-- **Migrasi D1:** tidak ada. Tabel dibuat Sesi A di JS-03 menurut kontrak di atas (Permintaan A-5).
+- **Migrasi D1:** tidak ada. Tabelnya dari `0001_awal.sql` (JS-03), dan JS-05 tidak menulis migrasi sendiri (`PLAN.md`, catatan untuk Plan JS-05).
 
 ## Aset
 
@@ -507,6 +473,10 @@ Setiap catatan diawali "Yang dibutuhkan kejadian: …." lalu kalimat berulang ya
 
 Contoh hasil lengkap, JR-19: "Yang dibutuhkan kejadian: pejalan kaki didahulukan saat menyeberang di tempat penyeberangan (K-06). Rujukan baru: baca pasalnya penuh di naskah resmi. Pra-pemeriksaan agen hanya memakai sumber sekunder, jadi bunyinya perlu dibaca langsung. Pastikan juga Pasal 131 tidak diubah UU Cipta Kerja." Panjang ke-23 catatan 221–482 karakter.
 
+### D-6 Id bank awal (Revisi 1)
+
+Saran: UUID tetap yang dihitung dari kode atau nama (P-40). Id yang sama di lingkungan uji dan produksi memudahkan membandingkan statistik dan ekspor per kejadian, dan semai ulang aman tanpa pemeriksaan tambahan. Alternatif: UUID acak setiap kali semai berjalan. Cara itu juga berfungsi karena semai hanya berlaku sekali per basis data, tetapi id berbeda di setiap lingkungan, dan teks SQL tidak lagi sama setiap kali dicetak sehingga lebih sulit diuji.
+
 ### D-5 Batas dan aturan yang belum tertulis di Architecture 5.4
 
 | Hal | Usulan | Alasan |
@@ -532,6 +502,7 @@ Batas ini diminta masuk Architecture 5.4 lewat Permintaan A-7.
 - **B-2** `semai.mjs` menyertakan galat asal (`cause`) pada galat "Bank awal tidak sah" (aturan ESLint `preserve-caught-error`). Pesan yang tampil tidak berubah.
 - **B-3** `bank-aturan` memuat contoh tambahan di luar tabel rencana uji: situasi berupa angka, petunjuk berisi ganti baris, id rujukan `R-08`, aturan yang tetap berjalan walaupun skema gagal (P-12), bentuk `letak` (P-15), kunci aset tanpa daftar aset, dan bank yang bukan objek. Semuanya mengikuti perilaku spesifikasi.
 - **B-4** `bank-semai` juga mencocokkan SQL setiap rujukan dan baris `kejadian` pertama huruf demi huruf dengan bentuk di bagian "SQL semai", dan menguji bank yang tidak ada (status "Bank tidak ditemukan").
+- **B-6 (Revisi 1)** `bank-semai` membuat akun peninjau uji di tabel `pengguna` sebelum menandai JR-04 terverifikasi, karena `rujukan.diverifikasi_oleh` merujuk tabel itu. Uji juga mencocokkan pernyataan versi, paket, dan isi paket pertama huruf demi huruf dengan bagian "SQL semai".
 - **B-5** Sebelum `kampung.json` ada, uji `bank-peta` dicoba dengan dua peta sementara di salinan kerja: peta dengan titik cukup (4 uji lulus) dan peta dengan satu titik di z3 (4 uji gagal, seperti seharusnya). Kedua peta dihapus dan tidak ikut ZIP.
 
 ## Kriteria penerimaan
@@ -545,15 +516,16 @@ Batas ini diminta masuk Architecture 5.4 lewat Permintaan A-7.
 - [ ] AC-7 **Protokol JS-02.** Dari setiap kejadian dibangun `kejadian_terbuka`, `petunjuk`, `hasil_1`, `hasil_2`, dan `data_pembahasan`, ditambah satu `selesai` berisi 16 rekap. Ke-81 pesan lolos skema `protokol.ts` yang ada.
 - [ ] AC-8 **Aset.** `setTokoh` sama dengan D-1: 44 kunci, 37 berbeda (26 `npc_` dan 11 `obj_`). Setiap kunci punya berkas `npc/{kunci}.png` atau `obj/{kunci}.png` dan baris di `CREDITS.md` yang memuat jalur itu dan kata "disetujui"; tidak ada kunci berakhiran `_atas`. Tabel set tokoh di `NASKAH.md` sama dengan bank.
 - [ ] AC-9 **SQL.** `teksSql(bank)` selalu sama untuk bank yang sama, berisi baris keterangan dan 73 pernyataan; tanpa `BEGIN`, `COMMIT`, atau kata "terverifikasi"; setiap pernyataan ≤ 100.000 byte; setiap `INSERT … SELECT` memiliki `WHERE`.
-- [ ] AC-10 **Semai pertama.** Di SQLite kosong dengan tabel dari migrasi JS-03 (bila ada) atau `kontrak-d1.sql`, semai menghasilkan 23 rujukan, 16 kejadian, 16 versi, 1 paket, 16 isi paket, dan 1 penanda. Semua rujukan `belum` dengan teks, sumber, catatan, dan kode Sehari sama dengan bank; semua kejadian `tinjau`; semua versi bernomor 1, `kerja`, tanpa pembuat, dengan catatan D-3 dan `isi_json` sama persis dengan `JSON.stringify` kejadiannya; paket aktif dengan urutan K-01 sampai K-16; waktu dalam 5 detik dari jam uji; penanda sesuai P-30.
-- [ ] AC-11 **Sekali per basis data.** Sesudah simulasi kerja di konsol (JR-04 ditandai terverifikasi oleh akun peninjau uji, teks JR-02 dan judul K-01 disunting, paket dinonaktifkan, K-05 dan JR-23 dihapus), semai ulang tidak mengubah satu baris pun.
+- [ ] AC-10 **Semai pertama (Revisi 1).** Di SQLite kosong dengan tabel dari semua migrasi di `server/jejak-setara/migrations/`, semai menghasilkan 23 rujukan, 16 kejadian, 16 versi, 1 paket, 16 isi paket, dan 1 penanda. Id kejadian, versi, dan paket sama dengan P-40, dan setiap versi menunjuk id kejadiannya. Semua rujukan `belum` dengan teks, sumber, catatan, dan kode Sehari sama dengan bank; semua kejadian `tinjau`; semua versi bernomor 1, `kerja`, tanpa pembuat, dengan catatan D-3 dan `isi_json` sama persis dengan `JSON.stringify` kejadiannya; paket aktif dengan urutan K-01 sampai K-16; waktu dalam 5 detik dari jam uji; penanda sesuai P-30.
+- [ ] AC-11 **Sekali per basis data (Revisi 1).** Sesudah simulasi kerja di konsol (JR-04 ditandai terverifikasi oleh akun peninjau uji yang dibuat di tabel `pengguna`, teks JR-02 dan judul K-01 disunting, paket dinonaktifkan, K-05 dan JR-23 dihapus), semai ulang tidak mengubah satu baris pun.
 - [ ] AC-12 **Semai terputus.** Semai yang berhenti sesudah 1, 23, 24, 36, atau 72 pernyataan, lalu dijalankan ulang penuh, menghasilkan isi yang sama dengan AC-10.
 - [ ] AC-13 **Pengutip.** Catatan berisi tanda kutip tunggal, tanda kutip ganda dua kali, dan potongan `; DROP TABLE rujukan; --` tersimpan utuh dan tabel tetap berisi 23 baris. `kutip(null)` menghasilkan `NULL`, `kutip("it's")` menghasilkan `'it''s'`, dan teks berisi karakter NUL ditolak.
 - [ ] AC-14 **Perintah semai.** Dijalankan sebagai proses Node: `--sql` keluar 0 dengan keluaran sama persis `teksSql(bank)`; tanpa argumen dan dengan argumen salah keluar 1 dan mencetak cara pakai. Pada salinan sementara repositori: tanpa `d1_databases`, `--jalankan -- --local` keluar 0 dengan pesan "Belum tersedia" persis; dengan `d1_databases` tetapi tanpa `node_modules`, keluar 1 dengan pesan `wrangler` belum terpasang; dengan bank ber-`versi` 2, keluar 1 dengan pesan bank tidak sah. `adaD1` benar untuk delapan contoh di rencana uji, dan `argumenWrangler` menghasilkan argumen P-33. `bacaBank` menolak JSON rusak, bank tanpa daftar, dan rujukan berkolom status.
 - [ ] AC-15 **Peta.** Selama `kampung.json` belum ada, `bank-peta` dilaporkan dilewati dengan nama P-38. Begitu ada, `bacaPeta` menerima peta itu, `periksaPaketPeta` untuk Paket inti 16 memberi 0 temuan, dan `tempatkanKejadian` berhasil menempatkan ke-16 kejadian di titik zonanya untuk tiga benih berbeda.
 - [ ] AC-16 **Perintah repositori.** `content:check:jejak` dan `test:jejak` lulus; `build:jejak` tetap lulus. Bila perintah ini tidak bisa dijalankan di lingkungan agen, pengganti yang dipakai dan alasannya dicatat di laporan uji, dan hasil pastinya dibaca di alur kerja "Jejak: uji" sesudah push.
-- [ ] AC-17 **Galeri dan batas berkas.** Berkas baru dan berubah tidak menambah kelas Tailwind di CSS galeri (`build:pages` menghasilkan 178 berkas identik byte, atau pemeriksaan pengganti 0 kelas baru). Hanya berkas di tabel "Berkas yang dibuat dan diubah" yang berubah.
+- [ ] AC-17 **Galeri dan batas berkas.** Berkas baru dan berubah tidak menambah kelas Tailwind di CSS galeri (`build:pages` menghasilkan 178 berkas identik byte, atau pemeriksaan pengganti 0 kelas baru). Hanya berkas di tabel "Berkas yang dibuat dan diubah" yang berubah, dan `kontrak-d1.sql` terhapus (Revisi 1).
 - [ ] AC-18 **Dokumen.** `NASKAH.md` memuat bagian "Set tokoh dan latar titik (bank awal)" dengan tabel D-1 dan D-2 yang disetujui; `STATUS.md` mencatat Build dan Test; laporan `tests/JS-05-hasil.md` memuat setiap kriteria.
+- [ ] AC-19 **Id bank awal (Revisi 1).** `uuid5` menghasilkan `886313e1-3b8a-5372-9b90-0c9aee199e5d` untuk nama `python.org` di ruang nama DNS (contoh dokumentasi Python) dan menolak UUID dasar yang tidak sah. `DASAR_ID` serta id K-01, versi kerja K-01, dan Paket inti 16 sama dengan P-40. Ke-33 id bank awal berbentuk UUID versi 5, berbeda satu sama lain, dan sama bila dihitung ulang.
 
 ## Rencana uji
 
@@ -566,7 +538,7 @@ Batas ini diminta masuk Architecture 5.4 lewat Permintaan A-7.
 | `bank-aturan.test.ts` | AC-3: satu kejadian sah (salinan K-03) tanpa temuan; contoh cacat per kode (di bawah); contoh bank cacat; `periksaPaketPeta`; `adaGalat`; fungsi teks |
 | `bank-protokol.test.ts` | AC-7 |
 | `bank-aset.test.ts` | AC-8 (bagian berkas dan kredit) |
-| `bank-semai.test.ts` | AC-9 sampai AC-14 dan bagian SQL AC-6 |
+| `bank-semai.test.ts` | AC-9 sampai AC-14, AC-19, dan bagian SQL AC-6. Skenario SQLite memakai tabel dari migrasi (Revisi 1) |
 | `bank-peta.test.ts` | AC-15 |
 | `naskah-cocok.test.ts` | AC-4, AC-5, AC-6 (pustaka), dan tabel set tokoh di `NASKAH.md` (AC-8) |
 
@@ -616,7 +588,7 @@ Lingkungan agen tidak bisa memasang paket, jadi `vitest`, `tsc`, ESLint, dan `bu
 
 Tidak ada daftar periksa layar (AGENTS bagian 9) yang berlaku, karena JS-05 tidak punya layar. Pemeriksaan manual oleh pemilik proyek: D-1 sampai D-5 di spesifikasi ini, dan kecocokan catatan rujukan saat Peninjau memverifikasi di konsol (JS-12).
 
-## Hasil pemeriksaan prototipe (7 November 2026)
+## Hasil pemeriksaan prototipe (7 November 2026, sebelum Revisi 1)
 
 Diperiksa dengan prototipe di luar repositori (Node 22.23.4, `zod` 3.25.76, `tsx` 4.23.12, TypeScript 6.0.3, SQLite 3.53.4 bawaan Node), memakai `acak.ts` dan `protokol.ts` JS-02 yang asli:
 
