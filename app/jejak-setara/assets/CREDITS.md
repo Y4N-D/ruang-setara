@@ -77,3 +77,56 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 | `ubin/ubin_pagi.png` | U-01 sampai U-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ubin/ubin_siang.png` | U-01 sampai U-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ubin/ubin_sore.png` | U-01 sampai U-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+
+## Objek dan bangunan (`obj/`)
+
+| File | ID | Atribusi |
+|---|---|---|
+| `obj/obj_angkot.png` | O-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_angkot_atas.png` | O-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_bale.png` | O-14 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_bale_atas.png` | O-14 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_gerbang_buka.png` | O-07 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_gerbang_buka_atas.png` | O-07 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_gerbang_tutup.png` | O-07 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_gerbang_tutup_atas.png` | O-07 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_gerobak.png` | O-13 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_gerobak_atas.png` | O-13 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_halte.png` | O-08 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_halte_atas.png` | O-08 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_jembatan_datar.png` | O-16 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_jembatan_tegak.png` | O-16 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_kantin.png` | O-05 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_kantin_atas.png` | O-05 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_kantor_desa.png` | O-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_kantor_desa_atas.png` | O-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_kelapa.png` | O-17 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_kelapa_atas.png` | O-17 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_los.png` | O-12 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_los_atas.png` | O-12 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_pos_ronda.png` | O-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_pos_ronda_atas.png` | O-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_puskesmas.png` | O-18 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_puskesmas_atas.png` | O-18 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rambu_halte.png` | O-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rambu_halte_atas.png` | O-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rambu_seberang.png` | O-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rambu_seberang_atas.png` | O-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rumah_a.png` | O-02 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rumah_a_atas.png` | O-02 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rumah_b.png` | O-02 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rumah_b_atas.png` | O-02 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rumah_nara.png` | O-01 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_rumah_nara_atas.png` | O-01 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_sekolah.png` | O-04 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_sekolah_atas.png` | O-04 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_tenda_a.png` | O-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_tenda_a_atas.png` | O-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_tenda_b.png` | O-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_tenda_b_atas.png` | O-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_tiang_bendera.png` | O-06 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_tiang_bendera_atas.png` | O-06 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_warung_made.png` | O-03 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_warung_made_atas.png` | O-03 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_warung_wifi.png` | O-20 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_warung_wifi_atas.png` | O-20 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |

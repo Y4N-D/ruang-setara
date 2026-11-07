@@ -586,9 +586,141 @@ def obj_warung_wifi():
     return _bingkai(d)
 
 
+# --------------------------------------------------------------------------- kelompok O2: objek umum
+def obj_pohon():
+    """Pohon rindang (O-21), 3x3 ubin: batang 1 ubin di tengah bawah, tajuk 2x2 ubin di lapisan atas."""
+    d = C(48, 48)                                                                    # noqa: F405
+    d.r(21, 26, 6, 19, WOOD); d.vl(25, 26, 44, WOODD); d.vl(26, 26, 44, WOODD)       # noqa: F405  batang
+    d.r(19, 44, 10, 2, WOOD); d.hl(19, 28, 45, WOODD); d.p(18, 45, WOOD); d.p(29, 45, WOODD)   # noqa: F405  akar
+    for cx, cy, r in ((24, 8, 7), (15, 11, 7), (33, 11, 7), (24, 15, 8), (12, 19, 7), (36, 19, 7), (20, 22, 7),
+                      (29, 22, 7)):
+        d.disc(cx, cy, r, LEAF)                                                      # noqa: F405  tajuk
+    for y in range(48):                                                              # sisi kanan bawah teduh
+        for x in range(48):
+            if d.px[x, y] == LEAF and (x - 24) + (y - 14) > 10 and (x + y) % 2 == 0:  # noqa: F405
+                d.p(x, y, GRASS)                                                     # noqa: F405
+    for x, y in ((11, 11), (19, 6), (27, 3), (8, 18), (17, 14), (26, 10), (33, 15), (15, 22), (24, 19), (31, 22)):
+        d.p(x, y, GRASS); d.hl(x + 1, x + 3, y + 1, GRASS); d.p(x + 4, y, GRASS)     # noqa: F405  gerombol daun
+    return _bingkai(d)
+
+
+def obj_semak():
+    """Semak (O-22), 1x1 ubin."""
+    d = C(16, 16)                                                                    # noqa: F405
+    for cx, cy, r in ((8, 5, 4), (4, 9, 4), (11, 9, 4), (7, 11, 4)):
+        d.disc(cx, cy, r, LEAF)                                                      # noqa: F405  semak
+    for y in range(16):
+        for x in range(16):
+            if d.px[x, y] == LEAF and (x - 8) + (y - 8) > 3 and (x + y) % 2 == 0:    # noqa: F405
+                d.p(x, y, GRASS)                                                     # noqa: F405
+    for x, y in ((2, 7), (6, 3), (5, 10)):
+        d.p(x, y, GRASS); d.hl(x + 1, x + 2, y + 1, GRASS); d.p(x + 3, y, GRASS)     # noqa: F405  gerombol daun
+    return _bingkai(d)
+
+
+PAGAR = {   # nama ruas: arah yang tersambung (w, e, n, s). Nama ruas tidak boleh berakhiran _atas (lihat OBJEK).
+    "datar": "we", "tegak": "ns", "sudut_atas_kiri": "es", "sudut_atas_kanan": "ws",
+    "sudut_bawah_kiri": "en", "sudut_bawah_kanan": "wn", "ujung_kiri": "e", "ujung_kanan": "w",
+}
+
+
+def _pagar(gaya, jenis):
+    """Ruas pagar 1x1 ubin. Sisi yang tersambung digambar menembus tepi lalu dipotong, sehingga ruas yang
+    berdampingan bersambung tanpa garis luar di tengah sambungan."""
+    sambung = PAGAR[jenis]
+    E = 6
+    d = C(16 + 2 * E, 16 + 2 * E)                                                    # noqa: F405
+    o = E                                                                            # pojok ubin di kanvas
+    xa = o - E if "w" in sambung else o + 5                                          # rentang mendatar
+    xb = o + 15 + E if "e" in sambung else o + 10
+    ya = o - E if "n" in sambung else o + 3                                          # rentang tegak
+    yb = o + 15 + E if "s" in sambung else o + 13
+    tiang_tengah = jenis not in ("datar", "tegak")
+    if gaya == "bambu":
+        if "w" in sambung or "e" in sambung:                                         # palang mendatar
+            for y in (o + 6, o + 11):
+                d.hl(xa, xb, y, WOOD); d.hl(xa, xb, y + 1, WOODD)                    # noqa: F405
+        if "n" in sambung or "s" in sambung:                                         # palang tegak
+            d.vl(o + 6, ya, yb, WOOD); d.vl(o + 9, ya, yb, WOODD)                    # noqa: F405
+        if jenis == "datar":
+            tiang = [(o + 1, o + 2, 2), (o + 6, o + 2, 2), (o + 11, o + 2, 2)]
+        elif jenis == "tegak":
+            tiang = [(o + 6, o + 1, 4), (o + 6, o + 9, 4)]
+        else:
+            tiang = [(o + 6, o + 1, 4)]
+        for x, y, lebar in tiang:                                                    # tiang bambu beruas
+            tinggi = 6 if jenis == "tegak" else 13
+            d.r(x, y, lebar, tinggi, WOOD); d.vl(x + lebar - 1, y, y + tinggi - 1, WOODD)   # noqa: F405
+            for yy in range(y + 3, y + tinggi, 4):
+                d.hl(x, x + lebar - 1, yy, WOODD)                                    # noqa: F405
+            d.p(x + lebar - 1, y, T)                                                 # noqa: F405  ujung membulat
+    else:                                                                            # tembok sekolah
+        if "w" in sambung or "e" in sambung:
+            d.r(xa, o + 6, xb - xa + 1, 8, CREAM); d.hl(xa, xb, o + 12, MIST); d.hl(xa, xb, o + 13, SLATE)   # noqa: F405
+            d.r(xa, o + 4, xb - xa + 1, 2, SKYD); d.hl(xa, xb, o + 4, SIANG1)        # noqa: F405  tutup tembok
+        if "n" in sambung or "s" in sambung:
+            d.r(o + 5, ya, 6, yb - ya + 1, SKYD); d.vl(o + 5, ya, yb, SIANG1)        # noqa: F405  tembok dari atas
+        if tiang_tengah:                                                             # pilar sudut
+            d.r(o + 4, o + 4, 8, 10, CREAM); d.vl(o + 11, o + 4, o + 13, MIST); d.hl(o + 4, o + 11, o + 13, SLATE)  # noqa: F405
+            d.r(o + 3, o + 2, 10, 3, SKYD); d.hl(o + 3, o + 12, o + 2, SIANG1)       # noqa: F405
+    c = C(d.w + 2, d.h + 2)                                                          # noqa: F405
+    c.paste(d, 1, 1)
+    c.outline()
+    hasil = C(18, 18)                                                                # noqa: F405
+    hasil.im.alpha_composite(c.im.crop((E, E, E + 18, E + 18)))
+    hasil.px = hasil.im.load()
+    return hasil
+
+
+def obj_bangku():
+    """Bangku panjang kayu (O-25), 2x1 ubin."""
+    d = C(32, 16)                                                                    # noqa: F405
+    d.r(2, 1, 28, 3, WOOD); d.hl(2, 29, 3, WOODD)                                    # noqa: F405  sandaran
+    for x in (4, 26):
+        d.r(x, 4, 2, 3, WOODD)                                                       # noqa: F405
+    d.r(1, 7, 30, 3, WOOD); d.hl(1, 30, 9, WOODD)                                    # noqa: F405  dudukan
+    for x in (3, 27):
+        d.r(x, 10, 2, 5, WOODD)                                                      # noqa: F405  kaki
+    return _bingkai(d)
+
+
+def obj_tempat_sampah():
+    """Dua tempat sampah untuk memilah (O-26), 1x1 ubin: hijau dan kuning, tanpa tulisan."""
+    d = C(16, 16)                                                                    # noqa: F405
+    for x0, dasar, gelap in ((1, LEAF, GRASS), (9, SUN, MANGO)):                     # noqa: F405
+        d.r(x0, 5, 6, 10, dasar); d.vl(x0 + 5, 5, 14, gelap); d.hl(x0, x0 + 5, 14, gelap)
+        d.r(x0 - 1, 3, 8, 2, DUSK); d.hl(x0, x0 + 5, 3, SLATE)                       # noqa: F405  tutup
+        d.hl(x0 + 2, x0 + 3, 2, DUSK)                                                # noqa: F405  pegangan
+    return _bingkai(d)
+
+
+def obj_motor():
+    """Motor parkir (O-27), 2x1 ubin: matik mango seperti motor Dimas di Sehari Setara, tanpa merek dan pelat."""
+    d = C(32, 16)                                                                    # noqa: F405
+    for cx in (6, 25):
+        d.disc(cx, 12, 3, INK); d.disc(cx, 12, 1, SLATE)                             # noqa: F405  roda
+    d.r(8, 6, 14, 5, MANGO); d.hl(8, 21, 6, SUN); d.hl(8, 21, 10, CORAL)             # noqa: F405  badan
+    d.r(7, 4, 9, 2, DUSK)                                                            # noqa: F405  jok
+    d.r(20, 3, 3, 7, MANGO); d.vl(22, 3, 9, CORAL)                                   # noqa: F405  depan
+    d.r(20, 1, 5, 1, SLATE); d.p(23, 4, SUN)                                         # noqa: F405  setang dan lampu
+    _garis(d, 22, 9, 25, 12, SLATE)                                                  # noqa: F405  garpu depan
+    d.hl(10, 15, 11, SLATE)                                                          # noqa: F405  pijakan kaki
+    return _bingkai(d)
+
+
+def obj_tiang_lampu():
+    """Tiang lampu jalan (O-28), 1x2 ubin."""
+    d = C(16, 32)                                                                    # noqa: F405
+    d.r(6, 6, 2, 24, SLATE); d.vl(7, 6, 29, DUSK); d.r(4, 29, 6, 3, DUSK)            # noqa: F405  tiang dan alas
+    d.hl(7, 12, 5, SLATE); d.hl(7, 12, 6, DUSK)                                      # noqa: F405  lengan
+    d.r(10, 6, 5, 3, MIST); d.hl(10, 14, 6, SLATE); d.r(11, 8, 3, 2, LAMPU)          # noqa: F405  kap dan lampu
+    return _bingkai(d)
+
+
 # --------------------------------------------------------------------------- daftar objek
 # nama: (fungsi, ukuran dalam ubin (lebar, tinggi), baris potong kanvas atau None, kotak padat [(x, y, l, t)] dalam
 #        ubin relatif terhadap pojok kiri atas, jenis bayangan di tanah, bisa dilewati?)
+# Nama objek tidak boleh berakhiran _atas, karena akhiran itu dipakai berkas bagian atas (obj_{nama}_atas.png).
 # Jenis bayangan: "kotak" = bayangan bangunan U-13 mengikuti tapak; "pohon" = U-14 2x2 di bawah tajuk;
 # "kecil" = U-14 1x1 di ubin batang (pohon kelapa); None = tanpa bayangan (tiang, rambu, gerbang, jembatan).
 OBJEK = {
@@ -617,13 +749,29 @@ OBJEK = {
     "puskesmas": (obj_puskesmas, (6, 4), 31, [(0, 1, 6, 3)], "kotak", False),
     "kantor_desa": (obj_kantor_desa, (6, 4), 31, [(0, 1, 6, 3)], "kotak", False),
     "warung_wifi": (obj_warung_wifi, (4, 3), 21, [(0, 1, 4, 2)], "kotak", False),
+    # kelompok O2
+    "pohon": (obj_pohon, (3, 3), 29, [(1, 2, 1, 1)], "pohon", False),
+    "semak": (obj_semak, (1, 1), None, [(0, 0, 1, 1)], "kecil", False),
+    "bangku": (obj_bangku, (2, 1), None, [(0, 0, 2, 1)], None, False),
+    "tempat_sampah": (obj_tempat_sampah, (1, 1), None, [(0, 0, 1, 1)], "kecil", False),
+    "motor": (obj_motor, (2, 1), None, [(0, 0, 2, 1)], "kecil", False),
+    "tiang_lampu": (obj_tiang_lampu, (1, 2), 17, [(0, 1, 1, 1)], None, False),
 }
+for _gaya in ("bambu", "sekolah"):
+    for _jenis in PAGAR:
+        OBJEK[f"pagar_{_gaya}_{_jenis}"] = ((lambda g, j: (lambda: _pagar("bambu" if g == "bambu" else "tembok", j)))(
+            _gaya, _jenis), (1, 1), None, [(0, 0, 1, 1)], None, False)
 KODE_OBJEK = {"rumah_nara": "O-01", "rumah_a": "O-02", "rumah_b": "O-02", "warung_made": "O-03", "sekolah": "O-04",
               "kantin": "O-05", "tiang_bendera": "O-06", "gerbang_tutup": "O-07", "gerbang_buka": "O-07",
               "halte": "O-08", "angkot": "O-09", "rambu_seberang": "O-10", "rambu_halte": "O-10",
               "tenda_a": "O-11", "tenda_b": "O-11", "los": "O-12", "gerobak": "O-13", "bale": "O-14",
               "pos_ronda": "O-15", "jembatan_datar": "O-16", "jembatan_tegak": "O-16", "kelapa": "O-17",
-              "puskesmas": "O-18", "kantor_desa": "O-19", "warung_wifi": "O-20"}
+              "puskesmas": "O-18", "kantor_desa": "O-19", "warung_wifi": "O-20",
+              "pohon": "O-21", "semak": "O-22", "bangku": "O-25", "tempat_sampah": "O-26", "motor": "O-27",
+              "tiang_lampu": "O-28"}
+for _jenis in PAGAR:
+    KODE_OBJEK[f"pagar_bambu_{_jenis}"] = "O-23"
+    KODE_OBJEK[f"pagar_sekolah_{_jenis}"] = "O-24"
 
 
 def pisah(c, baris):

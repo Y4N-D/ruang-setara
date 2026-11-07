@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Versi | 0.4 |
+| Versi | 0.5 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Kelompok A dan U disetujui. Kelompok O1 (bangunan penanda zona) diserahkan: menunggu "Setuju: aset O1" |
+| Tahap saat ini | Kelompok A, U, dan O1 disetujui. Kelompok O2 (objek umum) diserahkan: menunggu "Setuju: aset O2" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -27,6 +27,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Kelompok U | Lembar ubin tiga masa (377 ubin per lembar) diserahkan, menunggu "Setuju: aset U" |
 | 6 Nov 2026 | Kelompok U | Pemilik proyek membalas "Setuju: aset U": U-01 sampai U-15 Disetujui, termasuk warna bahan baru. Kredit lembar ubin ditambahkan; Permintaan C-2 dilengkapi |
 | 6 Nov 2026 | Kelompok O1 | 25 objek (48 berkas) diserahkan, menunggu "Setuju: aset O1" |
+| 6 Nov 2026 | Kelompok O1 | Pemilik proyek membalas "Setuju: aset O1": O-01 sampai O-20 Disetujui; kredit 48 berkas objek ditambahkan |
+| 6 Nov 2026 | Kelompok O2 | Objek umum (24 berkas, termasuk 16 ruas pagar) diserahkan, menunggu "Setuju: aset O2" |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -47,7 +49,7 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 
 | | |
 |---|---|
-| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A dan U Disetujui 6 Nov 2026; kelompok O1 diserahkan, menunggu "Setuju: aset O1" |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, dan O1 Disetujui 6 Nov 2026; kelompok O2 diserahkan, menunggu "Setuju: aset O2" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -322,26 +324,26 @@ Bangunan dan pohon terdiri atas `obj_{nama}.png` dan `obj_{nama}_atas.png` (usul
 
 | ID | Berkas | Ukuran (ubin) | Isi | Zona dan kejadian | Status |
 |---|---|---|---|---|---|
-| O-01 | `obj_rumah_nara` | 4 × 4 | Rumah Nara: bentuk rumah a dengan pintu `teal`, kanopi `coral` di atas pintu, dan dua pot bunga; jendela bertirai `rose` | Z1, K-01 | Ditinjau (kelompok O1) |
-| O-02 | `obj_rumah_a`, `obj_rumah_b` | 4 × 4, 3 × 3 | Rumah warga: varian a (uji gaya, atap limasan) dan varian b (atap pelana, lebih kecil) | Z1 | Ditinjau (kelompok O1) |
-| O-03 | `obj_warung_made` | 3 × 3 | Warung berdinding papan, atap `coral`, etalase terbuka berisi stoples dan jajanan polos | Z1, K-02 | Ditinjau (kelompok O1) |
-| O-04 | `obj_sekolah` | 10 × 6 | Gedung SMP dua lantai: dinding `cream`, atap limasan `sky-d`, selasar berpagar, tiga pintu kelas, tangga ke lantai dua di kanan depan | Z2, K-04 | Ditinjau (kelompok O1) |
-| O-05 | `obj_kantin` | 4 × 3 | Kantin beratap `sky-d` dengan jendela layan berisi jajanan polos | Z2, K-03 | Ditinjau (kelompok O1) |
-| O-06 | `obj_tiang_bendera` | 1 × 3 | Tiang bendera merah putih di atas alas semen | Z2 | Ditinjau (kelompok O1) |
-| O-07 | `obj_gerbang_tutup`, `obj_gerbang_buka` | 4 × 2 | Gerbang besi berpilar `cream` bertopi `sky-d`: tertutup bergembok dan terbuka | Z2, lobi | Ditinjau (kelompok O1) |
-| O-08 | `obj_halte` | 3 × 2 | Halte beratap `teal` dengan panel belakang dan bangku kayu | Z3, K-05, K-06 | Ditinjau (kelompok O1) |
-| O-09 | `obj_angkot` | 3 × 2 | Angkot `sky-d` bergaris putih seperti di Sehari Setara, pintu samping terbuka | Z3, K-06 | Ditinjau (kelompok O1) |
-| O-10 | `obj_rambu_seberang`, `obj_rambu_halte` | 1 × 2 | Rambu biru bertepi putih: segitiga berpejalan kaki, dan gambar angkot | Z3 | Ditinjau (kelompok O1) |
-| O-11 | `obj_tenda_a`, `obj_tenda_b` | 3 × 3 | Tenda bergaris `mango` dan `sun`: varian a berisi sayur dan buah, varian b berisi tampah bumbu | Z4 | Ditinjau (kelompok O1) |
-| O-12 | `obj_los` | 6 × 3 | Los beratap seng (`slate`), tirai bergaris, lapak sepanjang depan | Z4, K-07 | Ditinjau (kelompok O1) |
-| O-13 | `obj_gerobak` | 2 × 2 | Gerobak kayu beroda dengan atap kecil `teal` dan etalase kaca | Z4, Z7, K-14 | Ditinjau (kelompok O1) |
-| O-14 | `obj_bale` | 5 × 4 | Bale terbuka: lantai papan panggung, tiang kayu, atap limasan `wood-d` | Z5, K-09, K-10 | Ditinjau (kelompok O1) |
-| O-15 | `obj_pos_ronda` | 3 × 3 | Pos ronda panggung beratap `wood-d` dengan kentongan tergantung | Z5 | Ditinjau (kelompok O1) |
-| O-16 | `obj_jembatan_datar`, `obj_jembatan_tegak` | 3 × 2, 2 × 3 | Jembatan papan berpagar, satu berkas tanpa bagian atas, bisa dilewati di atas air | Z6 | Ditinjau (kelompok O1) |
-| O-17 | `obj_kelapa` | 3 × 4 | Pohon kelapa: batang condong berbuku, tajuk 11 pelepah dengan buah | Z6 | Ditinjau (kelompok O1) |
-| O-18 | `obj_puskesmas` | 6 × 4 | Dinding `white`, atap limasan `teal`, papan bergambar hati `leaf`, pintu kaca ganda, landai berpegangan di samping pintu | Z7, K-13 | Ditinjau (kelompok O1) |
-| O-19 | `obj_kantor_desa` | 6 × 4 | Dinding `cream`, atap `teal`, serambi bertiang putih, pintu kayu ganda, tiang bendera kecil | Z7, K-14 | Ditinjau (kelompok O1) |
-| O-20 | `obj_warung_wifi` | 4 × 3 | Atap `berry`, antena, papan bergambar gelombang sinyal `teal`, colokan, bangku panjang | Z8, K-15, K-16 | Ditinjau (kelompok O1) |
+| O-01 | `obj_rumah_nara` | 4 × 4 | Rumah Nara: bentuk rumah a dengan pintu `teal`, kanopi `coral` di atas pintu, dan dua pot bunga; jendela bertirai `rose` | Z1, K-01 | Disetujui (6 Nov) |
+| O-02 | `obj_rumah_a`, `obj_rumah_b` | 4 × 4, 3 × 3 | Rumah warga: varian a (uji gaya, atap limasan) dan varian b (atap pelana, lebih kecil) | Z1 | Disetujui (6 Nov) |
+| O-03 | `obj_warung_made` | 3 × 3 | Warung berdinding papan, atap `coral`, etalase terbuka berisi stoples dan jajanan polos | Z1, K-02 | Disetujui (6 Nov) |
+| O-04 | `obj_sekolah` | 10 × 6 | Gedung SMP dua lantai: dinding `cream`, atap limasan `sky-d`, selasar berpagar, tiga pintu kelas, tangga ke lantai dua di kanan depan | Z2, K-04 | Disetujui (6 Nov) |
+| O-05 | `obj_kantin` | 4 × 3 | Kantin beratap `sky-d` dengan jendela layan berisi jajanan polos | Z2, K-03 | Disetujui (6 Nov) |
+| O-06 | `obj_tiang_bendera` | 1 × 3 | Tiang bendera merah putih di atas alas semen | Z2 | Disetujui (6 Nov) |
+| O-07 | `obj_gerbang_tutup`, `obj_gerbang_buka` | 4 × 2 | Gerbang besi berpilar `cream` bertopi `sky-d`: tertutup bergembok dan terbuka | Z2, lobi | Disetujui (6 Nov) |
+| O-08 | `obj_halte` | 3 × 2 | Halte beratap `teal` dengan panel belakang dan bangku kayu | Z3, K-05, K-06 | Disetujui (6 Nov) |
+| O-09 | `obj_angkot` | 3 × 2 | Angkot `sky-d` bergaris putih seperti di Sehari Setara, pintu samping terbuka | Z3, K-06 | Disetujui (6 Nov) |
+| O-10 | `obj_rambu_seberang`, `obj_rambu_halte` | 1 × 2 | Rambu biru bertepi putih: segitiga berpejalan kaki, dan gambar angkot | Z3 | Disetujui (6 Nov) |
+| O-11 | `obj_tenda_a`, `obj_tenda_b` | 3 × 3 | Tenda bergaris `mango` dan `sun`: varian a berisi sayur dan buah, varian b berisi tampah bumbu | Z4 | Disetujui (6 Nov) |
+| O-12 | `obj_los` | 6 × 3 | Los beratap seng (`slate`), tirai bergaris, lapak sepanjang depan | Z4, K-07 | Disetujui (6 Nov) |
+| O-13 | `obj_gerobak` | 2 × 2 | Gerobak kayu beroda dengan atap kecil `teal` dan etalase kaca | Z4, Z7, K-14 | Disetujui (6 Nov) |
+| O-14 | `obj_bale` | 5 × 4 | Bale terbuka: lantai papan panggung, tiang kayu, atap limasan `wood-d` | Z5, K-09, K-10 | Disetujui (6 Nov) |
+| O-15 | `obj_pos_ronda` | 3 × 3 | Pos ronda panggung beratap `wood-d` dengan kentongan tergantung | Z5 | Disetujui (6 Nov) |
+| O-16 | `obj_jembatan_datar`, `obj_jembatan_tegak` | 3 × 2, 2 × 3 | Jembatan papan berpagar, satu berkas tanpa bagian atas, bisa dilewati di atas air | Z6 | Disetujui (6 Nov) |
+| O-17 | `obj_kelapa` | 3 × 4 | Pohon kelapa: batang condong berbuku, tajuk 11 pelepah dengan buah | Z6 | Disetujui (6 Nov) |
+| O-18 | `obj_puskesmas` | 6 × 4 | Dinding `white`, atap limasan `teal`, papan bergambar hati `leaf`, pintu kaca ganda, landai berpegangan di samping pintu | Z7, K-13 | Disetujui (6 Nov) |
+| O-19 | `obj_kantor_desa` | 6 × 4 | Dinding `cream`, atap `teal`, serambi bertiang putih, pintu kayu ganda, tiang bendera kecil | Z7, K-14 | Disetujui (6 Nov) |
+| O-20 | `obj_warung_wifi` | 4 × 3 | Atap `berry`, antena, papan bergambar gelombang sinyal `teal`, colokan, bangku panjang | Z8, K-15, K-16 | Disetujui (6 Nov) |
 
 #### Rincian kelompok O1 (6 November 2026)
 
@@ -362,14 +364,29 @@ Bangunan dan pohon terdiri atas `obj_{nama}.png` dan `obj_{nama}_atas.png` (usul
 
 | ID | Berkas | Ukuran (ubin) | Isi | Zona dan kejadian | Status |
 |---|---|---|---|---|---|
-| O-21 | `obj_pohon` | batang 1, tajuk 2 × 2 | Pohon rindang (Design System bagian 7) | Semua | Belum |
-| O-22 | `obj_semak` | 1 × 1 | Semak | Semua | Belum |
-| O-23 | `obj_pagar_bambu_datar`, `_tegak`, `_sudut` | 1 × 1 | Pagar bambu `wood` | Z1, K-01 | Belum |
-| O-24 | `obj_pagar_sekolah_datar`, `_tegak`, `_sudut` | 1 × 1 | Pagar tembok sekolah | Z2 | Belum |
-| O-25 | `obj_bangku` | 2 × 1 | Bangku panjang kayu | Z6, Z7, Z8 | Belum |
-| O-26 | `obj_tempat_sampah` | 1 × 1 | Tempat sampah | Semua, K-11 | Belum |
-| O-27 | `obj_motor` | 2 × 1 | Motor parkir tanpa merek dan pelat | Z3, Z4, K-05 | Belum |
-| O-28 | `obj_tiang_lampu` | 1 × 2 | Tiang lampu jalan | Z1, Z3 | Belum |
+| O-21 | `obj_pohon` | 3 × 3 (batang 1 ubin, tajuk 2 × 2) | Pohon rindang: tajuk bergerombol `leaf` dengan lengkung daun dan sisi kanan bawah teduh, batang di tengah bawah | Semua | Ditinjau (kelompok O2) |
+| O-22 | `obj_semak` | 1 × 1 | Semak bergerombol | Semua | Ditinjau (kelompok O2) |
+| O-23 | `obj_pagar_bambu_{ruas}` | 1 × 1 | Pagar bambu `wood` beruas dalam 8 ruas: datar, tegak, sudut atas kiri, sudut atas kanan, sudut bawah kiri, sudut bawah kanan, ujung kiri, ujung kanan | Z1, K-01 | Ditinjau (kelompok O2) |
+| O-24 | `obj_pagar_sekolah_{ruas}` | 1 × 1 | Tembok sekolah `cream` bertutup `sky-d`, dengan 8 ruas yang sama; sudutnya berupa pilar | Z2 | Ditinjau (kelompok O2) |
+| O-25 | `obj_bangku` | 2 × 1 | Bangku panjang kayu bersandaran | Z6, Z7, Z8 | Ditinjau (kelompok O2) |
+| O-26 | `obj_tempat_sampah` | 1 × 1 | Dua tempat sampah untuk memilah, hijau dan kuning, tanpa tulisan | Semua, K-11 | Ditinjau (kelompok O2) |
+| O-27 | `obj_motor` | 2 × 1 | Motor matik `mango` seperti motor Dimas di Sehari Setara, tanpa merek dan pelat | Z3, Z4, K-05 | Ditinjau (kelompok O2) |
+| O-28 | `obj_tiang_lampu` | 1 × 2 | Tiang lampu jalan dengan lampu berwarna `lampu` (#F7D774) | Z1, Z3 | Ditinjau (kelompok O2) |
+
+#### Rincian kelompok O2 (6 November 2026)
+
+| | |
+|---|---|
+| Kode | `scripts/game/art/atas_objek.py` (fungsi objek, `_pagar` untuk semua ruas pagar, dan entri `OBJEK`) |
+| Berkas | 24 PNG di `app/jejak-setara/assets/obj/`: pohon dan tiang lampu dua bagian, objek lain satu berkas, ditambah 8 ruas pagar bambu dan 8 ruas tembok sekolah |
+| Ukuran | Seluruh kelompok O2 4,8 KB |
+| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai ubin |
+| Pratinjau | `preview/obj2_lembar.png` (objek ×3, ruas pagar ×3, dan contoh susunan pagar ×2) dan `preview/obj2_peta.png` (peta contoh 30 × 20 ubin, ×2) |
+
+- Daftar rencana menyebut ruas datar, tegak, dan sudut. Kini setiap pagar punya 8 ruas (empat sudut dan dua ujung), agar pagar bisa mengelilingi halaman dan menyisakan celah di depan pintu atau gerbang.
+- Sisi ruas yang tersambung digambar menembus tepi ubin lalu dipotong, sehingga ruas yang berdampingan menyambung tanpa garis luar di tengah sambungan. Di JS-06, `build_peta.py` memilih ruas dari tetangganya.
+- Kotak padat: pohon hanya di ubin batang; tiang lampu di alasnya; pagar, bangku, tempat sampah, dan motor di seluruh ubinnya.
+- Bayangan di tanah: pohon memakai bayangan pohon 2 × 2 (U-14) di bawah tajuk; semak, tempat sampah, dan motor memakai bayangan kecil (U-14); pagar, bangku, dan tiang lampu tanpa bayangan.
 
 ### O3. Properti kejadian
 
@@ -525,5 +542,5 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## Cara membalas
 
-- **"Setuju: aset O1"** berarti ke-25 objek kelompok O1 disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok O2 (pohon, semak, pagar, bangku, tempat sampah, motor, tiang lampu).
-- Perbaikan cukup ditulis per objek, misalnya "O-17: daun kelapa lebih lebat" atau "O-04: atap sekolah terlalu tinggi". Objek lain yang tidak disebut tetap seperti sekarang.
+- **"Setuju: aset O2"** berarti semua objek kelompok O2 disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok T (penanda kejadian, kotak bantuan, panah kompas, panah diri di peta mini, debu lari, dan kilau kotak).
+- Perbaikan cukup ditulis per objek, misalnya "O-21: pohon lebih rimbun" atau "O-24: tutup tembok jangan biru". Objek lain yang tidak disebut tetap seperti sekarang.

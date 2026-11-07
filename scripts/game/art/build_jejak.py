@@ -30,7 +30,7 @@ from atas_tokoh import (AVATAR, ARAH, BINGKAI, KETERANGAN, WARNA_TAS, avatar, st
                         ikon_kepala, ganti_tas)
 from atas_ubin import (MASA, NAMA_MASA, KOLOM, NOMOR, BLOB, WILAYAH, SUSUNAN, UKURAN_LEMBAR,   # noqa: E402
                        ubin_rumput, ubin_wilayah, lembar_ubin, nomor_tanah)
-from atas_objek import POTONG_ATAP, OBJEK, KODE_OBJEK, obj_rumah_a, pisah   # noqa: E402
+from atas_objek import POTONG_ATAP, OBJEK, KODE_OBJEK, PAGAR, obj_rumah_a, pisah   # noqa: E402
 
 if HERE.parts[-3:] == ("scripts", "game", "art"):      # berada di dalam repositori
     REPO = HERE.parents[2]
@@ -58,17 +58,22 @@ for _masa in MASA:
     ASSETS[f"ubin_{_masa}"] = ("ubin", lambda m=_masa: lembar_ubin(m).im, UKURAN_LEMBAR)
 
 # Kelompok O1 (Ditinjau): bangunan penanda zona; bangunan dan pohon dipotong dua (usulan 6a)
+NAMA_OBJEK = {}                      # nama berkas -> nama objek di OBJEK
 for _nama, (_fn, _ub, _pot, _padat, _bay, _lewat) in OBJEK.items():
     _w, _h = _ub[0] * 16 + 2, _ub[1] * 16 + 2
     if _pot:
         ASSETS[f"obj_{_nama}"] = ("obj", lambda f=_fn, p=_pot: pisah(f(), p)[1].im, (_w, _h - _pot))
         ASSETS[f"obj_{_nama}_atas"] = ("obj", lambda f=_fn, p=_pot: pisah(f(), p)[0].im, (_w, _pot))
+        NAMA_OBJEK[f"obj_{_nama}_atas"] = _nama
     else:
         ASSETS[f"obj_{_nama}"] = ("obj", lambda f=_fn: f().im, (_w, _h))
+    NAMA_OBJEK[f"obj_{_nama}"] = _nama
 
 # Aset berstatus Disetujui: nama -> tanggal. Hanya aset di sini yang masuk CREDITS.md dan manifest.ts.
+KELOMPOK_O1 = {n for n, kode in KODE_OBJEK.items() if kode <= "O-20"}
 DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
-             if nama.startswith(("ava_", "ikon_ava_", "ubin_"))}       # kelompok A dan U (Setuju: aset A, aset U)
+             if nama.startswith(("ava_", "ikon_ava_", "ubin_"))                     # kelompok A dan U
+             or NAMA_OBJEK.get(nama) in KELOMPOK_O1}                                    # kelompok O1
 
 BATAS_STRIP = 6 * 1024              # satu strip avatar atau tokoh
 BATAS_UBIN = 60 * 1024              # satu lembar ubin per masa
@@ -83,8 +88,8 @@ def kode_aset(nama):
         return "A-09"
     if nama.startswith("ubin_"):
         return "U-01 sampai U-15"
-    if nama.startswith("obj_"):
-        return KODE_OBJEK.get(nama[4:].removesuffix("_atas"), "—")
+    if nama in NAMA_OBJEK:
+        return KODE_OBJEK[NAMA_OBJEK[nama]]
     return "—"
 
 
@@ -490,8 +495,8 @@ def render_peta(peta, masa, objek=(("rumah_a", 3, 2),), pemain=()):
         elif jenis == "kecil":
             bayangan[(x0 + w // 2, y0 + h - 1)] = "bayangan_kecil"
         elif jenis == "pohon":
-            for (dx, dy), bag in (((1, 2), "kiri_atas"), ((2, 2), "kanan_atas"), ((1, 3), "kiri_bawah"),
-                                  ((2, 3), "kanan_bawah")):
+            for (dx, dy), bag in (((1, 1), "kiri_atas"), ((2, 1), "kanan_atas"), ((1, 2), "kiri_bawah"),
+                                  ((2, 2), "kanan_bawah")):
                 bayangan[(x0 + dx, y0 + dy)] = f"bayangan_pohon_{bag}"
     for lapis in (tumpang, bayangan):                # lapisan 10: detail dan marka, lalu bayangan
         for (x, y), nama in lapis.items():
@@ -583,10 +588,12 @@ def pratinjau_ubin_lembar():
 # ---------------------------------------------------------------------------
 def pratinjau_obj_lembar():
     L = Lembar(1440, 1440)
-    L.judul("Kelompok O1 — Bangunan penanda zona (×2)", "Sesi C · 6 Nov 2026 · Ditinjau · di atas rumput siang")
+    L.judul("Kelompok O1 — Bangunan penanda zona (×2)", "Sesi C · disetujui 6 Nov 2026 · di atas rumput siang")
     m = MASA["siang"]
     x, y, tinggi_baris = 20, 70, 0
     for nama, (fn, (w, h), potong, _, _, lewat) in OBJEK.items():
+        if KODE_OBJEK[nama] > "O-20":
+            continue
         latar = C((w + 1) * 16, (h + 1) * 16)                                     # noqa: F405
         for ty in range(h + 1):
             for tx in range(w + 1):
@@ -643,7 +650,7 @@ def _pemain_kampung():
 
 def pratinjau_obj_peta():
     L = Lembar(1320, 970)
-    L.judul("Kelompok O1 — Delapan zona di peta contoh", "Sesi C · 6 Nov 2026 · Ditinjau · 40×26 ubin, siang (×2)")
+    L.judul("Kelompok O1 — Delapan zona di peta contoh", "Sesi C · disetujui 6 Nov 2026 · 40×26 ubin, siang (×2)")
     L.tempel(besar(render_peta(peta_kampung(), "siang", OBJEK_KAMPUNG, _pemain_kampung()), 2), 20, 70)
     L.label("Z1 rumah dan gang (kiri atas) · Z2 sekolah · Z7 puskesmas dan kantor desa · Z8 warung berwifi · "
             "Z3 jalan, halte, angkot", 660, 912)
@@ -653,7 +660,7 @@ def pratinjau_obj_peta():
 
 def pratinjau_obj_dekat():
     L = Lembar(1020, 760)
-    L.judul("Kelompok O1 — Potongan dekat (×3)", "Sesi C · 6 Nov 2026 · Ditinjau · dengan garis pindai")
+    L.judul("Kelompok O1 — Potongan dekat (×3)", "Sesi C · disetujui 6 Nov 2026 · dengan garis pindai")
     peta = render_peta(peta_kampung(), "siang", OBJEK_KAMPUNG, _pemain_kampung())
     potong = [((0, 0), "Z1 rumah Nara, rumah warga, warung Pak Made"), ((14, 0), "Z2 gedung SMP dan kantin"),
               ((28, 0), "Z7 puskesmas dan kantor desa"), ((14, 16), "Z5 bale dan pos ronda")]
@@ -664,11 +671,101 @@ def pratinjau_obj_dekat():
     return L.im
 
 
+# ---------------------------------------------------------------------------
+# Pratinjau kelompok O2: objek umum
+# ---------------------------------------------------------------------------
+def _pagar_kotak(gaya, x0, y0, x1, y1, celah=()):
+    """Ruas pagar keliling persegi panjang; celah = kolom di sisi bawah yang dibiarkan terbuka."""
+    hasil = [(f"pagar_{gaya}_sudut_atas_kiri", x0, y0), (f"pagar_{gaya}_sudut_atas_kanan", x1, y0),
+             (f"pagar_{gaya}_sudut_bawah_kiri", x0, y1), (f"pagar_{gaya}_sudut_bawah_kanan", x1, y1)]
+    hasil += [(f"pagar_{gaya}_datar", x, y0) for x in range(x0 + 1, x1)]
+    hasil += [(f"pagar_{gaya}_tegak", x, y) for x in (x0, x1) for y in range(y0 + 1, y1)]
+    for x in range(x0 + 1, x1):
+        if x in celah:
+            continue
+        jenis = "ujung_kanan" if x + 1 in celah else "ujung_kiri" if x - 1 in celah else "datar"
+        hasil.append((f"pagar_{gaya}_{jenis}", x, y1))
+    return hasil
+
+
+def peta_o2():
+    W, H = 30, 20
+    g = [["."] * W for _ in range(H)]
+
+    def isi(x0, y0, x1, y1, ch):
+        for yy in range(y0, y1 + 1):
+            for xx in range(x0, x1 + 1):
+                g[yy][xx] = ch
+
+    isi(0, 8, 29, 8, "s"); isi(0, 12, 29, 12, "s")                    # trotoar
+    isi(0, 9, 29, 11, "a"); isi(0, 10, 29, 10, "-")                    # jalan
+    isi(4, 5, 5, 7, "p")                                               # gang dari pintu rumah ke trotoar
+    isi(18, 1, 27, 6, "s")                                             # halaman sekolah berpagar tembok
+    isi(0, 16, 15, 17, "t")                                            # jalan setapak taman
+    for x, y, ch in ((11, 2, "*"), (14, 6, "+"), (2, 14, "^"), (20, 15, "*"), (26, 18, "+"), (9, 19, "d")):
+        g[y][x] = ch
+    return ["".join(r) for r in g]
+
+
+OBJEK_O2 = ([("rumah_nara", 3, 1)] + _pagar_kotak("bambu", 1, 0, 8, 6, celah=(4, 5)) +
+            _pagar_kotak("sekolah", 17, 0, 28, 7, celah=(21, 22, 23, 24)) +
+            [("gerbang_buka", 21, 6), ("tiang_bendera", 22, 2), ("pohon", 9, 0), ("pohon", 12, 3),
+             ("semak", 10, 6), ("semak", 15, 4), ("semak", 7, 13), ("tiang_lampu", 3, 7), ("tiang_lampu", 14, 7),
+             ("tiang_lampu", 26, 11), ("motor", 16, 12), ("motor", 19, 12), ("bangku", 3, 14), ("bangku", 9, 14),
+             ("tempat_sampah", 6, 14), ("pohon", 12, 13), ("pohon", 18, 15), ("kelapa", 24, 14), ("semak", 16, 18)])
+
+
+def pratinjau_obj2_peta():
+    L = Lembar(1000, 760)
+    L.judul("Kelompok O2 — Peta contoh", "Sesi C · 6 Nov 2026 · Ditinjau · 30×20 ubin, siang (×2)")
+    pemain = [_pemain(1, 72, 120, tas="sun"), _pemain(4, 232, 204, "kanan", "jalan", 1, tas="rose"),
+              _pemain(6, 120, 276, tas="teal"), _pemain(2, 392, 72, "bawah", "jalan", 1, tas="mango")]
+    L.tempel(besar(render_peta(peta_o2(), "siang", OBJEK_O2, pemain), 2), 20, 70)
+    L.label("Pagar bambu mengelilingi rumah Nara, dengan celah di depan pintu; tembok sekolah dengan gerbang terbuka", 500, 712)
+    L.label("Pohon, semak, lampu jalan, motor, bangku, dan tempat sampah", 500, 734)
+    return L.im
+
+
+def pratinjau_obj2_lembar():
+    L = Lembar(1440, 720)
+    L.judul("Kelompok O2 — Objek umum (×3)", "Sesi C · 6 Nov 2026 · Ditinjau · di atas rumput siang")
+    m = MASA["siang"]
+    x, y = 20, 70
+    for nama in ("pohon", "semak", "bangku", "tempat_sampah", "motor", "tiang_lampu"):
+        fn, (w, h), _, _, _, _ = OBJEK[nama]
+        latar = C((w + 1) * 16, (h + 1) * 16)                                     # noqa: F405
+        for ty in range(h + 1):
+            for tx in range(w + 1):
+                latar.paste(ubin_rumput(m, (tx + ty) % 4), tx * 16, ty * 16)
+        latar.paste(fn(), 7, 7)
+        L.tempel(besar(latar, 3), x, y)
+        L.label(KODE_OBJEK[nama], x + latar.w * 3 / 2, y + latar.h * 3 + 4, "tebal")
+        L.label(nama.replace("_", " "), x + latar.w * 3 / 2, y + latar.h * 3 + 24)
+        x += max(latar.w * 3, 130) + 30
+    y = 330
+    for i, gaya in enumerate(("bambu", "sekolah")):
+        x = 20 + i * 710
+        L.d.text((x, y), f"{KODE_OBJEK['pagar_' + gaya + '_datar']} pagar {gaya}: 8 ruas (×3) dan contoh susunan (×2)",
+                 font=L.f["tebal"], fill=INK[:3])                                  # noqa: F405
+        for j, jenis in enumerate(PAGAR):
+            latar = C(32, 32)                                                      # noqa: F405
+            for t in range(4):
+                latar.paste(ubin_rumput(m, t), (t % 2) * 16, (t // 2) * 16)
+            latar.paste(OBJEK[f"pagar_{gaya}_{jenis}"][0](), 7, 7)
+            L.tempel(besar(latar, 3), x + (j % 4) * 104, y + 30 + (j // 4) * 150)
+            L.label(jenis.replace("sudut_", "").replace("_", " "), x + (j % 4) * 104 + 48, y + 30 + (j // 4) * 150 + 100)
+        peta = ["......", "......", "......", "......", "......"]
+        contoh = _pagar_kotak(gaya, 0, 0, 5, 4, celah=(2, 3))
+        L.tempel(besar(render_peta(peta, "siang", contoh), 2), x + 430, y + 40)
+    return L.im
+
+
 PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringkasan,
             "ava_pose_semua": pratinjau_ava_pose_semua, "ubin_contoh": pratinjau_ubin_contoh,
             "ubin_masa": pratinjau_ubin_masa, "ubin_dekat": pratinjau_ubin_dekat,
             "ubin_lembar": pratinjau_ubin_lembar, "obj_lembar": pratinjau_obj_lembar,
-            "obj_peta": pratinjau_obj_peta, "obj_dekat": pratinjau_obj_dekat}
+            "obj_peta": pratinjau_obj_peta, "obj_dekat": pratinjau_obj_dekat,
+            "obj2_lembar": pratinjau_obj2_lembar, "obj2_peta": pratinjau_obj2_peta}
 for _n in AVATAR:
     PREVIEWS[f"pose_ava_{_n}"] = (lambda n=_n: pratinjau_pose_avatar(n))
 ANIMASI = {"ava_gerak": pratinjau_ava_gerak}
