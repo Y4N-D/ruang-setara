@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Versi | 0.2 |
+| Versi | 0.3 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Kelompok A (avatar pemain) diserahkan: menunggu "Setuju: aset A" |
+| Tahap saat ini | Kelompok A disetujui. Kelompok U (ubin per masa) diserahkan: menunggu "Setuju: aset U" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -23,6 +23,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Plan | Daftar aset, urutan pengerjaan, usulan, dan lembar uji gaya `preview/uji_gaya.png` diserahkan; menunggu "Setuju: aset" |
 | 6 Nov 2026 | Plan | Pemilik proyek membalas "Setuju: aset": semua saran (a) diterima (usulan 1a sampai 10a) |
 | 6 Nov 2026 | Kelompok A | Kit `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, dan `build_jejak.py` dibuat; delapan avatar dan ikon kepalanya diserahkan, menunggu "Setuju: aset A" |
+| 6 Nov 2026 | Kelompok A | Pemilik proyek membalas "Setuju: aset A": A-01 sampai A-09 Disetujui. `app/jejak-setara/assets/CREDITS.md` dibuat otomatis oleh `build_jejak.py` |
+| 6 Nov 2026 | Kelompok U | Lembar ubin tiga masa (377 ubin per lembar) diserahkan, menunggu "Setuju: aset U" |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -43,7 +45,7 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 
 | | |
 |---|---|
-| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A diserahkan; menunggu "Setuju: aset A" |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A Disetujui 6 Nov 2026; kelompok U diserahkan, menunggu "Setuju: aset U" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -194,15 +196,15 @@ Setiap desain: seragam SMP (kemeja putih, celana atau rok `navy`, ikat pinggang 
 
 | ID | Desain | Kulit | Rambut atau kepala | Bawahan | Ciri lain | Status |
 |---|---|---|---|---|---|---|
-| A-01 | A1 | `skin-3` | `hair-1` pendek rapi, belah samping | Celana | — | Ditinjau (kelompok A) |
-| A-02 | A2 | `skin-1` | `hair-1` panjang dikuncir, ikat rambut `berry` | Rok, kaus kaki putih | — | Ditinjau (kelompok A) |
-| A-03 | A3 | `skin-4` | `hair-1` pendek ikal | Celana | Kacamata | Ditinjau (kelompok A) |
-| A-04 | A4 | `skin-2` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Ditinjau (kelompok A) |
-| A-05 | A5 | `skin-2` | `hair-2` pendek berdiri | Celana | — | Ditinjau (kelompok A) |
-| A-06 | A6 | `skin-3` | `hair-2` panjang dikuncir, ikat rambut `rose` | Rok, kaus kaki putih | Kacamata | Ditinjau (kelompok A) |
-| A-07 | A7 | `skin-1` | `hair-2` pendek cepak | Celana | — | Ditinjau (kelompok A) |
-| A-08 | A8 | `skin-4` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Ditinjau (kelompok A) |
-| A-09 | Ikon kepala | — | Kepala dan bahu A1–A8 menghadap bawah, untuk papan skor, lobi, dan kartu pemain (`ikon_ava_{n}.png`, 16 × 16); tali tas ikut berwarna kunci | — | — | Ditinjau (kelompok A) |
+| A-01 | A1 | `skin-3` | `hair-1` pendek rapi, belah samping | Celana | — | Disetujui (6 Nov) |
+| A-02 | A2 | `skin-1` | `hair-1` panjang dikuncir, ikat rambut `berry` | Rok, kaus kaki putih | — | Disetujui (6 Nov) |
+| A-03 | A3 | `skin-4` | `hair-1` pendek ikal | Celana | Kacamata | Disetujui (6 Nov) |
+| A-04 | A4 | `skin-2` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Disetujui (6 Nov) |
+| A-05 | A5 | `skin-2` | `hair-2` pendek berdiri | Celana | — | Disetujui (6 Nov) |
+| A-06 | A6 | `skin-3` | `hair-2` panjang dikuncir, ikat rambut `rose` | Rok, kaus kaki putih | Kacamata | Disetujui (6 Nov) |
+| A-07 | A7 | `skin-1` | `hair-2` pendek cepak | Celana | — | Disetujui (6 Nov) |
+| A-08 | A8 | `skin-4` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Disetujui (6 Nov) |
+| A-09 | Ikon kepala | — | Kepala dan bahu A1–A8 menghadap bawah, untuk papan skor, lobi, dan kartu pemain (`ikon_ava_{n}.png`, 16 × 16); tali tas ikut berwarna kunci | — | — | Disetujui (6 Nov) |
 
 **Warna tas** (dasar dan bayangan; warna kunci di gambar: `sun` dan `mango`)
 
@@ -226,7 +228,7 @@ Setiap desain: seragam SMP (kemeja putih, celana atau rok `navy`, ikat pinggang 
 | Ukuran | Strip diam 417–561 B, strip jalan 526–701 B (batas 6 KB per strip); enam strip satu avatar 3,0–3,4 KB; ikon 235–325 B; seluruh kelompok A 27,8 KB |
 | Pemeriksaan `build_jejak.py` | Lulus: 0 piksel di luar palet atau semi-transparan, ukuran 32 × 24 (diam), 64 × 24 (jalan), 16 × 16 (ikon), dan warna kunci tas tidak dipakai di luar tas |
 | Pratinjau | `preview/ava_ringkasan.png` (ringkasan), `preview/ava_pose_semua.png` (semua bingkai ×3), `preview/pose_ava_1.png` sampai `pose_ava_8.png` (×6), dan `preview/ava_gerak.gif` (berjalan ke empat arah, lalu diam) |
-| Belum termasuk | `CREDITS.md` dan `manifest.ts`: dibuat sesudah "Setuju: aset A" dan sesudah bentuk manifest disepakati (Permintaan C-6) |
+| Kredit dan manifest | `CREDITS.md` dibuat otomatis sesudah "Setuju: aset A" (56 aset). `manifest.ts` menunggu bentuk yang disepakati Sesi A (Permintaan C-6) |
 
 - A1 sama piksel dengan avatar uji gaya yang disetujui, termasuk bingkai jalan dan arah atas.
 - Rok: kaus kaki putih di bawah rok. Pada bingkai diam kedua (bernapas), badan turun 1 piksel sehingga rok menutup kaus kaki, sama seperti celana yang menutup sebagian kaki pada A1.
@@ -238,27 +240,60 @@ Setiap desain: seragam SMP (kemeja putih, celana atau rok `navy`, ikat pinggang 
 
 ## U. Ubin per masa
 
-Satu lembar per masa: `ubin_pagi.png`, `ubin_siang.png`, dan `ubin_sore.png`, 16 ubin per baris. Nomor ubin sama di ketiga lembar. Jumlah pasti (sekitar 130 ubin) ditetapkan bersama legenda `kampung.txt` di JS-06.
+Satu lembar per masa: `ubin_pagi.png`, `ubin_siang.png`, dan `ubin_sore.png`, masing-masing 256 × 384 piksel (377 ubin, 16 per baris). Nomor ubin sama di ketiga lembar.
 
-| ID | Isi | Bahan | Perkiraan ubin | Zona | Status |
+| ID | Isi | Lapisan | Jumlah ubin | Zona | Status |
 |---|---|---|---|---|---|
-| U-01 | Rumput dasar, 4 varian yang disebar acak berbenih oleh `build_peta.py` agar pola tidak berulang | rumput, tekstur, kilau | 4 | Semua | Ditinjau: varian 1 (uji gaya) disetujui sebagai acuan 6 Nov; status akhir di kelompok U |
-| U-02 | Detail rumput tumpang: bunga, rumput tinggi, daun gugur (lapisan 10) | tekstur, kilau, bunga warna tetap | 4 | Semua | Belum |
-| U-03 | Tanah setapak dan peralihannya dengan rumput | tanah (usulan) | 17 | Z1, Z6 | Belum |
-| U-04 | Paving gang dan peralihannya dengan rumput | paving (usulan) | 17 | Z1 | Belum |
-| U-05 | Aspal, garis tengah, garis tepi | aspal, marka | 6 | Z3 | Belum |
-| U-06 | Zebra cross mendatar dan tegak | aspal, marka | 2 | Z3 | Belum |
-| U-07 | Trotoar dan kerb (lurus dan sudut) | lantai (usulan) | 9 | Z3, Z4 | Belum |
-| U-08 | Air dan air dalam, serta peralihannya dengan rumput | air, air dalam, rumput | 18 | Z6 | Belum |
-| U-09 | Pasir dan peralihannya dengan rumput dan air | pasir, air | 18 | Z6 | Belum |
-| U-10 | Halaman sekolah dan lapangan bergaris | lantai (usulan), marka | 8 | Z2 | Belum |
-| U-11 | Lantai semen pasar dan papan bale | lantai (usulan), kayu | 4 | Z4, Z5, Z7 | Belum |
-| U-12 | Lapangan taman bergaris | rumput, marka | 6 | Z6 | Belum |
-| U-13 | Bayangan tumpang bangunan: tepi kanan, tepi bawah, dan sudut, dalam pecahan 4 piksel (usulan 4) | bayangan | 8 | Semua | Belum |
-| U-14 | Bayangan tumpang pohon dan objek bulat (2 × 2 dan 1 × 1) | bayangan | 5 | Semua | Belum |
-| U-15 | Detail tanah: retakan, batu kecil, genangan | aspal, tekstur | 4 | Semua | Belum |
+| U-01 | Rumput dasar, 4 varian yang dipilih berbenih menurut posisi agar pola tidak berulang | 0 | 4 | Semua | Ditinjau (kelompok U) |
+| U-02 | Detail rumput: bunga merah muda, bunga putih, rumput tinggi, daun gugur | 10 | 4 | Semua | Ditinjau (kelompok U) |
+| U-03 | Tanah setapak (`skin-2`, kerikil `wood`) dan peralihannya | 0 | 48 | Z1, Z6 | Ditinjau (kelompok U) |
+| U-04 | Paving gang (bata `wood`, nat `wood-d`) dan peralihannya | 0 | 48 | Z1 | Ditinjau (kelompok U) |
+| U-05 | Aspal dan peralihannya; pinggir jalan berisi bayangan kerb dan garis tepi; garis tengah putus-putus mendatar dan tegak | 0 dan 10 | 48 + 2 | Z3 | Ditinjau (kelompok U) |
+| U-06 | Zebra cross mendatar dan tegak | 10 | 2 | Z3 | Ditinjau (kelompok U) |
+| U-07 | Trotoar dan kerb: trotoar memakai semen (U-10), kerb menjadi pinggir aspal (U-05) | — | — | Z3, Z4 | Digabung ke U-05 dan U-10 |
+| U-08 | Air dan air dalam, masing-masing dengan peralihannya (garis tepi dan buih; air dalam berpola papan catur ke air) | 0 | 48 + 48 | Z6 | Ditinjau (kelompok U) |
+| U-09 | Pasir dan peralihannya dengan rumput; tepi air ke pasir digambar oleh ubin air | 0 | 48 | Z6 | Ditinjau (kelompok U) |
+| U-10 | Semen (`mist`) untuk halaman sekolah, trotoar, pasar, dan halaman puskesmas, dengan peralihannya | 0 | 48 | Z2, Z3, Z4, Z7 | Ditinjau (kelompok U) |
+| U-11 | Lantai pasar memakai semen (U-10); lantai papan bale menjadi bagian objek bale (O-14) | — | — | Z4, Z5 | Digabung ke U-10 dan O-14 |
+| U-12 | Garis lapangan: empat sisi, empat sudut, garis tengah mendatar dan tegak, dan pertemuan garis tengah dengan sisi; dipakai di atas rumput (taman) maupun semen (sekolah) | 10 | 14 | Z2, Z6 | Ditinjau (kelompok U) |
+| U-13 | Bayangan bangunan: kanan atas, kanan, sudut, bawah kiri, bawah | 10 | 5 | Semua | Ditinjau (kelompok U) |
+| U-14 | Bayangan pohon (2 × 2) dan objek kecil (1 × 1) | 10 | 5 | Semua | Ditinjau (kelompok U) |
+| U-15 | Detail tanah: batu, kerikil, retakan, genangan | 10 | 4 | Semua | Ditinjau (kelompok U) |
 
-**Bahan per masa.** Baris dengan tanda "usulan" belum ada di Design System bagian 4; pemetaannya ditetapkan lewat pratinjau kelompok U, lalu diajukan ke Sesi A.
+
+### Rincian kelompok U (6 November 2026)
+
+**Susunan lembar** (nomor ubin = baris × 16 + kolom, sama di ketiga masa):
+
+| Nomor | Isi |
+|---|---|
+| 0–3 | Rumput varian 1–4 (varian 1 = uji gaya) |
+| 4–39 | Ubin tumpang lapisan 10: detail (4–11), bayangan (12–21), marka jalan (22–25), garis lapangan (26–39) |
+| 40–46 | Varian kedua isi tanah, paving, semen, pasir, aspal, air, dan air dalam |
+| 47 | Kosong |
+| 48–376 | 47 ubin peralihan per bahan, berurutan: tanah (48), paving (95), semen (142), pasir (189), aspal (236), air (283), air dalam (330) |
+
+**Cara peralihan dibuat.** Setiap bahan wilayah punya urutan prioritas: rumput, tanah, paving, semen, pasir, aspal, air, lalu air dalam. Sebuah sel mendapat pita tepi di sisi atau sudut yang bertetangga dengan bahan berprioritas lebih rendah. Pita tepinya: tanah = rumput berpola papan catur lalu garis `wood`; paving = garis `wood-d`; semen = garis `slate`; pasir = rumput berpola papan catur; aspal = bayangan kerb `dusk`, aspal, lalu garis tepi (marka); air = garis bayangan lalu buih (kilau); air dalam = air berpola papan catur. Karena dihitung dari 8 tetangga, satu bahan cukup 47 ubin untuk semua bentuk, termasuk sudut dalam (jalan setapak berbentuk L dan tepi air berundak di pratinjau).
+
+**Aturan peta untuk JS-06** (diperiksa `build_peta.py` nanti):
+- Tanah dan pasir hanya bersebelahan dengan rumput atau air, karena pita tepinya memakai warna rumput.
+- Lapangan berbentuk persegi panjang dengan lebar ganjil, agar garis tengah tepat di tengah.
+- Setiap sel paling banyak satu ubin tumpang detail atau marka, dan satu ubin bayangan.
+- Bayangan bangunan mengikuti kotak tapak bangunan (bentuk persegi), digeser 8 piksel ke kanan dan 4 piksel ke bawah.
+
+| | |
+|---|---|
+| Kode | `scripts/game/art/atas_ubin.py` (bahan, ubin, susunan lembar, `nomor_tanah` untuk peta) dan `build_jejak.py` (ekspor, pemeriksaan, pratinjau) |
+| Berkas | `app/jejak-setara/assets/ubin/ubin_pagi.png`, `ubin_siang.png`, `ubin_sore.png` |
+| Ukuran | Sekitar 5,8 KB per lembar (batas 60 KB) |
+| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, ukuran 256 × 384, dan semua ubin lapisan 0 penuh tanpa lubang transparan |
+| Pratinjau | `preview/ubin_contoh.png` (peta contoh siang ×2), `preview/ubin_masa.png` (tiga masa ×1), `preview/ubin_dekat.png` (potongan ×3 dengan garis pindai), dan `preview/ubin_lembar.png` (lembar ubin) |
+
+- Rumput tetap `leaf` di ketiga masa, jadi pagi dan siang hampir sama di atas rumput. Perbedaan terbesar ada di air (biru muda, biru, jingga), pasir, warna bayangan, dan marka.
+- Garis lapangan di atas semen memakai marka: putih di siang hari dan `cream` di pagi dan sore. Garis `cream` di atas `mist` tetap terlihat, tetapi lebih lembut.
+- Pohon belum digambar (kelompok O2), jadi ubin bayangan pohon baru terlihat di lembar ubin.
+
+**Bahan per masa.** Baris bertanda "usulan" belum ada di Design System bagian 4. Pemetaannya diusulkan bersama pratinjau kelompok U; sesudah disetujui, diajukan ke Sesi A (Permintaan C-2).
 
 | Bahan | Pagi | Siang | Sore | Asal |
 |---|---|---|---|---|
@@ -272,9 +307,10 @@ Satu lembar per masa: `ubin_pagi.png`, `ubin_siang.png`, dan `ubin_sore.png`, 16
 | Air dalam | `sky-d` | `sky-d` | `sky-d` | Design System bagian 4 |
 | Pasir | `PAGI2` | `cream` | `SORE1` | Design System bagian 4 |
 | Dinding | `cream` | `cream` | `cream` | Design System bagian 4 |
-| Tanah setapak | `wood`, `wood-d` | sama | sama | Usulan, tidak ditukar |
-| Paving gang | `mist`, `slate` | sama | sama | Usulan, tidak ditukar |
-| Lantai semen, trotoar | `mist`, `slate`, `cream` | sama | sama | Usulan, tidak ditukar |
+| Tanah setapak | `skin-2`, kerikil `wood` | sama | sama | Usulan kelompok U, tidak ditukar |
+| Paving gang | bata `wood`, nat `wood-d` | sama | sama | Usulan kelompok U, tidak ditukar |
+| Semen (halaman, trotoar, lantai pasar) | `mist`, bintik dan tepi `slate` | sama | sama | Usulan kelompok U, tidak ditukar |
+| Kerb dan pinggir aspal | bayangan kerb `dusk`, garis tepi = marka | sama | sama | Usulan kelompok U |
 
 ## O. Objek dan bangunan
 
@@ -422,6 +458,7 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 - **Tas:** warna kunci `sun` dan `mango` diganti serentak saat memuat (tabel "Warna tas").
 - **Objek dua bagian:** `obj_{nama}.png` dan `obj_{nama}_atas.png` berasal dari satu gambar yang dipotong di satu baris. Keduanya digambar di titik yang sama, dengan bagian atas tepat di atas bagian bawah.
 - **Bayangan objek:** berupa ubin tumpang lapisan 10 di lembar ubin (usulan 4). Letaknya dihitung `build_peta.py`, jadi antarmuka tidak menggambar bayangan objek sendiri.
+- **Lembar ubin:** nomor ubin = baris × 16 + kolom. Ubin lapisan 0 selalu penuh; ubin tumpang berlatar transparan. `kampung.json` (JS-06) memuat nomor ubin per lapisan (tanah, tumpang, bayangan), jadi antarmuka cukup menyalin potongan 16 × 16 dari lembar masa yang aktif. Saat masa berganti, hanya lembar yang ditukar.
 - **Siluet pemain:** pemain sendiri di belakang objek atas sebaiknya bergaris ganda (Permintaan C-4).
 
 ## Permintaan untuk Sesi A
@@ -471,5 +508,5 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## Cara membalas
 
-- **"Setuju: aset A"** berarti kedelapan avatar dan ikon kepalanya disetujui. Statusnya menjadi Disetujui, `CREDITS.md` dibuat, dan saya lanjut ke kelompok U (ubin per masa).
-- Perbaikan cukup ditulis bebas per avatar, misalnya "A5: rambut kurang berdiri" atau "A4: kerudung lebih panjang". Avatar lain yang tidak disebut tetap seperti sekarang.
+- **"Setuju: aset U"** berarti ketiga lembar ubin dan pemetaan bahan barunya disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, pemetaan bahan diajukan ke Sesi A (Permintaan C-2), dan saya lanjut ke kelompok O1 (bangunan penanda zona).
+- Perbaikan cukup ditulis bebas per bahan, misalnya "tanah terlalu terang" atau "air sore terlalu jingga". Bahan lain yang tidak disebut tetap seperti sekarang.
