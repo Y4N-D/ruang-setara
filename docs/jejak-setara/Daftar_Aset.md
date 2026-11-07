@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Versi | 0.7 |
+| Versi | 0.8 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Kelompok A, U, O1, O2, dan T disetujui. Kelompok N1 (tokoh Sehari Setara) diserahkan: menunggu "Setuju: aset N1" |
+| Tahap saat ini | Kelompok A, U, O1, O2, T, dan N1 disetujui; ukuran peta ditetapkan 160 × 100 ubin. Kelompok N2 (warga dan tokoh baru) diserahkan: menunggu "Setuju: aset N2" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -33,6 +33,9 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Kelompok T | Penanda dan efek (12 berkas, kode baru `atas_ikon.py`) diserahkan, menunggu "Setuju: aset T" |
 | 6 Nov 2026 | Kelompok T | Pemilik proyek membalas "Setuju: aset T": T-01 sampai T-12 Disetujui; kredit 12 berkas ditambahkan |
 | 6 Nov 2026 | Kelompok N1 | Sembilan tokoh Sehari Setara versi tampak atas (11 berkas, termasuk Dimas di motor dan Komang menunduk) diserahkan, menunggu "Setuju: aset N1" |
+| 6 Nov 2026 | Peta | Pemilik proyek menetapkan ukuran peta 160 × 100 ubin (rencana awal 120 × 80), karena perkiraan 50–100 pemain per sesi dan pertanyaan yang banyak serta bervariasi. Permintaan C-7 dan C-8 diajukan |
+| 6 Nov 2026 | Kelompok N1 | Pemilik proyek membalas "Setuju: aset N1": N-01 sampai N-09 Disetujui; kredit 11 berkas ditambahkan |
+| 6 Nov 2026 | Kelompok N2 | 18 tokoh (22 berkas) diserahkan, termasuk usulan ciri Raka, Wayan, dan siswa umum; menunggu "Setuju: aset N2" |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -49,11 +52,21 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | KT-C9 | 9a: siswa bukan pemain tanpa tas; ciri Raka, Wayan, dan siswa umum diusulkan di kelompok N2 |
 | KT-C10 | 10a: `CREDITS.md` dan `manifest.ts` dibuat `build_jejak.py` untuk aset Disetujui |
 
+## Keputusan ukuran peta (6 November 2026)
+
+| Hal | Keputusan |
+|---|---|
+| Ukuran peta | 160 × 100 ubin (2.560 × 1.600 piksel logis, sekitar 8 × 9 layar HP), menggantikan rencana 120 × 80 di PRD JFR-09 dan Design System bagian 3.2 |
+| Alasan | Pemilik proyek memperkirakan 50–100 pemain per sesi, pemain mencari kejadian dalam waktu yang ditetapkan, dan pertanyaannya banyak serta bervariasi |
+| Titik kejadian | Sedikitnya 12 titik per zona (96 titik), cukup untuk sekitar 48 kejadian dengan 2 titik calon masing-masing |
+| Waktu menyeberang | Sekitar 36 detik berjalan dari ujung ke ujung (4,5 ubin per detik) |
+| Masih perlu keputusan | Kapasitas pemain per ruang dan jumlah kejadian per ronde (Permintaan C-8) |
+
 ## Ringkasan rencana (templat AGENTS 12.1)
 
 | | |
 |---|---|
-| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, O2, dan T Disetujui 6 Nov 2026; kelompok N1 diserahkan, menunggu "Setuju: aset N1" |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, O2, T, dan N1 Disetujui 6 Nov 2026; kelompok N2 diserahkan, menunggu "Setuju: aset N2" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -193,7 +206,8 @@ Setiap kelompok diserahkan dalam satu balasan: pratinjau tampil di balasan, ZIP 
 | 6 | N1 — Tokoh Sehari Setara | N-01 sampai N-09 | sekitar 12 | JS-08 | `Setuju: aset N1` |
 | 7 | N2 — Warga dan tokoh baru | N-10 sampai N-20 | sekitar 22 | JS-08 | `Setuju: aset N2` |
 | 8 | O3 — Properti kejadian | O-29 sampai O-41 | sekitar 14 | JS-08 | `Setuju: aset O3` |
-| 9 | I — Ikon | I-01 sampai I-19 | sekitar 35 | JS-07, JS-09, JS-10, JS-12 | `Setuju: aset I` |
+| 9 | O4 — Varian untuk peta besar | Rumah warga dan pohon tambahan, agar peta 160 × 100 tidak terlihat berulang | sekitar 10 | JS-06 | `Setuju: aset O4` |
+| 10 | I — Ikon | I-01 sampai I-19 | sekitar 35 | JS-07, JS-09, JS-10, JS-12 | `Setuju: aset I` |
 
 - Bila kabar "JS-02 selesai" datang sebelum kelompok U dan O1 disetujui, JS-06 memakai *placeholder* berupa kotak warna palet dengan label kunci aset (AGENTS bagian 5), lalu diganti sesudah disetujui.
 - Setiap kelompok diperiksa dengan daftar periksa Design System bagian 14 dan bagian 12 Sehari Setara sebelum diserahkan.
@@ -460,15 +474,15 @@ Tampak atas, menghadap bawah, diam 2 bingkai (`npc_{tokoh}_bawah_diam.png`), dit
 
 | ID | Tokoh | Berkas | Ciri | Kejadian | Status |
 |---|---|---|---|---|---|
-| N-01 | Nara | `npc_nara_bawah_diam.png` (16 × 24) | Rambut berponi `hair-1`, `skin-2`, seragam SMP, tali tas `mango` (tas `sun`, warna asli, tidak diganti antarmuka) | K-01, K-08 | Ditinjau (kelompok N1) |
-| N-02 | Ibu | `npc_ibu_bawah_diam.png` (16 × 26) | `skin-3`, rambut `hair-2` bersanggul, daster `rose` bertitik putih dan kuning, sandal | Tidak ada di set peta naskah; Design System bagian 8 | Ditinjau (kelompok N1) |
-| N-03 | Gita | `npc_gita_bawah_diam.png` (14 × 20) | Anak SD: `skin-1`, rambut dikuncir samping berikat `coral`, pipi merah muda, kemeja putih, rok `coral`, kaus kaki putih | K-01, K-12 | Ditinjau (kelompok N1) |
-| N-04 | Dimas | `npc_dimas_bawah_diam.png` (16 × 24), `npc_dimas_kanan_motor.png` (34 × 30) | `skin-4`, rambut cepak, jaket `sky-d` terbuka di atas seragam; pose khusus duduk di motor matik `mango` menghadap kanan, tanpa helm seperti adegan 2 Sehari Setara | K-02, K-05 | Ditinjau (kelompok N1) |
-| N-05 | Sinta | `npc_sinta_bawah_diam.png` (16 × 24) | `skin-3`, kerudung putih, kemeja lengan panjang, rok panjang `navy`, tanpa tas | K-09 | Ditinjau (kelompok N1) |
-| N-06 | Bu Ratih | `npc_ratih_bawah_diam.png` (16 × 26) | `skin-4`, rambut bob, kacamata, kemeja batik `teal`, rok cokelat, memeluk buku `mango` | Disebut di pilihan K-03 dan K-14; Design System bagian 8 | Ditinjau (kelompok N1) |
-| N-07 | Komang | `npc_komang_bawah_diam.png`, `npc_komang_bawah_menunduk.png` (16 × 24) | `skin-2`, potongan mangkuk, 1 piksel lebih pendek, seragam kebesaran tidak dimasukkan, sepatu kanan robek; pose khusus menunduk memegang kotak bekal | K-03 (K-15 hanya di dalam video, tidak di peta) | Ditinjau (kelompok N1) |
-| N-08 | Pak Made | `npc_made_bawah_diam.png` (16 × 26) | `skin-4`, rambut kelabu menipis, kumis kelabu, kaus `mango`, sarung kotak-kotak `navy` bergaris `sky-d`, sandal | K-02 | Ditinjau (kelompok N1) |
-| N-09 | Bayu | `npc_bayu_bawah_diam.png` (16 × 26) | `skin-2`, rambut rapi `hair-2`, kaus `mist`, jin `sky-d`, sepatu kets putih; netral dan ramah | K-07 | Ditinjau (kelompok N1) |
+| N-01 | Nara | `npc_nara_bawah_diam.png` (16 × 24) | Rambut berponi `hair-1`, `skin-2`, seragam SMP, tali tas `mango` (tas `sun`, warna asli, tidak diganti antarmuka) | K-01, K-08 | Disetujui (6 Nov) |
+| N-02 | Ibu | `npc_ibu_bawah_diam.png` (16 × 26) | `skin-3`, rambut `hair-2` bersanggul, daster `rose` bertitik putih dan kuning, sandal | Tidak ada di set peta naskah; Design System bagian 8 | Disetujui (6 Nov) |
+| N-03 | Gita | `npc_gita_bawah_diam.png` (14 × 20) | Anak SD: `skin-1`, rambut dikuncir samping berikat `coral`, pipi merah muda, kemeja putih, rok `coral`, kaus kaki putih | K-01, K-12 | Disetujui (6 Nov) |
+| N-04 | Dimas | `npc_dimas_bawah_diam.png` (16 × 24), `npc_dimas_kanan_motor.png` (34 × 30) | `skin-4`, rambut cepak, jaket `sky-d` terbuka di atas seragam; pose khusus duduk di motor matik `mango` menghadap kanan, tanpa helm seperti adegan 2 Sehari Setara | K-02, K-05 | Disetujui (6 Nov) |
+| N-05 | Sinta | `npc_sinta_bawah_diam.png` (16 × 24) | `skin-3`, kerudung putih, kemeja lengan panjang, rok panjang `navy`, tanpa tas | K-09 | Disetujui (6 Nov) |
+| N-06 | Bu Ratih | `npc_ratih_bawah_diam.png` (16 × 26) | `skin-4`, rambut bob, kacamata, kemeja batik `teal`, rok cokelat, memeluk buku `mango` | Disebut di pilihan K-03 dan K-14; Design System bagian 8 | Disetujui (6 Nov) |
+| N-07 | Komang | `npc_komang_bawah_diam.png`, `npc_komang_bawah_menunduk.png` (16 × 24) | `skin-2`, potongan mangkuk, 1 piksel lebih pendek, seragam kebesaran tidak dimasukkan, sepatu kanan robek; pose khusus menunduk memegang kotak bekal | K-03 (K-15 hanya di dalam video, tidak di peta) | Disetujui (6 Nov) |
+| N-08 | Pak Made | `npc_made_bawah_diam.png` (16 × 26) | `skin-4`, rambut kelabu menipis, kumis kelabu, kaus `mango`, sarung kotak-kotak `navy` bergaris `sky-d`, sandal | K-02 | Disetujui (6 Nov) |
+| N-09 | Bayu | `npc_bayu_bawah_diam.png` (16 × 26) | `skin-2`, rambut rapi `hair-2`, kaus `mist`, jin `sky-d`, sepatu kets putih; netral dan ramah | K-07 | Disetujui (6 Nov) |
 
 #### Rincian kelompok N1 (6 November 2026)
 
@@ -488,19 +502,36 @@ Tampak atas, menghadap bawah, diam 2 bingkai (`npc_{tokoh}_bawah_diam.png`), dit
 
 ### N2. Warga dan tokoh baru
 
-| ID | Tokoh | Ciri | Pose khusus | Kejadian | Status |
+Ciri Raka, Wayan, dan siswa umum adalah usulan Sesi C. Dengan "Setuju: aset N2", ciri ini ditetapkan dan Sesi A dapat menyalinnya ke Design System bagian 8 (Permintaan A-1 Sesi B).
+
+| ID | Tokoh | Berkas | Ciri | Kejadian | Status |
 |---|---|---|---|---|---|
-| N-10 | Warga dewasa 1–3 | Tiga variasi kulit, rambut, dan baju | Menunjuk sambil bicara, tanpa kekerasan | K-07, K-10 | Belum |
-| N-11 | Nenek bertongkat | Lansia sedikit membungkuk | — | K-06 | Belum |
-| N-12 | Ibu menggendong bayi | Dewasa menggendong bayi | — | K-13 | Belum |
-| N-13 | Anak SD 1–2 | Dua anak SD | Lompat tali (bila diperlukan) | K-12 | Belum |
-| N-14 | Pedagang | Pedagang pasar bercelemek | — | K-07 | Belum |
-| N-15 | Petugas puskesmas | Berseragam putih dengan tanda hati `leaf`, ramah | — | K-13 | Belum |
-| N-16 | Polisi | Seragam cokelat rapi, sikap membantu, tanpa lambang instansi | — | Design System bagian 8 | Belum |
-| N-17 | Raka | Teman sekelas pengguna kursi roda; ciri diusulkan di pratinjau N2 | Duduk di kursi roda | K-04 | Belum |
-| N-18 | Wayan | Teman sekelas; ciri diusulkan di pratinjau N2 | — | K-14 | Belum |
-| N-19 | Siswa umum S1–S4 | Baju bebas, tanpa tas (usulan 9) | Memegang HP; menunduk | K-01, K-08, K-09, K-10, K-11, K-12, K-15, K-16 | Belum |
-| N-20 | Siswa umum S5–S6 | Berseragam, tanpa tas (usulan 9) | Memegang HP | K-03, K-04, K-13 | Belum |
+| N-10 | Warga dewasa 1–3 | `npc_warga1_bawah_diam`, `npc_warga1_bawah_menunjuk`, `npc_warga2_bawah_diam`, `npc_warga3_bawah_diam` (16 × 26) | Warga 1: `skin-3`, rambut rapi, kemeja `sky-d`, celana `dusk`; pose menunjuk sambil bicara, tanpa kekerasan. Warga 2: `skin-1`, kerudung `teal`, baju lengan panjang `berry`, rok panjang `navy`. Warga 3: `skin-4`, rambut kelabu cepak, kemeja cokelat | K-07, K-10 | Ditinjau (kelompok N2) |
+| N-11 | Nenek | `npc_nenek_bawah_diam` (16 × 24) | `skin-3`, rambut kelabu bersanggul, baju lengan panjang `berry`, kain cokelat, bertongkat, sedikit lebih rendah | K-06 | Ditinjau (kelompok N2) |
+| N-12 | Ibu menggendong bayi | `npc_ibubayi_bawah_diam` (16 × 26) | `skin-2`, rambut bersanggul, baju `teal`, rok panjang `navy`, gendongan `mango`, bayi berselimut putih | K-13 | Ditinjau (kelompok N2) |
+| N-13 | Anak SD 1–2 | `npc_anak1_bawah_diam`, `npc_anak2_bawah_diam` (14 × 20) | Anak 1: `skin-3`, rambut pendek, kaus `sun`, celana pendek `navy`. Anak 2: `skin-4`, rambut dikuncir dua berikat `leaf`, kaus `rose`, rok `sky-d` | K-12 | Ditinjau (kelompok N2) |
+| N-14 | Pedagang | `npc_pedagang_bawah_diam` (16 × 26) | `skin-3`, caping anyaman, kaus `coral`, celemek putih, sandal | K-07 | Ditinjau (kelompok N2) |
+| N-15 | Petugas puskesmas | `npc_petugas_bawah_diam` (16 × 26) | `skin-1`, rambut bersanggul, seragam putih dengan tanda hati `leaf`, sepatu putih; ramah | K-13 | Ditinjau (kelompok N2) |
+| N-16 | Polisi | `npc_polisi_bawah_diam` (16 × 26) | `skin-2`, topi gelap polos, seragam cokelat bersaku tanpa lambang instansi; sikap membantu | Design System bagian 8 | Ditinjau (kelompok N2) |
+| N-17 | Raka | `npc_raka_bawah_kursiroda` (16 × 24) | Usulan: `skin-3`, rambut belah tengah `hair-2`, seragam tanpa tas, duduk di kursi roda dengan tangan di pelek roda | K-04 | Ditinjau (kelompok N2) |
+| N-18 | Wayan | `npc_wayan_bawah_diam` (16 × 24) | Usulan: `skin-4`, rambut belah tengah, kaus `leaf`, celana pendek cokelat, sandal (membantu gerobak orang tuanya) | K-14 | Ditinjau (kelompok N2) |
+| N-19 | Siswa umum S1–S4 | `npc_siswa1_bawah_diam`, `npc_siswa1_bawah_hp`, `npc_siswa2_bawah_diam`, `npc_siswa2_bawah_menunduk`, `npc_siswa3_bawah_diam`, `npc_siswa4_bawah_diam` (16 × 24) | Usulan, berbaju bebas tanpa tas: S1 `skin-1`, rambut tergerai, kaus `berry`, jin; S2 `skin-3`, rambut ikal, kaus `sky-d`; S3 `skin-2`, kerudung `rose`, baju lengan panjang `sky-d`, rok panjang; S4 `skin-4`, rambut dikuncir, kaus `leaf`. Pose memegang HP (S1) dan menunduk (S2) | K-01, K-08, K-09, K-10, K-11, K-12, K-15, K-16 | Ditinjau (kelompok N2) |
+| N-20 | Siswa umum S5–S6 | `npc_siswa5_bawah_diam`, `npc_siswa5_bawah_hp`, `npc_siswa6_bawah_diam` (16 × 24) | Usulan, berseragam tanpa tas: S5 `skin-1`, rambut belah tengah, celana; S6 `skin-4`, rambut tergerai, rok panjang. Pose memegang HP (S5) | K-03, K-04, K-13 | Ditinjau (kelompok N2) |
+
+#### Rincian kelompok N2 (6 November 2026)
+
+| | |
+|---|---|
+| Kode | `scripts/game/art/atas_tokoh.py` (bagian "kelompok N2": `NPC2`, `npc2()`, `strip_npc2()`) |
+| Berkas | 22 PNG di `app/jejak-setara/assets/npc/`, masing-masing strip 2 bingkai |
+| Ukuran | Seluruh kelompok N2 11,1 KB |
+| Titik kaki (jangkar) | Sama dengan kelompok N1: siswa dan lansia (8, 21), dewasa (8, 23), anak (7, 17); Raka di kursi roda (8, 21) |
+| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai |
+| Pratinjau | `preview/npc2_ringkasan.png` (semua tokoh ×5 dan usulan ciri) dan `preview/npc2_peta.png` (tokoh di tempat kejadiannya) |
+
+- Siswa umum tidak bertas punggung, sehingga tidak tertukar dengan pemain (usulan 9a). Kerudung, kulit, dan rambut dibuat beragam.
+- Polisi tanpa lambang instansi, petugas puskesmas memakai tanda hati `leaf`, dan caping pedagang tanpa tulisan.
+- Tokoh kelompok N1 dan kedelapan avatar tidak berubah.
 
 ## I. Ikon
 
@@ -543,6 +574,8 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 | C-3 | `docs/jejak-setara/Design_System.md` bagian 8 dan `Architecture.md` bagian 9 | Catat warna kunci tas `sun` dan `mango`, tabel delapan pasangan warna, dan penggantian serentak saat memuat | Usulan 5 | Diajukan (usulan 5a disetujui 6 Nov 2026) |
 | C-4 | `docs/jejak-setara/Design_System.md` bagian 7 (lapisan 60) | Siluet pemain sendiri bergaris ganda: garis dalam `ink` 1 piksel, lalu garis luar `sun` 1 piksel | Garis `sun` saja 1,0–2,9 : 1 di enam dari tujuh warna atap (percobaan 4); dengan garis ganda salah satu garis selalu ≥ 3 : 1 | Diajukan |
 | C-5 | `docs/jejak-setara/Design_System.md` bagian 14 (penamaan) | Tambahkan pola `obj_{nama}_atas.png`, `ikon_ava_{n}.png`, `tanda_debu.png`, dan `tanda_kilau.png`; arah tokoh `bawah`, `atas`, dan `kanan`; tanpa berkas arah kiri | Usulan 6 dan 7 | Diajukan (usulan 6a dan 7a disetujui 6 Nov 2026) |
+| C-7 | `docs/jejak-setara/PRD.md` JFR-09, `Design_System.md` bagian 3.2, dan `Architecture.md` bagian 9 dan 11.3 | Ubah ukuran peta menjadi sekitar 160 × 100 ubin (2.560 × 1.600 piksel logis, sekitar 8 × 9 layar). Periksa anggaran peta JSON (≤ 60 KB setelah gzip) dan jumlah potongan 256 × 256 per masa (sekitar 70) | Keputusan pemilik proyek 6 Nov 2026 (bagian "Keputusan ukuran peta") | Diajukan |
+| C-8 | `docs/jejak-setara/PRD.md` bagian 8.3 dan 12, `Architecture.md` bagian 13 | Nilai kapasitas sampai 100 pemain per ruang (sekarang 50) dan jumlah kejadian per ronde yang lebih banyak. Peta 160 × 100 menyediakan titik untuk sekitar 48 kejadian. Gagasan untuk dinilai: satu kejadian muncul di dua titik sekaligus agar pemain tidak menumpuk | Pemilik proyek memperkirakan 50–100 pemain dan pertanyaan yang banyak serta bervariasi | Diajukan; perlu keputusan pemilik proyek bersama Sesi A dan Sesi B |
 | C-6 | `docs/jejak-setara/Architecture.md` bagian 11.2 | Sepakati bentuk `manifest.ts`: kunci, ukuran dan jumlah bingkai, titik kaki, pasangan bagian atas objek, dan nomor ubin. Usul Sesi C: manifest dibuat otomatis oleh `build_jejak.py` | Usulan 10 | Diajukan (usulan 10a disetujui 6 Nov 2026). Usulan bentuknya ada di bagian "Usulan bentuk manifest"; perlu jawaban sebelum manifest dibuat |
 
 ## Usulan bentuk manifest (Permintaan C-6)
@@ -575,11 +608,12 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 ## Catatan untuk JS-06 (peta)
 
 - JS-06 dimulai sesudah pemilik proyek mengabarkan "JS-02 selesai". Entri Plan JS-06 (templat 12.1) ditulis di berkas ini pada saat itu.
+- Ukuran peta 160 × 100 ubin dengan sedikitnya 12 titik kejadian per zona (keputusan 6 November 2026).
 - Ukuran objek di bagian O dipakai untuk menata `kampung.txt` dan `objek.json`; kotak tabrakan bangunan mencakup dinding dan bagian bawah atap, sedangkan baris atap paling atas menutupi tanah yang bisa dilewati (lapisan 40).
 - Letak ubin tumpang bayangan (usulan 4) dan varian rumput acak berbenih dihitung `build_peta.py`.
 - Uji gaya memakai pergeseran bayangan 8 piksel ke kanan dan 4 piksel ke bawah.
 
 ## Cara membalas
 
-- **"Setuju: aset N1"** berarti kesembilan tokoh dan kedua pose khusus disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok N2 (warga, Raka, Wayan, dan siswa umum). Ciri Raka, Wayan, dan siswa umum saya usulkan di pratinjau N2 untuk Anda setujui (Permintaan A-1 Sesi B).
-- Perbaikan cukup ditulis per tokoh, misalnya "N-08: rambut Pak Made lebih banyak" atau "N-02: Ibu membawa keranjang". Tokoh lain yang tidak disebut tetap seperti sekarang.
+- **"Setuju: aset N2"** berarti ke-18 tokoh kelompok N2, termasuk usulan ciri Raka, Wayan, dan siswa umum, disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok O3 (properti kejadian).
+- Perbaikan cukup ditulis per tokoh, misalnya "N-17: Raka berambut pendek" atau "N-19: S3 berkerudung biru". Tokoh lain yang tidak disebut tetap seperti sekarang.

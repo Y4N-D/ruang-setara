@@ -166,3 +166,19 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 | `obj/obj_warung_made_atas.png` | O-03 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_warung_wifi.png` | O-20 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_warung_wifi_atas.png` | O-20 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+
+## Tokoh bukan pemain (`npc/`)
+
+| File | ID | Atribusi |
+|---|---|---|
+| `npc/npc_bayu_bawah_diam.png` | N-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_dimas_bawah_diam.png` | N-04 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_dimas_kanan_motor.png` | N-04 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_gita_bawah_diam.png` | N-03 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_ibu_bawah_diam.png` | N-02 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_komang_bawah_diam.png` | N-07 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_komang_bawah_menunduk.png` | N-07 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_made_bawah_diam.png` | N-08 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_nara_bawah_diam.png` | N-01 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_ratih_bawah_diam.png` | N-06 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_sinta_bawah_diam.png` | N-05 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
