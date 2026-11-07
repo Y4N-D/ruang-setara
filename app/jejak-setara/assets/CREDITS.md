@@ -69,3 +69,11 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 | `ikon/ikon_ava_6.png` | A-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/ikon_ava_7.png` | A-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/ikon_ava_8.png` | A-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+
+## Lembar ubin per masa (`ubin/`)
+
+| File | ID | Atribusi |
+|---|---|---|
+| `ubin/ubin_pagi.png` | U-01 sampai U-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ubin/ubin_siang.png` | U-01 sampai U-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ubin/ubin_sore.png` | U-01 sampai U-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |

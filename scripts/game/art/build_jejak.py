@@ -29,8 +29,8 @@ from pixelart import *          # noqa: E402,F401,F403
 from atas_tokoh import (AVATAR, ARAH, BINGKAI, KETERANGAN, WARNA_TAS, avatar, strip_avatar,   # noqa: E402
                         ikon_kepala, ganti_tas)
 from atas_ubin import (MASA, NAMA_MASA, KOLOM, NOMOR, BLOB, WILAYAH, SUSUNAN, UKURAN_LEMBAR,   # noqa: E402
-                       ubin_rumput, lembar_ubin, nomor_tanah)
-from atas_objek import POTONG_ATAP, obj_rumah_a, pisah   # noqa: E402
+                       ubin_rumput, ubin_wilayah, lembar_ubin, nomor_tanah)
+from atas_objek import POTONG_ATAP, OBJEK, KODE_OBJEK, obj_rumah_a, pisah   # noqa: E402
 
 if HERE.parts[-3:] == ("scripts", "game", "art"):      # berada di dalam repositori
     REPO = HERE.parents[2]
@@ -57,8 +57,18 @@ for _n in AVATAR:
 for _masa in MASA:
     ASSETS[f"ubin_{_masa}"] = ("ubin", lambda m=_masa: lembar_ubin(m).im, UKURAN_LEMBAR)
 
+# Kelompok O1 (Ditinjau): bangunan penanda zona; bangunan dan pohon dipotong dua (usulan 6a)
+for _nama, (_fn, _ub, _pot, _padat, _bay, _lewat) in OBJEK.items():
+    _w, _h = _ub[0] * 16 + 2, _ub[1] * 16 + 2
+    if _pot:
+        ASSETS[f"obj_{_nama}"] = ("obj", lambda f=_fn, p=_pot: pisah(f(), p)[1].im, (_w, _h - _pot))
+        ASSETS[f"obj_{_nama}_atas"] = ("obj", lambda f=_fn, p=_pot: pisah(f(), p)[0].im, (_w, _pot))
+    else:
+        ASSETS[f"obj_{_nama}"] = ("obj", lambda f=_fn: f().im, (_w, _h))
+
 # Aset berstatus Disetujui: nama -> tanggal. Hanya aset di sini yang masuk CREDITS.md dan manifest.ts.
-DISETUJUI = {nama: "6 November 2026" for nama in ASSETS if nama.startswith(("ava_", "ikon_ava_"))}   # kelompok A
+DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
+             if nama.startswith(("ava_", "ikon_ava_", "ubin_"))}       # kelompok A dan U (Setuju: aset A, aset U)
 
 BATAS_STRIP = 6 * 1024              # satu strip avatar atau tokoh
 BATAS_UBIN = 60 * 1024              # satu lembar ubin per masa
@@ -73,10 +83,12 @@ def kode_aset(nama):
         return "A-09"
     if nama.startswith("ubin_"):
         return "U-01 sampai U-15"
+    if nama.startswith("obj_"):
+        return KODE_OBJEK.get(nama[4:].removesuffix("_atas"), "—")
     return "—"
 
 
-JUDUL_FOLDER = {"ava": "Avatar pemain", "ikon": "Ikon", "ubin": "Lembar ubin per masa"}
+JUDUL_FOLDER = {"ava": "Avatar pemain", "ikon": "Ikon", "ubin": "Lembar ubin per masa", "obj": "Objek dan bangunan"}
 
 
 def tulis_kredit(out_dir):
@@ -447,7 +459,8 @@ def _bayangan_bangunan(x0, y0, w=4, h=4):
     return hasil
 
 
-def render_peta(peta, masa, rumah=RUMAH_CONTOH, pemain=()):
+def render_peta(peta, masa, objek=(("rumah_a", 3, 2),), pemain=()):
+    """Peta pratinjau: lapisan 0, ubin tumpang, bayangan objek, objek bawah, tokoh, lalu objek atas."""
     lembar = lembar_ubin(masa).im
     H, W = len(peta), len(peta[0])
 
@@ -470,19 +483,33 @@ def render_peta(peta, masa, rumah=RUMAH_CONTOH, pemain=()):
     for ch in ("c", "g"):
         tumpang.update(_garis_wilayah(peta, ch))
     bayangan = {}
-    for x0, y0 in rumah:
-        bayangan.update(_bayangan_bangunan(x0, y0))
+    for nama, x0, y0 in objek:
+        _, (w, h), _, _, jenis, _ = OBJEK[nama]
+        if jenis == "kotak":
+            bayangan.update(_bayangan_bangunan(x0, y0, w, h))
+        elif jenis == "kecil":
+            bayangan[(x0 + w // 2, y0 + h - 1)] = "bayangan_kecil"
+        elif jenis == "pohon":
+            for (dx, dy), bag in (((1, 2), "kiri_atas"), ((2, 2), "kanan_atas"), ((1, 3), "kiri_bawah"),
+                                  ((2, 3), "kanan_bawah")):
+                bayangan[(x0 + dx, y0 + dy)] = f"bayangan_pohon_{bag}"
     for lapis in (tumpang, bayangan):                # lapisan 10: detail dan marka, lalu bayangan
         for (x, y), nama in lapis.items():
-            g.im.alpha_composite(ubin(NOMOR[("tumpang", nama)]), (x * 16, y * 16))
-    rumah_img = obj_rumah_a()
-    atas, bawah = pisah(rumah_img, POTONG_ATAP)
-    for x0, y0 in rumah:                             # lapisan 20
-        g.paste(bawah, x0 * 16 - 1, y0 * 16 - 1 + POTONG_ATAP)
-    for spr, _, ax, ay, _ in sorted(pemain, key=lambda p: p[3]):   # lapisan 30
+            if 0 <= x < W and 0 <= y < H:
+                g.im.alpha_composite(ubin(NOMOR[("tumpang", nama)]), (x * 16, y * 16))
+    gambar = []
+    for nama, x0, y0 in objek:
+        fn, (w, h), potong, _, _, _ = OBJEK[nama]
+        img = fn()
+        atas, bawah = pisah(img, potong) if potong else (None, img)
+        gambar.append((y0 + h, x0, y0, atas, bawah, potong or 0))
+    for _, x0, y0, _, bawah, potong in sorted(gambar, key=lambda t: t[0]):     # lapisan 20
+        g.paste(bawah, x0 * 16 - 1, y0 * 16 - 1 + potong)
+    for spr, _, ax, ay, _ in sorted(pemain, key=lambda p: p[3]):               # lapisan 30
         g.paste(spr, ax - 8, ay - 21)
-    for x0, y0 in rumah:                             # lapisan 40
-        g.paste(atas, x0 * 16 - 1, y0 * 16 - 1)
+    for _, x0, y0, atas, _, _ in sorted(gambar, key=lambda t: t[0]):           # lapisan 40
+        if atas:
+            g.paste(atas, x0 * 16 - 1, y0 * 16 - 1)
     return g
 
 
@@ -551,10 +578,97 @@ def pratinjau_ubin_lembar():
     return L.im
 
 
+# ---------------------------------------------------------------------------
+# Pratinjau kelompok O1: bangunan penanda zona
+# ---------------------------------------------------------------------------
+def pratinjau_obj_lembar():
+    L = Lembar(1440, 1440)
+    L.judul("Kelompok O1 — Bangunan penanda zona (×2)", "Sesi C · 6 Nov 2026 · Ditinjau · di atas rumput siang")
+    m = MASA["siang"]
+    x, y, tinggi_baris = 20, 70, 0
+    for nama, (fn, (w, h), potong, _, _, lewat) in OBJEK.items():
+        latar = C((w + 1) * 16, (h + 1) * 16)                                     # noqa: F405
+        for ty in range(h + 1):
+            for tx in range(w + 1):
+                latar.paste(ubin_wilayah("air", 0, m) if lewat else ubin_rumput(m, (tx + ty) % 4), tx * 16, ty * 16)
+        latar.paste(fn(), 7, 7)
+        lebar, tinggi = max(latar.w * 2, 150), latar.h * 2 + 46
+        if x + lebar > 1420:
+            x, y, tinggi_baris = 20, y + tinggi_baris + 12, 0
+        L.tempel(besar(latar, 2), x + (lebar - latar.w * 2) // 2, y)
+        L.label(KODE_OBJEK[nama], x + lebar / 2, y + latar.h * 2 + 4, "tebal")
+        L.label(nama.replace("_", " "), x + lebar / 2, y + latar.h * 2 + 24)
+        x += lebar + 14
+        tinggi_baris = max(tinggi_baris, tinggi)
+    return L.im.crop((0, 0, 1440, min(1440, y + tinggi_baris + 20)))
+
+
+def peta_kampung():
+    W, H = 40, 26
+    g = [["."] * W for _ in range(H)]
+
+    def isi(x0, y0, x1, y1, ch):
+        for yy in range(y0, y1 + 1):
+            for xx in range(x0, x1 + 1):
+                g[yy][xx] = ch
+
+    isi(0, 11, 39, 11, "s"); isi(0, 15, 39, 15, "s")                  # trotoar
+    isi(0, 12, 39, 14, "a"); isi(0, 13, 39, 13, "-"); isi(20, 12, 21, 14, "z")   # jalan dan zebra cross
+    isi(4, 0, 5, 10, "p")                                             # gang paving (Z1)
+    isi(12, 6, 27, 10, "s")                                           # halaman lobi sekolah (Z2)
+    isi(28, 4, 39, 6, "s")                                            # halaman puskesmas dan kantor desa (Z7)
+    isi(0, 16, 13, 25, "s")                                           # lantai pasar (Z4)
+    isi(34, 16, 39, 25, "b"); isi(30, 16, 32, 25, "w")                # pasir dan sungai (Z6)
+    for x, y, ch in ((10, 1, "*"), (11, 4, "+"), (25, 21, "*"), (27, 17, "^"), (24, 24, "+"), (33, 9, "^"),
+                     (20, 22, "d"), (14, 24, "^"), (37, 9, "*")):
+        g[y][x] = ch
+    return ["".join(r) for r in g]
+
+
+OBJEK_KAMPUNG = [("rumah_nara", 0, 1), ("rumah_a", 6, 1), ("rumah_b", 0, 6), ("warung_made", 6, 6),
+                 ("halte", 9, 9), ("rambu_halte", 8, 9), ("sekolah", 14, 0), ("kantin", 24, 1),
+                 ("tiang_bendera", 12, 6), ("gerbang_tutup", 17, 9), ("rambu_seberang", 22, 9),
+                 ("puskesmas", 28, 0), ("kantor_desa", 34, 0), ("gerobak", 36, 5), ("warung_wifi", 29, 7),
+                 ("angkot", 12, 12), ("tenda_a", 1, 17), ("tenda_b", 5, 17), ("los", 1, 21), ("gerobak", 9, 18),
+                 ("bale", 15, 17), ("pos_ronda", 21, 17), ("jembatan_datar", 30, 19), ("kelapa", 35, 17),
+                 ("kelapa", 26, 21)]
+
+
+def _pemain_kampung():
+    return [_pemain(1, 72, 140, "bawah", "jalan", 1, tas="sun"), _pemain(2, 328, 220, "kanan", "jalan", 1, tas="mango"),
+            _pemain(3, 152, 296, "atas", "diam", 0, tas="coral"), _pemain(4, 248, 148, tas="rose"),
+            _pemain(5, 504, 332, "kanan", "jalan", 3, tas="berry"), _pemain(6, 616, 380, tas="teal"),
+            _pemain(7, 280, 364, tas="leaf"), _pemain(8, 520, 92, "bawah", "jalan", 1, tas="sky-d")]
+
+
+def pratinjau_obj_peta():
+    L = Lembar(1320, 970)
+    L.judul("Kelompok O1 — Delapan zona di peta contoh", "Sesi C · 6 Nov 2026 · Ditinjau · 40×26 ubin, siang (×2)")
+    L.tempel(besar(render_peta(peta_kampung(), "siang", OBJEK_KAMPUNG, _pemain_kampung()), 2), 20, 70)
+    L.label("Z1 rumah dan gang (kiri atas) · Z2 sekolah · Z7 puskesmas dan kantor desa · Z8 warung berwifi · "
+            "Z3 jalan, halte, angkot", 660, 912)
+    L.label("Z4 pasar (kiri bawah) · Z5 bale dan pos ronda · Z6 sungai, jembatan, dan pohon kelapa", 660, 936)
+    return L.im
+
+
+def pratinjau_obj_dekat():
+    L = Lembar(1020, 760)
+    L.judul("Kelompok O1 — Potongan dekat (×3)", "Sesi C · 6 Nov 2026 · Ditinjau · dengan garis pindai")
+    peta = render_peta(peta_kampung(), "siang", OBJEK_KAMPUNG, _pemain_kampung())
+    potong = [((0, 0), "Z1 rumah Nara, rumah warga, warung Pak Made"), ((14, 0), "Z2 gedung SMP dan kantin"),
+              ((28, 0), "Z7 puskesmas dan kantor desa"), ((14, 16), "Z5 bale dan pos ronda")]
+    for i, ((tx, ty), teks) in enumerate(potong):
+        x, y = 20 + (i % 2) * 500, 70 + (i // 2) * 340
+        L.tempel(scanlines(peta.im.crop((tx * 16, ty * 16, tx * 16 + 160, ty * 16 + 96)), k=3), x, y)  # noqa: F405
+        L.label(teks, x + 240, y + 294, "tebal")
+    return L.im
+
+
 PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringkasan,
             "ava_pose_semua": pratinjau_ava_pose_semua, "ubin_contoh": pratinjau_ubin_contoh,
             "ubin_masa": pratinjau_ubin_masa, "ubin_dekat": pratinjau_ubin_dekat,
-            "ubin_lembar": pratinjau_ubin_lembar}
+            "ubin_lembar": pratinjau_ubin_lembar, "obj_lembar": pratinjau_obj_lembar,
+            "obj_peta": pratinjau_obj_peta, "obj_dekat": pratinjau_obj_dekat}
 for _n in AVATAR:
     PREVIEWS[f"pose_ava_{_n}"] = (lambda n=_n: pratinjau_pose_avatar(n))
 ANIMASI = {"ava_gerak": pratinjau_ava_gerak}
