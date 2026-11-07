@@ -722,6 +722,144 @@ def obj_tiang_lampu():
     return _bingkai(d)
 
 
+# --------------------------------------------------------------------------- kelompok O3: properti kejadian
+# Benda kecil (kotak bekal, dompet, bola, tali lompat) digambar di tengah kanvas 1x1 ubin agar mudah diletakkan.
+def obj_pengeras_suara():
+    """Pengeras suara portabel (O-29, K-02)."""
+    d = C(16, 16)                                                                    # noqa: F405
+    d.r(3, 2, 10, 13, DUSK); d.vl(3, 2, 14, SLATE); d.hl(5, 10, 1, SLATE)            # noqa: F405  badan dan pegangan
+    d.disc(8, 10, 3, INK); d.ring(8, 10, 2, SLATE); d.p(8, 10, MIST)                 # noqa: F405  corong bawah
+    d.r(7, 4, 3, 3, INK); d.p(8, 5, SLATE)                                           # noqa: F405  corong atas
+    return _bingkai(d)
+
+
+def obj_kotak_bekal():
+    """Kotak bekal (O-30, K-03)."""
+    d = C(16, 16)                                                                    # noqa: F405
+    d.r(4, 7, 8, 6, SKYD); d.r(4, 7, 8, 2, MIST); d.hl(4, 11, 9, NAVY); d.r(7, 8, 2, 2, WHITE)   # noqa: F405
+    return _bingkai(d)
+
+
+def obj_kursi_roda():
+    """Kursi roda kosong (O-31, K-04)."""
+    d = C(16, 16)                                                                    # noqa: F405
+    for x in (0, 14):
+        d.r(x, 4, 2, 11, INK); d.vl(x + (1 if x == 0 else 0), 5, 13, SLATE); d.p(x, 4, SLATE); d.p(x, 14, SLATE)   # noqa: F405
+    d.r(3, 1, 10, 7, DUSK); d.hl(3, 12, 1, SLATE); d.vl(3, 1, 8, SLATE); d.vl(12, 1, 8, SLATE)   # noqa: F405  sandaran
+    d.r(2, 0, 2, 2, SLATE); d.r(12, 0, 2, 2, SLATE)                                  # noqa: F405  pegangan dorong
+    d.r(3, 8, 10, 3, DUSK); d.hl(3, 12, 8, SLATE)                                    # noqa: F405  dudukan
+    d.vl(4, 11, 13, SLATE); d.vl(11, 11, 13, SLATE); d.r(4, 13, 8, 1, SLATE); d.hl(4, 11, 14, MIST)   # noqa: F405
+    return _bingkai(d)
+
+
+def obj_tiang_kamera():
+    """Tiang dengan kamera keamanan kecil (O-32, K-07), 1x2 ubin."""
+    d = C(16, 32)                                                                    # noqa: F405
+    d.r(7, 6, 2, 24, SLATE); d.vl(8, 6, 29, DUSK); d.r(5, 29, 6, 3, DUSK)            # noqa: F405  tiang
+    d.hl(8, 10, 6, SLATE)                                                            # noqa: F405  lengan
+    d.r(9, 3, 6, 4, MIST); d.vl(14, 3, 6, SLATE); d.hl(9, 13, 2, WHITE)              # noqa: F405  badan kamera
+    d.p(14, 5, INK); d.p(10, 4, CORAL)                                               # noqa: F405  lensa dan lampu
+    return _bingkai(d)
+
+
+def obj_lapak():
+    """Lapak sayur dan buah (O-33, K-07), 2x2 ubin."""
+    d = C(32, 32)                                                                    # noqa: F405
+    d.r(2, 14, 28, 4, WOOD); d.hl(2, 29, 14, SK2); d.r(2, 18, 28, 6, WOODD)          # noqa: F405  meja
+    for x in (3, 27):
+        d.r(x, 24, 2, 6, WOODD)                                                      # noqa: F405  kaki
+    for x, w in ((4, LEAF), (13, CORAL), (22, SUN)):                                 # noqa: F405  keranjang berisi
+        d.r(x, 9, 7, 5, WOOD); d.hl(x, x + 6, 13, WOODD); d.r(x + 1, 7, 5, 4, w); d.p(x + 1, 7, WHITE)   # noqa: F405
+    d.r(6, 25, 9, 6, WOOD); d.hl(6, 14, 27, WOODD); d.hl(6, 14, 29, WOODD)          # noqa: F405  peti di depan
+    d.r(7, 23, 7, 2, BERRY); d.p(8, 23, ROSE)                                        # noqa: F405  terung
+    return _bingkai(d)
+
+
+def obj_dompet():
+    """Dompet tanpa tulisan (O-34, K-08)."""
+    d = C(16, 16)                                                                    # noqa: F405
+    d.r(4, 8, 8, 5, WOODD); d.r(4, 8, 8, 2, WOOD); d.p(10, 10, SUN); d.hl(5, 10, 12, HR2)   # noqa: F405
+    return _bingkai(d)
+
+
+def obj_bangku_pasar():
+    """Bangku pasar tanpa sandaran (O-35, K-08), 2x1 ubin."""
+    d = C(32, 16)                                                                    # noqa: F405
+    d.r(1, 5, 30, 3, WOOD); d.hl(1, 30, 5, SK2); d.hl(1, 30, 7, WOODD)              # noqa: F405
+    for x in (3, 27):
+        d.r(x, 8, 2, 6, WOODD)                                                       # noqa: F405
+    d.hl(4, 27, 11, WOODD)                                                           # noqa: F405  penyangga
+    return _bingkai(d)
+
+
+def obj_pos_keamanan():
+    """Pos keamanan pasar tanpa tulisan (O-36, K-08), 2x2 ubin."""
+    d = C(32, 32)                                                                    # noqa: F405
+    _dinding(d, 2, 12, 28, 17, warna=MIST, teduh=SLATE); _pondasi(d, 2, 29, 28)      # noqa: F405
+    _jendela(d, 5, 16, 11, 8, bingkai=SLATE)                                         # noqa: F405  loket
+    _pintu(d, 19, 15, 8, 14, kayu=SLATE, gelap=DUSK)                                 # noqa: F405
+    _atap_pelana(d, 0, 0, 32, 12, "seng", alur="tegak")
+    return _bingkai(d)
+
+
+def obj_meja_panitia():
+    """Meja panitia dengan kertas rencana tanpa tulisan (O-37, K-09, K-10), 2x1 ubin."""
+    d = C(32, 16)                                                                    # noqa: F405
+    d.r(1, 3, 30, 5, WOOD); d.hl(1, 30, 3, SK2); d.r(1, 8, 30, 3, WOODD)             # noqa: F405  meja
+    for x in (2, 28):
+        d.r(x, 11, 2, 4, WOODD)                                                      # noqa: F405
+    d.r(4, 4, 6, 3, WHITE); d.p(9, 6, MIST); d.r(12, 3, 5, 4, WHITE); d.p(16, 3, MIST)   # noqa: F405  kertas polos
+    d.hl(19, 22, 5, SUN); d.p(23, 5, INK); d.r(25, 4, 4, 3, WHITE); d.hl(25, 28, 6, MIST)   # noqa: F405  pensil, tumpukan
+    return _bingkai(d)
+
+
+def obj_sisa_piknik():
+    """Tikar dan sisa piknik berupa sampah plastik (O-38, K-11), 2x1 ubin."""
+    d = C(32, 16)                                                                    # noqa: F405
+    d.r(1, 2, 30, 12, SK2)                                                           # noqa: F405  tikar
+    for x in range(3, 30, 4):
+        d.vl(x, 2, 13, WOOD)                                                         # noqa: F405  anyaman
+    for y in (5, 9):
+        d.hl(1, 30, y, WOOD)                                                         # noqa: F405
+    d.r(5, 6, 4, 2, SIANG3); d.p(9, 6, MIST)                                         # noqa: F405  botol plastik
+    d.r(14, 7, 3, 3, CORAL); d.p(15, 8, SUN)                                         # noqa: F405  bungkus makanan
+    d.r(21, 4, 4, 3, WHITE); d.p(24, 6, MIST)                                        # noqa: F405  kantong plastik
+    d.r(25, 9, 3, 2, SUN)                                                            # noqa: F405
+    return _bingkai(d)
+
+
+def obj_bola():
+    """Bola (O-39, K-12)."""
+    d = C(16, 16)                                                                    # noqa: F405
+    d.disc(8, 10, 3, WHITE)                                                          # noqa: F405
+    for x, y in ((8, 10), (7, 8), (10, 9), (6, 11), (9, 12)):
+        d.p(x, y, DUSK)                                                              # noqa: F405
+    return _bingkai(d)
+
+
+def obj_tali_lompat():
+    """Tali lompat tergeletak di tanah (O-40, K-12)."""
+    d = C(16, 16)                                                                    # noqa: F405
+    for i in range(0, 181, 6):
+        a = math.radians(180 + i)
+        d.p(int(round(8 + 5 * math.cos(a))), int(round(12 + 6 * math.sin(a))), CORAL)   # noqa: F405
+    d.r(2, 12, 2, 3, WOOD); d.r(12, 12, 2, 3, WOOD)                                  # noqa: F405  pegangan
+    return _bingkai(d)
+
+
+def obj_bangku_antrean():
+    """Bangku antrean puskesmas (O-41, K-13), 3x1 ubin: empat kursi plastik bersambung."""
+    d = C(48, 16)                                                                    # noqa: F405
+    d.r(1, 11, 46, 1, SLATE)                                                         # noqa: F405  rangka
+    for x in (3, 44):
+        d.r(x, 11, 1, 4, SLATE)                                                      # noqa: F405
+    for i in range(4):
+        x = 2 + i * 11
+        d.r(x, 2, 10, 5, SKYD); d.hl(x, x + 9, 2, SIANG1)                            # noqa: F405  sandaran
+        d.r(x, 7, 10, 3, SKYD); d.hl(x, x + 9, 9, NAVY)                              # noqa: F405  dudukan
+    return _bingkai(d)
+
+
 # --------------------------------------------------------------------------- daftar objek
 # nama: (fungsi, ukuran dalam ubin (lebar, tinggi), baris potong kanvas atau None, kotak padat [(x, y, l, t)] dalam
 #        ubin relatif terhadap pojok kiri atas, jenis bayangan di tanah, bisa dilewati?)
@@ -761,6 +899,20 @@ OBJEK = {
     "tempat_sampah": (obj_tempat_sampah, (1, 1), None, [(0, 0, 1, 1)], "kecil", False),
     "motor": (obj_motor, (2, 1), None, [(0, 0, 2, 1)], "kecil", False),
     "tiang_lampu": (obj_tiang_lampu, (1, 2), 17, [(0, 1, 1, 1)], None, False),
+    # kelompok O3 (benda kecil tanpa kotak padat bisa dilewati)
+    "pengeras_suara": (obj_pengeras_suara, (1, 1), None, [(0, 0, 1, 1)], "kecil", False),
+    "kotak_bekal": (obj_kotak_bekal, (1, 1), None, [], None, False),
+    "kursi_roda": (obj_kursi_roda, (1, 1), None, [(0, 0, 1, 1)], "kecil", False),
+    "tiang_kamera": (obj_tiang_kamera, (1, 2), 17, [(0, 1, 1, 1)], None, False),
+    "lapak": (obj_lapak, (2, 2), None, [(0, 1, 2, 1)], "kotak", False),
+    "dompet": (obj_dompet, (1, 1), None, [], None, False),
+    "bangku_pasar": (obj_bangku_pasar, (2, 1), None, [(0, 0, 2, 1)], None, False),
+    "pos_keamanan": (obj_pos_keamanan, (2, 2), 13, [(0, 1, 2, 1)], "kotak", False),
+    "meja_panitia": (obj_meja_panitia, (2, 1), None, [(0, 0, 2, 1)], None, False),
+    "sisa_piknik": (obj_sisa_piknik, (2, 1), None, [], None, False),
+    "bola": (obj_bola, (1, 1), None, [], None, False),
+    "tali_lompat": (obj_tali_lompat, (1, 1), None, [], None, False),
+    "bangku_antrean": (obj_bangku_antrean, (3, 1), None, [(0, 0, 3, 1)], None, False),
 }
 for _gaya in ("bambu", "sekolah"):
     for _jenis in PAGAR:
@@ -773,7 +925,10 @@ KODE_OBJEK = {"rumah_nara": "O-01", "rumah_a": "O-02", "rumah_b": "O-02", "warun
               "pos_ronda": "O-15", "jembatan_datar": "O-16", "jembatan_tegak": "O-16", "kelapa": "O-17",
               "puskesmas": "O-18", "kantor_desa": "O-19", "warung_wifi": "O-20",
               "pohon": "O-21", "semak": "O-22", "bangku": "O-25", "tempat_sampah": "O-26", "motor": "O-27",
-              "tiang_lampu": "O-28"}
+              "tiang_lampu": "O-28", "pengeras_suara": "O-29", "kotak_bekal": "O-30", "kursi_roda": "O-31",
+              "tiang_kamera": "O-32", "lapak": "O-33", "dompet": "O-34", "bangku_pasar": "O-35",
+              "pos_keamanan": "O-36", "meja_panitia": "O-37", "sisa_piknik": "O-38", "bola": "O-39",
+              "tali_lompat": "O-40", "bangku_antrean": "O-41"}
 for _jenis in PAGAR:
     KODE_OBJEK[f"pagar_bambu_{_jenis}"] = "O-23"
     KODE_OBJEK[f"pagar_sekolah_{_jenis}"] = "O-24"

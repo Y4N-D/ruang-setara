@@ -109,7 +109,8 @@ DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              if nama.startswith(("ava_", "ikon_ava_", "ubin_"))                     # kelompok A dan U
              or NAMA_OBJEK.get(nama) in KELOMPOK_O1 | KELOMPOK_O2                       # kelompok O1 dan O2
              or nama.startswith("tanda_")                                               # kelompok T
-             or (nama.startswith("npc_") and nama.split("_")[1] in NPC)}                 # kelompok N1
+             or (nama.startswith("npc_") and nama.split("_")[1] in NPC)                  # kelompok N1
+             or (nama.startswith("npc_") and nama.split("_")[1] in NPC2)}                # kelompok N2
 
 BATAS_STRIP = 6 * 1024              # satu strip avatar atau tokoh
 BATAS_UBIN = 60 * 1024              # satu lembar ubin per masa
@@ -1016,7 +1017,7 @@ LABEL_N2 = {"warga1": ("N-10 warga 1", "kemeja sky-d"), "warga2": ("N-10 warga 2
 
 def pratinjau_npc2_ringkasan():
     L = Lembar(1440, 760)
-    L.judul("Kelompok N2 — Warga dan tokoh baru (×5)", "Sesi C · 6 Nov 2026 · Ditinjau · S1–S6 = siswa umum tanpa tas")
+    L.judul("Kelompok N2 — Warga dan tokoh baru (×5)", "Sesi C · disetujui 6 Nov 2026 · S1–S6 = siswa umum tanpa tas")
     sel = [(n, p) for n, ps in POSE_NPC2.items() for p in ps]
     for i, (nama, pose) in enumerate(sel):
         x, y = 20 + (i % 11) * 128, 70 + (i // 11) * 230
@@ -1045,7 +1046,7 @@ def _npc2_di(nama, pose, x_kaki, y_kaki):
 
 def pratinjau_npc2_peta():
     L = Lembar(1320, 970)
-    L.judul("Kelompok N2 — Tokoh di peta contoh", "Sesi C · 6 Nov 2026 · Ditinjau · siang (×2)")
+    L.judul("Kelompok N2 — Tokoh di peta contoh", "Sesi C · disetujui 6 Nov 2026 · siang (×2)")
     tokoh = [_npc2_di("nenek", "diam", 340, 186), _npc2_di("polisi", "diam", 372, 250),
              _npc2_di("raka", "kursiroda", 372, 104), _npc2_di("siswa6", "diam", 392, 108),
              _npc2_di("siswa5", "hp", 430, 76), _npc2_di("ibubayi", "diam", 470, 92), _npc2_di("petugas", "diam", 488, 92),
@@ -1062,6 +1063,89 @@ def pratinjau_npc2_peta():
     return L.im
 
 
+# ---------------------------------------------------------------------------
+# Pratinjau kelompok O3: properti kejadian
+# ---------------------------------------------------------------------------
+O3 = ("pengeras_suara", "kotak_bekal", "kursi_roda", "tiang_kamera", "lapak", "dompet", "bangku_pasar", "pos_keamanan",
+      "meja_panitia", "sisa_piknik", "bola", "tali_lompat", "bangku_antrean")
+KEJADIAN_O3 = {"pengeras_suara": "K-02", "kotak_bekal": "K-03", "kursi_roda": "K-04", "tiang_kamera": "K-07",
+               "lapak": "K-07", "dompet": "K-08", "bangku_pasar": "K-08", "pos_keamanan": "K-08",
+               "meja_panitia": "K-09, K-10", "sisa_piknik": "K-11", "bola": "K-12", "tali_lompat": "K-12",
+               "bangku_antrean": "K-13"}
+
+
+def pratinjau_obj3_lembar():
+    L = Lembar(1440, 660)
+    L.judul("Kelompok O3 — Properti kejadian (×4)", "Sesi C · 6 Nov 2026 · Ditinjau")
+    m = MASA["siang"]
+    x, y, tinggi_baris = 20, 70, 0
+    for nama in O3:
+        fn, (w, h), _, _, _, _ = OBJEK[nama]
+        latar = C((w + 1) * 16, (h + 1) * 16)                                     # noqa: F405
+        for ty in range(h + 1):
+            for tx in range(w + 1):
+                latar.paste(ubin_wilayah("semen", 0, m) if nama in ("bangku_antrean", "pos_keamanan", "lapak",
+                            "bangku_pasar", "tiang_kamera", "dompet") else ubin_rumput(m, (tx + ty) % 4), tx * 16, ty * 16)
+        latar.paste(fn(), 7, 7)
+        lebar = max(latar.w * 4, 150)
+        if x + lebar > 1420:
+            x, y, tinggi_baris = 20, y + tinggi_baris + 16, 0
+        tinggi_baris = max(tinggi_baris, latar.h * 4 + 48)
+        L.tempel(besar(latar, 4), x + (lebar - latar.w * 4) // 2, y)
+        L.label(f"{KODE_OBJEK[nama]} · {KEJADIAN_O3[nama]}", x + lebar / 2, y + latar.h * 4 + 4, "tebal")
+        L.label(nama.replace("_", " "), x + lebar / 2, y + latar.h * 4 + 24)
+        x += lebar + 16
+    return L.im.crop((0, 0, 1440, y + tinggi_baris + 12))
+
+
+def _tokoh_di(jenis, nama, pose, x, y):
+    return (_npc_di if jenis == "n1" else _npc2_di)(nama, pose, x, y)
+
+
+SET_KEJADIAN = [   # (kejadian, keterangan, peta 7x5, objek, tokoh, posisi tanda "!")
+    ("K-01", "Nara, Gita, teman di pagar", ["......."] * 5,
+     [("pagar_bambu_datar", x, 1) for x in range(7)],
+     [("n1", "nara", "diam", 36, 62), ("n1", "gita", "diam", 54, 64), ("n2", "siswa1", "diam", 76, 62)], (46, 30)),
+    ("K-02", "Pak Made, Dimas, pengeras suara", ["......."] * 5, [("pengeras_suara", 4, 2)],
+     [("n1", "made", "diam", 36, 58), ("n1", "dimas", "diam", 58, 60)], (40, 22)),
+    ("K-03", "Komang menunduk, ada yang memotret", ["sssssss"] * 5, [],
+     [("n1", "komang", "menunduk", 40, 58), ("n2", "siswa5", "hp", 64, 60), ("n2", "siswa6", "diam", 84, 58)], (56, 22)),
+    ("K-04", "Raka dan teman sekelas", ["sssssss"] * 5, [],
+     [("n2", "raka", "kursiroda", 44, 60), ("n2", "siswa2", "diam", 66, 60), ("n2", "siswa5", "diam", 86, 58)], (58, 22)),
+    ("K-06", "Nenek di zebra cross", ["sssssss", "aaazaaa", "---z---", "aaazaaa", "sssssss"], [],
+     [("n2", "nenek", "diam", 50, 76), ("n2", "siswa4", "diam", 74, 76)], (44, 46)),
+    ("K-07", "Lapak, kamera, pedagang, warga", ["sssssss"] * 5, [("lapak", 1, 1), ("tiang_kamera", 5, 1)],
+     [("n2", "pedagang", "diam", 30, 76), ("n1", "bayu", "diam", 58, 70), ("n2", "warga1", "menunjuk", 80, 72)], (54, 20)),
+    ("K-08", "Dompet, bangku, pos keamanan", ["sssssss"] * 5,
+     [("bangku_pasar", 0, 3), ("dompet", 2, 3), ("pos_keamanan", 4, 1)],
+     [("n1", "nara", "diam", 50, 46), ("n2", "siswa2", "diam", 30, 46)], (36, 14)),
+    ("K-09", "Sinta dan panitia di meja", ["......."] * 5, [("meja_panitia", 2, 2)],
+     [("n1", "sinta", "diam", 36, 64), ("n2", "siswa4", "diam", 72, 64)], (52, 18)),
+    ("K-11", "Sisa piknik di tepi sungai", [".......", ".......", ".......", "wwwwwww", "wwwwwww"],
+     [("sisa_piknik", 1, 1), ("tempat_sampah", 5, 1)],
+     [("n2", "siswa3", "diam", 58, 46), ("n2", "siswa4", "diam", 78, 46)], (44, 6)),
+    ("K-12", "Bola dan tali lompat", ["ggggggg"] * 5, [("bola", 1, 3), ("tali_lompat", 5, 3)],
+     [("n1", "gita", "diam", 40, 50), ("n2", "anak1", "diam", 60, 52), ("n2", "anak2", "diam", 82, 50)], (58, 16)),
+    ("K-13", "Antrean puskesmas", ["sssssss"] * 5, [("bangku_antrean", 2, 1)],
+     [("n2", "ibubayi", "diam", 36, 62), ("n2", "siswa5", "diam", 60, 70), ("n2", "petugas", "diam", 82, 62)], (58, 10)),
+    ("K-14", "Wayan menjaga gerobak", ["sssssss"] * 5, [("gerobak", 2, 1)],
+     [("n2", "wayan", "diam", 72, 52)], (60, 14)),
+]
+
+
+def pratinjau_obj3_set():
+    L = Lembar(1440, 960)
+    L.judul("Kelompok O3 — Set tokoh dan properti per kejadian (×3)", "Sesi C · 6 Nov 2026 · Ditinjau · tabel NASKAH.md")
+    for i, (k, teks, peta, objek, tokoh, tanda) in enumerate(SET_KEJADIAN):
+        x, y = 20 + (i % 4) * 352, 70 + (i // 4) * 296
+        g = render_peta(peta, "siang", tuple(objek), [_tokoh_di(*t) for t in tokoh])
+        g.paste(tanda_kejadian(), tanda[0], tanda[1])
+        L.tempel(besar(g, 3), x, y)
+        L.label(k, x + 168, y + 244, "tebal")
+        L.label(teks, x + 168, y + 264)
+    return L.im
+
+
 PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringkasan,
             "ava_pose_semua": pratinjau_ava_pose_semua, "ubin_contoh": pratinjau_ubin_contoh,
             "ubin_masa": pratinjau_ubin_masa, "ubin_dekat": pratinjau_ubin_dekat,
@@ -1070,7 +1154,8 @@ PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringk
             "obj2_lembar": pratinjau_obj2_lembar, "obj2_peta": pratinjau_obj2_peta,
             "tanda_lembar": pratinjau_tanda_lembar, "npc1_ringkasan": pratinjau_npc1_ringkasan,
             "npc1_peta": pratinjau_npc1_peta, "npc2_ringkasan": pratinjau_npc2_ringkasan,
-            "npc2_peta": pratinjau_npc2_peta}
+            "npc2_peta": pratinjau_npc2_peta, "obj3_lembar": pratinjau_obj3_lembar,
+            "obj3_set": pratinjau_obj3_set}
 for _n in AVATAR:
     PREVIEWS[f"pose_ava_{_n}"] = (lambda n=_n: pratinjau_pose_avatar(n))
 ANIMASI = {"ava_gerak": pratinjau_ava_gerak, "tanda_gerak": pratinjau_tanda_gerak}

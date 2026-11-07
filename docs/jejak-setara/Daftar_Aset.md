@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Versi | 0.8 |
+| Versi | 0.9 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Kelompok A, U, O1, O2, T, dan N1 disetujui; ukuran peta ditetapkan 160 × 100 ubin. Kelompok N2 (warga dan tokoh baru) diserahkan: menunggu "Setuju: aset N2" |
+| Tahap saat ini | Kelompok A, U, O1, O2, T, N1, dan N2 disetujui; ukuran peta 160 × 100 ubin. Kelompok O3 (properti kejadian) diserahkan: menunggu "Setuju: aset O3" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -36,6 +36,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Peta | Pemilik proyek menetapkan ukuran peta 160 × 100 ubin (rencana awal 120 × 80), karena perkiraan 50–100 pemain per sesi dan pertanyaan yang banyak serta bervariasi. Permintaan C-7 dan C-8 diajukan |
 | 6 Nov 2026 | Kelompok N1 | Pemilik proyek membalas "Setuju: aset N1": N-01 sampai N-09 Disetujui; kredit 11 berkas ditambahkan |
 | 6 Nov 2026 | Kelompok N2 | 18 tokoh (22 berkas) diserahkan, termasuk usulan ciri Raka, Wayan, dan siswa umum; menunggu "Setuju: aset N2" |
+| 6 Nov 2026 | Kelompok N2 | Pemilik proyek membalas "Setuju: aset N2": N-10 sampai N-20 Disetujui, termasuk ciri Raka, Wayan, dan siswa umum; kredit 22 berkas ditambahkan |
+| 6 Nov 2026 | Kelompok O3 | 13 properti kejadian (15 berkas) diserahkan bersama pratinjau set tokoh per kejadian; menunggu "Setuju: aset O3" |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -66,7 +68,7 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 
 | | |
 |---|---|
-| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, O2, T, dan N1 Disetujui 6 Nov 2026; kelompok N2 diserahkan, menunggu "Setuju: aset N2" |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, O2, T, N1, dan N2 Disetujui 6 Nov 2026; kelompok O3 diserahkan, menunggu "Setuju: aset O3" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -408,24 +410,38 @@ Bangunan dan pohon terdiri atas `obj_{nama}.png` dan `obj_{nama}_atas.png` (usul
 
 ### O3. Properti kejadian
 
-Diambil dari tabel "Tokoh dan properti per kejadian" di `naskah/NASKAH.md`. Properti yang dipegang tokoh (HP, tali lompat yang sedang dipakai) digambar sebagai pose tokoh di kelompok N.
+Diambil dari tabel "Tokoh dan properti per kejadian" di `naskah/NASKAH.md`. Properti yang dipegang tokoh (HP, kotak bekal di tangan Komang) sudah menjadi pose tokoh di kelompok N. Benda kecil digambar di tengah kanvas 1 × 1 ubin agar mudah diletakkan, dan bisa dilewati.
 
-| ID | Berkas | Ukuran | Isi | Kejadian | Status |
+| ID | Berkas | Ukuran (ubin) | Isi | Kejadian | Status |
 |---|---|---|---|---|---|
-| O-29 | `obj_pengeras_suara` | 1 × 1 | Pengeras suara | K-02 | Belum |
-| O-30 | `obj_kotak_bekal` | ½ ubin | Kotak bekal | K-03 | Belum |
-| O-31 | `obj_kursi_roda` | 1 × 1 | Kursi roda kosong; Raka yang duduk di kursi roda ada di N-17 | K-04 | Belum |
-| O-32 | `obj_tiang_kamera` | 1 × 2 | Tiang dengan kamera keamanan kecil | K-07 | Belum |
-| O-33 | `obj_lapak` | 2 × 2 | Lapak sayur dan buah | K-07 | Belum |
-| O-34 | `obj_dompet` | ½ ubin | Dompet | K-08 | Belum |
-| O-35 | `obj_bangku_pasar` | 2 × 1 | Bangku pasar | K-08 | Belum |
-| O-36 | `obj_pos_keamanan` | 2 × 2 | Pos keamanan pasar | K-08 | Belum |
-| O-37 | `obj_meja_panitia` | 2 × 1 | Meja panitia dengan kertas rencana tanpa tulisan | K-09, K-10 | Belum |
-| O-38 | `obj_sisa_piknik` | 2 × 1 | Tikar dan bungkus plastik | K-11 | Belum |
-| O-39 | `obj_bola` | ½ ubin | Bola | K-12 | Belum |
-| O-40 | `obj_tali_lompat` | 1 × 1 | Tali lompat di tanah | K-12 | Belum |
-| O-41 | `obj_bangku_antrean` | 3 × 1 | Bangku antrean | K-13 | Belum |
+| O-29 | `obj_pengeras_suara` | 1 × 1 | Pengeras suara portabel `dusk` | K-02 | Ditinjau (kelompok O3) |
+| O-30 | `obj_kotak_bekal` | 1 × 1, benda kecil | Kotak bekal `sky-d` bertutup `mist` | K-03 | Ditinjau (kelompok O3) |
+| O-31 | `obj_kursi_roda` | 1 × 1 | Kursi roda kosong dilihat dari depan; Raka yang duduk di kursi roda ada di N-17 | K-04 | Ditinjau (kelompok O3) |
+| O-32 | `obj_tiang_kamera` | 1 × 2 | Tiang dengan kamera keamanan kecil | K-07 | Ditinjau (kelompok O3) |
+| O-33 | `obj_lapak` | 2 × 2 | Meja lapak dengan tiga keranjang sayur dan buah, peti terung di depan | K-07 | Ditinjau (kelompok O3) |
+| O-34 | `obj_dompet` | 1 × 1, benda kecil | Dompet cokelat tanpa tulisan | K-08 | Ditinjau (kelompok O3) |
+| O-35 | `obj_bangku_pasar` | 2 × 1 | Bangku kayu tanpa sandaran | K-08 | Ditinjau (kelompok O3) |
+| O-36 | `obj_pos_keamanan` | 2 × 2 | Pos jaga beratap seng dengan loket dan pintu, tanpa tulisan dan lambang | K-08 | Ditinjau (kelompok O3) |
+| O-37 | `obj_meja_panitia` | 2 × 1 | Meja dengan kertas polos, pensil, dan tumpukan kertas, tanpa tulisan | K-09, K-10 | Ditinjau (kelompok O3) |
+| O-38 | `obj_sisa_piknik` | 2 × 1 | Tikar anyaman dengan botol, bungkus, dan kantong plastik; bisa dilewati | K-11 | Ditinjau (kelompok O3) |
+| O-39 | `obj_bola` | 1 × 1, benda kecil | Bola putih bertambal | K-12 | Ditinjau (kelompok O3) |
+| O-40 | `obj_tali_lompat` | 1 × 1 | Tali lompat `coral` bergagang kayu, tergeletak di tanah | K-12 | Ditinjau (kelompok O3) |
+| O-41 | `obj_bangku_antrean` | 3 × 1 | Empat kursi plastik `sky-d` bersambung | K-13 | Ditinjau (kelompok O3) |
 | O-42 | `obj_sanggah` | — | Sanggah keluarga untuk K-02 versi B | K-02 | Ditunda: hanya bila KT-10 memilih versi B dan pemilik proyek mengizinkan, karena Design System bagian 7 aturan 6 tidak menggambar tempat ibadah sebagai penanda zona |
+
+#### Rincian kelompok O3 (6 November 2026)
+
+| | |
+|---|---|
+| Kode | `scripts/game/art/atas_objek.py` (bagian "kelompok O3" dan entri `OBJEK`) |
+| Berkas | 15 PNG di `app/jejak-setara/assets/obj/`; tiang kamera dan pos keamanan berbagian bawah dan atas |
+| Ukuran | Seluruh kelompok O3 3,2 KB |
+| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai ubin |
+| Pratinjau | `preview/obj3_lembar.png` (properti ×4) dan `preview/obj3_set.png` (set tokoh dan properti untuk 12 kejadian, ×3) |
+
+- Pratinjau set kejadian memakai tokoh yang sudah disetujui dan mengikuti tabel tokoh dan properti di `naskah/NASKAH.md`. Di JS-06, setiap titik kejadian menyediakan ruang 3 × 3 ubin untuk set ini.
+- K-05 (Dimas di motor dan halte), K-10, K-15, dan K-16 memakai tokoh dan objek dari kelompok yang sudah disetujui (pose Dimas di motor, halte, meja panitia, warung berwifi, pose memegang HP).
+- Benda kecil (kotak bekal, dompet, bola, tali lompat) dan sisa piknik tidak punya kotak padat.
 
 ## T. Penanda dan efek
 
@@ -502,21 +518,21 @@ Tampak atas, menghadap bawah, diam 2 bingkai (`npc_{tokoh}_bawah_diam.png`), dit
 
 ### N2. Warga dan tokoh baru
 
-Ciri Raka, Wayan, dan siswa umum adalah usulan Sesi C. Dengan "Setuju: aset N2", ciri ini ditetapkan dan Sesi A dapat menyalinnya ke Design System bagian 8 (Permintaan A-1 Sesi B).
+Ciri Raka, Wayan, dan siswa umum diusulkan Sesi C dan ditetapkan pemilik proyek pada 6 November 2026 ("Setuju: aset N2"). Sesi A dapat menyalinnya ke Design System bagian 8 untuk menyelesaikan Permintaan A-1 Sesi B.
 
 | ID | Tokoh | Berkas | Ciri | Kejadian | Status |
 |---|---|---|---|---|---|
-| N-10 | Warga dewasa 1–3 | `npc_warga1_bawah_diam`, `npc_warga1_bawah_menunjuk`, `npc_warga2_bawah_diam`, `npc_warga3_bawah_diam` (16 × 26) | Warga 1: `skin-3`, rambut rapi, kemeja `sky-d`, celana `dusk`; pose menunjuk sambil bicara, tanpa kekerasan. Warga 2: `skin-1`, kerudung `teal`, baju lengan panjang `berry`, rok panjang `navy`. Warga 3: `skin-4`, rambut kelabu cepak, kemeja cokelat | K-07, K-10 | Ditinjau (kelompok N2) |
-| N-11 | Nenek | `npc_nenek_bawah_diam` (16 × 24) | `skin-3`, rambut kelabu bersanggul, baju lengan panjang `berry`, kain cokelat, bertongkat, sedikit lebih rendah | K-06 | Ditinjau (kelompok N2) |
-| N-12 | Ibu menggendong bayi | `npc_ibubayi_bawah_diam` (16 × 26) | `skin-2`, rambut bersanggul, baju `teal`, rok panjang `navy`, gendongan `mango`, bayi berselimut putih | K-13 | Ditinjau (kelompok N2) |
-| N-13 | Anak SD 1–2 | `npc_anak1_bawah_diam`, `npc_anak2_bawah_diam` (14 × 20) | Anak 1: `skin-3`, rambut pendek, kaus `sun`, celana pendek `navy`. Anak 2: `skin-4`, rambut dikuncir dua berikat `leaf`, kaus `rose`, rok `sky-d` | K-12 | Ditinjau (kelompok N2) |
-| N-14 | Pedagang | `npc_pedagang_bawah_diam` (16 × 26) | `skin-3`, caping anyaman, kaus `coral`, celemek putih, sandal | K-07 | Ditinjau (kelompok N2) |
-| N-15 | Petugas puskesmas | `npc_petugas_bawah_diam` (16 × 26) | `skin-1`, rambut bersanggul, seragam putih dengan tanda hati `leaf`, sepatu putih; ramah | K-13 | Ditinjau (kelompok N2) |
-| N-16 | Polisi | `npc_polisi_bawah_diam` (16 × 26) | `skin-2`, topi gelap polos, seragam cokelat bersaku tanpa lambang instansi; sikap membantu | Design System bagian 8 | Ditinjau (kelompok N2) |
-| N-17 | Raka | `npc_raka_bawah_kursiroda` (16 × 24) | Usulan: `skin-3`, rambut belah tengah `hair-2`, seragam tanpa tas, duduk di kursi roda dengan tangan di pelek roda | K-04 | Ditinjau (kelompok N2) |
-| N-18 | Wayan | `npc_wayan_bawah_diam` (16 × 24) | Usulan: `skin-4`, rambut belah tengah, kaus `leaf`, celana pendek cokelat, sandal (membantu gerobak orang tuanya) | K-14 | Ditinjau (kelompok N2) |
-| N-19 | Siswa umum S1–S4 | `npc_siswa1_bawah_diam`, `npc_siswa1_bawah_hp`, `npc_siswa2_bawah_diam`, `npc_siswa2_bawah_menunduk`, `npc_siswa3_bawah_diam`, `npc_siswa4_bawah_diam` (16 × 24) | Usulan, berbaju bebas tanpa tas: S1 `skin-1`, rambut tergerai, kaus `berry`, jin; S2 `skin-3`, rambut ikal, kaus `sky-d`; S3 `skin-2`, kerudung `rose`, baju lengan panjang `sky-d`, rok panjang; S4 `skin-4`, rambut dikuncir, kaus `leaf`. Pose memegang HP (S1) dan menunduk (S2) | K-01, K-08, K-09, K-10, K-11, K-12, K-15, K-16 | Ditinjau (kelompok N2) |
-| N-20 | Siswa umum S5–S6 | `npc_siswa5_bawah_diam`, `npc_siswa5_bawah_hp`, `npc_siswa6_bawah_diam` (16 × 24) | Usulan, berseragam tanpa tas: S5 `skin-1`, rambut belah tengah, celana; S6 `skin-4`, rambut tergerai, rok panjang. Pose memegang HP (S5) | K-03, K-04, K-13 | Ditinjau (kelompok N2) |
+| N-10 | Warga dewasa 1–3 | `npc_warga1_bawah_diam`, `npc_warga1_bawah_menunjuk`, `npc_warga2_bawah_diam`, `npc_warga3_bawah_diam` (16 × 26) | Warga 1: `skin-3`, rambut rapi, kemeja `sky-d`, celana `dusk`; pose menunjuk sambil bicara, tanpa kekerasan. Warga 2: `skin-1`, kerudung `teal`, baju lengan panjang `berry`, rok panjang `navy`. Warga 3: `skin-4`, rambut kelabu cepak, kemeja cokelat | K-07, K-10 | Disetujui (6 Nov) |
+| N-11 | Nenek | `npc_nenek_bawah_diam` (16 × 24) | `skin-3`, rambut kelabu bersanggul, baju lengan panjang `berry`, kain cokelat, bertongkat, sedikit lebih rendah | K-06 | Disetujui (6 Nov) |
+| N-12 | Ibu menggendong bayi | `npc_ibubayi_bawah_diam` (16 × 26) | `skin-2`, rambut bersanggul, baju `teal`, rok panjang `navy`, gendongan `mango`, bayi berselimut putih | K-13 | Disetujui (6 Nov) |
+| N-13 | Anak SD 1–2 | `npc_anak1_bawah_diam`, `npc_anak2_bawah_diam` (14 × 20) | Anak 1: `skin-3`, rambut pendek, kaus `sun`, celana pendek `navy`. Anak 2: `skin-4`, rambut dikuncir dua berikat `leaf`, kaus `rose`, rok `sky-d` | K-12 | Disetujui (6 Nov) |
+| N-14 | Pedagang | `npc_pedagang_bawah_diam` (16 × 26) | `skin-3`, caping anyaman, kaus `coral`, celemek putih, sandal | K-07 | Disetujui (6 Nov) |
+| N-15 | Petugas puskesmas | `npc_petugas_bawah_diam` (16 × 26) | `skin-1`, rambut bersanggul, seragam putih dengan tanda hati `leaf`, sepatu putih; ramah | K-13 | Disetujui (6 Nov) |
+| N-16 | Polisi | `npc_polisi_bawah_diam` (16 × 26) | `skin-2`, topi gelap polos, seragam cokelat bersaku tanpa lambang instansi; sikap membantu | Design System bagian 8 | Disetujui (6 Nov) |
+| N-17 | Raka | `npc_raka_bawah_kursiroda` (16 × 24) | Usulan: `skin-3`, rambut belah tengah `hair-2`, seragam tanpa tas, duduk di kursi roda dengan tangan di pelek roda | K-04 | Disetujui (6 Nov) |
+| N-18 | Wayan | `npc_wayan_bawah_diam` (16 × 24) | Usulan: `skin-4`, rambut belah tengah, kaus `leaf`, celana pendek cokelat, sandal (membantu gerobak orang tuanya) | K-14 | Disetujui (6 Nov) |
+| N-19 | Siswa umum S1–S4 | `npc_siswa1_bawah_diam`, `npc_siswa1_bawah_hp`, `npc_siswa2_bawah_diam`, `npc_siswa2_bawah_menunduk`, `npc_siswa3_bawah_diam`, `npc_siswa4_bawah_diam` (16 × 24) | Usulan, berbaju bebas tanpa tas: S1 `skin-1`, rambut tergerai, kaus `berry`, jin; S2 `skin-3`, rambut ikal, kaus `sky-d`; S3 `skin-2`, kerudung `rose`, baju lengan panjang `sky-d`, rok panjang; S4 `skin-4`, rambut dikuncir, kaus `leaf`. Pose memegang HP (S1) dan menunduk (S2) | K-01, K-08, K-09, K-10, K-11, K-12, K-15, K-16 | Disetujui (6 Nov) |
+| N-20 | Siswa umum S5–S6 | `npc_siswa5_bawah_diam`, `npc_siswa5_bawah_hp`, `npc_siswa6_bawah_diam` (16 × 24) | Usulan, berseragam tanpa tas: S5 `skin-1`, rambut belah tengah, celana; S6 `skin-4`, rambut tergerai, rok panjang. Pose memegang HP (S5) | K-03, K-04, K-13 | Disetujui (6 Nov) |
 
 #### Rincian kelompok N2 (6 November 2026)
 
@@ -615,5 +631,5 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## Cara membalas
 
-- **"Setuju: aset N2"** berarti ke-18 tokoh kelompok N2, termasuk usulan ciri Raka, Wayan, dan siswa umum, disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok O3 (properti kejadian).
-- Perbaikan cukup ditulis per tokoh, misalnya "N-17: Raka berambut pendek" atau "N-19: S3 berkerudung biru". Tokoh lain yang tidak disebut tetap seperti sekarang.
+- **"Setuju: aset O3"** berarti ke-13 properti kejadian disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok O4 (varian rumah dan pohon untuk peta 160 × 100).
+- Perbaikan cukup ditulis per properti, misalnya "O-33: lapak beratap" atau "O-38: sampah lebih banyak". Properti lain yang tidak disebut tetap seperti sekarang.
