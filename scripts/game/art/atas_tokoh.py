@@ -144,7 +144,7 @@ def _lengan(c, d, x, y0, dy, kain):
         c.r(x, y0, 1, 3, kain); c.r(x, y0 + 3 + dy, 1, 2, s); c.p(x, y0 + 4 + dy, sd)
 
 
-def _badan_bawah(c, d, y0, tas, ayun=0):
+def _badan_bawah(c, d, y0, tas, ayun=0, tali=True):
     s = d["skin"]
     t, td = tas
     c.r(4, y0, 8, 5, WHITE); c.vl(11, y0, y0 + 4, MIST)                                 # noqa: F405  kemeja
@@ -155,7 +155,8 @@ def _badan_bawah(c, d, y0, tas, ayun=0):
     _bawahan(c, d, y0, "bawah")
     if d["gaya"] == "kerudung":
         _kerudung_badan(c, "bawah", y0)
-    c.vl(5, y0, y0 + 3, t); c.vl(10, y0, y0 + 3, td)                                    # tali tas
+    if tali:
+        c.vl(5, y0, y0 + 3, t); c.vl(10, y0, y0 + 3, td)                                # tali tas
 
 
 # --------------------------------------------------------------------------- menghadap atas (punggung)
@@ -363,3 +364,505 @@ def ganti_tas(c, nama):
             elif c.px[x, y] == MANGO:                                                   # noqa: F405
                 n.px[x, y] = bayang
     return n
+
+
+# =========================================================================== tokoh bukan pemain (kelompok N)
+# Ukuran bingkai (Design System bagian 8): siswa 16x24, dewasa 16x26 (badan 2 piksel lebih tinggi), anak SD 14x20.
+# Titik kaki (jangkar): siswa (8, 21), dewasa (8, 23), anak (7, 17); Dimas di motor (17, 28).
+# Ciri setiap tokoh Sehari Setara mengikuti docs/sehari-setara/Daftar_Aset.md bagian A. Tokoh bukan pemain tidak
+# memakai tas punggung berwarna kunci; hanya Nara yang bertas (tas sun bertali mango, warna asli, tidak diganti).
+UKURAN_NPC = {"siswa": ((16, 24), (8, 21)), "dewasa": ((16, 26), (8, 23)), "anak": ((14, 20), (7, 17))}
+
+NPC = {
+    "nara": dict(ukuran="siswa", skin=SK2, skin_d=SK3, hair=HR1, gaya="poni", bawahan="celana"),          # noqa: F405
+    "ibu": dict(ukuran="dewasa", skin=SK3, skin_d=SK4, hair=HR2, gaya="sanggul", atas="daster",           # noqa: F405
+                warna=(ROSE, CORAL), titik=(WHITE, SUN), alas="sandal"),                                  # noqa: F405
+    "gita": dict(ukuran="anak", skin=SK1, skin_d=SK2, hair=HR1, ikat=CORAL),                              # noqa: F405
+    "dimas": dict(ukuran="siswa", skin=SK4, skin_d=HR2, hair=HR1, gaya="cepak", bawahan="celana",         # noqa: F405
+                  jaket=(SKYD, NAVY)),                                                                    # noqa: F405
+    "sinta": dict(ukuran="siswa", skin=SK3, skin_d=SK4, hair=None, gaya="kerudung", bawahan="rok_panjang",   # noqa: F405
+                  lengan_panjang=True),
+    "ratih": dict(ukuran="dewasa", skin=SK4, skin_d=HR2, hair=HR1, gaya="bob", kacamata=True, atas="batik",  # noqa: F405
+                  warna=(TEAL, GRASS, SUN), bawah=(WOODD, HR2), alas="sepatu"),                           # noqa: F405
+    "komang": dict(ukuran="siswa", skin=SK2, skin_d=SK3, hair=HR1, gaya="mangkuk", bawahan="celana"),     # noqa: F405
+    "made": dict(ukuran="dewasa", skin=SK4, skin_d=HR2, hair=SLATE, gaya="tipis", kumis=SLATE, atas="kaus",  # noqa: F405
+                 warna=(MANGO, CORAL), bawah=(NAVY, DUSK, SKYD), alas="sandal", sarung=True),             # noqa: F405
+    "bayu": dict(ukuran="dewasa", skin=SK2, skin_d=SK3, hair=HR2, gaya="rapi", atas="kaus",               # noqa: F405
+                 warna=(MIST, SLATE), bawah=(SKYD, NAVY), alas="sneaker"),                                # noqa: F405
+}
+POSE_NPC = {"nara": ["diam"], "ibu": ["diam"], "gita": ["diam"], "dimas": ["diam", "motor"], "sinta": ["diam"],
+            "ratih": ["diam"], "komang": ["diam", "menunduk"], "made": ["diam"], "bayu": ["diam"]}
+
+
+def _kepala_npc(c, s, y0, menunduk=False):
+    """Kepala menghadap bawah 12x10 di x 2-13. Gaya avatar dipakai ulang; gaya baru khusus tokoh Sehari Setara."""
+    gaya = s["gaya"]
+    if gaya in ("rapi", "cepak", "berdiri", "ikal", "kuncir", "kerudung"):
+        _kepala_bawah(c, dict(skin=s["skin"], skin_d=s["skin_d"], hair=s["hair"], gaya=gaya,
+                              kacamata=s.get("kacamata")), y0)
+        return
+    sk, sd, h = s["skin"], s["skin_d"], s["hair"]
+    k = _kilau_rambut(h) if h in (HR1, HR2) else MIST                                   # noqa: F405
+    _kepala_kulit(c, sk, y0)
+    telinga = True
+    if gaya == "poni":           # Nara: rambut pendek berponi
+        c.r(4, y0, 8, 1, h); c.r(3, y0 + 1, 10, 1, h); c.r(2, y0 + 2, 12, 3, h)
+        c.r(2, y0 + 5, 2, 1, h); c.r(12, y0 + 5, 2, 1, h); c.p(5, y0 + 5, h); c.p(9, y0 + 5, h)
+        c.p(2, y0 + 6, h); c.p(13, y0 + 6, h)
+        c.hl(4, 6, y0 + 1, k)
+    elif gaya == "sanggul":      # Ibu: belah tengah, sanggul di puncak belakang
+        c.r(4, y0, 8, 1, h); c.r(3, y0 + 1, 10, 1, h); c.r(2, y0 + 2, 12, 1, h)
+        c.r(2, y0 + 3, 2, 3, h); c.r(12, y0 + 3, 2, 3, h); c.hl(4, 6, y0 + 3, h); c.hl(9, 11, y0 + 3, h)
+        c.r(6, y0, 4, 2, HR1); c.hl(6, 7, y0, k)                                        # noqa: F405
+    elif gaya == "bob":          # Bu Ratih: bob sebatas rahang, poni menyamping
+        c.r(4, y0, 8, 1, h); c.r(3, y0 + 1, 10, 1, h); c.r(2, y0 + 2, 12, 2, h)
+        c.r(2, y0 + 4, 2, 5, h); c.r(12, y0 + 4, 2, 5, h)
+        c.r(4, y0 + 4, 6, 1, h); c.r(4, y0 + 5, 3, 1, h)
+        c.hl(4, 6, y0 + 1, k)
+        telinga = False
+    elif gaya == "mangkuk":      # Komang: potongan mangkuk, poni rata sampai alis
+        c.r(4, y0, 8, 1, h); c.r(3, y0 + 1, 10, 1, h); c.r(2, y0 + 2, 12, 4, h)
+        c.p(2, y0 + 6, h); c.p(13, y0 + 6, h)
+        c.hl(4, 6, y0 + 1, k)
+    elif gaya == "tipis":        # Pak Made: rambut kelabu menipis di puncak
+        c.r(2, y0 + 2, 2, 5, h); c.r(12, y0 + 2, 2, 5, h)
+        for x, y in ((4, y0 + 1), (6, y0), (9, y0), (11, y0 + 1), (3, y0 + 2), (12, y0 + 2)):
+            c.p(x, y, h)
+    if telinga:
+        c.p(2, y0 + 7, sd); c.p(13, y0 + 7, sd)
+    if menunduk:                                                                      # mata memandang ke bawah
+        c.p(5, y0 + 7, INK); c.p(10, y0 + 7, INK)                                     # noqa: F405
+    else:
+        c.r(5, y0 + 6, 1, 2, INK); c.r(10, y0 + 6, 1, 2, INK)                         # noqa: F405
+    if s.get("kumis"):
+        c.hl(6, 9, y0 + 8, s["kumis"])
+    else:
+        c.hl(7, 8, y0 + 8, sd)
+    if s.get("kacamata"):
+        for x in (4, 9):
+            c.hl(x, x + 2, y0 + 5, SLATE); c.vl(x, y0 + 6, y0 + 7, SLATE); c.vl(x + 2, y0 + 6, y0 + 7, SLATE)  # noqa: F405
+        c.hl(7, 8, y0 + 6, SLATE)                                                     # noqa: F405
+
+
+def _npc_siswa(c, s, top, menunduk=False):
+    """Siswa SMP: Nara, Dimas, Sinta, Komang (badan dan kaki memakai bagian avatar)."""
+    y0b = top + 10
+    if s["gaya"] == "mangkuk":                       # Komang: seragam kebesaran, tidak dimasukkan, tanpa tas
+        _kaki(c, s, "bawah", 0)
+        c.r(4, y0b + 6, 8, 2, NAVY); c.vl(11, y0b + 6, y0b + 7, DUSK)                 # noqa: F405
+        c.r(3, y0b, 10, 7, WHITE); c.vl(12, y0b, y0b + 6, MIST); c.hl(3, 12, y0b + 6, MIST)   # noqa: F405
+        c.p(7, y0b, s["skin"]); c.p(8, y0b, s["skin"])
+        if menunduk:                                 # kedua tangan memegang kotak bekal di depan perut
+            c.r(6, y0b + 3, 4, 3, SKYD); c.hl(6, 9, y0b + 3, MIST)                     # noqa: F405
+            for x in (2, 13):
+                c.r(x, y0b, 1, 3, WHITE if x == 2 else MIST)                          # noqa: F405
+            c.r(4, y0b + 3, 2, 2, s["skin"]); c.r(10, y0b + 3, 2, 2, s["skin"])
+        else:
+            for x, kain in ((2, WHITE), (13, MIST)):                                  # noqa: F405  lengan baju sampai siku
+                c.r(x, y0b, 1, 4, kain); c.r(x, y0b + 4, 1, 2, s["skin"]); c.p(x, y0b + 5, s["skin_d"])
+        c.p(10, 20, WHITE)                                                            # noqa: F405  sepatu kanan robek
+        _kepala_npc(c, s, top, menunduk)
+        return
+    _kaki(c, s, "bawah", 0)
+    if s["gaya"] == "poni":                          # Nara: tas sun bertali mango (warna asli)
+        _badan_bawah(c, s, y0b, (MANGO, MANGO), 0)                                    # noqa: F405
+    else:
+        _badan_bawah(c, s, y0b, TAS, 0, tali=False)
+    if s.get("jaket"):                               # Dimas: jaket sky-d terbuka di atas seragam
+        j, jd = s["jaket"]
+        c.r(4, y0b, 2, 6, j); c.r(10, y0b, 2, 6, j); c.vl(11, y0b, y0b + 5, jd)
+        c.p(5, y0b, jd); c.p(10, y0b, jd)
+        for x, kain in ((3, j), (12, jd)):
+            c.r(x, y0b, 1, 4, kain); c.p(x, y0b + 4, s["skin"])
+    _kepala_npc(c, s, top, menunduk)
+
+
+def _npc_dewasa(c, s, top):
+    """Dewasa: Ibu, Bu Ratih, Pak Made, Bayu. Badan 10 baris, kaki di baris 21-22."""
+    sk, sd = s["skin"], s["skin_d"]
+    y0b = top + 10
+    w = s["warna"]
+    # kaki dan alas kaki
+    if s.get("sarung"):
+        c.r(4, 21, 8, 1, s["bawah"][0]); c.vl(11, 21, 21, s["bawah"][1])
+        c.r(4, 22, 3, 1, WOODD); c.r(9, 22, 3, 1, WOODD); c.p(5, 22, sk); c.p(10, 22, sk)   # noqa: F405  sandal
+    else:
+        kaki = s["bawah"][0] if s["atas"] == "kaus" else sk
+        c.r(5, 21, 2, 1, kaki); c.r(9, 21, 2, 1, kaki)
+        alas = {"sandal": (WOODD, WOODD), "sepatu": (DUSK, DUSK), "sneaker": (WHITE, MIST)}[s["alas"]]   # noqa: F405
+        c.r(4, 22, 3, 1, alas[0]); c.r(9, 22, 3, 1, alas[0]); c.p(6, 22, alas[1]); c.p(11, 22, alas[1])
+        if s["alas"] == "sandal":
+            c.p(5, 22, sk); c.p(10, 22, sk)
+    if s["atas"] == "daster":                        # Ibu: daster rose bermotif titik sampai bawah lutut
+        c.r(4, y0b, 8, 11 - (top - 1), w[0]); c.r(3, y0b + 6, 10, 21 - (y0b + 6), w[0])
+        c.vl(12, y0b + 6, 20, w[1]); c.vl(11, y0b, y0b + 5, w[1])
+        c.p(7, y0b, sk); c.p(8, y0b, sk)
+        for (x, y), t in zip(((5, 2), (9, 3), (6, 6), (10, 7), (4, 9), (8, 9)), (0, 1, 1, 0, 0, 1)):
+            c.p(x, y0b + y, s["titik"][t])
+        for x, kain in ((3, w[0]), (12, w[1])):
+            c.r(x, y0b, 1, 2, kain); c.r(x, y0b + 2, 1, 3, sk); c.p(x, y0b + 4, sd)
+    else:
+        c.r(4, y0b, 8, 6, w[0]); c.vl(11, y0b, y0b + 5, w[1])                        # baju atas
+        c.p(7, y0b, sk); c.p(8, y0b, sk); c.p(6, y0b, w[1]); c.p(9, y0b, w[1])        # leher
+        if s["atas"] == "batik":                     # Bu Ratih: motif batik teal, rok cokelat, memeluk buku
+            for x, y in ((5, 1), (8, 2), (6, 4), (10, 4), (9, 0)):
+                c.p(x, y0b + y, w[1])
+            c.p(5, y0b + 3, w[2]); c.p(9, y0b + 5, w[2])
+            c.r(4, y0b + 6, 8, 4, s["bawah"][0]); c.vl(11, y0b + 6, y0b + 9, s["bawah"][1])
+            c.hl(3, 12, y0b + 9, s["bawah"][0]); c.p(12, y0b + 9, s["bawah"][1])
+            for x, kain in ((3, w[0]), (12, w[1])):
+                c.r(x, y0b, 1, 3, kain)
+            c.r(6, y0b + 3, 4, 3, MANGO); c.hl(6, 9, y0b + 5, CORAL)                  # noqa: F405  buku
+            c.r(4, y0b + 3, 2, 2, sk); c.r(10, y0b + 3, 2, 2, sk)
+        else:                                        # kaus: Pak Made (sarung kotak-kotak), Bayu (jin)
+            for x, kain in ((3, w[0]), (12, w[1])):
+                c.r(x, y0b, 1, 2, kain); c.r(x, y0b + 2, 1, 3, sk); c.p(x, y0b + 4, sd)
+            b = s["bawah"]
+            c.r(4, y0b + 6, 8, 4, b[0]); c.vl(11, y0b + 6, y0b + 9, b[1])
+            if s.get("sarung"):
+                c.hl(4, 11, y0b + 6, b[1]); c.vl(6, y0b + 7, 21, b[2]); c.vl(9, y0b + 7, 21, b[2])
+                c.hl(4, 11, y0b + 8, b[2])
+            else:
+                c.hl(4, 11, y0b + 6, b[1]); c.vl(7, y0b + 8, y0b + 9, b[1])          # ikat pinggang, belahan kaki
+    _kepala_npc(c, s, top)
+
+
+def _npc_anak(c, s, top):
+    """Gita (anak SD 14x20): rambut dikuncir samping berikat coral, kemeja putih, rok coral, kaus kaki putih."""
+    sk, sd, h = s["skin"], s["skin_d"], s["hair"]
+    c.r(4, 15, 2, 1, WHITE); c.r(8, 15, 2, 1, WHITE)                                  # noqa: F405  kaus kaki
+    c.r(4, 16, 2, 1, DUSK); c.r(8, 16, 2, 1, DUSK); c.p(3, 16, DUSK); c.p(10, 16, DUSK)   # noqa: F405  sepatu
+    y0b = top + 8
+    c.r(3, y0b + 3, 8, 15 - (y0b + 3), CORAL); c.hl(2, 11, 14, CORAL); c.vl(11, y0b + 3, 14, WOODD)   # noqa: F405  rok
+    c.r(4, y0b, 6, 3, WHITE); c.vl(9, y0b, y0b + 2, MIST); c.p(6, y0b, sk); c.p(7, y0b, sk)   # noqa: F405  kemeja
+    for x, kain in ((3, WHITE), (10, MIST)):                                          # noqa: F405
+        c.r(x, y0b, 1, 2, kain); c.r(x, y0b + 2, 1, 2, sk)
+    c.r(4, top, 6, 1, sk); c.r(3, top + 1, 8, 1, sk); c.r(2, top + 2, 10, 5, sk); c.r(3, top + 7, 8, 1, sk)
+    c.r(4, top, 6, 1, h); c.r(3, top + 1, 8, 1, h); c.r(2, top + 2, 10, 2, h)
+    c.r(2, top + 4, 1, 2, h); c.r(11, top + 4, 1, 2, h); c.hl(3, 6, top + 4, h)
+    c.hl(4, 5, top + 1, _kilau_rambut(h))
+    c.p(12, top + 2, s["ikat"]); c.r(12, top + 3, 1, 4, h)                            # kuncir samping
+    c.r(4, top + 5, 1, 2, INK); c.r(9, top + 5, 1, 2, INK); c.hl(6, 7, top + 7, sd)   # noqa: F405
+    c.p(3, top + 6, ROSE); c.p(10, top + 6, ROSE)                                     # noqa: F405  pipi
+
+
+def _bayangan_elips(c, x0, y0, lebar, tinggi=4):
+    for dy in range(tinggi):
+        for dx in range(lebar):
+            ujung = dy in (0, tinggi - 1) and (dx < 2 or dx >= lebar - 2)
+            x, y = x0 + dx, y0 + dy
+            if not ujung and 0 <= x < c.w and 0 <= y < c.h and (x + y) % 2 == 0 and c.px[x, y][3] == 0:
+                c.px[x, y] = INK                                                      # noqa: F405
+
+
+def _dimas_motor(bingkai):
+    """Dimas duduk di motor matik mango, menghadap kanan, tanpa helm (seperti adegan 2 Sehari Setara)."""
+    from atas_objek import _motor
+    s = NPC["dimas"]
+    c = C(34, 30)                                                                    # noqa: F405
+    _motor(c, 1, 13)
+    turun = bingkai
+    j, jd = s["jaket"]
+    c.r(13, 16, 6, 2, NAVY); c.r(17, 18, 2, 4, NAVY)                                  # noqa: F405  paha dan betis
+    c.r(16, 22, 4, 2, DUSK)                                                          # noqa: F405  sepatu di pijakan
+    c.r(12, 9 + turun, 6, 8 - turun, j); c.vl(12, 9 + turun, 16, jd)                  # badan berjaket
+    c.r(17, 11 + turun, 4, 2, j); c.r(21, 13, 2, 2, s["skin"])                        # lengan ke setang
+    kepala = C(16, 24)                                                               # noqa: F405
+    _kepala_kanan(kepala, dict(skin=s["skin"], skin_d=s["skin_d"], hair=s["hair"], gaya="cepak"), 1)
+    c.paste(kepala, 6, -1 + turun)
+    c.outline()
+    _bayangan_elips(c, 6, 27, 22, 3)
+    return c
+
+
+def npc(nama, pose="diam", bingkai=0):
+    """Satu bingkai tokoh bukan pemain menghadap bawah (atau Dimas di motor)."""
+    if pose == "motor":
+        return _dimas_motor(bingkai)
+    s = NPC[nama]
+    (w, h), _ = UKURAN_NPC[s["ukuran"]]
+    c = C(w, h)                                                                      # noqa: F405
+    top = 1 + bingkai + (1 if nama == "komang" else 0) + (1 if pose == "menunduk" else 0)
+    if s["ukuran"] == "siswa":
+        _npc_siswa(c, s, top, menunduk=(pose == "menunduk"))
+    elif s["ukuran"] == "dewasa":
+        _npc_dewasa(c, s, top)
+    else:
+        _npc_anak(c, s, top)
+    c.outline()
+    if s["ukuran"] == "anak":
+        _bayangan_elips(c, 3, 16, 8, 4)
+    else:
+        _bayangan_elips(c, 3, h - 4, 10, 4)
+    return c
+
+
+def strip_npc(nama, pose):
+    return strip([npc(nama, pose, b) for b in range(2)])                             # noqa: F405
+
+
+# =========================================================================== kelompok N2: warga dan tokoh baru
+# Ciri Raka, Wayan, dan siswa umum adalah usulan Sesi C (Permintaan A-1 Sesi B), ditetapkan pemilik proyek.
+# Siswa umum tidak bertas punggung (usulan 9a): S1-S4 berbaju bebas, S5-S6 berseragam.
+NPC2 = {
+    "warga1": dict(ukuran="dewasa", skin=SK3, skin_d=SK4, hair=HR1, gaya="rapi", atas="kemeja",          # noqa: F405
+                   warna=(SKYD, NAVY), bawah=(DUSK, INK), kaki="panjang", alas="sepatu"),                 # noqa: F405
+    "warga2": dict(ukuran="dewasa", skin=SK1, skin_d=SK2, gaya="kerudung_warna", kerudung=(TEAL, GRASS),  # noqa: F405
+                   atas="kaus", lengan_panjang=True, warna=(BERRY, MALAM1), bawah=(NAVY, DUSK),           # noqa: F405
+                   kaki="rok_panjang", alas="sandal"),
+    "warga3": dict(ukuran="dewasa", skin=SK4, skin_d=HR2, hair=MIST, gaya="cepak", atas="kemeja",         # noqa: F405
+                   warna=(WOOD, WOODD), bawah=(SLATE, DUSK), kaki="panjang", alas="sandal"),              # noqa: F405
+    "nenek": dict(ukuran="siswa", skin=SK3, skin_d=SK4, hair=MIST, gaya="sanggul_kelabu", atas="kaus",    # noqa: F405
+                  lengan_panjang=True, warna=(BERRY, MALAM1), bawah=(WOOD, WOODD), kaki="rok_panjang",    # noqa: F405
+                  alas="sandal", tongkat=True),
+    "ibubayi": dict(ukuran="dewasa", skin=SK2, skin_d=SK3, hair=HR1, gaya="sanggul", atas="kaus",         # noqa: F405
+                    warna=(TEAL, GRASS), bawah=(NAVY, DUSK), kaki="rok_panjang", alas="sandal",           # noqa: F405
+                    gendongan=(MANGO, CORAL)),                                                            # noqa: F405
+    "anak1": dict(ukuran="anak", skin=SK3, skin_d=SK4, hair=HR1, gaya="pendek", atas=(SUN, MANGO),        # noqa: F405
+                  bawah=(NAVY, DUSK), kaki="pendek"),                                                     # noqa: F405
+    "anak2": dict(ukuran="anak", skin=SK4, skin_d=HR2, hair=HR2, gaya="kuncir_dua", ikat=LEAF,            # noqa: F405
+                  atas=(ROSE, CORAL), bawah=(SKYD, NAVY), kaki="rok"),                                    # noqa: F405
+    "pedagang": dict(ukuran="dewasa", skin=SK3, skin_d=SK4, hair=HR1, gaya="caping", atas="kaus",         # noqa: F405
+                     warna=(CORAL, WOODD), bawah=(DUSK, INK), kaki="panjang", alas="sandal",              # noqa: F405
+                     celemek=(WHITE, MIST)),                                                              # noqa: F405
+    "petugas": dict(ukuran="dewasa", skin=SK1, skin_d=SK2, hair=HR2, gaya="sanggul", atas="kemeja",       # noqa: F405
+                    warna=(WHITE, MIST), bawah=(WHITE, MIST), kaki="panjang", alas="sepatu_putih",        # noqa: F405
+                    lencana=LEAF),                                                                        # noqa: F405
+    "polisi": dict(ukuran="dewasa", skin=SK2, skin_d=SK3, hair=HR1, gaya="topi", atas="kemeja",           # noqa: F405
+                   warna=(WOOD, WOODD), bawah=(WOODD, HR2), kaki="panjang", alas="sepatu", saku=True),    # noqa: F405
+    "raka": dict(ukuran="siswa", skin=SK3, skin_d=SK4, hair=HR2, gaya="belah_tengah"),                    # noqa: F405
+    "wayan": dict(ukuran="siswa", skin=SK4, skin_d=HR2, hair=HR1, gaya="belah_tengah", atas="kaus",       # noqa: F405
+                  warna=(LEAF, GRASS), bawah=(WOOD, WOODD), kaki="pendek", alas="sandal"),                # noqa: F405
+    "siswa1": dict(ukuran="siswa", skin=SK1, skin_d=SK2, hair=HR2, gaya="tergerai", atas="kaus",          # noqa: F405
+                   warna=(BERRY, MALAM1), bawah=(SKYD, NAVY), kaki="panjang", alas="sneaker"),            # noqa: F405
+    "siswa2": dict(ukuran="siswa", skin=SK3, skin_d=SK4, hair=HR1, gaya="ikal", atas="kaus",              # noqa: F405
+                   warna=(SKYD, NAVY), bawah=(DUSK, INK), kaki="panjang", alas="sneaker"),                # noqa: F405
+    "siswa3": dict(ukuran="siswa", skin=SK2, skin_d=SK3, gaya="kerudung_warna", kerudung=(ROSE, CORAL),   # noqa: F405
+                   atas="kaus", lengan_panjang=True, warna=(SKYD, NAVY), bawah=(DUSK, INK),               # noqa: F405
+                   kaki="rok_panjang", alas="sepatu"),
+    "siswa4": dict(ukuran="siswa", skin=SK4, skin_d=HR2, hair=HR2, gaya="kuncir", ikat=SUN, atas="kaus",  # noqa: F405
+                   warna=(LEAF, GRASS), bawah=(DUSK, INK), kaki="panjang", alas="sepatu"),                # noqa: F405
+    "siswa5": dict(ukuran="siswa", skin=SK1, skin_d=SK2, hair=HR1, gaya="belah_tengah", seragam=True,     # noqa: F405
+                   bawahan="celana"),
+    "siswa6": dict(ukuran="siswa", skin=SK4, skin_d=HR2, hair=HR2, gaya="tergerai", seragam=True,         # noqa: F405
+                   bawahan="rok_panjang"),
+}
+POSE_NPC2 = {"warga1": ["diam", "menunjuk"], "warga2": ["diam"], "warga3": ["diam"], "nenek": ["diam"],
+             "ibubayi": ["diam"], "anak1": ["diam"], "anak2": ["diam"], "pedagang": ["diam"], "petugas": ["diam"],
+             "polisi": ["diam"], "raka": ["kursiroda"], "wayan": ["diam"], "siswa1": ["diam", "hp"],
+             "siswa2": ["diam", "menunduk"], "siswa3": ["diam"], "siswa4": ["diam"], "siswa5": ["diam", "hp"],
+             "siswa6": ["diam"]}
+
+
+def _kepala_npc2(c, s, y0, menunduk=False):
+    """Kepala tokoh N2: gaya N1 dan avatar dipakai ulang; gaya baru: tergerai, belah tengah, caping, topi,
+    kerudung berwarna, sanggul kelabu."""
+    gaya = s["gaya"]
+    if gaya not in ("tergerai", "belah_tengah", "caping", "topi", "kerudung_warna", "sanggul_kelabu"):
+        _kepala_npc(c, s, y0, menunduk)
+        return
+    sk, sd, h = s["skin"], s["skin_d"], s.get("hair")
+    telinga = True
+    if gaya == "kerudung_warna":
+        W, M = s["kerudung"]
+        c.r(4, y0, 8, 1, W); c.r(3, y0 + 1, 10, 1, W); c.r(2, y0 + 2, 12, 8, W)
+        c.p(11, y0, M); c.p(12, y0 + 1, M); c.vl(13, y0 + 2, y0 + 9, M)
+        c.r(5, y0 + 4, 6, 1, sk); c.r(4, y0 + 5, 8, 4, sk); c.r(5, y0 + 9, 6, 1, sk)
+        c.hl(5, 10, y0 + 3, M); c.vl(3, y0 + 5, y0 + 8, M)
+        telinga = False
+    else:
+        _kepala_kulit(c, sk, y0)
+        k = _kilau_rambut(h) if h in (HR1, HR2) else WHITE                            # noqa: F405
+        if gaya == "tergerai":       # rambut panjang tergerai melewati bahu
+            c.r(4, y0, 8, 1, h); c.r(3, y0 + 1, 10, 1, h); c.r(2, y0 + 2, 12, 2, h)
+            c.r(1, y0 + 4, 3, 6, h); c.r(12, y0 + 4, 3, 6, h); c.r(4, y0 + 4, 4, 1, h); c.p(4, y0 + 5, h)
+            c.hl(4, 6, y0 + 1, k)
+            telinga = False
+        elif gaya == "belah_tengah":
+            c.r(4, y0, 8, 1, h); c.r(3, y0 + 1, 10, 1, h); c.r(2, y0 + 2, 12, 1, h)
+            c.r(2, y0 + 3, 5, 1, h); c.r(9, y0 + 3, 5, 1, h)
+            c.r(2, y0 + 4, 2, 2, h); c.r(12, y0 + 4, 2, 2, h); c.p(4, y0 + 4, h); c.p(11, y0 + 4, h)
+            c.hl(4, 5, y0 + 1, k); c.hl(10, 11, y0 + 1, k)
+        elif gaya == "sanggul_kelabu":
+            c.r(4, y0, 8, 1, h); c.r(3, y0 + 1, 10, 1, h); c.r(2, y0 + 2, 12, 1, h)
+            c.r(2, y0 + 3, 2, 3, h); c.r(12, y0 + 3, 2, 3, h); c.hl(4, 6, y0 + 3, h); c.hl(9, 11, y0 + 3, h)
+            c.r(6, y0, 4, 2, SLATE); c.hl(6, 7, y0, WHITE)                            # noqa: F405
+        elif gaya == "caping":       # caping anyaman: kerucut di atas, tepi lebar
+            c.r(1, y0 + 3, 14, 2, SK2); c.hl(1, 14, y0 + 4, WOOD)                     # noqa: F405
+            c.r(4, y0 + 1, 8, 2, SK2); c.r(6, y0, 4, 1, SK2); c.p(7, y0 - 0, WOOD)    # noqa: F405
+            c.dither(9, y0 + 1, 3, 3, WOOD, only=SK2); c.dither(11, y0 + 3, 4, 1, WOOD, only=SK2)   # noqa: F405
+        elif gaya == "topi":         # topi gelap polos tanpa lambang
+            c.r(3, y0, 10, 4, DUSK); c.hl(4, 6, y0, SLATE); c.r(3, y0 + 4, 10, 1, INK)   # noqa: F405
+            c.r(2, y0 + 5, 2, 1, h); c.r(12, y0 + 5, 2, 1, h)
+    if telinga:
+        c.p(2, y0 + 7, sd); c.p(13, y0 + 7, sd)
+    if menunduk:
+        c.p(5, y0 + 7, INK); c.p(10, y0 + 7, INK)                                     # noqa: F405
+    else:
+        c.r(5, y0 + 6, 1, 2, INK); c.r(10, y0 + 6, 1, 2, INK)                         # noqa: F405
+    c.hl(7, 8, y0 + 8, sd)
+
+
+def _kaki_npc2(c, s, y):
+    """Kaki di baris y dan alas kaki di baris y+1."""
+    sk = s["skin"]
+    jenis, warna = s["kaki"], s["bawah"][0]
+    kaki = {"panjang": warna, "pendek": sk, "rok": sk}.get(jenis)
+    if kaki:
+        c.r(5, y, 2, 1, kaki); c.r(9, y, 2, 1, kaki)
+    alas = s.get("alas", "sepatu")
+    a, ad = {"sepatu": (DUSK, DUSK), "sneaker": (WHITE, MIST), "sandal": (WOODD, WOODD),        # noqa: F405
+             "sepatu_putih": (WHITE, MIST)}[alas]                                              # noqa: F405
+    c.r(5, y + 1, 2, 1, a); c.r(9, y + 1, 2, 1, a); c.p(6, y + 1, ad); c.p(10, y + 1, ad)
+    if alas == "sandal":
+        c.p(5, y + 1, sk); c.p(9, y + 1, sk)
+    else:
+        c.p(4, y + 1, a); c.p(11, y + 1, a)
+
+
+def _badan_npc2(c, s, y0b, tinggi, pose):
+    """Badan berbaju bebas atau berseragam kerja: 6 baris baju atas, sisanya bawahan."""
+    sk, sd = s["skin"], s["skin_d"]
+    w, wd = s["warna"]
+    b, bd = s["bawah"]
+    kaki_y = y0b + tinggi + (1 if tinggi == 8 else 1)
+    n = 6
+    jenis = s["kaki"]
+    if jenis == "rok_panjang":                                                        # rok sampai mata kaki
+        c.r(4, y0b + n, 8, 1, b); c.r(3, y0b + n + 1, 10, kaki_y - (y0b + n + 1) + 1, b)
+        c.vl(12, y0b + n + 1, kaki_y, bd)
+    else:
+        c.r(4, y0b + n, 8, tinggi - n, b); c.vl(11, y0b + n, y0b + tinggi - 1, bd)
+        if jenis in ("panjang", "pendek"):
+            c.vl(7, y0b + tinggi - 1, y0b + tinggi - 1, bd)
+    c.r(4, y0b, 8, n, w); c.vl(11, y0b, y0b + n - 1, wd)                             # baju atas
+    c.p(7, y0b, sk); c.p(8, y0b, sk)
+    if s["atas"] == "kemeja":                                                         # kerah dan kancing
+        c.p(6, y0b, WHITE if w != WHITE else MIST); c.p(9, y0b, WHITE if w != WHITE else MIST)   # noqa: F405
+        c.vl(8, y0b + 1, y0b + n - 1, wd)
+    else:
+        c.p(6, y0b, wd); c.p(9, y0b, wd)
+    if s.get("saku"):                                                                 # seragam cokelat bersaku, tanpa lambang
+        c.hl(5, 6, y0b + 2, wd); c.hl(9, 10, y0b + 2, wd); c.hl(4, 11, y0b + n - 1, DUSK)   # noqa: F405
+    if s.get("lencana"):                                                              # tanda hati leaf di dada
+        _mask_tokoh(c, ["#.#", "###", ".#."], s["lencana"], 4, y0b + 1)
+    if s.get("celemek"):
+        cw, cwd = s["celemek"]
+        c.r(5, y0b + 2, 6, tinggi - 2, cw); c.vl(10, y0b + 2, y0b + tinggi - 1, cwd)
+        c.p(5, y0b + 1, cw); c.p(10, y0b + 1, cw)
+    for x, kain, dy in ((3, w, 0), (12, wd, 0)):                                      # lengan
+        if pose == "menunjuk" and x == 12:
+            c.r(12, y0b + 1, 2, 1, wd); c.p(14, y0b + 1, sk); c.p(12, y0b, wd)
+            continue
+        if pose == "hp":
+            c.r(x, y0b, 1, 2, kain)
+            continue
+        if s.get("lengan_panjang"):
+            c.r(x, y0b, 1, 4, kain); c.p(x, y0b + 4, sk)
+        else:
+            c.r(x, y0b, 1, 2, kain); c.r(x, y0b + 2, 1, 3, sk); c.p(x, y0b + 4, sd)
+    if pose == "hp":                                                                  # memegang HP di depan dada
+        c.r(4, y0b + 2, 2, 2, sk); c.r(10, y0b + 2, 2, 2, sk)
+        c.r(6, y0b + 2, 4, 3, DUSK); c.r(7, y0b + 2, 2, 2, SIANG3)                    # noqa: F405
+    if s.get("gendongan"):                                                            # menggendong bayi di dada
+        g, gd = s["gendongan"]
+        for i in range(6):
+            c.p(11 - i, y0b + i, g)
+        c.r(4, y0b + 2, 5, 3, WHITE); c.vl(8, y0b + 2, y0b + 4, MIST)                 # noqa: F405  kain bayi
+        c.r(5, y0b + 1, 3, 2, SK1); c.hl(5, 7, y0b + 1, HR1); c.p(5, y0b + 2, INK); c.p(7, y0b + 2, INK)   # noqa: F405
+        c.p(3, y0b + 3, sk); c.p(4, y0b + 5, gd)
+    if s.get("tongkat"):                                                              # tongkat di tangan kanan
+        c.vl(13, y0b + 2, kaki_y + 1, WOODD); c.hl(12, 13, y0b + 2, WOODD); c.p(12, y0b + 3, sk)   # noqa: F405
+    _kaki_npc2(c, s, kaki_y)
+
+
+def _mask_tokoh(c, rows, col, x0, y0):
+    for dy, row in enumerate(rows):
+        for dx, ch in enumerate(row):
+            if ch == "#":
+                c.p(x0 + dx, y0 + dy, col)
+
+
+def _anak2(c, s, top):
+    """Anak SD 14x20 (N-13)."""
+    sk, sd, h = s["skin"], s["skin_d"], s["hair"]
+    w, wd = s["atas"]
+    b, bd = s["bawah"]
+    c.r(4, 15, 2, 1, sk); c.r(8, 15, 2, 1, sk)                                        # kaki
+    c.r(4, 16, 2, 1, DUSK); c.r(8, 16, 2, 1, DUSK); c.p(3, 16, DUSK); c.p(10, 16, DUSK)   # noqa: F405
+    y0b = top + 8
+    if s["kaki"] == "rok":
+        c.r(3, y0b + 3, 8, 15 - (y0b + 3), b); c.hl(2, 11, 14, b); c.vl(11, y0b + 3, 14, bd)
+    else:
+        c.r(3, y0b + 3, 8, 15 - (y0b + 3), b); c.vl(10, y0b + 3, 14, bd); c.vl(6, 13, 14, bd)
+    c.r(3, y0b, 8, 3, w); c.vl(10, y0b, y0b + 2, wd); c.p(6, y0b, sk); c.p(7, y0b, sk)
+    for x in (2, 11):
+        c.r(x, y0b, 1, 1, w if x == 2 else wd); c.r(x, y0b + 1, 1, 3, sk)
+    c.r(4, top, 6, 1, sk); c.r(3, top + 1, 8, 1, sk); c.r(2, top + 2, 10, 5, sk); c.r(3, top + 7, 8, 1, sk)
+    c.r(4, top, 6, 1, h); c.r(3, top + 1, 8, 1, h); c.r(2, top + 2, 10, 2, h)
+    if s["gaya"] == "kuncir_dua":                     # dua kuncir di kiri dan kanan
+        c.r(2, top + 4, 1, 2, h); c.r(11, top + 4, 1, 2, h)
+        for x in (1, 12):
+            c.p(x, top + 2, s["ikat"]); c.r(x, top + 3, 1, 3, h)
+    else:                                             # rambut pendek
+        c.p(2, top + 4, h); c.p(11, top + 4, h); c.hl(3, 5, top + 4, h)
+    c.hl(4, 5, top + 1, _kilau_rambut(h))
+    c.r(4, top + 5, 1, 2, INK); c.r(9, top + 5, 1, 2, INK); c.hl(6, 7, top + 7, sd)   # noqa: F405
+
+
+def _kursi_roda(c, s, top):
+    """Raka (N-17) duduk di kursi roda, menghadap bawah, berseragam tanpa tas."""
+    sk, sd = s["skin"], s["skin_d"]
+    for x in (1, 13):                                                                 # roda besar di kiri dan kanan
+        c.r(x, 11, 2, 10, INK); c.vl(x + (1 if x == 1 else 0), 12, 19, SLATE)         # noqa: F405
+        c.p(x, 11, SLATE); c.p(x, 20, SLATE)                                          # noqa: F405
+    c.r(3, 9, 1, 3, SLATE); c.r(12, 9, 1, 3, SLATE)                                   # noqa: F405  pegangan sandaran
+    c.r(3, 16, 10, 2, DUSK); c.hl(3, 12, 16, SLATE)                                   # noqa: F405  dudukan
+    c.r(4, 19, 8, 1, SLATE); c.hl(4, 11, 20, MIST)                                    # noqa: F405  pijakan kaki
+    c.r(5, 17, 2, 2, NAVY); c.r(9, 17, 2, 2, NAVY)                                    # noqa: F405  kaki
+    c.r(5, 19, 2, 1, DUSK); c.r(9, 19, 2, 1, DUSK)                                    # noqa: F405  sepatu
+    y0b = top + 10
+    c.r(4, y0b, 8, 5, WHITE); c.vl(11, y0b, y0b + 4, MIST)                            # noqa: F405  kemeja
+    c.p(7, y0b, sk); c.p(8, y0b, sk); c.p(6, y0b, MIST); c.p(9, y0b, MIST)            # noqa: F405
+    c.r(4, y0b + 5, 8, 16 - (y0b + 5), NAVY)                                          # noqa: F405  pangkuan
+    c.r(3, y0b, 1, 3, WHITE); c.r(12, y0b, 1, 3, MIST)                                # noqa: F405  lengan
+    c.r(3, y0b + 3, 1, 2, sk); c.r(12, y0b + 3, 1, 2, sk)                             # tangan di pelek roda
+    _kepala_npc2(c, s, top)
+
+
+def npc2(nama, pose="diam", bingkai=0):
+    """Satu bingkai tokoh kelompok N2."""
+    s = NPC2[nama]
+    (w, h), _ = UKURAN_NPC[s["ukuran"]]
+    c = C(w, h)                                                                      # noqa: F405
+    if pose == "kursiroda":
+        _kursi_roda(c, s, 3 + bingkai)
+        c.outline()
+        _bayangan_elips(c, 1, 20, 14, 4)
+        return c
+    if s["ukuran"] == "anak":
+        _anak2(c, s, 1 + bingkai)
+        c.outline()
+        _bayangan_elips(c, 3, 16, 8, 4)
+        return c
+    top = 1 + bingkai + (1 if nama == "nenek" else 0) + (1 if pose == "menunduk" else 0)
+    if s.get("seragam"):                                                             # S5-S6: seragam tanpa tas
+        d = dict(skin=s["skin"], skin_d=s["skin_d"], hair=s["hair"], gaya="kuncir", bawahan=s["bawahan"],
+                 lengan_panjang=False)
+        _kaki(c, d, "bawah", 0)
+        _badan_bawah(c, d, top + 10, TAS, 0, tali=False)
+        if pose == "hp":
+            c.r(3, top + 12, 2, 2, s["skin"]); c.r(11, top + 12, 2, 2, s["skin"])
+            c.r(5, top + 12, 6, 3, DUSK); c.r(6, top + 12, 4, 2, SIANG3)              # noqa: F405
+        _kepala_npc2(c, s, top, menunduk=(pose == "hp"))
+    else:
+        tinggi = 10 if s["ukuran"] == "dewasa" else 8
+        _badan_npc2(c, s, top + 10, tinggi, pose)
+        _kepala_npc2(c, s, top, menunduk=(pose in ("menunduk", "hp")))
+    c.outline()
+    _bayangan_elips(c, 3, h - 4, 10, 4)
+    return c
+
+
+def strip_npc2(nama, pose):
+    return strip([npc2(nama, pose, b) for b in range(2)])                            # noqa: F405
