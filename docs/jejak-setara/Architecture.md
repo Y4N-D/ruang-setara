@@ -5,12 +5,14 @@
 | Versi | 0.1 (draf) |
 | Tanggal | 4 November 2026 |
 | Repositori | `ruang-setara` (akun GitHub Y4N-D) |
-| Hosting | Cloudflare Workers paket berbayar: aset statis, API, Durable Objects, D1 |
+| Hosting | Cloudflare Workers: aset statis, API, Durable Objects, D1. Paket gratis untuk JS-03 sampai JS-14, paket berbayar sebelum JS-15 atau uji coba kelas pertama (JA-14) |
 | Dokumen terkait | `PRD.md`, `Design_System.md`, `AGENTS.md` (di `docs/jejak-setara/`) |
 
 Catatan: nama kunci konfigurasi Cloudflare dan perintah `wrangler` di dokumen ini adalah contoh. Agen wajib mencocokkannya dengan dokumentasi resmi terbaru (developers.cloudflare.com) dan versi `wrangler` di `package.json` saat tahap Plan, lalu mencatat bila ada yang berbeda.
 
 Pemeriksaan pertama dilakukan di Plan JS-01 (5 November 2026) terhadap `wrangler` 4.92.0 dan `@cloudflare/vite-plugin` 1.37.1. Perbedaannya sudah dimasukkan ke bagian 1 (JA-15), 4.1, 4.2, 4.4, dan 12.2; rinciannya ada di entri JS-01 `PLAN.md`.
+
+Pemeriksaan kedua dilakukan di Plan JS-03 (7 November 2026) terhadap halaman harga dan batas Durable Objects, D1, dan Workers untuk paket gratis. Hasilnya ada di bagian 13.4 dan entri JS-03 `PLAN.md`.
 
 ---
 
@@ -20,7 +22,7 @@ Pemeriksaan pertama dilakukan di Plan JS-01 (5 November 2026) terhadap `wrangler
 |---|---|---|
 | JA-01 | Jejak Setara **dihosting terpisah di Cloudflare Workers**: halaman pemain, konsol admin, API, ruang real-time, dan basis data dalam satu Worker. Galeri dan Sehari Setara tetap di GitHub Pages | GitHub Pages hanya menyajikan berkas statis, sedangkan mode ini butuh server real-time. Satu asal (*origin*) untuk halaman, API, dan WebSocket membuat cookie sesi menjadi pihak pertama dan tidak memerlukan CORS |
 | JA-02 | **Satu ruang = satu Durable Object** (`RuangJejak`), satu-satunya sumber kebenaran selama sesi | Durable Object menjamin satu instans per ruang, punya penyimpanan SQLite sendiri, dan bisa melayani banyak WebSocket sekaligus |
-| JA-03 | **D1** (SQLite) untuk data tetap: akun, sesi login, bank kejadian dan versinya, rujukan, paket, ruang, peserta, jawaban, pengaturan, dan log audit | Termasuk dalam paket berbayar, ada pemulihan titik waktu (*Time Travel*) 30 hari, dan SQL memudahkan statistik |
+| JA-03 | **D1** (SQLite) untuk data tetap: akun, sesi login, bank kejadian dan versinya, rujukan, paket, ruang, peserta, jawaban, pengaturan, dan log audit | Tersedia di paket gratis dan berbayar, ada pemulihan titik waktu (*Time Travel*) 7 hari di paket gratis dan 30 hari di paket berbayar, dan SQL memudahkan statistik |
 | JA-04 | **Server berwenang** atas waktu, kejadian, kunci jawaban, skor, peringkat, skill, dan kotak. **Klien berwenang atas gerak**, tetapi setiap laporan posisi diperiksa server (kecepatan dan tabrakan) | Cukup aman untuk kelas, sederhana, dan terasa responsif di HP walaupun jaringan lambat |
 | JA-05 | Kunci jawaban, umpan balik, dan isi Langkah 2 **baru dikirim sesudah pemain mengunci jawaban** | Jawaban tidak bisa diintip dari lalu lintas jaringan. Bank awal tetap terbaca di repositori publik; risiko ini diterima (bagian 12) |
 | JA-06 | **Autentikasi sendiri**: email dan sandi, hash PBKDF2 lewat WebCrypto, sesi di D1, cookie `HttpOnly`. Tanpa layanan login pihak ketiga | Tidak memerlukan penyiapan tambahan dan sesuai skala. Cloudflare Access bisa ditambahkan kemudian sebagai lapisan kedua untuk konsol |
@@ -31,7 +33,7 @@ Pemeriksaan pertama dilakukan di Plan JS-01 (5 November 2026) terhadap `wrangler
 | JA-11 | **Inti ruang ditulis sebagai modul murni** (tanpa API Workers) dan Durable Object hanya pembungkus tipis | Logika ruang bisa diuji cepat dengan Vitest biasa, termasuk dengan jam tiruan |
 | JA-12 | **Dua lingkungan:** `uji` (otomatis setiap ada perubahan di `main`) dan `produksi` (dijalankan pemilik proyek lewat tombol alur kerja) | Kelas yang sedang berjalan tidak terganggu perubahan yang belum dicoba |
 | JA-13 | Durable Object diberi **petunjuk lokasi `apac-se`** (Asia Tenggara) | Dekat dengan Indonesia; petunjuk bersifat *best-effort* |
-| JA-14 | **Paket Cloudflare Workers Paid** (US$5 per bulan) | Kuota termasuk jauh di atas pemakaian kelas (bagian 13) |
+| JA-14 | **Paket bertahap:** paket gratis (Workers Free) untuk JS-03 sampai JS-14, lalu **Workers Paid** (US$5 per bulan) diaktifkan sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu | Pengembangan dan lingkungan uji muat dalam kuota harian gratis, sedangkan kelas sungguhan dan uji beban penuh butuh kuota berbayar (bagian 13.2 dan 13.4). Keputusan pemilik proyek, 7 Nov 2026 (Plan JS-03) |
 | JA-15 | Pengembangan, build, dan uji ujung ke ujung memakai **plugin Cloudflare untuk Vite** (`@cloudflare/vite-plugin`): `dev:jejak` menjalankan halaman dan Worker di satu alamat; `build:jejak` menghasilkan `dist-jejak/client/` dan `dist-jejak/worker/`; uji ujung ke ujung memakai `vite preview`. Lingkungan Cloudflare dipilih saat build lewat `CLOUDFLARE_ENV` | Satu perintah dan satu alamat seperti di server sungguhan; cara yang dianjurkan dokumentasi Cloudflare untuk proyek Vite; paket sudah terpasang. Diputuskan di Gerbang 1 JS-01 (5 Nov 2026) |
 
 Dependensi yang mungkin diperlukan dan **wajib izin tertulis** pemilik proyek: alat uji Worker (misalnya `@cloudflare/vitest-pool-workers`) dan pembuat kode QR. Semua kebutuhan lain memakai paket yang sudah ada: `react`, `zod`, `wrangler`, `@cloudflare/workers-types`, `@cloudflare/vite-plugin`, `vite`, `vitest`, `@playwright/test`, `@fontsource/*`, dan primitif `radix-ui` untuk komponen konsol.
@@ -614,7 +616,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 
 ### 10.3 Autentikasi dan sesi
 
-- **Hash sandi:** PBKDF2-HMAC-SHA256 lewat WebCrypto dengan garam acak 16 byte dan kunci tambahan `KUNCI_SANDI`. Jumlah iterasi setinggi yang diizinkan runtime Workers (sumber komunitas menyebut batas 100.000; diukur ulang di Plan fitur autentikasi), disimpan per akun agar bisa dinaikkan. Pembandingan memakai waktu konstan. Bila pemilik proyek ingin hash yang lebih kuat, Argon2id lewat pustaka WASM bisa dipakai dengan izin dependensi.
+- **Hash sandi:** PBKDF2-HMAC-SHA256 lewat WebCrypto dengan garam acak 16 byte dan kunci tambahan `KUNCI_SANDI`. Jumlah iterasi setinggi yang diizinkan runtime Workers (sumber komunitas menyebut batas 100.000; diukur ulang di Plan fitur autentikasi), disimpan per akun agar bisa dinaikkan. Pembandingan memakai waktu konstan. Bila pemilik proyek ingin hash yang lebih kuat, Argon2id lewat pustaka WASM bisa dipakai dengan izin dependensi. Selama paket gratis berlaku (CPU 10 ms per permintaan, bagian 13.4), jumlah iterasi dipilih agar satu hash muat dalam batas itu. Percobaan Plan JS-03 di Node 22: 50.000 iterasi sekitar 7,8 ms CPU dan 100.000 iterasi sekitar 15 ms; `workerd` lokal menerima 600.000 iterasi, jadi batas 100.000 dari sumber komunitas diperiksa ulang. Angkanya ditetapkan di Plan JS-04 lewat pengukuran di lingkungan uji, lalu dinaikkan sesudah paket berbayar aktif; hash lama diperbarui saat pengguna berhasil masuk.
 - **Sandi:** minimal 12 karakter; sandi sementara wajib diganti saat masuk pertama.
 - **Pembatas percobaan:** 5 kali gagal dalam 15 menit per email, atau 20 kali per hash IP harian, mengunci percobaan selama 15 menit. Pesan galat selalu sama ("Email atau sandi salah"), agar tidak membocorkan email mana yang terdaftar.
 - **Sesi:** token acak 32 byte di cookie `__Host-jejak_sesi` dengan `HttpOnly`, `Secure`, `SameSite=Lax`, dan `Path=/`. D1 hanya menyimpan hash-nya. Sesi berakhir sesudah 8 jam tidak dipakai, dan paling lama 7 hari. Keluar dan ganti sandi menghapus sesi.
@@ -743,7 +745,7 @@ Rincian di PRD bagian 13. Ketentuan teknisnya:
 
 ### 13.2 Perkiraan pemakaian dan biaya
 
-Paket Workers Paid berharga US$5 per bulan dan sudah termasuk: 10 juta permintaan Worker; 1 juta permintaan dan 400.000 GB-detik durasi Durable Objects; serta 25 miliar baris baca, 50 juta baris tulis, dan 5 GB penyimpanan D1. Permintaan aset statis gratis. Pesan WebSocket masuk ke Durable Object ditagih dengan rasio 20 : 1, sedangkan pesan keluar tidak ditagih.
+Bagian ini berlaku sesudah paket berbayar aktif (JA-14); masa paket gratis ada di bagian 13.4. Paket Workers Paid berharga US$5 per bulan dan sudah termasuk: 10 juta permintaan Worker; 1 juta permintaan dan 400.000 GB-detik durasi Durable Objects; serta 25 miliar baris baca, 50 juta baris tulis, dan 5 GB penyimpanan D1. Permintaan aset statis gratis. Pesan WebSocket masuk ke Durable Object ditagih dengan rasio 20 : 1, sedangkan pesan keluar tidak ditagih.
 
 Perkiraan satu sesi (40 pemain, ronde 15 menit, sekitar 20 menit objek aktif):
 
@@ -769,7 +771,28 @@ Kurs yang dipakai sekitar Rp 18.150 per dolar AS (3 November 2026). Pajak dan bi
 | VPS (Jakarta atau Singapura) dengan Node.js dan basis data sendiri | Perlu pemeliharaan server (pembaruan keamanan, sertifikat, cadangan, pemantauan) yang berat untuk pemilik proyek yang bukan programmer |
 | Supabase (Realtime + Postgres + Auth) | Pesan *broadcast* dihitung per penerima, sehingga posisi 40 pemain 10 kali per detik cepat menghabiskan kuota; logika skor yang berwenang tetap butuh fungsi server terpisah |
 | Firebase | Aturan keamanan basis datanya sulit menjamin skor tidak dimanipulasi, sehingga logika skor berwenang tetap perlu Cloud Functions; biaya mengikuti lalu lintas unduh |
-| Cloudflare paket gratis | Bisa untuk uji coba, tetapi kuota harian (100.000 permintaan Durable Object per hari) bisa habis bila beberapa kelas bermain pada hari yang sama, dan permintaan yang melewati kuota gagal |
+| Cloudflare paket gratis saja | Dipakai untuk pengembangan JS-03 sampai JS-14 (bagian 13.4), tetapi kuota hariannya (100.000 permintaan Durable Object per hari) habis bila beberapa kelas bermain pada hari yang sama, dan permintaan yang melewati kuota gagal |
+
+### 13.4 Masa paket gratis (JS-03 sampai JS-14)
+
+Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* dan *Limits* Durable Objects, D1, dan Workers) pada 7 November 2026.
+
+| Layanan | Batas paket gratis | Akibat untuk Jejak Setara |
+|---|---|---|
+| Workers | 100.000 permintaan per hari; CPU 10 ms per permintaan | Aset statis tidak dihitung. Hash sandi JS-04 harus muat dalam 10 ms (bagian 10.3) |
+| Durable Objects: permintaan | 100.000 per hari. Satu sambungan WebSocket dihitung 1 permintaan, pesan masuk dihitung 20 : 1, setiap alarm dihitung 1 permintaan, sedangkan pesan keluar dan ping protokol gratis | Sekitar 13.600 permintaan per sesi 40 pemain dan 33.500 per sesi 100 pemain (percobaan Plan JS-03) |
+| Durable Objects: CPU | Sama dengan Workers: 10 ms per peristiwa (permintaan, pesan WebSocket, atau alarm). Sisa CPU dihitung ulang setiap ada pesan masuk | Pekerjaan berkala di antara dua pesan masuk harus jauh di bawah 10 ms. Satu putaran 100 ms untuk 100 pemain sekitar 0,16 ms di Node (percobaan Plan JS-03) |
+| Durable Objects: durasi | 13.000 GB-detik per hari | Sekitar 150 GB-detik per sesi; bukan hambatan bila lobi dan jeda bisa beristirahat (*hibernate*) |
+| Durable Objects: penyimpanan SQLite | 5 juta baris dibaca dan 100.000 baris ditulis per hari, 5 GB per akun; setiap `setAlarm()` dihitung 1 baris ditulis | Posisi pemain tidak ditulis ke SQLite pada setiap `gerak`; yang ditulis hanya perubahan penting (bagian 8.6). Putaran 100 ms memakai pengatur waktu, bukan alarm berulang |
+| Durable Objects: jenis | Hanya kelas SQLite (`new_sqlite_classes`) | Sudah sesuai bagian 4.2 |
+| D1 | 5 juta baris dibaca dan 100.000 baris ditulis per hari; 5 GB per akun, 500 MB per basis data, 10 basis data; 50 kueri per permintaan; *Time Travel* 7 hari | Sekitar 2.100 baris ditulis per sesi 40 pemain (bagian 13.2) |
+
+- Bila salah satu batas terlampaui, operasi jenis itu gagal dengan galat sampai kuota pulih pukul 00.00 UTC (08.00 WITA). Tidak ada tagihan.
+- Dengan kuota 100.000 permintaan Durable Objects per hari, sekitar tujuh sesi 40 pemain atau tiga sesi 100 pemain muat dalam sehari. Cukup untuk pengembangan dan percobaan pemilik proyek, tetapi tidak cukup untuk beberapa kelas sehari.
+- Dokumentasi menyebut rasio 20 : 1 untuk penagihan pesan masuk. Bila batas harian gratis ternyata menghitung pesan tanpa rasio itu, satu sesi 40 pemain sudah melewatinya. Karena itu percobaan dengan banyak perangkat di lingkungan uji ditunda sampai paket berbayar aktif.
+- `sim:beban` dijalankan terhadap Worker lokal (`vite preview`), yang tidak memakai kuota Cloudflare. Uji beban penuh di lingkungan uji (bagian 14) menunggu paket berbayar: satu kali uji 10 ruang × 50 bot selama 15 menit memakai sekitar 170.000 permintaan, melebihi kuota harian.
+- Satu Durable Object punya batas lunak sekitar 1.000 permintaan per detik. Ruang 100 pemain yang banyak bergerak mendekati batas itu (sekitar 740 pesan per detik di percobaan Plan JS-03).
+- Saat pindah ke paket berbayar, kode dan data tidak berubah; yang berubah hanya kuota (bagian 18, langkah 2).
 
 ## 14. Pengujian
 
@@ -780,7 +803,7 @@ Kurs yang dipakai sekitar Rp 18.150 per dolar AS (3 November 2026). Pajak dan bi
 | Worker dan D1 | Alat yang disetujui di Plan JS-03 | Rute API, izin per peran, autentikasi, pembatas percobaan, migrasi, versi dan status kejadian, statistik, CSV |
 | Ujung ke ujung | Playwright, beberapa konteks peramban, terhadap `vite preview` (berkas `e2e/jejak-setara/*.uji.ts`) | Guru masuk, membuat ruang, dan membuka layar kelas; tiga pemain bergabung (satu dengan emulasi HP Android dan sentuhan); mulai; bergerak lewat kait uji; memeriksa dan menjawab kejadian; papan skor berubah; jeda dan lanjut; sambungan diputus lalu tersambung kembali; dikeluarkan; ronde berakhir; podium; pembahasan; rekap pribadi; ekspor CSV |
 | Jaringan | Playwright + pembatas jaringan | Jaringan lambat dan terputus-putus; latensi 300 ms; sambung ulang |
-| Beban | `sim:beban` (Node 22, WebSocket bawaan) | 50 bot per ruang dan 10 ruang serentak selama 15 menit: CPU per putaran, ukuran dan jumlah pesan, lalu lintas per pemain, p95 waktu pulang-pergi, dan perkiraan biaya |
+| Beban | `sim:beban` (Node 22, WebSocket bawaan) | 50 bot per ruang dan 10 ruang serentak selama 15 menit: CPU per putaran, ukuran dan jumlah pesan, lalu lintas per pemain, p95 waktu pulang-pergi, dan perkiraan biaya. Selama paket gratis, hanya terhadap Worker lokal (bagian 13.4) |
 | Manual | Daftar periksa AGENTS | HP kelas bawah, proyektor dari 8 m, wifi sekolah, kurangi gerak, keyboard saja, uji coba kelas |
 
 Tangkapan layar uji: HP 731 × 411 (emulasi Android), laptop 1280 × 720, dan layar kelas 1024 × 768 serta 1920 × 1080.
@@ -789,10 +812,10 @@ Tangkapan layar uji: HP 731 × 411 (emulasi Android), laptop 1280 × 720, dan la
 
 - **Rilis:** push ke `main` memperbarui lingkungan **uji** secara otomatis. Sesudah dicoba, pemilik proyek menekan "Run workflow" pada `jejak-produksi.yml`. Alur itu menolak berjalan bila ada ruang produksi yang sedang `main` atau `jeda`.
 - **Migrasi D1:** hanya maju dan tidak merusak. Perubahan yang menghapus kolom dilakukan dalam dua rilis (berhenti memakai dulu, baru menghapus).
-- **Kembali ke versi sebelumnya:** versi Worker sebelumnya dipulihkan dengan fitur *rollback* Workers. Data D1 dapat dipulihkan ke titik waktu sampai 30 hari ke belakang (*Time Travel*).
+- **Kembali ke versi sebelumnya:** versi Worker sebelumnya dipulihkan dengan fitur *rollback* Workers. Data D1 dapat dipulihkan ke titik waktu sampai 7 hari ke belakang di paket gratis dan 30 hari di paket berbayar (*Time Travel*).
 - **Cadangan konten:** admin mengunduh ekspor bank (JSON) setiap akhir bulan; agen juga boleh menyimpannya ke repositori atas permintaan pemilik proyek.
 - **Pemulihan akun admin:** isi rahasia `JEJAK_ADMIN_SANDI_SEMENTARA` dengan sandi baru, jalankan `jejak-admin-awal.yml`, masuk, lalu ganti sandi.
-- **Pemantauan:** pemakaian dan tagihan dicek di dasbor Cloudflare setiap bulan; aktifkan pemberitahuan penagihan bila tersedia di akun.
+- **Pemantauan:** selama paket gratis, pemakaian harian dicek di dasbor Cloudflare sesudah percobaan dengan banyak perangkat. Sesudah paket berbayar aktif, pemakaian dan tagihan dicek setiap bulan, dan pemberitahuan penagihan diaktifkan bila tersedia di akun.
 - **Sebelum kelas:** buat ruang uji, masuk dengan satu HP lewat wifi sekolah, lalu tutup ruang uji.
 
 ## 16. Integrasi dengan Ruang Setara
@@ -812,17 +835,27 @@ Tangkapan layar uji: HP 731 × 411 (emulasi Android), laptop 1280 × 720, dan la
 
 ## 18. Panduan penyiapan server untuk pemilik proyek
 
-Langkah ini dikerjakan pemilik proyek sekali saja, sebelum fitur server dibangun. Agen mendampingi dengan bahasa sederhana.
+Langkah ini dikerjakan pemilik proyek, dengan pendampingan agen dalam bahasa sederhana. Sejak keputusan 7 November 2026 (JA-14), penyiapan dimulai dengan **paket gratis**. Nomor langkah tetap, tetapi waktunya mengikuti tabel ini.
 
-1. **Buat akun Cloudflare** di cloudflare.com dengan email Anda.
-2. **Aktifkan paket Workers Paid** (US$5 per bulan) di menu Workers & Pages → Plans. Siapkan kartu yang bisa dipakai untuk pembayaran internasional, atau metode lain yang ditawarkan Cloudflare.
-3. **Buat dua basis data D1** di menu Storage & Databases → D1: `jejak-setara` dan `jejak-setara-uji`. Salin **Database ID** keduanya dan kirimkan kepada agen. ID ini bukan rahasia.
-4. **Buat token API** di My Profile → API Tokens → Create Token. Pakai templat "Edit Cloudflare Workers", lalu tambahkan izin D1 Edit. Salin tokennya; token hanya tampil sekali.
+| Kapan | Langkah |
+|---|---|
+| Sebelum Build JS-03 | 1; 3 (hanya basis data uji); 4; 5; 6 (dua rahasia Cloudflare) |
+| Sesudah hasil Build JS-03 di-push | 8 |
+| Sebelum Build JS-04 | 6 (dua rahasia admin) |
+| Sesudah hasil JS-04 di-push | 9 |
+| Sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu | 2, lalu 3 (basis data produksi) |
+| Sebelum uji coba kelas (disarankan) | 7 |
+| Saat rilis | 10 |
+
+1. **Buat akun Cloudflare** di cloudflare.com dengan email Anda. Akun baru langsung memakai paket gratis (Workers Free), tanpa kartu.
+2. **(Ditunda sampai sebelum JS-15 atau uji coba kelas pertama) Aktifkan paket Workers Paid** (US$5 per bulan) di menu Workers & Pages → Plans. Siapkan kartu yang bisa dipakai untuk pembayaran internasional, atau metode lain yang ditawarkan Cloudflare. Kode dan data tidak berubah; yang berubah hanya kuota (bagian 13.4).
+3. **Buat basis data D1** di menu Storage & Databases → D1. Sekarang cukup `jejak-setara-uji`; `jejak-setara` (produksi) dibuat bersama langkah 2. Salin **Database ID** dan kirimkan kepada agen. ID ini bukan rahasia.
+4. **Buat token API** di My Profile → API Tokens → Create Token. Pakai templat "Edit Cloudflare Workers", lalu tambahkan izin D1 Edit. Salin tokennya; token hanya tampil sekali. **Jangan kirim token ke chat**; token hanya disimpan di GitHub (langkah 6).
 5. **Catat Account ID** yang tampil di halaman Workers & Pages.
-6. **Simpan rahasia di GitHub:** buka repositori `ruang-setara` → Settings → Secrets and variables → Actions → New repository secret. Isi `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `JEJAK_ADMIN_EMAIL`, dan `JEJAK_ADMIN_SANDI_SEMENTARA` (minimal 12 karakter).
+6. **Simpan rahasia di GitHub:** buka repositori `ruang-setara` → Settings → Secrets and variables → Actions → New repository secret. Sebelum Build JS-03: `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`. Sebelum Build JS-04: `JEJAK_ADMIN_EMAIL` dan `JEJAK_ADMIN_SANDI_SEMENTARA` (minimal 12 karakter).
 7. **(Disarankan) Domain sendiri:** beli domain, tambahkan ke Cloudflare (paket gratis cukup untuk DNS), ganti *nameserver* di tempat membeli domain, lalu sambungkan domain ke Worker `jejak-setara` lewat Settings → Domains & Routes.
-8. **Deploy pertama** terjadi otomatis sesudah perubahan fitur server di-push ke `main`. Agen memberi tahu alamat lingkungan uji.
+8. **Deploy pertama** ke lingkungan uji terjadi otomatis sesudah perubahan fitur server di-push ke `main`. Bila deploy pertama gagal karena akun belum punya subdomain `workers.dev`, buka Workers & Pages, pilih nama subdomain, lalu jalankan ulang alur kerja; agen memberi langkahnya. Agen memberi tahu alamat lingkungan uji.
 9. **Buat akun admin pertama:** buka tab Actions di GitHub → "Jejak: admin awal" → Run workflow. Masuk ke `/admin/`, lalu ganti sandi.
 10. **Terbitkan ke produksi:** Actions → "Jejak: produksi" → Run workflow.
 
-Kunci rahasia Worker (`KUNCI_TIKET`, `KUNCI_SANDI`, `KUNCI_IP`) dibuat oleh alur kerja deploy pertama dengan nilai acak, sehingga pemilik proyek tidak perlu mengetiknya (bagian 4.5).
+Kunci rahasia Worker (`KUNCI_TIKET`, `KUNCI_SANDI`, `KUNCI_IP`) dibuat oleh alur kerja deploy dengan nilai acak, sehingga pemilik proyek tidak perlu mengetiknya (bagian 4.5).

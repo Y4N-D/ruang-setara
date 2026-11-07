@@ -441,10 +441,16 @@ Pemain adalah anak di bawah umur. Prinsipnya: **kumpulkan sesedikit mungkin, sim
 
 ## 14. Server dan biaya
 
-Rekomendasi: **Cloudflare Workers paket berbayar (Workers Paid)**. Satu layanan memuat halaman pemain, konsol admin, ruang real-time (Durable Objects), dan basis data (D1).
+**Cloudflare Workers.** Satu layanan memuat halaman pemain, konsol admin, ruang real-time (Durable Objects), dan basis data (D1). Paketnya bertahap (keputusan pemilik proyek, 7 November 2026):
 
-- Biaya tetap US$5 per bulan, sekitar **Rp 91.000** dengan kurs sekitar Rp 18.150 per dolar AS (3 November 2026), belum termasuk pajak atau biaya kartu bila ada.
-- Perkiraan pemakaian 100 sesi kelas per bulan masih jauh di dalam kuota paket itu, sehingga tagihan biasanya tetap US$5 (rincian di Architecture bagian 13).
+| Masa | Paket | Biaya | Cukup untuk |
+|---|---|---|---|
+| JS-03 sampai JS-14 | Paket gratis (Workers Free) | Rp 0 | Pengembangan, lingkungan uji, dan percobaan pemilik proyek dengan beberapa perangkat. Kuotanya harian, dan permintaan yang melewati kuota gagal sampai kuota pulih pukul 08.00 WITA (Architecture bagian 13.4) |
+| Sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu | Paket berbayar (Workers Paid) | US$5 per bulan | Uji beban penuh, uji coba kelas, dan pemakaian kelas sehari-hari |
+
+- Biaya paket berbayar tetap US$5 per bulan, sekitar **Rp 91.000** dengan kurs sekitar Rp 18.150 per dolar AS (3 November 2026), belum termasuk pajak atau biaya kartu bila ada.
+- Perkiraan pemakaian 100 sesi kelas per bulan masih jauh di dalam kuota paket berbayar, sehingga tagihan biasanya tetap US$5 (rincian di Architecture bagian 13).
+- Paket gratis tidak dipakai untuk kelas sungguhan: satu sesi 40 pemain memakai sekitar 14% kuota harian Durable Objects, sehingga hanya sekitar tujuh sesi muat dalam sehari, dan uji beban penuh tidak bisa dijalankan di lingkungan uji (Architecture bagian 13.4).
 - Domain sendiri (misalnya `jejak.namadomain.id`) disarankan agar tautan pendek dan mudah diketik siswa (KT-06). Biayanya tahunan dan bergantung pada ekstensi domain.
 - Sisa anggaran di bawah Rp 500.000 menjadi cadangan bila pemakaian melonjak.
 
@@ -491,6 +497,7 @@ Semua aset gambar digambar dengan kode oleh Claude, mengikuti Design System bagi
 | Rujukan keliru di soal buatan guru | Kejadian tidak bisa terbit sebelum semua rujukannya ditandai Terverifikasi oleh Peninjau |
 | Akun admin dibobol | Sandi di-hash, pembatasan percobaan masuk, sesi yang kedaluwarsa, log audit |
 | Biaya melonjak | Kuota paket jauh di atas pemakaian kelas; batas pemain dan pesan per ruang; pemantauan pemakaian bulanan |
+| Kuota harian paket gratis habis selama pengembangan | Uji beban hanya di komputer lokal; lingkungan uji dipakai seperlunya; paket berbayar diaktifkan sebelum JS-15 atau uji coba kelas pertama |
 | Pemilik proyek bukan programmer | Penyiapan server dalam langkah bernomor; rilis produksi dengan satu tombol; pemulihan akun admin lewat alur kerja GitHub |
 | Gaya visual tampak atas tidak selaras dengan Sehari Setara | Palet, huruf, bingkai, dan kit gambar yang sama; pratinjau disetujui sebelum dipakai |
 
@@ -539,3 +546,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 4 Nov 2026 | Akun admin untuk membuat dan menjalankan ruang, menambah dan menyunting soal serta jawaban, melihat papan skor dan peringkat, serta statistik pemain (permintaan pemilik proyek) |
 | 4 Nov 2026 | Server berbayar dengan anggaran di bawah Rp 500.000 per bulan; rekomendasi Cloudflare Workers Paid, sekitar US$5 per bulan |
 | 5 Nov 2026 | Nama produk tetap "Jejak Setara" (KT-01, Gerbang 1 JS-01) |
+| 7 Nov 2026 | Mulai dengan paket gratis Cloudflare (Workers Free) untuk JS-03 sampai JS-14; Workers Paid diaktifkan sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu (keputusan pemilik proyek, Plan JS-03) |

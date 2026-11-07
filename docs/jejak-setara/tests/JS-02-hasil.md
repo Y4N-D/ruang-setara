@@ -6,6 +6,8 @@ Salinan uji: ZIP `main` 7 November 2026 ditambah ZIP Gerbang 1 dan Gerbang 2 JS-
 
 **Catatan penting tentang lingkungan.** Sesi ini tidak bisa memasang dependensi, karena akses jaringan untuk pemasangan paket tertutup. Akibatnya `pnpm install` gagal, dan perintah yang memerlukan `vitest`, `vite`, plugin Cloudflare, `@playwright/test`, atau konfigurasi ESLint Next tidak bisa dijalankan. Setiap perintah itu diganti pemeriksaan setara dengan alat yang sudah ada di lingkungan agen (tabel "Perintah"). Uji unit, kode, dan dokumen tidak berbeda karena hal ini; yang berbeda hanya alat penjalannya. Alur kerja "Jejak: uji" di GitHub akan menjalankan `content:check:jejak`, `test:jejak` (Vitest sungguhan), dan `build:jejak` sesudah push, dan perintah sisanya dijalankan ulang di sesi berikutnya yang bisa memasang paket (`PLAN.md`, catatan "Plan JS-03, langkah pertama").
 
+**Pembaruan 7 November 2026 (Plan JS-03).** Semua perintah resmi yang tertunda sudah dijalankan dengan dependensi terpasang dan lulus. Pemilik proyek menjalankan sebagian di luar sesi agen, lalu Sesi A menjalankan sisanya dan mengulang yang lain. Rinciannya ada di bagian "Uji ulang dengan dependensi terpasang". Baris "Lulus (pengganti)" di tabel di bawah kini juga dibuktikan dengan perintah resmi.
+
 | Kriteria | Hasil | Bukti |
 |---|---|---|
 | AC-1 Kompilasi dan kemurnian | Lulus (pengganti) | TypeScript 6.0.3 dengan pilihan `tsconfig.json` akar (`strict`, `isolatedModules`, `moduleResolution: bundler`), ditambah `noUnusedLocals` dan `noUnusedParameters`, pada keenam berkas `inti/`, keenam berkas uji, dan `teks.ts`: 0 galat. Pengganti ESLint: 43 aturan inti ESLint 10 (termasuk `prefer-const`, `no-var`, `no-unused-vars`, `no-useless-escape`) pada keluaran esbuild ke-12 berkas baru: 0 masalah; berkas contoh yang sengaja salah ditandai 3 masalah. Pencarian teks: tidak ada `any`, `@ts-ignore`, `eslint-disable`, `require(`, tanda `!` non-null, atau ekspor bawaan. `kemurnian.test.ts`: 43 uji lulus, termasuk 25 contoh pelanggaran yang tertangkap dan 11 contoh sah yang tidak tertangkap (komentar dan isi teks diabaikan, ekspresi `${…}` tetap diperiksa) |
@@ -62,6 +64,25 @@ A	docs/jejak-setara/specs/JS-02-inti-bersama.md
 A	docs/jejak-setara/tests/JS-02-hasil.md
 ```
 
+## Uji ulang dengan dependensi terpasang (Plan JS-03, 7 November 2026)
+
+Salinan: ZIP `main` 7 November 2026 sesudah JS-02 di-push. Node 22.23.4, pnpm 11.25.0, dan Chromium 153 lewat `JEJAK_CHROMIUM`. Lingkungan agen kini bisa memasang paket dari registry npm.
+
+| Perintah | Dijalankan oleh | Hasil |
+|---|---|---|
+| `install --frozen-lockfile` | Sesi A | Lulus (26 detik); `pnpm-lock.yaml` tidak berubah |
+| `test:jejak` | Pemilik proyek dan Sesi A | Lulus: 7 berkas, 294 uji, dengan Vitest sungguhan, termasuk "dua salinan modul" AC-2 lewat `vi.resetModules` |
+| `test` (Sehari Setara) | Pemilik proyek dan Sesi A | Lulus: 14 berkas, 296 uji, 1 dilewati |
+| `RILIS=1 content:check` | Pemilik proyek dan Sesi A | Lulus: 43 uji; "Verifikasi rujukan: 14 dari 14 terverifikasi." |
+| `content:check:jejak` | Sesi A | Kode 0: "Belum tersedia: …" (JS-05 dan JS-06 belum ada) |
+| `build:jejak` dan ukuran halaman | Pemilik proyek dan Sesi A | Lulus. Rolldown membuang skema `protokol.ts` dari halaman: potongan bersama 191.705 B (sama persis dengan JS-01), 59.665 B gzip tingkat 9; titik masuk pemain 235 B; CSS 989 B. Layar pemain sekitar 61,2 KB gzip termasuk `index.html` (pemilik proyek mencatat 60,55 KB dengan cara ukur lain), atau 31% dari anggaran 200 KB. Tidak ada zod di halaman mana pun; Worker 1.231 B |
+| `test:e2e:jejak` | Sesi A | Lulus: 18 uji (38 detik termasuk build dan `vite preview`) |
+| `build:pages` dan SHA-256 ke-178 berkas | Pemilik proyek dan Sesi A | Lulus. Pemilik proyek: 178 berkas identik dengan commit `6a57ece` (rilis F-11). Sesi A: 178 berkas, dengan CSS galeri `main-Bp-7VtNx.css` yang sama dengan laporan sebelumnya |
+| `tsc --noEmit -p tsconfig.json --incremental false` | Sesi A | 0 galat (22 detik), seluruh repositori, tanpa `next-env.d.ts` |
+| ESLint `--max-warnings 0` pada `app/jejak-setara`, `server/jejak-setara`, `web/jejak-setara`, `e2e/jejak-setara`, `scripts/jejak-setara`, dan ketiga konfigurasi Jejak | Sesi A | 0 masalah |
+
+Dengan ini, AC-1 dan AC-11 sampai AC-14 terbukti dengan perintah resmi, tanpa pengganti.
+
 ## Simulasi beban (bila wajib)
 
 Tidak dijalankan: spesifikasi JS-02 menetapkannya tidak wajib karena belum ada ruang, dan `sim:beban` masih mencetak "Belum tersedia (dibuat di JS-03)." Sebagai gantinya, beban CPU inti untuk satu ruang penuh diukur di Node (bagian berikut).
@@ -107,15 +128,15 @@ Tidak ada butir yang berlaku: belum ada permainan, jaringan, atau perangkat. But
 
 ## Temuan
 
-1. **Lingkungan tanpa pemasangan paket.** Delapan perintah tahap Test diganti pemeriksaan setara (tabel "Perintah"). Batas pengganti: TypeScript 6.0.3 dipakai sebagai ganti 5.9.3; ESLint memakai aturan inti saja, tanpa aturan React dan Next yang tidak relevan bagi kode tanpa komponen; `vi.resetModules` di pengganti tidak memuat salinan modul baru, sehingga bagian "dua salinan modul" AC-2 baru benar-benar diuji Vitest di alur kerja "Jejak: uji"; ukuran halaman diukur dengan esbuild, bukan Rolldown. Semua perintah resmi dijalankan ulang di awal Plan JS-03.
+1. **Lingkungan tanpa pemasangan paket.** Delapan perintah tahap Test diganti pemeriksaan setara (tabel "Perintah"). Batas pengganti: TypeScript 6.0.3 dipakai sebagai ganti 5.9.3; ESLint memakai aturan inti saja, tanpa aturan React dan Next yang tidak relevan bagi kode tanpa komponen; `vi.resetModules` di pengganti tidak memuat salinan modul baru, sehingga bagian "dua salinan modul" AC-2 baru benar-benar diuji Vitest di alur kerja "Jejak: uji"; ukuran halaman diukur dengan esbuild, bukan Rolldown. Semua perintah resmi dijalankan ulang di awal Plan JS-03. **Selesai 7 November 2026:** semuanya lulus (bagian "Uji ulang dengan dependensi terpasang").
 2. **AC-4 salah tulis.** Angka 85 tidak mungkin dicapai dengan poin PRD 8.4. Spesifikasi diberi catatan **[Build]** di AC-4 dan catatan B-1; poin tidak berubah.
 3. **P-26 menggabungkan dua hal.** Gerak di layar pemain (normalisasi diagonal, peluncuran di dinding) dan pemeriksaan laporan di server dibuat sebagai dua fungsi. Pemeriksaan server juga memastikan tujuan bisa dicapai tanpa menembus ubin padat, karena pada selang 1 detik batas jaraknya 94 piksel, cukup untuk melompati dinding satu ubin. Catatan B-5; Architecture 8.2 disesuaikan.
 4. **Panjang token.** Spesifikasi meminta token 43 karakter base64url (32 byte), sedangkan Architecture 6.8 menulis 128 bit. Architecture 6.8 disesuaikan menjadi 256 bit (catatan B-8). Bila pemilik proyek lebih suka 128 bit (22 karakter), cukup satu baris skema diubah sebelum JS-03.
-5. **Halaman kerangka mengimpor `protokol.ts`.** `HalamanKerangka.tsx` (JS-01) mengambil `PROTOKOL_VERSI` dari `protokol.ts`, sehingga skema zod bisa ikut terbundel ke halaman. Skema dibuat lewat fungsi dan ditandai `/* @__PURE__ */` agar bisa dibuang (catatan B-9); esbuild membuktikannya, Rolldown diperiksa di JS-03.
+5. **Halaman kerangka mengimpor `protokol.ts`.** `HalamanKerangka.tsx` (JS-01) mengambil `PROTOKOL_VERSI` dari `protokol.ts`, sehingga skema zod bisa ikut terbundel ke halaman. Skema dibuat lewat fungsi dan ditandai `/* @__PURE__ */` agar bisa dibuang (catatan B-9); esbuild membuktikannya, Rolldown diperiksa di JS-03. **Diperiksa 7 November 2026:** Rolldown juga membuangnya.
 6. **Format Architecture.** Paragraf JS-02 di bagian 5.1 (ZIP Gerbang 2) berada di dalam blok kode, dan judul 11.1.1 memakai tingkat 5. Keduanya dirapikan.
 7. **Permintaan Sesi B.** `naskah/STATUS.md` di ZIP ini memuat Permintaan A-1 sampai A-4 untuk PRD dan Design System. Permintaan itu dibaca, tetapi dikerjakan atau dijawab di Plan JS-03, karena Plan JS-02 sudah lewat dan perubahannya di luar cakupan spesifikasi. Tidak menghambat JS-05.
 8. **Jitter jaringan.** Laporan gerak yang tiba berdempet memampatkan selang di server, sehingga gerak jujur bisa dikoreksi. Dicatat untuk Plan JS-03 dan uji jaringan.
 
 ## Keputusan: Lulus
 
-Lulus dengan pemeriksaan pengganti untuk AC-1 dan AC-11 sampai AC-14. Keputusan ini menjadi final bila alur kerja "Jejak: uji" hijau sesudah push dan perintah resmi yang belum dijalankan lulus di awal Plan JS-03. Bila salah satunya gagal karena kode JS-02, JS-02 kembali ke Build.
+Lulus. Pemeriksaan pengganti untuk AC-1 dan AC-11 sampai AC-14 sudah diganti perintah resmi pada 7 November 2026, dan semuanya lulus (bagian "Uji ulang dengan dependensi terpasang"). JS-02 berstatus Selesai di `PLAN.md`. Alur kerja "Jejak: uji" menjalankan tiga perintah yang sama (`content:check:jejak`, `test:jejak`, dan `build:jejak`), yang lulus di kedua uji ulang; bila tab Actions menunjukkan warna merah, pemilik proyek mengirim tangkapan layarnya kepada Sesi A.
