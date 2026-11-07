@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Versi | 1.0 |
+| Versi | 0.2 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Semua kelompok aset dalam rencana Disetujui (6 November 2026). Menunggu kabar "JS-02 selesai" untuk memulai JS-06 (peta 160 × 100) |
+| Tahap saat ini | Kelompok A (avatar pemain) diserahkan: menunggu "Setuju: aset A" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -23,26 +23,6 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Plan | Daftar aset, urutan pengerjaan, usulan, dan lembar uji gaya `preview/uji_gaya.png` diserahkan; menunggu "Setuju: aset" |
 | 6 Nov 2026 | Plan | Pemilik proyek membalas "Setuju: aset": semua saran (a) diterima (usulan 1a sampai 10a) |
 | 6 Nov 2026 | Kelompok A | Kit `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, dan `build_jejak.py` dibuat; delapan avatar dan ikon kepalanya diserahkan, menunggu "Setuju: aset A" |
-| 6 Nov 2026 | Kelompok A | Pemilik proyek membalas "Setuju: aset A": A-01 sampai A-09 Disetujui. `app/jejak-setara/assets/CREDITS.md` dibuat otomatis oleh `build_jejak.py` |
-| 6 Nov 2026 | Kelompok U | Lembar ubin tiga masa (377 ubin per lembar) diserahkan, menunggu "Setuju: aset U" |
-| 6 Nov 2026 | Kelompok U | Pemilik proyek membalas "Setuju: aset U": U-01 sampai U-15 Disetujui, termasuk warna bahan baru. Kredit lembar ubin ditambahkan; Permintaan C-2 dilengkapi |
-| 6 Nov 2026 | Kelompok O1 | 25 objek (48 berkas) diserahkan, menunggu "Setuju: aset O1" |
-| 6 Nov 2026 | Kelompok O1 | Pemilik proyek membalas "Setuju: aset O1": O-01 sampai O-20 Disetujui; kredit 48 berkas objek ditambahkan |
-| 6 Nov 2026 | Kelompok O2 | Objek umum (24 berkas, termasuk 16 ruas pagar) diserahkan, menunggu "Setuju: aset O2" |
-| 6 Nov 2026 | Kelompok O2 | Pemilik proyek membalas "Setuju: aset O2": O-21 sampai O-28 Disetujui; kredit 24 berkas ditambahkan |
-| 6 Nov 2026 | Kelompok T | Penanda dan efek (12 berkas, kode baru `atas_ikon.py`) diserahkan, menunggu "Setuju: aset T" |
-| 6 Nov 2026 | Kelompok T | Pemilik proyek membalas "Setuju: aset T": T-01 sampai T-12 Disetujui; kredit 12 berkas ditambahkan |
-| 6 Nov 2026 | Kelompok N1 | Sembilan tokoh Sehari Setara versi tampak atas (11 berkas, termasuk Dimas di motor dan Komang menunduk) diserahkan, menunggu "Setuju: aset N1" |
-| 6 Nov 2026 | Peta | Pemilik proyek menetapkan ukuran peta 160 × 100 ubin (rencana awal 120 × 80), karena perkiraan 50–100 pemain per sesi dan pertanyaan yang banyak serta bervariasi. Permintaan C-7 dan C-8 diajukan |
-| 6 Nov 2026 | Kelompok N1 | Pemilik proyek membalas "Setuju: aset N1": N-01 sampai N-09 Disetujui; kredit 11 berkas ditambahkan |
-| 6 Nov 2026 | Kelompok N2 | 18 tokoh (22 berkas) diserahkan, termasuk usulan ciri Raka, Wayan, dan siswa umum; menunggu "Setuju: aset N2" |
-| 6 Nov 2026 | Kelompok N2 | Pemilik proyek membalas "Setuju: aset N2": N-10 sampai N-20 Disetujui, termasuk ciri Raka, Wayan, dan siswa umum; kredit 22 berkas ditambahkan |
-| 6 Nov 2026 | Kelompok O3 | 13 properti kejadian (15 berkas) diserahkan bersama pratinjau set tokoh per kejadian; menunggu "Setuju: aset O3" |
-| 6 Nov 2026 | Kelompok O3 | Pemilik proyek membalas "Setuju: aset O3": O-29 sampai O-41 Disetujui; kredit 15 berkas ditambahkan |
-| 6 Nov 2026 | Kelompok O4 | 9 varian untuk peta 160 × 100 (15 berkas) diserahkan; menunggu "Setuju: aset O4" |
-| 6 Nov 2026 | Kelompok O4 | Pemilik proyek membalas "Setuju: aset O4": O-43 sampai O-51 Disetujui; kredit 15 berkas ditambahkan |
-| 6 Nov 2026 | Kelompok I | Ikon (33 berkas: 22 ikon baru dan 11 ikon Sehari Setara yang dipakai ulang) diserahkan; menunggu "Setuju: aset I" |
-| 6 Nov 2026 | Kelompok I | Pemilik proyek membalas "Setuju: aset I": I-01 sampai I-19 Disetujui; kredit 33 berkas ditambahkan. Seluruh 239 berkas aset dalam rencana Disetujui |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -59,21 +39,11 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | KT-C9 | 9a: siswa bukan pemain tanpa tas; ciri Raka, Wayan, dan siswa umum diusulkan di kelompok N2 |
 | KT-C10 | 10a: `CREDITS.md` dan `manifest.ts` dibuat `build_jejak.py` untuk aset Disetujui |
 
-## Keputusan ukuran peta (6 November 2026)
-
-| Hal | Keputusan |
-|---|---|
-| Ukuran peta | 160 × 100 ubin (2.560 × 1.600 piksel logis, sekitar 8 × 9 layar HP), menggantikan rencana 120 × 80 di PRD JFR-09 dan Design System bagian 3.2 |
-| Alasan | Pemilik proyek memperkirakan 50–100 pemain per sesi, pemain mencari kejadian dalam waktu yang ditetapkan, dan pertanyaannya banyak serta bervariasi |
-| Titik kejadian | Sedikitnya 12 titik per zona (96 titik), cukup untuk sekitar 48 kejadian dengan 2 titik calon masing-masing |
-| Waktu menyeberang | Sekitar 36 detik berjalan dari ujung ke ujung (4,5 ubin per detik) |
-| Masih perlu keputusan | Kapasitas pemain per ruang dan jumlah kejadian per ronde (Permintaan C-8) |
-
 ## Ringkasan rencana (templat AGENTS 12.1)
 
 | | |
 |---|---|
-| Status | Selesai 6 Nov 2026: semua kelompok (A, U, O1, O2, O3, O4, T, N1, N2, I) Disetujui; 239 berkas, 100,3 KB |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A diserahkan; menunggu "Setuju: aset A" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -213,24 +183,7 @@ Setiap kelompok diserahkan dalam satu balasan: pratinjau tampil di balasan, ZIP 
 | 6 | N1 — Tokoh Sehari Setara | N-01 sampai N-09 | sekitar 12 | JS-08 | `Setuju: aset N1` |
 | 7 | N2 — Warga dan tokoh baru | N-10 sampai N-20 | sekitar 22 | JS-08 | `Setuju: aset N2` |
 | 8 | O3 — Properti kejadian | O-29 sampai O-41 | sekitar 14 | JS-08 | `Setuju: aset O3` |
-| 9 | O4 — Varian untuk peta besar | Rumah warga dan pohon tambahan, agar peta 160 × 100 tidak terlihat berulang | sekitar 10 | JS-06 | `Setuju: aset O4` |
-| 10 | I — Ikon | I-01 sampai I-19 | sekitar 35 | JS-07, JS-09, JS-10, JS-12 | `Setuju: aset I` |
-
-Status 6 November 2026: semua kelompok Disetujui.
-
-| Kelompok | Isi | Berkas | Ukuran |
-|---|---|---|---|
-| A | Avatar pemain | 56 | 27,8 KB |
-| U | Ubin per masa | 3 | 17,3 KB |
-| O1 | Bangunan penanda zona | 48 | 15,9 KB |
-| O2 | Objek umum | 24 | 4,8 KB |
-| T | Penanda dan efek | 12 | 3,1 KB |
-| N1 | Tokoh Sehari Setara | 11 | 5,5 KB |
-| N2 | Warga dan tokoh baru | 22 | 11,1 KB |
-| O3 | Properti kejadian | 15 | 3,2 KB |
-| O4 | Varian untuk peta besar | 15 | 4,7 KB |
-| I | Ikon | 33 | 6,7 KB |
-| **Jumlah** | | **239** | **100,3 KB** |
+| 9 | I — Ikon | I-01 sampai I-19 | sekitar 35 | JS-07, JS-09, JS-10, JS-12 | `Setuju: aset I` |
 
 - Bila kabar "JS-02 selesai" datang sebelum kelompok U dan O1 disetujui, JS-06 memakai *placeholder* berupa kotak warna palet dengan label kunci aset (AGENTS bagian 5), lalu diganti sesudah disetujui.
 - Setiap kelompok diperiksa dengan daftar periksa Design System bagian 14 dan bagian 12 Sehari Setara sebelum diserahkan.
@@ -241,15 +194,15 @@ Setiap desain: seragam SMP (kemeja putih, celana atau rok `navy`, ikat pinggang 
 
 | ID | Desain | Kulit | Rambut atau kepala | Bawahan | Ciri lain | Status |
 |---|---|---|---|---|---|---|
-| A-01 | A1 | `skin-3` | `hair-1` pendek rapi, belah samping | Celana | — | Disetujui (6 Nov) |
-| A-02 | A2 | `skin-1` | `hair-1` panjang dikuncir, ikat rambut `berry` | Rok, kaus kaki putih | — | Disetujui (6 Nov) |
-| A-03 | A3 | `skin-4` | `hair-1` pendek ikal | Celana | Kacamata | Disetujui (6 Nov) |
-| A-04 | A4 | `skin-2` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Disetujui (6 Nov) |
-| A-05 | A5 | `skin-2` | `hair-2` pendek berdiri | Celana | — | Disetujui (6 Nov) |
-| A-06 | A6 | `skin-3` | `hair-2` panjang dikuncir, ikat rambut `rose` | Rok, kaus kaki putih | Kacamata | Disetujui (6 Nov) |
-| A-07 | A7 | `skin-1` | `hair-2` pendek cepak | Celana | — | Disetujui (6 Nov) |
-| A-08 | A8 | `skin-4` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Disetujui (6 Nov) |
-| A-09 | Ikon kepala | — | Kepala dan bahu A1–A8 menghadap bawah, untuk papan skor, lobi, dan kartu pemain (`ikon_ava_{n}.png`, 16 × 16); tali tas ikut berwarna kunci | — | — | Disetujui (6 Nov) |
+| A-01 | A1 | `skin-3` | `hair-1` pendek rapi, belah samping | Celana | — | Ditinjau (kelompok A) |
+| A-02 | A2 | `skin-1` | `hair-1` panjang dikuncir, ikat rambut `berry` | Rok, kaus kaki putih | — | Ditinjau (kelompok A) |
+| A-03 | A3 | `skin-4` | `hair-1` pendek ikal | Celana | Kacamata | Ditinjau (kelompok A) |
+| A-04 | A4 | `skin-2` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Ditinjau (kelompok A) |
+| A-05 | A5 | `skin-2` | `hair-2` pendek berdiri | Celana | — | Ditinjau (kelompok A) |
+| A-06 | A6 | `skin-3` | `hair-2` panjang dikuncir, ikat rambut `rose` | Rok, kaus kaki putih | Kacamata | Ditinjau (kelompok A) |
+| A-07 | A7 | `skin-1` | `hair-2` pendek cepak | Celana | — | Ditinjau (kelompok A) |
+| A-08 | A8 | `skin-4` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Ditinjau (kelompok A) |
+| A-09 | Ikon kepala | — | Kepala dan bahu A1–A8 menghadap bawah, untuk papan skor, lobi, dan kartu pemain (`ikon_ava_{n}.png`, 16 × 16); tali tas ikut berwarna kunci | — | — | Ditinjau (kelompok A) |
 
 **Warna tas** (dasar dan bayangan; warna kunci di gambar: `sun` dan `mango`)
 
@@ -273,7 +226,7 @@ Setiap desain: seragam SMP (kemeja putih, celana atau rok `navy`, ikat pinggang 
 | Ukuran | Strip diam 417–561 B, strip jalan 526–701 B (batas 6 KB per strip); enam strip satu avatar 3,0–3,4 KB; ikon 235–325 B; seluruh kelompok A 27,8 KB |
 | Pemeriksaan `build_jejak.py` | Lulus: 0 piksel di luar palet atau semi-transparan, ukuran 32 × 24 (diam), 64 × 24 (jalan), 16 × 16 (ikon), dan warna kunci tas tidak dipakai di luar tas |
 | Pratinjau | `preview/ava_ringkasan.png` (ringkasan), `preview/ava_pose_semua.png` (semua bingkai ×3), `preview/pose_ava_1.png` sampai `pose_ava_8.png` (×6), dan `preview/ava_gerak.gif` (berjalan ke empat arah, lalu diam) |
-| Kredit dan manifest | `CREDITS.md` dibuat otomatis sesudah "Setuju: aset A" (56 aset). `manifest.ts` menunggu bentuk yang disepakati Sesi A (Permintaan C-6) |
+| Belum termasuk | `CREDITS.md` dan `manifest.ts`: dibuat sesudah "Setuju: aset A" dan sesudah bentuk manifest disepakati (Permintaan C-6) |
 
 - A1 sama piksel dengan avatar uji gaya yang disetujui, termasuk bingkai jalan dan arah atas.
 - Rok: kaus kaki putih di bawah rok. Pada bingkai diam kedua (bernapas), badan turun 1 piksel sehingga rok menutup kaus kaki, sama seperti celana yang menutup sebagian kaki pada A1.
@@ -285,60 +238,27 @@ Setiap desain: seragam SMP (kemeja putih, celana atau rok `navy`, ikat pinggang 
 
 ## U. Ubin per masa
 
-Satu lembar per masa: `ubin_pagi.png`, `ubin_siang.png`, dan `ubin_sore.png`, masing-masing 256 × 384 piksel (377 ubin, 16 per baris). Nomor ubin sama di ketiga lembar.
+Satu lembar per masa: `ubin_pagi.png`, `ubin_siang.png`, dan `ubin_sore.png`, 16 ubin per baris. Nomor ubin sama di ketiga lembar. Jumlah pasti (sekitar 130 ubin) ditetapkan bersama legenda `kampung.txt` di JS-06.
 
-| ID | Isi | Lapisan | Jumlah ubin | Zona | Status |
+| ID | Isi | Bahan | Perkiraan ubin | Zona | Status |
 |---|---|---|---|---|---|
-| U-01 | Rumput dasar, 4 varian yang dipilih berbenih menurut posisi agar pola tidak berulang | 0 | 4 | Semua | Disetujui (6 Nov) |
-| U-02 | Detail rumput: bunga merah muda, bunga putih, rumput tinggi, daun gugur | 10 | 4 | Semua | Disetujui (6 Nov) |
-| U-03 | Tanah setapak (`skin-2`, kerikil `wood`) dan peralihannya | 0 | 48 | Z1, Z6 | Disetujui (6 Nov) |
-| U-04 | Paving gang (bata `wood`, nat `wood-d`) dan peralihannya | 0 | 48 | Z1 | Disetujui (6 Nov) |
-| U-05 | Aspal dan peralihannya; pinggir jalan berisi bayangan kerb dan garis tepi; garis tengah putus-putus mendatar dan tegak | 0 dan 10 | 48 + 2 | Z3 | Disetujui (6 Nov) |
-| U-06 | Zebra cross mendatar dan tegak | 10 | 2 | Z3 | Disetujui (6 Nov) |
-| U-07 | Trotoar dan kerb: trotoar memakai semen (U-10), kerb menjadi pinggir aspal (U-05) | — | — | Z3, Z4 | Digabung ke U-05 dan U-10 |
-| U-08 | Air dan air dalam, masing-masing dengan peralihannya (garis tepi dan buih; air dalam berpola papan catur ke air) | 0 | 48 + 48 | Z6 | Disetujui (6 Nov) |
-| U-09 | Pasir dan peralihannya dengan rumput; tepi air ke pasir digambar oleh ubin air | 0 | 48 | Z6 | Disetujui (6 Nov) |
-| U-10 | Semen (`mist`) untuk halaman sekolah, trotoar, pasar, dan halaman puskesmas, dengan peralihannya | 0 | 48 | Z2, Z3, Z4, Z7 | Disetujui (6 Nov) |
-| U-11 | Lantai pasar memakai semen (U-10); lantai papan bale menjadi bagian objek bale (O-14) | — | — | Z4, Z5 | Digabung ke U-10 dan O-14 |
-| U-12 | Garis lapangan: empat sisi, empat sudut, garis tengah mendatar dan tegak, dan pertemuan garis tengah dengan sisi; dipakai di atas rumput (taman) maupun semen (sekolah) | 10 | 14 | Z2, Z6 | Disetujui (6 Nov) |
-| U-13 | Bayangan bangunan: kanan atas, kanan, sudut, bawah kiri, bawah | 10 | 5 | Semua | Disetujui (6 Nov) |
-| U-14 | Bayangan pohon (2 × 2) dan objek kecil (1 × 1) | 10 | 5 | Semua | Disetujui (6 Nov) |
-| U-15 | Detail tanah: batu, kerikil, retakan, genangan | 10 | 4 | Semua | Disetujui (6 Nov) |
+| U-01 | Rumput dasar, 4 varian yang disebar acak berbenih oleh `build_peta.py` agar pola tidak berulang | rumput, tekstur, kilau | 4 | Semua | Ditinjau: varian 1 (uji gaya) disetujui sebagai acuan 6 Nov; status akhir di kelompok U |
+| U-02 | Detail rumput tumpang: bunga, rumput tinggi, daun gugur (lapisan 10) | tekstur, kilau, bunga warna tetap | 4 | Semua | Belum |
+| U-03 | Tanah setapak dan peralihannya dengan rumput | tanah (usulan) | 17 | Z1, Z6 | Belum |
+| U-04 | Paving gang dan peralihannya dengan rumput | paving (usulan) | 17 | Z1 | Belum |
+| U-05 | Aspal, garis tengah, garis tepi | aspal, marka | 6 | Z3 | Belum |
+| U-06 | Zebra cross mendatar dan tegak | aspal, marka | 2 | Z3 | Belum |
+| U-07 | Trotoar dan kerb (lurus dan sudut) | lantai (usulan) | 9 | Z3, Z4 | Belum |
+| U-08 | Air dan air dalam, serta peralihannya dengan rumput | air, air dalam, rumput | 18 | Z6 | Belum |
+| U-09 | Pasir dan peralihannya dengan rumput dan air | pasir, air | 18 | Z6 | Belum |
+| U-10 | Halaman sekolah dan lapangan bergaris | lantai (usulan), marka | 8 | Z2 | Belum |
+| U-11 | Lantai semen pasar dan papan bale | lantai (usulan), kayu | 4 | Z4, Z5, Z7 | Belum |
+| U-12 | Lapangan taman bergaris | rumput, marka | 6 | Z6 | Belum |
+| U-13 | Bayangan tumpang bangunan: tepi kanan, tepi bawah, dan sudut, dalam pecahan 4 piksel (usulan 4) | bayangan | 8 | Semua | Belum |
+| U-14 | Bayangan tumpang pohon dan objek bulat (2 × 2 dan 1 × 1) | bayangan | 5 | Semua | Belum |
+| U-15 | Detail tanah: retakan, batu kecil, genangan | aspal, tekstur | 4 | Semua | Belum |
 
-
-### Rincian kelompok U (6 November 2026)
-
-**Susunan lembar** (nomor ubin = baris × 16 + kolom, sama di ketiga masa):
-
-| Nomor | Isi |
-|---|---|
-| 0–3 | Rumput varian 1–4 (varian 1 = uji gaya) |
-| 4–39 | Ubin tumpang lapisan 10: detail (4–11), bayangan (12–21), marka jalan (22–25), garis lapangan (26–39) |
-| 40–46 | Varian kedua isi tanah, paving, semen, pasir, aspal, air, dan air dalam |
-| 47 | Kosong |
-| 48–376 | 47 ubin peralihan per bahan, berurutan: tanah (48), paving (95), semen (142), pasir (189), aspal (236), air (283), air dalam (330) |
-
-**Cara peralihan dibuat.** Setiap bahan wilayah punya urutan prioritas: rumput, tanah, paving, semen, pasir, aspal, air, lalu air dalam. Sebuah sel mendapat pita tepi di sisi atau sudut yang bertetangga dengan bahan berprioritas lebih rendah. Pita tepinya: tanah = rumput berpola papan catur lalu garis `wood`; paving = garis `wood-d`; semen = garis `slate`; pasir = rumput berpola papan catur; aspal = bayangan kerb `dusk`, aspal, lalu garis tepi (marka); air = garis bayangan lalu buih (kilau); air dalam = air berpola papan catur. Karena dihitung dari 8 tetangga, satu bahan cukup 47 ubin untuk semua bentuk, termasuk sudut dalam (jalan setapak berbentuk L dan tepi air berundak di pratinjau).
-
-**Aturan peta untuk JS-06** (diperiksa `build_peta.py` nanti):
-- Tanah dan pasir hanya bersebelahan dengan rumput atau air, karena pita tepinya memakai warna rumput.
-- Lapangan berbentuk persegi panjang dengan lebar ganjil, agar garis tengah tepat di tengah.
-- Setiap sel paling banyak satu ubin tumpang detail atau marka, dan satu ubin bayangan.
-- Bayangan bangunan mengikuti kotak tapak bangunan (bentuk persegi), digeser 8 piksel ke kanan dan 4 piksel ke bawah.
-
-| | |
-|---|---|
-| Kode | `scripts/game/art/atas_ubin.py` (bahan, ubin, susunan lembar, `nomor_tanah` untuk peta) dan `build_jejak.py` (ekspor, pemeriksaan, pratinjau) |
-| Berkas | `app/jejak-setara/assets/ubin/ubin_pagi.png`, `ubin_siang.png`, `ubin_sore.png` |
-| Ukuran | Sekitar 5,8 KB per lembar (batas 60 KB) |
-| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, ukuran 256 × 384, dan semua ubin lapisan 0 penuh tanpa lubang transparan |
-| Pratinjau | `preview/ubin_contoh.png` (peta contoh siang ×2), `preview/ubin_masa.png` (tiga masa ×1), `preview/ubin_dekat.png` (potongan ×3 dengan garis pindai), dan `preview/ubin_lembar.png` (lembar ubin) |
-
-- Rumput tetap `leaf` di ketiga masa, jadi pagi dan siang hampir sama di atas rumput. Perbedaan terbesar ada di air (biru muda, biru, jingga), pasir, warna bayangan, dan marka.
-- Garis lapangan di atas semen memakai marka: putih di siang hari dan `cream` di pagi dan sore. Garis `cream` di atas `mist` tetap terlihat, tetapi lebih lembut.
-- Pohon belum digambar (kelompok O2), jadi ubin bayangan pohon baru terlihat di lembar ubin.
-
-**Bahan per masa.** Baris yang disetujui di kelompok U belum ada di Design System bagian 4 dan diajukan ke Sesi A (Permintaan C-2).
+**Bahan per masa.** Baris dengan tanda "usulan" belum ada di Design System bagian 4; pemetaannya ditetapkan lewat pratinjau kelompok U, lalu diajukan ke Sesi A.
 
 | Bahan | Pagi | Siang | Sore | Asal |
 |---|---|---|---|---|
@@ -352,10 +272,9 @@ Satu lembar per masa: `ubin_pagi.png`, `ubin_siang.png`, dan `ubin_sore.png`, ma
 | Air dalam | `sky-d` | `sky-d` | `sky-d` | Design System bagian 4 |
 | Pasir | `PAGI2` | `cream` | `SORE1` | Design System bagian 4 |
 | Dinding | `cream` | `cream` | `cream` | Design System bagian 4 |
-| Tanah setapak | `skin-2`, kerikil `wood` | sama | sama | Disetujui 6 Nov (kelompok U), tidak ditukar |
-| Paving gang | bata `wood`, nat `wood-d` | sama | sama | Disetujui 6 Nov (kelompok U), tidak ditukar |
-| Semen (halaman, trotoar, lantai pasar) | `mist`, bintik dan tepi `slate` | sama | sama | Disetujui 6 Nov (kelompok U), tidak ditukar |
-| Kerb dan pinggir aspal | bayangan kerb `dusk`, garis tepi = marka | sama | sama | Disetujui 6 Nov (kelompok U) |
+| Tanah setapak | `wood`, `wood-d` | sama | sama | Usulan, tidak ditukar |
+| Paving gang | `mist`, `slate` | sama | sama | Usulan, tidak ditukar |
+| Lantai semen, trotoar | `mist`, `slate`, `cream` | sama | sama | Usulan, tidak ditukar |
 
 ## O. Objek dan bangunan
 
@@ -365,133 +284,60 @@ Bangunan dan pohon terdiri atas `obj_{nama}.png` dan `obj_{nama}_atas.png` (usul
 
 | ID | Berkas | Ukuran (ubin) | Isi | Zona dan kejadian | Status |
 |---|---|---|---|---|---|
-| O-01 | `obj_rumah_nara` | 4 × 4 | Rumah Nara: bentuk rumah a dengan pintu `teal`, kanopi `coral` di atas pintu, dan dua pot bunga; jendela bertirai `rose` | Z1, K-01 | Disetujui (6 Nov) |
-| O-02 | `obj_rumah_a`, `obj_rumah_b` | 4 × 4, 3 × 3 | Rumah warga: varian a (uji gaya, atap limasan) dan varian b (atap pelana, lebih kecil) | Z1 | Disetujui (6 Nov) |
-| O-03 | `obj_warung_made` | 3 × 3 | Warung berdinding papan, atap `coral`, etalase terbuka berisi stoples dan jajanan polos | Z1, K-02 | Disetujui (6 Nov) |
-| O-04 | `obj_sekolah` | 10 × 6 | Gedung SMP dua lantai: dinding `cream`, atap limasan `sky-d`, selasar berpagar, tiga pintu kelas, tangga ke lantai dua di kanan depan | Z2, K-04 | Disetujui (6 Nov) |
-| O-05 | `obj_kantin` | 4 × 3 | Kantin beratap `sky-d` dengan jendela layan berisi jajanan polos | Z2, K-03 | Disetujui (6 Nov) |
-| O-06 | `obj_tiang_bendera` | 1 × 3 | Tiang bendera merah putih di atas alas semen | Z2 | Disetujui (6 Nov) |
-| O-07 | `obj_gerbang_tutup`, `obj_gerbang_buka` | 4 × 2 | Gerbang besi berpilar `cream` bertopi `sky-d`: tertutup bergembok dan terbuka | Z2, lobi | Disetujui (6 Nov) |
-| O-08 | `obj_halte` | 3 × 2 | Halte beratap `teal` dengan panel belakang dan bangku kayu | Z3, K-05, K-06 | Disetujui (6 Nov) |
-| O-09 | `obj_angkot` | 3 × 2 | Angkot `sky-d` bergaris putih seperti di Sehari Setara, pintu samping terbuka | Z3, K-06 | Disetujui (6 Nov) |
-| O-10 | `obj_rambu_seberang`, `obj_rambu_halte` | 1 × 2 | Rambu biru bertepi putih: segitiga berpejalan kaki, dan gambar angkot | Z3 | Disetujui (6 Nov) |
-| O-11 | `obj_tenda_a`, `obj_tenda_b` | 3 × 3 | Tenda bergaris `mango` dan `sun`: varian a berisi sayur dan buah, varian b berisi tampah bumbu | Z4 | Disetujui (6 Nov) |
-| O-12 | `obj_los` | 6 × 3 | Los beratap seng (`slate`), tirai bergaris, lapak sepanjang depan | Z4, K-07 | Disetujui (6 Nov) |
-| O-13 | `obj_gerobak` | 2 × 2 | Gerobak kayu beroda dengan atap kecil `teal` dan etalase kaca | Z4, Z7, K-14 | Disetujui (6 Nov) |
-| O-14 | `obj_bale` | 5 × 4 | Bale terbuka: lantai papan panggung, tiang kayu, atap limasan `wood-d` | Z5, K-09, K-10 | Disetujui (6 Nov) |
-| O-15 | `obj_pos_ronda` | 3 × 3 | Pos ronda panggung beratap `wood-d` dengan kentongan tergantung | Z5 | Disetujui (6 Nov) |
-| O-16 | `obj_jembatan_datar`, `obj_jembatan_tegak` | 3 × 2, 2 × 3 | Jembatan papan berpagar, satu berkas tanpa bagian atas, bisa dilewati di atas air | Z6 | Disetujui (6 Nov) |
-| O-17 | `obj_kelapa` | 3 × 4 | Pohon kelapa: batang condong berbuku, tajuk 11 pelepah dengan buah | Z6 | Disetujui (6 Nov) |
-| O-18 | `obj_puskesmas` | 6 × 4 | Dinding `white`, atap limasan `teal`, papan bergambar hati `leaf`, pintu kaca ganda, landai berpegangan di samping pintu | Z7, K-13 | Disetujui (6 Nov) |
-| O-19 | `obj_kantor_desa` | 6 × 4 | Dinding `cream`, atap `teal`, serambi bertiang putih, pintu kayu ganda, tiang bendera kecil | Z7, K-14 | Disetujui (6 Nov) |
-| O-20 | `obj_warung_wifi` | 4 × 3 | Atap `berry`, antena, papan bergambar gelombang sinyal `teal`, colokan, bangku panjang | Z8, K-15, K-16 | Disetujui (6 Nov) |
-
-#### Rincian kelompok O1 (6 November 2026)
-
-| | |
-|---|---|
-| Kode | `scripts/game/art/atas_objek.py`: satu fungsi per objek dan daftar `OBJEK` (ukuran, baris potong, kotak padat, jenis bayangan, bisa dilewati) yang nanti dipakai `build_peta.py` di JS-06 |
-| Berkas | 48 PNG di `app/jejak-setara/assets/obj/`: 23 objek berbagian bawah dan atas (`obj_{nama}.png` dan `obj_{nama}_atas.png`) dan 2 jembatan satu berkas |
-| Ukuran | Seluruh kelompok O1 15,9 KB; berkas terbesar 747 B |
-| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai ubin (lebar ubin × 16 + 2 piksel margin) |
-| Pratinjau | `preview/obj_lembar.png` (semua objek ×2), `preview/obj_peta.png` (delapan zona di peta contoh, ×2), `preview/obj_dekat.png` (potongan ×3 dengan garis pindai) |
-
-- Kotak padat: bangunan padat kecuali baris ubin teratas, tempat atap menutupi pemain yang berjalan di belakangnya. Tiang bendera, rambu, dan gerbang hanya padat di alasnya; gerbang terbuka hanya di kedua pilarnya. Pohon kelapa hanya padat di ubin batang. Jembatan bisa dilewati walaupun di atas air.
-- Bayangan di tanah: bangunan memakai ubin bayangan bangunan (U-13) mengikuti tapaknya; pohon kelapa memakai bayangan kecil (U-14) di ubin batang; tiang, rambu, gerbang, dan jembatan tanpa bayangan.
-- Semua tanpa tulisan, logo, merek, pelat nomor, atau lambang instansi. Puskesmas memakai hati `leaf`, bukan palang merah. Bendera merah putih memakai `coral` dan `white` seperti di Sehari Setara.
-- Landai berpegangan di puskesmas dan tangga terbuka di sekolah mendukung kejadian K-04 (akses kursi roda).
+| O-01 | `obj_rumah_nara` | 4 × 4 | Rumah Nara: atap limasan `coral`, dinding `cream`, jendela bertirai `rose` seperti rumah Nara di Sehari Setara, pagar bambu di depan (O-23) | Z1, K-01 | Belum |
+| O-02 | `obj_rumah_a`, `obj_rumah_b` | 4 × 4, 3 × 3 | Rumah warga, dua varian; uji gaya memakai bentuk varian a | Z1 | Ditinjau: varian a (uji gaya) disetujui sebagai acuan 6 Nov; status akhir di kelompok O1 |
+| O-03 | `obj_warung_made` | 3 × 3 | Warung Pak Made beratap `coral` dengan etalase jajanan polos | Z1, K-02 | Belum |
+| O-04 | `obj_sekolah` | 10 × 6 | Gedung SMP dua lantai, dinding `cream`, atap `sky-d`, tangga ke lantai dua terlihat di depan | Z2, K-04 | Belum |
+| O-05 | `obj_kantin` | 4 × 3 | Kantin sekolah beratap `sky-d` | Z2, K-03 | Belum |
+| O-06 | `obj_tiang_bendera` | 1 × 3 | Tiang bendera merah putih (`coral` dan `white`, seperti Sehari Setara) | Z2 | Belum |
+| O-07 | `obj_gerbang_tutup`, `obj_gerbang_buka` | 4 × 2 | Gerbang halaman lobi di depan sekolah, tertutup dan terbuka | Z2, lobi | Belum |
+| O-08 | `obj_halte` | 3 × 2 | Halte beratap `teal` dengan bangku | Z3, K-05, K-06 | Belum |
+| O-09 | `obj_angkot` | 3 × 2 | Angkot berhenti | Z3, K-06 | Belum |
+| O-10 | `obj_rambu_seberang`, `obj_rambu_halte` | 1 × 2 | Rambu hanya bergambar: penyeberangan dan angkot | Z3 | Belum |
+| O-11 | `obj_tenda_a`, `obj_tenda_b` | 3 × 3 | Tenda pasar bergaris `mango` dan `sun`, dua varian | Z4 | Belum |
+| O-12 | `obj_los` | 6 × 3 | Los pedagang beratap | Z4, K-07 | Belum |
+| O-13 | `obj_gerobak` | 2 × 2 | Gerobak dagangan beroda | Z4, K-14 | Belum |
+| O-14 | `obj_bale` | 5 × 4 | Bale kayu terbuka (`wood`) beratap `wood-d` | Z5, K-09, K-10 | Belum |
+| O-15 | `obj_pos_ronda` | 3 × 3 | Pos ronda dengan kentongan | Z5 | Belum |
+| O-16 | `obj_jembatan_datar`, `obj_jembatan_tegak` | 3 × 2, 2 × 3 | Jembatan kayu di atas sungai (bisa dilewati) | Z6 | Belum |
+| O-17 | `obj_kelapa` | batang 1, tajuk 3 × 3 | Pohon kelapa | Z6 | Belum |
+| O-18 | `obj_puskesmas` | 6 × 4 | Puskesmas: dinding `white`, atap `teal`, papan bergambar hati `leaf` | Z7, K-13 | Belum |
+| O-19 | `obj_kantor_desa` | 6 × 4 | Kantor desa dengan tiang bendera kecil | Z7, K-14 | Belum |
+| O-20 | `obj_warung_wifi` | 4 × 3 | Warung beratap `berry` dengan antena, bangku panjang, dan colokan | Z8, K-15, K-16 | Belum |
 
 ### O2. Objek umum
 
 | ID | Berkas | Ukuran (ubin) | Isi | Zona dan kejadian | Status |
 |---|---|---|---|---|---|
-| O-21 | `obj_pohon` | 3 × 3 (batang 1 ubin, tajuk 2 × 2) | Pohon rindang: tajuk bergerombol `leaf` dengan lengkung daun dan sisi kanan bawah teduh, batang di tengah bawah | Semua | Disetujui (6 Nov) |
-| O-22 | `obj_semak` | 1 × 1 | Semak bergerombol | Semua | Disetujui (6 Nov) |
-| O-23 | `obj_pagar_bambu_{ruas}` | 1 × 1 | Pagar bambu `wood` beruas dalam 8 ruas: datar, tegak, sudut atas kiri, sudut atas kanan, sudut bawah kiri, sudut bawah kanan, ujung kiri, ujung kanan | Z1, K-01 | Disetujui (6 Nov) |
-| O-24 | `obj_pagar_sekolah_{ruas}` | 1 × 1 | Tembok sekolah `cream` bertutup `sky-d`, dengan 8 ruas yang sama; sudutnya berupa pilar | Z2 | Disetujui (6 Nov) |
-| O-25 | `obj_bangku` | 2 × 1 | Bangku panjang kayu bersandaran | Z6, Z7, Z8 | Disetujui (6 Nov) |
-| O-26 | `obj_tempat_sampah` | 1 × 1 | Dua tempat sampah untuk memilah, hijau dan kuning, tanpa tulisan | Semua, K-11 | Disetujui (6 Nov) |
-| O-27 | `obj_motor` | 2 × 1 | Motor matik `mango` seperti motor Dimas di Sehari Setara, tanpa merek dan pelat | Z3, Z4, K-05 | Disetujui (6 Nov) |
-| O-28 | `obj_tiang_lampu` | 1 × 2 | Tiang lampu jalan dengan lampu berwarna `lampu` (#F7D774) | Z1, Z3 | Disetujui (6 Nov) |
-
-#### Rincian kelompok O2 (6 November 2026)
-
-| | |
-|---|---|
-| Kode | `scripts/game/art/atas_objek.py` (fungsi objek, `_pagar` untuk semua ruas pagar, dan entri `OBJEK`) |
-| Berkas | 24 PNG di `app/jejak-setara/assets/obj/`: pohon dan tiang lampu dua bagian, objek lain satu berkas, ditambah 8 ruas pagar bambu dan 8 ruas tembok sekolah |
-| Ukuran | Seluruh kelompok O2 4,8 KB |
-| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai ubin |
-| Pratinjau | `preview/obj2_lembar.png` (objek ×3, ruas pagar ×3, dan contoh susunan pagar ×2) dan `preview/obj2_peta.png` (peta contoh 30 × 20 ubin, ×2) |
-
-- Daftar rencana menyebut ruas datar, tegak, dan sudut. Kini setiap pagar punya 8 ruas (empat sudut dan dua ujung), agar pagar bisa mengelilingi halaman dan menyisakan celah di depan pintu atau gerbang.
-- Sisi ruas yang tersambung digambar menembus tepi ubin lalu dipotong, sehingga ruas yang berdampingan menyambung tanpa garis luar di tengah sambungan. Di JS-06, `build_peta.py` memilih ruas dari tetangganya.
-- Kotak padat: pohon hanya di ubin batang; tiang lampu di alasnya; pagar, bangku, tempat sampah, dan motor di seluruh ubinnya.
-- Bayangan di tanah: pohon memakai bayangan pohon 2 × 2 (U-14) di bawah tajuk; semak, tempat sampah, dan motor memakai bayangan kecil (U-14); pagar, bangku, dan tiang lampu tanpa bayangan.
+| O-21 | `obj_pohon` | batang 1, tajuk 2 × 2 | Pohon rindang (Design System bagian 7) | Semua | Belum |
+| O-22 | `obj_semak` | 1 × 1 | Semak | Semua | Belum |
+| O-23 | `obj_pagar_bambu_datar`, `_tegak`, `_sudut` | 1 × 1 | Pagar bambu `wood` | Z1, K-01 | Belum |
+| O-24 | `obj_pagar_sekolah_datar`, `_tegak`, `_sudut` | 1 × 1 | Pagar tembok sekolah | Z2 | Belum |
+| O-25 | `obj_bangku` | 2 × 1 | Bangku panjang kayu | Z6, Z7, Z8 | Belum |
+| O-26 | `obj_tempat_sampah` | 1 × 1 | Tempat sampah | Semua, K-11 | Belum |
+| O-27 | `obj_motor` | 2 × 1 | Motor parkir tanpa merek dan pelat | Z3, Z4, K-05 | Belum |
+| O-28 | `obj_tiang_lampu` | 1 × 2 | Tiang lampu jalan | Z1, Z3 | Belum |
 
 ### O3. Properti kejadian
 
-Diambil dari tabel "Tokoh dan properti per kejadian" di `naskah/NASKAH.md`. Properti yang dipegang tokoh (HP, kotak bekal di tangan Komang) sudah menjadi pose tokoh di kelompok N. Benda kecil digambar di tengah kanvas 1 × 1 ubin agar mudah diletakkan, dan bisa dilewati.
+Diambil dari tabel "Tokoh dan properti per kejadian" di `naskah/NASKAH.md`. Properti yang dipegang tokoh (HP, tali lompat yang sedang dipakai) digambar sebagai pose tokoh di kelompok N.
 
-| ID | Berkas | Ukuran (ubin) | Isi | Kejadian | Status |
+| ID | Berkas | Ukuran | Isi | Kejadian | Status |
 |---|---|---|---|---|---|
-| O-29 | `obj_pengeras_suara` | 1 × 1 | Pengeras suara portabel `dusk` | K-02 | Disetujui (6 Nov) |
-| O-30 | `obj_kotak_bekal` | 1 × 1, benda kecil | Kotak bekal `sky-d` bertutup `mist` | K-03 | Disetujui (6 Nov) |
-| O-31 | `obj_kursi_roda` | 1 × 1 | Kursi roda kosong dilihat dari depan; Raka yang duduk di kursi roda ada di N-17 | K-04 | Disetujui (6 Nov) |
-| O-32 | `obj_tiang_kamera` | 1 × 2 | Tiang dengan kamera keamanan kecil | K-07 | Disetujui (6 Nov) |
-| O-33 | `obj_lapak` | 2 × 2 | Meja lapak dengan tiga keranjang sayur dan buah, peti terung di depan | K-07 | Disetujui (6 Nov) |
-| O-34 | `obj_dompet` | 1 × 1, benda kecil | Dompet cokelat tanpa tulisan | K-08 | Disetujui (6 Nov) |
-| O-35 | `obj_bangku_pasar` | 2 × 1 | Bangku kayu tanpa sandaran | K-08 | Disetujui (6 Nov) |
-| O-36 | `obj_pos_keamanan` | 2 × 2 | Pos jaga beratap seng dengan loket dan pintu, tanpa tulisan dan lambang | K-08 | Disetujui (6 Nov) |
-| O-37 | `obj_meja_panitia` | 2 × 1 | Meja dengan kertas polos, pensil, dan tumpukan kertas, tanpa tulisan | K-09, K-10 | Disetujui (6 Nov) |
-| O-38 | `obj_sisa_piknik` | 2 × 1 | Tikar anyaman dengan botol, bungkus, dan kantong plastik; bisa dilewati | K-11 | Disetujui (6 Nov) |
-| O-39 | `obj_bola` | 1 × 1, benda kecil | Bola putih bertambal | K-12 | Disetujui (6 Nov) |
-| O-40 | `obj_tali_lompat` | 1 × 1 | Tali lompat `coral` bergagang kayu, tergeletak di tanah | K-12 | Disetujui (6 Nov) |
-| O-41 | `obj_bangku_antrean` | 3 × 1 | Empat kursi plastik `sky-d` bersambung | K-13 | Disetujui (6 Nov) |
+| O-29 | `obj_pengeras_suara` | 1 × 1 | Pengeras suara | K-02 | Belum |
+| O-30 | `obj_kotak_bekal` | ½ ubin | Kotak bekal | K-03 | Belum |
+| O-31 | `obj_kursi_roda` | 1 × 1 | Kursi roda kosong; Raka yang duduk di kursi roda ada di N-17 | K-04 | Belum |
+| O-32 | `obj_tiang_kamera` | 1 × 2 | Tiang dengan kamera keamanan kecil | K-07 | Belum |
+| O-33 | `obj_lapak` | 2 × 2 | Lapak sayur dan buah | K-07 | Belum |
+| O-34 | `obj_dompet` | ½ ubin | Dompet | K-08 | Belum |
+| O-35 | `obj_bangku_pasar` | 2 × 1 | Bangku pasar | K-08 | Belum |
+| O-36 | `obj_pos_keamanan` | 2 × 2 | Pos keamanan pasar | K-08 | Belum |
+| O-37 | `obj_meja_panitia` | 2 × 1 | Meja panitia dengan kertas rencana tanpa tulisan | K-09, K-10 | Belum |
+| O-38 | `obj_sisa_piknik` | 2 × 1 | Tikar dan bungkus plastik | K-11 | Belum |
+| O-39 | `obj_bola` | ½ ubin | Bola | K-12 | Belum |
+| O-40 | `obj_tali_lompat` | 1 × 1 | Tali lompat di tanah | K-12 | Belum |
+| O-41 | `obj_bangku_antrean` | 3 × 1 | Bangku antrean | K-13 | Belum |
 | O-42 | `obj_sanggah` | — | Sanggah keluarga untuk K-02 versi B | K-02 | Ditunda: hanya bila KT-10 memilih versi B dan pemilik proyek mengizinkan, karena Design System bagian 7 aturan 6 tidak menggambar tempat ibadah sebagai penanda zona |
-
-#### Rincian kelompok O3 (6 November 2026)
-
-| | |
-|---|---|
-| Kode | `scripts/game/art/atas_objek.py` (bagian "kelompok O3" dan entri `OBJEK`) |
-| Berkas | 15 PNG di `app/jejak-setara/assets/obj/`; tiang kamera dan pos keamanan berbagian bawah dan atas |
-| Ukuran | Seluruh kelompok O3 3,2 KB |
-| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai ubin |
-| Pratinjau | `preview/obj3_lembar.png` (properti ×4) dan `preview/obj3_set.png` (set tokoh dan properti untuk 12 kejadian, ×3) |
-
-- Pratinjau set kejadian memakai tokoh yang sudah disetujui dan mengikuti tabel tokoh dan properti di `naskah/NASKAH.md`. Di JS-06, setiap titik kejadian menyediakan ruang 3 × 3 ubin untuk set ini.
-- K-05 (Dimas di motor dan halte), K-10, K-15, dan K-16 memakai tokoh dan objek dari kelompok yang sudah disetujui (pose Dimas di motor, halte, meja panitia, warung berwifi, pose memegang HP).
-- Benda kecil (kotak bekal, dompet, bola, tali lompat) dan sisa piknik tidak punya kotak padat.
-
-### O4. Varian untuk peta besar
-
-Ditambahkan sesudah keputusan ukuran peta 160 × 100 ubin, agar kampung yang lebih luas tidak terlihat berulang. Semua memakai warna tetap dan gaya acuan yang sama.
-
-| ID | Berkas | Ukuran (ubin) | Isi | Zona | Status |
-|---|---|---|---|---|---|
-| O-43 | `obj_rumah_c` | 5 × 4 | Rumah warga memanjang: atap pelana `coral`, dinding peach, teras bertiang dengan bangku, tirai `leaf` | Z1 | Disetujui (6 Nov) |
-| O-44 | `obj_rumah_d` | 3 × 3 | Rumah warga kecil: atap limasan `coral`, dinding `mist`, pintu di kanan, tirai `sun` | Z1 | Disetujui (6 Nov) |
-| O-45 | `obj_pohon_b` | 3 × 3 (batang 1 ubin) | Pohon rindang gelap: tajuk bulat `grass` dengan lengkung daun `leaf` | Semua | Disetujui (6 Nov) |
-| O-46 | `obj_pohon_c` | 3 × 3 (batang 1 ubin) | Pohon berbunga: tajuk `leaf` dengan bunga `rose` dan putih | Semua | Disetujui (6 Nov) |
-| O-47 | `obj_pohon_kecil` | 1 × 2 | Pohon muda dengan tajuk kecil | Semua | Disetujui (6 Nov) |
-| O-48 | `obj_pisang` | 3 × 3 (batang 1 ubin) | Pohon pisang: batang semu hijau, daun lebar, setandan pisang dan jantungnya | Z1, Z6 | Disetujui (6 Nov) |
-| O-49 | `obj_semak_b` | 1 × 1 | Semak berbunga `rose` dan putih | Semua | Disetujui (6 Nov) |
-| O-50 | `obj_pot_tanaman` | 1 × 1 | Pot tanaman `coral` di depan rumah | Z1, Z8 | Disetujui (6 Nov) |
-| O-51 | `obj_batu` | 1 × 1 | Batu besar di tepi sungai atau taman | Z6 | Disetujui (6 Nov) |
-
-#### Rincian kelompok O4 (6 November 2026)
-
-| | |
-|---|---|
-| Kode | `scripts/game/art/atas_objek.py` (bagian "kelompok O4" dan entri `OBJEK`) |
-| Berkas | 15 PNG di `app/jejak-setara/assets/obj/`; rumah dan pohon berbagian bawah dan atas |
-| Ukuran | Seluruh kelompok O4 4,7 KB |
-| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai ubin |
-| Pratinjau | `preview/obj4_lembar.png` (varian ×3) dan `preview/obj4_peta.png` (potongan kampung 40 × 26 ubin dengan semua varian, ×2) |
-
-- Peta 160 × 100 kini bisa memakai lima bentuk rumah dan enam jenis pohon (termasuk kelapa). Di JS-06, `build_peta.py` memilih varian berbenih agar susunan tidak berulang.
-- Pohon dan pisang hanya padat di ubin batangnya; tajuknya di lapisan atas menutupi pemain yang lewat di belakangnya.
 
 ## T. Penanda dan efek
 
@@ -499,38 +345,19 @@ Berkas `tanda_*.png` disimpan di folder `ikon/`, karena Architecture bagian 3 ti
 
 | ID | Berkas | Ukuran | Isi | Status |
 |---|---|---|---|---|
-| T-01 | `tanda_kejadian.png` | 12 × 12 | Gelembung `sun` bertanda seru, bergaris luar `ink`, berkilau putih. Naik-turun 1 piksel dilakukan antarmuka | Disetujui (6 Nov) |
-| T-02 | `tanda_dibuka.png` | 12 × 12 | Gelembung `mist` bertanda tiga titik | Disetujui (6 Nov) |
-| T-03 | `tanda_selesai.png` | 10 × 10 | Gelembung kecil `leaf` bertanda centang `ink` | Disetujui (6 Nov) |
-| T-04 | `tanda_kotak_sepatu.png` | 3 × 14 × 12 | Peti kayu bergesper; tutupnya bergambar sepatu `coral` (Lari cepat). Bingkai: kecil, besar berkilau, biasa | Disetujui (6 Nov) |
-| T-05 | `tanda_kotak_kompas.png` | 3 × 14 × 12 | Peti bergambar kompas putih berjarum `teal` (Kompas kejadian) | Disetujui (6 Nov) |
-| T-06 | `tanda_kotak_buku.png` | 3 × 14 × 12 | Peti bergambar buku terbuka putih bersampul `sky-d` (Petunjuk) | Disetujui (6 Nov) |
-| T-07 | `tanda_kotak_teropong.png` | 3 × 14 × 12 | Peti bergambar teropong `dusk` (P1) | Disetujui (6 Nov) |
-| T-08 | `tanda_kotak_karcis.png` | 3 × 14 × 12 | Peti bergambar karcis `sun` (Angkot, P1) | Disetujui (6 Nov) |
-| T-09 | `tanda_kompas.png` | 16 × 7 × 7 | Panah `teal` bergaris luar `ink`, 8 arah; bingkai kedua lebih terang (berdenyut) | Disetujui (6 Nov) |
-| T-10 | `tanda_diri.png` | 4 × 7 × 7 | Panah `sun` bergaris luar `ink` untuk peta mini | Disetujui (6 Nov) |
-| T-11 | `tanda_debu.png` | 2 × 8 × 6 | Debu lari `mist` dan putih, tanpa garis luar | Disetujui (6 Nov) |
-| T-12 | `tanda_kilau.png` | 2 × 8 × 8 | Kilau putih dan `sun`, tanpa garis luar | Disetujui (6 Nov) |
+| T-01 | `tanda_kejadian.png` | 12 × 12 | Gelembung `sun` bertanda "!" bergaris luar `ink`. Naik-turun 1 piksel dilakukan antarmuka | Belum |
+| T-02 | `tanda_dibuka.png` | 12 × 12 | Gelembung `mist` bertanda "…" | Belum |
+| T-03 | `tanda_selesai.png` | 10 × 10 | Gelembung kecil `leaf` bertanda ✓ | Belum |
+| T-04 | `tanda_kotak_sepatu.png` | 3 × 12 × 10 | Peti `wood` berikon sepatu; strip pop: kecil, besar berkilau, normal | Belum |
+| T-05 | `tanda_kotak_kompas.png` | 3 × 12 × 10 | Peti berikon kompas | Belum |
+| T-06 | `tanda_kotak_buku.png` | 3 × 12 × 10 | Peti berikon buku | Belum |
+| T-07 | `tanda_kotak_teropong.png` | 3 × 12 × 10 | Peti berikon teropong (P1) | Belum |
+| T-08 | `tanda_kotak_karcis.png` | 3 × 12 × 10 | Peti berikon karcis (P1) | Belum |
+| T-09 | `tanda_kompas.png` | 16 × 7 × 7 | Panah `teal` bergaris luar `ink`: 8 arah × 2 bingkai denyut | Belum |
+| T-10 | `tanda_diri.png` | 4 × 7 × 7 | Panah `sun` bergaris luar `ink` untuk peta mini, 4 arah | Belum |
+| T-11 | `tanda_debu.png` | 2 × 8 × 6 | Debu lari | Belum |
+| T-12 | `tanda_kilau.png` | 2 × 8 × 8 | Kilau kotak | Belum |
 | — | Titik pemain di peta kelas | 3 × 3 | Digambar antarmuka dengan warna tas; tanpa berkas | — |
-
-### Rincian kelompok T (6 November 2026)
-
-| | |
-|---|---|
-| Kode | `scripts/game/art/atas_ikon.py` (baru): gelembung, peti, panah, debu, dan kilau |
-| Berkas | 12 PNG di `app/jejak-setara/assets/ikon/` |
-| Ukuran | Seluruh kelompok T 3,1 KB |
-| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran strip sesuai jumlah bingkai |
-| Pratinjau | `preview/tanda_lembar.png` (semua penanda ×8 di atas empat bahan, dan contoh saat bermain ×3) dan `preview/tanda_gerak.gif` (gerakan) |
-
-**Urutan bingkai di berkas**
-- `tanda_kompas.png`: atas, kanan atas, kanan, kanan bawah, bawah, kiri bawah, kiri, kiri atas; dua bingkai per arah (biasa, terang).
-- `tanda_diri.png`: bawah, atas, kanan, kiri.
-- `tanda_kotak_*.png`: kecil, besar berkilau, biasa. Bingkai biasa (ketiga) dipakai saat kotak diam.
-
-- Bingkai kotak menjadi 14 × 12, bukan 12 × 10 seperti di rencana, agar bingkai besar berkilau muat dalam strip. Peti biasa tetap 12 × 10, sesuai Design System bagian 9.
-- Semua penanda bergaris luar `ink`, sehingga tetap terlihat di rumput, aspal, semen, dan pasir. Kejadian, dialog, dan selesai dibedakan bentuk dan tandanya (seru, tiga titik, centang), bukan hanya warnanya.
-- Kurangi gerak: penanda dan panah diam di bingkai pertama, dan kotak langsung tampil dengan bingkai biasa (Design System bagian 11).
 
 ## N. Tokoh bukan pemain
 
@@ -538,98 +365,52 @@ Tampak atas, menghadap bawah, diam 2 bingkai (`npc_{tokoh}_bawah_diam.png`), dit
 
 ### N1. Tokoh Sehari Setara
 
-| ID | Tokoh | Berkas | Ciri | Kejadian | Status |
+| ID | Tokoh | Ciri | Pose khusus | Kejadian | Status |
 |---|---|---|---|---|---|
-| N-01 | Nara | `npc_nara_bawah_diam.png` (16 × 24) | Rambut berponi `hair-1`, `skin-2`, seragam SMP, tali tas `mango` (tas `sun`, warna asli, tidak diganti antarmuka) | K-01, K-08 | Disetujui (6 Nov) |
-| N-02 | Ibu | `npc_ibu_bawah_diam.png` (16 × 26) | `skin-3`, rambut `hair-2` bersanggul, daster `rose` bertitik putih dan kuning, sandal | Tidak ada di set peta naskah; Design System bagian 8 | Disetujui (6 Nov) |
-| N-03 | Gita | `npc_gita_bawah_diam.png` (14 × 20) | Anak SD: `skin-1`, rambut dikuncir samping berikat `coral`, pipi merah muda, kemeja putih, rok `coral`, kaus kaki putih | K-01, K-12 | Disetujui (6 Nov) |
-| N-04 | Dimas | `npc_dimas_bawah_diam.png` (16 × 24), `npc_dimas_kanan_motor.png` (34 × 30) | `skin-4`, rambut cepak, jaket `sky-d` terbuka di atas seragam; pose khusus duduk di motor matik `mango` menghadap kanan, tanpa helm seperti adegan 2 Sehari Setara | K-02, K-05 | Disetujui (6 Nov) |
-| N-05 | Sinta | `npc_sinta_bawah_diam.png` (16 × 24) | `skin-3`, kerudung putih, kemeja lengan panjang, rok panjang `navy`, tanpa tas | K-09 | Disetujui (6 Nov) |
-| N-06 | Bu Ratih | `npc_ratih_bawah_diam.png` (16 × 26) | `skin-4`, rambut bob, kacamata, kemeja batik `teal`, rok cokelat, memeluk buku `mango` | Disebut di pilihan K-03 dan K-14; Design System bagian 8 | Disetujui (6 Nov) |
-| N-07 | Komang | `npc_komang_bawah_diam.png`, `npc_komang_bawah_menunduk.png` (16 × 24) | `skin-2`, potongan mangkuk, 1 piksel lebih pendek, seragam kebesaran tidak dimasukkan, sepatu kanan robek; pose khusus menunduk memegang kotak bekal | K-03 (K-15 hanya di dalam video, tidak di peta) | Disetujui (6 Nov) |
-| N-08 | Pak Made | `npc_made_bawah_diam.png` (16 × 26) | `skin-4`, rambut kelabu menipis, kumis kelabu, kaus `mango`, sarung kotak-kotak `navy` bergaris `sky-d`, sandal | K-02 | Disetujui (6 Nov) |
-| N-09 | Bayu | `npc_bayu_bawah_diam.png` (16 × 26) | `skin-2`, rambut rapi `hair-2`, kaus `mist`, jin `sky-d`, sepatu kets putih; netral dan ramah | K-07 | Disetujui (6 Nov) |
-
-#### Rincian kelompok N1 (6 November 2026)
-
-| | |
-|---|---|
-| Kode | `scripts/game/art/atas_tokoh.py` (bagian "tokoh bukan pemain": `NPC`, `npc()`, `strip_npc()`); gambar motor dipakai bersama lewat `_motor()` di `atas_objek.py` (motor O-27 tetap sama piksel) |
-| Berkas | 11 PNG di `app/jejak-setara/assets/npc/`, masing-masing strip 2 bingkai (diam bernapas) |
-| Ukuran | Seluruh kelompok N1 5,5 KB |
-| Titik kaki (jangkar) | Siswa 16 × 24: (8, 21) · dewasa 16 × 26: (8, 23) · anak 14 × 20: (7, 17) · Dimas di motor 34 × 30: (17, 28) |
-| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai |
-| Pratinjau | `preview/npc1_ringkasan.png` (setiap tokoh di samping sprite Sehari Setara yang sudah disetujui) dan `preview/npc1_peta.png` (tokoh di peta contoh, di tempat kejadiannya) |
-
-- Ciri setiap tokoh sama dengan sprite Sehari Setara (`docs/sehari-setara/Daftar_Aset.md` bagian A), diperkecil menjadi gaya *chibi* tampak atas dengan proporsi avatar yang sudah disetujui.
-- Tokoh bukan pemain tidak bertas punggung, kecuali Nara, sehingga tidak tertukar dengan pemain (usulan 9a).
-- Bayu digambarkan netral dan ramah, dan Komang digambarkan bermartabat (AGENTS bagian 8).
-- Avatar A1 sampai A8 tidak berubah; `_badan_bawah` hanya mendapat pilihan tanpa tali tas untuk tokoh bukan pemain.
+| N-01 | Nara | Rambut berponi `hair-1`, `skin-2`, seragam, tas `sun` bertali `mango` | — | K-01, K-08 | Belum |
+| N-02 | Ibu | `skin-3`, rambut `hair-2` bersanggul, daster `rose` | — | Tidak ada di set peta naskah; Design System bagian 8 | Belum |
+| N-03 | Gita | `skin-1`, rambut dikuncir berikat `coral`, kemeja putih, rok `coral` | — | K-01, K-12 | Belum |
+| N-04 | Dimas | `skin-4`, rambut cepak, jaket `sky-d` | Di atas motor (`npc_dimas_kanan_motor.png`) | K-02, K-05 | Belum |
+| N-05 | Sinta | `skin-3`, kerudung putih, lengan panjang, rok panjang `navy` | — | K-09 | Belum |
+| N-06 | Bu Ratih | `skin-4`, rambut bob, kacamata, batik `teal` | — | Disebut di pilihan K-03 dan K-14; Design System bagian 8 | Belum |
+| N-07 | Komang | `skin-2`, potongan mangkuk, seragam kebesaran | Menunduk memegang kotak bekal | K-03 (K-15 hanya di dalam video, tidak di peta) | Belum |
+| N-08 | Pak Made | `skin-4`, rambut menipis kelabu, kumis, kaus `mango`, sarung kotak-kotak | — | K-02 | Belum |
+| N-09 | Bayu | `skin-2`, rambut rapi `hair-2`, kaus `mist`, jin `sky-d`; netral dan ramah | — | K-07 | Belum |
 
 ### N2. Warga dan tokoh baru
 
-Ciri Raka, Wayan, dan siswa umum diusulkan Sesi C dan ditetapkan pemilik proyek pada 6 November 2026 ("Setuju: aset N2"). Sesi A dapat menyalinnya ke Design System bagian 8 untuk menyelesaikan Permintaan A-1 Sesi B.
-
-| ID | Tokoh | Berkas | Ciri | Kejadian | Status |
+| ID | Tokoh | Ciri | Pose khusus | Kejadian | Status |
 |---|---|---|---|---|---|
-| N-10 | Warga dewasa 1–3 | `npc_warga1_bawah_diam`, `npc_warga1_bawah_menunjuk`, `npc_warga2_bawah_diam`, `npc_warga3_bawah_diam` (16 × 26) | Warga 1: `skin-3`, rambut rapi, kemeja `sky-d`, celana `dusk`; pose menunjuk sambil bicara, tanpa kekerasan. Warga 2: `skin-1`, kerudung `teal`, baju lengan panjang `berry`, rok panjang `navy`. Warga 3: `skin-4`, rambut kelabu cepak, kemeja cokelat | K-07, K-10 | Disetujui (6 Nov) |
-| N-11 | Nenek | `npc_nenek_bawah_diam` (16 × 24) | `skin-3`, rambut kelabu bersanggul, baju lengan panjang `berry`, kain cokelat, bertongkat, sedikit lebih rendah | K-06 | Disetujui (6 Nov) |
-| N-12 | Ibu menggendong bayi | `npc_ibubayi_bawah_diam` (16 × 26) | `skin-2`, rambut bersanggul, baju `teal`, rok panjang `navy`, gendongan `mango`, bayi berselimut putih | K-13 | Disetujui (6 Nov) |
-| N-13 | Anak SD 1–2 | `npc_anak1_bawah_diam`, `npc_anak2_bawah_diam` (14 × 20) | Anak 1: `skin-3`, rambut pendek, kaus `sun`, celana pendek `navy`. Anak 2: `skin-4`, rambut dikuncir dua berikat `leaf`, kaus `rose`, rok `sky-d` | K-12 | Disetujui (6 Nov) |
-| N-14 | Pedagang | `npc_pedagang_bawah_diam` (16 × 26) | `skin-3`, caping anyaman, kaus `coral`, celemek putih, sandal | K-07 | Disetujui (6 Nov) |
-| N-15 | Petugas puskesmas | `npc_petugas_bawah_diam` (16 × 26) | `skin-1`, rambut bersanggul, seragam putih dengan tanda hati `leaf`, sepatu putih; ramah | K-13 | Disetujui (6 Nov) |
-| N-16 | Polisi | `npc_polisi_bawah_diam` (16 × 26) | `skin-2`, topi gelap polos, seragam cokelat bersaku tanpa lambang instansi; sikap membantu | Design System bagian 8 | Disetujui (6 Nov) |
-| N-17 | Raka | `npc_raka_bawah_kursiroda` (16 × 24) | Usulan: `skin-3`, rambut belah tengah `hair-2`, seragam tanpa tas, duduk di kursi roda dengan tangan di pelek roda | K-04 | Disetujui (6 Nov) |
-| N-18 | Wayan | `npc_wayan_bawah_diam` (16 × 24) | Usulan: `skin-4`, rambut belah tengah, kaus `leaf`, celana pendek cokelat, sandal (membantu gerobak orang tuanya) | K-14 | Disetujui (6 Nov) |
-| N-19 | Siswa umum S1–S4 | `npc_siswa1_bawah_diam`, `npc_siswa1_bawah_hp`, `npc_siswa2_bawah_diam`, `npc_siswa2_bawah_menunduk`, `npc_siswa3_bawah_diam`, `npc_siswa4_bawah_diam` (16 × 24) | Usulan, berbaju bebas tanpa tas: S1 `skin-1`, rambut tergerai, kaus `berry`, jin; S2 `skin-3`, rambut ikal, kaus `sky-d`; S3 `skin-2`, kerudung `rose`, baju lengan panjang `sky-d`, rok panjang; S4 `skin-4`, rambut dikuncir, kaus `leaf`. Pose memegang HP (S1) dan menunduk (S2) | K-01, K-08, K-09, K-10, K-11, K-12, K-15, K-16 | Disetujui (6 Nov) |
-| N-20 | Siswa umum S5–S6 | `npc_siswa5_bawah_diam`, `npc_siswa5_bawah_hp`, `npc_siswa6_bawah_diam` (16 × 24) | Usulan, berseragam tanpa tas: S5 `skin-1`, rambut belah tengah, celana; S6 `skin-4`, rambut tergerai, rok panjang. Pose memegang HP (S5) | K-03, K-04, K-13 | Disetujui (6 Nov) |
-
-#### Rincian kelompok N2 (6 November 2026)
-
-| | |
-|---|---|
-| Kode | `scripts/game/art/atas_tokoh.py` (bagian "kelompok N2": `NPC2`, `npc2()`, `strip_npc2()`) |
-| Berkas | 22 PNG di `app/jejak-setara/assets/npc/`, masing-masing strip 2 bingkai |
-| Ukuran | Seluruh kelompok N2 11,1 KB |
-| Titik kaki (jangkar) | Sama dengan kelompok N1: siswa dan lansia (8, 21), dewasa (8, 23), anak (7, 17); Raka di kursi roda (8, 21) |
-| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai |
-| Pratinjau | `preview/npc2_ringkasan.png` (semua tokoh ×5 dan usulan ciri) dan `preview/npc2_peta.png` (tokoh di tempat kejadiannya) |
-
-- Siswa umum tidak bertas punggung, sehingga tidak tertukar dengan pemain (usulan 9a). Kerudung, kulit, dan rambut dibuat beragam.
-- Polisi tanpa lambang instansi, petugas puskesmas memakai tanda hati `leaf`, dan caping pedagang tanpa tulisan.
-- Tokoh kelompok N1 dan kedelapan avatar tidak berubah.
+| N-10 | Warga dewasa 1–3 | Tiga variasi kulit, rambut, dan baju | Menunjuk sambil bicara, tanpa kekerasan | K-07, K-10 | Belum |
+| N-11 | Nenek bertongkat | Lansia sedikit membungkuk | — | K-06 | Belum |
+| N-12 | Ibu menggendong bayi | Dewasa menggendong bayi | — | K-13 | Belum |
+| N-13 | Anak SD 1–2 | Dua anak SD | Lompat tali (bila diperlukan) | K-12 | Belum |
+| N-14 | Pedagang | Pedagang pasar bercelemek | — | K-07 | Belum |
+| N-15 | Petugas puskesmas | Berseragam putih dengan tanda hati `leaf`, ramah | — | K-13 | Belum |
+| N-16 | Polisi | Seragam cokelat rapi, sikap membantu, tanpa lambang instansi | — | Design System bagian 8 | Belum |
+| N-17 | Raka | Teman sekelas pengguna kursi roda; ciri diusulkan di pratinjau N2 | Duduk di kursi roda | K-04 | Belum |
+| N-18 | Wayan | Teman sekelas; ciri diusulkan di pratinjau N2 | — | K-14 | Belum |
+| N-19 | Siswa umum S1–S4 | Baju bebas, tanpa tas (usulan 9) | Memegang HP; menunduk | K-01, K-08, K-09, K-10, K-11, K-12, K-15, K-16 | Belum |
+| N-20 | Siswa umum S5–S6 | Berseragam, tanpa tas (usulan 9) | Memegang HP | K-03, K-04, K-13 | Belum |
 
 ## I. Ikon
 
-Ikon 16 × 16 (termasuk margin 1 piksel) bergaris luar `ink`, sejalan dengan ikon antarmuka Sehari Setara.
-
 | ID | Berkas | Ukuran | Isi | Status |
 |---|---|---|---|---|
-| I-01 | `ikon_lari.png` | 16 × 16 | Sepatu `coral` bersol putih dengan garis laju (Lari cepat) | Disetujui (6 Nov) |
-| I-02 | `ikon_kompas.png` | 16 × 16 | Kompas bermuka putih, jarum `teal` (Kompas kejadian) | Disetujui (6 Nov) |
-| I-03 | `ikon_petunjuk.png` | 16 × 16 | Buku terbuka bersampul `sky-d` dengan pembatas `coral` (Petunjuk) | Disetujui (6 Nov) |
-| I-04 | `ikon_teropong.png` | 16 × 16 | Teropong `dusk` (P1) | Disetujui (6 Nov) |
-| I-05 | `ikon_karcis.png` | 16 × 16 | Karcis `sun` bergambar angkot (Angkot, P1) | Disetujui (6 Nov) |
-| I-06 sampai I-13 | `ikon_zona_1.png` sampai `ikon_zona_8.png` | 16 × 16 | Ikon zona: rumah, buku, rambu, keranjang, kentongan, pohon kelapa, hati, gelombang sinyal | Disetujui (6 Nov) |
-| I-14 | `ikon_mini_kejadian.png`, `ikon_mini_selesai.png`, `ikon_mini_halte.png` | 7 × 7 | Peta mini: "!" `sun`, centang `leaf`, dan halte `teal` (P1); ukuran dipastikan bersama JS-07 | Disetujui (6 Nov) |
-| I-15 | `ikon_menyambung.png` | 2 × 16 × 16 | Jam berputar untuk layar menyambung ulang | Disetujui (6 Nov) |
-| I-16 | `ikon_putar_hp.png` | 32 × 32 | Panah dari HP tegak ke HP mendatar | Disetujui (6 Nov) |
-| I-17 | `ikon_jejak.png` | 32 × 32 | Ikon tab: dua jejak kaki `sun` di atas petak `navy` | Disetujui (6 Nov) |
-| I-18 | `ikon_arsip.png`, `ikon_peringatan.png`, `ikon_centang.png` | 16 × 16 | Konsol: kotak arsip `mist`, segitiga `mango` bertanda seru (rujukan belum diverifikasi), lingkaran `leaf` bercentang (terverifikasi) | Disetujui (6 Nov) |
-| I-19 | `ikon_bintang.png` (3 bingkai), `ikon_jam.png`, `ikon_suara_nyala.png`, `ikon_suara_mati.png`, `ikon_layar_penuh.png`, `ikon_matahari.png`, `ikon_bulan.png`, `ikon_emosi_hati.png`, `ikon_emosi_keringat.png`, `ikon_emosi_tanya.png`, `ikon_emosi_seru.png` | 16 × 16, emosi 8 × 8 | Dipakai ulang dari Sehari Setara: dibangun dari `ikon.py` tanpa perubahan; piksel sama dengan berkas Sehari Setara | Disetujui (6 Nov) |
+| I-01 | `ikon_lari.png` | 16 × 16 | Sepatu (Lari cepat) | Belum |
+| I-02 | `ikon_kompas.png` | 16 × 16 | Kompas (Kompas kejadian) | Belum |
+| I-03 | `ikon_petunjuk.png` | 16 × 16 | Buku terbuka (Petunjuk) | Belum |
+| I-04 | `ikon_teropong.png` | 16 × 16 | Teropong (P1) | Belum |
+| I-05 | `ikon_karcis.png` | 16 × 16 | Karcis angkot (P1) | Belum |
+| I-06 sampai I-13 | `ikon_zona_1.png` sampai `ikon_zona_8.png` | 16 × 16 | Ikon zona: rumah, buku, rambu, keranjang, kentongan, pohon kelapa, hati, gelombang sinyal | Belum |
+| I-14 | `ikon_mini_kejadian.png`, `ikon_mini_selesai.png`, `ikon_mini_halte.png` | 7 × 7 (usulan) | Peta mini: "!" `sun`, ✓ `leaf`, dan halte `teal` (P1); ukuran dipastikan bersama JS-07 | Belum |
+| I-15 | `ikon_menyambung.png` | 2 × 16 × 16 | Jam berputar untuk layar menyambung ulang | Belum |
+| I-16 | `ikon_putar_hp.png` | 32 × 32 | Ajakan memutar HP ke posisi mendatar | Belum |
+| I-17 | `ikon_jejak.png` | 32 × 32 | Ikon tab halaman pemain dan konsol | Belum |
+| I-18 | Ikon status konsol | 16 × 16 | Arsip, rujukan belum diverifikasi, terverifikasi | Belum |
+| I-19 | Ikon Sehari Setara yang dipakai ulang | 16 × 16 dan 8 × 8 | Bintang (3 bingkai), jam, suara nyala dan mati, layar penuh, matahari, bulan, dan empat ikon emosi; dibangun ulang tanpa perubahan dari `ikon.py` dengan nama Jejak Setara (misalnya `ikon_bintang.png`, `ikon_emosi_hati.png`) | Belum (dipakai ulang) |
 
-### Rincian kelompok I (6 November 2026)
-
-| | |
-|---|---|
-| Kode | `scripts/game/art/atas_ikon.py` (bagian "kelompok I"); ikon I-19 dipanggil dari `ikon.py` Sehari Setara tanpa diubah |
-| Berkas | 33 PNG di `app/jejak-setara/assets/ikon/`: 22 ikon baru dan 11 ikon yang dipakai ulang |
-| Ukuran | Seluruh kelompok I 6,7 KB |
-| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai. Ikon I-19 sama piksel dengan berkas Sehari Setara |
-| Pratinjau | `preview/ikon_lembar.png` (semua ikon) dan `preview/ikon_hud.png` (ikon di tiruan HUD, bukan tata letak akhir) |
-
-- Ikon antarmuka (I-15 sampai I-18) dibuat sekarang agar Sesi A bisa langsung memakainya; bentuk akhirnya bisa disesuaikan ketika spesifikasi JS-07 sampai JS-12 ditulis.
-- Tidak ada tulisan, logo, atau lambang di ikon mana pun. Ikon zona Z7 memakai hati, bukan palang merah.
+Daftar akhir I-15 sampai I-18 mengikuti spesifikasi JS-07 sampai JS-12.
 
 ## Efek suara
 
@@ -641,7 +422,6 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 - **Tas:** warna kunci `sun` dan `mango` diganti serentak saat memuat (tabel "Warna tas").
 - **Objek dua bagian:** `obj_{nama}.png` dan `obj_{nama}_atas.png` berasal dari satu gambar yang dipotong di satu baris. Keduanya digambar di titik yang sama, dengan bagian atas tepat di atas bagian bawah.
 - **Bayangan objek:** berupa ubin tumpang lapisan 10 di lembar ubin (usulan 4). Letaknya dihitung `build_peta.py`, jadi antarmuka tidak menggambar bayangan objek sendiri.
-- **Lembar ubin:** nomor ubin = baris × 16 + kolom. Ubin lapisan 0 selalu penuh; ubin tumpang berlatar transparan. `kampung.json` (JS-06) memuat nomor ubin per lapisan (tanah, tumpang, bayangan), jadi antarmuka cukup menyalin potongan 16 × 16 dari lembar masa yang aktif. Saat masa berganti, hanya lembar yang ditukar.
 - **Siluet pemain:** pemain sendiri di belakang objek atas sebaiknya bergaris ganda (Permintaan C-4).
 
 ## Permintaan untuk Sesi A
@@ -649,12 +429,10 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 | Kode | Berkas | Permintaan | Alasan | Status |
 |---|---|---|---|---|
 | C-1 | `docs/jejak-setara/PRD.md` bagian 15 | Ubah "empat masa (pagi, siang, sore, malam)" menjadi "tiga masa (pagi, siang, sore)" | Design System bagian 4 dan instruksi pemilik proyek memakai tiga masa (usulan 3) | Diajukan (usulan 3a disetujui 6 Nov 2026) |
-| C-2 | `docs/jejak-setara/Design_System.md` bagian 4 | Tambahkan: hanya lembar ubin yang berganti per masa; bayangan objek berupa ubin tumpang lapisan 10; objek, tokoh, dan ikon satu berkas untuk semua masa. Tambahkan juga baris bahan baru yang disetujui: tanah setapak (`skin-2`, kerikil `wood`), paving gang (bata `wood`, nat `wood-d`), semen (`mist`, tepi `slate`), dan pinggir aspal (bayangan kerb `dusk`, garis tepi = marka); semuanya tidak berganti per masa | Usulan 4 dan kelompok U (tabel "Bahan per masa" di bagian U) | Diajukan (usulan 4a dan kelompok U disetujui 6 Nov 2026) |
+| C-2 | `docs/jejak-setara/Design_System.md` bagian 4 | Tambahkan: hanya lembar ubin yang berganti per masa; bayangan objek berupa ubin tumpang lapisan 10; objek, tokoh, dan ikon satu berkas untuk semua masa. Bahan baru (tanah, paving, lantai) menyusul sesudah kelompok U disetujui | Usulan 4 | Diajukan (usulan 4a disetujui 6 Nov 2026) |
 | C-3 | `docs/jejak-setara/Design_System.md` bagian 8 dan `Architecture.md` bagian 9 | Catat warna kunci tas `sun` dan `mango`, tabel delapan pasangan warna, dan penggantian serentak saat memuat | Usulan 5 | Diajukan (usulan 5a disetujui 6 Nov 2026) |
 | C-4 | `docs/jejak-setara/Design_System.md` bagian 7 (lapisan 60) | Siluet pemain sendiri bergaris ganda: garis dalam `ink` 1 piksel, lalu garis luar `sun` 1 piksel | Garis `sun` saja 1,0–2,9 : 1 di enam dari tujuh warna atap (percobaan 4); dengan garis ganda salah satu garis selalu ≥ 3 : 1 | Diajukan |
 | C-5 | `docs/jejak-setara/Design_System.md` bagian 14 (penamaan) | Tambahkan pola `obj_{nama}_atas.png`, `ikon_ava_{n}.png`, `tanda_debu.png`, dan `tanda_kilau.png`; arah tokoh `bawah`, `atas`, dan `kanan`; tanpa berkas arah kiri | Usulan 6 dan 7 | Diajukan (usulan 6a dan 7a disetujui 6 Nov 2026) |
-| C-7 | `docs/jejak-setara/PRD.md` JFR-09, `Design_System.md` bagian 3.2, dan `Architecture.md` bagian 9 dan 11.3 | Ubah ukuran peta menjadi sekitar 160 × 100 ubin (2.560 × 1.600 piksel logis, sekitar 8 × 9 layar). Periksa anggaran peta JSON (≤ 60 KB setelah gzip) dan jumlah potongan 256 × 256 per masa (sekitar 70) | Keputusan pemilik proyek 6 Nov 2026 (bagian "Keputusan ukuran peta") | Diajukan |
-| C-8 | `docs/jejak-setara/PRD.md` bagian 8.3 dan 12, `Architecture.md` bagian 13 | Nilai kapasitas sampai 100 pemain per ruang (sekarang 50) dan jumlah kejadian per ronde yang lebih banyak. Peta 160 × 100 menyediakan titik untuk sekitar 48 kejadian. Gagasan untuk dinilai: satu kejadian muncul di dua titik sekaligus agar pemain tidak menumpuk | Pemilik proyek memperkirakan 50–100 pemain dan pertanyaan yang banyak serta bervariasi | Diajukan; perlu keputusan pemilik proyek bersama Sesi A dan Sesi B |
 | C-6 | `docs/jejak-setara/Architecture.md` bagian 11.2 | Sepakati bentuk `manifest.ts`: kunci, ukuran dan jumlah bingkai, titik kaki, pasangan bagian atas objek, dan nomor ubin. Usul Sesi C: manifest dibuat otomatis oleh `build_jejak.py` | Usulan 10 | Diajukan (usulan 10a disetujui 6 Nov 2026). Usulan bentuknya ada di bagian "Usulan bentuk manifest"; perlu jawaban sebelum manifest dibuat |
 
 ## Usulan bentuk manifest (Permintaan C-6)
@@ -687,22 +465,11 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 ## Catatan untuk JS-06 (peta)
 
 - JS-06 dimulai sesudah pemilik proyek mengabarkan "JS-02 selesai". Entri Plan JS-06 (templat 12.1) ditulis di berkas ini pada saat itu.
-- Ukuran peta 160 × 100 ubin dengan sedikitnya 12 titik kejadian per zona (keputusan 6 November 2026).
 - Ukuran objek di bagian O dipakai untuk menata `kampung.txt` dan `objek.json`; kotak tabrakan bangunan mencakup dinding dan bagian bawah atap, sedangkan baris atap paling atas menutupi tanah yang bisa dilewati (lapisan 40).
 - Letak ubin tumpang bayangan (usulan 4) dan varian rumput acak berbenih dihitung `build_peta.py`.
 - Uji gaya memakai pergeseran bayangan 8 piksel ke kanan dan 4 piksel ke bawah.
 
-## Yang masih menunggu
-
-| Hal | Menunggu | Keterangan |
-|---|---|---|
-| JS-06 (peta 160 × 100) | Kabar "JS-02 selesai" dari pemilik proyek | Entri Plan JS-06 ditulis di berkas ini; tanah, objek, tokoh, dan penanda sudah tersedia |
-| `manifest.ts` | Jawaban Sesi A atas Permintaan C-6 | Dibuat otomatis oleh `build_jejak.py` untuk semua aset Disetujui |
-| Permintaan C-1 sampai C-8 | Sesi A | Termasuk ukuran peta (C-7) dan kapasitas pemain serta jumlah kejadian (C-8) |
-| O-42 sanggah | Keputusan KT-10 | Hanya bila versi B K-02 dipilih dan pemilik proyek mengizinkan |
-| Efek suara | Keputusan pemilik proyek | Bukan bagian kit gambar Sesi C |
-
 ## Cara membalas
 
-- **"JS-02 selesai"** memulai JS-06: saya menulis entri Plan JS-06 di berkas ini, lalu berhenti di Gerbang 1.
-- Perbaikan aset tetap bisa diminta kapan saja: tulis ID aset dan perubahannya, misalnya "N-08: rambut Pak Made lebih banyak". Aset yang diubah kembali berstatus Ditinjau sampai disetujui lagi.
+- **"Setuju: aset A"** berarti kedelapan avatar dan ikon kepalanya disetujui. Statusnya menjadi Disetujui, `CREDITS.md` dibuat, dan saya lanjut ke kelompok U (ubin per masa).
+- Perbaikan cukup ditulis bebas per avatar, misalnya "A5: rambut kurang berdiri" atau "A4: kerudung lebih panjang". Avatar lain yang tidak disebut tetap seperti sekarang.
