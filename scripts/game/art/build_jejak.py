@@ -31,6 +31,8 @@ from atas_tokoh import (AVATAR, ARAH, BINGKAI, KETERANGAN, WARNA_TAS, avatar, st
 from atas_ubin import (MASA, NAMA_MASA, KOLOM, NOMOR, BLOB, WILAYAH, SUSUNAN, UKURAN_LEMBAR,   # noqa: E402
                        ubin_rumput, ubin_wilayah, lembar_ubin, nomor_tanah)
 from atas_objek import POTONG_ATAP, OBJEK, KODE_OBJEK, PAGAR, obj_rumah_a, pisah   # noqa: E402
+from atas_ikon import (SKILL, ARAH_KOMPAS, ARAH_DIRI, tanda_kejadian, tanda_dibuka, tanda_selesai,   # noqa: E402
+                       tanda_kotak, tanda_kompas, tanda_diri, tanda_debu, tanda_kilau)
 
 if HERE.parts[-3:] == ("scripts", "game", "art"):      # berada di dalam repositori
     REPO = HERE.parents[2]
@@ -69,11 +71,23 @@ for _nama, (_fn, _ub, _pot, _padat, _bay, _lewat) in OBJEK.items():
         ASSETS[f"obj_{_nama}"] = ("obj", lambda f=_fn: f().im, (_w, _h))
     NAMA_OBJEK[f"obj_{_nama}"] = _nama
 
+# Kelompok T (Ditinjau): penanda dan efek, di folder ikon/
+ASSETS["tanda_kejadian"] = ("ikon", lambda: tanda_kejadian().im, (12, 12))
+ASSETS["tanda_dibuka"] = ("ikon", lambda: tanda_dibuka().im, (12, 12))
+ASSETS["tanda_selesai"] = ("ikon", lambda: tanda_selesai().im, (10, 10))
+for _skill in SKILL:
+    ASSETS[f"tanda_kotak_{_skill}"] = ("ikon", lambda k=_skill: strip([tanda_kotak(k, b) for b in range(3)]), (42, 12))
+ASSETS["tanda_kompas"] = ("ikon", lambda: strip([tanda_kompas(a, b) for a in ARAH_KOMPAS for b in range(2)]), (112, 7))
+ASSETS["tanda_diri"] = ("ikon", lambda: strip([tanda_diri(a) for a in ARAH_DIRI]), (28, 7))
+ASSETS["tanda_debu"] = ("ikon", lambda: strip([tanda_debu(b) for b in range(2)]), (16, 6))
+ASSETS["tanda_kilau"] = ("ikon", lambda: strip([tanda_kilau(b) for b in range(2)]), (16, 8))
+
 # Aset berstatus Disetujui: nama -> tanggal. Hanya aset di sini yang masuk CREDITS.md dan manifest.ts.
 KELOMPOK_O1 = {n for n, kode in KODE_OBJEK.items() if kode <= "O-20"}
+KELOMPOK_O2 = {n for n, kode in KODE_OBJEK.items() if "O-21" <= kode <= "O-28"}
 DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              if nama.startswith(("ava_", "ikon_ava_", "ubin_"))                     # kelompok A dan U
-             or NAMA_OBJEK.get(nama) in KELOMPOK_O1}                                    # kelompok O1
+             or NAMA_OBJEK.get(nama) in KELOMPOK_O1 | KELOMPOK_O2}                      # kelompok O1 dan O2
 
 BATAS_STRIP = 6 * 1024              # satu strip avatar atau tokoh
 BATAS_UBIN = 60 * 1024              # satu lembar ubin per masa
@@ -90,6 +104,12 @@ def kode_aset(nama):
         return "U-01 sampai U-15"
     if nama in NAMA_OBJEK:
         return KODE_OBJEK[NAMA_OBJEK[nama]]
+    kode_t = {"tanda_kejadian": "T-01", "tanda_dibuka": "T-02", "tanda_selesai": "T-03", "tanda_kotak_sepatu": "T-04",
+              "tanda_kotak_kompas": "T-05", "tanda_kotak_buku": "T-06", "tanda_kotak_teropong": "T-07",
+              "tanda_kotak_karcis": "T-08", "tanda_kompas": "T-09", "tanda_diri": "T-10", "tanda_debu": "T-11",
+              "tanda_kilau": "T-12"}
+    if nama in kode_t:
+        return kode_t[nama]
     return "—"
 
 
@@ -717,7 +737,7 @@ OBJEK_O2 = ([("rumah_nara", 3, 1)] + _pagar_kotak("bambu", 1, 0, 8, 6, celah=(4,
 
 def pratinjau_obj2_peta():
     L = Lembar(1000, 760)
-    L.judul("Kelompok O2 — Peta contoh", "Sesi C · 6 Nov 2026 · Ditinjau · 30×20 ubin, siang (×2)")
+    L.judul("Kelompok O2 — Peta contoh", "Sesi C · disetujui 6 Nov 2026 · 30×20 ubin, siang (×2)")
     pemain = [_pemain(1, 72, 120, tas="sun"), _pemain(4, 232, 204, "kanan", "jalan", 1, tas="rose"),
               _pemain(6, 120, 276, tas="teal"), _pemain(2, 392, 72, "bawah", "jalan", 1, tas="mango")]
     L.tempel(besar(render_peta(peta_o2(), "siang", OBJEK_O2, pemain), 2), 20, 70)
@@ -728,7 +748,7 @@ def pratinjau_obj2_peta():
 
 def pratinjau_obj2_lembar():
     L = Lembar(1440, 720)
-    L.judul("Kelompok O2 — Objek umum (×3)", "Sesi C · 6 Nov 2026 · Ditinjau · di atas rumput siang")
+    L.judul("Kelompok O2 — Objek umum (×3)", "Sesi C · disetujui 6 Nov 2026 · di atas rumput siang")
     m = MASA["siang"]
     x, y = 20, 70
     for nama in ("pohon", "semak", "bangku", "tempat_sampah", "motor", "tiang_lampu"):
@@ -760,15 +780,141 @@ def pratinjau_obj2_lembar():
     return L.im
 
 
+# ---------------------------------------------------------------------------
+# Pratinjau kelompok T: penanda dan efek
+# ---------------------------------------------------------------------------
+NAMA_SKILL = {"sepatu": "Lari cepat", "kompas": "Kompas", "buku": "Petunjuk", "teropong": "Teropong (P1)",
+              "karcis": "Angkot (P1)"}
+
+
+def _latar_bahan(m):
+    """Empat ubin contoh: rumput, aspal, semen, pasir (untuk memeriksa kontras penanda)."""
+    c = C(64, 16)                                                                 # noqa: F405
+    c.paste(ubin_rumput(m), 0, 0)
+    for i, b in enumerate(("aspal", "semen", "pasir")):
+        c.paste(ubin_wilayah(b, 0, m), 16 + i * 16, 0)
+    return c
+
+
+def pratinjau_tanda_lembar():
+    L = Lembar(1440, 1240)
+    L.judul("Kelompok T — Penanda dan efek (×8)", "Sesi C · 6 Nov 2026 · Ditinjau · di atas rumput, aspal, semen, pasir")
+    m = MASA["siang"]
+    for i, (fn, teks) in enumerate(((tanda_kejadian, "T-01 kejadian belum diperiksa"),
+                                    (tanda_dibuka, "T-02 dialog sedang terbuka"),
+                                    (tanda_selesai, "T-03 kejadian selesai"))):
+        x = 20 + i * 470
+        latar = _latar_bahan(m)
+        t = fn()
+        for k in range(4):
+            latar.paste(t, k * 16 + (16 - t.w) // 2, (16 - t.h) // 2)
+        L.tempel(besar(latar, 7), x, 70)
+        L.label(teks, x + 224, 186, "tebal")
+    y = 230
+    L.d.text((20, y), "T-04 sampai T-08 kotak bantuan: kecil, besar berkilau, biasa (bingkai 14×12)",
+             font=L.f["tebal"], fill=INK[:3])                                      # noqa: F405
+    for i, skill in enumerate(SKILL):
+        x = 20 + i * 284
+        for b in range(3):
+            kotak = tanda_kotak(skill, b)
+            latar = C(14, 12, LEAF)                                               # noqa: F405
+            latar.paste(kotak, (14 - kotak.w) // 2, 12 - kotak.h)
+            L.tempel(besar(latar, 6), x + b * 90, y + 34)
+        L.label(NAMA_SKILL[skill], x + 130, y + 112, "tebal")
+    y = 400
+    L.d.text((20, y), "T-09 panah kompas: 8 arah × 2 bingkai denyut", font=L.f["tebal"], fill=INK[:3])   # noqa: F405
+    for i, arah in enumerate(ARAH_KOMPAS):
+        for b in range(2):
+            latar = C(9, 9, LEAF)                                                 # noqa: F405
+            latar.paste(tanda_kompas(arah, b), 1, 1)
+            L.tempel(besar(latar, 8), 20 + i * 176 + b * 80, y + 34)
+        L.label(arah.replace("_", " "), 20 + i * 176 + 76, y + 112)
+    y = 580
+    L.d.text((20, y), "T-10 panah diri (peta mini)", font=L.f["tebal"], fill=INK[:3])   # noqa: F405
+    for i, arah in enumerate(ARAH_DIRI):
+        latar = C(9, 9, LEAF)                                                     # noqa: F405
+        latar.paste(tanda_diri(arah), 1, 1)
+        L.tempel(besar(latar, 8), 20 + i * 100, y + 34)
+        L.label(arah, 20 + i * 100 + 36, y + 112)
+    L.d.text((480, y), "T-11 debu lari (2 bingkai)", font=L.f["tebal"], fill=INK[:3])   # noqa: F405
+    for b in range(2):
+        latar = C(10, 8, LEAF)                                                    # noqa: F405
+        latar.paste(tanda_debu(b), 1, 1)
+        L.tempel(besar(latar, 8), 480 + b * 100, y + 34)
+    L.d.text((780, y), "T-12 kilau kotak (2 bingkai)", font=L.f["tebal"], fill=INK[:3])   # noqa: F405
+    for b in range(2):
+        latar = C(10, 10, LEAF)                                                   # noqa: F405
+        latar.paste(tanda_kilau(b), 1, 1)
+        L.tempel(besar(latar, 8), 780 + b * 100, y + 34)
+    y = 760
+    L.d.text((20, y), "Saat bermain (×3): kejadian, dialog terbuka, selesai, kotak, kilau, debu, panah kompas",
+             font=L.f["tebal"], fill=INK[:3])                                      # noqa: F405
+    L.tempel(besar(_adegan_tanda(), 3), 20, y + 34)
+    catatan = ["Urutan bingkai di berkas:", "tanda_kompas: atas, kanan atas, kanan, kanan bawah,",
+               "bawah, kiri bawah, kiri, kiri atas; 2 bingkai per arah", "tanda_diri: bawah, atas, kanan, kiri",
+               "tanda_kotak_*: kecil, besar berkilau, biasa", "", "Kurangi gerak: penanda dan panah diam di",
+               "bingkai pertama; kotak langsung bingkai biasa.", "",
+               "Titik pemain di peta kelas digambar antarmuka", "dengan warna tas, tanpa berkas."]
+    for j, t in enumerate(catatan):
+        L.d.text((820, y + 40 + j * 26), t, font=L.f["tebal" if t.endswith(":") else "kecil"], fill=INK[:3])  # noqa: F405
+    return L.im
+
+
+def _adegan_tanda():
+    """Potongan peta contoh dengan penanda, kotak, debu, dan kilau seperti saat bermain (siang)."""
+    pemain = [_pemain(1, 232, 156, tas="sun"), _pemain(3, 300, 200, "kanan", "jalan", 1, tas="coral")]
+    g = render_peta(peta_contoh(), "siang", pemain=pemain)
+    g.paste(tanda_kejadian(), 296, 124)                     # kejadian belum diperiksa di dekat zebra cross
+    g.paste(tanda_dibuka(), 226, 120)                        # pemain membuka dialog
+    g.paste(tanda_selesai(), 380, 150)                       # kejadian yang sudah dijawab
+    g.paste(tanda_kotak("sepatu", 2), 252, 214)               # kotak bantuan
+    g.paste(tanda_kotak("kompas", 2), 196, 236)
+    g.paste(tanda_kilau(0), 199, 228)
+    g.paste(tanda_kotak("buku", 2), 330, 236)
+    g.paste(tanda_debu(0), 283, 194)                         # debu di belakang pemain yang berlari
+    g.paste(tanda_kompas("kanan_atas", 0), 410, 210)         # panah kompas (di tepi pandangan saat bermain)
+    return _potong(g, (176, 112, 432, 256))
+
+
+def _potong(g, kotak):
+    c = C(kotak[2] - kotak[0], kotak[3] - kotak[1])                               # noqa: F405
+    c.im.alpha_composite(g.im.crop(kotak))
+    c.px = c.im.load()
+    return c
+
+
+def pratinjau_tanda_gerak():
+    """GIF 2 detik (×3): gelembung naik-turun, kompas berdenyut, kotak pop dan kilau, debu, selesai, dibuka."""
+    bingkai, lama = [], []
+    for t in range(0, 2000, 80):
+        sel = C(132, 22, LEAF)                                                    # noqa: F405
+        naik = 0 if (t // 500) % 2 == 0 else -1
+        sel.paste(tanda_kejadian(), 5, 6 + naik)
+        sel.paste(tanda_kompas("kanan", (t // 500) % 2), 29, 8)
+        pop = 0 if t < 80 else 1 if t < 160 else 2
+        kotak = tanda_kotak("sepatu", pop)
+        sel.paste(kotak, 44 + (14 - kotak.w) // 2, 16 - kotak.h)
+        sel.paste(tanda_kilau((t // 250) % 2), 47, 2)
+        sel.paste(tanda_debu((t // 120) % 2), 70, 10)
+        sel.paste(tanda_selesai(), 92, 7 + naik)
+        sel.paste(tanda_dibuka(), 112, 6 + naik)
+        g = besar(sel, 3).convert("RGBA")
+        im = Image.new("RGB", (g.width + 20, g.height + 20), CREAM[:3])           # noqa: F405
+        im.paste(g, (10, 10), g)
+        bingkai.append(im); lama.append(80)
+    return bingkai, lama
+
+
 PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringkasan,
             "ava_pose_semua": pratinjau_ava_pose_semua, "ubin_contoh": pratinjau_ubin_contoh,
             "ubin_masa": pratinjau_ubin_masa, "ubin_dekat": pratinjau_ubin_dekat,
             "ubin_lembar": pratinjau_ubin_lembar, "obj_lembar": pratinjau_obj_lembar,
             "obj_peta": pratinjau_obj_peta, "obj_dekat": pratinjau_obj_dekat,
-            "obj2_lembar": pratinjau_obj2_lembar, "obj2_peta": pratinjau_obj2_peta}
+            "obj2_lembar": pratinjau_obj2_lembar, "obj2_peta": pratinjau_obj2_peta,
+            "tanda_lembar": pratinjau_tanda_lembar}
 for _n in AVATAR:
     PREVIEWS[f"pose_ava_{_n}"] = (lambda n=_n: pratinjau_pose_avatar(n))
-ANIMASI = {"ava_gerak": pratinjau_ava_gerak}
+ANIMASI = {"ava_gerak": pratinjau_ava_gerak, "tanda_gerak": pratinjau_tanda_gerak}
 
 
 def build_previews(preview_dir, only=None):

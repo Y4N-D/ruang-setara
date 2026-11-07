@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Versi | 0.5 |
+| Versi | 0.6 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Kelompok A, U, dan O1 disetujui. Kelompok O2 (objek umum) diserahkan: menunggu "Setuju: aset O2" |
+| Tahap saat ini | Kelompok A, U, O1, dan O2 disetujui. Kelompok T (penanda dan efek) diserahkan: menunggu "Setuju: aset T" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -29,6 +29,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Kelompok O1 | 25 objek (48 berkas) diserahkan, menunggu "Setuju: aset O1" |
 | 6 Nov 2026 | Kelompok O1 | Pemilik proyek membalas "Setuju: aset O1": O-01 sampai O-20 Disetujui; kredit 48 berkas objek ditambahkan |
 | 6 Nov 2026 | Kelompok O2 | Objek umum (24 berkas, termasuk 16 ruas pagar) diserahkan, menunggu "Setuju: aset O2" |
+| 6 Nov 2026 | Kelompok O2 | Pemilik proyek membalas "Setuju: aset O2": O-21 sampai O-28 Disetujui; kredit 24 berkas ditambahkan |
+| 6 Nov 2026 | Kelompok T | Penanda dan efek (12 berkas, kode baru `atas_ikon.py`) diserahkan, menunggu "Setuju: aset T" |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -49,7 +51,7 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 
 | | |
 |---|---|
-| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, dan O1 Disetujui 6 Nov 2026; kelompok O2 diserahkan, menunggu "Setuju: aset O2" |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, dan O2 Disetujui 6 Nov 2026; kelompok T diserahkan, menunggu "Setuju: aset T" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -364,14 +366,14 @@ Bangunan dan pohon terdiri atas `obj_{nama}.png` dan `obj_{nama}_atas.png` (usul
 
 | ID | Berkas | Ukuran (ubin) | Isi | Zona dan kejadian | Status |
 |---|---|---|---|---|---|
-| O-21 | `obj_pohon` | 3 × 3 (batang 1 ubin, tajuk 2 × 2) | Pohon rindang: tajuk bergerombol `leaf` dengan lengkung daun dan sisi kanan bawah teduh, batang di tengah bawah | Semua | Ditinjau (kelompok O2) |
-| O-22 | `obj_semak` | 1 × 1 | Semak bergerombol | Semua | Ditinjau (kelompok O2) |
-| O-23 | `obj_pagar_bambu_{ruas}` | 1 × 1 | Pagar bambu `wood` beruas dalam 8 ruas: datar, tegak, sudut atas kiri, sudut atas kanan, sudut bawah kiri, sudut bawah kanan, ujung kiri, ujung kanan | Z1, K-01 | Ditinjau (kelompok O2) |
-| O-24 | `obj_pagar_sekolah_{ruas}` | 1 × 1 | Tembok sekolah `cream` bertutup `sky-d`, dengan 8 ruas yang sama; sudutnya berupa pilar | Z2 | Ditinjau (kelompok O2) |
-| O-25 | `obj_bangku` | 2 × 1 | Bangku panjang kayu bersandaran | Z6, Z7, Z8 | Ditinjau (kelompok O2) |
-| O-26 | `obj_tempat_sampah` | 1 × 1 | Dua tempat sampah untuk memilah, hijau dan kuning, tanpa tulisan | Semua, K-11 | Ditinjau (kelompok O2) |
-| O-27 | `obj_motor` | 2 × 1 | Motor matik `mango` seperti motor Dimas di Sehari Setara, tanpa merek dan pelat | Z3, Z4, K-05 | Ditinjau (kelompok O2) |
-| O-28 | `obj_tiang_lampu` | 1 × 2 | Tiang lampu jalan dengan lampu berwarna `lampu` (#F7D774) | Z1, Z3 | Ditinjau (kelompok O2) |
+| O-21 | `obj_pohon` | 3 × 3 (batang 1 ubin, tajuk 2 × 2) | Pohon rindang: tajuk bergerombol `leaf` dengan lengkung daun dan sisi kanan bawah teduh, batang di tengah bawah | Semua | Disetujui (6 Nov) |
+| O-22 | `obj_semak` | 1 × 1 | Semak bergerombol | Semua | Disetujui (6 Nov) |
+| O-23 | `obj_pagar_bambu_{ruas}` | 1 × 1 | Pagar bambu `wood` beruas dalam 8 ruas: datar, tegak, sudut atas kiri, sudut atas kanan, sudut bawah kiri, sudut bawah kanan, ujung kiri, ujung kanan | Z1, K-01 | Disetujui (6 Nov) |
+| O-24 | `obj_pagar_sekolah_{ruas}` | 1 × 1 | Tembok sekolah `cream` bertutup `sky-d`, dengan 8 ruas yang sama; sudutnya berupa pilar | Z2 | Disetujui (6 Nov) |
+| O-25 | `obj_bangku` | 2 × 1 | Bangku panjang kayu bersandaran | Z6, Z7, Z8 | Disetujui (6 Nov) |
+| O-26 | `obj_tempat_sampah` | 1 × 1 | Dua tempat sampah untuk memilah, hijau dan kuning, tanpa tulisan | Semua, K-11 | Disetujui (6 Nov) |
+| O-27 | `obj_motor` | 2 × 1 | Motor matik `mango` seperti motor Dimas di Sehari Setara, tanpa merek dan pelat | Z3, Z4, K-05 | Disetujui (6 Nov) |
+| O-28 | `obj_tiang_lampu` | 1 × 2 | Tiang lampu jalan dengan lampu berwarna `lampu` (#F7D774) | Z1, Z3 | Disetujui (6 Nov) |
 
 #### Rincian kelompok O2 (6 November 2026)
 
@@ -415,19 +417,38 @@ Berkas `tanda_*.png` disimpan di folder `ikon/`, karena Architecture bagian 3 ti
 
 | ID | Berkas | Ukuran | Isi | Status |
 |---|---|---|---|---|
-| T-01 | `tanda_kejadian.png` | 12 × 12 | Gelembung `sun` bertanda "!" bergaris luar `ink`. Naik-turun 1 piksel dilakukan antarmuka | Belum |
-| T-02 | `tanda_dibuka.png` | 12 × 12 | Gelembung `mist` bertanda "…" | Belum |
-| T-03 | `tanda_selesai.png` | 10 × 10 | Gelembung kecil `leaf` bertanda ✓ | Belum |
-| T-04 | `tanda_kotak_sepatu.png` | 3 × 12 × 10 | Peti `wood` berikon sepatu; strip pop: kecil, besar berkilau, normal | Belum |
-| T-05 | `tanda_kotak_kompas.png` | 3 × 12 × 10 | Peti berikon kompas | Belum |
-| T-06 | `tanda_kotak_buku.png` | 3 × 12 × 10 | Peti berikon buku | Belum |
-| T-07 | `tanda_kotak_teropong.png` | 3 × 12 × 10 | Peti berikon teropong (P1) | Belum |
-| T-08 | `tanda_kotak_karcis.png` | 3 × 12 × 10 | Peti berikon karcis (P1) | Belum |
-| T-09 | `tanda_kompas.png` | 16 × 7 × 7 | Panah `teal` bergaris luar `ink`: 8 arah × 2 bingkai denyut | Belum |
-| T-10 | `tanda_diri.png` | 4 × 7 × 7 | Panah `sun` bergaris luar `ink` untuk peta mini, 4 arah | Belum |
-| T-11 | `tanda_debu.png` | 2 × 8 × 6 | Debu lari | Belum |
-| T-12 | `tanda_kilau.png` | 2 × 8 × 8 | Kilau kotak | Belum |
+| T-01 | `tanda_kejadian.png` | 12 × 12 | Gelembung `sun` bertanda seru, bergaris luar `ink`, berkilau putih. Naik-turun 1 piksel dilakukan antarmuka | Ditinjau (kelompok T) |
+| T-02 | `tanda_dibuka.png` | 12 × 12 | Gelembung `mist` bertanda tiga titik | Ditinjau (kelompok T) |
+| T-03 | `tanda_selesai.png` | 10 × 10 | Gelembung kecil `leaf` bertanda centang `ink` | Ditinjau (kelompok T) |
+| T-04 | `tanda_kotak_sepatu.png` | 3 × 14 × 12 | Peti kayu bergesper; tutupnya bergambar sepatu `coral` (Lari cepat). Bingkai: kecil, besar berkilau, biasa | Ditinjau (kelompok T) |
+| T-05 | `tanda_kotak_kompas.png` | 3 × 14 × 12 | Peti bergambar kompas putih berjarum `teal` (Kompas kejadian) | Ditinjau (kelompok T) |
+| T-06 | `tanda_kotak_buku.png` | 3 × 14 × 12 | Peti bergambar buku terbuka putih bersampul `sky-d` (Petunjuk) | Ditinjau (kelompok T) |
+| T-07 | `tanda_kotak_teropong.png` | 3 × 14 × 12 | Peti bergambar teropong `dusk` (P1) | Ditinjau (kelompok T) |
+| T-08 | `tanda_kotak_karcis.png` | 3 × 14 × 12 | Peti bergambar karcis `sun` (Angkot, P1) | Ditinjau (kelompok T) |
+| T-09 | `tanda_kompas.png` | 16 × 7 × 7 | Panah `teal` bergaris luar `ink`, 8 arah; bingkai kedua lebih terang (berdenyut) | Ditinjau (kelompok T) |
+| T-10 | `tanda_diri.png` | 4 × 7 × 7 | Panah `sun` bergaris luar `ink` untuk peta mini | Ditinjau (kelompok T) |
+| T-11 | `tanda_debu.png` | 2 × 8 × 6 | Debu lari `mist` dan putih, tanpa garis luar | Ditinjau (kelompok T) |
+| T-12 | `tanda_kilau.png` | 2 × 8 × 8 | Kilau putih dan `sun`, tanpa garis luar | Ditinjau (kelompok T) |
 | — | Titik pemain di peta kelas | 3 × 3 | Digambar antarmuka dengan warna tas; tanpa berkas | — |
+
+### Rincian kelompok T (6 November 2026)
+
+| | |
+|---|---|
+| Kode | `scripts/game/art/atas_ikon.py` (baru): gelembung, peti, panah, debu, dan kilau |
+| Berkas | 12 PNG di `app/jejak-setara/assets/ikon/` |
+| Ukuran | Seluruh kelompok T 3,1 KB |
+| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran strip sesuai jumlah bingkai |
+| Pratinjau | `preview/tanda_lembar.png` (semua penanda ×8 di atas empat bahan, dan contoh saat bermain ×3) dan `preview/tanda_gerak.gif` (gerakan) |
+
+**Urutan bingkai di berkas**
+- `tanda_kompas.png`: atas, kanan atas, kanan, kanan bawah, bawah, kiri bawah, kiri, kiri atas; dua bingkai per arah (biasa, terang).
+- `tanda_diri.png`: bawah, atas, kanan, kiri.
+- `tanda_kotak_*.png`: kecil, besar berkilau, biasa. Bingkai biasa (ketiga) dipakai saat kotak diam.
+
+- Bingkai kotak menjadi 14 × 12, bukan 12 × 10 seperti di rencana, agar bingkai besar berkilau muat dalam strip. Peti biasa tetap 12 × 10, sesuai Design System bagian 9.
+- Semua penanda bergaris luar `ink`, sehingga tetap terlihat di rumput, aspal, semen, dan pasir. Kejadian, dialog, dan selesai dibedakan bentuk dan tandanya (seru, tiga titik, centang), bukan hanya warnanya.
+- Kurangi gerak: penanda dan panah diam di bingkai pertama, dan kotak langsung tampil dengan bingkai biasa (Design System bagian 11).
 
 ## N. Tokoh bukan pemain
 
@@ -542,5 +563,5 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## Cara membalas
 
-- **"Setuju: aset O2"** berarti semua objek kelompok O2 disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok T (penanda kejadian, kotak bantuan, panah kompas, panah diri di peta mini, debu lari, dan kilau kotak).
-- Perbaikan cukup ditulis per objek, misalnya "O-21: pohon lebih rimbun" atau "O-24: tutup tembok jangan biru". Objek lain yang tidak disebut tetap seperti sekarang.
+- **"Setuju: aset T"** berarti semua penanda dan efek kelompok T disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok N1 (sembilan tokoh Sehari Setara versi tampak atas).
+- Perbaikan cukup ditulis per penanda, misalnya "T-03: centang lebih tebal" atau "T-05: kompas di tutup peti lebih besar". Penanda lain yang tidak disebut tetap seperti sekarang.
