@@ -117,7 +117,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
-| JFR-01 | Guru atau admin yang sudah masuk membuat ruang: label kelas (misalnya "IX B"), paket kejadian, durasi 10, 15 (bawaan), atau 20 menit, skill yang aktif, batas pemain (bawaan 40, paling banyak 50), batas bergabung terlambat (bawaan 5 menit sesudah mulai), dan mode nomor absen (mati secara bawaan) | P0 |
+| JFR-01 | Guru atau admin yang sudah masuk membuat ruang: label kelas (misalnya "IX B"), paket kejadian, durasi 10, 15 (bawaan), atau 20 menit, skill yang aktif, batas pemain (bawaan 40, paling banyak 100), batas bergabung terlambat (bawaan 5 menit sesudah mulai), dan mode nomor absen (mati secara bawaan; hanya untuk ruang sampai 50 pemain) | P0 |
 | JFR-02 | Ruang mendapat kode 5 karakter tanpa huruf dan angka yang mirip (misalnya tanpa O dan 0) serta tautan pendek untuk dibuka di HP | P0 |
 | JFR-03 | Kode QR tautan ruang di lobi layar kelas | P1 |
 | JFR-04 | Siswa masuk tanpa akun: buka tautan, ketik kode, isi nomor absen bila mode nomor absen aktif, pilih satu dari tiga saran nama samaran (boleh acak ulang), lalu pilih satu dari 8 avatar | P0 |
@@ -130,7 +130,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
-| JFR-09 | Peta tampak atas 3/4 sekitar 120 × 80 ubin dengan 8 zona (bagian 9), dijelajah dengan keyboard (WASD atau panah) atau joystick sentuh | P0 |
+| JFR-09 | Peta tampak atas 3/4 sekitar 160 × 100 ubin dengan 8 zona (bagian 9), dijelajah dengan keyboard (WASD atau panah) atau joystick sentuh | P0 |
 | JFR-10 | Pemain lain terlihat sebagai avatar dengan nama samaran. Pemain saling tembus dan tidak bisa saling mengganggu | P0 |
 | JFR-11 | Peta mini pribadi: posisi sendiri, zona, halte, dan kejadian yang **sudah pernah terlihat**; kejadian yang belum terlihat tidak ditampilkan | P0 |
 | JFR-12 | "Langit sehari": waktu ronde dipetakan ke satu hari (pagi, siang, sore), warna peta berganti per masa, dan busur hari tampil di bilah atas | P0 |
@@ -252,6 +252,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 - Menutup dialog **sebelum** Langkah 1 dikunci diperbolehkan tanpa akibat. Sesudah Langkah 1 dikunci, jawabannya tersimpan; bila dialog ditutup, pemeriksaan berikutnya langsung membuka Langkah 2 (keputusan terbuka KT-13).
 - Langkah 1 boleh menanyakan hak yang terganggu, kewajiban yang diabaikan, atau peran lembaga, sesuai kejadiannya.
 - Setiap kejadian punya sedikitnya dua titik di zonanya. Penempatan diacak sekali per ruang dengan benih (*seed*) ruang, sehingga peta tidak bisa dihafal antarsesi, tetapi adil di dalam satu ruang.
+- Di ruang lebih dari 50 pemain, setiap kejadian aktif di dua titik zonanya sekaligus agar pemain tidak menumpuk; pemeriksaan, penanda, dan Kompas memakai titik terdekat (Permintaan C-8; dibangun di JS-08).
 
 ### 8.4 Skor dan peringkat
 
@@ -321,10 +322,10 @@ Keterangan: **Tipe** "mirip adegan n" berarti kejadian itu sejenis dengan adegan
 | K-01 | Z1 | Menjaga adik | Ibu mengantar Nenek ke puskesmas dan meminta Nara menjaga Gita sampai sore. Teman mengajak bermain ke pantai. | Kewajiban Nara | Menjaga Gita; mengajak teman bermain di rumah atau lain hari | Mirip adegan 1 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19 (R-02); Pasal 28B ayat (2) UUD NRI 1945 (R-01) |
 | K-02 | Z1 | Hari suci tetangga | Keluarga Pak Made menjalankan hari suci yang menuntut suasana tenang. Dimas mengajak bermain musik keras di teras. | Hak yang perlu dihormati | Menolak dengan sopan; bermain tanpa suara keras atau di tempat lain | Baru (toleransi) | Pasal 28E ayat (1), Pasal 29 ayat (2), Pasal 28J ayat (1) UUD NRI 1945 (R-08) |
 | K-03 | Z2 | Bekal yang diejek | Komang diejek karena bekalnya sederhana, dan seseorang memotretnya. | Hak yang terganggu | Menghentikan dengan cara aman, mengajak Komang menjauh, melapor kepada Bu Ratih | Mirip adegan 4 | Pasal 28B ayat (2) (R-01), Pasal 28G ayat (1) (R-03), Pasal 28J ayat (1) (R-08) UUD NRI 1945 |
-| K-04 | Z2 | Kelas di lantai dua | Raka, teman berkursi roda, tidak bisa ikut praktik di lab lantai dua. Teman lain berkata dia tidak usah ikut. | Hak yang dipertaruhkan | Mengusulkan kepada guru agar praktik dipindah ke lantai satu atau Raka dibantu dengan aman | Baru (disabilitas) | Pasal 31 ayat (1) (R-04), Pasal 28H ayat (2) UUD NRI 1945 |
-| K-05 | Z3 | Bonceng tanpa helm | Dimas menawarkan boncengan ke lapangan tanpa helm cadangan. Ia belum punya SIM. | Kewajiban yang diabaikan | Menolak dengan sopan, berjalan atau naik angkot, mengingatkan helm | Mirip adegan 2 | Pasal 27 ayat (1) UUD NRI 1945 (R-05); UU No. 22 Tahun 2009, Pasal 77 ayat (1) dan Pasal 106 ayat (8) (R-06) |
-| K-06 | Z3 | Zebra cross | Seorang nenek ragu menyeberang di zebra cross, sementara kendaraan terus melaju. | Hak siapa yang terganggu | Membantu nenek menyeberang di tempat penyeberangan dengan aman | Baru | UU No. 22 Tahun 2009, Pasal 131 ayat (2); Pasal 28J ayat (1) UUD NRI 1945 (R-08) |
-| K-07 | Z4 | Tuduhan di pasar | Dompet pedagang hilang. Beberapa orang langsung menuduh Bayu yang lewat dan ingin menggeledahnya beramai-ramai. | Lembaga yang berwenang menerima laporan dan menyelidiki | Mengingatkan agar tidak main hakim sendiri; menyarankan melapor kepada petugas pasar dan polisi; menunjuk kamera pasar | Mirip adegan 5 | Pasal 28D ayat (1) (R-09), Pasal 28G ayat (1) (R-03) UUD NRI 1945; UU No. 48 Tahun 2009, Pasal 8 ayat (1) (R-12); UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g (R-11) |
+| K-04 | Z2 | Kelas di lantai dua | Raka, teman berkursi roda, tidak bisa ikut praktik di lab lantai dua. Teman lain berkata dia tidak usah ikut. | Hak yang dipertaruhkan | Mengusulkan kepada guru agar praktik dipindah ke lantai satu atau Raka dibantu dengan aman | Baru (disabilitas) | Pasal 31 ayat (1) (R-04), Pasal 28H ayat (2), Pasal 28J ayat (1) (R-08) UUD NRI 1945 |
+| K-05 | Z3 | Bonceng tanpa helm | Dimas menawarkan boncengan ke lapangan tanpa helm cadangan. Ia belum punya SIM. | Kewajiban yang diabaikan | Menolak dengan sopan, berjalan atau naik angkot, mengingatkan helm | Mirip adegan 2 | Pasal 27 ayat (1) (R-05), Pasal 28G ayat (1) (R-03) UUD NRI 1945; UU No. 22 Tahun 2009 tentang LLAJ, Pasal 77 ayat (1) dan Pasal 106 ayat (8) (R-06) |
+| K-06 | Z3 | Zebra cross | Seorang nenek ragu menyeberang di zebra cross, sementara kendaraan terus melaju. | Hak siapa yang terganggu | Membantu nenek menyeberang di tempat penyeberangan dengan aman | Baru | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 131 ayat (2); Pasal 28J ayat (1) UUD NRI 1945 (R-08) |
+| K-07 | Z4 | Tuduhan di pasar | Dompet pedagang hilang. Beberapa orang langsung menuduh Bayu yang lewat dan ingin menggeledahnya beramai-ramai. | Lembaga yang berwenang menerima laporan dan menyelidiki | Mengingatkan agar tidak main hakim sendiri; menyarankan melapor kepada petugas pasar dan polisi; menunjuk kamera pasar | Mirip adegan 5 | Pasal 28D ayat (1) (R-09), Pasal 28G ayat (1) (R-03) UUD NRI 1945; UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah) (R-12); UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g (R-11) |
 | K-08 | Z4 | Dompet tertinggal | Nara menemukan dompet berisi uang di bangku pasar. Teman menyarankan uangnya dibagi. | Hak yang harus dihormati | Menyerahkan kepada pos keamanan pasar tanpa mengambil isinya | Baru | Pasal 28H ayat (4), Pasal 28J ayat (1) (R-08) UUD NRI 1945 |
 | K-09 | Z5 | Rapat lomba | Rapat persiapan lomba 17-an. Usul Sinta tentang lomba yang bisa diikuti semua anak dipotong dan ditertawakan. | Hak yang terganggu | Meminta Sinta menyelesaikan usulnya; memutuskan dengan musyawarah dan alasan | Mirip adegan 3 | Pasal 28E ayat (3) (R-07), Pasal 28J ayat (1) (R-08) UUD NRI 1945 |
 | K-10 | Z5 | Logat yang diejek | Peserta lomba yang baru pindah dari daerah lain ditertawakan karena logatnya. Panitia remaja ikut tertawa. | Hak yang terganggu | Menghentikan ejekan, menyambut peserta, mengingatkan panitia | Baru (diskriminasi) | Pasal 28I ayat (2), Pasal 28J ayat (1) (R-08) UUD NRI 1945 |
@@ -406,7 +407,7 @@ Ruang uji (JFR-47) tidak masuk statistik. Statistik dicatat per versi kejadian, 
 
 | Aspek | Kebutuhan |
 |---|---|
-| Kapasitas | 50 pemain per ruang dan sedikitnya 10 ruang serentak tanpa penurunan layanan |
+| Kapasitas | Sampai 100 pemain per ruang (bawaan 40) dan sedikitnya 10 ruang serentak tanpa penurunan layanan; syarat teknisnya di Architecture 6.5 |
 | Latensi | Waktu pulang-pergi pesan p95 ≤ 250 ms di wifi sekolah; permainan tetap layak sampai 500 ms |
 | Kinerja HP | ≥ 30 fps di HP kelas bawah (RAM 3 GB, Android 10 ke atas); sasaran 60 fps |
 | Muatan awal | Halaman pemain siap ≤ 6 detik pada koneksi 10 Mbps: kode pemain ≤ 200 KB (gzip), aset pemain ≤ 2 MB |
@@ -458,10 +459,10 @@ Pemain adalah anak di bawah umur. Prinsipnya: **kumpulkan sesedikit mungkin, sim
 
 Semua aset gambar digambar dengan kode oleh Claude, mengikuti Design System bagian 14, dan disetujui pemilik proyek. Status setiap aset dicatat di `docs/jejak-setara/Daftar_Aset.md`.
 
-- Lembar ubin kampung dalam empat masa (pagi, siang, sore, malam) lewat tukar palet.
+- Lembar ubin kampung dalam tiga masa (pagi, siang, sore) lewat tukar palet. Layar akhir dan pembahasan bernuansa malam memakai warna antarmuka, bukan lembar ubin malam.
 - Bangunan dan objek: rumah, sekolah dua lantai, kantin, halte, pasar, bale, pos ronda, puskesmas, kantor desa, warung berwifi, pohon, pohon kelapa, jembatan, pagar, tempat sampah, kursi roda, motor, dan properti kejadian.
 - 8 avatar pemain tampak atas (empat arah, diam dan berjalan) dengan tas berwarna penanda.
-- Tokoh Sehari Setara versi tampak atas, ditambah warga umum (dewasa, lansia, ibu menggendong bayi, anak SD, pedagang, petugas puskesmas, polisi).
+- Tokoh Sehari Setara versi tampak atas, ditambah warga umum (dewasa, lansia, ibu menggendong bayi, anak SD, pedagang, petugas puskesmas, polisi), serta Raka, Wayan, dan siswa SMP umum tanpa tas punggung.
 - Penanda kejadian, kotak bantuan, ikon skill, ikon zona, dan ikon peta mini.
 - Efek suara chiptune; bunyi klik dan bunyi teks Sehari Setara dipakai ulang.
 
@@ -547,3 +548,5 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 4 Nov 2026 | Server berbayar dengan anggaran di bawah Rp 500.000 per bulan; rekomendasi Cloudflare Workers Paid, sekitar US$5 per bulan |
 | 5 Nov 2026 | Nama produk tetap "Jejak Setara" (KT-01, Gerbang 1 JS-01) |
 | 7 Nov 2026 | Mulai dengan paket gratis Cloudflare (Workers Free) untuk JS-03 sampai JS-14; Workers Paid diaktifkan sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu (keputusan pemilik proyek, Plan JS-03) |
+| 7 Nov 2026 | Permintaan Sesi B (A-1 sampai A-4) dan Sesi C (C-1 sampai C-7) diterapkan: tokoh Raka, Wayan, dan siswa umum; teks rujukan bagian 10; tiga masa; peta sekitar 160 × 100 ubin (Gerbang 1 JS-03) |
+| 7 Nov 2026 | Kapasitas ruang sampai 100 pemain (bawaan 40); mode nomor absen disediakan, mati secara bawaan, dan hanya untuk ruang sampai 50 pemain (KT-02 dan Permintaan C-8, Gerbang 1 JS-03) |
