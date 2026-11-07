@@ -32,7 +32,7 @@ Pemeriksaan kedua dilakukan di Plan JS-03 (7 November 2026) terhadap halaman har
 | JA-10 | **Bank awal disemai dari repositori ke D1.** Sesudah itu konsol adalah tempat menyunting. Setiap terbitan menjadi versi tetap, dan ruang memakai salinan versi saat ruang dibuat | Guru tidak perlu menunggu deploy untuk memperbaiki soal; statistik tetap konsisten |
 | JA-11 | **Inti ruang ditulis sebagai modul murni** (tanpa API Workers) dan Durable Object hanya pembungkus tipis | Logika ruang bisa diuji cepat dengan Vitest biasa, termasuk dengan jam tiruan |
 | JA-12 | **Dua lingkungan:** `uji` (otomatis setiap ada perubahan di `main`) dan `produksi` (dijalankan pemilik proyek lewat tombol alur kerja) | Kelas yang sedang berjalan tidak terganggu perubahan yang belum dicoba |
-| JA-13 | Durable Object diberi **petunjuk lokasi `apac`** (Asia-Pasifik; `apac-se` ternyata bukan petunjuk yang sah, dikoreksi di Build JS-03) | Dekat dengan Indonesia; petunjuk bersifat *best-effort* |
+| JA-13 | Durable Object diberi **petunjuk lokasi `apac-se`** (Asia Tenggara) | Dekat dengan Indonesia; petunjuk bersifat *best-effort* |
 | JA-14 | **Paket bertahap:** paket gratis (Workers Free) untuk JS-03 sampai JS-14, lalu **Workers Paid** (US$5 per bulan) diaktifkan sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu | Pengembangan dan lingkungan uji muat dalam kuota harian gratis, sedangkan kelas sungguhan dan uji beban penuh butuh kuota berbayar (bagian 13.2 dan 13.4). Keputusan pemilik proyek, 7 Nov 2026 (Plan JS-03) |
 | JA-15 | Pengembangan, build, dan uji ujung ke ujung memakai **plugin Cloudflare untuk Vite** (`@cloudflare/vite-plugin`): `dev:jejak` menjalankan halaman dan Worker di satu alamat; `build:jejak` menghasilkan `dist-jejak/client/` dan `dist-jejak/worker/`; uji ujung ke ujung memakai `vite preview`. Lingkungan Cloudflare dipilih saat build lewat `CLOUDFLARE_ENV` | Satu perintah dan satu alamat seperti di server sungguhan; cara yang dianjurkan dokumentasi Cloudflare untuk proyek Vite; paket sudah terpasang. Diputuskan di Gerbang 1 JS-01 (5 Nov 2026) |
 
@@ -166,13 +166,31 @@ JS-01, hanya lingkungan lokal:
 }
 ```
 
-JS-03 (isi lengkap di spesifikasi JS-03, bagian "Konfigurasi"): Durable Object `RuangJejak` (binding `RUANG`) dengan migrasi `v1` kelas SQLite; D1 (binding `DB`: `jejak-setara-lokal` di lokal, `jejak-setara-uji` di lingkungan `uji`); dua pembatas percobaan, `BATAS_PUBLIK` dan `BATAS_WS` (300 per menit per alamat IP); pemicu harian `0 19 * * *` (03.00 WITA); dan lingkungan bernama `uji` (Worker `jejak-setara-uji`). Lingkungan `produksi` ditambahkan menjelang rilis. Binding, variabel, dan pembatas ditulis ulang di setiap lingkungan karena tidak diwariskan dari lingkungan teratas, sedangkan migrasi Durable Object diwariskan (percobaan Plan JS-03). Plugin Vite memakai folder keadaan lokal `JEJAK_KEADAAN` (bawaan `.wrangler/state`), sama dengan `db:migrasi:lokal`.
+Rencana JS-03 (contoh; ditetapkan di Plan JS-03):
+
+```jsonc
+{
+  "name": "jejak-setara-lokal",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-15",
+  "assets": { "binding": "ASSETS", "run_worker_first": ["/api/*", "/ws/*"] },
+  "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RuangJejak"] }],
+  "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara", "database_id": "<diisi>", "migrations_dir": "migrations" }],
+  "triggers": { "crons": ["0 19 * * *"] },   // 03.00 WITA: pembersihan harian
+  "vars": { "LINGKUNGAN": "lokal" },
+  "env": {
+    "uji": { "name": "jejak-setara-uji", "vars": { "LINGKUNGAN": "uji" } /* D1 dan DO tersendiri */ },
+    "produksi": { "name": "jejak-setara", "vars": { "LINGKUNGAN": "produksi" } /* D1 dan DO tersendiri */ }
+  }
+}
+```
 
 - Lingkungan teratas hanya untuk pengembangan lokal. Dengan plugin Vite, lingkungan dipilih saat build lewat `CLOUDFLARE_ENV` (misalnya `CLOUDFLARE_ENV=uji`), dan `--env` saat deploy tidak berpengaruh. Build yang lupa memilih lingkungan menghasilkan Worker lokal, jadi tidak pernah menyentuh produksi.
 - `compatibility_date` mengikuti runtime `workerd` yang terpasang (kini 1.20260515, batas 22 Mei 2026). Tanggal yang lebih baru membuat `wrangler dev` dan uji lokal berhenti dengan galat, jadi tanggal dinaikkan bersama `wrangler` dengan izin dependensi.
 - Plugin Vite mengabaikan `assets.directory`; folder aset adalah hasil build halaman (`dist-jejak/client/`).
 - Permintaan `/api/*` dan `/ws/*` selalu ditangani Worker. Selain itu, aset statis disajikan langsung (gratis dan tidak dihitung kuota).
-- Stub ruang diambil dengan `env.RUANG.get(id, { locationHint: "apac" })` (JA-13; dikoreksi di Build JS-03).
+- Stub ruang diambil dengan `env.RUANG.get(id, { locationHint: "apac-se" })` (JA-13).
 
 ### 4.3 Skrip `package.json` (tambahan)
 
@@ -182,12 +200,12 @@ JS-03 (isi lengkap di spesifikasi JS-03, bagian "Konfigurasi"): Durable Object `
 | `build:jejak` | Build halaman ke `dist-jejak/client/` dan Worker ke `dist-jejak/worker/` | JS-01 |
 | `content:check:jejak` | Validasi bank awal, peta, dan kecocokan rujukan: semua uji di `app/jejak-setara/__tests__/konten/` | JS-05 dan JS-06 |
 | `test:jejak` | Uji unit `inti/`, inti ruang, klien, dan konten (Vitest di Node) | JS-01 |
-| `test:jejak:server` | Uji Worker, Durable Object, dan D1: Vitest di Node terhadap Worker hasil build yang dijalankan `vite preview` (Gerbang 1 JS-03, usulan 3a) | JS-03 |
+| `test:jejak:server` | Uji Worker dan D1 (alat diputuskan di Plan JS-03) | JS-03 |
 | `test:e2e:jejak` | Uji Playwright multi-konteks terhadap `vite preview` (berkas `e2e/jejak-setara/*.uji.ts`) | JS-01 |
-| `sim:beban` | Simulasi bot pada Worker lokal; lingkungan uji hanya dengan pilihan tertulis dan sesudah paket berbayar aktif (bagian 13.4) | JS-03 |
+| `sim:beban` | Simulasi 50 bot pada Worker lokal atau lingkungan uji | JS-03 |
 | `peta:build` | `python scripts/jejak-setara/peta/build_peta.py` | JS-06 |
 | `assets:build:jejak` | `python scripts/game/art/build_jejak.py` | Aset pertama Sesi C |
-| `db:migrasi:lokal` | Menerapkan migrasi D1 ke basis data lokal di `.wrangler/state`, yang juga dibaca `dev:jejak` dan `vite preview` | JS-03 |
+| `db:migrasi:lokal` | Menerapkan migrasi D1 ke basis data lokal | JS-03 |
 
 Skrip yang berkas atau fiturnya belum ada dijalankan lewat `scripts/jejak-setara/bila-ada.mjs`, yang mencetak "Belum tersedia: …" lalu selesai tanpa galat. Bila berkasnya sudah ada, perintah sungguhan dijalankan, sehingga Sesi B dan C tidak perlu mengubah `package.json` (spesifikasi JS-01).
 
@@ -197,8 +215,7 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 
 | Berkas | Nama di tab Actions | Pemicu | Langkah |
 |---|---|---|---|
-| `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara (daftar jalur di berkasnya), atau tombol "Run workflow" | Sejak JS-01: pasang → `content:check:jejak` → `test:jejak` → `build:jejak`. Sejak JS-03 ditambah "Uji server Jejak", lalu pekerjaan "Deploy uji" di cabang `main` (push atau tombol): build dengan `CLOUDFLARE_ENV=uji`, migrasi D1 jarak jauh, `wrangler deploy` di folder `web/jejak-setara`, dan pemeriksaan `/api/sehat`. Deploy dilewati dengan pemberitahuan bila rahasia atau Database ID uji belum diisi |
-| `jejak-ruang-coba.yml` | Jejak: ruang coba | Tombol "Run workflow" | Membuat satu ruang coba di lingkungan uji dengan kunci sekali pakai `KUNCI_COBA`, lalu menulis kode dan tautannya di ringkasan alur kerja (JS-03; dipensiunkan di JS-10) |
+| `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara (daftar jalur di berkasnya), atau tombol "Run workflow" | Sejak JS-01: pasang → `content:check:jejak` → `test:jejak` → `build:jejak`. Sejak JS-03 ditambah migrasi D1 lingkungan uji dan deploy: build dengan `CLOUDFLARE_ENV=uji`, lalu `wrangler deploy` |
 | `jejak-produksi.yml` | Jejak: produksi | Tombol "Run workflow" oleh pemilik proyek | Sama, untuk produksi (build dengan `CLOUDFLARE_ENV=produksi`); berhenti bila ada ruang produksi berstatus `main` atau `jeda` (dicek lewat API) |
 | `jejak-admin-awal.yml` | Jejak: admin awal | Tombol "Run workflow" | Membuat akun admin pertama, atau mengatur ulang sandi admin dengan sandi sementara dari rahasia GitHub |
 
@@ -213,7 +230,6 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 | `KUNCI_TIKET` | Rahasia Worker (`wrangler secret`) | Kunci HMAC tiket layar kelas |
 | `KUNCI_SANDI` | Rahasia Worker | Kunci tambahan (*pepper*) hash sandi |
 | `KUNCI_IP` | Rahasia Worker | Garam harian untuk hash IP pada pembatas percobaan masuk |
-| `KUNCI_COBA` | Rahasia Worker lingkungan uji | Kunci sekali pakai untuk `POST /api/ruang-coba`, dibuat ulang setiap "Jejak: ruang coba" dijalankan (JS-03) |
 | `LINGKUNGAN` | Variabel Worker | `lokal` (pengembangan dan uji di mesin agen), `uji`, atau `produksi` |
 
 Rahasia tidak pernah ditulis di repositori, log, atau pesan galat.
@@ -251,7 +267,7 @@ export interface IsiKejadian {               // satu versi kejadian
 
 export interface PengaturanRuang {
   durasiMenit: 10 | 15 | 20;
-  batasPemain: number;                       // 2–100, bawaan 40; mode nomor absen hanya sampai 50 (C-8)
+  batasPemain: number;                       // 2–50, bawaan 40
   batasTerlambatMenit: number;               // 0–10, bawaan 5
   skillAktif: SkillId[];
   modeNomorAbsen: boolean;
@@ -316,8 +332,6 @@ erDiagram
   KEJADIAN_VERSI ||--o{ JAWABAN : dijawab
 ```
 
-Migrasi `0001_awal.sql` (JS-03) membuat ketiga belas tabel ini sekaligus, dengan kolom, kunci, dan indeks seperti spesifikasi JS-03. Waktu disimpan sebagai bilangan bulat milidetik UTC. Migrasi berikutnya hanya ditulis Sesi A; sesi lain yang membutuhkan perubahan skema menulis permintaan di berkas statusnya (Gerbang 1 JS-03, usulan 4a).
-
 ### 5.3 Status di Durable Object ruang
 
 Disimpan di SQLite milik Durable Object, sehingga tetap ada bila objek dikeluarkan dari memori:
@@ -332,8 +346,6 @@ Disimpan di SQLite milik Durable Object, sehingga tetap ada bila objek dikeluark
 | `tiket_terpakai` | Tiket layar kelas yang sudah dipakai (dibersihkan sesudah kedaluwarsa) |
 
 Isi kejadian **disalin saat ruang dibuat**, sehingga penyuntingan di konsol tidak mengubah ruang yang sedang berjalan.
-
-JS-03 membuat tabel `meta`, `pemain`, dan `kiriman`; tabel lain ditambahkan fitur yang memakainya. Posisi pemain tidak ditulis pada setiap `gerak` (bagian 13.4).
 
 ### 5.4 Aturan validasi konten
 
@@ -364,7 +376,7 @@ Diperiksa skema `zod` yang sama untuk bank awal (`content:check:jejak`) dan untu
 | `wss://{host}/ws/ruang/{KODE}` | Pemain | Kode ruang aktif; pesan pertama harus `halo` |
 | `wss://{host}/ws/kelas/{ruangId}?tiket={tiket}` | Layar kelas | Tiket dari `POST /api/ruang/{id}/tiket`: HMAC, berlaku 60 detik, sekali pakai |
 
-Worker memeriksa tajuk `Origin` (hanya domain Jejak Setara sendiri dan `localhost` saat pengembangan), mencari ruang lewat D1, lalu meneruskan permintaan ke Durable Object dengan tajuk internal `X-Jejak-Peran` (`pemain` atau `guru`) dan `X-Jejak-Pengguna`. Tajuk `X-Jejak-*` yang dikirim klien dibuang lebih dulu. Kode penutupan sambungan (JS-03): 1008 pelanggaran, 4000 ruang ditutup, 4001 diganti sambungan baru, 4002 tanpa `halo`, 4003 ditolak masuk, 4004 dikeluarkan, dan 4005 versi berbeda.
+Worker memeriksa tajuk `Origin` (hanya domain Jejak Setara sendiri dan `localhost` saat pengembangan), mencari ruang lewat D1, lalu meneruskan permintaan ke Durable Object dengan tajuk internal `X-Jejak-Peran` (`pemain` atau `guru`) dan `X-Jejak-Pengguna`.
 
 ### 6.2 Amplop pesan
 
@@ -378,7 +390,6 @@ Setiap pesan adalah objek JSON `{ "v": 1, "t": "<tipe>", ...isi }`. `v` adalah `
 |---|---|---|
 | `halo` | `peran: "pemain"`, `token?`, `nomorAbsen?` | Pesan pertama; `token` dipakai untuk menyambung ulang |
 | `pilih_identitas` | `nama`, `avatar` | Di layar gabung; `nama` harus salah satu saran server |
-| `minta_nama` | — | Tombol "Acak ulang"; dijawab `saran_nama` (JS-03) |
 | `gerak` | `x`, `y`, `arah`, `jalan` (boolean), `seq` | Paling banyak 10 per detik saat bergerak, 1 per detik saat diam |
 | `periksa` | `kejadianId` | Membuka dialog |
 | `kunci_1` | `kejadianId`, `opsiId` | Mengunci Langkah 1 |
@@ -393,7 +404,6 @@ Setiap pesan adalah objek JSON `{ "v": 1, "t": "<tipe>", ...isi }`. `v` adalah `
 | `t` | Isi |
 |---|---|
 | `selamat_datang` | `pemainId`, `token`, status dan pengaturan ruang, `waktuServer`, versi peta, tiga saran nama samaran, avatar yang tersedia |
-| `saran_nama` | Paling banyak tiga saran nama samaran baru: jawaban `minta_nama`, atau sesudah galat `NAMA_DIPAKAI` (JS-03) |
 | `status_ruang` | `status`, `mulaiPada`, `berakhirPada`, `jedaSejak` |
 | `dunia` | `w` (waktu server), `p`: larik `[id, x, y, arah, jalan]` untuk pemain yang berubah di sekitar pemain ini, `n` (jumlah pemain) |
 | `pemain_baru` · `pemain_pergi` | `id`, `nama`, `avatar`, `warnaTas` · `id` |
@@ -429,12 +439,12 @@ Setiap pesan adalah objek JSON `{ "v": 1, "t": "<tipe>", ...isi }`. `v` adalah `
 
 | Aliran | Frekuensi | Ukuran perkiraan |
 |---|---|---|
-| `gerak` dari pemain | ≤ 10 per detik saat bergerak, ≤ 6 per detik di ruang lebih dari 50 pemain, 1 per detik saat diam | ±60 byte |
-| `dunia` ke pemain | 10 per detik, hanya pemain yang berubah dalam radius 1,5 pandangan (480 × 270 piksel logis), paling banyak 24 pemain terdekat | ±200 byte |
+| `gerak` dari pemain | ≤ 10 per detik saat bergerak | ±60 byte |
+| `dunia` ke pemain | 10 per detik, hanya pemain yang berubah dalam radius 1,5 pandangan (480 × 270 piksel logis) | ±200 byte |
 | `dunia_kelas` | 4 per detik, semua pemain | ±1 KB untuk 40 pemain |
 | `papan` | ≤ 1 per detik, hanya bila berubah | ±1,5 KB |
 
-Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 MB naik, di bawah anggaran 3 MB (PRD bagian 12). Bila uji beban melampaui anggaran, `dunia` diturunkan ke 5 per detik. Percobaan Plan JS-03 (lokal, dengan batas 24 pemain terdekat): sekitar 1,5 MB untuk ruang 40 pemain dan 2,5 MB untuk ruang 100 pemain, per pemain per 15 menit.
+Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 MB naik, di bawah anggaran 3 MB (PRD bagian 12). Bila uji beban melampaui anggaran, `dunia` diturunkan ke 5 per detik.
 
 ### 6.6 Validasi dan pembatasan
 
@@ -456,9 +466,8 @@ Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 M
 | `TERLALU_CEPAT` | Batas pesan terlampaui | Tidak ditampilkan; dicatat |
 | `DIKELUARKAN` | Dikeluarkan guru | "Kamu dikeluarkan dari ruang oleh guru." |
 | `BUKAN_JANGKAUAN` | Memeriksa kejadian dari tempat yang terlalu jauh | Tidak ditampilkan; posisi dikoreksi |
-| `NOMOR_ABSEN_DIPAKAI` | Nomor absen sudah dipakai pemain lain di ruang itu (JS-03) | "Nomor absen ini sudah dipakai di ruang ini. Periksa lagi nomormu." |
 
-Teks akhir ditetapkan di spesifikasi JS-03 dan disimpan di `teks.ts`.
+Teks akhir ditetapkan di spesifikasi fitur.
 
 ### 6.8 Jam dan sambung ulang
 
@@ -505,13 +514,11 @@ stateDiagram-v2
 
 - **Pembuatan:** `POST /api/ruang` memeriksa izin, memilih versi terbit setiap kejadian di paket (semua rujukannya harus terverifikasi, kecuali ruang uji), membuat kode, membuat baris `ruang` di D1, lalu memanggil Durable Object baru dengan salinan isi, pengaturan, dan benih.
 - **Penempatan kejadian:** setiap kejadian diberi satu titik dari titik-titik zonanya dengan pengacakan berbenih; satu titik untuk satu kejadian.
-- **Lobi dan jeda:** tanpa pengatur waktu berkala, sehingga Durable Object boleh beristirahat (*hibernate*). Sambungan memakai WebSocket Hibernation API; identitas sambungan disimpan dengan `serializeAttachment`. Kiriman ke D1 memakai pengatur waktu 30 detik hanya selama antreannya berisi, sehingga ruang tetap bisa beristirahat sesudahnya (JS-03).
+- **Lobi dan jeda:** tanpa pengatur waktu berkala, sehingga Durable Object boleh beristirahat (*hibernate*). Sambungan memakai WebSocket Hibernation API; identitas sambungan disimpan dengan `serializeAttachment`.
 - **Main:** pengatur waktu 100 ms menyusun dan mengirim `dunia`, `pribadi`, dan `papan`. Alarm dipasang pada `berakhirPada`.
 - **Jeda:** jam berhenti; `berakhirPada` digeser sebesar lama jeda saat dilanjutkan.
 - **Selesai:** peringkat akhir dihitung, `selesai` dikirim ke setiap pemain, seluruh `kiriman` dikirim ke D1, dan `ringkasan_json` ditulis.
 - **Ditutup otomatis:** 3 jam tanpa sambungan apa pun, atau 6 jam sejak dibuat. Penyimpanan Durable Object dihapus 24 jam sesudah ditutup, setelah kiriman ke D1 dipastikan lengkap.
-- **Sejak JS-03:** siklus ini dijalankan inti ruang. Pesan layar kelas sampai ke ruang lewat rute `/ws/kelas/` di JS-10; di lingkungan lokal juga lewat kait uji `POST /api/ruang-coba/{KODE}/kelas`.
-- **Satu alarm:** inti ruang menghitung tenggat terdekat dari semua jadwal (hitung mundur, akhir ronde, tutup otomatis, hapus penyimpanan, dan kiriman yang gagal), lalu pembungkus memasang alarm itu.
 
 ## 8. Aturan permainan di server
 
@@ -562,17 +569,16 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 
 ### 8.6 Penyimpanan dan kiriman ke D1
 
-- Setiap perubahan penting (bergabung, jawaban, skor) ditulis lebih dulu ke SQLite Durable Object, lalu dimasukkan ke `kiriman`. Posisi pemain tidak ditulis pada setiap `gerak` (bagian 13.4); posisi disimpan saat pemain terputus dan bersama kiriman berkala.
-- Selama antrean berisi, setiap 30 detik (pengatur waktu, bukan alarm), dan saat ronde selesai, `kiriman` dikirim ke D1 dalam satu *batch* dengan `INSERT … ON CONFLICT DO UPDATE` berdasarkan id, sehingga pengiriman ulang aman.
+- Setiap perubahan penting (bergabung, jawaban, skor) ditulis lebih dulu ke SQLite Durable Object, lalu dimasukkan ke `kiriman`.
+- Setiap 30 detik dan saat ronde selesai, `kiriman` dikirim ke D1 dalam satu *batch* dengan `INSERT … ON CONFLICT DO UPDATE` berdasarkan id, sehingga pengiriman ulang aman.
 - Bila D1 gagal, kiriman dicoba lagi lewat alarm dengan jeda yang makin panjang, dan ruang tidak ditutup sebelum kiriman habis.
 
 ## 9. Klien pemain
 
 - **Loop:** `requestAnimationFrame`; gerak pemain sendiri dihitung dengan langkah tetap 60 Hz memakai `inti/gerak.ts` (langsung terasa tanpa menunggu server).
 - **Pemain lain:** digambar 120 ms di belakang waktu server, dengan interpolasi di antara dua `dunia` terakhir.
-- **Kanvas:** ukuran *backing store* = 320 × k dan 180 × k piksel perangkat dengan k bilangan bulat terbesar yang muat (Design System bagian 3.2). Peta digambar dari potongan 256 × 256 yang disiapkan di kanvas luar layar per masa. Peta sekitar 160 × 100 ubin berarti sekitar 70 potongan per masa (sekitar 17,5 MB memori gambar bila semuanya disiapkan), jadi hanya potongan di sekitar kamera yang disiapkan dan yang jauh dilepas (JS-07).
+- **Kanvas:** ukuran *backing store* = 320 × k dan 180 × k piksel perangkat dengan k bilangan bulat terbesar yang muat (Design System bagian 3.2). Peta digambar dari potongan 256 × 256 yang disiapkan di kanvas luar layar per masa.
 - **Urutan gambar:** lapisan Design System bagian 7; tokoh diurutkan menurut y kaki; siluet pemain sendiri digambar di atas objek atas.
-- **Warna tas:** saat memuat, setiap strip avatar disalin untuk warna tas yang dipakai, dengan mengganti warna kunci `sun` dan `mango` serentak memakai pasangan Design System bagian 8 (JS-07).
 - **Input:** keyboard (`keydown`/`keyup` dengan peta tombol), joystick sentuh (*pointer events*, satu penunjuk di separuh kiri), dan tombol HTML untuk Periksa serta skill.
 - **HUD dan dialog:** komponen React di atas kanvas. Dialog dibuka dari `kejadian_terbuka` dan memakai komponen `bersama/` yang juga dipakai pratinjau konsol.
 - **Label nama:** kanvas lapisan kedua dengan resolusi perangkat, agar teks tajam; paling banyak 8 label.
@@ -606,8 +612,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `GET` · `PUT /api/pengaturan` | Pengaturan umum | Admin |
 | `GET /api/log` | Log audit | Admin |
 | `GET /api/bank/ekspor`; `POST /api/bank/impor` | Ekspor dan impor JSON bank | Admin |
-| `GET /api/publik/ruang/{KODE}` | Apakah kode ada dan apakah mode nomor absen aktif; dibaca dari D1 tanpa memanggil ruang (JS-03) | Umum, dibatasi frekuensinya |
-| `POST /api/ruang-coba`; `POST /api/ruang-coba/{KODE}/kelas`; `GET /api/ruang-coba/{KODE}/statistik` | Ruang coba di lingkungan `lokal` dan `uji` (di `uji` dengan kunci `KUNCI_COBA`); kait uji dan statistik ruang hanya di `lokal`. Dipensiunkan di JS-10 (JS-03) | Alur kerja "Jejak: ruang coba"; uji |
+| `GET /api/publik/ruang/{KODE}` | Apakah kode ada dan masih bisa dimasuki (tanpa rincian lain) | Umum, dibatasi frekuensinya |
 
 ### 10.3 Autentikasi dan sesi
 
@@ -660,10 +665,9 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 
 ### 11.1 Peta
 
-- Ukuran: sekitar 160 × 100 ubin (2.560 × 1.600 piksel logis; keputusan pemilik proyek 6 Nov 2026, Permintaan C-7).
 - Sumber: `scripts/jejak-setara/peta/kampung.txt` (satu karakter per ubin untuk tanah dan tabrakan) dan `objek.json` (bangunan, pohon, titik kejadian per zona, kotak, halte, gerbang lobi, dan titik munculnya pemain).
 - `build_peta.py` menghasilkan `app/jejak-setara/peta/kampung.json` (lapisan ubin, grid tabrakan sebagai bit, daftar objek, batas zona) dan pratinjau di `docs/jejak-setara/preview/`.
-- Uji peta (`content:check:jejak`): semua titik kejadian, kotak, dan halte bisa dicapai dari titik muncul (pencarian lebar); setiap titik punya ruang kosong 3 × 3 ubin; jarak antartitik kejadian ≥ 6 ubin; setiap zona punya sedikitnya 12 titik kejadian (keputusan 6 Nov 2026); dan jumlah titik cukup untuk Paket inti.
+- Uji peta (`content:check:jejak`): semua titik kejadian, kotak, dan halte bisa dicapai dari titik muncul (pencarian lebar); setiap titik punya ruang kosong 3 × 3 ubin; jarak antartitik kejadian ≥ 6 ubin; setiap zona punya sedikitnya 4 titik kejadian; dan jumlah titik cukup untuk Paket inti.
 
 #### 11.1.1 Bentuk `kampung.json` (ditetapkan JS-02)
 
@@ -680,12 +684,6 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 ### 11.2 Manifest aset
 
 `app/jejak-setara/assets/manifest.ts` menjadi satu-satunya pintu masuk aset, dengan pola Sehari Setara. Kelompoknya: `ubin` (per masa), `objek`, `avatar`, `npc`, `ikon`, `tanda`, dan `suara`. Aset selalu menjadi berkas berhash, bukan data URI.
-
-Manifest dibuat otomatis oleh `build_jejak.py` (Sesi C) hanya untuk aset Disetujui, dan tidak disunting manual. Bentuknya mengikuti usulan Sesi C di `Daftar_Aset.md` (Permintaan C-6, disetujui di Gerbang 1 JS-03), dengan tiga ketentuan:
-
-1. `AVATAR` berupa larik delapan butir berurutan A1–A8, sehingga nomor avatar di protokol (0–7) langsung menjadi indeks. Nama berkas tetap `ava_1` sampai `ava_8`.
-2. Kunci `WARNA_TAS` sama dengan tipe `WarnaTas` di `inti/tipe.ts`.
-3. Manifest tidak mengimpor apa pun dari `inti/`, karena hanya dipakai klien.
 
 ### 11.3 Anggaran
 
@@ -738,7 +736,7 @@ Rincian di PRD bagian 13. Ketentuan teknisnya:
 
 | Ukuran | Sasaran |
 |---|---|
-| Pemain per ruang | 40 bawaan, paling banyak 100 (C-8, Gerbang 1 JS-03) |
+| Pemain per ruang | 50 |
 | Ruang serentak | ≥ 10 tanpa penurunan layanan |
 | Waktu pulang-pergi pesan p95 | ≤ 250 ms di wifi sekolah |
 | Waktu tangani satu `gerak` di server | ≤ 1 ms |
@@ -793,7 +791,6 @@ Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* dan *Limits* 
 - Dengan kuota 100.000 permintaan Durable Objects per hari, sekitar tujuh sesi 40 pemain atau tiga sesi 100 pemain muat dalam sehari. Cukup untuk pengembangan dan percobaan pemilik proyek, tetapi tidak cukup untuk beberapa kelas sehari.
 - Dokumentasi menyebut rasio 20 : 1 untuk penagihan pesan masuk. Bila batas harian gratis ternyata menghitung pesan tanpa rasio itu, satu sesi 40 pemain sudah melewatinya. Karena itu percobaan dengan banyak perangkat di lingkungan uji ditunda sampai paket berbayar aktif.
 - `sim:beban` dijalankan terhadap Worker lokal (`vite preview`), yang tidak memakai kuota Cloudflare. Uji beban penuh di lingkungan uji (bagian 14) menunggu paket berbayar: satu kali uji 10 ruang × 50 bot selama 15 menit memakai sekitar 170.000 permintaan, melebihi kuota harian.
-- Ukuran Build JS-03 (`sim:beban` lokal, 50 detik, jeda acak 50 ms): ruang 50 pemain sekitar 7,0 pesan naik per pemain per detik, 1,7 MB turun per 15 menit, dan sekitar 15.900 permintaan Durable Object per sesi; ruang 100 pemain dengan `gerak` 6 per detik sekitar 4,1 pesan naik, 1,9 MB, dan sekitar 18.400 permintaan per sesi (sekitar lima sesi 100 pemain per hari di paket gratis).
 - Satu Durable Object punya batas lunak sekitar 1.000 permintaan per detik. Ruang 100 pemain yang banyak bergerak mendekati batas itu (sekitar 740 pesan per detik di percobaan Plan JS-03).
 - Saat pindah ke paket berbayar, kode dan data tidak berubah; yang berubah hanya kuota (bagian 18, langkah 2).
 
@@ -803,10 +800,10 @@ Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* dan *Limits* 
 |---|---|---|
 | Unit | Vitest | `inti/` (skor, peringkat dan seri, skill, kotak, masa, gerak dan tabrakan, pemeriksaan kecepatan, pengacakan berbenih, skema protokol), inti ruang dengan jam tiruan (siklus ruang, jeda, sambung ulang, kunci sekali, batas pesan, penempatan kejadian), klien (kamera, skala, interpolasi) |
 | Konten dan peta | Vitest + zod | Bank awal (bagian 5.4), kecocokan rujukan dengan pustaka awal, keterjangkauan peta, jarak antartitik, kecukupan titik per zona |
-| Worker dan D1 | Vitest di Node terhadap Worker hasil build yang dijalankan `vite preview` (`test:jejak:server`; Gerbang 1 JS-03, usulan 3a) | Rute API, izin per peran, autentikasi, pembatas percobaan, migrasi, versi dan status kejadian, statistik, CSV |
+| Worker dan D1 | Alat yang disetujui di Plan JS-03 | Rute API, izin per peran, autentikasi, pembatas percobaan, migrasi, versi dan status kejadian, statistik, CSV |
 | Ujung ke ujung | Playwright, beberapa konteks peramban, terhadap `vite preview` (berkas `e2e/jejak-setara/*.uji.ts`) | Guru masuk, membuat ruang, dan membuka layar kelas; tiga pemain bergabung (satu dengan emulasi HP Android dan sentuhan); mulai; bergerak lewat kait uji; memeriksa dan menjawab kejadian; papan skor berubah; jeda dan lanjut; sambungan diputus lalu tersambung kembali; dikeluarkan; ronde berakhir; podium; pembahasan; rekap pribadi; ekspor CSV |
 | Jaringan | Playwright + pembatas jaringan | Jaringan lambat dan terputus-putus; latensi 300 ms; sambung ulang |
-| Beban | `sim:beban` (Node 22, WebSocket bawaan) | 50 bot per ruang dan 10 ruang serentak, serta 1 ruang × 100 bot, selama 15 menit: CPU per putaran, ukuran dan jumlah pesan, lalu lintas per pemain, p95 waktu pulang-pergi, dan perkiraan biaya. Selama paket gratis, hanya terhadap Worker lokal (bagian 13.4) |
+| Beban | `sim:beban` (Node 22, WebSocket bawaan) | 50 bot per ruang dan 10 ruang serentak selama 15 menit: CPU per putaran, ukuran dan jumlah pesan, lalu lintas per pemain, p95 waktu pulang-pergi, dan perkiraan biaya. Selama paket gratis, hanya terhadap Worker lokal (bagian 13.4) |
 | Manual | Daftar periksa AGENTS | HP kelas bawah, proyektor dari 8 m, wifi sekolah, kurangi gerak, keyboard saja, uji coba kelas |
 
 Tangkapan layar uji: HP 731 × 411 (emulasi Android), laptop 1280 × 720, dan layar kelas 1024 × 768 serta 1920 × 1080.
