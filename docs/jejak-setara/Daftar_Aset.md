@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Versi | 0.6 |
+| Versi | 0.7 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Kelompok A, U, O1, dan O2 disetujui. Kelompok T (penanda dan efek) diserahkan: menunggu "Setuju: aset T" |
+| Tahap saat ini | Kelompok A, U, O1, O2, dan T disetujui. Kelompok N1 (tokoh Sehari Setara) diserahkan: menunggu "Setuju: aset N1" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -31,6 +31,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Kelompok O2 | Objek umum (24 berkas, termasuk 16 ruas pagar) diserahkan, menunggu "Setuju: aset O2" |
 | 6 Nov 2026 | Kelompok O2 | Pemilik proyek membalas "Setuju: aset O2": O-21 sampai O-28 Disetujui; kredit 24 berkas ditambahkan |
 | 6 Nov 2026 | Kelompok T | Penanda dan efek (12 berkas, kode baru `atas_ikon.py`) diserahkan, menunggu "Setuju: aset T" |
+| 6 Nov 2026 | Kelompok T | Pemilik proyek membalas "Setuju: aset T": T-01 sampai T-12 Disetujui; kredit 12 berkas ditambahkan |
+| 6 Nov 2026 | Kelompok N1 | Sembilan tokoh Sehari Setara versi tampak atas (11 berkas, termasuk Dimas di motor dan Komang menunduk) diserahkan, menunggu "Setuju: aset N1" |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -51,7 +53,7 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 
 | | |
 |---|---|
-| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, dan O2 Disetujui 6 Nov 2026; kelompok T diserahkan, menunggu "Setuju: aset T" |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, O2, dan T Disetujui 6 Nov 2026; kelompok N1 diserahkan, menunggu "Setuju: aset N1" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -417,18 +419,18 @@ Berkas `tanda_*.png` disimpan di folder `ikon/`, karena Architecture bagian 3 ti
 
 | ID | Berkas | Ukuran | Isi | Status |
 |---|---|---|---|---|
-| T-01 | `tanda_kejadian.png` | 12 × 12 | Gelembung `sun` bertanda seru, bergaris luar `ink`, berkilau putih. Naik-turun 1 piksel dilakukan antarmuka | Ditinjau (kelompok T) |
-| T-02 | `tanda_dibuka.png` | 12 × 12 | Gelembung `mist` bertanda tiga titik | Ditinjau (kelompok T) |
-| T-03 | `tanda_selesai.png` | 10 × 10 | Gelembung kecil `leaf` bertanda centang `ink` | Ditinjau (kelompok T) |
-| T-04 | `tanda_kotak_sepatu.png` | 3 × 14 × 12 | Peti kayu bergesper; tutupnya bergambar sepatu `coral` (Lari cepat). Bingkai: kecil, besar berkilau, biasa | Ditinjau (kelompok T) |
-| T-05 | `tanda_kotak_kompas.png` | 3 × 14 × 12 | Peti bergambar kompas putih berjarum `teal` (Kompas kejadian) | Ditinjau (kelompok T) |
-| T-06 | `tanda_kotak_buku.png` | 3 × 14 × 12 | Peti bergambar buku terbuka putih bersampul `sky-d` (Petunjuk) | Ditinjau (kelompok T) |
-| T-07 | `tanda_kotak_teropong.png` | 3 × 14 × 12 | Peti bergambar teropong `dusk` (P1) | Ditinjau (kelompok T) |
-| T-08 | `tanda_kotak_karcis.png` | 3 × 14 × 12 | Peti bergambar karcis `sun` (Angkot, P1) | Ditinjau (kelompok T) |
-| T-09 | `tanda_kompas.png` | 16 × 7 × 7 | Panah `teal` bergaris luar `ink`, 8 arah; bingkai kedua lebih terang (berdenyut) | Ditinjau (kelompok T) |
-| T-10 | `tanda_diri.png` | 4 × 7 × 7 | Panah `sun` bergaris luar `ink` untuk peta mini | Ditinjau (kelompok T) |
-| T-11 | `tanda_debu.png` | 2 × 8 × 6 | Debu lari `mist` dan putih, tanpa garis luar | Ditinjau (kelompok T) |
-| T-12 | `tanda_kilau.png` | 2 × 8 × 8 | Kilau putih dan `sun`, tanpa garis luar | Ditinjau (kelompok T) |
+| T-01 | `tanda_kejadian.png` | 12 × 12 | Gelembung `sun` bertanda seru, bergaris luar `ink`, berkilau putih. Naik-turun 1 piksel dilakukan antarmuka | Disetujui (6 Nov) |
+| T-02 | `tanda_dibuka.png` | 12 × 12 | Gelembung `mist` bertanda tiga titik | Disetujui (6 Nov) |
+| T-03 | `tanda_selesai.png` | 10 × 10 | Gelembung kecil `leaf` bertanda centang `ink` | Disetujui (6 Nov) |
+| T-04 | `tanda_kotak_sepatu.png` | 3 × 14 × 12 | Peti kayu bergesper; tutupnya bergambar sepatu `coral` (Lari cepat). Bingkai: kecil, besar berkilau, biasa | Disetujui (6 Nov) |
+| T-05 | `tanda_kotak_kompas.png` | 3 × 14 × 12 | Peti bergambar kompas putih berjarum `teal` (Kompas kejadian) | Disetujui (6 Nov) |
+| T-06 | `tanda_kotak_buku.png` | 3 × 14 × 12 | Peti bergambar buku terbuka putih bersampul `sky-d` (Petunjuk) | Disetujui (6 Nov) |
+| T-07 | `tanda_kotak_teropong.png` | 3 × 14 × 12 | Peti bergambar teropong `dusk` (P1) | Disetujui (6 Nov) |
+| T-08 | `tanda_kotak_karcis.png` | 3 × 14 × 12 | Peti bergambar karcis `sun` (Angkot, P1) | Disetujui (6 Nov) |
+| T-09 | `tanda_kompas.png` | 16 × 7 × 7 | Panah `teal` bergaris luar `ink`, 8 arah; bingkai kedua lebih terang (berdenyut) | Disetujui (6 Nov) |
+| T-10 | `tanda_diri.png` | 4 × 7 × 7 | Panah `sun` bergaris luar `ink` untuk peta mini | Disetujui (6 Nov) |
+| T-11 | `tanda_debu.png` | 2 × 8 × 6 | Debu lari `mist` dan putih, tanpa garis luar | Disetujui (6 Nov) |
+| T-12 | `tanda_kilau.png` | 2 × 8 × 8 | Kilau putih dan `sun`, tanpa garis luar | Disetujui (6 Nov) |
 | — | Titik pemain di peta kelas | 3 × 3 | Digambar antarmuka dengan warna tas; tanpa berkas | — |
 
 ### Rincian kelompok T (6 November 2026)
@@ -456,17 +458,33 @@ Tampak atas, menghadap bawah, diam 2 bingkai (`npc_{tokoh}_bawah_diam.png`), dit
 
 ### N1. Tokoh Sehari Setara
 
-| ID | Tokoh | Ciri | Pose khusus | Kejadian | Status |
+| ID | Tokoh | Berkas | Ciri | Kejadian | Status |
 |---|---|---|---|---|---|
-| N-01 | Nara | Rambut berponi `hair-1`, `skin-2`, seragam, tas `sun` bertali `mango` | — | K-01, K-08 | Belum |
-| N-02 | Ibu | `skin-3`, rambut `hair-2` bersanggul, daster `rose` | — | Tidak ada di set peta naskah; Design System bagian 8 | Belum |
-| N-03 | Gita | `skin-1`, rambut dikuncir berikat `coral`, kemeja putih, rok `coral` | — | K-01, K-12 | Belum |
-| N-04 | Dimas | `skin-4`, rambut cepak, jaket `sky-d` | Di atas motor (`npc_dimas_kanan_motor.png`) | K-02, K-05 | Belum |
-| N-05 | Sinta | `skin-3`, kerudung putih, lengan panjang, rok panjang `navy` | — | K-09 | Belum |
-| N-06 | Bu Ratih | `skin-4`, rambut bob, kacamata, batik `teal` | — | Disebut di pilihan K-03 dan K-14; Design System bagian 8 | Belum |
-| N-07 | Komang | `skin-2`, potongan mangkuk, seragam kebesaran | Menunduk memegang kotak bekal | K-03 (K-15 hanya di dalam video, tidak di peta) | Belum |
-| N-08 | Pak Made | `skin-4`, rambut menipis kelabu, kumis, kaus `mango`, sarung kotak-kotak | — | K-02 | Belum |
-| N-09 | Bayu | `skin-2`, rambut rapi `hair-2`, kaus `mist`, jin `sky-d`; netral dan ramah | — | K-07 | Belum |
+| N-01 | Nara | `npc_nara_bawah_diam.png` (16 × 24) | Rambut berponi `hair-1`, `skin-2`, seragam SMP, tali tas `mango` (tas `sun`, warna asli, tidak diganti antarmuka) | K-01, K-08 | Ditinjau (kelompok N1) |
+| N-02 | Ibu | `npc_ibu_bawah_diam.png` (16 × 26) | `skin-3`, rambut `hair-2` bersanggul, daster `rose` bertitik putih dan kuning, sandal | Tidak ada di set peta naskah; Design System bagian 8 | Ditinjau (kelompok N1) |
+| N-03 | Gita | `npc_gita_bawah_diam.png` (14 × 20) | Anak SD: `skin-1`, rambut dikuncir samping berikat `coral`, pipi merah muda, kemeja putih, rok `coral`, kaus kaki putih | K-01, K-12 | Ditinjau (kelompok N1) |
+| N-04 | Dimas | `npc_dimas_bawah_diam.png` (16 × 24), `npc_dimas_kanan_motor.png` (34 × 30) | `skin-4`, rambut cepak, jaket `sky-d` terbuka di atas seragam; pose khusus duduk di motor matik `mango` menghadap kanan, tanpa helm seperti adegan 2 Sehari Setara | K-02, K-05 | Ditinjau (kelompok N1) |
+| N-05 | Sinta | `npc_sinta_bawah_diam.png` (16 × 24) | `skin-3`, kerudung putih, kemeja lengan panjang, rok panjang `navy`, tanpa tas | K-09 | Ditinjau (kelompok N1) |
+| N-06 | Bu Ratih | `npc_ratih_bawah_diam.png` (16 × 26) | `skin-4`, rambut bob, kacamata, kemeja batik `teal`, rok cokelat, memeluk buku `mango` | Disebut di pilihan K-03 dan K-14; Design System bagian 8 | Ditinjau (kelompok N1) |
+| N-07 | Komang | `npc_komang_bawah_diam.png`, `npc_komang_bawah_menunduk.png` (16 × 24) | `skin-2`, potongan mangkuk, 1 piksel lebih pendek, seragam kebesaran tidak dimasukkan, sepatu kanan robek; pose khusus menunduk memegang kotak bekal | K-03 (K-15 hanya di dalam video, tidak di peta) | Ditinjau (kelompok N1) |
+| N-08 | Pak Made | `npc_made_bawah_diam.png` (16 × 26) | `skin-4`, rambut kelabu menipis, kumis kelabu, kaus `mango`, sarung kotak-kotak `navy` bergaris `sky-d`, sandal | K-02 | Ditinjau (kelompok N1) |
+| N-09 | Bayu | `npc_bayu_bawah_diam.png` (16 × 26) | `skin-2`, rambut rapi `hair-2`, kaus `mist`, jin `sky-d`, sepatu kets putih; netral dan ramah | K-07 | Ditinjau (kelompok N1) |
+
+#### Rincian kelompok N1 (6 November 2026)
+
+| | |
+|---|---|
+| Kode | `scripts/game/art/atas_tokoh.py` (bagian "tokoh bukan pemain": `NPC`, `npc()`, `strip_npc()`); gambar motor dipakai bersama lewat `_motor()` di `atas_objek.py` (motor O-27 tetap sama piksel) |
+| Berkas | 11 PNG di `app/jejak-setara/assets/npc/`, masing-masing strip 2 bingkai (diam bernapas) |
+| Ukuran | Seluruh kelompok N1 5,5 KB |
+| Titik kaki (jangkar) | Siswa 16 × 24: (8, 21) · dewasa 16 × 26: (8, 23) · anak 14 × 20: (7, 17) · Dimas di motor 34 × 30: (17, 28) |
+| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai |
+| Pratinjau | `preview/npc1_ringkasan.png` (setiap tokoh di samping sprite Sehari Setara yang sudah disetujui) dan `preview/npc1_peta.png` (tokoh di peta contoh, di tempat kejadiannya) |
+
+- Ciri setiap tokoh sama dengan sprite Sehari Setara (`docs/sehari-setara/Daftar_Aset.md` bagian A), diperkecil menjadi gaya *chibi* tampak atas dengan proporsi avatar yang sudah disetujui.
+- Tokoh bukan pemain tidak bertas punggung, kecuali Nara, sehingga tidak tertukar dengan pemain (usulan 9a).
+- Bayu digambarkan netral dan ramah, dan Komang digambarkan bermartabat (AGENTS bagian 8).
+- Avatar A1 sampai A8 tidak berubah; `_badan_bawah` hanya mendapat pilihan tanpa tali tas untuk tokoh bukan pemain.
 
 ### N2. Warga dan tokoh baru
 
@@ -563,5 +581,5 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## Cara membalas
 
-- **"Setuju: aset T"** berarti semua penanda dan efek kelompok T disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok N1 (sembilan tokoh Sehari Setara versi tampak atas).
-- Perbaikan cukup ditulis per penanda, misalnya "T-03: centang lebih tebal" atau "T-05: kompas di tutup peti lebih besar". Penanda lain yang tidak disebut tetap seperti sekarang.
+- **"Setuju: aset N1"** berarti kesembilan tokoh dan kedua pose khusus disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok N2 (warga, Raka, Wayan, dan siswa umum). Ciri Raka, Wayan, dan siswa umum saya usulkan di pratinjau N2 untuk Anda setujui (Permintaan A-1 Sesi B).
+- Perbaikan cukup ditulis per tokoh, misalnya "N-08: rambut Pak Made lebih banyak" atau "N-02: Ibu membawa keranjang". Tokoh lain yang tidak disebut tetap seperti sekarang.

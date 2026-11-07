@@ -27,7 +27,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from pixelart import *          # noqa: E402,F401,F403
 from atas_tokoh import (AVATAR, ARAH, BINGKAI, KETERANGAN, WARNA_TAS, avatar, strip_avatar,   # noqa: E402
-                        ikon_kepala, ganti_tas)
+                        ikon_kepala, ganti_tas, NPC, POSE_NPC, UKURAN_NPC, npc, strip_npc)
 from atas_ubin import (MASA, NAMA_MASA, KOLOM, NOMOR, BLOB, WILAYAH, SUSUNAN, UKURAN_LEMBAR,   # noqa: E402
                        ubin_rumput, ubin_wilayah, lembar_ubin, nomor_tanah)
 from atas_objek import POTONG_ATAP, OBJEK, KODE_OBJEK, PAGAR, obj_rumah_a, pisah   # noqa: E402
@@ -82,12 +82,22 @@ ASSETS["tanda_diri"] = ("ikon", lambda: strip([tanda_diri(a) for a in ARAH_DIRI]
 ASSETS["tanda_debu"] = ("ikon", lambda: strip([tanda_debu(b) for b in range(2)]), (16, 6))
 ASSETS["tanda_kilau"] = ("ikon", lambda: strip([tanda_kilau(b) for b in range(2)]), (16, 8))
 
+# Kelompok N1 (Ditinjau): tokoh Sehari Setara versi tampak atas, di folder npc/
+KODE_NPC = {"nara": "N-01", "ibu": "N-02", "gita": "N-03", "dimas": "N-04", "sinta": "N-05", "ratih": "N-06",
+            "komang": "N-07", "made": "N-08", "bayu": "N-09"}
+for _n, _poses in POSE_NPC.items():
+    for _pose in _poses:
+        _ukuran = (68, 30) if _pose == "motor" else (UKURAN_NPC[NPC[_n]["ukuran"]][0][0] * 2, UKURAN_NPC[NPC[_n]["ukuran"]][0][1])
+        ASSETS[f"npc_{_n}_{'kanan' if _pose == 'motor' else 'bawah'}_{_pose}"] = (
+            "npc", lambda n=_n, p=_pose: strip_npc(n, p), _ukuran)
+
 # Aset berstatus Disetujui: nama -> tanggal. Hanya aset di sini yang masuk CREDITS.md dan manifest.ts.
 KELOMPOK_O1 = {n for n, kode in KODE_OBJEK.items() if kode <= "O-20"}
 KELOMPOK_O2 = {n for n, kode in KODE_OBJEK.items() if "O-21" <= kode <= "O-28"}
 DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              if nama.startswith(("ava_", "ikon_ava_", "ubin_"))                     # kelompok A dan U
-             or NAMA_OBJEK.get(nama) in KELOMPOK_O1 | KELOMPOK_O2}                      # kelompok O1 dan O2
+             or NAMA_OBJEK.get(nama) in KELOMPOK_O1 | KELOMPOK_O2                       # kelompok O1 dan O2
+             or nama.startswith("tanda_")}                                              # kelompok T
 
 BATAS_STRIP = 6 * 1024              # satu strip avatar atau tokoh
 BATAS_UBIN = 60 * 1024              # satu lembar ubin per masa
@@ -110,10 +120,13 @@ def kode_aset(nama):
               "tanda_kilau": "T-12"}
     if nama in kode_t:
         return kode_t[nama]
+    if nama.startswith("npc_"):
+        return KODE_NPC.get(nama.split("_")[1], "—")
     return "—"
 
 
-JUDUL_FOLDER = {"ava": "Avatar pemain", "ikon": "Ikon", "ubin": "Lembar ubin per masa", "obj": "Objek dan bangunan"}
+JUDUL_FOLDER = {"ava": "Avatar pemain", "ikon": "Ikon", "ubin": "Lembar ubin per masa", "obj": "Objek dan bangunan",
+                "npc": "Tokoh bukan pemain"}
 
 
 def tulis_kredit(out_dir):
@@ -798,7 +811,7 @@ def _latar_bahan(m):
 
 def pratinjau_tanda_lembar():
     L = Lembar(1440, 1240)
-    L.judul("Kelompok T — Penanda dan efek (×8)", "Sesi C · 6 Nov 2026 · Ditinjau · di atas rumput, aspal, semen, pasir")
+    L.judul("Kelompok T — Penanda dan efek (×8)", "Sesi C · disetujui 6 Nov 2026 · di atas rumput, aspal, semen, pasir")
     m = MASA["siang"]
     for i, (fn, teks) in enumerate(((tanda_kejadian, "T-01 kejadian belum diperiksa"),
                                     (tanda_dibuka, "T-02 dialog sedang terbuka"),
@@ -905,13 +918,84 @@ def pratinjau_tanda_gerak():
     return bingkai, lama
 
 
+# ---------------------------------------------------------------------------
+# Pratinjau kelompok N1: tokoh Sehari Setara versi tampak atas
+# ---------------------------------------------------------------------------
+CIRI_NPC = {"nara": "poni, tas sun bertali mango", "ibu": "sanggul, daster rose", "gita": "kuncir coral, rok coral",
+            "dimas": "cepak, jaket sky-d", "sinta": "kerudung putih", "ratih": "bob, kacamata, batik teal",
+            "komang": "mangkuk, seragam kebesaran", "made": "kaus mango, sarung kotak", "bayu": "kaus mist, jin sky-d"}
+NAMA_NPC = {"nara": "Nara", "ibu": "Ibu", "gita": "Gita", "dimas": "Dimas", "sinta": "Sinta", "ratih": "Bu Ratih",
+            "komang": "Komang", "made": "Pak Made", "bayu": "Bayu"}
+
+
+def _sehari(nama):
+    """Sprite Sehari Setara yang sudah disetujui, sebagai pembanding ciri (dibaca dari tokoh.py tanpa diubah)."""
+    import tokoh as T
+    return {"nara": lambda: T.student("idle", 0), "ibu": lambda: T.mother("talk", 0), "gita": lambda: T.kid("idle"),
+            "dimas": lambda: T.dimas("offer", 0), "sinta": lambda: T.sinta("idle", 0), "ratih": lambda: T.ratih("idle", 0),
+            "komang": lambda: T.komang("idle", 0), "made": lambda: T.made("talk", 0),
+            "bayu": lambda: T.bayu("idle", 0)}[nama]()
+
+
+def pratinjau_npc1_ringkasan():
+    L = Lembar(1440, 940)
+    L.judul("Kelompok N1 — Tokoh Sehari Setara", "Sesi C · 6 Nov 2026 · Ditinjau · kiri: Sehari Setara ×2 · kanan: Jejak Setara ×6")
+    for i, nama in enumerate(NPC):
+        x, y = 20 + (i % 5) * 284, 70 + (i // 5) * 290
+        L.d.rectangle([x, y, x + 270, y + 270], outline=MIST[:3], width=2)        # noqa: F405
+        lama = besar(_sehari(nama), 2)
+        baru = besar(npc(nama, "diam", 0), 6)
+        dasar = y + 196
+        L.tempel(lama, x + 70 - lama.width // 2, dasar - lama.height)
+        L.tempel(baru, x + 196 - baru.width // 2, dasar - baru.height)
+        L.label(f"{KODE_NPC[nama]} {NAMA_NPC[nama]}", x + 135, y + 206, "tebal")
+        L.label(CIRI_NPC[nama], x + 135, y + 230)
+    x, y = 20 + 4 * 284, 70 + 290
+    L.d.rectangle([x, y, x + 270, y + 270], outline=MIST[:3], width=2)            # noqa: F405
+    L.d.text((x + 12, y + 10), "Pose khusus", font=L.f["tebal"], fill=INK[:3])     # noqa: F405
+    motor = besar(npc("dimas", "motor", 0), 3)
+    L.tempel(motor, x + 12, y + 46)
+    L.label("Dimas di motor (×3)", x + 12 + motor.width // 2, y + 46 + motor.height + 4)
+    tunduk = besar(npc("komang", "menunduk", 0), 4)
+    L.tempel(tunduk, x + 200, y + 150)
+    L.label("Komang menunduk (×4)", x + 135, y + 250)
+    L.d.text((20, 670), "Ukuran bingkai dan titik kaki: siswa 16×24 (8, 21) · dewasa 16×26 (8, 23) · anak 14×20 (7, 17) · "
+             "Dimas di motor 34×30 (17, 28). Diam 2 bingkai (bernapas).", font=L.f["kecil"], fill=INK[:3])   # noqa: F405
+    L.d.text((20, 696), "Tokoh bukan pemain tidak bertas punggung, kecuali Nara (tas sun bertali mango, warna asli). "
+             "Nama tokoh tidak ditulis di gambar.", font=L.f["kecil"], fill=INK[:3])   # noqa: F405
+    return L.im.crop((0, 0, 1440, 730))
+
+
+def _npc_di(nama, pose, x_kaki, y_kaki):
+    """Entri render_peta untuk tokoh bukan pemain dengan titik kaki (x_kaki, y_kaki)."""
+    jx, jy = (17, 28) if pose == "motor" else UKURAN_NPC[NPC[nama]["ukuran"]][1]
+    spr = npc(nama, pose, 0)
+    return (spr, spr, x_kaki - jx + 8, y_kaki - jy + 21, False)
+
+
+def pratinjau_npc1_peta():
+    L = Lembar(1320, 970)
+    L.judul("Kelompok N1 — Tokoh di peta contoh", "Sesi C · 6 Nov 2026 · Ditinjau · siang (×2)")
+    tokoh = [_npc_di("nara", "diam", 44, 92), _npc_di("gita", "diam", 58, 94), _npc_di("ibu", "diam", 28, 158),
+             _npc_di("made", "diam", 120, 158), _npc_di("dimas", "motor", 196, 186), _npc_di("komang", "menunduk", 404, 76),
+             _npc_di("ratih", "diam", 312, 128), _npc_di("sinta", "diam", 300, 352), _npc_di("bayu", "diam", 62, 400),
+             _pemain(5, 420, 210, "kanan", "jalan", 1, tas="berry"), _pemain(6, 250, 356, tas="teal")]
+    L.tempel(besar(render_peta(peta_kampung(), "siang", OBJEK_KAMPUNG, tokoh), 2), 20, 70)
+    L.label("Nara dan Gita di depan rumah (K-01) · Ibu · Pak Made di warung (K-02) · Dimas di motor dekat halte (K-05) · "
+            "Komang menunduk di kantin (K-03)", 660, 912)
+    L.label("Bu Ratih di halaman sekolah · Sinta di bale (K-09) · Bayu di pasar (K-07) · dua avatar pemain sebagai pembanding",
+            660, 936)
+    return L.im
+
+
 PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringkasan,
             "ava_pose_semua": pratinjau_ava_pose_semua, "ubin_contoh": pratinjau_ubin_contoh,
             "ubin_masa": pratinjau_ubin_masa, "ubin_dekat": pratinjau_ubin_dekat,
             "ubin_lembar": pratinjau_ubin_lembar, "obj_lembar": pratinjau_obj_lembar,
             "obj_peta": pratinjau_obj_peta, "obj_dekat": pratinjau_obj_dekat,
             "obj2_lembar": pratinjau_obj2_lembar, "obj2_peta": pratinjau_obj2_peta,
-            "tanda_lembar": pratinjau_tanda_lembar}
+            "tanda_lembar": pratinjau_tanda_lembar, "npc1_ringkasan": pratinjau_npc1_ringkasan,
+            "npc1_peta": pratinjau_npc1_peta}
 for _n in AVATAR:
     PREVIEWS[f"pose_ava_{_n}"] = (lambda n=_n: pratinjau_pose_avatar(n))
 ANIMASI = {"ava_gerak": pratinjau_ava_gerak, "tanda_gerak": pratinjau_tanda_gerak}

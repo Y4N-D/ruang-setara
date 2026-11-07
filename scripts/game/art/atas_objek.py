@@ -694,17 +694,22 @@ def obj_tempat_sampah():
     return _bingkai(d)
 
 
+def _motor(d, ox=0, oy=0):
+    """Motor matik mango 32x16 tanpa garis luar, digambar mulai (ox, oy). Dipakai O-27 dan pose Dimas."""
+    for cx in (6, 25):
+        d.disc(ox + cx, oy + 12, 3, INK); d.disc(ox + cx, oy + 12, 1, SLATE)       # noqa: F405  roda
+    d.r(ox + 8, oy + 6, 14, 5, MANGO); d.hl(ox + 8, ox + 21, oy + 6, SUN); d.hl(ox + 8, ox + 21, oy + 10, CORAL)  # noqa: F405
+    d.r(ox + 7, oy + 4, 9, 2, DUSK)                                                  # noqa: F405  jok
+    d.r(ox + 20, oy + 3, 3, 7, MANGO); d.vl(ox + 22, oy + 3, oy + 9, CORAL)          # noqa: F405  depan
+    d.r(ox + 20, oy + 1, 5, 1, SLATE); d.p(ox + 23, oy + 4, SUN)                     # noqa: F405  setang dan lampu
+    _garis(d, ox + 22, oy + 9, ox + 25, oy + 12, SLATE)                              # noqa: F405  garpu depan
+    d.hl(ox + 10, ox + 15, oy + 11, SLATE)                                           # noqa: F405  pijakan kaki
+
+
 def obj_motor():
     """Motor parkir (O-27), 2x1 ubin: matik mango seperti motor Dimas di Sehari Setara, tanpa merek dan pelat."""
     d = C(32, 16)                                                                    # noqa: F405
-    for cx in (6, 25):
-        d.disc(cx, 12, 3, INK); d.disc(cx, 12, 1, SLATE)                             # noqa: F405  roda
-    d.r(8, 6, 14, 5, MANGO); d.hl(8, 21, 6, SUN); d.hl(8, 21, 10, CORAL)             # noqa: F405  badan
-    d.r(7, 4, 9, 2, DUSK)                                                            # noqa: F405  jok
-    d.r(20, 3, 3, 7, MANGO); d.vl(22, 3, 9, CORAL)                                   # noqa: F405  depan
-    d.r(20, 1, 5, 1, SLATE); d.p(23, 4, SUN)                                         # noqa: F405  setang dan lampu
-    _garis(d, 22, 9, 25, 12, SLATE)                                                  # noqa: F405  garpu depan
-    d.hl(10, 15, 11, SLATE)                                                          # noqa: F405  pijakan kaki
+    _motor(d)
     return _bingkai(d)
 
 
