@@ -6,7 +6,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 |---|---|---|---|
 | JS-01 | Selesai (5 Nov 2026) | [JS-01-kerangka.md](specs/JS-01-kerangka.md) | [JS-01-hasil.md](tests/JS-01-hasil.md), lulus |
 | JS-02 | Selesai (7 Nov 2026) | [JS-02-inti-bersama.md](specs/JS-02-inti-bersama.md) | [JS-02-hasil.md](tests/JS-02-hasil.md), lulus (diuji ulang dengan dependensi terpasang di Plan JS-03) |
-| JS-03 | Direncanakan (7 Nov 2026), menunggu `Setuju: JS-03` | — | — |
+| JS-03 | Spesifikasi (DRAF 7 Nov 2026), menunggu `Spesifikasi disetujui: JS-03` | [JS-03-server-ruang.md](specs/JS-03-server-ruang.md) | — |
 | JS-04 | Belum direncanakan | — | — |
 | JS-05 | Dikerjakan Sesi B (mulai 7 Nov 2026); status di `naskah/STATUS.md` | — | — |
 | JS-06 | Dikerjakan Sesi C (mulai 7 Nov 2026); status di `Daftar_Aset.md` | — | — |
@@ -63,6 +63,7 @@ Keputusan pemilik proyek, 5 November 2026. Tiga sesi Claude bekerja bersamaan. S
 - Hanya Sesi A yang mengubah berkas berikut: `package.json`, `pnpm-lock.yaml`, `.gitignore`, `AGENTS.md` akar, dokumen ini (`docs/jejak-setara/PLAN.md`), keempat dokumen utama di `docs/jejak-setara/` (`PRD.md`, `Design_System.md`, `Architecture.md`, dan `AGENTS.md`), `vite.jejak.config.ts`, dan isi `.github/workflows/`.
 - `naskah/STATUS.md` dibuat dan diisi Sesi B; `Daftar_Aset.md` dibuat dan diisi Sesi C. Sesi A membaca keduanya dari ZIP repositori terbaru di setiap Plan, tetapi tidak mengubahnya.
 - Sesi B dan C menulis entri Plan JS-05 dan JS-06 (templat 12.1), status, serta tautan spesifikasi dan laporan ujinya di berkas statusnya sendiri. Permintaan perubahan pada berkas Sesi A ditulis di berkas yang sama di bawah judul "Permintaan untuk Sesi A". Sesi A membaca kedua berkas di setiap Plan dari ZIP terbaru, lalu mengerjakan atau menjawabnya di dokumen ini (keputusan Gerbang 1 JS-01, usulan 12a; AGENTS bagian 4.1).
+- Migrasi D1 (`server/jejak-setara/migrations/`) hanya ditulis Sesi A. `0001_awal.sql` (JS-03) memuat seluruh skema Architecture 5.2. Sesi lain yang butuh perubahan skema menulis permintaan di berkas statusnya (keputusan Gerbang 1 JS-03, usulan 4a).
 
 ## Keputusan server: paket gratis dulu
 
@@ -110,6 +111,8 @@ Keputusan pemilik proyek, 7 November 2026 (Plan JS-03):
 - Plan JS-08 (bila usulan 11a JS-03 disetujui): `tempatkanKejadian` (JS-02) diperluas agar satu kejadian mendapat dua titik aktif di ruang lebih dari 50 pemain; `periksa`, `kejadian_terlihat`, dan Kompas memakai titik terdekat.
 - Plan JS-15: aktifkan paket berbayar lebih dulu (Architecture 18 langkah 2), lalu jalankan `sim:beban` penuh di lingkungan uji.
 - Semua fitur sejak JS-03: `wrangler` terpasang 4.92.0, sedangkan versi terbaru 4.158.0 (pesan `wrangler deploy --dry-run`, 7 Nov 2026). Kenaikan versi tetap memerlukan izin dependensi dan uji ulang Vinext.
+- Plan JS-05 (Sesi B): semai bank awal menulis ke tabel `rujukan`, `kejadian`, `kejadian_versi`, `paket`, dan `paket_kejadian` dari `0001_awal.sql` (JS-03), dengan semua rujukan berstatus `belum`. Jangan menulis migrasi sendiri; kekurangan skema ditulis sebagai permintaan di `naskah/STATUS.md`.
+- Plan JS-06 (Sesi C): `manifest.ts` mengikuti Architecture 11.2 (C-6): `AVATAR` berupa larik A1–A8 yang langsung diindeks nomor avatar protokol (0–7). Uji peta meminta sedikitnya 12 titik kejadian per zona (Architecture 11.1).
 
 ## JS-01 — Kerangka
 
@@ -220,7 +223,7 @@ Keputusan pemilik proyek, 7 November 2026 (Plan JS-03):
 
 ## JS-03 — Server ruang
 
-- Status: Direncanakan (7 Nov 2026), menunggu `Setuju: JS-03`. Diperiksa sebelum Plan: JS-02 berstatus Selesai dan laporannya Lulus (uji ulang dengan dependensi terpasang, 7 Nov 2026). Server memakai paket gratis Cloudflare (bagian "Keputusan server" di atas).
+- Status: Disetujui (7 Nov 2026): balasan `Setuju: JS-03`, yaitu saran semua usulan diterima (1a sampai 12a), KT-02 dijawab sesuai saran (disediakan, mati secara bawaan, hanya untuk ruang sampai 50 pemain), KT-07 tidak diperlukan (3a), dan kapasitas ruang mengikuti usulan 11a. Direncanakan 7 Nov 2026. Spesifikasi ditulis 7 Nov 2026 ([JS-03-server-ruang.md](specs/JS-03-server-ruang.md)) bersama perubahan PRD dan Architecture untuk C-8 dan keputusan Gerbang 1; menunggu `Spesifikasi disetujui: JS-03` beserta pilihan DRAF D-1 sampai D-7. Diperiksa sebelum Plan: JS-02 berstatus Selesai dan laporannya Lulus (uji ulang dengan dependensi terpasang, 7 Nov 2026). Server memakai paket gratis Cloudflare (bagian "Keputusan server" di atas).
 - Memenuhi: JFR-02 (kode 5 karakter tanpa huruf dan angka yang mirip), JFR-04 (masuk tanpa akun: kode, nomor absen bila mode aktif, tiga saran nama samaran yang bisa diacak ulang, dan delapan avatar), JFR-08 (sambung ulang dengan skor dan progres utuh), serta bagian server JFR-01 (membuat ruang beserta pengaturannya), JFR-05 (daftar pemain di lobi; berjalan di halaman lobi menunggu JS-07, dan tampilan layar kelas menunggu JS-10), dan JFR-06 (mengunci ruang dan mengeluarkan pemain di inti ruang; tombolnya di JS-10). Architecture JA-02, JA-03, JA-04 (pemeriksaan gerak di server), JA-11, JA-12 (lingkungan uji), JA-13, bagian 6.1–6.8, 7, dan 8.6 (kiriman peserta ke D1). PRD bagian 12: koneksi yang putus sampai 2 menit tersambung kembali.
 - Bergantung pada: JS-02 (Selesai, 7 Nov 2026) dan penyiapan server dengan paket gratis (langkah 1 dan 3–6 Architecture bagian 18; bagian "Yang perlu disiapkan pemilik proyek" di bawah). Tidak menunggu JS-05 dan JS-06: JS-03 belum memakai kejadian, dan gerak diperiksa dengan peta uji sampai `kampung.json` Sesi C tersedia.
 - File yang dibuat/diubah (rencana; dipastikan di Specify):
@@ -276,7 +279,9 @@ Keputusan pemilik proyek, 7 November 2026 (Plan JS-03):
   - Galeri: setiap ZIP dicek dengan `build:pages`, dan ke-178 berkas harus identik.
 - Ukuran: L
 
-### Tanggapan permintaan Sesi B dan C (untuk disetujui sekaligus)
+### Tanggapan permintaan Sesi B dan C (disetujui 7 Nov 2026)
+
+A-1 sampai A-4 dan C-1 sampai C-7 diterapkan di ZIP dokumen `JS-03-dokumen-bc.zip` segera sesudah persetujuan (usulan 12a). C-8 diterapkan bersama spesifikasi JS-03.
 
 | Kode | Permintaan singkat | Tanggapan Sesi A | Perubahan yang diusulkan |
 |---|---|---|---|
