@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Tahap saat ini | Specify JS-05 (Gerbang 2): spesifikasi [`specs/JS-05-konten.md`](../specs/JS-05-konten.md) ditulis 7 November 2026, menunggu `Spesifikasi disetujui: JS-05` |
+| Tahap saat ini | JS-05 dibangun dan diuji 7 November 2026: laporan [`tests/JS-05-hasil.md`](../tests/JS-05-hasil.md) berkeputusan Lulus dengan pemeriksaan pengganti. Menunggu ZIP di-commit dan alur kerja "Jejak: uji" hijau |
 | Pekerjaan | Naskah final 16 kejadian dan rujukannya (selesai 5 November 2026), lalu JS-05: skema konten, bank awal, semai ke D1, dan `content:check:jejak` |
 | Tanggal | 7 November 2026 |
 | Acuan | ZIP repositori 7 November 2026 (JS-02 selesai menurut pemilik proyek; semua aset Sesi C Disetujui) |
@@ -35,12 +35,15 @@
 | 7 Nov 2026 | Plan JS-05 | Pemilik proyek mengabarkan JS-02 selesai dan sudah di-push. Entri Plan JS-05 serta Permintaan A-5 sampai A-9 ditulis; menunggu `Setuju: JS-05` |
 | 7 Nov 2026 | Plan JS-05 | Pemilik proyek membalas `Setuju: JS-05`: semua saran diterima (usulan 1a sampai 10a) |
 | 7 Nov 2026 | Specify JS-05 | Spesifikasi `specs/JS-05-konten.md` ditulis dengan DRAF D-1 sampai D-5. Daftar cek rujukan dilengkapi: JR-04 juga dipakai K-04, dan JR-05 juga dipakai K-05 (sesuai persetujuan Permintaan A-3 dan A-4). Permintaan A-5 dan A-7 diperbarui, dan bagian "Untuk Sesi C" mengikuti usulan 4a dan 6a. Menunggu `Spesifikasi disetujui: JS-05` |
+| 7 Nov 2026 | Specify JS-05 | Pemilik proyek membalas `Spesifikasi disetujui: JS-05`: D-1 sampai D-5 diterima tanpa perubahan |
+| 7 Nov 2026 | Build JS-05 | Uji konten ditulis lebih dulu, lalu `inti/konten/skema.ts`, `inti/konten/periksa.ts`, `seed/bank-awal.json`, `seed/kontrak-d1.sql`, dan `scripts/jejak-setara/semai.mjs`. `NASKAH.md` mendapat bagian "Set tokoh dan latar titik (bank awal)". Permintaan A-10 ditambahkan |
+| 7 Nov 2026 | Test JS-05 | Semua kriteria AC-1 sampai AC-18 lulus, sebagian dengan pemeriksaan pengganti karena pemasangan paket tertutup (laporan `tests/JS-05-hasil.md`). Semai tidak dijalankan ke basis data mana pun |
 
 ## JS-05 — Konten
 
 Entri Plan JS-05 (templat AGENTS 12.1). Entri ini ditulis di sini, bukan di `PLAN.md`, karena `PLAN.md` hanya diubah Sesi A (AGENTS bagian 4.1).
 
-- Status: Spesifikasi (7 Nov 2026), menunggu `Spesifikasi disetujui: JS-05`. Gerbang 1 disetujui 7 Nov 2026 dengan usulan 1a sampai 10a. Spesifikasi: [`specs/JS-05-konten.md`](../specs/JS-05-konten.md).
+- Status: Diuji (7 Nov 2026). Gerbang 1 disetujui dengan usulan 1a sampai 10a, dan Gerbang 2 dengan D-1 sampai D-5 tanpa perubahan. Spesifikasi: [`specs/JS-05-konten.md`](../specs/JS-05-konten.md). Laporan: [`tests/JS-05-hasil.md`](../tests/JS-05-hasil.md), Lulus dengan pemeriksaan pengganti. JS-05 menjadi Selesai sesudah ZIP di-commit, alur kerja "Jejak: uji" hijau, dan perintah resmi yang belum bisa dijalankan di sesi ini lulus (laporan, bagian "Perintah").
   - Pemeriksaan sebelum Plan (AGENTS 4.1 langkah 1): pemilik proyek menyatakan JS-02 selesai dan sudah di-push (7 Nov 2026). ZIP 7 Nov 2026 memuat kode `app/jejak-setara/inti/` dari JS-02, dan laporan JS-02 berkeputusan Lulus (dengan pemeriksaan pengganti). `PLAN.md` masih menulis JS-02 "Diuji"; status Selesai dicatat Sesi A di awal Plan JS-03, sesuai catatan "Plan JS-03, langkah pertama" di `PLAN.md`.
   - KT-10 dijawab pemilik proyek (7 Nov 2026): K-02 versi A. Keputusan ini sudah diterapkan di ZIP Gerbang 1 ini (`K-02.md` dan `NASKAH.md`).
 - Memenuhi: JFR-15, JFR-16, JFR-43, dan JFR-45 (bagian data), ditambah Paket inti 16 untuk JFR-46. Rinciannya: 16 kejadian, dua per zona, untuk penempatan per ruang (JFR-15); isi dialog dua langkah dan kartu dampak (JFR-16); status awal kejadian (JFR-43); serta pustaka 23 rujukan dengan teks, sumber, dan status `belum` (JFR-45). Juga Architecture 5.4 (satu skema `zod` untuk bank awal dan isian konsol), JA-10 (bank awal disemai dari repositori ke D1), dan 10.6 (agen dan skrip tidak pernah menyemai `terverifikasi`).
@@ -51,7 +54,7 @@ Entri Plan JS-05 (templat AGENTS 12.1). Entri ini ditulis di sini, bukan di `PLA
   - Baru, data dan skrip: `server/jejak-setara/seed/bank-awal.json` (usulan 2 dan 3) dan `scripts/jejak-setara/semai.mjs` (usulan 7). Specify menambah `server/jejak-setara/seed/kontrak-d1.sql`: kontrak tabel untuk uji semai sebelum migrasi JS-03 ada, bukan migrasi.
   - Baru, uji di `app/jejak-setara/__tests__/konten/` (usulan 9): `bank-skema.test.ts`, `bank-aturan.test.ts`, `bank-protokol.test.ts`, `bank-aset.test.ts`, `bank-semai.test.ts`, `bank-peta.test.ts`, `naskah-cocok.test.ts`, dan berkas pembantu `naskah-urai.ts`.
   - Baru, dokumen: `docs/jejak-setara/specs/JS-05-konten.md` (ZIP Gerbang 2) dan `docs/jejak-setara/tests/JS-05-hasil.md` (Test), sesuai usulan 10a.
-  - Diubah saat Build: `naskah/NASKAH.md` (kolom kunci set tokoh dan latar titik) dan `naskah/STATUS.md`.
+  - Diubah saat Build: `naskah/NASKAH.md` (bagian baru "Set tokoh dan latar titik (bank awal)", berisi tabel D-1 dan D-2) dan `naskah/STATUS.md`.
   - Tidak disentuh: `package.json`, lockfile, alur kerja, `server/jejak-setara/wrangler.jsonc`, folder migrasi, berkas `inti/` lain (termasuk `tipe.ts` dan `protokol.ts`), `teks.ts`, keempat dokumen utama, aset, kode dan dokumen Sehari Setara, serta galeri. Perubahan yang dibutuhkan di sana ditulis sebagai Permintaan A-5 sampai A-9.
 - Migrasi D1: tidak ada. Tabel D1 dibuat Sesi A di JS-03; semai menulis ke tabel Architecture 5.2 sesuai kontrak di Permintaan A-5.
 - Pesan protokol baru/berubah: tidak ada. Isi bank diperiksa terhadap skema pesan JS-02 yang sudah ada.
@@ -390,6 +393,8 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 | A-8 | `docs/jejak-setara/PRD.md` bagian 10, 20, dan 21 | (1) Catat KT-10 dijawab pemilik proyek (7 Nov 2026): K-02 memakai versi A (umum, tanpa menyebut hari suci tertentu). (2) Bila usulan 6a entri JS-05 dipilih, tambahkan di "Aturan menulis kejadian": latar situasi harus ada di semua titik kejadian zonanya | Keputusan pemilik proyek di awal Plan JS-05; usulan 6 entri JS-05 | Diajukan |
 | A-9 | Plan JS-08 dan JS-10 | Rencanakan uji kejadian dan ruang kelas dengan ruang uji atau data uji. Kejadian bank awal baru bisa terbit sesudah Peninjau memverifikasi ke-23 rujukannya di konsol (JS-12) | AGENTS bagian 8 dan JFR-43; risiko di entri JS-05 | Diajukan |
 
+| A-10 | `docs/jejak-setara/PLAN.md` | Catat status JS-05: Diuji 7 Nov 2026 dengan laporan `tests/JS-05-hasil.md` (Lulus dengan pemeriksaan pengganti), lalu Selesai sesudah alur kerja "Jejak: uji" hijau dan perintah resmi lulus. Di Plan JS-03, jalankan juga `content:check:jejak` dengan Vitest sungguhan, seperti catatan "Plan JS-03, langkah pertama" untuk JS-02 | AGENTS bagian 10 (definisi selesai: `PLAN.md` diperbarui); `PLAN.md` hanya diubah Sesi A | Diajukan |
+
 ## Untuk Sesi C (diteruskan pemilik proyek)
 
 - O-42 (`obj_sanggah`) tidak diperlukan: KT-10 dijawab versi A (7 Nov 2026).
@@ -398,7 +403,9 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 
 ## Catatan untuk JS-05
 
-- JS-05 dimulai 7 Nov 2026, sesudah pemilik proyek mengabarkan bahwa JS-02 selesai. Gerbang 1 disetujui pada hari yang sama (usulan 1a sampai 10a), dan spesifikasinya ada di `specs/JS-05-konten.md`.
+- JS-05 dimulai 7 Nov 2026, sesudah pemilik proyek mengabarkan bahwa JS-02 selesai. Gerbang 1 dan Gerbang 2 disetujui pada hari yang sama, lalu JS-05 dibangun dan diuji (`specs/JS-05-konten.md`, `tests/JS-05-hasil.md`).
+- Bank awal disemai sekali per basis data. Sesudah semai pertama di sebuah basis data, perbaikan naskah dilakukan di konsol (JA-10); mengubah `bank-awal.json` hanya berpengaruh pada basis data baru. Bila teks naskah di repositori diubah, `K-xx.md`, `NASKAH.md`, dan `bank-awal.json` diubah bersama, dan uji `naskah-cocok` memastikan ketiganya sama.
+- Begitu `manifest.ts` ada (Permintaan A-6), Sesi B menambah pemeriksaan kunci set tokoh ke manifest di uji `bank-aset`.
 - Batas berkas JS-05 dari pemilik proyek (7 Nov 2026): `docs/jejak-setara/naskah/`, `app/jejak-setara/inti/konten/`, `server/jejak-setara/seed/`, `scripts/jejak-setara/semai.mjs`, dan berkas berawalan `naskah-` atau `bank-` di `app/jejak-setara/__tests__/konten/`. Sesi C juga menaruh uji peta di folder itu. Perubahan pada berkas lain ditulis di "Permintaan untuk Sesi A".
 
 ## Ringkasan akhir tahap naskah (5 November 2026)
@@ -417,14 +424,13 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 
 | No. | Hal | Siapa | Keterangan |
 |---|---|---|---|
-| 1 | `Spesifikasi disetujui: JS-05`, boleh dengan perubahan D-1 sampai D-5 | Pemilik proyek | DRAF ada di bagian "DRAF untuk ditinjau pemilik proyek" spesifikasi JS-05 |
-| 2 | Permintaan A-1 sampai A-9 | Sesi A | Dibaca Sesi A dari berkas ini pada Plan berikutnya. A-5 (diperbarui 7 Nov 2026) diperlukan sebelum semai bisa dijalankan di D1 |
+| 1 | Commit dan push ZIP JS-05, lalu memastikan alur kerja "Jejak: uji" hijau | Pemilik proyek | Bila merah, kirim tangkapan layarnya ke Sesi B |
+| 2 | Permintaan A-1 sampai A-10 | Sesi A | Dibaca Sesi A dari berkas ini pada Plan berikutnya. A-5 (diperbarui 7 Nov 2026) diperlukan sebelum semai bisa dijalankan di D1 |
 | 3 | Membaca langsung JR-19 dan JR-22 di naskah resmi | Pemilik proyek | Pra-pemeriksaan keduanya memakai sumber sekunder. Pastikan juga keduanya tidak diubah UU Cipta Kerja; catatan R-06 meminta hal yang sama untuk JR-18 |
 | 4 | Tanda "Terverifikasi" untuk 23 rujukan | Peninjau, di konsol (JS-12) | Bank awal disemai dengan semua rujukan berstatus `belum` |
 | 5 | Pesan untuk Sesi C | Pemilik proyek | Teruskan bagian "Untuk Sesi C" sebelum Sesi C menata titik kejadian di peta JS-06 |
 
 ## Cara membalas
 
-- Bila semua DRAF diterima, cukup tulis "Spesifikasi disetujui: JS-05".
-- Bila ingin mengubah, sebutkan kode DRAF-nya, misalnya "Spesifikasi disetujui: JS-05, D-1: K-15 memakai npc_siswa1_bawah_hp".
+- Sesudah push, cukup kabari warna alur kerja "Jejak: uji". Bila merah, kirim tangkapan layarnya.
 - Revisi atau pertanyaan cukup ditulis bebas.

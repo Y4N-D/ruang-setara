@@ -1,0 +1,1379 @@
+{
+  "versi": 1,
+  "rujukan": [
+    {
+      "id": "JR-01",
+      "teks": "Pasal 28B ayat (2) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": "R-01",
+      "catatan": "Yang dibutuhkan kejadian: perlindungan dan tumbuh kembang Gita (K-01); perlindungan Komang dari kekerasan psikis dan diskriminasi (K-03). Padanan Sehari Setara: R-01, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-02",
+      "teks": "Pasal 28E ayat (1) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: kebebasan memeluk agama dan beribadat (K-02). Rujukan baru: baca pasalnya penuh di naskah resmi. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-03",
+      "teks": "Pasal 29 ayat (2) UUD NRI 1945",
+      "sumber": "https://jdih.kemenkeu.go.id/FullText/1945/UUDTAHUN~1945UUD.HTM",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: jaminan negara atas kemerdekaan beribadat (K-02). Rujukan baru: baca pasalnya penuh di naskah resmi. Bunyi pasal ada di naskah asli 1945; pastikan juga di naskah gabungan bahwa ayat ini tidak diubah."
+    },
+    {
+      "id": "JR-04",
+      "teks": "Pasal 28J ayat (1) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": "R-08",
+      "catatan": "Yang dibutuhkan kejadian: kewajiban menghormati hak asasi orang lain. Dipakai di sebelas kejadian bank awal: K-02, K-03, K-04, K-06, K-08, K-09, K-10, K-12, K-13, K-15, dan K-16. Padanan Sehari Setara: R-08, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-05",
+      "teks": "Pasal 28G ayat (1) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": "R-03",
+      "catatan": "Yang dibutuhkan kejadian: kehormatan dan martabat (K-03, K-15); rasa aman dan keselamatan di jalan (K-05); nama baik dan rasa aman Bayu (K-07). Padanan Sehari Setara: R-03, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-06",
+      "teks": "Pasal 31 ayat (1) UUD NRI 1945",
+      "sumber": "https://jdih.setkab.go.id/PUUdoc/16953/UUD1945PerubahanKeempat.pdf",
+      "kodeSehari": "R-04",
+      "catatan": "Yang dibutuhkan kejadian: hak atas pendidikan (K-04, K-14). Padanan Sehari Setara: R-04, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Cocokkan bunyi pasal dengan naskah Perubahan Keempat (2002)."
+    },
+    {
+      "id": "JR-07",
+      "teks": "Pasal 28H ayat (2) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: kemudahan atau perlakuan khusus agar Raka mendapat kesempatan yang sama (K-04). Rujukan baru: baca pasalnya penuh di naskah resmi. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-08",
+      "teks": "Pasal 27 ayat (1) UUD NRI 1945",
+      "sumber": "https://jdih.kemenkeu.go.id/FullText/1945/UUDTAHUN~1945UUD.HTM",
+      "kodeSehari": "R-05",
+      "catatan": "Yang dibutuhkan kejadian: kewajiban menjunjung hukum, termasuk aturan lalu lintas (K-05). Padanan Sehari Setara: R-05, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Bunyi pasal ada di naskah asli 1945; pastikan juga di naskah gabungan bahwa ayat ini tidak diubah."
+    },
+    {
+      "id": "JR-09",
+      "teks": "Pasal 28D ayat (1) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": "R-09",
+      "catatan": "Yang dibutuhkan kejadian: kepastian hukum yang adil dan perlakuan yang sama di hadapan hukum (K-07). Padanan Sehari Setara: R-09, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-10",
+      "teks": "Pasal 28H ayat (4) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: hak milik pribadi tidak boleh diambil alih secara sewenang-wenang (K-08). Rujukan baru: baca pasalnya penuh di naskah resmi. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-11",
+      "teks": "Pasal 28E ayat (3) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": "R-07",
+      "catatan": "Yang dibutuhkan kejadian: kebebasan mengeluarkan pendapat (K-09). Padanan Sehari Setara: R-07, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-12",
+      "teks": "Pasal 28I ayat (2) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: bebas dari perlakuan yang diskriminatif (K-10). Rujukan baru: baca pasalnya penuh di naskah resmi. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-13",
+      "teks": "Pasal 28H ayat (1) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: lingkungan hidup yang baik dan sehat (K-11); pelayanan kesehatan (K-13). Rujukan baru: baca pasalnya penuh di naskah resmi. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-14",
+      "teks": "Pasal 28F UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: hak berkomunikasi dan memperoleh informasi (K-16). Rujukan baru: baca pasalnya penuh di naskah resmi. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-15",
+      "teks": "Pasal 28J ayat (2) UUD NRI 1945",
+      "sumber": "https://peraturan.go.id/files/UUD+1945+Perubahan+Kedua.pdf",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: pembatasan hak dengan undang-undang demi hak orang lain dan ketertiban umum (K-16). Rujukan baru: baca pasalnya penuh di naskah resmi. Cocokkan bunyi pasal dengan naskah Perubahan Kedua (2000), bukan naskah gabungan UUD 1945 di JDIH Kemenkeu yang memuat beberapa salah ketik di Bab XA."
+    },
+    {
+      "id": "JR-16",
+      "teks": "UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19",
+      "sumber": "https://peraturan.bpk.go.id/Details/44473/uu-no-23-tahun-2002 · https://peraturan.go.id/files/uu35-2014bt.pdf",
+      "kodeSehari": "R-02",
+      "catatan": "Yang dibutuhkan kejadian: kewajiban anak menghormati orang tua dan menyayangi keluarga (K-01). Padanan Sehari Setara: R-02, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Sumbernya dua: UU 23/2002 dan UU 35/2014 yang mengubahnya."
+    },
+    {
+      "id": "JR-17",
+      "teks": "UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 11",
+      "sumber": "https://peraturan.bpk.go.id/Details/44473/uu-no-23-tahun-2002 · https://peraturan.go.id/files/uu35-2014bt.pdf",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: hak anak beristirahat, bermain, dan bergaul dengan teman sebaya (K-12). Rujukan baru: baca pasalnya penuh di naskah resmi. Pastikan apakah Pasal 11 termasuk pasal yang diubah UU 35/2014 (lihat Pasal I UU 35/2014)."
+    },
+    {
+      "id": "JR-18",
+      "teks": "UU No. 22 Tahun 2009 tentang LLAJ, Pasal 77 ayat (1) dan Pasal 106 ayat (8)",
+      "sumber": "https://peraturan.bpk.go.id/Details/38654/uu-no-22-tahun-2009",
+      "kodeSehari": "R-06",
+      "catatan": "Yang dibutuhkan kejadian: wajib punya SIM; pengemudi dan penumpang sepeda motor wajib berhelm (K-05). Padanan Sehari Setara: R-06, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Seperti catatan R-06, pastikan Pasal 77 dan Pasal 106 tidak diubah UU Cipta Kerja."
+    },
+    {
+      "id": "JR-19",
+      "teks": "UU No. 22 Tahun 2009 tentang LLAJ, Pasal 131 ayat (2)",
+      "sumber": "https://peraturan.bpk.go.id/Details/38654/uu-no-22-tahun-2009",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: pejalan kaki didahulukan saat menyeberang di tempat penyeberangan (K-06). Rujukan baru: baca pasalnya penuh di naskah resmi. Pra-pemeriksaan agen hanya memakai sumber sekunder, jadi bunyinya perlu dibaca langsung. Pastikan juga Pasal 131 tidak diubah UU Cipta Kerja."
+    },
+    {
+      "id": "JR-20",
+      "teks": "UU No. 48 Tahun 2009, Pasal 8 ayat (1) (asas praduga tak bersalah)",
+      "sumber": "https://peraturan.go.id/files/uu48-2009.pdf",
+      "kodeSehari": "R-12",
+      "catatan": "Yang dibutuhkan kejadian: Bayu dianggap tidak bersalah selama belum ada putusan pengadilan (K-07). Padanan Sehari Setara: R-12, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya."
+    },
+    {
+      "id": "JR-21",
+      "teks": "UU No. 2 Tahun 2002 sebagaimana telah diubah terakhir dengan UU No. 5 Tahun 2026, Pasal 13 dan Pasal 14 ayat (1) huruf g",
+      "sumber": "https://peraturan.bpk.go.id/Details/44418/uu-no-2-tahun-2002 · https://peraturan.bpk.go.id/Details/350096/uu-no-5-tahun-2026",
+      "kodeSehari": "R-11",
+      "catatan": "Yang dibutuhkan kejadian: polisi menerima laporan dan menyelidiki (K-07). Padanan Sehari Setara: R-11, dicek pemilik proyek untuk Sehari Setara pada 5 November 2026; cukup pastikan isinya cocok dengan kejadian yang memakainya. Menurut catatan R-11 (5 November 2026), UU 5/2026 sedang diuji di Mahkamah Konstitusi; bila dibatalkan, rujukan ini ditinjau ulang."
+    },
+    {
+      "id": "JR-22",
+      "teks": "UU No. 32 Tahun 2009, Pasal 67",
+      "sumber": "https://peraturan.bpk.go.id/Details/38771/uu-no-32-tahun-2009",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: kewajiban setiap orang menjaga kelestarian lingkungan dan mencegah pencemaran (K-11). Rujukan baru: baca pasalnya penuh di naskah resmi. Pra-pemeriksaan agen hanya memakai sumber sekunder, jadi bunyinya perlu dibaca langsung. Halaman JDIH BPK mencatat UU ini diubah lewat UU Cipta Kerja; pastikan Pasal 67 tidak termasuk yang diubah."
+    },
+    {
+      "id": "JR-23",
+      "teks": "Pasal 31 ayat (2) UUD NRI 1945",
+      "sumber": "https://jdih.setkab.go.id/PUUdoc/16953/UUD1945PerubahanKeempat.pdf",
+      "kodeSehari": null,
+      "catatan": "Yang dibutuhkan kejadian: kewajiban mengikuti pendidikan dasar, dan kewajiban pemerintah membiayainya (K-14). Rujukan baru: baca pasalnya penuh di naskah resmi. Cocokkan bunyi pasal dengan naskah Perubahan Keempat (2002)."
+    }
+  ],
+  "kejadian": [
+    {
+      "kode": "K-01",
+      "judul": "Menjaga adik",
+      "zona": "z1",
+      "setTokoh": [
+        "npc_nara_bawah_diam",
+        "npc_gita_bawah_diam",
+        "npc_siswa1_bawah_diam"
+      ],
+      "situasi": "Ibu pergi mengantar Nenek ke puskesmas dan meminta Nara menjaga Gita sampai sore. Tidak lama kemudian, seorang teman datang ke pagar dan mengajak Nara bermain ke pantai. “Ayo ikut, Gita bisa ditinggal sebentar,” katanya.",
+      "langkah1": {
+        "pertanyaan": "Kewajiban apa yang perlu Nara jalankan saat ini?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Mengerjakan PR lebih dulu karena kewajiban utama seorang siswa adalah belajar",
+            "benar": false,
+            "umpanBalik": "Belajar memang kewajiban siswa, tetapi saat ini yang dipertaruhkan adalah keselamatan Gita yang dititipkan Ibu kepada Nara."
+          },
+          {
+            "id": "1b",
+            "teks": "Menjaga Gita sampai sore sebagai tanda hormat dan sayang kepada keluarga",
+            "benar": true,
+            "umpanBalik": "Ibu sedang mengantar Nenek, jadi Nara diminta menggantikannya menjaga Gita. Menjalankan permintaan itu adalah wujud hormat dan sayang kepada keluarga."
+          },
+          {
+            "id": "1c",
+            "teks": "Menitipkan Gita kepada tetangga sebentar agar ia tetap bisa pergi ke pantai",
+            "benar": false,
+            "umpanBalik": "Ibu menitipkan Gita kepada Nara, bukan kepada tetangga. Memindahkan tugas itu tanpa izin Ibu sama saja dengan mengabaikannya."
+          },
+          {
+            "id": "1d",
+            "teks": "Menuruti ajakan temannya agar Nara tidak dianggap sombong dan dijauhi",
+            "benar": false,
+            "umpanBalik": "Menyayangi teman tidak berarti harus selalu menuruti ajakannya. Teman yang baik akan mengerti bila Nara sedang menjaga adiknya."
+          }
+        ],
+        "petunjuk": "Perhatikan apa yang diminta Ibu sebelum pergi dan siapa yang perlu dilindungi."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang sebaiknya Nara lakukan terhadap ajakan itu?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Tetap di rumah, tetapi asyik bermain HP dan membiarkan Gita bermain sendiri di gang",
+            "tingkat": "kurang",
+            "terjadi": "Nara memang di rumah, tetapi Gita bermain sendirian di gang tanpa diawasi. Ibu kecewa saat tahu Gita dibiarkan sendiri."
+          },
+          {
+            "id": "2b",
+            "teks": "Tetap menjaga Gita dan mengajak temannya bermain di rumah atau pergi lain hari",
+            "tingkat": "tepat",
+            "terjadi": "Temannya mau bermain di halaman bersama Nara, dan Gita senang bisa ikut. Saat Ibu pulang, Gita aman dan Ibu merasa tenang."
+          },
+          {
+            "id": "2c",
+            "teks": "Pergi ke pantai sebentar bersama temannya dan meninggalkan Gita sendirian di rumah",
+            "tingkat": "berisiko",
+            "terjadi": "Gita ketakutan sendirian di rumah dan menangis mencari kakaknya. Tetangga harus menenangkannya sampai Ibu pulang."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak anak atas perlindungan serta kesempatan tumbuh dan berkembang.",
+        "kewajiban": "Kewajiban anak menghormati orang tua dan menyayangi keluarga.",
+        "rujukan": [
+          "JR-16",
+          "JR-01"
+        ]
+      },
+      "topik": "Kewajiban anak dalam keluarga",
+      "jenis": "pengabaian_kewajiban"
+    },
+    {
+      "kode": "K-02",
+      "judul": "Hari suci tetangga",
+      "zona": "z1",
+      "setTokoh": [
+        "npc_made_bawah_diam",
+        "npc_dimas_bawah_diam",
+        "obj_pengeras_suara"
+      ],
+      "situasi": "Keluarga Pak Made sedang menjalankan hari suci agamanya dan beribadah di rumah dengan khusyuk. Dimas datang membawa pengeras suara dan mengajakmu bermain musik keras di teras dekat rumah mereka. “Sebentar saja, mereka pasti tidak keberatan,” katanya.",
+      "langkah1": {
+        "pertanyaan": "Hak apa yang perlu dihormati dalam situasi ini?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak Pak Made untuk melarang siapa pun lewat di depan rumahnya hari ini",
+            "benar": false,
+            "umpanBalik": "Keluarga Pak Made tidak melarang siapa pun lewat. Yang mereka butuhkan hanyalah suasana tenang untuk beribadah."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak anak-anak untuk bermain dan bergembira bersama teman sebayanya",
+            "benar": false,
+            "umpanBalik": "Hak bermain tetap ada dan tidak hilang. Kalian tetap bisa bermain tanpa suara keras atau di tempat lain."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak Dimas untuk bermain musik kapan saja di sekitar rumahnya sendiri",
+            "benar": false,
+            "umpanBalik": "Bermain musik memang boleh, tetapi hak itu dijalankan dengan menghormati hak orang lain, apalagi saat tetangga sedang beribadah."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak keluarga Pak Made untuk beribadah dengan tenang menurut agamanya",
+            "benar": true,
+            "umpanBalik": "Beribadah menurut agama masing-masing adalah hak setiap orang. Suasana tenang membantu keluarga Pak Made beribadah dengan khusyuk."
+          }
+        ],
+        "petunjuk": "Perhatikan apa yang sedang dilakukan keluarga Pak Made dan apa yang mereka butuhkan."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Ikut bermain musik di teras itu, tetapi meminta Dimas sedikit mengecilkan suaranya",
+            "tingkat": "kurang",
+            "terjadi": "Suara musik memang lebih kecil, tetapi masih terdengar sampai ke rumah mereka. Keluarga Pak Made sulit beribadah dengan khusyuk."
+          },
+          {
+            "id": "2b",
+            "teks": "Ikut bermain musik sekeras-kerasnya karena kalian juga punya hak untuk bersenang-senang",
+            "tingkat": "berisiko",
+            "terjadi": "Ibadah keluarga Pak Made terganggu oleh musik keras dari teras itu. Hubungan dengan tetangga pun menjadi renggang."
+          },
+          {
+            "id": "2c",
+            "teks": "Menolak dengan sopan dan mengajak Dimas bermain tanpa pengeras suara atau di tempat lain",
+            "tingkat": "tepat",
+            "terjadi": "Dimas berpikir ulang, lalu kalian bermain di tempat lain. Keluarga Pak Made dapat beribadah dengan tenang."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak beribadah dengan tenang menurut agama masing-masing.",
+        "kewajiban": "Kewajiban menghormati hak orang lain untuk beribadah.",
+        "rujukan": [
+          "JR-02",
+          "JR-03",
+          "JR-04"
+        ]
+      },
+      "topik": "Kebebasan beragama",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-03",
+      "judul": "Bekal yang diejek",
+      "zona": "z2",
+      "setTokoh": [
+        "npc_komang_bawah_menunduk",
+        "npc_siswa5_bawah_hp",
+        "npc_siswa6_bawah_diam"
+      ],
+      "situasi": "Saat istirahat di dekat kantin, Komang, adik kelas VII, membuka bekal sederhana yang dibawanya dari rumah. Beberapa siswa menertawakan bekalnya, dan salah satu dari mereka memotretnya dengan HP. Komang menunduk lalu menutup kotak bekalnya.",
+      "langkah1": {
+        "pertanyaan": "Hak apa yang terganggu oleh perbuatan para siswa itu?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak siswa yang memotret untuk menyimpan foto apa pun di HP miliknya sendiri",
+            "benar": false,
+            "umpanBalik": "Memiliki HP tidak membuat seseorang boleh memotret orang lain untuk diejek. Foto itu justru bisa membuat Komang makin malu."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak para siswa untuk bercanda dan berpendapat tentang apa saja di sekolah",
+            "benar": false,
+            "umpanBalik": "Bercanda dan berpendapat memang hak, tetapi tidak boleh merendahkan orang lain. Ejekan tentang bekal Komang melukai martabatnya."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak sekolah untuk mengatur jenis bekal yang boleh dibawa setiap siswa",
+            "benar": false,
+            "umpanBalik": "Sekolah memang membuat aturan, tetapi masalah di sini bukan jenis bekal, melainkan ejekan yang merendahkan Komang."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak Komang untuk dihormati dan dilindungi dari ejekan yang merendahkannya",
+            "benar": true,
+            "umpanBalik": "Komang berhak atas kehormatan dan martabatnya, juga atas perlindungan sebagai anak. Ejekan dan foto itu merendahkan dirinya."
+          }
+        ],
+        "petunjuk": "Perhatikan perasaan Komang dan apa yang sebenarnya diserang oleh ejekan itu."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Meminta mereka berhenti dengan tenang, mengajak Komang menjauh, lalu melapor kepada Bu Ratih",
+            "tingkat": "tepat",
+            "terjadi": "Para siswa berhenti tertawa, dan Komang tidak lagi sendirian. Bu Ratih segera menanggapi laporan itu, dan foto Komang dihapus."
+          },
+          {
+            "id": "2b",
+            "teks": "Duduk menemani Komang tanpa berkata apa-apa, tetapi tidak melapor kepada siapa pun di sekolah",
+            "tingkat": "kurang",
+            "terjadi": "Komang merasa sedikit lebih tenang, tetapi ejekan berlanjut dan fotonya mulai beredar. Tidak ada guru yang tahu."
+          },
+          {
+            "id": "2c",
+            "teks": "Ikut tertawa dan meminta fotonya dikirim kepadamu agar kamu tidak ikut diejek",
+            "tingkat": "berisiko",
+            "terjadi": "Komang makin malu karena orang yang ia harapkan membela malah ikut menertawakannya. Fotonya pun makin cepat beredar."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak anak atas kehormatan dan martabat, serta perlindungan dari kekerasan dan diskriminasi.",
+        "kewajiban": "Kewajiban tidak merendahkan orang lain.",
+        "rujukan": [
+          "JR-01",
+          "JR-05",
+          "JR-04"
+        ]
+      },
+      "topik": "Perlindungan dari perundungan",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-04",
+      "judul": "Kelas di lantai dua",
+      "zona": "z2",
+      "setTokoh": [
+        "npc_raka_bawah_kursiroda",
+        "npc_siswa5_bawah_diam"
+      ],
+      "situasi": "Kelasmu akan praktik di laboratorium lantai dua, dan satu-satunya jalan ke sana adalah tangga. Raka, teman sekelas pengguna kursi roda, ingin ikut praktik bersama kelompoknya. Seorang teman berkata, “Raka tidak usah ikut saja, nanti kita terlambat.”",
+      "langkah1": {
+        "pertanyaan": "Hak apa yang dipertaruhkan bila Raka tidak ikut praktik?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak guru untuk menentukan sendiri siapa saja yang boleh ikut praktik itu",
+            "benar": false,
+            "umpanBalik": "Guru mengatur pelajaran, tetapi setiap siswa tetap berhak ikut. Guru justru bisa membantu mencari ruang yang bisa dijangkau Raka."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak Raka untuk beristirahat di kelas selama teman-temannya praktik",
+            "benar": false,
+            "umpanBalik": "Tidak ikut praktik bukan istirahat bagi Raka, melainkan kehilangan kesempatan belajar yang sama dengan teman-temannya."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak teman-teman untuk praktik tepat waktu tanpa harus menunggu Raka",
+            "benar": false,
+            "umpanBalik": "Praktik tepat waktu memang penting, tetapi tidak boleh dicapai dengan meninggalkan seorang teman. Semua siswa berhak ikut belajar."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak Raka atas pendidikan, dengan kemudahan agar ia bisa ikut praktik",
+            "benar": true,
+            "umpanBalik": "Raka berhak mendapat pendidikan yang sama. Ia juga berhak atas kemudahan, misalnya praktik di ruang yang bisa ia jangkau."
+          }
+        ],
+        "petunjuk": "Pikirkan siapa yang kehilangan kesempatan belajar dan apa yang bisa membuatnya tetap ikut."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Mengangkat kursi roda Raka menaiki tangga bersama teman-teman tanpa bertanya dan tanpa guru",
+            "tingkat": "berisiko",
+            "terjadi": "Kursi roda sempat oleng di tangga, dan Raka ketakutan. Untung tidak ada yang terluka, tetapi Raka tidak ditanya lebih dulu."
+          },
+          {
+            "id": "2b",
+            "teks": "Menemani Raka di kelas selama jam praktik dan menceritakan isi praktik itu kepadanya sesudahnya",
+            "tingkat": "kurang",
+            "terjadi": "Raka tidak sendirian, tetapi ia tetap kehilangan praktik itu. Lab yang sulit dijangkau masih menjadi masalah di pelajaran berikutnya."
+          },
+          {
+            "id": "2c",
+            "teks": "Bertanya kepada Raka, lalu bersamanya mengusulkan kepada guru agar praktik pindah ke lantai satu",
+            "tingkat": "tepat",
+            "terjadi": "Guru memindahkan praktik ke ruang di lantai satu. Raka ikut bersama kelompoknya, dan pelajaran tetap dimulai tepat waktu."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak atas pendidikan serta kemudahan untuk memperoleh kesempatan yang sama.",
+        "kewajiban": "Kewajiban menghormati hak teman untuk ikut belajar bersama.",
+        "rujukan": [
+          "JR-06",
+          "JR-07",
+          "JR-04"
+        ]
+      },
+      "topik": "Hak atas pendidikan",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-05",
+      "judul": "Bonceng tanpa helm",
+      "zona": "z3",
+      "setTokoh": [
+        "npc_dimas_kanan_motor"
+      ],
+      "situasi": "Kamu sedang menunggu angkot di halte untuk berangkat ke lapangan. Dimas berhenti dengan motornya dan menawarkan boncengan, padahal ia belum punya SIM dan tidak membawa helm cadangan. “Ayo naik, lapangannya cuma dekat,” katanya.",
+      "langkah1": {
+        "pertanyaan": "Kewajiban apa yang diabaikan dalam tawaran Dimas?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Kewajiban pengemudi memiliki SIM, serta pengemudi dan penumpang memakai helm",
+            "benar": true,
+            "umpanBalik": "Pengemudi wajib punya SIM, dan pengemudi serta penumpang wajib berhelm. Menaatinya adalah bagian dari kewajiban menjunjung hukum."
+          },
+          {
+            "id": "1b",
+            "teks": "Tidak ada, karena helm hanya wajib dipakai di jalan raya yang ramai",
+            "benar": false,
+            "umpanBalik": "Kewajiban memakai helm berlaku di jalan umum mana pun, termasuk jalan kampung yang dekat."
+          },
+          {
+            "id": "1c",
+            "teks": "Kewajiban datang tepat waktu ke lapangan agar tidak mengecewakan teman satu tim",
+            "benar": false,
+            "umpanBalik": "Datang tepat waktu memang baik, tetapi tidak sebanding dengan keselamatan. Terlambat sedikit lebih baik daripada celaka di jalan."
+          },
+          {
+            "id": "1d",
+            "teks": "Kewajiban menerima tawaran teman agar tidak dianggap menolak kebaikannya",
+            "benar": false,
+            "umpanBalik": "Menghargai kebaikan teman tidak berarti menerima tawaran yang membahayakan dan melanggar aturan."
+          }
+        ],
+        "petunjuk": "Perhatikan dua hal yang tidak dimiliki Dimas sebelum ia menawarkan boncengan."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Ikut membonceng setelah meminjam helm dari warung, walaupun Dimas tetap tanpa helm dan SIM",
+            "tingkat": "kurang",
+            "terjadi": "Bahayanya sedikit berkurang karena kamu berhelm, tetapi Dimas tetap berkendara tanpa helm dan tanpa SIM."
+          },
+          {
+            "id": "2b",
+            "teks": "Ikut membonceng tanpa helm karena lapangannya dekat dan kamu tidak mau terlambat",
+            "tingkat": "berisiko",
+            "terjadi": "Kalian sampai lebih cepat, tetapi berboncengan tanpa helm dengan pengendara tanpa SIM membahayakan keselamatan kalian berdua."
+          },
+          {
+            "id": "2c",
+            "teks": "Menolak dengan sopan, naik angkot atau berjalan, dan mengingatkan Dimas soal helm dan SIM",
+            "tingkat": "tepat",
+            "terjadi": "Kamu tiba di lapangan dengan selamat, sedikit lebih lambat. Dimas jadi berpikir ulang dan menitipkan motornya di rumah."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak atas rasa aman dan keselamatan di jalan.",
+        "kewajiban": "Kewajiban menaati aturan lalu lintas.",
+        "rujukan": [
+          "JR-08",
+          "JR-18",
+          "JR-05"
+        ]
+      },
+      "topik": "Tertib lalu lintas",
+      "jenis": "pengabaian_kewajiban"
+    },
+    {
+      "kode": "K-06",
+      "judul": "Zebra cross",
+      "zona": "z3",
+      "setTokoh": [
+        "npc_nenek_bawah_diam"
+      ],
+      "situasi": "Di zebra cross dekat halte, seorang nenek bertongkat sudah lama menunggu untuk menyeberang. Kendaraan terus melaju tanpa memberi kesempatan, sehingga nenek itu ragu melangkah. Kamu berdiri tidak jauh darinya.",
+      "langkah1": {
+        "pertanyaan": "Hak siapa yang terganggu di sini?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak warga di halte untuk menunggu angkot tanpa terganggu orang menyeberang",
+            "benar": false,
+            "umpanBalik": "Warga di halte tidak terganggu. Yang haknya terganggu adalah nenek yang tidak diberi kesempatan menyeberang."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak nenek itu sebagai pejalan kaki untuk didahulukan saat menyeberang",
+            "benar": true,
+            "umpanBalik": "Di tempat penyeberangan, pejalan kaki berhak didahulukan. Kendaraan yang terus melaju membuat nenek itu tidak bisa menyeberang dengan aman."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak pengendara untuk terus melaju tanpa berhenti karena jalan sedang ramai",
+            "benar": false,
+            "umpanBalik": "Jalan yang ramai tidak menghapus hak pejalan kaki. Justru di tempat penyeberangan, pejalan kaki yang didahulukan."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak sopir angkot untuk berhenti di mana saja demi mencari penumpang",
+            "benar": false,
+            "umpanBalik": "Angkot memang mencari penumpang, tetapi yang sedang kesulitan di sini adalah nenek yang ingin menyeberang."
+          }
+        ],
+        "petunjuk": "Perhatikan siapa yang sedang berada di tempat penyeberangan dan apa yang ia butuhkan."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Menemani nenek di zebra cross, memberi isyarat tangan, dan menyeberang saat kendaraan berhenti",
+            "tingkat": "tepat",
+            "terjadi": "Pengendara melihat isyaratmu dan berhenti. Nenek itu menyeberang dengan aman dan berterima kasih kepadamu."
+          },
+          {
+            "id": "2b",
+            "teks": "Menggandeng nenek lalu mengajaknya berlari menyeberang di sela-sela kendaraan yang masih melaju",
+            "tingkat": "berisiko",
+            "terjadi": "Sebuah motor mengerem mendadak di dekat kalian. Kalian selamat, tetapi nenek itu sangat ketakutan."
+          },
+          {
+            "id": "2c",
+            "teks": "Menyarankan nenek menunggu sampai jalan benar-benar sepi, lalu kamu melanjutkan perjalanan",
+            "tingkat": "kurang",
+            "terjadi": "Nenek itu masih menunggu lama dan makin cemas. Haknya untuk didahulukan di tempat penyeberangan tetap tidak terpenuhi."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak pejalan kaki untuk didahulukan saat menyeberang di tempat penyeberangan.",
+        "kewajiban": "Kewajiban menghormati hak pejalan kaki dan menjaga keselamatan bersama di jalan.",
+        "rujukan": [
+          "JR-19",
+          "JR-04"
+        ]
+      },
+      "topik": "Hak pejalan kaki",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-07",
+      "judul": "Tuduhan di pasar",
+      "zona": "z4",
+      "setTokoh": [
+        "npc_bayu_bawah_diam",
+        "npc_pedagang_bawah_diam",
+        "npc_warga1_bawah_menunjuk",
+        "obj_tiang_kamera"
+      ],
+      "situasi": "Di pasar, seorang pedagang panik karena dompetnya hilang. Beberapa orang langsung menuduh Bayu yang kebetulan lewat dan ingin menggeledahnya beramai-ramai. Kamu melihat ada kamera keamanan di tiang dekat lapak itu.",
+      "langkah1": {
+        "pertanyaan": "Siapa yang berwenang menerima laporan dan menyelidiki hilangnya dompet itu?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Polisi, yang bertugas menerima laporan dan menyelidiki suatu perkara",
+            "benar": true,
+            "umpanBalik": "Polisi menerima laporan warga dan menyelidiki apa yang terjadi, misalnya lewat rekaman kamera. Warga tidak perlu menggeledah sendiri."
+          },
+          {
+            "id": "1b",
+            "teks": "Jaksa, yang bertugas menuntut orang yang didakwa di pengadilan",
+            "benar": false,
+            "umpanBalik": "Jaksa menuntut di pengadilan, sesudah polisi menyelidiki perkaranya. Laporan pertama tetap disampaikan kepada polisi."
+          },
+          {
+            "id": "1c",
+            "teks": "Advokat, yang bertugas mendampingi orang yang berhadapan dengan hukum",
+            "benar": false,
+            "umpanBalik": "Advokat mendampingi orang yang berhadapan dengan hukum. Ia tidak menerima laporan dan tidak menyelidiki perkara."
+          },
+          {
+            "id": "1d",
+            "teks": "Hakim, yang bertugas memeriksa, mengadili, dan memutus perkara",
+            "benar": false,
+            "umpanBalik": "Hakim memutus perkara di pengadilan, jauh sesudah laporan dibuat. Yang menerima laporan dan menyelidiki adalah polisi."
+          }
+        ],
+        "petunjuk": "Pikirkan lembaga yang pertama kali didatangi warga untuk melaporkan barang hilang."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Meminta warga tidak main hakim sendiri, lalu mengajak melapor kepada polisi dan memeriksa kamera",
+            "tingkat": "tepat",
+            "terjadi": "Petugas pasar dan polisi memeriksa rekaman kamera, dan ternyata dompet itu terjatuh di bawah lapak sebelah. Bayu tidak jadi digeledah."
+          },
+          {
+            "id": "2b",
+            "teks": "Ikut menuduh Bayu dan merekamnya dengan HP agar semua orang di grup warga tahu siapa pelakunya",
+            "tingkat": "berisiko",
+            "terjadi": "Video tuduhan itu beredar, padahal belum ada bukti apa pun. Nama baik Bayu tercemar, dan dompet itu belum juga ditemukan."
+          },
+          {
+            "id": "2c",
+            "teks": "Menjauh dari keributan itu karena takut ikut terlibat, tanpa memberi tahu siapa pun soal kamera itu",
+            "tingkat": "kurang",
+            "terjadi": "Warga hampir menggeledah Bayu tanpa bukti, dan tidak ada yang mengingatkan mereka. Suasana pasar menjadi tegang."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak atas kepastian hukum yang adil dan perlakuan yang sama di hadapan hukum.",
+        "kewajiban": "Kewajiban menghormati proses hukum dan tidak main hakim sendiri.",
+        "rujukan": [
+          "JR-09",
+          "JR-05",
+          "JR-20",
+          "JR-21"
+        ]
+      },
+      "topik": "Perlakuan yang sama di hadapan hukum",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-08",
+      "judul": "Dompet tertinggal",
+      "zona": "z4",
+      "setTokoh": [
+        "npc_nara_bawah_diam",
+        "npc_siswa2_bawah_diam",
+        "obj_dompet",
+        "obj_bangku_pasar"
+      ],
+      "situasi": "Nara menemukan dompet berisi uang dan kartu identitas di bangku pasar. Temannya berbisik, “Tidak ada yang lihat, uangnya kita bagi dua saja.” Pos keamanan pasar ada di ujung lorong.",
+      "langkah1": {
+        "pertanyaan": "Hak apa yang harus Nara hormati dalam situasi ini?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak penemu untuk memiliki barang apa pun yang ia temukan di tempat umum",
+            "benar": false,
+            "umpanBalik": "Menemukan barang tidak membuat kita menjadi pemiliknya. Barang temuan perlu dikembalikan kepada pemiliknya."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak pemilik atas dompetnya, yang tidak boleh diambil oleh orang lain",
+            "benar": true,
+            "umpanBalik": "Dompet itu tetap milik pemiliknya walaupun tertinggal. Hak milik pribadi tidak boleh diambil siapa pun secara sewenang-wenang."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak teman Nara untuk mendapat bagian karena ikut melihat dompet itu",
+            "benar": false,
+            "umpanBalik": "Ikut melihat tidak memberi hak apa pun atas dompet orang lain. Usul membagi uang itu justru mengambil hak pemiliknya."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak pengelola pasar untuk memiliki barang yang tertinggal di pasarnya",
+            "benar": false,
+            "umpanBalik": "Pos keamanan pasar menyimpan barang tertinggal untuk dikembalikan, bukan untuk dimiliki pengelola pasar."
+          }
+        ],
+        "petunjuk": "Pikirkan siapa yang mungkin sedang kebingungan mencari dompetnya saat ini."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang sebaiknya Nara lakukan dengan dompet itu?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Mengambil uangnya untuk dibagi berdua, lalu meninggalkan dompet kosong di bangku itu",
+            "tingkat": "berisiko",
+            "terjadi": "Pemilik dompet kehilangan uangnya dan tidak tahu harus mencari ke mana. Nara dan temannya telah mengambil hak milik orang lain."
+          },
+          {
+            "id": "2b",
+            "teks": "Menyerahkan dompet itu utuh ke pos keamanan pasar dan menolak usul temannya dengan sopan",
+            "tingkat": "tepat",
+            "terjadi": "Petugas pos keamanan menghubungi pemiliknya lewat kartu identitas di dompet. Pemiliknya lega karena uangnya utuh."
+          },
+          {
+            "id": "2c",
+            "teks": "Membawa pulang dompet itu dan menyimpannya sambil menunggu pemiliknya mengumumkan kehilangan",
+            "tingkat": "kurang",
+            "terjadi": "Uangnya memang aman, tetapi pemiliknya mencari ke pos keamanan dan tidak menemukan apa-apa. Ia pulang dengan cemas."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak milik pribadi yang tidak boleh diambil alih secara sewenang-wenang.",
+        "kewajiban": "Kewajiban menghormati hak orang lain dengan mengembalikan barang temuan.",
+        "rujukan": [
+          "JR-10",
+          "JR-04"
+        ]
+      },
+      "topik": "Hak milik pribadi",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-09",
+      "judul": "Rapat lomba",
+      "zona": "z5",
+      "setTokoh": [
+        "npc_sinta_bawah_diam",
+        "npc_siswa4_bawah_diam",
+        "obj_meja_panitia"
+      ],
+      "situasi": "Di balai warga, panitia remaja sedang rapat menyiapkan lomba kampung. Sinta mengusulkan lomba yang ramah untuk anak-anak kecil, tetapi usulannya dipotong dan ditertawakan. “Lomba anak kecil itu membosankan,” kata seorang anggota panitia.",
+      "langkah1": {
+        "pertanyaan": "Hak apa yang terganggu dalam rapat itu?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak anak-anak kecil untuk ikut semua lomba yang diadakan di kampung",
+            "benar": false,
+            "umpanBalik": "Anak-anak memang perlu dipikirkan, dan justru itulah usulan Sinta. Yang terganggu sekarang adalah hak Sinta untuk berpendapat."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak panitia untuk langsung menolak usulan yang menurut mereka membosankan",
+            "benar": false,
+            "umpanBalik": "Panitia boleh tidak setuju, tetapi usulan perlu didengar dulu dan diputuskan bersama, bukan dipotong dan ditertawakan."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak ketua panitia untuk menentukan sendiri semua jenis lomba",
+            "benar": false,
+            "umpanBalik": "Rapat diadakan agar keputusan diambil bersama. Ketua memimpin rapat, bukan memutuskan semuanya sendiri."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak Sinta untuk mengeluarkan pendapat dan didengarkan dalam rapat",
+            "benar": true,
+            "umpanBalik": "Setiap orang bebas mengeluarkan pendapat. Usulan Sinta boleh tidak dipilih, tetapi ia berhak didengar sampai selesai."
+          }
+        ],
+        "petunjuk": "Perhatikan apa yang terjadi pada usulan Sinta sebelum sempat dibahas."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Meminta semua usulan didengar sampai selesai, lalu mengajak panitia memutuskan bersama",
+            "tingkat": "tepat",
+            "terjadi": "Sinta menjelaskan usulannya sampai selesai. Panitia menimbang semua usulan, dan lomba untuk anak kecil ikut masuk acara."
+          },
+          {
+            "id": "2b",
+            "teks": "Diam saja di rapat, lalu sesudahnya menghibur Sinta bahwa usulannya sebenarnya sangat bagus",
+            "tingkat": "kurang",
+            "terjadi": "Sinta sedikit terhibur, tetapi rapat berjalan tanpa mendengar usulannya. Anak-anak kecil tidak punya lomba."
+          },
+          {
+            "id": "2c",
+            "teks": "Ikut menertawakan usulan Sinta supaya rapat cepat selesai dan tidak bertele-tele lagi",
+            "tingkat": "berisiko",
+            "terjadi": "Sinta berhenti berpendapat di rapat-rapat berikutnya. Panitia kehilangan usulan yang bisa membuat lomba lebih meriah."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak atas kebebasan mengeluarkan pendapat.",
+        "kewajiban": "Kewajiban menghormati pendapat orang lain.",
+        "rujukan": [
+          "JR-11",
+          "JR-04"
+        ]
+      },
+      "topik": "Kebebasan berpendapat",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-10",
+      "judul": "Logat yang diejek",
+      "zona": "z5",
+      "setTokoh": [
+        "npc_siswa2_bawah_menunduk",
+        "npc_siswa3_bawah_diam",
+        "npc_warga2_bawah_diam",
+        "obj_meja_panitia"
+      ],
+      "situasi": "Di balai warga, peserta lomba bergantian memperkenalkan diri. Seorang peserta yang baru pindah dari daerah lain ditertawakan karena logatnya, dan panitia remaja ikut tertawa. Peserta itu langsung diam dan menunduk.",
+      "langkah1": {
+        "pertanyaan": "Hak apa yang terganggu dalam kejadian itu?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak peserta itu untuk diperlakukan setara tanpa dibedakan karena asalnya",
+            "benar": true,
+            "umpanBalik": "Setiap orang berhak bebas dari perlakuan yang membeda-bedakan, termasuk karena logat dan daerah asalnya."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak warga lama untuk didahulukan dalam semua lomba di kampungnya",
+            "benar": false,
+            "umpanBalik": "Warga lama dan warga baru punya hak yang sama untuk ikut lomba. Tidak ada yang perlu didahulukan karena asalnya."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak penonton untuk tertawa karena logat yang berbeda memang terdengar lucu",
+            "benar": false,
+            "umpanBalik": "Merasa lucu boleh saja, tetapi menertawakan cara bicara seseorang membuatnya merasa dibeda-bedakan dan tidak diterima."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak panitia untuk meminta semua peserta berbicara dengan logat setempat",
+            "benar": false,
+            "umpanBalik": "Tidak ada aturan bahwa peserta harus memakai logat tertentu. Setiap orang boleh berbicara dengan logatnya sendiri."
+          }
+        ],
+        "petunjuk": "Pikirkan bagaimana rasanya dibeda-bedakan hanya karena cara bicara yang berbeda."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Ikut menirukan logat peserta itu agar semua orang makin tertawa dan suasana menjadi ramai",
+            "tingkat": "berisiko",
+            "terjadi": "Peserta itu makin malu dan merasa tidak diterima di tempat barunya. Ia tidak mau lagi datang ke acara kampung."
+          },
+          {
+            "id": "2b",
+            "teks": "Tidak ikut tertawa, tetapi diam saja karena panitia yang seharusnya adil pun ikut tertawa",
+            "tingkat": "kurang",
+            "terjadi": "Ejekan berlanjut karena tidak ada yang menghentikannya. Peserta itu mundur dari lomba dan pulang lebih dulu."
+          },
+          {
+            "id": "2c",
+            "teks": "Meminta semua orang berhenti tertawa, lalu mengajak peserta itu bergabung dengan timmu",
+            "tingkat": "tepat",
+            "terjadi": "Tawa berhenti, dan panitia meminta maaf kepada peserta itu. Ia ikut lomba bersama timmu dan mulai merasa diterima."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak bebas dari perlakuan yang membeda-bedakan karena asal daerah.",
+        "kewajiban": "Kewajiban menghormati setiap orang tanpa membeda-bedakan asalnya.",
+        "rujukan": [
+          "JR-12",
+          "JR-04"
+        ]
+      },
+      "topik": "Bebas dari diskriminasi",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-11",
+      "judul": "Sampah di sungai",
+      "zona": "z6",
+      "setTokoh": [
+        "npc_siswa3_bawah_diam",
+        "npc_siswa4_bawah_diam",
+        "obj_sisa_piknik",
+        "obj_tempat_sampah"
+      ],
+      "situasi": "Sesudah piknik di tepi sungai, beberapa temanmu membuang sisa makanan dan bungkus plastik ke air. Tempat sampah sebenarnya ada tidak jauh dari situ. “Nanti juga hanyut sendiri,” kata salah satu dari mereka.",
+      "langkah1": {
+        "pertanyaan": "Kewajiban apa yang diabaikan oleh teman-temanmu?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Kewajiban menghabiskan makanan supaya tidak ada sisa yang terbuang",
+            "benar": false,
+            "umpanBalik": "Tidak menyisakan makanan memang baik, tetapi masalahnya di sini adalah membuang sampah ke sungai."
+          },
+          {
+            "id": "1b",
+            "teks": "Kewajiban menjaga kelestarian lingkungan dan tidak mencemari sungai",
+            "benar": true,
+            "umpanBalik": "Setiap orang wajib menjaga kelestarian lingkungan hidup dan mencegah pencemaran. Membuang sampah ke sungai melanggar kewajiban itu."
+          },
+          {
+            "id": "1c",
+            "teks": "Tidak ada, karena sisa makanan dan plastik akan hanyut terbawa arus",
+            "benar": false,
+            "umpanBalik": "Sampah yang hanyut tidak hilang. Plastik itu mencemari sungai dan merusak lingkungan di tempat lain, sampai ke pantai."
+          },
+          {
+            "id": "1d",
+            "teks": "Kewajiban petugas kebersihan untuk membersihkan sungai setiap harinya",
+            "benar": false,
+            "umpanBalik": "Petugas kebersihan memang membantu, tetapi menjaga lingkungan adalah kewajiban setiap orang, termasuk pengunjung."
+          }
+        ],
+        "petunjuk": "Pikirkan ke mana sampah itu pergi dan siapa yang wajib menjaga sungai."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Mengajak teman-teman memungut sampah bersama dan membuangnya ke tempat sampah, tanpa memarahi",
+            "tingkat": "tepat",
+            "terjadi": "Teman-temanmu ikut memungut sampah tanpa merasa dihakimi. Tepi sungai kembali bersih, dan air tidak tercemar plastik."
+          },
+          {
+            "id": "2b",
+            "teks": "Ikut membuang sisa makananmu ke sungai karena teman-temanmu juga melakukannya dan tidak ada yang melihat",
+            "tingkat": "berisiko",
+            "terjadi": "Sampah di sungai makin banyak. Plastik itu hanyut sampai ke pantai dan mencemari tempat bermain warga."
+          },
+          {
+            "id": "2c",
+            "teks": "Memungut sampahmu sendiri saja dan membiarkan sampah teman-temanmu tetap mengapung di sungai",
+            "tingkat": "kurang",
+            "terjadi": "Sampahmu terbuang dengan benar, tetapi plastik teman-temanmu tetap hanyut dan mencemari sungai."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak atas lingkungan hidup yang baik dan sehat.",
+        "kewajiban": "Kewajiban menjaga kelestarian lingkungan dan mencegah pencemaran.",
+        "rujukan": [
+          "JR-13",
+          "JR-22"
+        ]
+      },
+      "topik": "Lingkungan hidup",
+      "jenis": "pengabaian_kewajiban"
+    },
+    {
+      "kode": "K-12",
+      "judul": "Lapangan untuk semua",
+      "zona": "z6",
+      "setTokoh": [
+        "npc_gita_bawah_diam",
+        "npc_anak1_bawah_diam",
+        "obj_bola",
+        "obj_tali_lompat"
+      ],
+      "situasi": "Kamu dan teman-teman datang membawa bola ke lapangan taman. Di sana, anak-anak SD, termasuk Gita, sedang bermain lompat tali, lalu temanmu menyuruh mereka pergi. “Lapangan ini untuk yang besar,” katanya.",
+      "langkah1": {
+        "pertanyaan": "Hak apa yang terganggu bila anak-anak itu diusir?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak remaja untuk memakai lapangan karena badan mereka lebih besar",
+            "benar": false,
+            "umpanBalik": "Badan yang lebih besar tidak memberi hak lebih atas lapangan umum. Semua orang boleh memakainya secara bergantian."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak pengelola taman untuk menentukan siapa yang boleh bermain di sana",
+            "benar": false,
+            "umpanBalik": "Pengelola taman memang mengatur taman, tetapi tidak sedang terlibat di sini. Yang terganggu adalah hak anak-anak untuk bermain."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak anak-anak untuk bermain dan bergaul dengan teman sebayanya",
+            "benar": true,
+            "umpanBalik": "Anak-anak berhak bermain dan bergaul dengan teman sebayanya. Mengusir mereka dari lapangan umum mengambil hak itu."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak remaja untuk berolahraga dengan bebas di tempat umum mana pun",
+            "benar": false,
+            "umpanBalik": "Remaja juga boleh berolahraga, tetapi tidak dengan mengusir anak-anak. Lapangan umum bisa dipakai bergantian."
+          }
+        ],
+        "petunjuk": "Pikirkan apa yang sedang dilakukan anak-anak itu sebelum diusir."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Ikut mengusir anak-anak itu, termasuk Gita, supaya lapangan cepat bisa dipakai bermain bola",
+            "tingkat": "berisiko",
+            "terjadi": "Gita dan teman-temannya pulang dengan sedih. Mereka kehilangan tempat bermain di taman yang seharusnya untuk semua."
+          },
+          {
+            "id": "2b",
+            "teks": "Mengajak teman-temanmu pergi bermain di tempat lain, tanpa membahas cara berbagi lapangan",
+            "tingkat": "kurang",
+            "terjadi": "Anak-anak bisa bermain hari ini, tetapi besok perebutan lapangan bisa terulang karena belum ada kesepakatan."
+          },
+          {
+            "id": "2c",
+            "teks": "Mengusulkan pembagian waktu atau tempat, misalnya separuh lapangan untuk anak-anak",
+            "tingkat": "tepat",
+            "terjadi": "Anak-anak bermain di separuh lapangan, dan kalian bermain bola di separuh lainnya. Gita dan teman-temannya tetap bisa bermain."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak anak untuk bermain dan bergaul dengan teman sebayanya.",
+        "kewajiban": "Kewajiban menghormati hak orang lain dalam memakai fasilitas umum.",
+        "rujukan": [
+          "JR-17",
+          "JR-04"
+        ]
+      },
+      "topik": "Hak anak untuk bermain",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-13",
+      "judul": "Antrean puskesmas",
+      "zona": "z7",
+      "setTokoh": [
+        "npc_ibubayi_bawah_diam",
+        "npc_siswa5_bawah_diam",
+        "npc_petugas_bawah_diam",
+        "obj_bangku_antrean"
+      ],
+      "situasi": "Ruang tunggu puskesmas penuh. Seorang ibu menggendong bayinya yang demam sudah lama mengantre. Teman sekelasmu menyerobot ke depan karena ingin cepat pulang, lalu mengajakmu ikut.",
+      "langkah1": {
+        "pertanyaan": "Hak siapa yang paling terganggu di sini?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak petugas untuk beristirahat sebentar karena ruang tunggu penuh",
+            "benar": false,
+            "umpanBalik": "Petugas memang perlu beristirahat, tetapi yang dirugikan oleh serobotan ini adalah orang-orang yang mengantre."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak ibu dan bayinya untuk memperoleh pelayanan kesehatan secara tertib",
+            "benar": true,
+            "umpanBalik": "Bayi yang demam berhak dilayani, dan antrean menjaga agar semua orang dilayani dengan adil."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak pengunjung untuk pindah ke puskesmas lain yang antreannya lebih pendek",
+            "benar": false,
+            "umpanBalik": "Pindah puskesmas tidak menyelesaikan masalah di sini. Ibu itu tetap dirugikan karena gilirannya diserobot."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak temanmu untuk pulang cepat karena ia juga sudah lama menunggu",
+            "benar": false,
+            "umpanBalik": "Semua orang di ruang tunggu sama-sama menunggu. Ingin cepat pulang bukan alasan untuk mengambil giliran orang lain."
+          }
+        ],
+        "petunjuk": "Perhatikan siapa yang sudah lama menunggu dan paling membutuhkan layanan."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Ikut menyerobot bersama temanmu karena antreannya terlalu lama dan kamu juga lelah",
+            "tingkat": "berisiko",
+            "terjadi": "Ibu itu harus menunggu lebih lama, padahal bayinya demam. Melihat kalian, orang lain ikut menyerobot."
+          },
+          {
+            "id": "2b",
+            "teks": "Menolak, mengajak temanmu kembali ke antrean, lalu memberi tahu petugas tentang bayi yang demam",
+            "tingkat": "tepat",
+            "terjadi": "Temanmu kembali ke antrean. Petugas memeriksa bayi itu lebih dulu karena keadaannya, dan antrean kembali tertib."
+          },
+          {
+            "id": "2c",
+            "teks": "Menolak ikut dan tetap mengantre di tempatmu, tetapi diam saja dan membiarkan temanmu menyerobot",
+            "tingkat": "kurang",
+            "terjadi": "Kamu tidak ikut menyerobot, tetapi temanmu tetap mengambil giliran orang lain. Ibu itu masih harus menunggu lama."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak memperoleh pelayanan kesehatan.",
+        "kewajiban": "Kewajiban menghormati hak orang lain dengan tertib mengantre.",
+        "rujukan": [
+          "JR-13",
+          "JR-04"
+        ]
+      },
+      "topik": "Hak atas kesehatan",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-14",
+      "judul": "Berhenti sekolah?",
+      "zona": "z7",
+      "setTokoh": [
+        "npc_wayan_bawah_diam",
+        "obj_gerobak"
+      ],
+      "situasi": "Di depan kantor desa, Wayan, teman sekelasmu, sedang menjaga gerobak dagangan orang tuanya. Ia berkata akan berhenti sekolah agar bisa membantu berdagang setiap hari. “Aku tidak tega melihat Bapak dan Ibu bekerja sendiri,” katanya.",
+      "langkah1": {
+        "pertanyaan": "Apa hak dan kewajiban Wayan yang berkaitan dengan sekolah?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hanya berhak bersekolah bila orang tuanya mampu membayar biayanya",
+            "benar": false,
+            "umpanBalik": "Hak atas pendidikan berlaku bagi setiap warga negara. Untuk pendidikan dasar, pemerintah bahkan wajib membiayainya."
+          },
+          {
+            "id": "1b",
+            "teks": "Wajib bekerja membantu orang tua walaupun harus meninggalkan sekolah",
+            "benar": false,
+            "umpanBalik": "Membantu orang tua itu baik, tetapi tidak harus dengan meninggalkan sekolah. Wayan tetap bisa membantu di luar jam sekolah."
+          },
+          {
+            "id": "1c",
+            "teks": "Berhak berhenti sekolah kapan saja karena itu keputusannya sendiri",
+            "benar": false,
+            "umpanBalik": "Pendapat Wayan perlu didengar, tetapi pendidikan dasar adalah kewajiban setiap warga negara, bukan sekadar pilihan."
+          },
+          {
+            "id": "1d",
+            "teks": "Berhak mendapat pendidikan dan wajib mengikuti pendidikan dasar",
+            "benar": true,
+            "umpanBalik": "Wayan masih SMP, jenjang pendidikan dasar. Sekolah adalah haknya sekaligus kewajibannya, dan pemerintah wajib membiayainya."
+          }
+        ],
+        "petunjuk": "Pikirkan apakah sekolah hanya hak yang boleh dilepas, atau juga kewajiban yang dijamin negara."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Mengajak Wayan menemui wali kelas atau guru BK untuk mencari bantuan agar ia tetap bisa sekolah",
+            "tingkat": "tepat",
+            "terjadi": "Bu Ratih, guru BK, menemui orang tua Wayan dan membantu mengurus bantuan pendidikan. Wayan tetap sekolah dan membantu berdagang sepulang sekolah."
+          },
+          {
+            "id": "2b",
+            "teks": "Menghormati keputusannya dan berjanji meminjamkan catatan pelajaran supaya ia tidak tertinggal",
+            "tingkat": "kurang",
+            "terjadi": "Wayan merasa didukung, tetapi ia tetap berhenti sekolah. Catatan pinjaman tidak bisa menggantikan haknya untuk belajar di kelas."
+          },
+          {
+            "id": "2c",
+            "teks": "Mendukung Wayan berhenti sekolah karena menurutmu berdagang lebih berguna daripada belajar",
+            "tingkat": "berisiko",
+            "terjadi": "Wayan makin yakin berhenti sekolah. Ia kehilangan kesempatan belajar yang sebenarnya bisa dipertahankan dengan bantuan."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak mendapat pendidikan.",
+        "kewajiban": "Kewajiban mengikuti pendidikan dasar, yang wajib dibiayai pemerintah.",
+        "rujukan": [
+          "JR-06",
+          "JR-23"
+        ]
+      },
+      "topik": "Hak atas pendidikan",
+      "jenis": "keduanya"
+    },
+    {
+      "kode": "K-15",
+      "judul": "Video yang disebar",
+      "zona": "z8",
+      "setTokoh": [
+        "npc_siswa4_bawah_diam"
+      ],
+      "situasi": "Di grup kelasmu beredar video Komang terjatuh di lapangan, lengkap dengan stiker lucu. Teman-teman membalas dengan emoji tertawa, dan seseorang memintamu ikut meneruskannya ke grup lain. Sejak tadi Komang tidak membalas apa pun.",
+      "langkah1": {
+        "pertanyaan": "Hak apa yang terganggu oleh video itu?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Hak anggota grup untuk berbagi video lucu yang mereka terima",
+            "benar": false,
+            "umpanBalik": "Berbagi video memang mudah, tetapi video yang mempermalukan seseorang tidak pantas disebar, walaupun terasa lucu."
+          },
+          {
+            "id": "1b",
+            "teks": "Hak Komang untuk keluar dari grup kelas bila ia merasa malu",
+            "benar": false,
+            "umpanBalik": "Komang tidak seharusnya yang pergi. Yang perlu berhenti adalah penyebaran video yang mempermalukannya."
+          },
+          {
+            "id": "1c",
+            "teks": "Hak Komang atas kehormatan dan rasa aman, juga di dunia maya",
+            "benar": true,
+            "umpanBalik": "Komang berhak atas kehormatan dan rasa aman. Menyebarkan video yang mempermalukannya merendahkan dirinya, di dunia maya maupun nyata."
+          },
+          {
+            "id": "1d",
+            "teks": "Hak perekam video untuk menyebarkan rekaman buatannya sendiri",
+            "benar": false,
+            "umpanBalik": "Merekam tidak memberi hak untuk mempermalukan orang yang direkam. Kehormatan Komang tetap harus dihormati."
+          }
+        ],
+        "petunjuk": "Bayangkan bila kamu yang terjatuh dan videonya ditertawakan banyak orang."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Meneruskan video itu ke grup lain dengan tambahan stiker yang lebih lucu agar makin ramai",
+            "tingkat": "berisiko",
+            "terjadi": "Video itu makin luas beredar dan sulit dihapus. Komang makin malu dan enggan datang ke sekolah."
+          },
+          {
+            "id": "2b",
+            "teks": "Tidak ikut meneruskan, tetapi diam saja di grup dan tidak pernah menanyakan kabar Komang sama sekali",
+            "tingkat": "kurang",
+            "terjadi": "Kamu tidak ikut menyebarkan, tetapi video itu terus beredar. Komang merasa sendirian menghadapinya."
+          },
+          {
+            "id": "2c",
+            "teks": "Tidak meneruskan, meminta video dihapus, menyapa Komang, dan melapor kepada guru bila berlanjut",
+            "tingkat": "tepat",
+            "terjadi": "Pengirim menghapus videonya, dan teman lain ikut berhenti menertawakan. Komang merasa ada yang peduli kepadanya."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak atas kehormatan, martabat, dan rasa aman, termasuk di dunia maya.",
+        "kewajiban": "Kewajiban menghormati orang lain, termasuk saat memakai media sosial.",
+        "rujukan": [
+          "JR-05",
+          "JR-04"
+        ]
+      },
+      "topik": "Perlindungan dari perundungan",
+      "jenis": "pelanggaran_hak"
+    },
+    {
+      "kode": "K-16",
+      "judul": "Kabar menakutkan",
+      "zona": "z8",
+      "setTokoh": [
+        "npc_siswa1_bawah_hp"
+      ],
+      "situasi": "Di pojok gawai, temanmu menunjukkan pesan berantai tentang penculikan anak di desa sebelah. Pesan itu tidak menyebut sumber, tetapi sudah beredar di banyak grup. “Kita teruskan ke grup keluarga, ya, biar semua waspada,” katanya.",
+      "langkah1": {
+        "pertanyaan": "Hak dan kewajiban apa yang berkaitan dengan pesan itu?",
+        "opsi": [
+          {
+            "id": "1a",
+            "teks": "Berhak berbagi informasi, tetapi wajib memeriksa kebenarannya lebih dulu",
+            "benar": true,
+            "umpanBalik": "Setiap orang berhak berkomunikasi dan berbagi informasi. Namun, hak itu dibatasi demi hak orang lain dan ketertiban umum, jadi kabar perlu diperiksa dulu."
+          },
+          {
+            "id": "1b",
+            "teks": "Wajib meneruskan semua kabar bahaya secepatnya agar orang lain waspada",
+            "benar": false,
+            "umpanBalik": "Niat agar orang waspada memang baik, tetapi kabar yang belum pasti bisa menimbulkan ketakutan dan tuduhan kepada orang yang tidak bersalah."
+          },
+          {
+            "id": "1c",
+            "teks": "Berhak meneruskan pesan apa pun karena pesan itu sudah beredar di banyak grup",
+            "benar": false,
+            "umpanBalik": "Banyaknya grup yang menyebarkan tidak membuat pesan itu benar. Pesan tanpa sumber justru perlu diperiksa dulu."
+          },
+          {
+            "id": "1d",
+            "teks": "Hanya polisi yang berhak membicarakan kabar penculikan di media sosial",
+            "benar": false,
+            "umpanBalik": "Semua orang berhak berkomunikasi dan berbagi informasi. Yang penting, kabar itu diperiksa dulu dari sumber resmi."
+          }
+        ],
+        "petunjuk": "Perhatikan apa yang tidak ada dalam pesan itu sebelum kamu memutuskan meneruskannya."
+      },
+      "langkah2": {
+        "pertanyaan": "Apa yang kamu lakukan?",
+        "opsi": [
+          {
+            "id": "2a",
+            "teks": "Tidak meneruskan pesan itu, tetapi diam saja saat temanmu tetap mengirimkannya ke grup keluarganya",
+            "tingkat": "kurang",
+            "terjadi": "Kamu tidak ikut menyebarkan, tetapi pesan itu tetap sampai ke grup keluarga dan membuat banyak orang cemas."
+          },
+          {
+            "id": "2b",
+            "teks": "Mengajak temanmu memeriksa sumber resmi dulu, tidak meneruskan pesan, dan memberi tahu keluarga",
+            "tingkat": "tepat",
+            "terjadi": "Pengumuman resmi dari kantor desa menyatakan kabar itu tidak benar. Keluargamu tenang, dan pesan itu berhenti beredar di grupmu."
+          },
+          {
+            "id": "2c",
+            "teks": "Meneruskan pesan itu ke semua grupmu dan menambahkan ciri-ciri orang yang kamu curigai",
+            "tingkat": "berisiko",
+            "terjadi": "Ciri-ciri yang kamu tambahkan membuat warga mencurigai orang yang tidak bersalah. Kabar itu ternyata tidak benar."
+          }
+        ]
+      },
+      "kartu": {
+        "hak": "Hak berkomunikasi dan memperoleh informasi.",
+        "kewajiban": "Kewajiban memeriksa kebenaran kabar sebelum menyebarkannya, demi hak orang lain dan ketertiban umum.",
+        "rujukan": [
+          "JR-14",
+          "JR-04",
+          "JR-15"
+        ]
+      },
+      "topik": "Literasi digital",
+      "jenis": "keduanya"
+    }
+  ],
+  "paket": [
+    {
+      "nama": "Paket inti 16",
+      "deskripsi": "Enam belas kejadian bank awal, dua di setiap zona.",
+      "kejadian": [
+        "K-01",
+        "K-02",
+        "K-03",
+        "K-04",
+        "K-05",
+        "K-06",
+        "K-07",
+        "K-08",
+        "K-09",
+        "K-10",
+        "K-11",
+        "K-12",
+        "K-13",
+        "K-14",
+        "K-15",
+        "K-16"
+      ]
+    }
+  ]
+}

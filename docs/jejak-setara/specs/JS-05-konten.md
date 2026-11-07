@@ -2,9 +2,10 @@
 
 | | |
 |---|---|
-| Status | Spesifikasi (7 November 2026), menunggu `Spesifikasi disetujui: JS-05` |
+| Status | Disetujui 7 November 2026; dibangun dan diuji 7 November 2026 ([laporan](../tests/JS-05-hasil.md)) |
 | Sesi | B (Naskah dan rujukan). Rencana dan status ada di `docs/jejak-setara/naskah/STATUS.md`, bagian "JS-05 — Konten", bukan di `PLAN.md` (AGENTS bagian 4.1) |
 | Keputusan Gerbang 1 | Balasan `Setuju: JS-05` (7 Nov 2026): semua saran (a) diterima, yaitu usulan 1a sampai 10a |
+| Keputusan Gerbang 2 | Balasan `Spesifikasi disetujui: JS-05` (7 Nov 2026): D-1 sampai D-5 diterima tanpa perubahan |
 | Batas berkas | `docs/jejak-setara/naskah/`, `app/jejak-setara/inti/konten/`, `server/jejak-setara/seed/`, `scripts/jejak-setara/semai.mjs`, berkas berawalan `naskah-` atau `bank-` di `app/jejak-setara/__tests__/konten/`, serta spesifikasi dan laporan uji ini (usulan 10a). Perubahan berkas lain ditulis sebagai Permintaan untuk Sesi A di `STATUS.md` |
 
 ## Ringkasan
@@ -524,6 +525,14 @@ Contoh hasil lengkap, JR-19: "Yang dibutuhkan kejadian: pejalan kaki didahulukan
 | Isi paket | ≤ 64 kejadian | Batas rekap di pesan `selesai` |
 
 Batas ini diminta masuk Architecture 5.4 lewat Permintaan A-7.
+
+## Catatan Build (7 November 2026)
+
+- **B-1** `naskah-urai.ts` juga berisi pembaca bank (`bacaBankAwal`) dan daftar kunci aset Disetujui (`kunciAsetDisetujui`), yang dipakai beberapa uji. Keduanya pembantu uji di dalam batas berkas.
+- **B-2** `semai.mjs` menyertakan galat asal (`cause`) pada galat "Bank awal tidak sah" (aturan ESLint `preserve-caught-error`). Pesan yang tampil tidak berubah.
+- **B-3** `bank-aturan` memuat contoh tambahan di luar tabel rencana uji: situasi berupa angka, petunjuk berisi ganti baris, id rujukan `R-08`, aturan yang tetap berjalan walaupun skema gagal (P-12), bentuk `letak` (P-15), kunci aset tanpa daftar aset, dan bank yang bukan objek. Semuanya mengikuti perilaku spesifikasi.
+- **B-4** `bank-semai` juga mencocokkan SQL setiap rujukan dan baris `kejadian` pertama huruf demi huruf dengan bentuk di bagian "SQL semai", dan menguji bank yang tidak ada (status "Bank tidak ditemukan").
+- **B-5** Sebelum `kampung.json` ada, uji `bank-peta` dicoba dengan dua peta sementara di salinan kerja: peta dengan titik cukup (4 uji lulus) dan peta dengan satu titik di z3 (4 uji gagal, seperti seharusnya). Kedua peta dihapus dan tidak ikut ZIP.
 
 ## Kriteria penerimaan
 
