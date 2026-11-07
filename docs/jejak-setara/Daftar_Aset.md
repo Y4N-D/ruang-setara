@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Versi | 0.9 |
+| Versi | 0.10 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Kelompok A, U, O1, O2, T, N1, dan N2 disetujui; ukuran peta 160 × 100 ubin. Kelompok O3 (properti kejadian) diserahkan: menunggu "Setuju: aset O3" |
+| Tahap saat ini | Kelompok A, U, O1, O2, O3, T, N1, dan N2 disetujui; ukuran peta 160 × 100 ubin. Kelompok O4 (varian untuk peta besar) diserahkan: menunggu "Setuju: aset O4" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -38,6 +38,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Kelompok N2 | 18 tokoh (22 berkas) diserahkan, termasuk usulan ciri Raka, Wayan, dan siswa umum; menunggu "Setuju: aset N2" |
 | 6 Nov 2026 | Kelompok N2 | Pemilik proyek membalas "Setuju: aset N2": N-10 sampai N-20 Disetujui, termasuk ciri Raka, Wayan, dan siswa umum; kredit 22 berkas ditambahkan |
 | 6 Nov 2026 | Kelompok O3 | 13 properti kejadian (15 berkas) diserahkan bersama pratinjau set tokoh per kejadian; menunggu "Setuju: aset O3" |
+| 6 Nov 2026 | Kelompok O3 | Pemilik proyek membalas "Setuju: aset O3": O-29 sampai O-41 Disetujui; kredit 15 berkas ditambahkan |
+| 6 Nov 2026 | Kelompok O4 | 9 varian untuk peta 160 × 100 (15 berkas) diserahkan; menunggu "Setuju: aset O4" |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -68,7 +70,7 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 
 | | |
 |---|---|
-| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, O2, T, N1, dan N2 Disetujui 6 Nov 2026; kelompok O3 diserahkan, menunggu "Setuju: aset O3" |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A, U, O1, O2, O3, T, N1, dan N2 Disetujui 6 Nov 2026; kelompok O4 diserahkan, menunggu "Setuju: aset O4" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -414,19 +416,19 @@ Diambil dari tabel "Tokoh dan properti per kejadian" di `naskah/NASKAH.md`. Prop
 
 | ID | Berkas | Ukuran (ubin) | Isi | Kejadian | Status |
 |---|---|---|---|---|---|
-| O-29 | `obj_pengeras_suara` | 1 × 1 | Pengeras suara portabel `dusk` | K-02 | Ditinjau (kelompok O3) |
-| O-30 | `obj_kotak_bekal` | 1 × 1, benda kecil | Kotak bekal `sky-d` bertutup `mist` | K-03 | Ditinjau (kelompok O3) |
-| O-31 | `obj_kursi_roda` | 1 × 1 | Kursi roda kosong dilihat dari depan; Raka yang duduk di kursi roda ada di N-17 | K-04 | Ditinjau (kelompok O3) |
-| O-32 | `obj_tiang_kamera` | 1 × 2 | Tiang dengan kamera keamanan kecil | K-07 | Ditinjau (kelompok O3) |
-| O-33 | `obj_lapak` | 2 × 2 | Meja lapak dengan tiga keranjang sayur dan buah, peti terung di depan | K-07 | Ditinjau (kelompok O3) |
-| O-34 | `obj_dompet` | 1 × 1, benda kecil | Dompet cokelat tanpa tulisan | K-08 | Ditinjau (kelompok O3) |
-| O-35 | `obj_bangku_pasar` | 2 × 1 | Bangku kayu tanpa sandaran | K-08 | Ditinjau (kelompok O3) |
-| O-36 | `obj_pos_keamanan` | 2 × 2 | Pos jaga beratap seng dengan loket dan pintu, tanpa tulisan dan lambang | K-08 | Ditinjau (kelompok O3) |
-| O-37 | `obj_meja_panitia` | 2 × 1 | Meja dengan kertas polos, pensil, dan tumpukan kertas, tanpa tulisan | K-09, K-10 | Ditinjau (kelompok O3) |
-| O-38 | `obj_sisa_piknik` | 2 × 1 | Tikar anyaman dengan botol, bungkus, dan kantong plastik; bisa dilewati | K-11 | Ditinjau (kelompok O3) |
-| O-39 | `obj_bola` | 1 × 1, benda kecil | Bola putih bertambal | K-12 | Ditinjau (kelompok O3) |
-| O-40 | `obj_tali_lompat` | 1 × 1 | Tali lompat `coral` bergagang kayu, tergeletak di tanah | K-12 | Ditinjau (kelompok O3) |
-| O-41 | `obj_bangku_antrean` | 3 × 1 | Empat kursi plastik `sky-d` bersambung | K-13 | Ditinjau (kelompok O3) |
+| O-29 | `obj_pengeras_suara` | 1 × 1 | Pengeras suara portabel `dusk` | K-02 | Disetujui (6 Nov) |
+| O-30 | `obj_kotak_bekal` | 1 × 1, benda kecil | Kotak bekal `sky-d` bertutup `mist` | K-03 | Disetujui (6 Nov) |
+| O-31 | `obj_kursi_roda` | 1 × 1 | Kursi roda kosong dilihat dari depan; Raka yang duduk di kursi roda ada di N-17 | K-04 | Disetujui (6 Nov) |
+| O-32 | `obj_tiang_kamera` | 1 × 2 | Tiang dengan kamera keamanan kecil | K-07 | Disetujui (6 Nov) |
+| O-33 | `obj_lapak` | 2 × 2 | Meja lapak dengan tiga keranjang sayur dan buah, peti terung di depan | K-07 | Disetujui (6 Nov) |
+| O-34 | `obj_dompet` | 1 × 1, benda kecil | Dompet cokelat tanpa tulisan | K-08 | Disetujui (6 Nov) |
+| O-35 | `obj_bangku_pasar` | 2 × 1 | Bangku kayu tanpa sandaran | K-08 | Disetujui (6 Nov) |
+| O-36 | `obj_pos_keamanan` | 2 × 2 | Pos jaga beratap seng dengan loket dan pintu, tanpa tulisan dan lambang | K-08 | Disetujui (6 Nov) |
+| O-37 | `obj_meja_panitia` | 2 × 1 | Meja dengan kertas polos, pensil, dan tumpukan kertas, tanpa tulisan | K-09, K-10 | Disetujui (6 Nov) |
+| O-38 | `obj_sisa_piknik` | 2 × 1 | Tikar anyaman dengan botol, bungkus, dan kantong plastik; bisa dilewati | K-11 | Disetujui (6 Nov) |
+| O-39 | `obj_bola` | 1 × 1, benda kecil | Bola putih bertambal | K-12 | Disetujui (6 Nov) |
+| O-40 | `obj_tali_lompat` | 1 × 1 | Tali lompat `coral` bergagang kayu, tergeletak di tanah | K-12 | Disetujui (6 Nov) |
+| O-41 | `obj_bangku_antrean` | 3 × 1 | Empat kursi plastik `sky-d` bersambung | K-13 | Disetujui (6 Nov) |
 | O-42 | `obj_sanggah` | — | Sanggah keluarga untuk K-02 versi B | K-02 | Ditunda: hanya bila KT-10 memilih versi B dan pemilik proyek mengizinkan, karena Design System bagian 7 aturan 6 tidak menggambar tempat ibadah sebagai penanda zona |
 
 #### Rincian kelompok O3 (6 November 2026)
@@ -442,6 +444,35 @@ Diambil dari tabel "Tokoh dan properti per kejadian" di `naskah/NASKAH.md`. Prop
 - Pratinjau set kejadian memakai tokoh yang sudah disetujui dan mengikuti tabel tokoh dan properti di `naskah/NASKAH.md`. Di JS-06, setiap titik kejadian menyediakan ruang 3 × 3 ubin untuk set ini.
 - K-05 (Dimas di motor dan halte), K-10, K-15, dan K-16 memakai tokoh dan objek dari kelompok yang sudah disetujui (pose Dimas di motor, halte, meja panitia, warung berwifi, pose memegang HP).
 - Benda kecil (kotak bekal, dompet, bola, tali lompat) dan sisa piknik tidak punya kotak padat.
+
+### O4. Varian untuk peta besar
+
+Ditambahkan sesudah keputusan ukuran peta 160 × 100 ubin, agar kampung yang lebih luas tidak terlihat berulang. Semua memakai warna tetap dan gaya acuan yang sama.
+
+| ID | Berkas | Ukuran (ubin) | Isi | Zona | Status |
+|---|---|---|---|---|---|
+| O-43 | `obj_rumah_c` | 5 × 4 | Rumah warga memanjang: atap pelana `coral`, dinding peach, teras bertiang dengan bangku, tirai `leaf` | Z1 | Ditinjau (kelompok O4) |
+| O-44 | `obj_rumah_d` | 3 × 3 | Rumah warga kecil: atap limasan `coral`, dinding `mist`, pintu di kanan, tirai `sun` | Z1 | Ditinjau (kelompok O4) |
+| O-45 | `obj_pohon_b` | 3 × 3 (batang 1 ubin) | Pohon rindang gelap: tajuk bulat `grass` dengan lengkung daun `leaf` | Semua | Ditinjau (kelompok O4) |
+| O-46 | `obj_pohon_c` | 3 × 3 (batang 1 ubin) | Pohon berbunga: tajuk `leaf` dengan bunga `rose` dan putih | Semua | Ditinjau (kelompok O4) |
+| O-47 | `obj_pohon_kecil` | 1 × 2 | Pohon muda dengan tajuk kecil | Semua | Ditinjau (kelompok O4) |
+| O-48 | `obj_pisang` | 3 × 3 (batang 1 ubin) | Pohon pisang: batang semu hijau, daun lebar, setandan pisang dan jantungnya | Z1, Z6 | Ditinjau (kelompok O4) |
+| O-49 | `obj_semak_b` | 1 × 1 | Semak berbunga `rose` dan putih | Semua | Ditinjau (kelompok O4) |
+| O-50 | `obj_pot_tanaman` | 1 × 1 | Pot tanaman `coral` di depan rumah | Z1, Z8 | Ditinjau (kelompok O4) |
+| O-51 | `obj_batu` | 1 × 1 | Batu besar di tepi sungai atau taman | Z6 | Ditinjau (kelompok O4) |
+
+#### Rincian kelompok O4 (6 November 2026)
+
+| | |
+|---|---|
+| Kode | `scripts/game/art/atas_objek.py` (bagian "kelompok O4" dan entri `OBJEK`) |
+| Berkas | 15 PNG di `app/jejak-setara/assets/obj/`; rumah dan pohon berbagian bawah dan atas |
+| Ukuran | Seluruh kelompok O4 4,7 KB |
+| Pemeriksaan `build_jejak.py` | Lulus: hanya warna palet, tanpa piksel semi-transparan, ukuran sesuai ubin |
+| Pratinjau | `preview/obj4_lembar.png` (varian ×3) dan `preview/obj4_peta.png` (potongan kampung 40 × 26 ubin dengan semua varian, ×2) |
+
+- Peta 160 × 100 kini bisa memakai lima bentuk rumah dan enam jenis pohon (termasuk kelapa). Di JS-06, `build_peta.py` memilih varian berbenih agar susunan tidak berulang.
+- Pohon dan pisang hanya padat di ubin batangnya; tajuknya di lapisan atas menutupi pemain yang lewat di belakangnya.
 
 ## T. Penanda dan efek
 
@@ -631,5 +662,5 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## Cara membalas
 
-- **"Setuju: aset O3"** berarti ke-13 properti kejadian disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok O4 (varian rumah dan pohon untuk peta 160 × 100).
-- Perbaikan cukup ditulis per properti, misalnya "O-33: lapak beratap" atau "O-38: sampah lebih banyak". Properti lain yang tidak disebut tetap seperti sekarang.
+- **"Setuju: aset O4"** berarti kesembilan varian disetujui. Statusnya menjadi Disetujui, kreditnya ditambahkan, dan saya lanjut ke kelompok I (ikon skill, ikon zona, ikon peta mini, ikon antarmuka, dan ikon Sehari Setara yang dipakai ulang).
+- Perbaikan cukup ditulis per varian, misalnya "O-48: daun pisang lebih lebar" atau "O-43: dinding rumah c putih". Varian lain yang tidak disebut tetap seperti sekarang.

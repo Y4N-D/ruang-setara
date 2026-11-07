@@ -105,9 +105,10 @@ for _n, _poses in POSE_NPC2.items():
 # Aset berstatus Disetujui: nama -> tanggal. Hanya aset di sini yang masuk CREDITS.md dan manifest.ts.
 KELOMPOK_O1 = {n for n, kode in KODE_OBJEK.items() if kode <= "O-20"}
 KELOMPOK_O2 = {n for n, kode in KODE_OBJEK.items() if "O-21" <= kode <= "O-28"}
+KELOMPOK_O3 = {n for n, kode in KODE_OBJEK.items() if "O-29" <= kode <= "O-41"}
 DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              if nama.startswith(("ava_", "ikon_ava_", "ubin_"))                     # kelompok A dan U
-             or NAMA_OBJEK.get(nama) in KELOMPOK_O1 | KELOMPOK_O2                       # kelompok O1 dan O2
+             or NAMA_OBJEK.get(nama) in KELOMPOK_O1 | KELOMPOK_O2 | KELOMPOK_O3         # kelompok O1, O2, O3
              or nama.startswith("tanda_")                                               # kelompok T
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC)                  # kelompok N1
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC2)}                # kelompok N2
@@ -1076,7 +1077,7 @@ KEJADIAN_O3 = {"pengeras_suara": "K-02", "kotak_bekal": "K-03", "kursi_roda": "K
 
 def pratinjau_obj3_lembar():
     L = Lembar(1440, 660)
-    L.judul("Kelompok O3 — Properti kejadian (×4)", "Sesi C · 6 Nov 2026 · Ditinjau")
+    L.judul("Kelompok O3 — Properti kejadian (×4)", "Sesi C · disetujui 6 Nov 2026")
     m = MASA["siang"]
     x, y, tinggi_baris = 20, 70, 0
     for nama in O3:
@@ -1135,7 +1136,7 @@ SET_KEJADIAN = [   # (kejadian, keterangan, peta 7x5, objek, tokoh, posisi tanda
 
 def pratinjau_obj3_set():
     L = Lembar(1440, 960)
-    L.judul("Kelompok O3 — Set tokoh dan properti per kejadian (×3)", "Sesi C · 6 Nov 2026 · Ditinjau · tabel NASKAH.md")
+    L.judul("Kelompok O3 — Set tokoh dan properti per kejadian (×3)", "Sesi C · disetujui 6 Nov 2026 · tabel NASKAH.md")
     for i, (k, teks, peta, objek, tokoh, tanda) in enumerate(SET_KEJADIAN):
         x, y = 20 + (i % 4) * 352, 70 + (i // 4) * 296
         g = render_peta(peta, "siang", tuple(objek), [_tokoh_di(*t) for t in tokoh])
@@ -1143,6 +1144,74 @@ def pratinjau_obj3_set():
         L.tempel(besar(g, 3), x, y)
         L.label(k, x + 168, y + 244, "tebal")
         L.label(teks, x + 168, y + 264)
+    return L.im
+
+
+# ---------------------------------------------------------------------------
+# Pratinjau kelompok O4: varian untuk peta besar
+# ---------------------------------------------------------------------------
+O4 = ("rumah_c", "rumah_d", "pohon_b", "pohon_c", "pohon_kecil", "pisang", "semak_b", "pot_tanaman", "batu")
+
+
+def pratinjau_obj4_lembar():
+    L = Lembar(1440, 700)
+    L.judul("Kelompok O4 — Varian untuk peta besar (×3)", "Sesi C · 6 Nov 2026 · Ditinjau · di atas rumput siang")
+    m = MASA["siang"]
+    x, y, tinggi_baris = 20, 70, 0
+    for nama in O4:
+        fn, (w, h), _, _, _, _ = OBJEK[nama]
+        latar = C((w + 1) * 16, (h + 1) * 16)                                     # noqa: F405
+        for ty in range(h + 1):
+            for tx in range(w + 1):
+                latar.paste(ubin_rumput(m, (tx + ty) % 4), tx * 16, ty * 16)
+        latar.paste(fn(), 7, 7)
+        lebar = max(latar.w * 3, 130)
+        if x + lebar > 1420:
+            x, y, tinggi_baris = 20, y + tinggi_baris + 12, 0
+        tinggi_baris = max(tinggi_baris, latar.h * 3 + 48)
+        L.tempel(besar(latar, 3), x + (lebar - latar.w * 3) // 2, y)
+        L.label(KODE_OBJEK[nama], x + lebar / 2, y + latar.h * 3 + 4, "tebal")
+        L.label(nama.replace("_", " "), x + lebar / 2, y + latar.h * 3 + 24)
+        x += lebar + 20
+    return L.im.crop((0, 0, 1440, y + tinggi_baris + 12))
+
+
+def peta_o4():
+    W, H = 40, 26
+    g = [["."] * W for _ in range(H)]
+    for yy in (9, 10):
+        for xx in range(W):
+            g[yy][xx] = "p"                                                       # gang mendatar
+    for yy in range(H):
+        for xx in (19, 20):
+            g[yy][xx] = "p"                                                       # gang tegak
+    for yy in (23, 24, 25):
+        for xx in range(W):
+            g[yy][xx] = "w"                                                       # sungai
+    for x, y, ch in ((6, 19, "*"), (37, 20, "+"), (12, 2, "^"), (27, 20, "d"), (3, 21, "+")):
+        g[y][x] = ch
+    return ["".join(r) for r in g]
+
+
+OBJEK_O4 = [("rumah_c", 1, 4), ("rumah_d", 7, 5), ("rumah_a", 11, 4), ("pohon_c", 15, 3), ("rumah_b", 22, 5),
+            ("rumah_nara", 26, 4), ("rumah_d", 31, 5), ("pisang", 35, 5), ("pohon_b", 2, 0), ("pohon", 7, 1),
+            ("pohon_kecil", 12, 1), ("pohon_b", 23, 1), ("pohon_kecil", 30, 1), ("pohon", 34, 1),
+            ("rumah_a", 1, 12), ("rumah_c", 7, 12), ("rumah_b", 13, 12), ("rumah_d", 22, 12), ("rumah_c", 26, 12),
+            ("rumah_b", 32, 12), ("pohon_c", 2, 17), ("pisang", 8, 17), ("pohon_b", 13, 17), ("pohon_kecil", 17, 18),
+            ("pohon", 23, 17), ("pohon_c", 28, 17), ("pisang", 33, 17), ("batu", 5, 22), ("batu", 17, 22),
+            ("batu", 30, 22), ("semak_b", 11, 21), ("semak_b", 25, 21), ("semak", 36, 21), ("pot_tanaman", 6, 8),
+            ("pot_tanaman", 10, 8), ("pot_tanaman", 25, 8), ("semak", 14, 8), ("semak_b", 34, 8), ("kelapa", 37, 15)]
+
+
+def pratinjau_obj4_peta():
+    L = Lembar(1320, 960)
+    L.judul("Kelompok O4 — Varian rumah dan pohon", "Sesi C · 6 Nov 2026 · Ditinjau · 40×26 ubin, siang (×2)")
+    tokoh = [_pemain(2, 312, 156, "kanan", "jalan", 1, tas="mango"), _pemain(7, 330, 300, "atas", "jalan", 3, tas="leaf"),
+             _npc_di("ibu", "diam", 136, 140), _npc2_di("anak1", "diam", 520, 150)]
+    L.tempel(besar(render_peta(peta_o4(), "siang", OBJEK_O4, tokoh), 2), 20, 70)
+    L.label("Lima bentuk rumah (a, b, c, d, rumah Nara), lima jenis pohon (rindang, gelap, berbunga, muda, pisang) dan kelapa, "
+            "semak berbunga, pot tanaman, dan batu", 660, 912)
+    L.label("Contoh potongan sekitar seperenam belas peta 160 × 100; peta sungguhan disusun di JS-06", 660, 936)
     return L.im
 
 
@@ -1155,7 +1224,8 @@ PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringk
             "tanda_lembar": pratinjau_tanda_lembar, "npc1_ringkasan": pratinjau_npc1_ringkasan,
             "npc1_peta": pratinjau_npc1_peta, "npc2_ringkasan": pratinjau_npc2_ringkasan,
             "npc2_peta": pratinjau_npc2_peta, "obj3_lembar": pratinjau_obj3_lembar,
-            "obj3_set": pratinjau_obj3_set}
+            "obj3_set": pratinjau_obj3_set, "obj4_lembar": pratinjau_obj4_lembar,
+            "obj4_peta": pratinjau_obj4_peta}
 for _n in AVATAR:
     PREVIEWS[f"pose_ava_{_n}"] = (lambda n=_n: pratinjau_pose_avatar(n))
 ANIMASI = {"ava_gerak": pratinjau_ava_gerak, "tanda_gerak": pratinjau_tanda_gerak}

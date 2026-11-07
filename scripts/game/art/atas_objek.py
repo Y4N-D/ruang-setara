@@ -860,6 +860,128 @@ def obj_bangku_antrean():
     return _bingkai(d)
 
 
+# --------------------------------------------------------------------------- kelompok O4: varian untuk peta besar
+def obj_rumah_c():
+    """Rumah warga varian c (O-43), 5x4 ubin: atap pelana coral, dinding peach, teras bertiang dengan bangku."""
+    d = C(80, 64)                                                                    # noqa: F405
+    _dinding(d, 3, 28, 74, 33, warna=PAGI3, teduh=SK2); _pondasi(d, 3, 61, 74)       # noqa: F405
+    for x in (6, 28):
+        d.r(x, 33, 2, 28, WOOD); d.vl(x + 1, 33, 60, WOODD)                          # noqa: F405  tiang teras
+    d.r(10, 52, 14, 2, WOOD); d.hl(10, 23, 53, WOODD); d.r(11, 54, 2, 4, WOODD); d.r(21, 54, 2, 4, WOODD)   # noqa: F405
+    _jendela(d, 12, 38, 12, 9, tirai=LEAF)                                           # noqa: F405
+    _pintu(d, 36, 40, 12, 21)
+    _jendela(d, 56, 38, 12, 9, tirai=LEAF)                                           # noqa: F405
+    _atap_pelana(d, 0, 0, 80, 28, "coral")
+    d.r(3, 28, 28, 3, CORAL); d.hl(3, 30, 28, MANGO); d.hl(3, 30, 30, WOODD)         # noqa: F405  atap teras
+    return _bingkai(d)
+
+
+def obj_rumah_d():
+    """Rumah warga varian d (O-44), 3x3 ubin: atap limasan coral, dinding mist, pintu di kanan."""
+    d = C(48, 48)                                                                    # noqa: F405
+    _dinding(d, 3, 24, 42, 21, warna=MIST, teduh=SLATE); _pondasi(d, 3, 45, 42)      # noqa: F405
+    _jendela(d, 8, 29, 12, 9, tirai=SUN)                                             # noqa: F405
+    _pintu(d, 30, 28, 10, 17)
+    _atap_limasan(d, 0, 0, 48, 24, "coral")
+    return _bingkai(d)
+
+
+def _tajuk(d, gerombol, dasar, gelap, terang=None, tengah=(24, 14), batas=10):
+    for cx, cy, r in gerombol:
+        d.disc(cx, cy, r, dasar)
+    for y in range(d.h):
+        for x in range(d.w):
+            if d.px[x, y] == dasar and (x - tengah[0]) + (y - tengah[1]) > batas and (x + y) % 2 == 0:
+                d.p(x, y, gelap)
+    return d
+
+
+def obj_pohon_b():
+    """Pohon rindang gelap (O-45), 3x3 ubin: tajuk bulat grass dengan lengkung daun leaf."""
+    d = C(48, 48)                                                                    # noqa: F405
+    d.r(21, 26, 6, 19, WOOD); d.vl(25, 26, 44, WOODD); d.vl(26, 26, 44, WOODD)       # noqa: F405
+    d.r(19, 44, 10, 2, WOOD); d.hl(19, 28, 45, WOODD)                                # noqa: F405
+    _tajuk(d, ((24, 13, 12), (13, 18, 8), (35, 18, 8), (24, 22, 9)), GRASS, DUSK, tengah=(24, 13), batas=12)   # noqa: F405
+    for x, y in ((11, 13), (18, 7), (27, 4), (9, 19), (17, 14), (26, 10), (32, 15), (20, 21)):
+        d.p(x, y, LEAF); d.hl(x + 1, x + 3, y + 1, LEAF); d.p(x + 4, y, LEAF)        # noqa: F405  lengkung daun terang
+    return _bingkai(d)
+
+
+def obj_pohon_c():
+    """Pohon berbunga (O-46), 3x3 ubin: tajuk leaf dengan bunga rose dan putih."""
+    d = C(48, 48)                                                                    # noqa: F405
+    d.r(21, 26, 6, 19, WOOD); d.vl(25, 26, 44, WOODD); d.vl(26, 26, 44, WOODD)       # noqa: F405
+    d.r(19, 44, 10, 2, WOOD); d.hl(19, 28, 45, WOODD)                                # noqa: F405
+    _tajuk(d, ((24, 9, 8), (14, 13, 8), (34, 13, 8), (24, 17, 10), (17, 22, 6), (31, 22, 6)), LEAF, GRASS)   # noqa: F405
+    for x, y in ((12, 15), (20, 8), (29, 6), (16, 20), (26, 14), (33, 18), (22, 24)):
+        d.p(x, y, GRASS); d.hl(x + 1, x + 2, y + 1, GRASS); d.p(x + 3, y, GRASS)     # noqa: F405
+    for i, (x, y) in enumerate(((10, 11), (17, 5), (25, 3), (33, 9), (14, 18), (22, 12), (30, 15), (37, 16),
+                                (19, 26), (27, 25), (24, 19), (11, 22))):
+        w = ROSE if i % 3 else WHITE                                                 # noqa: F405
+        d.p(x, y, w); d.p(x + 1, y, w); d.p(x, y + 1, w if i % 2 else SUN)           # noqa: F405  bunga
+    return _bingkai(d)
+
+
+def obj_pohon_kecil():
+    """Pohon muda (O-47), 1x2 ubin: batang 1 ubin, tajuk kecil."""
+    d = C(16, 32)                                                                    # noqa: F405
+    d.r(7, 14, 2, 17, WOOD); d.vl(8, 14, 30, WOODD); d.r(5, 30, 6, 2, WOOD); d.hl(5, 10, 31, WOODD)   # noqa: F405
+    _tajuk(d, ((8, 7, 6), (5, 10, 4), (11, 10, 4)), LEAF, GRASS, tengah=(8, 7), batas=4)   # noqa: F405
+    for x, y in ((4, 7), (8, 3), (9, 9)):
+        d.p(x, y, GRASS); d.hl(x + 1, x + 2, y + 1, GRASS); d.p(x + 3, y, GRASS)     # noqa: F405
+    return _bingkai(d)
+
+
+def obj_pisang():
+    """Pohon pisang (O-48), 3x3 ubin: batang semu di tengah, daun lebar, setandan pisang."""
+    d = C(48, 48)                                                                    # noqa: F405
+    d.r(22, 24, 4, 22, GRASS); d.vl(22, 24, 45, LEAF); d.p(24, 30, WOODD); d.p(23, 37, WOODD)   # noqa: F405  batang
+    d.r(20, 45, 8, 2, GRASS); d.hl(20, 27, 46, WOODD)                                # noqa: F405
+    for sudut, panjang in ((-155, 20), (-115, 15), (-65, 15), (-25, 20), (165, 15), (15, 15)):
+        a = math.radians(sudut)
+        for t in range(3, panjang):
+            x = int(round(24 + math.cos(a) * t))
+            y = int(round(22 + math.sin(a) * t * 0.7 + 0.035 * t * t))
+            lebar = 5 if t < panjang * 0.55 else 4 if t < panjang * 0.8 else 2
+            atas = y - lebar // 2
+            d.r(x, atas, 1, lebar, LEAF); d.p(x, atas + lebar - 1, GRASS)            # noqa: F405  helai daun lebar
+            if t % 3 == 0:
+                d.p(x, atas + lebar // 2, GRASS)                                     # noqa: F405  tulang daun
+    d.r(26, 24, 4, 5, SUN); d.p(29, 24, MANGO); d.p(27, 28, MANGO)                   # noqa: F405  setandan pisang
+    d.r(27, 29, 2, 3, BERRY)                                                         # noqa: F405  jantung pisang
+    return _bingkai(d)
+
+
+def obj_semak_b():
+    """Semak berbunga (O-49), 1x1 ubin."""
+    c = obj_semak()
+    for i, (x, y) in enumerate(((5, 7), (10, 6), (7, 11), (12, 10), (4, 10))):
+        c.p(x, y, ROSE if i % 2 == 0 else WHITE)                                     # noqa: F405
+    return c
+
+
+def obj_pot_tanaman():
+    """Pot tanaman di depan rumah (O-50), 1x1 ubin."""
+    d = C(16, 16)                                                                    # noqa: F405
+    d.r(4, 10, 8, 5, CORAL); d.hl(4, 11, 10, MANGO); d.vl(11, 11, 14, WOODD)         # noqa: F405  pot
+    for cx, cy, r in ((8, 6, 4), (5, 8, 3), (11, 8, 3)):
+        d.disc(cx, cy, r, LEAF)                                                      # noqa: F405
+    d.p(7, 4, GRASS); d.hl(8, 9, 5, GRASS); d.p(10, 4, GRASS); d.p(6, 8, ROSE); d.p(10, 7, SUN)   # noqa: F405
+    return _bingkai(d)
+
+
+def obj_batu():
+    """Batu besar di tepi sungai atau taman (O-51), 1x1 ubin."""
+    d = C(16, 16)                                                                    # noqa: F405
+    d.disc(8, 9, 6, MIST); d.r(2, 12, 13, 3, MIST)                                   # noqa: F405
+    for y in range(16):
+        for x in range(16):
+            if d.px[x, y] == MIST and (x - 8) + (y - 8) > 3 and (x + y) % 2 == 0:    # noqa: F405
+                d.p(x, y, SLATE)                                                     # noqa: F405
+    d.hl(5, 7, 5, WHITE); d.p(4, 6, WHITE); d.hl(2, 14, 14, SLATE)                   # noqa: F405
+    return _bingkai(d)
+
+
 # --------------------------------------------------------------------------- daftar objek
 # nama: (fungsi, ukuran dalam ubin (lebar, tinggi), baris potong kanvas atau None, kotak padat [(x, y, l, t)] dalam
 #        ubin relatif terhadap pojok kiri atas, jenis bayangan di tanah, bisa dilewati?)
@@ -913,6 +1035,16 @@ OBJEK = {
     "bola": (obj_bola, (1, 1), None, [], None, False),
     "tali_lompat": (obj_tali_lompat, (1, 1), None, [], None, False),
     "bangku_antrean": (obj_bangku_antrean, (3, 1), None, [(0, 0, 3, 1)], None, False),
+    # kelompok O4: varian untuk peta 160 x 100
+    "rumah_c": (obj_rumah_c, (5, 4), 29, [(0, 1, 5, 3)], "kotak", False),
+    "rumah_d": (obj_rumah_d, (3, 3), 25, [(0, 1, 3, 2)], "kotak", False),
+    "pohon_b": (obj_pohon_b, (3, 3), 29, [(1, 2, 1, 1)], "pohon", False),
+    "pohon_c": (obj_pohon_c, (3, 3), 29, [(1, 2, 1, 1)], "pohon", False),
+    "pohon_kecil": (obj_pohon_kecil, (1, 2), 17, [(0, 1, 1, 1)], "kecil", False),
+    "pisang": (obj_pisang, (3, 3), 25, [(1, 2, 1, 1)], "kecil", False),
+    "semak_b": (obj_semak_b, (1, 1), None, [(0, 0, 1, 1)], "kecil", False),
+    "pot_tanaman": (obj_pot_tanaman, (1, 1), None, [(0, 0, 1, 1)], None, False),
+    "batu": (obj_batu, (1, 1), None, [(0, 0, 1, 1)], "kecil", False),
 }
 for _gaya in ("bambu", "sekolah"):
     for _jenis in PAGAR:
@@ -928,7 +1060,9 @@ KODE_OBJEK = {"rumah_nara": "O-01", "rumah_a": "O-02", "rumah_b": "O-02", "warun
               "tiang_lampu": "O-28", "pengeras_suara": "O-29", "kotak_bekal": "O-30", "kursi_roda": "O-31",
               "tiang_kamera": "O-32", "lapak": "O-33", "dompet": "O-34", "bangku_pasar": "O-35",
               "pos_keamanan": "O-36", "meja_panitia": "O-37", "sisa_piknik": "O-38", "bola": "O-39",
-              "tali_lompat": "O-40", "bangku_antrean": "O-41"}
+              "tali_lompat": "O-40", "bangku_antrean": "O-41", "rumah_c": "O-43", "rumah_d": "O-44",
+              "pohon_b": "O-45", "pohon_c": "O-46", "pohon_kecil": "O-47", "pisang": "O-48", "semak_b": "O-49",
+              "pot_tanaman": "O-50", "batu": "O-51"}
 for _jenis in PAGAR:
     KODE_OBJEK[f"pagar_bambu_{_jenis}"] = "O-23"
     KODE_OBJEK[f"pagar_sekolah_{_jenis}"] = "O-24"
