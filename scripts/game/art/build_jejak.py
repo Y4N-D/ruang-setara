@@ -144,7 +144,8 @@ DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              or NAMA_OBJEK.get(nama) in KELOMPOK_O1 | KELOMPOK_O2 | KELOMPOK_O3 | KELOMPOK_O4   # kelompok O1-O4
              or nama.startswith("tanda_")                                               # kelompok T
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC)                  # kelompok N1
-             or (nama.startswith("npc_") and nama.split("_")[1] in NPC2)}                # kelompok N2
+             or (nama.startswith("npc_") and nama.split("_")[1] in NPC2)                 # kelompok N2
+             or nama in IKON_BARU or nama in IKON_ULANG}                                 # kelompok I
 
 BATAS_STRIP = 6 * 1024              # satu strip avatar atau tokoh
 BATAS_UBIN = 60 * 1024              # satu lembar ubin per masa
@@ -1266,7 +1267,7 @@ NAMA_IKON = {"ikon_lari": "lari cepat", "ikon_kompas": "kompas", "ikon_petunjuk"
 
 def pratinjau_ikon_lembar():
     L = Lembar(1440, 900)
-    L.judul("Kelompok I — Ikon (×6, ikon 32×32 ×4, ikon peta mini ×8)", "Sesi C · 6 Nov 2026 · Ditinjau")
+    L.judul("Kelompok I — Ikon (×6, ikon 32×32 ×4, ikon peta mini ×8)", "Sesi C · disetujui 6 Nov 2026")
     baris = [("Skill dan zona", [n for n in IKON_BARU if n.startswith(("ikon_lari", "ikon_kompas", "ikon_petunjuk",
                                                                        "ikon_teropong", "ikon_karcis"))]
               + [f"ikon_zona_{z}" for z in range(1, 9)]),
@@ -1326,7 +1327,7 @@ def pratinjau_ikon_hud():
         tempel(ikon, xx, yy, 3)
     tempel(tanda_diri("kanan"), 70, im.height - 60, 3)
     L = Lembar(im.width + 40, im.height + 140)
-    L.judul("Kelompok I — Ikon di tiruan HUD (×3)", "Sesi C · 6 Nov 2026 · Ditinjau")
+    L.judul("Kelompok I — Ikon di tiruan HUD (×3)", "Sesi C · disetujui 6 Nov 2026")
     L.tempel(im, 20, 70)
     L.label("Bilah atas: ikon zona, matahari, jam, bintang. Kanan bawah: tombol Lari cepat, Kompas, Petunjuk.",
             L.im.width / 2, im.height + 80)

@@ -61,6 +61,7 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 
 | File | ID | Atribusi |
 |---|---|---|
+| `ikon/ikon_arsip.png` | I-18 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/ikon_ava_1.png` | A-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/ikon_ava_2.png` | A-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/ikon_ava_3.png` | A-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
@@ -69,6 +70,38 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 | `ikon/ikon_ava_6.png` | A-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/ikon_ava_7.png` | A-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/ikon_ava_8.png` | A-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_bintang.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_bulan.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_centang.png` | I-18 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_emosi_hati.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_emosi_keringat.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_emosi_seru.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_emosi_tanya.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_jam.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_jejak.png` | I-17 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_karcis.png` | I-05 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_kompas.png` | I-02 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_lari.png` | I-01 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_layar_penuh.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_matahari.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_menyambung.png` | I-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_mini_halte.png` | I-14 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_mini_kejadian.png` | I-14 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_mini_selesai.png` | I-14 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_peringatan.png` | I-18 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_petunjuk.png` | I-03 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_putar_hp.png` | I-16 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_suara_mati.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_suara_nyala.png` | I-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_teropong.png` | I-04 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_zona_1.png` | I-06 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_zona_2.png` | I-07 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_zona_3.png` | I-08 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_zona_4.png` | I-09 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_zona_5.png` | I-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_zona_6.png` | I-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_zona_7.png` | I-12 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `ikon/ikon_zona_8.png` | I-13 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/tanda_debu.png` | T-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/tanda_dibuka.png` | T-02 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `ikon/tanda_diri.png` | T-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
