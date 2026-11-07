@@ -271,7 +271,34 @@ export interface PengaturanRuang {
   modeNomorAbsen: boolean;
   uji: boolean;                              // ruang uji: tidak masuk statistik
 }
+
+// Tambahan JS-02
+export type KotakJenis = "sepatu" | "kompas" | "buku" | "teropong" | "karcis";
+export type WarnaTas = "sun" | "mango" | "coral" | "rose" | "berry" | "teal" | "leaf" | "sky-d";
+export interface Posisi { x: number; y: number }                          // piksel logis; posisi pemain = titik kaki
+export interface TitikPeta { id: string; zona: ZonaId; x: number; y: number }   // ubin
+export interface PetaJejak<Lapisan = Uint8Array> { /* bagian 11.1.1 */ }
+
+export interface PemainRingkas {
+  id: string; nama: string; avatar: number; warnaTas: WarnaTas;
+  skor: number; waktuSkorMs: number; langkah1Benar: number; urutanGabung: number; terhubung: boolean;
+}
+
+export interface KeadaanSkill {                // dipegang pemanggil, bukan inti
+  muatan: Record<SkillId, number>;
+  aktifSampaiMs: Partial<Record<SkillId, number>>;
+  terakhirPakaiMs: Partial<Record<SkillId, number>>;
+}
+
+export type StatusPemainKejadian = "belum" | "langkah1" | "langkah2" | "selesai";
+
+export interface HasilPeriksaGerak {           // hasil satu laporan `gerak` (bagian 8.2)
+  diterima: boolean; x: number; y: number; arah: Arah; seq: number;
+  alasan: "seq" | "status" | "dialog" | "waktu" | "kecepatan" | "tabrakan" | null;
+}
 ```
+
+Tipe tambahan ditetapkan di JS-02 (spesifikasi JS-02, bagian "Data, protokol, API, dan migrasi" dan catatan Build B-7). Semua tipe dideklarasikan di `app/jejak-setara/inti/tipe.ts`; skema pesan dan tipenya ada di `inti/protokol.ts`.
 
 ### 5.2 Skema D1
 
@@ -444,7 +471,7 @@ Teks akhir ditetapkan di spesifikasi fitur.
 
 - Semua hitungan waktu berpatokan pada `waktuServer`. Klien menaksir selisih jam dari median lima `pong` terakhir.
 - Bila sambungan putus, klien mencoba lagi dengan jeda 0,5, 1, 2, 4, lalu 8 detik (paling lama 10 detik), sambil menampilkan "Menyambung ulang…".
-- `token` acak 128 bit disimpan di `sessionStorage` tab itu. Server menyimpan hash token dan seluruh status pemain selama ruang belum ditutup.
+- `token` acak 256 bit (32 byte, 43 karakter base64url; ditetapkan JS-02) disimpan di `sessionStorage` tab itu. Server menyimpan hash token dan seluruh status pemain selama ruang belum ditutup.
 - Avatar pemain yang terputus lebih dari 10 detik tampil pucat bagi pemain lain dan di layar kelas.
 - Layar kelas yang tertutup tidak menghentikan ronde. Guru membuka lagi layar kelas dari konsol (tiket baru).
 - Klien meminta *Screen Wake Lock* saat ronde dimulai (bila didukung), agar HP tidak terkunci di tengah ronde (JFR-14).
@@ -501,7 +528,7 @@ stateDiagram-v2
 
 - Kecepatan dasar 72 piksel logis per detik; ×1,6 saat Lari cepat aktif. Diagonal dinormalisasi.
 - Untuk setiap `gerak`, server menghitung jarak dari posisi terakhir yang diterima. Batasnya: kecepatan saat itu × selang waktu × 1,25 + 4 piksel.
-- Posisi juga ditolak bila berada di sel padat peta, di luar peta, atau saat status bukan `main`, atau saat dialog terbuka.
+- Posisi juga ditolak bila berada di sel padat peta, di luar peta, atau tidak bisa dicapai tanpa menembus sel padat (garis lurus, X lalu Y, atau Y lalu X; ditetapkan JS-02), atau saat status bukan `main`, atau saat dialog terbuka.
 - Posisi yang ditolak tidak dipakai; server mengirim `koreksi` dengan posisi terakhir yang sah, dan klien langsung berpindah ke sana.
 - Hitungan tabrakan memakai `inti/gerak.ts` dan grid tabrakan yang sama dengan klien.
 
@@ -520,7 +547,7 @@ stateDiagram-v2
 // app/jejak-setara/inti/aturan.ts
 export const POIN = { langkah1Benar: 40, tepat: 60, kurang: 25, berisiko: 0 } as const;
 
-export function bandingkanPeringkat(a: Pemain, b: Pemain): number {
+export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number {   // DataPeringkat = bagian PemainRingkas
   return (b.skor - a.skor)                        // 1) skor lebih tinggi
       || (a.waktuSkorMs - b.waktuSkorMs)          // 2) lebih dulu mencapai skor itu
       || (b.langkah1Benar - a.langkah1Benar)      // 3) lebih banyak Langkah 1 benar
@@ -639,6 +666,18 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 - Sumber: `scripts/jejak-setara/peta/kampung.txt` (satu karakter per ubin untuk tanah dan tabrakan) dan `objek.json` (bangunan, pohon, titik kejadian per zona, kotak, halte, gerbang lobi, dan titik munculnya pemain).
 - `build_peta.py` menghasilkan `app/jejak-setara/peta/kampung.json` (lapisan ubin, grid tabrakan sebagai bit, daftar objek, batas zona) dan pratinjau di `docs/jejak-setara/preview/`.
 - Uji peta (`content:check:jejak`): semua titik kejadian, kotak, dan halte bisa dicapai dari titik muncul (pencarian lebar); setiap titik punya ruang kosong 3 × 3 ubin; jarak antartitik kejadian ≥ 6 ubin; setiap zona punya sedikitnya 4 titik kejadian; dan jumlah titik cukup untuk Paket inti.
+
+#### 11.1.1 Bentuk `kampung.json` (ditetapkan JS-02)
+
+`build_peta.py` menghasilkan `app/jejak-setara/peta/kampung.json` berbentuk `PetaJejak<string>` (bagian 5.1), yaitu `PetaJejak` dengan lapisan `ubin` dan `tabrakan` berupa teks RLE. `bacaPeta` di `inti/peta.ts` adalah pemeriksa resminya: isi yang tidak cocok ditolak dengan galat `PETA_CACAT`, dan isi yang sah dikembalikan sebagai `PetaJejak` dengan kedua lapisan terurai (satu byte per sel, baris demi baris dari kiri-atas). Kunci lain selain yang tertulis di sini ditolak.
+
+- `versi` = 1; `lebar`, `tinggi` dalam ubin (1–512); `ukuranUbin` = 16.
+- `ubin` dan `tabrakan` berupa teks RLE `"<nilai>x<jumlah>;"` berulang, misalnya `"0x5;1x2;"`; `ubin` 0–63, `tabrakan` 0 (kosong) atau 1 (padat); jumlah sel tepat `lebar × tinggi`.
+- Koordinat `x`, `y` dalam ubin, bilangan bulat mulai 0 di kiri-atas dan selalu di dalam peta; pusat piksel logis ubin = `n × 16 + 8`.
+- `objek`: `id` unik, `jenis` (huruf kecil, angka, dan `_`; Sesi C bebas menambah jenis), `x`, `y`, dan `arah` bila perlu.
+- `zona`: `id` z1–z8 tanpa ganda, `nama` (1–32 karakter), dan batas `kiri`, `atas`, `kanan`, `bawah` (ubin, inklusif).
+- `titikKejadian`: `id`, `zona`, `x`, `y`. `kotak`: `id`, `jenis` (`sepatu` | `kompas` | `buku` | `teropong` | `karcis`), `zona`, `x`, `y`. `halte`: seperti titik kejadian. Id ketiganya unik bersama, dan `zona` harus ada di daftar `zona`.
+- `gerbangLobi`: batas ubin gerbang lobi `{ kiri, atas, kanan, bawah }` (inklusif). `titikMuncul`: daftar `{ x, y }`, sedikitnya satu.
 
 ### 11.2 Manifest aset
 
