@@ -6,7 +6,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 |---|---|---|---|
 | JS-01 | Selesai (5 Nov 2026) | [JS-01-kerangka.md](specs/JS-01-kerangka.md) | [JS-01-hasil.md](tests/JS-01-hasil.md), lulus |
 | JS-02 | Selesai (7 Nov 2026) | [JS-02-inti-bersama.md](specs/JS-02-inti-bersama.md) | [JS-02-hasil.md](tests/JS-02-hasil.md), lulus (diuji ulang dengan dependensi terpasang di Plan JS-03) |
-| JS-03 | Spesifikasi (DRAF 7 Nov 2026), menunggu `Spesifikasi disetujui: JS-03` | [JS-03-server-ruang.md](specs/JS-03-server-ruang.md) | — |
+| JS-03 | Disetujui (7 Nov 2026); spesifikasi sedang ditulis | — | — |
 | JS-04 | Belum direncanakan | — | — |
 | JS-05 | Dikerjakan Sesi B (mulai 7 Nov 2026); status di `naskah/STATUS.md` | — | — |
 | JS-06 | Dikerjakan Sesi C (mulai 7 Nov 2026); status di `Daftar_Aset.md` | — | — |
@@ -223,7 +223,7 @@ Keputusan pemilik proyek, 7 November 2026 (Plan JS-03):
 
 ## JS-03 — Server ruang
 
-- Status: Disetujui (7 Nov 2026): balasan `Setuju: JS-03`, yaitu saran semua usulan diterima (1a sampai 12a), KT-02 dijawab sesuai saran (disediakan, mati secara bawaan, hanya untuk ruang sampai 50 pemain), KT-07 tidak diperlukan (3a), dan kapasitas ruang mengikuti usulan 11a. Direncanakan 7 Nov 2026. Spesifikasi ditulis 7 Nov 2026 ([JS-03-server-ruang.md](specs/JS-03-server-ruang.md)) bersama perubahan PRD dan Architecture untuk C-8 dan keputusan Gerbang 1; menunggu `Spesifikasi disetujui: JS-03` beserta pilihan DRAF D-1 sampai D-7. Diperiksa sebelum Plan: JS-02 berstatus Selesai dan laporannya Lulus (uji ulang dengan dependensi terpasang, 7 Nov 2026). Server memakai paket gratis Cloudflare (bagian "Keputusan server" di atas).
+- Status: Disetujui (7 Nov 2026): balasan `Setuju: JS-03`, yaitu saran semua usulan diterima (1a sampai 12a), KT-02 dijawab sesuai saran (disediakan, mati secara bawaan, hanya untuk ruang sampai 50 pemain), KT-07 tidak diperlukan (3a), dan kapasitas ruang mengikuti usulan 11a. Direncanakan 7 Nov 2026. Diperiksa sebelum Plan: JS-02 berstatus Selesai dan laporannya Lulus (uji ulang dengan dependensi terpasang, 7 Nov 2026). Server memakai paket gratis Cloudflare (bagian "Keputusan server" di atas).
 - Memenuhi: JFR-02 (kode 5 karakter tanpa huruf dan angka yang mirip), JFR-04 (masuk tanpa akun: kode, nomor absen bila mode aktif, tiga saran nama samaran yang bisa diacak ulang, dan delapan avatar), JFR-08 (sambung ulang dengan skor dan progres utuh), serta bagian server JFR-01 (membuat ruang beserta pengaturannya), JFR-05 (daftar pemain di lobi; berjalan di halaman lobi menunggu JS-07, dan tampilan layar kelas menunggu JS-10), dan JFR-06 (mengunci ruang dan mengeluarkan pemain di inti ruang; tombolnya di JS-10). Architecture JA-02, JA-03, JA-04 (pemeriksaan gerak di server), JA-11, JA-12 (lingkungan uji), JA-13, bagian 6.1–6.8, 7, dan 8.6 (kiriman peserta ke D1). PRD bagian 12: koneksi yang putus sampai 2 menit tersambung kembali.
 - Bergantung pada: JS-02 (Selesai, 7 Nov 2026) dan penyiapan server dengan paket gratis (langkah 1 dan 3–6 Architecture bagian 18; bagian "Yang perlu disiapkan pemilik proyek" di bawah). Tidak menunggu JS-05 dan JS-06: JS-03 belum memakai kejadian, dan gerak diperiksa dengan peta uji sampai `kampung.json` Sesi C tersedia.
 - File yang dibuat/diubah (rencana; dipastikan di Specify):

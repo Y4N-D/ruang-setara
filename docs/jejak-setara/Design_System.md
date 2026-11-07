@@ -68,7 +68,7 @@ Ciri "Langit sehari" Sehari Setara diteruskan. Ronde dipetakan ke satu hari: **p
 |---|---|
 | Pandangan logis | **320 × 180** piksel (16:9), sama untuk semua pemain |
 | Ubin | 16 × 16 piksel logis; grid dasar 4 piksel |
-| Peta | Sekitar **120 × 80 ubin** (1.920 × 1.280 piksel logis), kira-kira 6 × 7 layar |
+| Peta | Sekitar **160 × 100 ubin** (2.560 × 1.600 piksel logis), kira-kira 8 × 9 layar HP (keputusan pemilik proyek, 6 Nov 2026) |
 | Skala | Bilangan bulat terbesar yang muat, **dihitung dalam piksel perangkat** (memperhitungkan `devicePixelRatio`). Sisa ruang menjadi bingkai `ink` atau tempat HUD. Tidak pernah memakai skala pecahan |
 | Kamera | Mengikuti pemain dengan zona mati 24 × 16 piksel di tengah; dijepit ke tepi peta; posisinya selalu bilangan bulat piksel logis |
 | Teks di dalam gambar | **Tidak ada.** Nama samaran dan semua tulisan ditampilkan oleh antarmuka |
@@ -224,13 +224,24 @@ Ubin peta digambar dengan **kunci bahan**, lalu kit gambar mengekspor satu lemba
 | Kilau (sisi yang kena cahaya) | `PAGI2` `#FFF1C9` | `white` | `SORE1` `#FFE3A3` |
 | Bayangan bangunan dan pohon (papan catur) | `dusk` | `dusk` | `wood-d` |
 | Aspal | `slate` | `slate` | `slate` |
-| Marka dan zebra cross | `cream` | `white` | `cream` |
+| Marka, zebra cross, dan garis lapangan | `cream` | `white` | `cream` |
 | Air | `PAGI1` `#9ED8F5` | `SIANG1` `#6EC6F2` | `SORE3` `#FF9E6B` |
 | Air dalam | `sky-d` | `sky-d` | `sky-d` |
 | Pasir | `PAGI2` | `cream` | `SORE1` |
 | Dinding | `cream` | `cream` | `cream` |
+| Tanah setapak | `skin-2`, kerikil `wood` | sama | sama |
+| Paving gang | bata `wood`, nat `wood-d` | sama | sama |
+| Semen (halaman, trotoar, lantai pasar) | `mist`, bintik dan tepi `slate` | sama | sama |
+| Pinggir aspal | bayangan kerb `dusk`, garis tepi mengikuti marka | sama | sama |
 
 Atap, kayu, kulit, rambut, pakaian, dan ikon tidak ikut ditukar. Bila 36 warna terbukti tidak cukup (misalnya untuk tajuk pohon yang lebih gelap), ajukan paling banyak 4 warna tambahan khusus peta lewat keputusan terbuka KT-04. Jangan menambah warna sebelum disetujui.
+
+Aturan tukar palet yang disetujui bersama aset kelompok U (6 November 2026):
+
+- Hanya lembar ubin yang berganti per masa: `ubin_pagi.png`, `ubin_siang.png`, dan `ubin_sore.png`, dengan nomor ubin yang sama di ketiganya.
+- Bayangan bangunan, pohon, dan objek besar berupa **ubin tumpang lapisan 10** di lembar ubin, sehingga ikut berganti warna. Letaknya dihitung `build_peta.py`.
+- Objek, tokoh, dan ikon cukup satu berkas untuk semua masa, dengan warna tetap.
+- Layar akhir dan pembahasan bernuansa malam memakai warna antarmuka `#4A4F9C`, bukan lembar ubin malam.
 
 ### Kontras tambahan (sudah dihitung)
 
@@ -296,7 +307,7 @@ Aturan menulis Sehari Setara berlaku: huruf kapital hanya di awal kalimat, satu 
 | 30 | Tokoh, avatar, penanda, dan kotak, diurutkan menurut baris kaki (y) |
 | 40 | Objek atas (atap, tajuk pohon) |
 | 50 | Efek (debu lari, kilau kotak) |
-| 60 | Siluet avatar pemain sendiri saat tertutup objek atas: garis luar `sun` 1 piksel |
+| 60 | Siluet avatar pemain sendiri saat tertutup objek atas: garis dalam `ink` 1 piksel, lalu garis luar `sun` 1 piksel, agar salah satunya selalu kontras ≥ 3 : 1 terhadap atap |
 | 70 | Garis pindai (CSS) |
 | 80+ | HUD dan dialog (HTML) |
 
@@ -347,12 +358,27 @@ Setiap zona punya bangunan penanda dan bahan dominan agar pemain bisa mengenali 
 
 - **Delapan desain dasar** (A1–A8) dengan seragam SMP (kemeja putih, celana atau rok `navy`) dan variasi warna kulit (`skin-1` sampai `skin-4`), rambut (`hair-1`, `hair-2`; pendek, panjang dikuncir), kerudung putih, dan kacamata.
 - **Tas punggung** berwarna penanda pemain dari delapan aksen: `sun`, `mango`, `coral`, `rose`, `berry`, `teal`, `leaf`, `sky-d`. Warna tas dipilih otomatis agar pemain berdekatan tidak berwarna sama.
+- Tas digambar dengan dua **warna kunci**, `sun` (dasar) dan `mango` (bayangan), yang tidak dipakai bagian lain avatar. Saat memuat, antarmuka membuat salinan avatar untuk setiap warna tas dengan mengganti kedua warna kunci **serentak** (bukan berurutan), memakai pasangan berikut:
+
+  | Warna tas | Dasar | Bayangan |
+  |---|---|---|
+  | sun | `sun` | `mango` |
+  | mango | `mango` | `coral` |
+  | coral | `coral` | `wood-d` |
+  | rose | `rose` | `coral` |
+  | berry | `berry` | `malam` (`#4A4F9C`) |
+  | teal | `teal` | `grass` |
+  | leaf | `leaf` | `grass` |
+  | sky-d | `sky-d` | `navy` |
+
 - Label nama samaran ditampilkan antarmuka di atas kepala, paling banyak 8 label terdekat sekaligus. Label pemain sendiri disembunyikan.
 
 ### Tokoh bukan pemain
 
 - Tokoh Sehari Setara versi tampak atas dengan ciri visual yang sama: Nara (tas `sun` bertali `mango`), Ibu, Gita, Dimas, Sinta (berkerudung putih), Bu Ratih (batik `teal`, kacamata), Komang, Pak Made (kaus `mango`, sarung kotak-kotak), dan Bayu (kaus `mist`, digambarkan netral dan ramah).
 - Warga umum: dewasa (3 variasi), lansia, ibu menggendong bayi, anak SD (2), pedagang, petugas puskesmas, dan polisi yang bersikap membantu.
+- Tokoh baru Jejak Setara (disetujui bersama aset kelompok N2, 6 November 2026): **Raka**, teman sekelas berkursi roda (`skin-3`, rambut belah tengah `hair-2`, seragam tanpa tas, tangan di pelek roda; K-04); **Wayan**, teman sekelas yang membantu orang tuanya berdagang (`skin-4`, rambut belah tengah, kaus `leaf`, celana pendek cokelat, sandal; K-14); dan **siswa SMP umum** S1–S6, empat berbaju bebas dan dua berseragam (K-03, K-10, K-11, K-12, K-13, K-16).
+- Tokoh bukan pemain tidak memakai tas punggung, kecuali Nara, agar tidak tertukar dengan avatar pemain.
 - Tokoh bukan pemain cukup berpose diam menghadap bawah (2 bingkai), ditambah pose khusus bila kejadian memerlukannya (menunjuk, menunduk, duduk di kursi roda).
 
 Semua aturan tokoh Sehari Setara tetap berlaku: tokoh orisinal, warna kulit beragam, tanpa stereotip, perundungan ditunjukkan lewat jarak dan sikap tubuh, bukan pukulan, dan tokoh berwenang digambarkan membantu.
@@ -482,12 +508,17 @@ Kit Jejak Setara berada di `scripts/game/art/` dan memakai ulang `palette.json` 
 | Jenis | Pola | Contoh |
 |---|---|---|
 | Lembar ubin per masa | `ubin_{masa}.png` | `ubin_sore.png` |
-| Objek | `obj_{nama}.png` | `obj_puskesmas.png` |
+| Objek (bagian bawah, lapisan 20) | `obj_{nama}.png` | `obj_puskesmas.png` |
+| Bagian atas bangunan dan pohon (lapisan 40) | `obj_{nama}_atas.png` | `obj_puskesmas_atas.png` |
 | Avatar | `ava_{n}_{arah}_{pose}.png` | `ava_3_bawah_jalan.png` |
 | Tokoh bukan pemain | `npc_{tokoh}_{arah}_{pose}.png` | `npc_bayu_bawah_diam.png` |
 | Ikon | `ikon_{nama}.png` | `ikon_kompas.png` |
-| Penanda | `tanda_{nama}.png` | `tanda_kejadian.png` |
+| Ikon kepala avatar | `ikon_ava_{n}.png` | `ikon_ava_3.png` |
+| Penanda dan efek | `tanda_{nama}.png` | `tanda_kejadian.png`, `tanda_debu.png`, `tanda_kilau.png` |
 | Suara | `sfx_{peristiwa}.wav` | `sfx_kotak.wav` |
+
+- Arah tokoh dan avatar hanya `bawah`, `atas`, dan `kanan`. Arah kiri tidak punya berkas, karena antarmuka mencerminkan arah kanan.
+- Berkas `tanda_*.png` disimpan di folder `ikon/`, tetapi tetap kelompok `tanda` di manifest.
 
 ### Pratinjau untuk persetujuan
 

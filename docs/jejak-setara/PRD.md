@@ -117,7 +117,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
-| JFR-01 | Guru atau admin yang sudah masuk membuat ruang: label kelas (misalnya "IX B"), paket kejadian, durasi 10, 15 (bawaan), atau 20 menit, skill yang aktif, batas pemain (bawaan 40, paling banyak 100), batas bergabung terlambat (bawaan 5 menit sesudah mulai), dan mode nomor absen (mati secara bawaan; hanya untuk ruang sampai 50 pemain) | P0 |
+| JFR-01 | Guru atau admin yang sudah masuk membuat ruang: label kelas (misalnya "IX B"), paket kejadian, durasi 10, 15 (bawaan), atau 20 menit, skill yang aktif, batas pemain (bawaan 40, paling banyak 50), batas bergabung terlambat (bawaan 5 menit sesudah mulai), dan mode nomor absen (mati secara bawaan) | P0 |
 | JFR-02 | Ruang mendapat kode 5 karakter tanpa huruf dan angka yang mirip (misalnya tanpa O dan 0) serta tautan pendek untuk dibuka di HP | P0 |
 | JFR-03 | Kode QR tautan ruang di lobi layar kelas | P1 |
 | JFR-04 | Siswa masuk tanpa akun: buka tautan, ketik kode, isi nomor absen bila mode nomor absen aktif, pilih satu dari tiga saran nama samaran (boleh acak ulang), lalu pilih satu dari 8 avatar | P0 |
@@ -252,7 +252,6 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 - Menutup dialog **sebelum** Langkah 1 dikunci diperbolehkan tanpa akibat. Sesudah Langkah 1 dikunci, jawabannya tersimpan; bila dialog ditutup, pemeriksaan berikutnya langsung membuka Langkah 2 (keputusan terbuka KT-13).
 - Langkah 1 boleh menanyakan hak yang terganggu, kewajiban yang diabaikan, atau peran lembaga, sesuai kejadiannya.
 - Setiap kejadian punya sedikitnya dua titik di zonanya. Penempatan diacak sekali per ruang dengan benih (*seed*) ruang, sehingga peta tidak bisa dihafal antarsesi, tetapi adil di dalam satu ruang.
-- Di ruang lebih dari 50 pemain, setiap kejadian aktif di dua titik zonanya sekaligus agar pemain tidak menumpuk; pemeriksaan, penanda, dan Kompas memakai titik terdekat (Permintaan C-8; dibangun di JS-08).
 
 ### 8.4 Skor dan peringkat
 
@@ -407,7 +406,7 @@ Ruang uji (JFR-47) tidak masuk statistik. Statistik dicatat per versi kejadian, 
 
 | Aspek | Kebutuhan |
 |---|---|
-| Kapasitas | Sampai 100 pemain per ruang (bawaan 40) dan sedikitnya 10 ruang serentak tanpa penurunan layanan; syarat teknisnya di Architecture 6.5 |
+| Kapasitas | 50 pemain per ruang dan sedikitnya 10 ruang serentak tanpa penurunan layanan |
 | Latensi | Waktu pulang-pergi pesan p95 ≤ 250 ms di wifi sekolah; permainan tetap layak sampai 500 ms |
 | Kinerja HP | ≥ 30 fps di HP kelas bawah (RAM 3 GB, Android 10 ke atas); sasaran 60 fps |
 | Muatan awal | Halaman pemain siap ≤ 6 detik pada koneksi 10 Mbps: kode pemain ≤ 200 KB (gzip), aset pemain ≤ 2 MB |
@@ -549,4 +548,3 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 5 Nov 2026 | Nama produk tetap "Jejak Setara" (KT-01, Gerbang 1 JS-01) |
 | 7 Nov 2026 | Mulai dengan paket gratis Cloudflare (Workers Free) untuk JS-03 sampai JS-14; Workers Paid diaktifkan sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu (keputusan pemilik proyek, Plan JS-03) |
 | 7 Nov 2026 | Permintaan Sesi B (A-1 sampai A-4) dan Sesi C (C-1 sampai C-7) diterapkan: tokoh Raka, Wayan, dan siswa umum; teks rujukan bagian 10; tiga masa; peta sekitar 160 × 100 ubin (Gerbang 1 JS-03) |
-| 7 Nov 2026 | Kapasitas ruang sampai 100 pemain (bawaan 40); mode nomor absen disediakan, mati secara bawaan, dan hanya untuk ruang sampai 50 pemain (KT-02 dan Permintaan C-8, Gerbang 1 JS-03) |
