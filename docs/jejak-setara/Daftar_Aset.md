@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| Versi | 0.1 |
+| Versi | 0.2 |
 | Diperbarui | 6 November 2026 |
-| Tahap saat ini | Plan aset tampak atas: menunggu "Setuju: aset" |
+| Tahap saat ini | Kelompok A (avatar pemain) diserahkan: menunggu "Setuju: aset A" |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
-| Cara membangun | `npx pnpm@11.25.0 assets:build:jejak` (menjalankan `scripts/game/art/build_jejak.py`, dibuat sesudah Plan ini disetujui) |
+| Cara membangun | `npx pnpm@11.25.0 assets:build:jejak` (menjalankan `python scripts/game/art/build_jejak.py`) |
 | Berkas yang boleh diubah Sesi C | `scripts/game/art/atas_*.py`, `scripts/game/art/build_jejak.py`, `app/jejak-setara/assets/`, `docs/jejak-setara/Daftar_Aset.md`, `docs/jejak-setara/preview/`. Sesudah kabar "JS-02 selesai": juga `scripts/jejak-setara/peta/` dan `app/jejak-setara/peta/` |
 
 Status: **Disetujui** (pratinjau sudah diterima pemilik proyek) · **Ditinjau** (pratinjau sudah dikirim, menunggu keputusan) · **Belum** · **Ditunda** (menunggu keputusan lain).
@@ -21,12 +21,29 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 |---|---|---|
 | 6 Nov 2026 | Plan | Dokumen dibaca, pemeriksaan awal dijalankan, percobaan uji gaya dimulai (laporan sementara) |
 | 6 Nov 2026 | Plan | Daftar aset, urutan pengerjaan, usulan, dan lembar uji gaya `preview/uji_gaya.png` diserahkan; menunggu "Setuju: aset" |
+| 6 Nov 2026 | Plan | Pemilik proyek membalas "Setuju: aset": semua saran (a) diterima (usulan 1a sampai 10a) |
+| 6 Nov 2026 | Kelompok A | Kit `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, dan `build_jejak.py` dibuat; delapan avatar dan ikon kepalanya diserahkan, menunggu "Setuju: aset A" |
+
+## Keputusan Gerbang aset (6 November 2026)
+
+| Kode | Keputusan |
+|---|---|
+| KT-C1 | 1a: gaya `preview/uji_gaya.png` menjadi acuan semua aset tampak atas |
+| KT-C2 | 2a: urutan A, U, O1, O2, T, N1, N2, O3, lalu I |
+| KT-C3 | 3a: tiga lembar ubin (pagi, siang, sore); Permintaan C-1 |
+| KT-C4 | 4a: hanya lembar ubin yang berganti per masa; bayangan objek menjadi ubin tumpang lapisan 10 |
+| KT-C5 | 5a: tas bergambar warna kunci `sun` dan `mango`, diganti antarmuka saat memuat |
+| KT-C6 | 6a: bangunan dan pohon dua bagian, `obj_{nama}.png` dan `obj_{nama}_atas.png` |
+| KT-C7 | 7a: satu strip per arah dan gerak; arah kiri dicerminkan antarmuka |
+| KT-C8 | 8a: delapan desain avatar di bagian A |
+| KT-C9 | 9a: siswa bukan pemain tanpa tas; ciri Raka, Wayan, dan siswa umum diusulkan di kelompok N2 |
+| KT-C10 | 10a: `CREDITS.md` dan `manifest.ts` dibuat `build_jejak.py` untuk aset Disetujui |
 
 ## Ringkasan rencana (templat AGENTS 12.1)
 
 | | |
 |---|---|
-| Status | Direncanakan; menunggu "Setuju: aset" |
+| Status | Disetujui 6 Nov 2026 (semua saran a). Kelompok A diserahkan; menunggu "Setuju: aset A" |
 | Memenuhi | Aset gambar untuk JFR-09, JFR-10, JFR-11, JFR-12, JFR-15, JFR-18, JFR-23, dan JFR-24 (JFR-25 untuk P1); PRD bagian 15; Design System bagian 7, 8, 9, dan 14 |
 | Bergantung pada | Tidak ada untuk menggambar. Peta (JS-06) baru dimulai sesudah kabar "JS-02 selesai" |
 | Berkas yang dibuat atau diubah | Sekarang: `docs/jejak-setara/Daftar_Aset.md` dan `docs/jejak-setara/preview/uji_gaya.png` (keduanya baru). Sesudah disetujui: `atas_tokoh.py`, `atas_ubin.py`, `atas_objek.py`, `atas_ikon.py`, dan `build_jejak.py` di `scripts/game/art/`; PNG di `app/jejak-setara/assets/` (`ava/`, `npc/`, `ubin/`, `obj/`, `ikon/`); `app/jejak-setara/assets/CREDITS.md`; pratinjau di `docs/jejak-setara/preview/` |
@@ -41,7 +58,7 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 Percobaan dijalankan di luar repositori dengan skrip kecil yang memakai `pixelart.py` dan `palette.json` tanpa mengubahnya.
 
 1. **Kit Sehari Setara tetap sama.** `build_assets.py` dibangun ulang ke folder sementara; ke-65 PNG Sehari Setara identik byte dengan yang ada di repositori. Plan ini tidak mengubah kode gambar bersama.
-2. **Uji gaya.** Satu ubin (rumput, tiga masa), satu avatar (A1: bawah, kanan, kiri sebagai cermin, atas; diam dan jalan; delapan warna tas), dan satu objek (rumah beratap limasan `coral`), lalu ketiganya disusun di peta kecil. Semua gambar: 0 piksel di luar palet, tanpa piksel semi-transparan. Hasil: `preview/uji_gaya.png`. Sesudah disetujui, kode percobaan menjadi awal `atas_ubin.py`, `atas_tokoh.py`, dan `atas_objek.py`, dan `build_jejak.py` membangun ulang pratinjau ini.
+2. **Uji gaya.** Satu ubin (rumput, tiga masa), satu avatar (A1: bawah, kanan, kiri sebagai cermin, atas; diam dan jalan; delapan warna tas), dan satu objek (rumah beratap limasan `coral`), lalu ketiganya disusun di peta kecil. Semua gambar: 0 piksel di luar palet, tanpa piksel semi-transparan. Hasil: `preview/uji_gaya.png`. Sesudah disetujui, kode percobaan menjadi awal `atas_ubin.py`, `atas_tokoh.py`, dan `atas_objek.py`, dan `build_jejak.py` membangun ulang pratinjau ini. Sudah dilakukan di kelompok A: avatar A1, ubin rumput, dan rumah di kit sama piksel dengan uji gaya, dan `uji_gaya.png` hasil bangun ulang identik byte dengan aslinya.
 3. **Ukuran berkas** (PNG teroptimasi):
 
    | Gambar | Ukuran | Anggaran (Architecture 11.3) |
@@ -70,7 +87,7 @@ Percobaan dijalankan di luar repositori dengan skrip kecil yang memakai `pixelar
 6. **Jumlah berkas.** Daftar di bawah menghasilkan sekitar 200 berkas kecil. Bila pramuat terasa lambat di wifi sekolah (diuji di JS-15), `build_jejak.py` bisa menggabungkannya menjadi beberapa lembar tanpa menggambar ulang.
 7. **Galeri (Tailwind).** `build:pages` dijalankan sebelum dan sesudah kedua berkas Plan ini ditambahkan. Ke-178 berkas `dist-pages/` identik byte, jadi tidak ada aturan CSS galeri yang bertambah (catatan "Semua fitur, semua sesi" di `PLAN.md`).
 
-## Usulan (dijawab di Gerbang "Setuju: aset")
+## Usulan (disetujui 6 November 2026: semua saran a)
 
 Setiap usulan berisi saran (a) dan alternatifnya. Kode KT-C adalah keputusan terbuka Sesi C.
 
@@ -177,15 +194,15 @@ Setiap desain: seragam SMP (kemeja putih, celana atau rok `navy`, ikat pinggang 
 
 | ID | Desain | Kulit | Rambut atau kepala | Bawahan | Ciri lain | Status |
 |---|---|---|---|---|---|---|
-| A-01 | A1 | `skin-3` | `hair-1` pendek rapi, belah samping | Celana | — | Ditinjau (uji gaya) |
-| A-02 | A2 | `skin-1` | `hair-1` panjang dikuncir | Rok | — | Belum |
-| A-03 | A3 | `skin-4` | `hair-1` pendek ikal | Celana | Kacamata | Belum |
-| A-04 | A4 | `skin-2` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Belum |
-| A-05 | A5 | `skin-2` | `hair-2` pendek berdiri | Celana | — | Belum |
-| A-06 | A6 | `skin-3` | `hair-2` panjang dikuncir | Rok | Kacamata | Belum |
-| A-07 | A7 | `skin-1` | `hair-2` pendek cepak | Celana | — | Belum |
-| A-08 | A8 | `skin-4` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Belum |
-| A-09 | Ikon kepala | — | Kepala A1–A8 menghadap bawah, untuk papan skor, lobi, dan kartu pemain (`ikon_ava_{n}.png`, 16 × 16) | — | — | Belum |
+| A-01 | A1 | `skin-3` | `hair-1` pendek rapi, belah samping | Celana | — | Ditinjau (kelompok A) |
+| A-02 | A2 | `skin-1` | `hair-1` panjang dikuncir, ikat rambut `berry` | Rok, kaus kaki putih | — | Ditinjau (kelompok A) |
+| A-03 | A3 | `skin-4` | `hair-1` pendek ikal | Celana | Kacamata | Ditinjau (kelompok A) |
+| A-04 | A4 | `skin-2` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Ditinjau (kelompok A) |
+| A-05 | A5 | `skin-2` | `hair-2` pendek berdiri | Celana | — | Ditinjau (kelompok A) |
+| A-06 | A6 | `skin-3` | `hair-2` panjang dikuncir, ikat rambut `rose` | Rok, kaus kaki putih | Kacamata | Ditinjau (kelompok A) |
+| A-07 | A7 | `skin-1` | `hair-2` pendek cepak | Celana | — | Ditinjau (kelompok A) |
+| A-08 | A8 | `skin-4` | Kerudung putih | Rok panjang | Kemeja lengan panjang | Ditinjau (kelompok A) |
+| A-09 | Ikon kepala | — | Kepala dan bahu A1–A8 menghadap bawah, untuk papan skor, lobi, dan kartu pemain (`ikon_ava_{n}.png`, 16 × 16); tali tas ikut berwarna kunci | — | — | Ditinjau (kelompok A) |
 
 **Warna tas** (dasar dan bayangan; warna kunci di gambar: `sun` dan `mango`)
 
@@ -200,13 +217,32 @@ Setiap desain: seragam SMP (kemeja putih, celana atau rok `navy`, ikat pinggang 
 | leaf | `leaf` | `grass` |
 | sky-d | `sky-d` | `navy` |
 
+### Rincian kelompok A (6 November 2026)
+
+| | |
+|---|---|
+| Kode | `scripts/game/art/atas_tokoh.py` (gambar avatar), `build_jejak.py` (daftar, ekspor, pemeriksaan, pratinjau). `atas_ubin.py` dan `atas_objek.py` berisi ubin rumput dan rumah dari uji gaya, untuk pratinjau |
+| Berkas | 48 strip di `app/jejak-setara/assets/ava/` (`ava_1_bawah_diam.png` sampai `ava_8_kanan_jalan.png`) dan 8 ikon di `app/jejak-setara/assets/ikon/` (`ikon_ava_1.png` sampai `ikon_ava_8.png`) |
+| Ukuran | Strip diam 417–561 B, strip jalan 526–701 B (batas 6 KB per strip); enam strip satu avatar 3,0–3,4 KB; ikon 235–325 B; seluruh kelompok A 27,8 KB |
+| Pemeriksaan `build_jejak.py` | Lulus: 0 piksel di luar palet atau semi-transparan, ukuran 32 × 24 (diam), 64 × 24 (jalan), 16 × 16 (ikon), dan warna kunci tas tidak dipakai di luar tas |
+| Pratinjau | `preview/ava_ringkasan.png` (ringkasan), `preview/ava_pose_semua.png` (semua bingkai ×3), `preview/pose_ava_1.png` sampai `pose_ava_8.png` (×6), dan `preview/ava_gerak.gif` (berjalan ke empat arah, lalu diam) |
+| Belum termasuk | `CREDITS.md` dan `manifest.ts`: dibuat sesudah "Setuju: aset A" dan sesudah bentuk manifest disepakati (Permintaan C-6) |
+
+- A1 sama piksel dengan avatar uji gaya yang disetujui, termasuk bingkai jalan dan arah atas.
+- Rok: kaus kaki putih di bawah rok. Pada bingkai diam kedua (bernapas), badan turun 1 piksel sehingga rok menutup kaus kaki, sama seperti celana yang menutup sebagian kaki pada A1.
+- Rok panjang: hanya sepatu yang terlihat; saat berjalan, ujung rok ikut maju bersama sepatu.
+- Kerudung: menutup kepala, telinga, bahu, dan dada; tepi juntai bergaris `slate`. Tali tas berada di atas juntai.
+- Rambut dikuncir: dari depan, rambut panjang menutup telinga; dari samping dan belakang, ekor kuda dan ikat rambutnya terlihat.
+- Kacamata: bingkai atas dan sisi berwarna `slate`.
+- Dari depan, warna tas hanya terlihat di dua tali; dari samping dan belakang, tas terlihat penuh. Nama samaran di atas kepala (antarmuka) tetap menjadi penanda utama dari depan.
+
 ## U. Ubin per masa
 
 Satu lembar per masa: `ubin_pagi.png`, `ubin_siang.png`, dan `ubin_sore.png`, 16 ubin per baris. Nomor ubin sama di ketiga lembar. Jumlah pasti (sekitar 130 ubin) ditetapkan bersama legenda `kampung.txt` di JS-06.
 
 | ID | Isi | Bahan | Perkiraan ubin | Zona | Status |
 |---|---|---|---|---|---|
-| U-01 | Rumput dasar, 4 varian yang disebar acak berbenih oleh `build_peta.py` agar pola tidak berulang | rumput, tekstur, kilau | 4 | Semua | Ditinjau (uji gaya, 1 varian) |
+| U-01 | Rumput dasar, 4 varian yang disebar acak berbenih oleh `build_peta.py` agar pola tidak berulang | rumput, tekstur, kilau | 4 | Semua | Ditinjau: varian 1 (uji gaya) disetujui sebagai acuan 6 Nov; status akhir di kelompok U |
 | U-02 | Detail rumput tumpang: bunga, rumput tinggi, daun gugur (lapisan 10) | tekstur, kilau, bunga warna tetap | 4 | Semua | Belum |
 | U-03 | Tanah setapak dan peralihannya dengan rumput | tanah (usulan) | 17 | Z1, Z6 | Belum |
 | U-04 | Paving gang dan peralihannya dengan rumput | paving (usulan) | 17 | Z1 | Belum |
@@ -249,7 +285,7 @@ Bangunan dan pohon terdiri atas `obj_{nama}.png` dan `obj_{nama}_atas.png` (usul
 | ID | Berkas | Ukuran (ubin) | Isi | Zona dan kejadian | Status |
 |---|---|---|---|---|---|
 | O-01 | `obj_rumah_nara` | 4 × 4 | Rumah Nara: atap limasan `coral`, dinding `cream`, jendela bertirai `rose` seperti rumah Nara di Sehari Setara, pagar bambu di depan (O-23) | Z1, K-01 | Belum |
-| O-02 | `obj_rumah_a`, `obj_rumah_b` | 4 × 4, 3 × 3 | Rumah warga, dua varian; uji gaya memakai bentuk varian a | Z1 | Ditinjau (uji gaya) |
+| O-02 | `obj_rumah_a`, `obj_rumah_b` | 4 × 4, 3 × 3 | Rumah warga, dua varian; uji gaya memakai bentuk varian a | Z1 | Ditinjau: varian a (uji gaya) disetujui sebagai acuan 6 Nov; status akhir di kelompok O1 |
 | O-03 | `obj_warung_made` | 3 × 3 | Warung Pak Made beratap `coral` dengan etalase jajanan polos | Z1, K-02 | Belum |
 | O-04 | `obj_sekolah` | 10 × 6 | Gedung SMP dua lantai, dinding `cream`, atap `sky-d`, tangga ke lantai dua terlihat di depan | Z2, K-04 | Belum |
 | O-05 | `obj_kantin` | 4 × 3 | Kantin sekolah beratap `sky-d` | Z2, K-03 | Belum |
@@ -392,12 +428,39 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 
 | Kode | Berkas | Permintaan | Alasan | Status |
 |---|---|---|---|---|
-| C-1 | `docs/jejak-setara/PRD.md` bagian 15 | Ubah "empat masa (pagi, siang, sore, malam)" menjadi "tiga masa (pagi, siang, sore)" | Design System bagian 4 dan instruksi pemilik proyek memakai tiga masa (usulan 3) | Diajukan, berlaku bila usulan 3a disetujui |
-| C-2 | `docs/jejak-setara/Design_System.md` bagian 4 | Tambahkan: hanya lembar ubin yang berganti per masa; bayangan objek berupa ubin tumpang lapisan 10; objek, tokoh, dan ikon satu berkas untuk semua masa. Bahan baru (tanah, paving, lantai) menyusul sesudah kelompok U disetujui | Usulan 4 | Diajukan, berlaku bila usulan 4a disetujui |
-| C-3 | `docs/jejak-setara/Design_System.md` bagian 8 dan `Architecture.md` bagian 9 | Catat warna kunci tas `sun` dan `mango`, tabel delapan pasangan warna, dan penggantian serentak saat memuat | Usulan 5 | Diajukan, berlaku bila usulan 5a disetujui |
+| C-1 | `docs/jejak-setara/PRD.md` bagian 15 | Ubah "empat masa (pagi, siang, sore, malam)" menjadi "tiga masa (pagi, siang, sore)" | Design System bagian 4 dan instruksi pemilik proyek memakai tiga masa (usulan 3) | Diajukan (usulan 3a disetujui 6 Nov 2026) |
+| C-2 | `docs/jejak-setara/Design_System.md` bagian 4 | Tambahkan: hanya lembar ubin yang berganti per masa; bayangan objek berupa ubin tumpang lapisan 10; objek, tokoh, dan ikon satu berkas untuk semua masa. Bahan baru (tanah, paving, lantai) menyusul sesudah kelompok U disetujui | Usulan 4 | Diajukan (usulan 4a disetujui 6 Nov 2026) |
+| C-3 | `docs/jejak-setara/Design_System.md` bagian 8 dan `Architecture.md` bagian 9 | Catat warna kunci tas `sun` dan `mango`, tabel delapan pasangan warna, dan penggantian serentak saat memuat | Usulan 5 | Diajukan (usulan 5a disetujui 6 Nov 2026) |
 | C-4 | `docs/jejak-setara/Design_System.md` bagian 7 (lapisan 60) | Siluet pemain sendiri bergaris ganda: garis dalam `ink` 1 piksel, lalu garis luar `sun` 1 piksel | Garis `sun` saja 1,0–2,9 : 1 di enam dari tujuh warna atap (percobaan 4); dengan garis ganda salah satu garis selalu ≥ 3 : 1 | Diajukan |
-| C-5 | `docs/jejak-setara/Design_System.md` bagian 14 (penamaan) | Tambahkan pola `obj_{nama}_atas.png`, `ikon_ava_{n}.png`, `tanda_debu.png`, dan `tanda_kilau.png`; arah tokoh `bawah`, `atas`, dan `kanan`; tanpa berkas arah kiri | Usulan 6 dan 7 | Diajukan, berlaku bila usulan 6a dan 7a disetujui |
-| C-6 | `docs/jejak-setara/Architecture.md` bagian 11.2 | Sepakati bentuk `manifest.ts`: kunci, ukuran dan jumlah bingkai, titik kaki, pasangan bagian atas objek, dan nomor ubin. Usul Sesi C: manifest dibuat otomatis oleh `build_jejak.py` | Usulan 10 | Diajukan; perlu jawaban sebelum kelompok A selesai |
+| C-5 | `docs/jejak-setara/Design_System.md` bagian 14 (penamaan) | Tambahkan pola `obj_{nama}_atas.png`, `ikon_ava_{n}.png`, `tanda_debu.png`, dan `tanda_kilau.png`; arah tokoh `bawah`, `atas`, dan `kanan`; tanpa berkas arah kiri | Usulan 6 dan 7 | Diajukan (usulan 6a dan 7a disetujui 6 Nov 2026) |
+| C-6 | `docs/jejak-setara/Architecture.md` bagian 11.2 | Sepakati bentuk `manifest.ts`: kunci, ukuran dan jumlah bingkai, titik kaki, pasangan bagian atas objek, dan nomor ubin. Usul Sesi C: manifest dibuat otomatis oleh `build_jejak.py` | Usulan 10 | Diajukan (usulan 10a disetujui 6 Nov 2026). Usulan bentuknya ada di bagian "Usulan bentuk manifest"; perlu jawaban sebelum manifest dibuat |
+
+## Usulan bentuk manifest (Permintaan C-6)
+
+`build_jejak.py` menulis `app/jejak-setara/assets/manifest.ts` dari daftar asetnya, hanya untuk aset Disetujui, dengan pola impor seperti manifest Sehari Setara (setiap PNG menjadi URL berkas berhash lewat Vite). Usulan isi untuk kelompok A:
+
+```ts
+// Dibuat build_jejak.py. Jangan disunting manual.
+import ava1BawahDiam from "./ava/ava_1_bawah_diam.png";
+// ... 48 strip dan 8 ikon
+
+export const TOKOH = { lebar: 16, tinggi: 24, kakiX: 8, kakiY: 21 } as const;
+export const BINGKAI = { diam: 2, jalan: 4 } as const;
+export const AVATAR = {
+  1: { bawah: { diam: ava1BawahDiam, jalan: ava1BawahJalan },
+       atas: { diam: ava1AtasDiam, jalan: ava1AtasJalan },
+       kanan: { diam: ava1KananDiam, jalan: ava1KananJalan }, ikon: ikonAva1 },
+  // ... 2 sampai 8
+} as const;
+export const KUNCI_TAS = { dasar: "#FFD23F", bayangan: "#FF9F1C" } as const;
+export const WARNA_TAS = {
+  sun: ["#FFD23F", "#FF9F1C"], mango: ["#FF9F1C", "#FF6B5B"], coral: ["#FF6B5B", "#8A5A33"],
+  rose: ["#FF8FB8", "#FF6B5B"], berry: ["#9B5DE5", "#4A4F9C"], teal: ["#2EC4B6", "#3BA55C"],
+  leaf: ["#8AD95B", "#3BA55C"], "sky-d": ["#3A86D9", "#2B3F8C"],
+} as const;
+```
+
+Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan pola yang sama. Bila Sesi A membutuhkan bentuk lain (misalnya mengikuti tipe di `inti/tipe.ts`), cukup tulis jawabannya di `PLAN.md`; `build_jejak.py` menyesuaikan.
 
 ## Catatan untuk JS-06 (peta)
 
@@ -408,6 +471,5 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 
 ## Cara membalas
 
-- **"Setuju: aset"** berarti semua saran (a) di atas diterima, dan saya mulai kelompok A (delapan avatar).
-- Untuk memilih alternatif, tulis misalnya **"Setuju: aset, 2b, 5c"**.
-- Perbaikan uji gaya cukup ditulis bebas, misalnya "atap rumah terlalu tinggi" atau "avatar tanpa mulut"; lembar uji gaya diperbaiki dulu sebelum kelompok A.
+- **"Setuju: aset A"** berarti kedelapan avatar dan ikon kepalanya disetujui. Statusnya menjadi Disetujui, `CREDITS.md` dibuat, dan saya lanjut ke kelompok U (ubin per masa).
+- Perbaikan cukup ditulis bebas per avatar, misalnya "A5: rambut kurang berdiri" atau "A4: kerudung lebih panjang". Avatar lain yang tidak disebut tetap seperti sekarang.
