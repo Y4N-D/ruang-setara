@@ -84,7 +84,8 @@ describe("Worker kerangka", () => {
   it("JS-03: ruang coba di uji butuh kunci (403) dan tidak ada di produksi (404), tanpa menyentuh D1", async () => {
     const coba = (lingkungan: string, tajuk: Record<string, string> = {}) =>
       worker.fetch(new Request("http://127.0.0.1/api/ruang-coba", { method: "POST", headers: tajuk, body: "{}" }), { ...env, LINGKUNGAN: lingkungan, KUNCI_COBA: "kunci-benar" } as typeof env);
-    for (const tajuk of [{}, { "X-Jejak-Kunci-Coba": "kunci-salah" }]) {
+    const tajukSalah: Record<string, string>[] = [{}, { "X-Jejak-Kunci-Coba": "kunci-salah" }];
+    for (const tajuk of tajukSalah) {
       const jawaban = await coba("uji", tajuk);
       expect(jawaban.status).toBe(403);
       expect(await jawaban.json()).toEqual({ galat: { kode: "KUNCI_SALAH", pesan: "Kunci ruang coba tidak cocok." } });
@@ -266,7 +267,7 @@ describe("Token dan tajuk", () => {
     );
   });
 
-  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi)", () => {
+  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi), dengan Database ID uji yang sudah diisi", () => {
     expect(JSON.parse(baca("server/jejak-setara/wrangler.jsonc"))).toEqual({
       "$schema": "../../node_modules/wrangler/config-schema.json",
       "name": "jejak-setara-lokal",
@@ -287,7 +288,7 @@ describe("Token dan tajuk", () => {
           "name": "jejak-setara-uji",
           "vars": { "LINGKUNGAN": "uji" },
           "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
-          "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "ISI_DATABASE_ID_UJI", "migrations_dir": "migrations" }],
+          "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "8870d944-5d38-4c97-b8bf-819f7676eeb1", "migrations_dir": "migrations" }],
           "ratelimits": [
             { "name": "BATAS_PUBLIK", "namespace_id": "3101", "simple": { "limit": 300, "period": 60 } },
             { "name": "BATAS_WS", "namespace_id": "3102", "simple": { "limit": 300, "period": 60 } }

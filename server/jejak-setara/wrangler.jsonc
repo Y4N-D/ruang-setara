@@ -18,7 +18,7 @@
       "name": "jejak-setara-uji",
       "vars": { "LINGKUNGAN": "uji" },
       "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
-      "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "ISI_DATABASE_ID_UJI", "migrations_dir": "migrations" }],
+      "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "8870d944-5d38-4c97-b8bf-819f7676eeb1", "migrations_dir": "migrations" }],
       "ratelimits": [
         { "name": "BATAS_PUBLIK", "namespace_id": "3101", "simple": { "limit": 300, "period": 60 } },
         { "name": "BATAS_WS", "namespace_id": "3102", "simple": { "limit": 300, "period": 60 } }
