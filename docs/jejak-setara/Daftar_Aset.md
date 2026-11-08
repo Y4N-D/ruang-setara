@@ -3,13 +3,13 @@
 | | |
 |---|---|
 | Versi | 1.0 |
-| Diperbarui | 6 November 2026 |
-| Tahap saat ini | Semua kelompok aset dalam rencana Disetujui (6 November 2026). Menunggu kabar "JS-02 selesai" untuk memulai JS-06 (peta 160 × 100) |
+| Diperbarui | 8 November 2026 |
+| Tahap saat ini | Plan JS-06 (peta 160 × 100) ditulis 8 November 2026 dan menunggu `Setuju: JS-06` (bagian "JS-06 Peta: rencana"). Semua kelompok aset dalam rencana Disetujui (6 November 2026) |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
-| Acuan | ZIP repositori 6 November 2026 (JS-01 selesai, naskah 16 kejadian disetujui) |
+| Acuan | ZIP repositori 7 November 2026 (JS-02 selesai dan di-push menurut pemilik proyek) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
 | Cara membangun | `npx pnpm@11.25.0 assets:build:jejak` (menjalankan `python scripts/game/art/build_jejak.py`) |
-| Berkas yang boleh diubah Sesi C | `scripts/game/art/atas_*.py`, `scripts/game/art/build_jejak.py`, `app/jejak-setara/assets/`, `docs/jejak-setara/Daftar_Aset.md`, `docs/jejak-setara/preview/`. Sesudah kabar "JS-02 selesai": juga `scripts/jejak-setara/peta/` dan `app/jejak-setara/peta/` |
+| Berkas yang boleh diubah Sesi C | `scripts/game/art/atas_*.py`, `scripts/game/art/build_jejak.py`, `app/jejak-setara/assets/`, `docs/jejak-setara/Daftar_Aset.md`, `docs/jejak-setara/preview/`. Sesudah kabar "JS-02 selesai": juga `scripts/jejak-setara/peta/`, `app/jejak-setara/peta/`, dan uji berawalan `peta-` di `app/jejak-setara/__tests__/konten/` (izin 7 Nov 2026) |
 
 Status: **Disetujui** (pratinjau sudah diterima pemilik proyek) · **Ditinjau** (pratinjau sudah dikirim, menunggu keputusan) · **Belum** · **Ditunda** (menunggu keputusan lain).
 
@@ -43,6 +43,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Kelompok O4 | Pemilik proyek membalas "Setuju: aset O4": O-43 sampai O-51 Disetujui; kredit 15 berkas ditambahkan |
 | 6 Nov 2026 | Kelompok I | Ikon (33 berkas: 22 ikon baru dan 11 ikon Sehari Setara yang dipakai ulang) diserahkan; menunggu "Setuju: aset I" |
 | 6 Nov 2026 | Kelompok I | Pemilik proyek membalas "Setuju: aset I": I-01 sampai I-19 Disetujui; kredit 33 berkas ditambahkan. Seluruh 239 berkas aset dalam rencana Disetujui |
+| 7 Nov 2026 | Plan JS-06 | Pemilik proyek mengabarkan JS-02 selesai dan di-push, lalu menetapkan batas berkas Sesi C untuk JS-06 |
+| 8 Nov 2026 | Plan JS-06 | Percobaan prototipe 160 × 100 dijalankan di luar repositori; entri Plan, denah kasar `preview/peta_denah.png`, dan Permintaan C-9 sampai C-11 diserahkan; menunggu `Setuju: JS-06` |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -656,6 +658,9 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 | C-7 | `docs/jejak-setara/PRD.md` JFR-09, `Design_System.md` bagian 3.2, dan `Architecture.md` bagian 9 dan 11.3 | Ubah ukuran peta menjadi sekitar 160 × 100 ubin (2.560 × 1.600 piksel logis, sekitar 8 × 9 layar). Periksa anggaran peta JSON (≤ 60 KB setelah gzip) dan jumlah potongan 256 × 256 per masa (sekitar 70) | Keputusan pemilik proyek 6 Nov 2026 (bagian "Keputusan ukuran peta") | Diajukan |
 | C-8 | `docs/jejak-setara/PRD.md` bagian 8.3 dan 12, `Architecture.md` bagian 13 | Nilai kapasitas sampai 100 pemain per ruang (sekarang 50) dan jumlah kejadian per ronde yang lebih banyak. Peta 160 × 100 menyediakan titik untuk sekitar 48 kejadian. Gagasan untuk dinilai: satu kejadian muncul di dua titik sekaligus agar pemain tidak menumpuk | Pemilik proyek memperkirakan 50–100 pemain dan pertanyaan yang banyak serta bervariasi | Diajukan; perlu keputusan pemilik proyek bersama Sesi A dan Sesi B |
 | C-6 | `docs/jejak-setara/Architecture.md` bagian 11.2 | Sepakati bentuk `manifest.ts`: kunci, ukuran dan jumlah bingkai, titik kaki, pasangan bagian atas objek, dan nomor ubin. Usul Sesi C: manifest dibuat otomatis oleh `build_jejak.py` | Usulan 10 | Diajukan (usulan 10a disetujui 6 Nov 2026). Usulan bentuknya ada di bagian "Usulan bentuk manifest"; perlu jawaban sebelum manifest dibuat |
+| C-9 | `docs/jejak-setara/Architecture.md` bagian 3, 11.1, 11.1.1, dan 11.3 | Catat berkas kedua `app/jejak-setara/peta/kampung_gambar.json` (daftar nomor ubin yang dipakai, lalu lapisan tanah, tumpang, dan bayangan berisi nomor urut dalam daftar itu, dalam RLE yang sama dan dibaca `uraiRle`); arti lapisan `ubin` di `kampung.json` (kode bahan 0 sampai 7: rumput, tanah, paving, semen, pasir, aspal, air, air dalam); anggaran 60 KB gzip untuk kedua berkas bersama; dan daftar uji peta (12 titik per zona, lebar jalan 2 ubin, keterlihatan penanda) | Bentuk JS-02 hanya memuat nilai 0 sampai 63 dalam satu lapisan, sedangkan lembar ubin berisi 377 nomor dalam tiga lapisan (bagian JS-06, percobaan 1 dan 2) | Diajukan; berlaku bila usulan JS-06 nomor 1a disetujui |
+| C-10 | `docs/jejak-setara/Architecture.md` bagian 7 dan 8.2 (dan spesifikasi JS-03 atau JS-07) | Selama status `lobi`, pemain boleh bergerak di halaman lobi, sel `gerbangLobi` diperlakukan padat oleh server dan layar pemain, dan gerbang digambar `obj_gerbang_tutup`; sesudah ronde dimulai digambar `obj_gerbang_buka`. Posisi awal pemain diambil dari `titikMuncul` | `periksaGerak` JS-02 menolak gerak di luar status `main`, sedangkan JFR-05 meminta pemain bisa berjalan di halaman lobi | Diajukan |
+| C-11 | `docs/jejak-setara/Design_System.md` bagian 7 (aturan peta 3) | Ubah menjadi "Dari titik mana pun, sedikitnya satu bangunan atau objek khas zona terlihat di layar", dengan daftar objek khas per zona dari JS-06 | Dengan tabel bangunan penanda saja, hanya 57,4% posisi di prototipe 160 × 100 yang memenuhi (bagian JS-06, percobaan 7) | Diajukan; berlaku bila usulan JS-06 nomor 5a disetujui |
 
 ## Usulan bentuk manifest (Permintaan C-6)
 
@@ -686,17 +691,117 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## Catatan untuk JS-06 (peta)
 
-- JS-06 dimulai sesudah pemilik proyek mengabarkan "JS-02 selesai". Entri Plan JS-06 (templat 12.1) ditulis di berkas ini pada saat itu.
+- JS-06 dimulai 7 November 2026, sesudah pemilik proyek mengabarkan JS-02 selesai. Entri Plan ada di bagian "JS-06 Peta: rencana".
 - Ukuran peta 160 × 100 ubin dengan sedikitnya 12 titik kejadian per zona (keputusan 6 November 2026).
 - Ukuran objek di bagian O dipakai untuk menata `kampung.txt` dan `objek.json`; kotak tabrakan bangunan mencakup dinding dan bagian bawah atap, sedangkan baris atap paling atas menutupi tanah yang bisa dilewati (lapisan 40).
 - Letak ubin tumpang bayangan (usulan 4) dan varian rumput acak berbenih dihitung `build_peta.py`.
 - Uji gaya memakai pergeseran bayangan 8 piksel ke kanan dan 4 piksel ke bawah.
 
+## JS-06 Peta: rencana (templat AGENTS 12.1)
+
+Ditulis 8 November 2026 di tahap Plan, sesudah pemilik proyek mengabarkan JS-02 selesai. Berhenti di Gerbang 1 sampai ada balasan `Setuju: JS-06`.
+
+| | |
+|---|---|
+| Status | Direncanakan (8 Nov 2026), menunggu `Setuju: JS-06` |
+| Fitur sebelumnya | JS-02: dinyatakan selesai dan sudah di-push oleh pemilik proyek (7 Nov 2026). `PLAN.md` masih menulis "Diuji"; status itu diubah Sesi A. Di salinan ZIP 7 Nov 2026, `test:jejak` resmi (Vitest 5.0.4) lulus: 7 berkas, 294 uji |
+| Memenuhi | JFR-09 (peta tampak atas 160 × 100 ubin dengan 8 zona) dan JFR-12 (bagian peta: lembar ubin per masa); data untuk JFR-05 (halaman lobi dan gerbang), JFR-11 (zona dan halte di peta mini), JFR-15 (titik kejadian per zona), JFR-23 (kotak bantuan per zona), dan JFR-25 (halte, P1); PRD 8.2, 8.3, dan 9; Design System 7 dan 14; Architecture 11.1 |
+| Bergantung pada | JS-02 (bentuk `kampung.json` dan pemeriksanya, `bacaPeta`); aset kelompok U dan O1 sampai O4 (Disetujui 6 Nov 2026) |
+| Migrasi D1 | Tidak ada |
+| Pesan protokol baru atau berubah | Tidak ada. Peta 2.560 × 1.600 piksel masih di bawah batas protokol (8.192 piksel dan 511 ubin) |
+| Aset yang dibutuhkan | Semua tersedia dan Disetujui: lembar ubin tiga masa (U), bangunan penanda (O1), pohon, semak, pagar, dan perabot (O2), properti kejadian (O3), varian rumah dan pohon (O4). Tidak ada aset baru. Bila Build ternyata memerlukannya, aset itu diajukan dulu sebagai kelompok baru |
+| Dependensi baru | Tidak ada. `build_peta.py` memakai Python 3 dan Pillow seperti kit gambar; uji memakai Vitest dan zod yang sudah terpasang |
+| Ukuran | L (backlog menulis M; naik karena peta 160 × 100, berkas gambar kedua, dan pemeriksaan keterlihatan) |
+
+### Berkas yang akan dibuat atau diubah
+
+| Berkas | Status | Isi |
+|---|---|---|
+| `scripts/jejak-setara/peta/kampung.txt` | Baru | 100 baris × 160 karakter, satu karakter per ubin (bahan tanah, marka, lapangan) |
+| `scripts/jejak-setara/peta/objek.json` | Baru | Zona, bangunan, pohon, pagar (ditulis sebagai garis lalu dipecah menjadi ruas), titik kejadian, kotak, halte, gerbang lobi, titik muncul |
+| `scripts/jejak-setara/peta/build_peta.py` | Baru | Membangun kedua berkas peta, menjalankan semua pemeriksaan, dan membuat pratinjau. Memakai `atas_ubin.py` dan `atas_objek.py` tanpa mengubahnya |
+| `app/jejak-setara/peta/kampung.json` | Baru (hasil bangun) | Bentuk JS-02 persis (usulan 1) |
+| `app/jejak-setara/peta/kampung_gambar.json` | Baru (hasil bangun) | Lapisan gambar untuk layar pemain (usulan 1) |
+| `app/jejak-setara/__tests__/konten/peta-berkas.test.ts`, `peta-aturan.test.ts` | Baru | Uji usulan 7, dijalankan `content:check:jejak` dan `test:jejak` |
+| `docs/jejak-setara/preview/peta_denah.png` | Baru (sekarang) | Denah kasar Plan |
+| `docs/jejak-setara/preview/peta_pagi.png`, `peta_siang.png`, `peta_sore.png`, `peta_zona_1.png` sampai `peta_zona_8.png`, `peta_periksa.png`, `peta_hp.png`, `peta_laptop.png` | Baru (Build) | Pratinjau Design System 14 dan peta pemeriksaan |
+| `docs/jejak-setara/specs/JS-06-peta.md`, `docs/jejak-setara/tests/JS-06-hasil.md` | Baru, bila usulan 8a disetujui | Spesifikasi dan laporan uji |
+| `docs/jejak-setara/Daftar_Aset.md` | Diubah | Bagian ini, status, dan permintaan |
+
+Tidak disentuh: kode gambar Sehari Setara, `atas_*.py` dan `build_jejak.py` (kecuali ada aset baru yang disetujui), `app/jejak-setara/inti/`, `package.json`, alur kerja, dan dokumen utama.
+
+### Hasil percobaan risiko
+
+Percobaan dijalankan di luar repositori. Prototipe peta 160 × 100 disusun dari kit yang sudah disetujui tanpa mengubah kit itu, lalu dibaca dengan kode resmi JS-02. Denahnya ada di `preview/peta_denah.png`.
+
+1. **Bentuk JS-02 tidak bisa memuat nomor ubin.** Lapisan `ubin` hanya menerima nilai 0 sampai 63 dalam satu lapisan, sedangkan lembar ubin berisi 377 nomor dan peta perlu tiga lapisan (tanah, tumpang, bayangan). Uji: `kampung.json` yang lapisan `ubin`-nya berisi nomor ubin 338 ditolak `bacaPeta` dengan galat `PETA_CACAT`.
+2. **Dua berkas berjalan dengan kode yang sudah ada.** `kampung.json` prototipe (lapisan `ubin` berisi kode bahan 0 sampai 7) lolos `bacaPeta` resmi dalam 33,9 ms. Ketiga lapisan `kampung_gambar.json` diurai `uraiRle` resmi dalam 8,6 ms, karena isinya nomor urut dalam daftar ubin yang dipakai (111 nomor: tanah 78, tumpang 23, bayangan 10; nomor terbesar 338). Isi kedua berkas diurai kembali dan cocok sel demi sel dengan susunan aslinya, termasuk daftar objek dan lapisan tabrakan. Peta lalu digambar ulang hanya dari kedua berkas itu, seperti cara layar pemain, dalam 0,23 detik di Python (potongan halaman lobi ditampilkan di balasan Plan).
+3. **Ukuran.** `kampung.json` 66,8 KB (8,3 KB gzip) dan `kampung_gambar.json` 55,6 KB (4,7 KB gzip): jumlah 13,0 KB gzip dari anggaran 60 KB. Varian rumput yang disimpan langsung membuat lapisan tanah 40,7 KB sebelum gzip (1,9 KB sesudah gzip), dibanding 8,1 KB tanpa varian; selisih sesudah gzip hanya 1,1 KB, jadi varian disimpan. Sumber `kampung.txt` 16,1 KB. Prototipe memuat 839 objek dari 59 jenis.
+4. **Titik kejadian.** Ke-96 titik (12 per zona) dipilih dengan ruang kosong 3 × 3 dan jarak paling dekat 6,0 ubin. Kapasitas zona dengan aturan yang sama: Z2 24, Z7 32, Z1 35, Z4 36, Z8 37, Z5 39, Z3 41, Z6 58, jumlah 302. Sekolah (Z2) paling sempit karena halaman lobi tidak boleh berisi titik.
+5. **Keterjangkauan dan lobi.** Dari titik muncul, 13.672 dari 13.676 sel yang bisa dilewati terjangkau (sisanya kantong tertutup di bawah atap rumah Nara). Semua titik, kotak, dan halte terjangkau. Saat gerbang ditutup, pemain hanya bisa bergerak di 475 sel halaman lobi, dan tidak ada titik, kotak, atau halte di dalamnya.
+6. **Lebar jalan.** Pemeriksaan "jalan paling sempit 2 ubin" menemukan 24 sel sempit: 17 di pantai (batang kelapa terlalu dekat dengan laut), 5 di tepi sungai Z6 (pohon dan semak terlalu dekat dengan air), 1 di Z2 (bangku di samping tembok sekolah), dan 1 di sudut tenggara. Semuanya tertangkap otomatis dan diperbaiki di Build. Bahan bertetangga (tanah dan pasir hanya di samping rumput atau air): 0 pelanggaran. Lapangan sekolah 11 × 15 dan lapangan taman 19 × 9 berlebar ganjil.
+7. **Bangunan penanda selalu terlihat (Design System 7, aturan 3).** Dengan daftar bangunan penanda di tabel Design System 7, hanya 57,4% posisi yang melihat sedikitnya satu bangunan penanda di layar 320 × 180. Bila rumah warga, kantin, tembok sekolah, rambu, dan pos keamanan ikut dihitung sebagai objek khas zona, angkanya 80,4%. Tempat paling kosong ada di taman Z6 dan kapling Z3 (usulan 5).
+8. **Waktu tempuh.** Dari gerbang lobi ke titik terjauh 22,9 detik berjalan; titik terdekat setiap zona 1,5 sampai 11,3 detik. Untuk pembanding, sekolah di tepi barat membuat titik terjauh berjarak 34,5 detik garis lurus, dibanding 21,2 detik dari tengah.
+9. **Untuk JS-07 (Sesi A).** Peta ini sekitar 8 × 9 layar dan menjadi 70 potongan 256 × 256 per masa. Bila semua potongan disiapkan sekaligus, perlu sekitar 17,5 MB memori gambar per masa, jadi sebaiknya hanya potongan di sekitar kamera yang disimpan.
+10. **Galeri.** `build:pages` sebelum dan sesudah berkas Plan ini ditambahkan: ke-178 berkas `dist-pages/` identik byte.
+
+### Usulan
+
+Setiap usulan berisi saran (a) dan alternatifnya. Kode KT-C11 sampai KT-C19 adalah keputusan terbuka Sesi C untuk JS-06.
+
+1. **Berkas peta (KT-C11).**
+   - (a, saran) Dua berkas hasil `build_peta.py`. `kampung.json` tetap persis bentuk JS-02, sehingga lolos `bacaPeta` tanpa perubahan kode Sesi A; lapisan `ubin`-nya berisi kode bahan 0 sampai 7 (rumput, tanah, paving, semen, pasir, aspal, air, air dalam) untuk peta mini dan pemeriksaan. Lapisan gambar ada di `kampung_gambar.json`: daftar nomor ubin yang dipakai, lalu lapisan tanah, tumpang, dan bayangan berisi nomor urut dalam daftar itu (0 berarti kosong), dalam RLE yang sama. Server tidak perlu memuat berkas kedua. JS-06 tidak menunggu Sesi A; dokumennya diajukan lewat Permintaan C-9.
+   - (b) Satu berkas: Sesi A mengubah `kampung.json` menjadi versi 2 dengan tiga lapisan gambar bernilai sampai 376. Lebih rapi, tetapi `inti/peta.ts`, `tipe.ts`, dan ujinya berubah, dan Build JS-06 menunggu perubahan itu.
+   - (c) Layar pemain menghitung sendiri peralihan ubin, garis lapangan, dan bayangan dari kode bahan. Berkasnya paling kecil, tetapi aturan kit gambar Python harus ditulis ulang di TypeScript dan dijaga tetap sama.
+2. **Denah (KT-C12).**
+   - (a, saran) Denah di `preview/peta_denah.png`: sekolah dan halaman lobi di tengah, dikelilingi jalan lingkar; laut dan pantai di utara seperti pesisir Buleleng; Z6 di barat laut, Z7 di timur laut, Z1 dan Z5 di barat, Z4 dan Z8 di timur, Z3 (persimpangan, jalan selatan, dan terminal angkot) di depan gerbang. Tepi barat, timur, dan selatan berupa semak rapat dan pohon, sehingga batas peta tampak padat. Semua pemain berangkat dari gerbang yang sama.
+   - (b) Sekolah di tepi dengan jalan raya melintang di tengah: lebih mirip kampung memanjang, tetapi jarak ke zona terjauh naik dari sekitar 21 menjadi 35 detik garis lurus.
+   - (c) Denah (a) dengan perbaikan yang Anda tulis bebas, misalnya "pasar dekat pantai" atau "balai warga di tengah".
+3. **Titik kejadian dan tempat dalam naskah (KT-C13).** Beberapa naskah menyebut tempat khusus (K-11 di tepi sungai dan K-12 di lapangan taman, keduanya Z6), sedangkan penempatan JS-02 bisa menaruh kejadian Z6 di titik Z6 mana pun.
+   - (a, saran) Titik umum per zona: setiap titik di satu zona cocok untuk semua kejadian zona itu. Zona ditata rapat sesuai temanya (di Z6 lapangan taman berada di tepi sungai; di Z3 titik berada di tepi jalan dekat zebra cross atau halte; di Z5 titik di sekitar bale), dan tokoh serta properti kejadian digambar layar pemain di ruang 3 × 3. Titik ditulis tangan di `objek.json`, lalu diperiksa otomatis.
+   - (b) Titik bertanda jenis tempat (misalnya "sungai" atau "lapangan"), dan kejadian hanya ditempatkan di titik yang cocok. Lebih tepat, tetapi bentuk peta, aturan penempatan JS-02, dan penyunting kejadian di konsol ikut berubah (Sesi A).
+   - (c) Titik dipilih otomatis oleh `build_peta.py` dari wilayah calon, seperti di percobaan. Lebih cepat, tetapi letaknya kurang bermakna.
+4. **Jumlah titik, kotak, dan halte (KT-C14).**
+   - (a, saran) 12 titik per zona (96 titik, keputusan 6 Nov 2026); kotak bantuan 3 per zona dengan isi PRD 8.5 (sepatu di Z3, Z4, dan Z6; kompas di Z1 dan Z5; buku di Z2, Z7, dan Z8), jumlah 24; 4 halte (2 di Z3, 1 di Z7, 1 di Z8). Kotak teropong dan karcis (P1) belum dimasukkan dan ditambahkan bersama JS-18.
+   - (b) Sama dengan (a), tetapi kotak P1 dimasukkan sekarang (2 teropong di Z6 dan karcis di setiap halte). Peta tidak perlu dibangun ulang nanti, tetapi JS-09 wajib menyembunyikan kotak yang skillnya belum aktif.
+   - (c) 16 titik per zona (128 titik, masih di bawah kapasitas terkecil 24) dan 2 kotak per zona.
+5. **Bangunan penanda selalu terlihat (KT-C15).**
+   - (a, saran) Aturan 3 dibaca sebagai "bangunan atau objek khas zona", dengan daftar per zona (tabel Design System 7 ditambah rumah warga, kantin, tembok sekolah, rambu, pos keamanan, dan objek sejenis). Pemeriksaan otomatis untuk semua posisi yang terjangkau, sasaran 100%; tempat kosong diisi objek khas zona. Perubahan kalimat Design System diajukan lewat Permintaan C-11.
+   - (b) Aturan harfiah: setiap posisi melihat bangunan di tabel Design System 7. Perlu banyak salinan puskesmas, bale, dan warung berwifi, sehingga kampung terasa berulang.
+   - (c) Tanpa pemeriksaan otomatis; dinilai dari pratinjau saja.
+6. **Lobi dan gerbang (KT-C16).**
+   - (a, saran) Halaman lobi semen 28 × 17 ubin di depan gedung SMP, dikelilingi tembok sekolah, dengan gerbang 4 × 2 yang bukaannya 2 ubin; 18 titik muncul; tiang bendera di halaman; tanpa titik, kotak, atau halte di dalam lobi. `kampung.json` mencatat gerbang terbuka. Selama status lobi, server dan layar pemain memperlakukan sel `gerbangLobi` sebagai padat dan menggambar `obj_gerbang_tutup` (Permintaan C-10).
+   - (b) Halaman lobi lebih luas, termasuk lapangan sekolah: lebih lega untuk 100 pemain, tetapi Z2 kehilangan sekitar 8 titik dari kapasitasnya yang sudah paling kecil.
+7. **Pemeriksaan dan uji (KT-C17).**
+   - (a, saran) `build_peta.py` membangun dan memeriksa, lalu membuat peta pemeriksaan yang menandai setiap masalah. Uji Vitest `peta-*.test.ts` memeriksa ulang hasilnya di GitHub: bentuk (`bacaPeta`), keterjangkauan, lobi tertutup, ruang 3 × 3, jarak 6 ubin, 12 titik per zona, titik di dalam zonanya, jenis kotak per zona, lebar jalan 2 ubin, keterlihatan penanda, bahan bertetangga, ukuran gzip, keabsahan berkas gambar, dan sidik sumber (berkas peta gagal diuji bila `kampung.txt` atau `objek.json` berubah tanpa dibangun ulang).
+   - (b) Hanya uji Vitest: satu tempat aturan, tetapi masalah baru terlihat sesudah berkas dibangun dan uji dijalankan.
+   - (c) Hanya Python: tidak berjalan di GitHub, karena alur kerja tidak memasang Python dan Pillow.
+8. **Tempat spesifikasi dan laporan uji (KT-C18).** Batas berkas Sesi C saat ini belum mencakup folder `specs/` dan `tests/`.
+   - (a, saran) Izinkan dua berkas baru khusus JS-06: `docs/jejak-setara/specs/JS-06-peta.md` dan `docs/jejak-setara/tests/JS-06-hasil.md`, seperti fitur lain. Tidak bertabrakan dengan sesi lain.
+   - (b) Spesifikasi dan laporan ditulis di berkas ini; berkas ini akan bertambah sekitar 400 baris.
+9. **Tinjauan visual di tengah Build (KT-C19).**
+   - (a, saran) Satu titik tinjau: draf peta penuh tiga masa dan potongan zona dikirim lebih dulu dengan frasa `Setuju: peta`, baru sesudahnya uji dan pratinjau akhir. Perbaikan tata letak lebih murah sebelum uji ditulis.
+   - (b) Ditinjau sekali di akhir bersama laporan uji (Gerbang 3).
+
+### Keputusan terbuka yang perlu dijawab
+
+KT-C11 sampai KT-C19 (usulan 1 sampai 9). Cukup balas `Setuju: JS-06` untuk semua saran (a), atau sebutkan pilihan lain, misalnya `Setuju: JS-06, 4b, 9b`. KT-04 (warna tambahan khusus peta) tidak diperlukan: peta prototipe memakai 26 warna, semuanya dari palet 36 warna, tanpa piksel semi-transparan.
+
+### Risiko
+
+- **Kerja paralel.** Usulan 1a tidak mengubah berkas Sesi A, tetapi JS-07 perlu membaca berkas kedua. Bila Sesi A memilih 1b, Build JS-06 menunggu perubahan `inti/peta.ts`.
+- **Tempat dalam naskah.** Dengan usulan 3a, kejadian yang naskahnya menyebut tempat khusus bisa muncul di titik lain zona yang sama. Dikurangi dengan menata zona rapat sesuai tema.
+- **Menyusun 16.000 sel dengan tangan.** Dikurangi dengan bantuan di `build_peta.py`: pagar ditulis sebagai garis, varian rumah dan pohon dipilih berbenih, dan bayangan serta peralihan ubin dihitung otomatis.
+- **Lobi.** Pemeriksa gerak JS-02 menolak gerak di luar status `main`, sedangkan JFR-05 meminta pemain bisa berjalan di lobi (Permintaan C-10).
+- **Memori HP.** 70 potongan per masa bisa memakan sekitar 17,5 MB bila disiapkan sekaligus (catatan untuk JS-07).
+- **Galeri.** Setiap berkas teks baru diperiksa dengan `build:pages` (178 berkas identik byte).
+
 ## Yang masih menunggu
 
 | Hal | Menunggu | Keterangan |
 |---|---|---|
-| JS-06 (peta 160 × 100) | Kabar "JS-02 selesai" dari pemilik proyek | Entri Plan JS-06 ditulis di berkas ini; tanah, objek, tokoh, dan penanda sudah tersedia |
+| JS-06 (peta 160 × 100) | Balasan `Setuju: JS-06` (Gerbang 1) | Entri Plan dan denah kasar sudah diserahkan; pilihan untuk usulan 1 sampai 9 boleh ditulis di balasan |
+| Permintaan C-9 sampai C-11 | Sesi A | Dokumen untuk berkas peta kedua, lobi, dan aturan penanda; tidak menghalangi Build JS-06 |
 | `manifest.ts` | Jawaban Sesi A atas Permintaan C-6 | Dibuat otomatis oleh `build_jejak.py` untuk semua aset Disetujui |
 | Permintaan C-1 sampai C-8 | Sesi A | Termasuk ukuran peta (C-7) dan kapasitas pemain serta jumlah kejadian (C-8) |
 | O-42 sanggah | Keputusan KT-10 | Hanya bila versi B K-02 dipilih dan pemilik proyek mengizinkan |
@@ -704,5 +809,5 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## Cara membalas
 
-- **"JS-02 selesai"** memulai JS-06: saya menulis entri Plan JS-06 di berkas ini, lalu berhenti di Gerbang 1.
+- **`Setuju: JS-06`** menyetujui Plan JS-06 dengan semua saran (a). Pilihan lain ditulis sesudahnya, misalnya `Setuju: JS-06, 4b, 9b`. Sesudah itu saya menulis spesifikasi lalu berhenti di Gerbang 2.
 - Perbaikan aset tetap bisa diminta kapan saja: tulis ID aset dan perubahannya, misalnya "N-08: rambut Pak Made lebih banyak". Aset yang diubah kembali berstatus Ditinjau sampai disetujui lagi.
