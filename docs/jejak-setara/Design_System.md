@@ -69,11 +69,11 @@ Ciri "Langit sehari" Sehari Setara diteruskan. Ronde dipetakan ke satu hari: **p
 | Pandangan logis | **320 × 180** piksel (16:9), sama untuk semua pemain |
 | Ubin | 16 × 16 piksel logis; grid dasar 4 piksel |
 | Peta | Sekitar **160 × 100 ubin** (2.560 × 1.600 piksel logis), kira-kira 8 × 9 layar HP (keputusan pemilik proyek, 6 Nov 2026) |
-| Skala | Bilangan bulat terbesar yang muat, **dihitung dalam piksel perangkat** (memperhitungkan `devicePixelRatio`). Sisa ruang menjadi bingkai `ink` atau tempat HUD. Tidak pernah memakai skala pecahan |
+| Skala | Bilangan bulat terbesar yang muat, **dihitung dalam piksel perangkat** (memperhitungkan `devicePixelRatio`). Pandangan boleh terpotong paling banyak 2 piksel logis di setiap sisi (pandangan sedikitnya 316 × 176), agar HP dengan bilah alamat peramban tidak turun satu skala hanya karena kurang beberapa piksel (keputusan Gerbang 1 JS-07, 8 Nov 2026). Sisa ruang menjadi bingkai `ink` atau tempat HUD. Tidak pernah memakai skala pecahan |
 | Kamera | Mengikuti pemain dengan zona mati 24 × 16 piksel di tengah; dijepit ke tepi peta; posisinya selalu bilangan bulat piksel logis |
 | Teks di dalam gambar | **Tidak ada.** Nama samaran dan semua tulisan ditampilkan oleh antarmuka |
 
-Contoh skala: HP 412 × 915 CSS px dengan rasio piksel 2,625 dalam posisi mendatar memiliki tinggi sekitar 1.080 piksel perangkat, sehingga skalanya ×6 (pandangan 1.920 × 1.080 piksel perangkat, yaitu 731 × 411 px CSS). Laptop 1366×768 dengan rasio 1 memakai ×3 (960 × 540).
+Contoh skala: HP 412 × 915 CSS px dengan rasio piksel 2,625 dalam posisi mendatar memiliki tinggi sekitar 1.080 piksel perangkat, sehingga skalanya ×6 (pandangan 1.920 × 1.080 piksel perangkat, yaitu 731 × 411 px CSS). Laptop 1366×768 dengan rasio 1 dan bilah peramban (tampilan sekitar 1366 × 657 px) memakai ×3 (960 × 540); dalam layar penuh, ×4 (1280 × 720).
 
 ### 3.3 Layar pemain di HP (mendatar)
 

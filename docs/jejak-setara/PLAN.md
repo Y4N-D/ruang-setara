@@ -10,7 +10,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-04 | Belum direncanakan; dikerjakan sesudah JS-08 (urutan 8 Nov 2026) | — | — |
 | JS-05 | Dikerjakan Sesi B (mulai 7 Nov 2026); status di `naskah/STATUS.md` | — | — |
 | JS-06 | Selesai (8 Nov 2026), dikerjakan Sesi C; riwayat di `Daftar_Aset.md` | [JS-06-peta.md](specs/JS-06-peta.md) | [JS-06-hasil.md](tests/JS-06-hasil.md), lulus |
-| JS-07 | Direncanakan (8 Nov 2026), menunggu `Setuju: JS-07` | — | — |
+| JS-07 | Disetujui (8 Nov 2026); spesifikasi menunggu `Spesifikasi disetujui: JS-07` | [JS-07-penjelajah.md](specs/JS-07-penjelajah.md) | — |
 | JS-08 | Belum direncanakan; dikerjakan sesudah JS-07 (urutan 8 Nov 2026) | — | — |
 | JS-09 | Belum direncanakan | — | — |
 | JS-10 | Belum direncanakan | — | — |
@@ -347,7 +347,7 @@ Bila nomor 2 sampai 5 belum selesai saat Build dimulai, Build dan uji lokal teta
 
 ## JS-07 — Penjelajah
 
-- Status: Direncanakan (8 Nov 2026), menunggu `Setuju: JS-07` beserta pilihan untuk usulan 1 sampai 11. Urutan mengikuti keputusan pemilik proyek 8 Nov 2026 (bagian "Keputusan urutan fitur"). Diperiksa sebelum Plan: JS-03 berstatus Selesai dengan laporan Lulus (catatan AC-20 diterima; pemeriksaan lingkungan uji 8 Nov 2026), dan JS-06 berstatus Selesai dengan laporan Lulus (Sesi C, 8 Nov 2026). Server tetap memakai paket gratis Cloudflare.
+- Status: Disetujui (8 Nov 2026): balasan `Setuju: JS-07`, yaitu saran semua usulan diterima (1a sampai 11a). Spesifikasi ditulis 8 Nov 2026 ([JS-07-penjelajah.md](specs/JS-07-penjelajah.md)) bersama perubahan Architecture 6.5, 7, 8.2, 9, dan 11.2 serta Design System 3.2; menunggu `Spesifikasi disetujui: JS-07` beserta pilihan DRAF D-1 sampai D-5. Sesudah persetujuan Gerbang 1, Sesi C membuat `manifest.ts` dengan bentuk usulan 11a sebelum Build. Urutan mengikuti keputusan pemilik proyek 8 Nov 2026 (bagian "Keputusan urutan fitur"). Diperiksa sebelum Plan: JS-03 berstatus Selesai dengan laporan Lulus (catatan AC-20 diterima; pemeriksaan lingkungan uji 8 Nov 2026), dan JS-06 berstatus Selesai dengan laporan Lulus (Sesi C, 8 Nov 2026). Server tetap memakai paket gratis Cloudflare.
 - Memenuhi: JFR-09 (peta 160 × 100 ubin, keyboard WASD atau panah, joystick sentuh), JFR-10 (pemain lain dengan nama samaran, saling tembus), JFR-11 (peta mini pribadi: posisi sendiri, zona, dan halte; penanda kejadian yang sudah terlihat diisi di JS-08), JFR-12 (langit sehari: tiga masa, tukar lembar ubin, busur hari di bilah atas), dan JFR-14 (layar tetap menyala), ditambah bagian pemain JFR-05 (berjalan di halaman lobi; Permintaan C-10). Design System 3.2–3.4, 7, 8, 10 (bilah atas, joystick, peta mini, layar menyambung, layar jeda, lobi), 11, dan 13; Architecture 9.
 - Bergantung pada: JS-03 (Selesai) dan JS-06 (Selesai), ditambah `manifest.ts` dari Sesi C (usulan 11) sebelum Build.
 - File yang dibuat/diubah (rencana; dipastikan di Specify):

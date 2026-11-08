@@ -430,8 +430,8 @@ Setiap pesan adalah objek JSON `{ "v": 1, "t": "<tipe>", ...isi }`. `v` adalah `
 
 | Aliran | Frekuensi | Ukuran perkiraan |
 |---|---|---|
-| `gerak` dari pemain | ≤ 10 per detik saat bergerak, ≤ 6 per detik di ruang lebih dari 50 pemain, 1 per detik saat diam | ±60 byte |
-| `dunia` ke pemain | 10 per detik, hanya pemain yang berubah dalam radius 1,5 pandangan (480 × 270 piksel logis), paling banyak 24 pemain terdekat | ±200 byte |
+| `gerak` dari pemain | ≤ 10 per detik saat bergerak, ≤ 6 per detik di ruang lebih dari 50 pemain; saat diam tidak ada kiriman, kecuali satu laporan `jalan: false` saat berhenti (JS-07) | ±60 byte |
+| `dunia` ke pemain | 10 per detik selama `main`, hanya pemain yang berubah dalam radius 1,5 pandangan (480 × 270 piksel logis), paling banyak 24 pemain terdekat. Sekali per detik per pemain berupa kerangka penuh yang juga memuat pemain diam di dalam radius. Di `lobi` dan `hitung_mundur` dikirim mengikuti `gerak` yang masuk, paling sering setiap 100 ms, tanpa putaran (JS-07) | ±200 byte |
 | `dunia_kelas` | 4 per detik, semua pemain | ±1 KB untuk 40 pemain |
 | `papan` | ≤ 1 per detik, hanya bila berubah | ±1,5 KB |
 
@@ -506,12 +506,12 @@ stateDiagram-v2
 
 - **Pembuatan:** `POST /api/ruang` memeriksa izin, memilih versi terbit setiap kejadian di paket (semua rujukannya harus terverifikasi, kecuali ruang uji), membuat kode, membuat baris `ruang` di D1, lalu memanggil Durable Object baru dengan salinan isi, pengaturan, dan benih.
 - **Penempatan kejadian:** setiap kejadian diberi satu titik dari titik-titik zonanya dengan pengacakan berbenih; satu titik untuk satu kejadian.
-- **Lobi dan jeda:** tanpa pengatur waktu berkala, sehingga Durable Object boleh beristirahat (*hibernate*). Sambungan memakai WebSocket Hibernation API; identitas sambungan disimpan dengan `serializeAttachment`. Kiriman ke D1 memakai pengatur waktu 30 detik hanya selama antreannya berisi, sehingga ruang tetap bisa beristirahat sesudahnya (JS-03).
+- **Lobi dan jeda:** tanpa pengatur waktu berkala, sehingga Durable Object boleh beristirahat (*hibernate*). Sejak JS-07 (Permintaan C-10), pemain boleh berjalan di halaman lobi selama `lobi` dan `hitung_mundur`, dengan sel gerbang lobi diperlakukan padat; `dunia` dikirim mengikuti `gerak` yang masuk (paling sering setiap 100 ms, dan langsung untuk laporan berhenti), jadi ruang tetap bisa beristirahat saat semua pemain diam. Sambungan memakai WebSocket Hibernation API; identitas sambungan disimpan dengan `serializeAttachment`. Kiriman ke D1 memakai pengatur waktu 30 detik hanya selama antreannya berisi, sehingga ruang tetap bisa beristirahat sesudahnya (JS-03).
 - **Main:** pengatur waktu 100 ms menyusun dan mengirim `dunia`, `pribadi`, dan `papan`. Alarm dipasang pada `berakhirPada`.
 - **Jeda:** jam berhenti; `berakhirPada` digeser sebesar lama jeda saat dilanjutkan.
 - **Selesai:** peringkat akhir dihitung, `selesai` dikirim ke setiap pemain, seluruh `kiriman` dikirim ke D1, dan `ringkasan_json` ditulis.
 - **Ditutup otomatis:** 3 jam tanpa sambungan apa pun, atau 6 jam sejak dibuat. Penyimpanan Durable Object dihapus 24 jam sesudah ditutup, setelah kiriman ke D1 dipastikan lengkap.
-- **Sejak JS-03:** siklus ini dijalankan inti ruang. Pesan layar kelas sampai ke ruang lewat rute `/ws/kelas/` di JS-10; di lingkungan lokal juga lewat kait uji `POST /api/ruang-coba/{KODE}/kelas`.
+- **Sejak JS-03:** siklus ini dijalankan inti ruang. Pesan layar kelas sampai ke ruang lewat rute `/ws/kelas/` di JS-10; di lingkungan lokal juga lewat kait uji `POST /api/ruang-coba/{KODE}/kelas`. Sejak JS-07, kait itu juga hidup di lingkungan uji dengan kunci sekali pakai `KUNCI_COBA`, dipanggil alur kerja "Jejak: kendali ruang coba", dan dipensiunkan di JS-10 bersama ruang coba.
 - **Satu alarm:** inti ruang menghitung tenggat terdekat dari semua jadwal (hitung mundur, akhir ronde, tutup otomatis, hapus penyimpanan, dan kiriman yang gagal), lalu pembungkus memasang alarm itu.
 
 ## 8. Aturan permainan di server
@@ -524,9 +524,11 @@ stateDiagram-v2
 
 - Kecepatan dasar 72 piksel logis per detik; ×1,6 saat Lari cepat aktif. Diagonal dinormalisasi.
 - Untuk setiap `gerak`, server menghitung jarak dari posisi terakhir yang diterima. Batasnya: kecepatan saat itu × selang waktu × 1,25 + 4 piksel.
-- Posisi juga ditolak bila berada di sel padat peta, di luar peta, atau tidak bisa dicapai tanpa menembus sel padat (garis lurus, X lalu Y, atau Y lalu X; ditetapkan JS-02), atau saat status bukan `main`, atau saat dialog terbuka.
+- Posisi juga ditolak bila berada di sel padat peta, di luar peta, atau tidak bisa dicapai tanpa menembus sel padat (garis lurus, X lalu Y, atau Y lalu X; ditetapkan JS-02), atau saat status bukan `lobi`, `hitung_mundur`, atau `main`, atau saat dialog terbuka. Di `lobi` dan `hitung_mundur`, pemeriksaan memakai grid lobi, yaitu grid peta dengan semua sel `gerbangLobi` padat (`tutupGerbang`, JS-07).
 - Posisi yang ditolak tidak dipakai; server mengirim `koreksi` dengan posisi terakhir yang sah, dan klien langsung berpindah ke sana.
-- Hitungan tabrakan memakai `inti/gerak.ts` dan grid tabrakan yang sama dengan klien.
+- Hitungan tabrakan memakai `inti/gerak.ts` dan grid tabrakan yang sama dengan klien. Server memakai `kampung.json` yang diimpor saat build; di lingkup modul Worker hanya lapisan `tabrakan`, `titikMuncul`, dan `gerbangLobi` yang diurai, sedangkan pemeriksaan penuh `bacaPeta` dijalankan uji (JS-07).
+- Posisi awal pemain (titik muncul menurut urutan bergabung) dan posisi sesudah sambung ulang dikirim lewat `koreksi` dengan `seq` gerak terakhir yang diterima, paling kecil 0 (JS-07).
+- Bila uji jaringan menunjukkan lebih dari 1% `gerak` jujur ditolak karena laporan tiba berdempet, pemeriksaan jarak memakai anggaran jarak yang terkumpul, paling banyak setengah detik berjalan (spesifikasi JS-07, P-52).
 
 ### 8.3 Kejadian
 
@@ -570,8 +572,9 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 ## 9. Klien pemain
 
 - **Loop:** `requestAnimationFrame`; gerak pemain sendiri dihitung dengan langkah tetap 60 Hz memakai `inti/gerak.ts` (langsung terasa tanpa menunggu server).
-- **Pemain lain:** digambar 120 ms di belakang waktu server, dengan interpolasi di antara dua `dunia` terakhir.
-- **Kanvas:** ukuran *backing store* = 320 × k dan 180 × k piksel perangkat dengan k bilangan bulat terbesar yang muat (Design System bagian 3.2). Peta digambar dari potongan 256 × 256 yang disiapkan di kanvas luar layar per masa. Peta sekitar 160 × 100 ubin berarti sekitar 70 potongan per masa (sekitar 17,5 MB memori gambar bila semuanya disiapkan), jadi hanya potongan di sekitar kamera yang disiapkan dan yang jauh dilepas (JS-07).
+- **Pemain lain:** digambar di belakang waktu server dengan tunda yang menyesuaikan jaringan: 100 ms ditambah dua kali jitter terukur, dijepit 120–250 ms, dengan interpolasi di antara dua butir dan penerusan paling lama 100 ms (JS-07). Di status `main`, pemain lain yang tidak muncul di `dunia` selama 2,5 detik disembunyikan; di lobi tidak.
+- **Kanvas:** ukuran *backing store* = 320 × k dan 180 × k piksel perangkat dengan k bilangan bulat terbesar yang muat, boleh terpotong paling banyak 2 piksel logis per sisi (Design System bagian 3.2). Dunia digambar di kanvas logis 320 × 180, lalu diperbesar sekali tanpa penghalusan (JS-07). Peta digambar dari potongan 256 × 256 yang disiapkan di kanvas luar layar per masa. Peta sekitar 160 × 100 ubin berarti sekitar 70 potongan per masa (sekitar 17,5 MB memori gambar bila semuanya disiapkan), jadi hanya potongan di sekitar kamera yang disiapkan dan yang jauh dilepas (JS-07). Setiap potongan punya lapis bawah (tanah, tumpang, bayangan, bagian bawah objek) dan lapis atas (bagian atas objek); paling banyak 16 potongan disimpan, dan potongan untuk masa berikutnya disiapkan mulai 10 detik sebelum masa berganti.
+- **Langit sehari:** kemajuan dihitung dari sisa waktu (`berakhirPada` dikurangi jam server, atau dikurangi `jedaSejak` saat jeda) dibagi durasi ronde, sehingga sama di setiap perangkat; tambah waktu memundurkan langit (JS-07).
 - **Urutan gambar:** lapisan Design System bagian 7; tokoh diurutkan menurut y kaki; siluet pemain sendiri digambar di atas objek atas.
 - **Warna tas:** saat memuat, setiap strip avatar disalin untuk warna tas yang dipakai, dengan mengganti warna kunci `sun` dan `mango` serentak memakai pasangan Design System bagian 8 (JS-07).
 - **Input:** keyboard (`keydown`/`keyup` dengan peta tombol), joystick sentuh (*pointer events*, satu penunjuk di separuh kiri), dan tombol HTML untuk Periksa serta skill.
@@ -691,6 +694,26 @@ Manifest dibuat otomatis oleh `build_jejak.py` (Sesi C) hanya untuk aset Disetuj
 1. `AVATAR` berupa larik delapan butir berurutan A1–A8, sehingga nomor avatar di protokol (0–7) langsung menjadi indeks. Nama berkas tetap `ava_1` sampai `ava_8`.
 2. Kunci `WARNA_TAS` sama dengan tipe `WarnaTas` di `inti/tipe.ts`.
 3. Manifest tidak mengimpor apa pun dari `inti/`, karena hanya dipakai klien.
+
+Bentuk lengkap semua kelompok (usulan 11a JS-07, disetujui 8 Nov 2026). `Gambar` adalah satu strip mendatar: `url`, ukuran satu bingkai (`lebar`, `tinggi`, piksel), dan jumlah `bingkai`.
+
+```ts
+type Gambar = { url: string; lebar: number; tinggi: number; bingkai: number };
+export const UBIN = { ukuran: 16, kolom: 16, jumlah: 377, pagi: url, siang: url, sore: url };
+export const TOKOH = { lebar: 16, tinggi: 24, kakiX: 8, kakiY: 21 };
+export const AVATAR: { bawah: { diam: Gambar; jalan: Gambar }; atas: { diam: Gambar; jalan: Gambar };
+                       kanan: { diam: Gambar; jalan: Gambar }; ikon: Gambar }[];   // 8 butir, A1–A8
+export const KUNCI_TAS = { dasar: "#FFD23F", bayangan: "#FF9F1C" };
+export const WARNA_TAS: Record<WarnaTas, [dasar: string, bayangan: string]>;      // tabel Design System 8
+export const OBJEK: Record<string, { bawah: Gambar; atas: Gambar | null; lebar: number; tinggi: number }>;
+export const NPC: Record<string, Gambar & { kakiX: number; kakiY: number }>;
+export const IKON: Record<string, Gambar>;
+export const TANDA: Record<string, Gambar>;
+```
+
+- `OBJEK` berkunci `jenis` di `kampung.json` (tanpa awalan `obj_`); `lebar` dan `tinggi` adalah jejak kaki dalam ubin.
+- `NPC`, `IKON`, dan `TANDA` berkunci nama berkas tanpa `.png`, misalnya `npc_bayu_bawah_diam`, `ikon_menyambung`, dan `tanda_diri`. Kunci `setTokoh` kejadian (Sesi B) dicocokkan langsung ke `NPC`, dan ke `OBJEK` tanpa awalan `obj_`.
+- Kelompok `suara` ditambahkan di JS-14.
 
 ### 11.3 Anggaran
 
