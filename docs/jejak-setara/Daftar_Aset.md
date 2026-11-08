@@ -4,12 +4,12 @@
 |---|---|
 | Versi | 1.0 |
 | Diperbarui | 8 November 2026 |
-| Tahap saat ini | JS-06 (peta 160 × 100) selesai 8 November 2026; laporan uji `tests/JS-06-hasil.md` Lulus. Menunggu Sesi A membaca Permintaan C-6, C-7, dan C-9 sampai C-12. Semua kelompok aset dalam rencana Disetujui (6 November 2026) |
+| Tahap saat ini | `manifest.ts` untuk JS-07 (Permintaan C-6) dibuat `build_jejak.py` 8 November 2026, dengan uji `aset-manifest.test.ts` (bagian "Manifest aset"). JS-06 (peta 160 × 100) selesai 8 November 2026; laporan uji `tests/JS-06-hasil.md` Lulus. Permintaan C-1 sampai C-12 sudah dijawab Sesi A; C-13 diajukan. Semua kelompok aset dalam rencana Disetujui (6 November 2026) |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
-| Acuan | ZIP repositori 7 November 2026 (JS-02 selesai dan di-push menurut pemilik proyek) |
+| Acuan | ZIP repositori 8 November 2026 (JS-06 selesai; JS-07 sudah melewati Gerbang 1 dan 2, Build JS-07 menunggu `manifest.ts`) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
 | Cara membangun | `npx pnpm@11.25.0 assets:build:jejak` (menjalankan `python scripts/game/art/build_jejak.py`) |
-| Berkas yang boleh diubah Sesi C | `scripts/game/art/atas_*.py`, `scripts/game/art/build_jejak.py`, `app/jejak-setara/assets/`, `docs/jejak-setara/Daftar_Aset.md`, `docs/jejak-setara/preview/`. Sesudah kabar "JS-02 selesai": juga `scripts/jejak-setara/peta/`, `app/jejak-setara/peta/`, dan uji berawalan `peta-` di `app/jejak-setara/__tests__/konten/` (izin 7 Nov 2026), serta `docs/jejak-setara/specs/JS-06-peta.md` dan `docs/jejak-setara/tests/JS-06-hasil.md` (usulan JS-06 nomor 8a, 8 Nov 2026) |
+| Berkas yang boleh diubah Sesi C | `scripts/game/art/atas_*.py`, `scripts/game/art/build_jejak.py`, `app/jejak-setara/assets/`, `docs/jejak-setara/Daftar_Aset.md`, `docs/jejak-setara/preview/`. Sesudah kabar "JS-02 selesai": juga `scripts/jejak-setara/peta/`, `app/jejak-setara/peta/`, dan uji berawalan `peta-` di `app/jejak-setara/__tests__/konten/` (izin 7 Nov 2026), serta `docs/jejak-setara/specs/JS-06-peta.md` dan `docs/jejak-setara/tests/JS-06-hasil.md` (usulan JS-06 nomor 8a, 8 Nov 2026). Untuk `manifest.ts`: uji berawalan `aset-` di `app/jejak-setara/__tests__/konten/` (izin 8 Nov 2026) |
 
 Status: **Disetujui** (pratinjau sudah diterima pemilik proyek) · **Ditinjau** (pratinjau sudah dikirim, menunggu keputusan) · **Belum** · **Ditunda** (menunggu keputusan lain).
 
@@ -51,6 +51,7 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 8 Nov 2026 | Build JS-06 | `build_peta.py`, `kampung.txt`, dan `objek.json` dibuat; semua pemeriksaan galat lulus (penanda terlihat 100%, 0 sel sempit); draf peta dikirim sebagai gambar untuk titik tinjau; menunggu `Setuju: peta` |
 | 8 Nov 2026 | Build JS-06 | Pemilik proyek membalas `Setuju: peta`: draf diterima tanpa perubahan |
 | 8 Nov 2026 | Test JS-06 | 25 uji peta baru lulus, 12 salinan rusak ditolak, `test:jejak` 319 uji lulus, `test:e2e:jejak` 18 uji lulus, galeri 178 berkas identik; JS-06 Selesai ([laporan](tests/JS-06-hasil.md)) |
+| 8 Nov 2026 | Build manifest (C-6) | `build_jejak.py` kini juga menulis `app/jejak-setara/assets/manifest.ts` dengan bentuk Architecture 11.2 (usulan 11a JS-07): 239 aset Disetujui. Uji baru `aset-manifest.test.ts` (16 uji) lulus dengan penjalan pengganti, dan 16 salinan rusak ditolak (bagian "Manifest aset"). Status C-1 sampai C-12 diperbarui sesuai tanggapan Sesi A di `PLAN.md`; C-8 ternyata baru diterapkan sebagian, dan Permintaan C-13 diajukan |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -281,7 +282,7 @@ Setiap desain: seragam SMP (kemeja putih, celana atau rok `navy`, ikat pinggang 
 | Ukuran | Strip diam 417–561 B, strip jalan 526–701 B (batas 6 KB per strip); enam strip satu avatar 3,0–3,4 KB; ikon 235–325 B; seluruh kelompok A 27,8 KB |
 | Pemeriksaan `build_jejak.py` | Lulus: 0 piksel di luar palet atau semi-transparan, ukuran 32 × 24 (diam), 64 × 24 (jalan), 16 × 16 (ikon), dan warna kunci tas tidak dipakai di luar tas |
 | Pratinjau | `preview/ava_ringkasan.png` (ringkasan), `preview/ava_pose_semua.png` (semua bingkai ×3), `preview/pose_ava_1.png` sampai `pose_ava_8.png` (×6), dan `preview/ava_gerak.gif` (berjalan ke empat arah, lalu diam) |
-| Kredit dan manifest | `CREDITS.md` dibuat otomatis sesudah "Setuju: aset A" (56 aset). `manifest.ts` menunggu bentuk yang disepakati Sesi A (Permintaan C-6) |
+| Kredit dan manifest | `CREDITS.md` dibuat otomatis sesudah "Setuju: aset A" (56 aset). `manifest.ts` dibuat otomatis 8 Nov 2026 (bagian "Manifest aset") |
 
 - A1 sama piksel dengan avatar uji gaya yang disetujui, termasuk bingkai jalan dan arah atas.
 - Rok: kaus kaki putih di bawah rok. Pada bingkai diam kedua (bernapas), badan turun 1 piksel sehingga rok menutup kaus kaki, sama seperti celana yang menutup sebagian kaki pada A1.
@@ -651,50 +652,49 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 - **Bayangan objek:** berupa ubin tumpang lapisan 10 di lembar ubin (usulan 4). Letaknya dihitung `build_peta.py`, jadi antarmuka tidak menggambar bayangan objek sendiri.
 - **Lembar ubin:** nomor ubin = baris × 16 + kolom. Ubin lapisan 0 selalu penuh; ubin tumpang berlatar transparan. `kampung.json` (JS-06) memuat nomor ubin per lapisan (tanah, tumpang, bayangan), jadi antarmuka cukup menyalin potongan 16 × 16 dari lembar masa yang aktif. Saat masa berganti, hanya lembar yang ditukar.
 - **Siluet pemain:** pemain sendiri di belakang objek atas sebaiknya bergaris ganda (Permintaan C-4).
+- **Manifest:** semua gambar dimuat lewat `app/jejak-setara/assets/manifest.ts` (bagian "Manifest aset"). `lebar` dan `tinggi` di setiap `Gambar` adalah ukuran satu bingkai, jadi bingkai ke-i berada di x = i × `lebar` pada strip mendatar.
+- **Berkas berhash:** selama Permintaan C-13 belum diterapkan, Vite menyelipkan PNG di bawah 4 KB ke kode sebagai data URI.
 
 ## Permintaan untuk Sesi A
 
 | Kode | Berkas | Permintaan | Alasan | Status |
 |---|---|---|---|---|
-| C-1 | `docs/jejak-setara/PRD.md` bagian 15 | Ubah "empat masa (pagi, siang, sore, malam)" menjadi "tiga masa (pagi, siang, sore)" | Design System bagian 4 dan instruksi pemilik proyek memakai tiga masa (usulan 3) | Diajukan (usulan 3a disetujui 6 Nov 2026) |
-| C-2 | `docs/jejak-setara/Design_System.md` bagian 4 | Tambahkan: hanya lembar ubin yang berganti per masa; bayangan objek berupa ubin tumpang lapisan 10; objek, tokoh, dan ikon satu berkas untuk semua masa. Tambahkan juga baris bahan baru yang disetujui: tanah setapak (`skin-2`, kerikil `wood`), paving gang (bata `wood`, nat `wood-d`), semen (`mist`, tepi `slate`), dan pinggir aspal (bayangan kerb `dusk`, garis tepi = marka); semuanya tidak berganti per masa | Usulan 4 dan kelompok U (tabel "Bahan per masa" di bagian U) | Diajukan (usulan 4a dan kelompok U disetujui 6 Nov 2026) |
-| C-3 | `docs/jejak-setara/Design_System.md` bagian 8 dan `Architecture.md` bagian 9 | Catat warna kunci tas `sun` dan `mango`, tabel delapan pasangan warna, dan penggantian serentak saat memuat | Usulan 5 | Diajukan (usulan 5a disetujui 6 Nov 2026) |
-| C-4 | `docs/jejak-setara/Design_System.md` bagian 7 (lapisan 60) | Siluet pemain sendiri bergaris ganda: garis dalam `ink` 1 piksel, lalu garis luar `sun` 1 piksel | Garis `sun` saja 1,0–2,9 : 1 di enam dari tujuh warna atap (percobaan 4); dengan garis ganda salah satu garis selalu ≥ 3 : 1 | Diajukan |
-| C-5 | `docs/jejak-setara/Design_System.md` bagian 14 (penamaan) | Tambahkan pola `obj_{nama}_atas.png`, `ikon_ava_{n}.png`, `tanda_debu.png`, dan `tanda_kilau.png`; arah tokoh `bawah`, `atas`, dan `kanan`; tanpa berkas arah kiri | Usulan 6 dan 7 | Diajukan (usulan 6a dan 7a disetujui 6 Nov 2026) |
-| C-7 | `docs/jejak-setara/PRD.md` JFR-09, `Design_System.md` bagian 3.2, dan `Architecture.md` bagian 9 dan 11.3 | Ubah ukuran peta menjadi sekitar 160 × 100 ubin (2.560 × 1.600 piksel logis, sekitar 8 × 9 layar). Periksa anggaran peta JSON (≤ 60 KB setelah gzip) dan jumlah potongan 256 × 256 per masa (sekitar 70) | Keputusan pemilik proyek 6 Nov 2026 (bagian "Keputusan ukuran peta") | Diajukan |
-| C-8 | `docs/jejak-setara/PRD.md` bagian 8.3 dan 12, `Architecture.md` bagian 13 | Nilai kapasitas sampai 100 pemain per ruang (sekarang 50) dan jumlah kejadian per ronde yang lebih banyak. Peta 160 × 100 menyediakan titik untuk sekitar 48 kejadian. Gagasan untuk dinilai: satu kejadian muncul di dua titik sekaligus agar pemain tidak menumpuk | Pemilik proyek memperkirakan 50–100 pemain dan pertanyaan yang banyak serta bervariasi | Diajukan; perlu keputusan pemilik proyek bersama Sesi A dan Sesi B |
-| C-6 | `docs/jejak-setara/Architecture.md` bagian 11.2 | Sepakati bentuk `manifest.ts`: kunci, ukuran dan jumlah bingkai, titik kaki, pasangan bagian atas objek, dan nomor ubin. Usul Sesi C: manifest dibuat otomatis oleh `build_jejak.py` | Usulan 10 | Diajukan (usulan 10a disetujui 6 Nov 2026). Usulan bentuknya ada di bagian "Usulan bentuk manifest"; perlu jawaban sebelum manifest dibuat |
-| C-9 | `docs/jejak-setara/Architecture.md` bagian 3, 11.1, 11.1.1, dan 11.3 | Catat berkas kedua `app/jejak-setara/peta/kampung_gambar.json` (daftar nomor ubin yang dipakai, lalu lapisan tanah, tumpang, dan bayangan berisi nomor urut dalam daftar itu, dalam RLE yang sama dan dibaca `uraiRle`); arti lapisan `ubin` di `kampung.json` (kode bahan 0 sampai 7: rumput, tanah, paving, semen, pasir, aspal, air, air dalam); anggaran 60 KB gzip untuk kedua berkas bersama; dan daftar uji peta (12 titik per zona, lebar jalan 2 ubin, keterlihatan penanda) | Bentuk JS-02 hanya memuat nilai 0 sampai 63 dalam satu lapisan, sedangkan lembar ubin berisi 377 nomor dalam tiga lapisan (bagian JS-06, percobaan 1 dan 2) | Diajukan (usulan JS-06 nomor 1a disetujui 8 Nov 2026); rincian bentuk di `specs/JS-06-peta.md` P-20 sampai P-24 |
-| C-10 | `docs/jejak-setara/Architecture.md` bagian 7 dan 8.2 (dan spesifikasi JS-03 atau JS-07) | Selama status `lobi`, pemain boleh bergerak di halaman lobi, sel `gerbangLobi` diperlakukan padat oleh server dan layar pemain, dan gerbang digambar `obj_gerbang_tutup`; sesudah ronde dimulai digambar `obj_gerbang_buka`. Posisi awal pemain diambil dari `titikMuncul` | `periksaGerak` JS-02 menolak gerak di luar status `main`, sedangkan JFR-05 meminta pemain bisa berjalan di halaman lobi | Diajukan |
-| C-11 | `docs/jejak-setara/Design_System.md` bagian 7 (aturan peta 3) | Ubah menjadi "Dari titik mana pun, sedikitnya satu bangunan atau objek khas zona terlihat di layar", dengan daftar objek khas per zona dari JS-06 | Dengan tabel bangunan penanda saja, hanya 57,4% posisi di prototipe 160 × 100 yang memenuhi (bagian JS-06, percobaan 7) | Diajukan (usulan JS-06 nomor 5a disetujui 8 Nov 2026); daftar objek penanda di `specs/JS-06-peta.md` P-14 |
-| C-12 | `docs/jejak-setara/PLAN.md`, tabel status fitur | Ubah baris JS-06 menjadi "Selesai (8 Nov 2026)" dengan tautan `specs/JS-06-peta.md` dan `tests/JS-06-hasil.md` | JS-06 selesai di Sesi C, dan statusnya baru tercatat di berkas ini | Diajukan |
+| C-1 | `docs/jejak-setara/PRD.md` bagian 15 | Ubah "empat masa (pagi, siang, sore, malam)" menjadi "tiga masa (pagi, siang, sore)" | Design System bagian 4 dan instruksi pemilik proyek memakai tiga masa (usulan 3) | Diterapkan: PRD 15 (`JS-03-dokumen-bc.zip`, 7 Nov 2026; tanggapan Sesi A di Plan JS-07) |
+| C-2 | `docs/jejak-setara/Design_System.md` bagian 4 | Tambahkan: hanya lembar ubin yang berganti per masa; bayangan objek berupa ubin tumpang lapisan 10; objek, tokoh, dan ikon satu berkas untuk semua masa. Tambahkan juga baris bahan baru yang disetujui: tanah setapak (`skin-2`, kerikil `wood`), paving gang (bata `wood`, nat `wood-d`), semen (`mist`, tepi `slate`), dan pinggir aspal (bayangan kerb `dusk`, garis tepi = marka); semuanya tidak berganti per masa | Usulan 4 dan kelompok U (tabel "Bahan per masa" di bagian U) | Diterapkan: Design System 4 (`JS-03-dokumen-bc.zip`, 7 Nov 2026) |
+| C-3 | `docs/jejak-setara/Design_System.md` bagian 8 dan `Architecture.md` bagian 9 | Catat warna kunci tas `sun` dan `mango`, tabel delapan pasangan warna, dan penggantian serentak saat memuat | Usulan 5 | Diterapkan: Design System 8 dan Architecture 9 (`JS-03-dokumen-bc.zip`, 7 Nov 2026) |
+| C-4 | `docs/jejak-setara/Design_System.md` bagian 7 (lapisan 60) | Siluet pemain sendiri bergaris ganda: garis dalam `ink` 1 piksel, lalu garis luar `sun` 1 piksel | Garis `sun` saja 1,0–2,9 : 1 di enam dari tujuh warna atap (percobaan 4); dengan garis ganda salah satu garis selalu ≥ 3 : 1 | Diterapkan: Design System 7, lapisan 60 (`JS-03-dokumen-bc.zip`, 7 Nov 2026) |
+| C-5 | `docs/jejak-setara/Design_System.md` bagian 14 (penamaan) | Tambahkan pola `obj_{nama}_atas.png`, `ikon_ava_{n}.png`, `tanda_debu.png`, dan `tanda_kilau.png`; arah tokoh `bawah`, `atas`, dan `kanan`; tanpa berkas arah kiri | Usulan 6 dan 7 | Diterapkan: Design System 14 (`JS-03-dokumen-bc.zip`, 7 Nov 2026) |
+| C-7 | `docs/jejak-setara/PRD.md` JFR-09, `Design_System.md` bagian 3.2, dan `Architecture.md` bagian 9 dan 11.3 | Ubah ukuran peta menjadi sekitar 160 × 100 ubin (2.560 × 1.600 piksel logis, sekitar 8 × 9 layar). Periksa anggaran peta JSON (≤ 60 KB setelah gzip) dan jumlah potongan 256 × 256 per masa (sekitar 70) | Keputusan pemilik proyek 6 Nov 2026 (bagian "Keputusan ukuran peta") | Diterapkan: PRD JFR-09, Design System 3.2, Architecture 9, 11.1, dan 11.3 (`JS-03-dokumen-bc.zip`, 7 Nov 2026). Sesi A mengukur di Plan JS-07: 5 sampai 9 potongan di sekitar kamera, sekitar 4,7 MB untuk dua lapis |
+| C-8 | `docs/jejak-setara/PRD.md` bagian 8.3 dan 12, `Architecture.md` bagian 13 | Nilai kapasitas sampai 100 pemain per ruang (sekarang 50) dan jumlah kejadian per ronde yang lebih banyak. Peta 160 × 100 menyediakan titik untuk sekitar 48 kejadian. Gagasan untuk dinilai: satu kejadian muncul di dua titik sekaligus agar pemain tidak menumpuk | Pemilik proyek memperkirakan 50–100 pemain dan pertanyaan yang banyak serta bervariasi | Diterapkan sebagian. Diputuskan di Gerbang 1 JS-03 (usulan 11a): bawaan 40, paling banyak 100 pemain; dua titik aktif per kejadian di ruang lebih dari 50 pemain (dibangun di JS-08); Paket inti 16 untuk rilis 1.0. Sudah ada di Architecture 5.1 dan 13.1 serta protokol (`pemainMaks` 100). Pemeriksaan Sesi C 8 Nov 2026: PRD JFR-01 dan PRD 12 masih menulis paling banyak 50 pemain, dan PRD 8.3 serta 21 belum memuat keputusan ini, padahal daftar dokumen spesifikasi JS-03 menyebutnya. Diteruskan ke Sesi A |
+| C-6 | `docs/jejak-setara/Architecture.md` bagian 11.2 | Sepakati bentuk `manifest.ts`: kunci, ukuran dan jumlah bingkai, titik kaki, pasangan bagian atas objek, dan nomor ubin. Usul Sesi C: manifest dibuat otomatis oleh `build_jejak.py` | Usulan 10 | Selesai 8 Nov 2026: bentuk disetujui di Gerbang 1 JS-03 dan dirinci di usulan 11a JS-07 (Architecture 11.2); `manifest.ts` dibuat `build_jejak.py` dan diperiksa `aset-manifest.test.ts` (bagian "Manifest aset") |
+| C-9 | `docs/jejak-setara/Architecture.md` bagian 3, 11.1, 11.1.1, dan 11.3 | Catat berkas kedua `app/jejak-setara/peta/kampung_gambar.json` (daftar nomor ubin yang dipakai, lalu lapisan tanah, tumpang, dan bayangan berisi nomor urut dalam daftar itu, dalam RLE yang sama dan dibaca `uraiRle`); arti lapisan `ubin` di `kampung.json` (kode bahan 0 sampai 7: rumput, tanah, paving, semen, pasir, aspal, air, air dalam); anggaran 60 KB gzip untuk kedua berkas bersama; dan daftar uji peta (12 titik per zona, lebar jalan 2 ubin, keterlihatan penanda) | Bentuk JS-02 hanya memuat nilai 0 sampai 63 dalam satu lapisan, sedangkan lembar ubin berisi 377 nomor dalam tiga lapisan (bagian JS-06, percobaan 1 dan 2) | Diterapkan: Architecture 3, 11.1, 11.1.1, dan 11.3 (ZIP Gerbang 1 JS-07, 8 Nov 2026); rincian bentuk di `specs/JS-06-peta.md` P-20 sampai P-24 |
+| C-10 | `docs/jejak-setara/Architecture.md` bagian 7 dan 8.2 (dan spesifikasi JS-03 atau JS-07) | Selama status `lobi`, pemain boleh bergerak di halaman lobi, sel `gerbangLobi` diperlakukan padat oleh server dan layar pemain, dan gerbang digambar `obj_gerbang_tutup`; sesudah ronde dimulai digambar `obj_gerbang_buka`. Posisi awal pemain diambil dari `titikMuncul` | `periksaGerak` JS-02 menolak gerak di luar status `main`, sedangkan JFR-05 meminta pemain bisa berjalan di halaman lobi | Diterapkan di dokumen: Architecture 7 dan 8.2, bersama spesifikasi JS-07 (rincian usulan 6 JS-07, disetujui 8 Nov 2026). Kodenya dibangun di Build JS-07 |
+| C-11 | `docs/jejak-setara/Design_System.md` bagian 7 (aturan peta 3) | Ubah menjadi "Dari titik mana pun, sedikitnya satu bangunan atau objek khas zona terlihat di layar", dengan daftar objek khas per zona dari JS-06 | Dengan tabel bangunan penanda saja, hanya 57,4% posisi di prototipe 160 × 100 yang memenuhi (bagian JS-06, percobaan 7) | Diterapkan: Design System 7 aturan 3 (ZIP Gerbang 1 JS-07, 8 Nov 2026); daftar objek penanda di `specs/JS-06-peta.md` P-14 |
+| C-12 | `docs/jejak-setara/PLAN.md`, tabel status fitur | Ubah baris JS-06 menjadi "Selesai (8 Nov 2026)" dengan tautan `specs/JS-06-peta.md` dan `tests/JS-06-hasil.md` | JS-06 selesai di Sesi C, dan statusnya baru tercatat di berkas ini | Diterapkan: tabel status `PLAN.md` (ZIP Gerbang 1 JS-07, 8 Nov 2026) |
+| C-13 | `vite.jejak.config.ts` | Tambahkan `build.assetsInlineLimit` yang mengembalikan `false` untuk berkas di `app/jejak-setara/assets/`, seperti `vite.pages.config.ts` untuk Sehari Setara, sehingga setiap PNG yang diimpor `manifest.ts` menjadi berkas berhash | Architecture 11.2 menulis "Aset selalu menjadi berkas berhash, bukan data URI", tetapi `vite.jejak.config.ts` belum mengatur `assetsInlineLimit`, sehingga Vite memakai batas bawaannya, 4 KB. Begitu layar pemain mengimpor manifest, sampai 236 dari 239 PNG (semua kecuali tiga lembar ubin, bila semua kelompok dipakai) diselipkan ke kode sebagai data URI: sekitar 116 KB teks atau 71 KB gzip, dari anggaran kode layar pemain 200 KB gzip (Architecture 11.3). Diukur Sesi C dengan esbuild, 8 Nov 2026. Ikon avatar di `pemain/avatar.ts` (JS-03) sudah terkena aturan yang sama | Diajukan; sebaiknya diterapkan sebelum atau bersama Build JS-07 |
 
-## Usulan bentuk manifest (Permintaan C-6)
+## Manifest aset (Permintaan C-6)
 
-`build_jejak.py` menulis `app/jejak-setara/assets/manifest.ts` dari daftar asetnya, hanya untuk aset Disetujui, dengan pola impor seperti manifest Sehari Setara (setiap PNG menjadi URL berkas berhash lewat Vite). Usulan isi untuk kelompok A:
+Selesai 8 November 2026. `build_jejak.py` menulis `app/jejak-setara/assets/manifest.ts` setiap kali dijalankan tanpa `--only`, dari daftar aset yang sama dengan `CREDITS.md`, dan hanya untuk aset Disetujui. Bentuknya persis Architecture 11.2 (usulan 11a JS-07, disetujui 8 Nov 2026). Usulan awal Sesi C di bagian ini (6 Nov 2026) sudah digantikan bentuk itu.
 
-```ts
-// Dibuat build_jejak.py. Jangan disunting manual.
-import ava1BawahDiam from "./ava/ava_1_bawah_diam.png";
-// ... 48 strip dan 8 ikon
+| Kelompok | Isi | Kunci |
+|---|---|---|
+| `UBIN` | `ukuran` 16, `kolom` 16, `jumlah` 377, dan URL lembar `pagi`, `siang`, dan `sore` | — |
+| `TOKOH` | Bingkai avatar 16 × 24 dengan titik kaki (8, 21) | — |
+| `AVATAR` | 8 butir berurutan A1–A8. Setiap butir berisi `bawah`, `atas`, dan `kanan`, masing-masing `diam` (2 bingkai) dan `jalan` (4 bingkai), ditambah `ikon` (ikon kepala) | Indeks 0–7 = nomor avatar di protokol |
+| `KUNCI_TAS`, `WARNA_TAS` | Warna kunci `#FFD23F` dan `#FF9F1C`, serta delapan pasangan `[dasar, bayangan]` dari tabel Design System 8 | Sama dengan `WarnaTas` |
+| `OBJEK` | 69 jenis: `bawah`, `atas` (atau `null` untuk objek satu berkas), dan jejak kaki `lebar` × `tinggi` dalam ubin menurut aturan JS-06 | Jenis di `kampung.json`, yaitu nama berkas tanpa `obj_` |
+| `NPC` | 33 strip 2 bingkai dengan titik kaki: siswa dan lansia (8, 21), dewasa (8, 23), anak (7, 17), Dimas di motor (17, 28) | Nama berkas tanpa `.png` |
+| `IKON` | 33 ikon; `ikon_bintang` 3 bingkai dan `ikon_menyambung` 2 bingkai. Ikon kepala avatar hanya ada di `AVATAR` | Nama berkas tanpa `.png` |
+| `TANDA` | 12 penanda dan efek; berkasnya di folder `ikon/`, dan urutan bingkainya di bagian T | Nama berkas tanpa `.png` |
 
-export const TOKOH = { lebar: 16, tinggi: 24, kakiX: 8, kakiY: 21 } as const;
-export const BINGKAI = { diam: 2, jalan: 4 } as const;
-export const AVATAR = {
-  1: { bawah: { diam: ava1BawahDiam, jalan: ava1BawahJalan },
-       atas: { diam: ava1AtasDiam, jalan: ava1AtasJalan },
-       kanan: { diam: ava1KananDiam, jalan: ava1KananJalan }, ikon: ikonAva1 },
-  // ... 2 sampai 8
-} as const;
-export const KUNCI_TAS = { dasar: "#FFD23F", bayangan: "#FF9F1C" } as const;
-export const WARNA_TAS = {
-  sun: ["#FFD23F", "#FF9F1C"], mango: ["#FF9F1C", "#FF6B5B"], coral: ["#FF6B5B", "#8A5A33"],
-  rose: ["#FF8FB8", "#FF6B5B"], berry: ["#9B5DE5", "#4A4F9C"], teal: ["#2EC4B6", "#3BA55C"],
-  leaf: ["#8AD95B", "#3BA55C"], "sky-d": ["#3A86D9", "#2B3F8C"],
-} as const;
-```
-
-Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan pola yang sama. Bila Sesi A membutuhkan bentuk lain (misalnya mengikuti tipe di `inti/tipe.ts`), cukup tulis jawabannya di `PLAN.md`; `build_jejak.py` menyesuaikan.
+- `Gambar` berisi `url`, `lebar` dan `tinggi` satu bingkai dalam piksel, dan jumlah `bingkai` pada strip mendatar. Tipe `Gambar`, `GambarAvatar`, `GambarObjek`, `GambarNpc`, dan `KunciWarnaTas` ikut diekspor.
+- Setiap PNG diimpor sebagai URL lewat Vite dengan pola manifest Sehari Setara, dan manifest tidak mengimpor apa pun dari `inti/`. Urutan kunci tetap (A1–A8, urutan `WarnaTas`, lalu abjad), sehingga bangun ulang menghasilkan berkas yang sama byte demi byte.
+- `build_jejak.py` tidak menulis manifest bila ada masalah: aset yang belum Disetujui, lebar strip yang tidak habis dibagi jumlah bingkai, jejak kaki objek yang tidak bulat, titik kaki di luar bingkai, jenis di `kampung.json` atau `gerbang_tutup` yang tidak ada, atau aset Disetujui yang tertinggal.
+- Uji `app/jejak-setara/__tests__/konten/aset-manifest.test.ts` (16 uji, dijalankan `content:check:jejak` dan `test:jejak`) memeriksa ulang hasilnya tanpa Python. 16 salinan manifest yang sengaja dirusak (misalnya bingkai salah, A1 dan A2 tertukar, `gerbang_tutup` hilang, impor dari `inti/`, warna tas salah, aset yang belum Disetujui) semuanya ditolak.
+- Untuk Sesi B: kunci `setTokoh` `npc_…` dicocokkan langsung ke `NPC`, dan `obj_…` ke `OBJEK` tanpa awalan `obj_`. Ke-37 kunci berbeda di bank awal (26 tokoh, 11 properti) semuanya ada di manifest.
+- Saat dibangun ulang di lingkungan Sesi C 8 November 2026 (Pillow 12.3 dengan zlib-ng), semua PNG sama piksel dengan yang ada di repositori, tetapi 31 PNG aset dan 31 pratinjau berbeda byte karena pemampatan yang lain. Berkas lama dipertahankan, jadi gambar di repositori tidak berubah.
+- Pemeriksaan 8 November 2026 dijalankan di lingkungan Sesi C yang tidak bisa memasang paket. `assets:build:jejak` dijalankan dengan perintah yang sama tanpa pnpm dan lulus; `build_assets.py` lulus dengan hasil sama byte. Uji memakai penjalan pengganti Vitest di atas `tsx`: folder `content:check:jejak` 10 berkas, 254 uji, dan pola `test:jejak` 23 berkas, 610 uji, semuanya lulus. tsc memakai TypeScript 6.0.3 dan 7.0.2 (0 galat), ESLint memakai aturan inti ESLint 10 (0 masalah), dan `build:jejak` serta `build:pages` diganti perbandingan bundel esbuild dan CSS galeri dari Tailwind 4.3.3 (keduanya identik dengan `main`). Perintah resmi berjalan di alur kerja "Jejak: uji" sesudah push.
 
 ## Catatan untuk JS-06 (peta)
 
@@ -808,9 +808,9 @@ Dijawab 8 November 2026: KT-C11 sampai KT-C19 memakai saran (a), yaitu usulan 1a
 | Hal | Menunggu | Keterangan |
 |---|---|---|
 | JS-06 (peta 160 × 100) | Selesai 8 Nov 2026 | Peta siap dipakai JS-03 (server memuat `kampung.json`) dan JS-07 (layar pemain memuat kedua berkas) |
-| Permintaan C-9 sampai C-12 | Sesi A | Dokumen untuk berkas peta kedua, lobi, aturan penanda, dan status JS-06 di `PLAN.md`; C-9 dan C-10 perlu dibaca sebelum JS-03 dan JS-07 memakai peta |
-| `manifest.ts` | Jawaban Sesi A atas Permintaan C-6 | Dibuat otomatis oleh `build_jejak.py` untuk semua aset Disetujui |
-| Permintaan C-1 sampai C-8 | Sesi A | Termasuk ukuran peta (C-7) dan kapasitas pemain serta jumlah kejadian (C-8) |
+| `manifest.ts` (C-6) | Selesai 8 Nov 2026 | Build JS-07 (Sesi A) bisa dimulai sesudah ZIP manifest di-commit dan di-push |
+| Permintaan C-8 | Sesi A | Kapasitas 100 pemain sudah ada di Architecture dan protokol, tetapi PRD JFR-01, 8.3, 12, dan 21 belum diperbarui |
+| Permintaan C-13 | Sesi A | `assetsInlineLimit` di `vite.jejak.config.ts`, agar PNG dari manifest menjadi berkas berhash; sebaiknya sebelum atau bersama Build JS-07 |
 | O-42 sanggah | Keputusan KT-10 | Hanya bila versi B K-02 dipilih dan pemilik proyek mengizinkan |
 | Efek suara | Keputusan pemilik proyek | Bukan bagian kit gambar Sesi C |
 

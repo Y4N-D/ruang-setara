@@ -7,18 +7,22 @@ Pemakaian (dari folder repositori):
 Hasil:
     <out>/ava/ava_{n}_{arah}_{pose}.png, <out>/ikon/ikon_ava_{n}.png, <out>/ubin/ubin_{masa}.png  (ukuran asli 1x)
     <out>/CREDITS.md                (dibuat otomatis untuk aset berstatus Disetujui)
+    <out>/manifest.ts               (dibuat otomatis untuk aset berstatus Disetujui; Architecture Jejak 11.2)
     <preview>/*.png dan *.gif       (pratinjau untuk persetujuan, docs/jejak-setara/preview/)
 Pemeriksaan: warna di luar palet, piksel semi-transparan, ukuran, warna kunci tas hanya di tas,
-dan anggaran (Architecture Jejak bagian 11.3).
+anggaran (Architecture Jejak bagian 11.3), dan kelengkapan manifest.
 
 Kit Sehari Setara (pixelart.py, palette.json, ikon.py) dipakai tanpa diubah; build_assets.py Sehari Setara
 tidak terpengaruh. Status setiap aset ada di docs/jejak-setara/Daftar_Aset.md. CREDITS.md dan manifest.ts
-dibuat dari daftar ini hanya untuk aset berstatus Disetujui (DISETUJUI di bawah; bentuk manifest menunggu
-Permintaan C-6).
+dibuat dari daftar ini hanya untuk aset berstatus Disetujui (DISETUJUI di bawah). Bentuk manifest mengikuti
+Architecture Jejak 11.2 (Permintaan C-6, usulan 11a JS-07) dan diuji ulang oleh
+app/jejak-setara/__tests__/konten/aset-manifest.test.ts.
 """
 import argparse
 import io
+import json
 import sys
+import textwrap
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -28,7 +32,7 @@ sys.path.insert(0, str(HERE))
 from pixelart import *          # noqa: E402,F401,F403
 from atas_tokoh import (AVATAR, ARAH, BINGKAI, KETERANGAN, WARNA_TAS, avatar, strip_avatar,   # noqa: E402
                         ikon_kepala, ganti_tas, NPC, POSE_NPC, UKURAN_NPC, npc, strip_npc,
-                        NPC2, POSE_NPC2, npc2, strip_npc2)
+                        NPC2, POSE_NPC2, npc2, strip_npc2, JANGKAR, UKURAN, TAS)
 from atas_ubin import (MASA, NAMA_MASA, KOLOM, NOMOR, BLOB, WILAYAH, SUSUNAN, UKURAN_LEMBAR,   # noqa: E402
                        ubin_rumput, ubin_wilayah, lembar_ubin, nomor_tanah)
 from atas_objek import POTONG_ATAP, OBJEK, KODE_OBJEK, PAGAR, obj_rumah_a, pisah   # noqa: E402
@@ -42,9 +46,11 @@ if HERE.parts[-3:] == ("scripts", "game", "art"):      # berada di dalam reposit
     REPO = HERE.parents[2]
     DEFAULT_OUT = REPO / "app" / "jejak-setara" / "assets"
     DEFAULT_PREVIEW = REPO / "docs" / "jejak-setara" / "preview"
+    PETA_KAMPUNG = REPO / "app" / "jejak-setara" / "peta" / "kampung.json"   # jenis objek di peta (JS-06)
 else:                                                 # dijalankan di folder lepas
     DEFAULT_OUT = HERE / "out" / "aset"
     DEFAULT_PREVIEW = HERE / "out" / "pratinjau"
+    PETA_KAMPUNG = None
 
 # ---------------------------------------------------------------------------
 # Daftar aset: nama berkas -> (folder, fungsi yang mengembalikan Image, ukuran yang diharapkan)
@@ -205,6 +211,219 @@ def tulis_kredit(out_dir):
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "CREDITS.md").write_text("\n".join(baris), encoding="utf-8")
     return len(DISETUJUI)
+
+
+# ---------------------------------------------------------------------------
+# manifest.ts: satu-satunya pintu masuk aset (Architecture Jejak 11.2; Permintaan C-6; usulan 11a JS-07)
+# ---------------------------------------------------------------------------
+# Jumlah bingkai setiap strip mendatar; aset lain satu bingkai. Urutan bingkai dicatat di Daftar_Aset.md.
+BINGKAI_ASET = {nama: 1 for nama in ASSETS}
+BINGKAI_ASET.update({f"ava_{n}_{a}_{p}": nb for n in AVATAR for a in ARAH for p, nb in BINGKAI.items()})
+BINGKAI_ASET.update({nama: 2 for nama in ASSETS if nama.startswith("npc_")})    # strip_npc dan strip_npc2
+BINGKAI_ASET.update({f"tanda_kotak_{k}": 3 for k in SKILL})                    # kecil, besar berkilau, biasa
+BINGKAI_ASET.update({"tanda_kompas": 2 * len(ARAH_KOMPAS), "tanda_diri": len(ARAH_DIRI), "tanda_debu": 2,
+                     "tanda_kilau": 2, "ikon_menyambung": 2, "ikon_bintang": 3})
+KAKI_MOTOR = (17, 28)      # titik kaki Dimas di motor, bingkai 34 x 30 (catatan titik kaki di atas_tokoh.py)
+KEPALA_MANIFEST = [
+    "// Dibuat build_jejak.py. Jangan disunting manual.",
+    "// Satu-satunya pintu masuk aset gambar Jejak Setara (Architecture 11.2; Permintaan C-6; usulan 11a JS-07),",
+    "// hanya untuk aset berstatus Disetujui di docs/jejak-setara/Daftar_Aset.md (sama dengan CREDITS.md).",
+    "// Setiap PNG diimpor sebagai URL berkas lewat Vite, seperti manifest Sehari Setara. Berkas ini tidak",
+    "// mengimpor apa pun dari inti/, karena hanya dipakai klien. Untuk mengubahnya, ubah kode gambar atau daftar",
+    "// aset di scripts/game/art/, lalu jalankan npx pnpm@11.25.0 assets:build:jejak. Isinya diperiksa ulang oleh",
+    "// app/jejak-setara/__tests__/konten/aset-manifest.test.ts.",
+]
+DOK_OBJEK = [
+    "Objek berkunci jenis di kampung.json, yaitu nama berkas tanpa awalan obj_. Bagian atas digambar di",
+    "piksel (16x − 1, 16y − 1) dan bagian bawah tepat di bawahnya. lebar dan tinggi adalah jejak kaki dalam",
+    "ubin menurut aturan JS-06: (lebar PNG − 2) / 16, dan (tinggi bagian bawah + tinggi bagian atas − 2) / 16.",
+]
+
+
+def _pengenal(nama):
+    """Nama impor TypeScript dari nama berkas: ava_1_bawah_diam menjadi ava1BawahDiam."""
+    awal, *sisa = nama.split("_")
+    return awal + "".join(b[:1].upper() + b[1:] for b in sisa)
+
+
+def _kunci_ts(kunci):
+    """Kunci objek TypeScript: tanpa tanda kutip bila berupa pengenal (sun), dengan tanda kutip bila tidak."""
+    return kunci if kunci.isidentifier() else json.dumps(kunci)
+
+
+def _hex(warna):
+    return "#{:02X}{:02X}{:02X}".format(*warna[:3])
+
+
+def _dok(teks):
+    """Komentar dokumentasi TypeScript paling lebar 120 karakter. teks berupa kalimat (dibungkus otomatis) atau
+    daftar baris yang sudah disusun."""
+    if isinstance(teks, str) and len(teks) + 7 <= 120:
+        return [f"/** {teks} */"]
+    baris = textwrap.wrap(teks, 117) if isinstance(teks, str) else teks
+    return ["/**"] + [f" * {b}".rstrip() for b in baris] + [" */"]
+
+
+def tulis_manifest(out_dir, ukuran):
+    """manifest.ts untuk aset berstatus Disetujui (Architecture Jejak 11.2). Jangan disunting manual.
+
+    ukuran: nama aset -> (lebar, tinggi) PNG yang baru dibangun. Mengembalikan (jumlah per kelompok, masalah).
+    Berkas hanya ditulis bila tidak ada masalah, sehingga manifest tidak pernah berbeda dari PNG-nya. Urutan
+    kunci tetap (A1-A8, urutan WARNA_TAS, lalu abjad), jadi hasilnya sama setiap kali dibangun."""
+    masalah, dirujuk = [], []
+
+    def rujuk(nama):
+        if nama not in DISETUJUI:
+            masalah.append(f"manifest: {nama} belum Disetujui")
+        if nama not in ukuran:
+            masalah.append(f"manifest: {nama} tidak dibangun")
+        dirujuk.append(nama)
+        return _pengenal(nama)
+
+    def isi(nama):
+        """Isi Gambar: url, ukuran satu bingkai dalam piksel, dan jumlah bingkai."""
+        url = rujuk(nama)
+        (w, h), b = ukuran.get(nama, (0, 0)), BINGKAI_ASET.get(nama, 1)
+        if w % b:
+            masalah.append(f"manifest: lebar {nama} ({w} piksel) tidak habis dibagi {b} bingkai")
+        return f"url: {url}, lebar: {w // b}, tinggi: {h}, bingkai: {b}"
+
+    def gambar(nama):
+        return "{ " + isi(nama) + " }"
+
+    # AVATAR: delapan butir berurutan A1-A8, sehingga nomor avatar protokol (0-7) menjadi indeks
+    if list(AVATAR) != list(range(1, 9)):
+        masalah.append(f"manifest: AVATAR harus A1-A8 berurutan, bukan {list(AVATAR)}")
+    avatar_ts = []
+    for n in AVATAR:
+        avatar_ts += [f"  // A{n} (indeks {n - 1})", "  {"]
+        for arah in ARAH:
+            avatar_ts += [f"    {arah}: {{"] + [f"      {p}: {gambar(f'ava_{n}_{arah}_{p}')}," for p in BINGKAI]
+            avatar_ts.append("    },")
+        avatar_ts += [f"    ikon: {gambar(f'ikon_ava_{n}')},", "  },"]
+
+    # OBJEK: berkunci jenis di kampung.json; jejak kaki dalam ubin menurut aturan JS-06
+    objek_ts, jenis_ada = [], []
+    for jenis in sorted(OBJEK):
+        bawah, atas = f"obj_{jenis}", f"obj_{jenis}_atas"
+        if bawah not in DISETUJUI:
+            continue                                     # objek yang belum Disetujui tidak masuk manifest
+        w, hb = ukuran.get(bawah, (2, 2))
+        wa, ha = ukuran.get(atas, (0, 0)) if atas in ASSETS else (w, 0)
+        if (w - 2) % 16 or (hb + ha - 2) % 16 or wa != w:
+            masalah.append(f"manifest: ukuran {bawah} dan bagian atasnya tidak sesuai jejak kaki ubin")
+        jenis_ada.append(jenis)
+        objek_ts += [f"  {_kunci_ts(jenis)}: {{", f"    bawah: {gambar(bawah)},",
+                     f"    atas: {gambar(atas) if atas in ASSETS else 'null'},",
+                     f"    lebar: {(w - 2) // 16},", f"    tinggi: {(hb + ha - 2) // 16},", "  },"]
+    jenis_peta = set()
+    if PETA_KAMPUNG is not None and PETA_KAMPUNG.exists():
+        jenis_peta = {o["jenis"] for o in json.loads(PETA_KAMPUNG.read_text(encoding="utf-8"))["objek"]}
+    kurang = sorted((jenis_peta | {"gerbang_tutup"}) - set(jenis_ada))
+    if kurang:
+        masalah.append(f"manifest: OBJEK tidak memuat jenis {kurang} (kampung.json dan gerbang_tutup)")
+
+    # NPC: berkunci nama berkas; titik kaki menurut ukuran tokoh (siswa, dewasa, anak) atau pose motor
+    npc_ts = []
+    for nama in sorted(n for n in DISETUJUI if n.startswith("npc_")):
+        tokoh, pose = nama.split("_")[1], nama.split("_")[-1]
+        kx, ky = KAKI_MOTOR if pose == "motor" else UKURAN_NPC[(NPC.get(tokoh) or NPC2[tokoh])["ukuran"]][1]
+        w, h = ukuran.get(nama, (0, 0))
+        if not (0 <= kx < w // BINGKAI_ASET[nama] and 0 <= ky < h):
+            masalah.append(f"manifest: titik kaki {nama} ({kx}, {ky}) di luar bingkai")
+        npc_ts.append(f"  {nama}: {{ {isi(nama)}, kakiX: {kx}, kakiY: {ky} }},")
+
+    # IKON dan TANDA: berkunci nama berkas; ikon kepala avatar sudah ada di AVATAR
+    nama_ikon = sorted(n for n in DISETUJUI if n.startswith("ikon_") and not n.startswith("ikon_ava_"))
+    ikon_ts = [f"  {n}: {gambar(n)}," for n in nama_ikon]
+    tanda_ts = [f"  {n}: {gambar(n)}," for n in sorted(n for n in DISETUJUI if n.startswith("tanda_"))]
+
+    # UBIN: tiga lembar masa; ubin nomor n ada di kolom n mod KOLOM dan baris n div KOLOM
+    lembar = {m: rujuk(f"ubin_{m}") for m in MASA}
+    if UKURAN_LEMBAR[0] != KOLOM * 16 or (UKURAN_LEMBAR[0] // 16) * (UKURAN_LEMBAR[1] // 16) < len(SUSUNAN):
+        masalah.append(f"manifest: lembar ubin {UKURAN_LEMBAR} tidak memuat {len(SUSUNAN)} ubin dalam {KOLOM} kolom")
+    if any(ukuran.get(f"ubin_{m}") != UKURAN_LEMBAR for m in MASA):
+        masalah.append(f"manifest: ukuran lembar ubin bukan {UKURAN_LEMBAR}")
+
+    # Kelengkapan: setiap aset Disetujui dirujuk tepat sekali, dan nama impor tidak bertabrakan
+    if len(dirujuk) != len(set(dirujuk)):
+        masalah.append("manifest: ada aset yang dirujuk lebih dari sekali")
+    tertinggal = sorted(set(DISETUJUI) - set(dirujuk))
+    if tertinggal:
+        masalah.append(f"manifest: aset Disetujui tidak masuk manifest: {tertinggal[:8]}")
+    if len({_pengenal(n) for n in dirujuk}) != len(set(dirujuk)):
+        masalah.append("manifest: nama impor bertabrakan")
+
+    impor = []
+    for folder in sorted({ASSETS[n][0] for n in dirujuk}):
+        impor += [f'import {_pengenal(n)} from "./{folder}/{n}.png";'
+                  for n in sorted({n for n in dirujuk if ASSETS[n][0] == folder})] + [""]
+    gerak = "{ " + "; ".join(f"{p}: Gambar" for p in BINGKAI) + " }"
+    bingkai_ikon = ", ".join(f"{n} {BINGKAI_ASET[n]}" for n in nama_ikon if BINGKAI_ASET[n] > 1)
+    teks = KEPALA_MANIFEST + [""] + impor + [
+        *_dok("Satu strip mendatar: URL berkas, ukuran satu bingkai dalam piksel, dan jumlah bingkai."),
+        "export type Gambar = { url: string; lebar: number; tinggi: number; bingkai: number };",
+        "",
+        *_dok("Strip avatar per arah (" + ", ".join(f"{p} {nb} bingkai" for p, nb in BINGKAI.items())
+              + ") dan ikon kepala. Arah kiri dicerminkan dari arah kanan."),
+        "export type GambarAvatar = {", *[f"  {a}: {gerak};" for a in ARAH], "  ikon: Gambar;", "};",
+        "",
+        *_dok("Bagian bawah (lapisan 20), bagian atas (lapisan 40) atau null, dan jejak kaki dalam ubin."),
+        "export type GambarObjek = { bawah: Gambar; atas: Gambar | null; lebar: number; tinggi: number };",
+        "",
+        *_dok("Strip tokoh bukan pemain dan titik kakinya di dalam satu bingkai."),
+        "export type GambarNpc = Gambar & { kakiX: number; kakiY: number };",
+        "",
+        *_dok("Sama dengan WarnaTas di inti/tipe.ts, ditulis ulang karena manifest tidak mengimpor dari inti/."),
+        "export type KunciWarnaTas = " + " | ".join(json.dumps(k) for k in WARNA_TAS) + ";",
+        "",
+        *_dok(f"Lembar ubin per masa ({UKURAN_LEMBAR[0]} × {UKURAN_LEMBAR[1]} piksel): ubin nomor n berada di "
+              f"kolom n mod {KOLOM} dan baris n div {KOLOM}, dan nomornya sama di ketiga masa."),
+        f"export const UBIN = {{ ukuran: 16, kolom: {KOLOM}, jumlah: {len(SUSUNAN)}, "
+        + ", ".join(f"{m}: {v}" for m, v in lembar.items()) + " } as const;",
+        "",
+        *_dok(f"Bingkai avatar {UKURAN[0]} × {UKURAN[1]} piksel dengan titik kaki ({JANGKAR[0]}, {JANGKAR[1]})."),
+        f"export const TOKOH = {{ lebar: {UKURAN[0]}, tinggi: {UKURAN[1]}, kakiX: {JANGKAR[0]}, "
+        f"kakiY: {JANGKAR[1]} }} as const;",
+        "",
+        *_dok("Avatar A1–A8 berurutan, sehingga nomor avatar di protokol (0–7) langsung menjadi indeks."),
+        "export const AVATAR: readonly GambarAvatar[] = [", *avatar_ts, "];",
+        "",
+        *_dok("Warna kunci tas di gambar avatar. Antarmuka mengganti keduanya serentak saat memuat "
+              "(Design System 8)."),
+        f'export const KUNCI_TAS = {{ dasar: "{_hex(TAS[0])}", bayangan: "{_hex(TAS[1])}" }} as const;',
+        "",
+        *_dok("Pasangan [dasar, bayangan] setiap warna tas, sesuai tabel Design System 8."),
+        "export const WARNA_TAS: Readonly<Record<KunciWarnaTas, readonly [dasar: string, bayangan: string]>> = {",
+        *[f'  {_kunci_ts(k)}: ["{_hex(d)}", "{_hex(b)}"],' for k, (d, b) in WARNA_TAS.items()],
+        "};",
+        "",
+        *_dok(DOK_OBJEK),
+        "export const OBJEK: Readonly<Record<string, GambarObjek>> = {", *objek_ts, "};",
+        "",
+        *_dok("Tokoh bukan pemain berkunci nama berkas tanpa .png: strip 2 bingkai (diam bernapas atau pose "
+              "khusus) dengan titik kaki di dalam satu bingkai."),
+        "export const NPC: Readonly<Record<string, GambarNpc>> = {", *npc_ts, "};",
+        "",
+        *_dok(f"Ikon berkunci nama berkas tanpa .png. Ikon kepala avatar ada di AVATAR. Strip lebih dari satu "
+              f"bingkai: {bingkai_ikon}."),
+        "export const IKON: Readonly<Record<string, Gambar>> = {", *ikon_ts, "};",
+        "",
+        *_dok(["Penanda dan efek berkunci nama berkas tanpa .png; berkasnya di folder ikon/. Urutan bingkai:",
+               f"- tanda_diri: {', '.join(ARAH_DIRI)};",
+               *textwrap.wrap("- tanda_kompas: dua bingkai (biasa, lalu terang) untuk setiap arah, berurutan "
+                              + ", ".join(a.replace("_", " ") for a in ARAH_KOMPAS) + ";", 117,
+                              subsequent_indent="  "),
+               "- tanda_kotak_*: kecil, besar berkilau, lalu biasa."]),
+        "export const TANDA: Readonly<Record<string, Gambar>> = {", *tanda_ts, "};",
+    ]
+    jumlah = {"AVATAR": len(AVATAR), "OBJEK": len(jenis_ada), "NPC": len(npc_ts), "IKON": len(ikon_ts),
+              "TANDA": len(tanda_ts), "UBIN": len(lembar), "berkas": len(set(dirujuk))}
+    if not masalah:
+        out_dir.mkdir(parents=True, exist_ok=True)
+        with open(out_dir / "manifest.ts", "w", encoding="utf-8", newline="\n") as f:
+            f.write("\n".join(teks) + "\n")
+    return jumlah, masalah
 
 
 def _kunci_tas_bocor(nama):
@@ -1374,7 +1593,7 @@ def main():
     ap.add_argument("--only", nargs="*", help="nama aset atau pratinjau tertentu saja")
     args = ap.parse_args()
 
-    masalah, total = [], 0
+    masalah, total, ukuran_png = [], 0, {}
     for nama, (folder, fn, ukuran) in ASSETS.items():
         if args.only and nama not in args.only:
             continue
@@ -1391,6 +1610,7 @@ def main():
         out = args.out / folder / f"{nama}.png"
         out.parent.mkdir(parents=True, exist_ok=True)
         im.save(out, optimize=True)
+        ukuran_png[nama] = im.size
         size = out.stat().st_size
         total += size
         if nama.startswith("ava_") and size > BATAS_STRIP:
@@ -1409,6 +1629,11 @@ def main():
     build_previews(args.preview, args.only)
     if not args.only:
         print(f"CREDITS.md: {tulis_kredit(args.out)} aset Disetujui")
+        jumlah, masalah_manifest = tulis_manifest(args.out, ukuran_png)
+        masalah += masalah_manifest
+        print(f"manifest.ts: {jumlah['berkas']} aset Disetujui (AVATAR {jumlah['AVATAR']}, OBJEK {jumlah['OBJEK']}, "
+              f"NPC {jumlah['NPC']}, IKON {jumlah['IKON']}, TANDA {jumlah['TANDA']}, UBIN {jumlah['UBIN']})"
+              + (", tidak ditulis karena ada masalah" if masalah_manifest else ""))
     print(f"Total aset: {total / 1024:.1f} KB (anggaran aset layar pemain {BATAS_TOTAL / 1024 / 1024:.0f} MB)")
     if total > BATAS_TOTAL:
         masalah.append("Total ukuran aset melebihi anggaran")
