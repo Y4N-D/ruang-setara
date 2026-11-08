@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Ditulis 8 November 2026 di tahap Specify, sesudah balasan `Setuju: JS-07` (semua saran a, usulan 1 sampai 11). Menunggu `Spesifikasi disetujui: JS-07` beserta pilihan DRAF D-1 sampai D-5 |
+| Status | Ditulis 8 November 2026 di tahap Specify, sesudah balasan `Setuju: JS-07` (semua saran a, usulan 1 sampai 11). **Disetujui 8 November 2026** (balasan `Spesifikasi disetujui: JS-07`) dengan semua saran DRAF: D-1 sampai D-5 pilihan (a). Build menunggu `manifest.ts` dari Sesi C |
 | Rencana | `PLAN.md`, bagian "JS-07 — Penjelajah" |
 | Sesi | Sesi A (mesin) |
 | Bergantung pada | JS-03 (Selesai), JS-06 (Selesai), dan `app/jejak-setara/assets/manifest.ts` dari Sesi C (usulan 11a) sebelum Build |
