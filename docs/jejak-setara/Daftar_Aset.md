@@ -4,12 +4,12 @@
 |---|---|
 | Versi | 1.0 |
 | Diperbarui | 8 November 2026 |
-| Tahap saat ini | Plan JS-06 (peta 160 × 100) ditulis 8 November 2026 dan menunggu `Setuju: JS-06` (bagian "JS-06 Peta: rencana"). Semua kelompok aset dalam rencana Disetujui (6 November 2026) |
+| Tahap saat ini | Spesifikasi JS-06 (`specs/JS-06-peta.md`) ditulis 8 November 2026 dan menunggu `Spesifikasi disetujui: JS-06`. Plan JS-06 disetujui 8 November 2026 dengan semua saran (a). Semua kelompok aset dalam rencana Disetujui (6 November 2026) |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 7 November 2026 (JS-02 selesai dan di-push menurut pemilik proyek) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
 | Cara membangun | `npx pnpm@11.25.0 assets:build:jejak` (menjalankan `python scripts/game/art/build_jejak.py`) |
-| Berkas yang boleh diubah Sesi C | `scripts/game/art/atas_*.py`, `scripts/game/art/build_jejak.py`, `app/jejak-setara/assets/`, `docs/jejak-setara/Daftar_Aset.md`, `docs/jejak-setara/preview/`. Sesudah kabar "JS-02 selesai": juga `scripts/jejak-setara/peta/`, `app/jejak-setara/peta/`, dan uji berawalan `peta-` di `app/jejak-setara/__tests__/konten/` (izin 7 Nov 2026) |
+| Berkas yang boleh diubah Sesi C | `scripts/game/art/atas_*.py`, `scripts/game/art/build_jejak.py`, `app/jejak-setara/assets/`, `docs/jejak-setara/Daftar_Aset.md`, `docs/jejak-setara/preview/`. Sesudah kabar "JS-02 selesai": juga `scripts/jejak-setara/peta/`, `app/jejak-setara/peta/`, dan uji berawalan `peta-` di `app/jejak-setara/__tests__/konten/` (izin 7 Nov 2026), serta `docs/jejak-setara/specs/JS-06-peta.md` dan `docs/jejak-setara/tests/JS-06-hasil.md` (usulan JS-06 nomor 8a, 8 Nov 2026) |
 
 Status: **Disetujui** (pratinjau sudah diterima pemilik proyek) · **Ditinjau** (pratinjau sudah dikirim, menunggu keputusan) · **Belum** · **Ditunda** (menunggu keputusan lain).
 
@@ -45,6 +45,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 6 Nov 2026 | Kelompok I | Pemilik proyek membalas "Setuju: aset I": I-01 sampai I-19 Disetujui; kredit 33 berkas ditambahkan. Seluruh 239 berkas aset dalam rencana Disetujui |
 | 7 Nov 2026 | Plan JS-06 | Pemilik proyek mengabarkan JS-02 selesai dan di-push, lalu menetapkan batas berkas Sesi C untuk JS-06 |
 | 8 Nov 2026 | Plan JS-06 | Percobaan prototipe 160 × 100 dijalankan di luar repositori; entri Plan, denah kasar `preview/peta_denah.png`, dan Permintaan C-9 sampai C-11 diserahkan; menunggu `Setuju: JS-06` |
+| 8 Nov 2026 | Plan JS-06 | Pemilik proyek membalas `Setuju: JS-06`: semua saran (a) diterima (usulan 1a sampai 9a, KT-C11 sampai KT-C19) |
+| 8 Nov 2026 | Specify JS-06 | Spesifikasi `specs/JS-06-peta.md` (P-1 sampai P-31, D-1 sampai D-7, AC-1 sampai AC-15) diserahkan; menunggu `Spesifikasi disetujui: JS-06` |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -658,9 +660,9 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 | C-7 | `docs/jejak-setara/PRD.md` JFR-09, `Design_System.md` bagian 3.2, dan `Architecture.md` bagian 9 dan 11.3 | Ubah ukuran peta menjadi sekitar 160 × 100 ubin (2.560 × 1.600 piksel logis, sekitar 8 × 9 layar). Periksa anggaran peta JSON (≤ 60 KB setelah gzip) dan jumlah potongan 256 × 256 per masa (sekitar 70) | Keputusan pemilik proyek 6 Nov 2026 (bagian "Keputusan ukuran peta") | Diajukan |
 | C-8 | `docs/jejak-setara/PRD.md` bagian 8.3 dan 12, `Architecture.md` bagian 13 | Nilai kapasitas sampai 100 pemain per ruang (sekarang 50) dan jumlah kejadian per ronde yang lebih banyak. Peta 160 × 100 menyediakan titik untuk sekitar 48 kejadian. Gagasan untuk dinilai: satu kejadian muncul di dua titik sekaligus agar pemain tidak menumpuk | Pemilik proyek memperkirakan 50–100 pemain dan pertanyaan yang banyak serta bervariasi | Diajukan; perlu keputusan pemilik proyek bersama Sesi A dan Sesi B |
 | C-6 | `docs/jejak-setara/Architecture.md` bagian 11.2 | Sepakati bentuk `manifest.ts`: kunci, ukuran dan jumlah bingkai, titik kaki, pasangan bagian atas objek, dan nomor ubin. Usul Sesi C: manifest dibuat otomatis oleh `build_jejak.py` | Usulan 10 | Diajukan (usulan 10a disetujui 6 Nov 2026). Usulan bentuknya ada di bagian "Usulan bentuk manifest"; perlu jawaban sebelum manifest dibuat |
-| C-9 | `docs/jejak-setara/Architecture.md` bagian 3, 11.1, 11.1.1, dan 11.3 | Catat berkas kedua `app/jejak-setara/peta/kampung_gambar.json` (daftar nomor ubin yang dipakai, lalu lapisan tanah, tumpang, dan bayangan berisi nomor urut dalam daftar itu, dalam RLE yang sama dan dibaca `uraiRle`); arti lapisan `ubin` di `kampung.json` (kode bahan 0 sampai 7: rumput, tanah, paving, semen, pasir, aspal, air, air dalam); anggaran 60 KB gzip untuk kedua berkas bersama; dan daftar uji peta (12 titik per zona, lebar jalan 2 ubin, keterlihatan penanda) | Bentuk JS-02 hanya memuat nilai 0 sampai 63 dalam satu lapisan, sedangkan lembar ubin berisi 377 nomor dalam tiga lapisan (bagian JS-06, percobaan 1 dan 2) | Diajukan; berlaku bila usulan JS-06 nomor 1a disetujui |
+| C-9 | `docs/jejak-setara/Architecture.md` bagian 3, 11.1, 11.1.1, dan 11.3 | Catat berkas kedua `app/jejak-setara/peta/kampung_gambar.json` (daftar nomor ubin yang dipakai, lalu lapisan tanah, tumpang, dan bayangan berisi nomor urut dalam daftar itu, dalam RLE yang sama dan dibaca `uraiRle`); arti lapisan `ubin` di `kampung.json` (kode bahan 0 sampai 7: rumput, tanah, paving, semen, pasir, aspal, air, air dalam); anggaran 60 KB gzip untuk kedua berkas bersama; dan daftar uji peta (12 titik per zona, lebar jalan 2 ubin, keterlihatan penanda) | Bentuk JS-02 hanya memuat nilai 0 sampai 63 dalam satu lapisan, sedangkan lembar ubin berisi 377 nomor dalam tiga lapisan (bagian JS-06, percobaan 1 dan 2) | Diajukan (usulan JS-06 nomor 1a disetujui 8 Nov 2026); rincian bentuk di `specs/JS-06-peta.md` P-20 sampai P-24 |
 | C-10 | `docs/jejak-setara/Architecture.md` bagian 7 dan 8.2 (dan spesifikasi JS-03 atau JS-07) | Selama status `lobi`, pemain boleh bergerak di halaman lobi, sel `gerbangLobi` diperlakukan padat oleh server dan layar pemain, dan gerbang digambar `obj_gerbang_tutup`; sesudah ronde dimulai digambar `obj_gerbang_buka`. Posisi awal pemain diambil dari `titikMuncul` | `periksaGerak` JS-02 menolak gerak di luar status `main`, sedangkan JFR-05 meminta pemain bisa berjalan di halaman lobi | Diajukan |
-| C-11 | `docs/jejak-setara/Design_System.md` bagian 7 (aturan peta 3) | Ubah menjadi "Dari titik mana pun, sedikitnya satu bangunan atau objek khas zona terlihat di layar", dengan daftar objek khas per zona dari JS-06 | Dengan tabel bangunan penanda saja, hanya 57,4% posisi di prototipe 160 × 100 yang memenuhi (bagian JS-06, percobaan 7) | Diajukan; berlaku bila usulan JS-06 nomor 5a disetujui |
+| C-11 | `docs/jejak-setara/Design_System.md` bagian 7 (aturan peta 3) | Ubah menjadi "Dari titik mana pun, sedikitnya satu bangunan atau objek khas zona terlihat di layar", dengan daftar objek khas per zona dari JS-06 | Dengan tabel bangunan penanda saja, hanya 57,4% posisi di prototipe 160 × 100 yang memenuhi (bagian JS-06, percobaan 7) | Diajukan (usulan JS-06 nomor 5a disetujui 8 Nov 2026); daftar objek penanda di `specs/JS-06-peta.md` P-14 |
 
 ## Usulan bentuk manifest (Permintaan C-6)
 
@@ -699,11 +701,11 @@ Kelompok berikutnya menambah `UBIN`, `OBJEK`, `NPC`, `IKON`, dan `TANDA` dengan 
 
 ## JS-06 Peta: rencana (templat AGENTS 12.1)
 
-Ditulis 8 November 2026 di tahap Plan, sesudah pemilik proyek mengabarkan JS-02 selesai. Berhenti di Gerbang 1 sampai ada balasan `Setuju: JS-06`.
+Ditulis 8 November 2026 di tahap Plan, sesudah pemilik proyek mengabarkan JS-02 selesai. Disetujui 8 November 2026 dengan balasan `Setuju: JS-06` (semua saran a). Spesifikasinya: [JS-06-peta.md](specs/JS-06-peta.md).
 
 | | |
 |---|---|
-| Status | Direncanakan (8 Nov 2026), menunggu `Setuju: JS-06` |
+| Status | Spesifikasi (8 Nov 2026): Plan disetujui dengan semua saran (a); [spesifikasi](specs/JS-06-peta.md) menunggu `Spesifikasi disetujui: JS-06` |
 | Fitur sebelumnya | JS-02: dinyatakan selesai dan sudah di-push oleh pemilik proyek (7 Nov 2026). `PLAN.md` masih menulis "Diuji"; status itu diubah Sesi A. Di salinan ZIP 7 Nov 2026, `test:jejak` resmi (Vitest 5.0.4) lulus: 7 berkas, 294 uji |
 | Memenuhi | JFR-09 (peta tampak atas 160 × 100 ubin dengan 8 zona) dan JFR-12 (bagian peta: lembar ubin per masa); data untuk JFR-05 (halaman lobi dan gerbang), JFR-11 (zona dan halte di peta mini), JFR-15 (titik kejadian per zona), JFR-23 (kotak bantuan per zona), dan JFR-25 (halte, P1); PRD 8.2, 8.3, dan 9; Design System 7 dan 14; Architecture 11.1 |
 | Bergantung pada | JS-02 (bentuk `kampung.json` dan pemeriksanya, `bacaPeta`); aset kelompok U dan O1 sampai O4 (Disetujui 6 Nov 2026) |
@@ -725,7 +727,7 @@ Ditulis 8 November 2026 di tahap Plan, sesudah pemilik proyek mengabarkan JS-02 
 | `app/jejak-setara/__tests__/konten/peta-berkas.test.ts`, `peta-aturan.test.ts` | Baru | Uji usulan 7, dijalankan `content:check:jejak` dan `test:jejak` |
 | `docs/jejak-setara/preview/peta_denah.png` | Baru (sekarang) | Denah kasar Plan |
 | `docs/jejak-setara/preview/peta_pagi.png`, `peta_siang.png`, `peta_sore.png`, `peta_zona_1.png` sampai `peta_zona_8.png`, `peta_periksa.png`, `peta_hp.png`, `peta_laptop.png` | Baru (Build) | Pratinjau Design System 14 dan peta pemeriksaan |
-| `docs/jejak-setara/specs/JS-06-peta.md`, `docs/jejak-setara/tests/JS-06-hasil.md` | Baru, bila usulan 8a disetujui | Spesifikasi dan laporan uji |
+| `docs/jejak-setara/specs/JS-06-peta.md`, `docs/jejak-setara/tests/JS-06-hasil.md` | Baru (usulan 8a disetujui 8 Nov 2026) | Spesifikasi dan laporan uji |
 | `docs/jejak-setara/Daftar_Aset.md` | Diubah | Bagian ini, status, dan permintaan |
 
 Tidak disentuh: kode gambar Sehari Setara, `atas_*.py` dan `build_jejak.py` (kecuali ada aset baru yang disetujui), `app/jejak-setara/inti/`, `package.json`, alur kerja, dan dokumen utama.
@@ -785,7 +787,7 @@ Setiap usulan berisi saran (a) dan alternatifnya. Kode KT-C11 sampai KT-C19 adal
 
 ### Keputusan terbuka yang perlu dijawab
 
-KT-C11 sampai KT-C19 (usulan 1 sampai 9). Cukup balas `Setuju: JS-06` untuk semua saran (a), atau sebutkan pilihan lain, misalnya `Setuju: JS-06, 4b, 9b`. KT-04 (warna tambahan khusus peta) tidak diperlukan: peta prototipe memakai 26 warna, semuanya dari palet 36 warna, tanpa piksel semi-transparan.
+Dijawab 8 November 2026: KT-C11 sampai KT-C19 memakai saran (a), yaitu usulan 1a sampai 9a. KT-04 (warna tambahan khusus peta) tidak diperlukan: peta prototipe memakai 26 warna, semuanya dari palet 36 warna, tanpa piksel semi-transparan.
 
 ### Risiko
 
@@ -800,7 +802,7 @@ KT-C11 sampai KT-C19 (usulan 1 sampai 9). Cukup balas `Setuju: JS-06` untuk semu
 
 | Hal | Menunggu | Keterangan |
 |---|---|---|
-| JS-06 (peta 160 × 100) | Balasan `Setuju: JS-06` (Gerbang 1) | Entri Plan dan denah kasar sudah diserahkan; pilihan untuk usulan 1 sampai 9 boleh ditulis di balasan |
+| JS-06 (peta 160 × 100) | Balasan `Spesifikasi disetujui: JS-06` (Gerbang 2) | Spesifikasi `specs/JS-06-peta.md` sudah diserahkan; pilihan untuk D-1 sampai D-7 boleh ditulis di balasan |
 | Permintaan C-9 sampai C-11 | Sesi A | Dokumen untuk berkas peta kedua, lobi, dan aturan penanda; tidak menghalangi Build JS-06 |
 | `manifest.ts` | Jawaban Sesi A atas Permintaan C-6 | Dibuat otomatis oleh `build_jejak.py` untuk semua aset Disetujui |
 | Permintaan C-1 sampai C-8 | Sesi A | Termasuk ukuran peta (C-7) dan kapasitas pemain serta jumlah kejadian (C-8) |
@@ -809,5 +811,5 @@ KT-C11 sampai KT-C19 (usulan 1 sampai 9). Cukup balas `Setuju: JS-06` untuk semu
 
 ## Cara membalas
 
-- **`Setuju: JS-06`** menyetujui Plan JS-06 dengan semua saran (a). Pilihan lain ditulis sesudahnya, misalnya `Setuju: JS-06, 4b, 9b`. Sesudah itu saya menulis spesifikasi lalu berhenti di Gerbang 2.
+- **`Spesifikasi disetujui: JS-06`** menyetujui spesifikasi JS-06 dengan saran D-1 sampai D-7. Pilihan lain ditulis sesudahnya, misalnya `Spesifikasi disetujui: JS-06, D-5b`. Sesudah itu Build dimulai, dan draf peta dikirim untuk dinilai dengan balasan `Setuju: peta`.
 - Perbaikan aset tetap bisa diminta kapan saja: tulis ID aset dan perubahannya, misalnya "N-08: rambut Pak Made lebih banyak". Aset yang diubah kembali berstatus Ditinjau sampai disetujui lagi.
