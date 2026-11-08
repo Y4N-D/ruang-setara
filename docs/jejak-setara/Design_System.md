@@ -330,7 +330,7 @@ Setiap zona punya bangunan penanda dan bahan dominan agar pemain bisa mengenali 
 
 1. Jalan yang bisa dilewati paling sempit 2 ubin. Hindari jalan buntu yang lebih panjang dari 6 ubin tanpa tujuan.
 2. Yang tidak bisa ditembus harus tampak padat (dinding, batang, pagar, air); yang bisa dilewati tampak datar.
-3. Dari titik mana pun, sedikitnya satu bangunan penanda zona terlihat di layar.
+3. Dari titik mana pun, sedikitnya satu bangunan atau objek khas zona terlihat di layar (Permintaan C-11, usulan JS-06 nomor 5a, disetujui 8 Nov 2026). Objek khas per zona: Z1 rumah Nara, warung Pak Made, rumah A–D, dan pagar bambu; Z2 gedung sekolah, kantin, tiang bendera, gerbang, dan pagar sekolah; Z3 halte, angkot, rambu penyeberangan, dan rambu halte; Z4 tenda, los, gerobak, lapak, dan pos keamanan; Z5 bale dan pos ronda; Z6 pohon kelapa dan jembatan; Z7 puskesmas, kantor desa, dan bangku antrean; Z8 warung berwifi. Daftar nama berkasnya di spesifikasi JS-06 P-14.
 4. Rambu dan papan hanya memakai ikon, tanpa tulisan.
 5. **Jangan** memakai lambang palang merah atau bulan sabit merah untuk puskesmas, karena lambang itu dilindungi hukum. Pakai ikon hati atau tanda tambah berwarna `leaf`.
 6. Tempat ibadah tidak digambar sebagai penanda zona. Kejadian bertema toleransi terjadi di lingkungan rumah dan balai warga.

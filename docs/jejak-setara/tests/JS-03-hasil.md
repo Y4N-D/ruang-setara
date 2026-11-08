@@ -88,8 +88,24 @@ Semua terhadap Worker lokal (`vite preview`), jeda acak 50 ms per laporan, sekit
 
 ## Temuan lain
 
-- `env.uji` masih memakai `ISI_DATABASE_ID_UJI`; deploy dilewati dengan pemberitahuan sampai Database ID dikirim.
+- `env.uji` masih memakai `ISI_DATABASE_ID_UJI`; deploy dilewati dengan pemberitahuan sampai Database ID dikirim. (Diisi 8 November 2026; lihat bagian berikut.)
 - Runtime lokal tidak meneruskan penutupan yang dimulai alarm, dan upgrade yang ditolak tampil sebagai soket diputus. Keduanya diperiksa ulang di lingkungan uji.
+
+## Pemeriksaan di lingkungan uji (8 November 2026)
+
+Sesudah commit `JS-03: isi Database ID lingkungan uji` (Database ID `jejak-setara-uji` diisi di `wrangler.jsonc`), pemilik proyek menjalankan pemeriksaan berikut dengan paket gratis Cloudflare.
+
+| Pemeriksaan | Hasil |
+|---|---|
+| Alur kerja "Jejak: uji": pekerjaan Uji dan Deploy uji (migrasi D1 uji dan deploy pertama) | Berhasil; `https://jejak-setara-uji.ruangsetara.workers.dev/api/sehat` menjawab `{"ok":true,"protokol":1,"lingkungan":"uji"}` |
+| Alur kerja "Jejak: ruang coba" | Berhasil; kode dan tautan ruang tampil di ringkasan alur kerja |
+| Bergabung dari HP dan dari laptop sebagai pemain kedua | Berhasil, dilaporkan pemilik proyek |
+| Butir manual AGENTS 9: wifi HP dimatikan 30 detik lalu dinyalakan | Tersambung kembali sendiri ke lobi, dilaporkan pemilik proyek |
+| Kode 4002 dari alarm sampai ke klien (catatan AC-6) | Berhasil: sambungan dari Console peramban di laptop yang tidak mengirim `halo` ditutup dengan kode 4002 sekitar 10 detik sesudah tersambung. Penutupan otomatis ruang (kode 4000) memakai jalur alarm yang sama (`tutupSoket` dari `alarm()`), jadi ikut terbukti sampai ke klien |
+
+Temuan saat mengisi Database ID: uji `kerangka.test.ts` mencocokkan `wrangler.jsonc` huruf demi huruf, jadi ikut diperbarui. Di berkas yang sama ada satu galat tipe (`tsc --noEmit`, baris 88, larik tajuk di uji ruang coba), padahal tabel di atas mencatat 0 galat. Galat itu tidak memengaruhi permainan maupun alur kerja (Vitest tidak memeriksa tipe), dan diperbaiki di commit yang sama: `tsc --noEmit` seluruh repositori kini 0 galat.
+
+Pemilik proyek menerima catatan AC-20: skenario 10 ruang × 50 bot diulang di JS-15. JS-03 Selesai (8 Nov 2026).
 
 ## Keputusan
 

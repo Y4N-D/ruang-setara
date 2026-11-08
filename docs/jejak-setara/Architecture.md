@@ -87,6 +87,7 @@ ruang-setara/
 │  ├─ bersama/                       # komponen untuk pemain dan konsol: bingkai, tombol pilihan, dialog kejadian, kartu dampak; HalamanKerangka (halaman kosong JS-01)
 │  ├─ teks.ts                        # semua teks yang tampil (bagian 17)
 │  ├─ peta/kampung.json              # hasil build_peta.py; jangan disunting manual
+│  ├─ peta/kampung_gambar.json       # hasil build_peta.py: nomor ubin per lapisan untuk layar pemain (C-9)
 │  ├─ assets/                        # manifest.ts, CREDITS.md, ubin/, obj/, ava/, npc/, ikon/, sfx/
 │  ├─ styles/jejak.css               # token --js-, bingkai piksel
 │  └─ __tests__/                     # uji unit, konten, peta, dan aset
@@ -662,20 +663,24 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 
 - Ukuran: sekitar 160 × 100 ubin (2.560 × 1.600 piksel logis; keputusan pemilik proyek 6 Nov 2026, Permintaan C-7).
 - Sumber: `scripts/jejak-setara/peta/kampung.txt` (satu karakter per ubin untuk tanah dan tabrakan) dan `objek.json` (bangunan, pohon, titik kejadian per zona, kotak, halte, gerbang lobi, dan titik munculnya pemain).
-- `build_peta.py` menghasilkan `app/jejak-setara/peta/kampung.json` (lapisan ubin, grid tabrakan sebagai bit, daftar objek, batas zona) dan pratinjau di `docs/jejak-setara/preview/`.
-- Uji peta (`content:check:jejak`): semua titik kejadian, kotak, dan halte bisa dicapai dari titik muncul (pencarian lebar); setiap titik punya ruang kosong 3 × 3 ubin; jarak antartitik kejadian ≥ 6 ubin; setiap zona punya sedikitnya 12 titik kejadian (keputusan 6 Nov 2026); dan jumlah titik cukup untuk Paket inti.
+- `build_peta.py` menghasilkan dua berkas dan pratinjau di `docs/jejak-setara/preview/` (Permintaan C-9, usulan JS-06 nomor 1a, disetujui 8 Nov 2026):
+  - `app/jejak-setara/peta/kampung.json`: lapisan bahan, grid tabrakan, daftar objek, zona, titik, gerbang lobi, dan titik muncul (bagian 11.1.1). Dipakai server dan layar pemain.
+  - `app/jejak-setara/peta/kampung_gambar.json`: nomor ubin lembar per sel untuk lapisan tanah, tumpang, dan bayangan (bagian 11.1.1). Hanya dipakai layar pemain untuk menggambar.
+- Uji peta (`content:check:jejak`, rinciannya di spesifikasi JS-06 P-25 sampai P-27): semua titik kejadian, kotak, dan halte bisa dicapai dari titik muncul (pencarian lebar); setiap titik punya ruang kosong 3 × 3 ubin; jarak antartitik kejadian ≥ 6 ubin; setiap zona punya sedikitnya 12 titik kejadian (keputusan 6 Nov 2026); jumlah titik cukup untuk Paket inti; setiap sel terjangkau termasuk blok 2 × 2 sel bebas (lebar jalan 2 ubin, Design System 7 aturan 1); dari setiap sel terjangkau, kamera 320 × 180 melihat sedikitnya satu ubin objek penanda zona (Design System 7 aturan 3); dan kedua berkas peta bersama-sama ≤ 60 KB gzip.
 
 #### 11.1.1 Bentuk `kampung.json` (ditetapkan JS-02)
 
 `build_peta.py` menghasilkan `app/jejak-setara/peta/kampung.json` berbentuk `PetaJejak<string>` (bagian 5.1), yaitu `PetaJejak` dengan lapisan `ubin` dan `tabrakan` berupa teks RLE. `bacaPeta` di `inti/peta.ts` adalah pemeriksa resminya: isi yang tidak cocok ditolak dengan galat `PETA_CACAT`, dan isi yang sah dikembalikan sebagai `PetaJejak` dengan kedua lapisan terurai (satu byte per sel, baris demi baris dari kiri-atas). Kunci lain selain yang tertulis di sini ditolak.
 
 - `versi` = 1; `lebar`, `tinggi` dalam ubin (1–512); `ukuranUbin` = 16.
-- `ubin` dan `tabrakan` berupa teks RLE `"<nilai>x<jumlah>;"` berulang, misalnya `"0x5;1x2;"`; `ubin` 0–63, `tabrakan` 0 (kosong) atau 1 (padat); jumlah sel tepat `lebar × tinggi`.
+- `ubin` dan `tabrakan` berupa teks RLE `"<nilai>x<jumlah>;"` berulang, misalnya `"0x5;1x2;"`; `ubin` 0–63, `tabrakan` 0 (kosong) atau 1 (padat); jumlah sel tepat `lebar × tinggi`. Di peta JS-06, `ubin` berisi kode bahan: 0 rumput, 1 tanah setapak, 2 paving, 3 semen, 4 pasir, 5 aspal, 6 air, 7 air dalam (C-9).
 - Koordinat `x`, `y` dalam ubin, bilangan bulat mulai 0 di kiri-atas dan selalu di dalam peta; pusat piksel logis ubin = `n × 16 + 8`.
 - `objek`: `id` unik, `jenis` (huruf kecil, angka, dan `_`; Sesi C bebas menambah jenis), `x`, `y`, dan `arah` bila perlu.
 - `zona`: `id` z1–z8 tanpa ganda, `nama` (1–32 karakter), dan batas `kiri`, `atas`, `kanan`, `bawah` (ubin, inklusif).
 - `titikKejadian`: `id`, `zona`, `x`, `y`. `kotak`: `id`, `jenis` (`sepatu` | `kompas` | `buku` | `teropong` | `karcis`), `zona`, `x`, `y`. `halte`: seperti titik kejadian. Id ketiganya unik bersama, dan `zona` harus ada di daftar `zona`.
 - `gerbangLobi`: batas ubin gerbang lobi `{ kiri, atas, kanan, bawah }` (inklusif). `titikMuncul`: daftar `{ x, y }`, sedikitnya satu.
+
+**Berkas kedua, `kampung_gambar.json` (C-9; bentuk lengkapnya di spesifikasi JS-06 P-20 sampai P-24).** Satu objek JSON dengan kunci tepat `versi` (1), `lebar`, `tinggi`, `kolom` (16, kolom lembar ubin), `jumlahUbin` (jumlah ubin di lembar), `sumber` (SHA-256 sumber peta, agar uji gagal bila sumber diubah tanpa `peta:build`), `daftar`, `tanah`, `tumpang`, dan `bayangan`. `daftar[0]` bernilai `null` (kosong), dan unsur lain adalah nomor ubin di lembar, unik dan urut naik, paling banyak 256. Ketiga lapisan berisi nomor urut dalam `daftar` untuk setiap sel, dalam RLE yang sama, sehingga bisa diurai `uraiRle`. Ubin nomor n berada di kolom n mod 16 dan baris n div 16 lembar `ubin_{masa}.png`. Layar pemain menggambar setiap sel dengan urutan tanah, tumpang, lalu bayangan.
 
 ### 11.2 Manifest aset
 
@@ -696,7 +701,7 @@ Manifest dibuat otomatis oleh `build_jejak.py` (Sesi C) hanya untuk aset Disetuj
 | Seluruh aset layar pemain | ≤ 2 MB |
 | Satu lembar ubin per masa | ≤ 60 KB |
 | Satu strip avatar atau tokoh | ≤ 6 KB |
-| Peta JSON (gzip) | ≤ 60 KB |
+| Kedua berkas peta JSON bersama, `kampung.json` dan `kampung_gambar.json` (gzip) | ≤ 60 KB |
 | Satu efek suara | ≤ 30 KB |
 
 ## 12. Keamanan dan privasi
