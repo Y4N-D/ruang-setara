@@ -2,7 +2,8 @@
 
 | | |
 |---|---|
-| Status | Spesifikasi ditulis 8 November 2026, menunggu `Spesifikasi disetujui: JS-06` |
+| Status | Selesai 8 November 2026; laporan uji [JS-06-hasil.md](../tests/JS-06-hasil.md) (Lulus) |
+| Keputusan Gerbang 2 | Balasan `Spesifikasi disetujui: JS-06` (8 Nov 2026): saran D-1 sampai D-7 |
 | Rencana | `docs/jejak-setara/Daftar_Aset.md`, bagian "JS-06 Peta: rencana" |
 | Keputusan Gerbang 1 | Balasan `Setuju: JS-06` (8 Nov 2026): semua saran (a), yaitu usulan 1a sampai 9a (KT-C11 sampai KT-C19) |
 | Dikerjakan | Sesi C (aset dan peta) |
@@ -111,7 +112,7 @@ Tidak disentuh: `app/jejak-setara/inti/`, `app/jejak-setara/assets/` (tidak ada 
 - **P-10. Benda kejadian.** Benda kecil properti kejadian (kotak bekal, dompet, bola, tali lompat, sisa piknik, pengeras suara, dan kursi roda kosong) tidak ditaruh di peta. Benda itu digambar bersama tokoh kejadian di titik kejadian (JS-08). Properti yang juga wajar sebagai pemandangan (lapak, bangku pasar, pos keamanan, meja panitia, bangku antrean, dan tiang kamera) boleh ditaruh.
 - **P-11. Pagar.** Setiap entri `pagar` berisi `gaya` (`bambu` atau `sekolah`) dan `titik`, yaitu garis berpatah dengan sedikitnya dua titik dan setiap ruasnya mendatar atau tegak. Garis dipecah menjadi ruas 1 × 1. Jenis ruas dihitung dari ruas pagar segaya yang bersebelahan (4 tetangga) dan harus salah satu dari delapan ruas yang sudah disetujui: datar, tegak, empat sudut, ujung kiri, dan ujung kanan. Karena itu pagar tidak boleh bercabang atau bersilang, dan garis tegak tidak boleh berakhir tanpa sudut. Pelanggaran adalah galat.
 - **P-12. Sebar.** Setiap entri `sebar` berisi daftar `jenis`, kotak wilayah (`kiri`, `atas`, `kanan`, `bawah`), dan `jumlah`. Objek ditaruh satu per satu dengan pembangkit `acakBerbenih(benih("sebar", benihPeta, nomorEntri))`: jenis dipilih dari daftar, lalu posisi dipilih di dalam wilayah. Satu posisi diterima bila semua ubin jejak kakinya rumput tanpa objek, ubin padatnya berjarak sedikitnya 2 ubin dari ubin padat lain, dan jejak kakinya tidak menyentuh ruang 3 × 3 titik kejadian, kotak, atau halte, maupun halaman lobi. Percobaan berhenti sesudah `jumlah` objek atau 80 × `jumlah` kali coba; kekurangan dicatat sebagai peringatan.
-- **P-13. Titik.** `titikKejadian` (id `t-z{n}-{nn}`), `kotak` (id `k-z{n}-{n}`, dengan `jenis`), dan `halte` (id `h-{n}`) ditulis tangan (usulan 3a), masing-masing dengan `zona`, `x`, dan `y`. Penataan setiap zona mengikuti temanya, agar setiap titik cocok untuk semua kejadian zona itu:
+- **P-13. Titik.** `titikKejadian` (id `t-z{n}-{nn}`), `kotak` (id `k-z{n}-{n}`, dengan `jenis`), dan `halte` (id `halte-{n}`, lihat B-8) ditulis tangan (usulan 3a), masing-masing dengan `zona`, `x`, dan `y`. Penataan setiap zona mengikuti temanya, agar setiap titik cocok untuk semua kejadian zona itu:
 
   | Zona | Tempat titik kejadian |
   |---|---|
@@ -322,3 +323,14 @@ Semua aturan P-1 sampai P-14 dan P-25, ditambah pemeriksaan sendiri `benih` dan 
 ### Daftar periksa manual (AGENTS bagian 9)
 
 Belum ada butir yang berlaku, karena peta baru bisa dimainkan sesudah JS-07. Penilaian visual dilakukan pemilik proyek di titik tinjau (P-31).
+
+## Catatan Build (8 November 2026)
+
+- **B-1.** Jarak sebar di P-12 dijalankan sebagai "tidak ada ubin padat lain, termasuk air, dalam radius 2 ubin", sehingga selalu ada sedikitnya dua ubin bebas di antara benda padat, sejalan dengan aturan lebar jalan.
+- **B-2.** Titik kejadian dan kotak disusun bertema per zona (P-13) dengan alat bantu di luar repositori, lalu dibekukan sebagai angka di `objek.json`. `build_peta.py` tidak memilih titik sendiri.
+- **B-3.** Pusat potongan zona di P-30 adalah objek penanda pertama zona itu menurut urutan `objek.json`.
+- **B-4.** Saat ada galat, `peta_periksa.png` tetap dibuat untuk membantu perbaikan, sedangkan kedua berkas hasil tidak ditulis (P-25).
+- **B-5.** Avatar contoh di peta penuh digambar di delapan titik muncul pertama. Tiruan HUD di `peta_hp.png` dan `peta_laptop.png` sederhana dan bukan tata letak final JS-07.
+- **B-6.** Jumlah `sebar` disesuaikan dengan yang benar-benar tertaruh, sehingga bangun hanya memberi satu peringatan: kantong di bawah atap rumah Nara (D-4).
+- **B-7.** Draf peta disetujui dengan balasan `Setuju: peta` (8 Nov 2026) tanpa perubahan.
+- **B-8.** Id titik halte memakai pola `halte-{n}`, menggantikan pola pendek yang semula tertulis di P-13. Pemeriksaan `build:pages` (AC-14) menunjukkan bahwa id pendek untuk halte pertama dan ketiga terbaca Tailwind sebagai kelas tinggi, sehingga CSS galeri berubah. Dengan `halte-{n}`, ke-178 berkas galeri kembali identik byte. Bangunan halte memakai id otomatis `o-{x}-{y}`.

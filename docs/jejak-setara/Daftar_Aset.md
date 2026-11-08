@@ -4,7 +4,7 @@
 |---|---|
 | Versi | 1.0 |
 | Diperbarui | 8 November 2026 |
-| Tahap saat ini | Spesifikasi JS-06 (`specs/JS-06-peta.md`) ditulis 8 November 2026 dan menunggu `Spesifikasi disetujui: JS-06`. Plan JS-06 disetujui 8 November 2026 dengan semua saran (a). Semua kelompok aset dalam rencana Disetujui (6 November 2026) |
+| Tahap saat ini | JS-06 (peta 160 × 100) selesai 8 November 2026; laporan uji `tests/JS-06-hasil.md` Lulus. Menunggu Sesi A membaca Permintaan C-6, C-7, dan C-9 sampai C-12. Semua kelompok aset dalam rencana Disetujui (6 November 2026) |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi" |
 | Acuan | ZIP repositori 7 November 2026 (JS-02 selesai dan di-push menurut pemilik proyek) |
 | Cara membuat | Digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14 |
@@ -47,6 +47,10 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 8 Nov 2026 | Plan JS-06 | Percobaan prototipe 160 × 100 dijalankan di luar repositori; entri Plan, denah kasar `preview/peta_denah.png`, dan Permintaan C-9 sampai C-11 diserahkan; menunggu `Setuju: JS-06` |
 | 8 Nov 2026 | Plan JS-06 | Pemilik proyek membalas `Setuju: JS-06`: semua saran (a) diterima (usulan 1a sampai 9a, KT-C11 sampai KT-C19) |
 | 8 Nov 2026 | Specify JS-06 | Spesifikasi `specs/JS-06-peta.md` (P-1 sampai P-31, D-1 sampai D-7, AC-1 sampai AC-15) diserahkan; menunggu `Spesifikasi disetujui: JS-06` |
+| 8 Nov 2026 | Specify JS-06 | Pemilik proyek membalas `Spesifikasi disetujui: JS-06`: saran D-1 sampai D-7 dipakai |
+| 8 Nov 2026 | Build JS-06 | `build_peta.py`, `kampung.txt`, dan `objek.json` dibuat; semua pemeriksaan galat lulus (penanda terlihat 100%, 0 sel sempit); draf peta dikirim sebagai gambar untuk titik tinjau; menunggu `Setuju: peta` |
+| 8 Nov 2026 | Build JS-06 | Pemilik proyek membalas `Setuju: peta`: draf diterima tanpa perubahan |
+| 8 Nov 2026 | Test JS-06 | 25 uji peta baru lulus, 12 salinan rusak ditolak, `test:jejak` 319 uji lulus, `test:e2e:jejak` 18 uji lulus, galeri 178 berkas identik; JS-06 Selesai ([laporan](tests/JS-06-hasil.md)) |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -663,6 +667,7 @@ Efek suara di Design System bagian 12 (`sfx_kejadian.wav` sampai `sfx_akhir.wav`
 | C-9 | `docs/jejak-setara/Architecture.md` bagian 3, 11.1, 11.1.1, dan 11.3 | Catat berkas kedua `app/jejak-setara/peta/kampung_gambar.json` (daftar nomor ubin yang dipakai, lalu lapisan tanah, tumpang, dan bayangan berisi nomor urut dalam daftar itu, dalam RLE yang sama dan dibaca `uraiRle`); arti lapisan `ubin` di `kampung.json` (kode bahan 0 sampai 7: rumput, tanah, paving, semen, pasir, aspal, air, air dalam); anggaran 60 KB gzip untuk kedua berkas bersama; dan daftar uji peta (12 titik per zona, lebar jalan 2 ubin, keterlihatan penanda) | Bentuk JS-02 hanya memuat nilai 0 sampai 63 dalam satu lapisan, sedangkan lembar ubin berisi 377 nomor dalam tiga lapisan (bagian JS-06, percobaan 1 dan 2) | Diajukan (usulan JS-06 nomor 1a disetujui 8 Nov 2026); rincian bentuk di `specs/JS-06-peta.md` P-20 sampai P-24 |
 | C-10 | `docs/jejak-setara/Architecture.md` bagian 7 dan 8.2 (dan spesifikasi JS-03 atau JS-07) | Selama status `lobi`, pemain boleh bergerak di halaman lobi, sel `gerbangLobi` diperlakukan padat oleh server dan layar pemain, dan gerbang digambar `obj_gerbang_tutup`; sesudah ronde dimulai digambar `obj_gerbang_buka`. Posisi awal pemain diambil dari `titikMuncul` | `periksaGerak` JS-02 menolak gerak di luar status `main`, sedangkan JFR-05 meminta pemain bisa berjalan di halaman lobi | Diajukan |
 | C-11 | `docs/jejak-setara/Design_System.md` bagian 7 (aturan peta 3) | Ubah menjadi "Dari titik mana pun, sedikitnya satu bangunan atau objek khas zona terlihat di layar", dengan daftar objek khas per zona dari JS-06 | Dengan tabel bangunan penanda saja, hanya 57,4% posisi di prototipe 160 × 100 yang memenuhi (bagian JS-06, percobaan 7) | Diajukan (usulan JS-06 nomor 5a disetujui 8 Nov 2026); daftar objek penanda di `specs/JS-06-peta.md` P-14 |
+| C-12 | `docs/jejak-setara/PLAN.md`, tabel status fitur | Ubah baris JS-06 menjadi "Selesai (8 Nov 2026)" dengan tautan `specs/JS-06-peta.md` dan `tests/JS-06-hasil.md` | JS-06 selesai di Sesi C, dan statusnya baru tercatat di berkas ini | Diajukan |
 
 ## Usulan bentuk manifest (Permintaan C-6)
 
@@ -705,7 +710,7 @@ Ditulis 8 November 2026 di tahap Plan, sesudah pemilik proyek mengabarkan JS-02 
 
 | | |
 |---|---|
-| Status | Spesifikasi (8 Nov 2026): Plan disetujui dengan semua saran (a); [spesifikasi](specs/JS-06-peta.md) menunggu `Spesifikasi disetujui: JS-06` |
+| Status | **Selesai** (8 Nov 2026): [spesifikasi](specs/JS-06-peta.md) dan [laporan uji](tests/JS-06-hasil.md) Lulus |
 | Fitur sebelumnya | JS-02: dinyatakan selesai dan sudah di-push oleh pemilik proyek (7 Nov 2026). `PLAN.md` masih menulis "Diuji"; status itu diubah Sesi A. Di salinan ZIP 7 Nov 2026, `test:jejak` resmi (Vitest 5.0.4) lulus: 7 berkas, 294 uji |
 | Memenuhi | JFR-09 (peta tampak atas 160 × 100 ubin dengan 8 zona) dan JFR-12 (bagian peta: lembar ubin per masa); data untuk JFR-05 (halaman lobi dan gerbang), JFR-11 (zona dan halte di peta mini), JFR-15 (titik kejadian per zona), JFR-23 (kotak bantuan per zona), dan JFR-25 (halte, P1); PRD 8.2, 8.3, dan 9; Design System 7 dan 14; Architecture 11.1 |
 | Bergantung pada | JS-02 (bentuk `kampung.json` dan pemeriksanya, `bacaPeta`); aset kelompok U dan O1 sampai O4 (Disetujui 6 Nov 2026) |
@@ -802,8 +807,8 @@ Dijawab 8 November 2026: KT-C11 sampai KT-C19 memakai saran (a), yaitu usulan 1a
 
 | Hal | Menunggu | Keterangan |
 |---|---|---|
-| JS-06 (peta 160 × 100) | Balasan `Spesifikasi disetujui: JS-06` (Gerbang 2) | Spesifikasi `specs/JS-06-peta.md` sudah diserahkan; pilihan untuk D-1 sampai D-7 boleh ditulis di balasan |
-| Permintaan C-9 sampai C-11 | Sesi A | Dokumen untuk berkas peta kedua, lobi, dan aturan penanda; tidak menghalangi Build JS-06 |
+| JS-06 (peta 160 × 100) | Selesai 8 Nov 2026 | Peta siap dipakai JS-03 (server memuat `kampung.json`) dan JS-07 (layar pemain memuat kedua berkas) |
+| Permintaan C-9 sampai C-12 | Sesi A | Dokumen untuk berkas peta kedua, lobi, aturan penanda, dan status JS-06 di `PLAN.md`; C-9 dan C-10 perlu dibaca sebelum JS-03 dan JS-07 memakai peta |
 | `manifest.ts` | Jawaban Sesi A atas Permintaan C-6 | Dibuat otomatis oleh `build_jejak.py` untuk semua aset Disetujui |
 | Permintaan C-1 sampai C-8 | Sesi A | Termasuk ukuran peta (C-7) dan kapasitas pemain serta jumlah kejadian (C-8) |
 | O-42 sanggah | Keputusan KT-10 | Hanya bila versi B K-02 dipilih dan pemilik proyek mengizinkan |
@@ -811,5 +816,5 @@ Dijawab 8 November 2026: KT-C11 sampai KT-C19 memakai saran (a), yaitu usulan 1a
 
 ## Cara membalas
 
-- **`Spesifikasi disetujui: JS-06`** menyetujui spesifikasi JS-06 dengan saran D-1 sampai D-7. Pilihan lain ditulis sesudahnya, misalnya `Spesifikasi disetujui: JS-06, D-5b`. Sesudah itu Build dimulai, dan draf peta dikirim untuk dinilai dengan balasan `Setuju: peta`.
+- **Perbaikan peta sesudah JS-06** cukup ditulis bebas, misalnya "titik z6-03 pindah ke tepi sungai". Saya mengubah `kampung.txt` atau `objek.json`, menjalankan `peta:build` dan uji peta, lalu menyerahkan ZIP kecil.
 - Perbaikan aset tetap bisa diminta kapan saja: tulis ID aset dan perubahannya, misalnya "N-08: rambut Pak Made lebih banyak". Aset yang diubah kembali berstatus Ditinjau sampai disetujui lagi.
