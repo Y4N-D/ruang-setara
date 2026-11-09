@@ -107,6 +107,21 @@ Temuan saat mengisi Database ID: uji `kerangka.test.ts` mencocokkan `wrangler.js
 
 Pemilik proyek menerima catatan AC-20: skenario 10 ruang × 50 bot diulang di JS-15. JS-03 Selesai (8 Nov 2026).
 
+## Perbaikan uji sesudah Selesai (9 November 2026)
+
+**Yang terjadi.** Sesudah ZIP dokumen JS-08 di-push (9 November 2026), alur kerja "Jejak: uji" merah di `test:jejak`: 702 dari 703 uji lulus, tetapi uji sebaran kode ruang di `kode.test.ts` gagal dengan chi² 55,17, di atas batas 50,89 (p = 0,01, derajat bebas 30). ZIP itu hanya mengubah dokumen.
+
+**Penyebab.** Uji itu membuat 100.000 kode dengan angka acak sungguhan (`crypto`) di setiap jalan, lalu menguji sebarannya pada p = 0,01. Walaupun `kodeAcak` merata, uji seperti ini gagal kira-kira sekali dari 100 kali jalan. Percobaan 40 kali jalan di lingkungan agen memberi chi² 18,0 sampai 46,6 dengan rata-rata 30,1, sesuai harapan 30 untuk pembuat kode yang merata. Nilai 55,17 adalah kebetulan yang jarang (sekitar 3 dari 1.000 jalan). Kode permainan tidak salah, dan tidak ada yang berubah di lingkungan uji: job "Deploy uji" dilewati karena job "Uji" gagal.
+
+**Perbaikan.** Uji sebaran dipecah menjadi tiga, dan semuanya kini hasilnya tetap:
+1. 100.000 kode dari `crypto` sungguhan diperiksa polanya dan pemakaian ke-31 karakternya, tanpa ambang peluang.
+2. Pemetaan byte diperiksa pasti: setiap karakter berasal dari tepat 8 nilai byte 0–247.
+3. Uji chi² memakai sumber byte berbenih dari `inti/acak.ts`, sehingga nilainya selalu sama (33,0).
+
+Uji pembuangan byte 248–255 tidak berubah. Kode `kodeAcak` tidak diubah.
+
+**Bukti.** `kode.test.ts` dijalankan 5 kali berturut-turut: semuanya lulus dengan hasil yang sama. Seluruh `test:jejak` lulus: 33 berkas, 705 uji (sebelumnya 703, karena satu uji dipecah menjadi tiga). `tsc --noEmit` 0 galat, ESLint 0 masalah, dan galeri tetap 178 berkas identik byte.
+
 ## Keputusan
 
 Lulus dengan catatan. Semua kriteria terpenuhi kecuali skenario 10 ruang × 50 bot (AC-20), yang tidak bisa dijalankan dengan sah di mesin agen 1 vCPU. Saran: terima JS-03 dengan catatan ini dan ulangi skenario itu di JS-15 (atau lebih awal lewat mesin GitHub). JS-03 berstatus Diuji sampai alur kerja "Jejak: uji" hijau sesudah push dan pemilik proyek menerima catatan ini.
