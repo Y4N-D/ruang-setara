@@ -10,5 +10,8 @@ export default defineConfig({
       "server/jejak-setara/**/*.test.ts",
     ],
     environment: "node",
+    // Batas waktu per uji 20 detik (bawaan Vitest 5 detik), karena mesin GitHub kadang lebih lambat dari mesin
+    // agen. Uji yang lebih lama dari sekitar 2 detik tetap menulis batasnya sendiri (perbaikan 9 Nov 2026).
+    testTimeout: 20_000,
   },
 });

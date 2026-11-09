@@ -145,6 +145,8 @@ describe("persiapan, pelepasan, dan ganti masa (P-8 sampai P-11; AC-4)", () => {
     expect(p.ambil(0, 0)?.bawah.has("pagi")).toBe(true);
   });
 
+  // Uji berat: sekitar 5 detik di mesin agen dan di GitHub, jadi batas waktunya 30 detik, bukan bawaan
+  // 5 detik (perbaikan 9 Nov 2026, "Jejak: uji" #49 gagal karena batas waktu).
   it("persiapan bertahap menghasilkan isi yang sama dengan persiapan utuh", () => {
     const data = dataPeta();
     const utuh = new PengelolaPotongan(data, buatUji);
@@ -158,7 +160,7 @@ describe("persiapan, pelepasan, dan ganti masa (P-8 sampai P-11; AC-4)", () => {
       expect((a?.bawah.get("sore") as unknown as KanvasUji).data).toEqual((b.bawah as unknown as KanvasUji).data);
       expect((a?.atas as unknown as KanvasUji | null)?.data ?? null).toEqual((b.atas as unknown as KanvasUji | null)?.data ?? null);
     }
-  });
+  }, 30_000);
 
   it("siluet: kotak bagian atas objek yang beririsan dengan kotak pemain terdeteksi", () => {
     const p = baru();

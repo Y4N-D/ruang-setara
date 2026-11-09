@@ -126,6 +126,18 @@ Sesudah ZIP JS-07 di-push (9 November 2026, 12.34 WITA), pemilik proyek mengulan
 - **Saran waktu uji HP kelas bawah:** saat uji coba kelas, dengan dua atau tiga HP siswa yang paling sederhana, selama satu ronde penuh 15 menit. Pada waktu itu JS-08 sudah selesai, sehingga dialog dan penanda kejadian ikut teruji, dan paket berbayar sudah aktif (Architecture 18 langkah 2), sehingga kuota tidak membatasi. Bila sebelum itu tersedia HP kelas bawah (misalnya milik keluarga atau rekan guru), uji bisa dimajukan di lingkungan uji dengan "Jejak: ruang coba" dan "Jejak: kendali ruang coba".
 - **Ambang otomatis AC-19** ditetapkan ulang di Plan JS-08 (usulan 10).
 
+## Perbaikan uji sesudah Selesai (9 November 2026)
+
+**Yang terjadi.** Sesudah ZIP perbaikan uji JS-03 di-push (9 November 2026), alur kerja "Jejak: uji" #49 merah di `test:jejak`. Uji `dunia/potongan.test.ts` baris 148, "persiapan bertahap menghasilkan isi yang sama dengan persiapan utuh", melewati batas waktu bawaan Vitest 5.000 ms. Kode permainan tidak berubah.
+
+**Penyebab.** Uji itu menyiapkan potongan peta bertahap selama 80 bingkai, lalu membandingkan tiga potongan piksel demi piksel di Node. Waktunya selalu mepet di batas 5 detik: 4.741 ms di "Jejak: uji" #48, dan 5.063 ms di mesin agen saat diukur ulang (pada pengukuran itu uji ini juga gagal karena batas waktu). Uji lain paling lama 644 ms.
+
+**Perbaikan.** Isi uji tidak diubah. Uji itu kini menulis batas waktunya sendiri, 30 detik, dan batas bawaan semua uji unit Jejak di `vitest.jejak.config.ts` menjadi 20 detik.
+
+**Bukti.** Uji potongan dijalankan 3 kali di mesin agen: semuanya lulus, dengan uji berat itu 5.379, 5.064, dan 4.785 ms (dua yang pertama pasti gagal dengan batas lama). `test:jejak` lulus 33 berkas dan 705 uji, uji konten 254, `tsc --noEmit` 0 galat, ESLint 0 masalah, dan galeri tetap 178 berkas identik byte.
+
+**Kegagalan lain di push yang sama.** Alur kerja galeri "Terbitkan ke GitHub Pages" #79 gagal dengan "Timeout reached, aborting!" sesudah 10 menit 54 detik. Proses sebelumnya (#78) juga lambat, 8 menit 49 detik, padahal biasanya kurang dari 1 menit 20 detik. Ini kelambatan layanan GitHub Pages, bukan kode: isi galeri dari ZIP Jejak Setara tetap 178 berkas identik byte, dan `deploy-pages.yml` tidak diubah.
+
 ## Keputusan
 
 **Lulus dengan catatan; JS-07 Selesai 9 November 2026.** Pemeriksaan manual pemilik proyek di lingkungan uji lancar di HP dan laptop. Uji ≥ 30 fps di HP Android kelas bawah selama satu ronde penuh dijadwalkan saat uji coba kelas, dan ambang otomatis AC-19 ditetapkan ulang di Plan JS-08 (usulan 10).
