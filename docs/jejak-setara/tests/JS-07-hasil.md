@@ -6,7 +6,7 @@
 | Spesifikasi | [specs/JS-07-penjelajah.md](../specs/JS-07-penjelajah.md), disetujui 8 November 2026 dengan semua saran DRAF D-1 sampai D-5 (pilihan a) |
 | Tanggal | 9 November 2026 |
 | Lingkungan | Lingkungan agen: Node 22.23.4, pnpm 11.25.0, `wrangler` 4.92.0, `@cloudflare/vite-plugin` 1.37.1, Chromium 153 tanpa GPU; 1 vCPU, 4 GB |
-| Keputusan | **Lulus dengan catatan**: AC-19 (kinerja) tidak mencapai p95 ≤ 4 ms pada CPU 6× dengan 40 pemain yang terus berjalan; pemilik proyek menjawab "Lanjutkan" atas saran pilihan (a) |
+| Keputusan | **Lulus dengan catatan**, ditutup 9 November 2026: AC-19 otomatis tidak mencapai p95 ≤ 4 ms pada CPU 6× dengan 40 pemain yang terus berjalan, dan pemilik proyek menjawab "Lanjutkan" atas saran pilihan (a); pemeriksaan manual pemilik proyek di lingkungan uji lancar di HP dan laptop. Uji di HP Android kelas bawah dijadwalkan saat uji coba kelas |
 
 ## Perintah resmi
 
@@ -49,7 +49,7 @@
 | AC-16 Server: peta dan gerak | Lulus | Uji server `dunia.uji-server.ts` dan uji inti ruang: peta kampung di ruang baru dan ruang yang dipulihkan, `bacaPeta` atas `kampung.json`, grid lobi, posisi awal dan sesudah sambung ulang lewat `koreksi`; versi peta sama, dan klien berhenti bila berbeda (`jaringan.test.ts`) |
 | AC-17 Server: `dunia` di lobi | Lulus | Uji inti ruang dan uji server: kiriman hanya mengikuti `gerak`, paling sering 100 ms kecuali laporan berhenti, kerangka penuh sekali per detik per pemain dan untuk pemain baru atau tersambung ulang, tanpa pengatur waktu selama lobi diam |
 | AC-18 Kendali ruang coba | Lulus | `kerangka.test.ts`: 403 tanpa kunci yang benar di `uji`, diteruskan dengan kunci benar, 404 di produksi, `statistik` dan `putuskan` tetap lokal; uji server: keenam aksi dengan status ruang sesudahnya; uji alur kerja: kunci disamarkan, coba ulang selama 403, ringkasan berbahasa Indonesia, dan masukan durasi |
-| AC-19 Kinerja | **Catatan** | Lihat bagian "Anggaran ukuran dan kinerja". Bingkai terlama ≤ 25 ms (di bawah 50 ms), tetapi p95 ≤ 12 ms, bukan ≤ 4 ms |
+| AC-19 Kinerja | **Lulus dengan catatan** | Otomatis: lihat bagian "Anggaran ukuran dan kinerja". Bingkai terlama ≤ 25 ms (di bawah 50 ms), tetapi p95 ≤ 12 ms, bukan ≤ 4 ms; diterima pemilik proyek sebagai batas lingkungan agen. Manual: lancar di HP dan laptop pemilik proyek (bagian "Pemeriksaan manual di lingkungan uji"). HP Android kelas bawah: dijadwalkan saat uji coba kelas |
 | AC-20 Beban dan lalu lintas | Lulus | Lihat bagian "Simulasi beban" |
 | AC-21 Gerak jujur | Lulus | Dengan anggaran jarak: 0 dari 14.512 laporan jujur ditolak; tanpa anggaran (aturan JS-02, diukur lebih dulu): 16,25%. Keputusan tercatat di Architecture 8.2 dan `PLAN.md` |
 | AC-22 Ukuran | Lulus | Lihat bagian "Anggaran ukuran dan kinerja" |
@@ -111,6 +111,21 @@ Di folder [JS-07/](JS-07/): lobi, ronde pagi, ronde sore, dan peta besar dalam e
 - Aksi "tutup" hanya berlaku di status `selesai` atau `pembahasan` (protokol layar kelas). Untuk menutup ruang yang sedang berjalan: "akhiri" lebih dulu, lalu "tutup".
 - Di peta besar, panah "Kamu di sini" bisa menutupi sebagian label zona Sekolah, karena halaman lobi berada di tengah zona itu.
 
+## Pemeriksaan manual di lingkungan uji (9 November 2026)
+
+Sesudah ZIP JS-07 di-push (9 November 2026, 12.34 WITA), pemilik proyek mengulang perintah resmi di luar sesi agen dan mencoba lingkungan uji.
+
+| Hal | Hasil |
+|---|---|
+| Perintah resmi | `content:check:jejak` 254 dari 254, `test:jejak` 703 dari 703, `test:jejak:server` 19 dari 19, `build:jejak` berhasil, dan `build:pages` 178 berkas identik dengan rilis F-11. Diulang Sesi A di awal Plan JS-08 dengan hasil yang sama |
+| Lingkungan uji di HP dan laptop | Lancar, menurut pemilik proyek |
+| Merek dan tipe HP | Belum dicatat; dilengkapi di Gerbang 2 JS-08 |
+| Butir yang dicek | Belum dicatat; dilengkapi bersama tipe HP |
+
+- **AC-19, bagian manual:** lancar di HP dan laptop pemilik proyek. Karena tipe HP belum dicatat, belum bisa dipastikan apakah HP itu termasuk kelas bawah menurut PRD 4 dan 12 (RAM sekitar 3 GB, Android 10 ke atas). Butir AGENTS 9 "Lancar (≥ 30 fps) di HP Android kelas bawah selama satu ronde penuh" tetap terbuka.
+- **Saran waktu uji HP kelas bawah:** saat uji coba kelas, dengan dua atau tiga HP siswa yang paling sederhana, selama satu ronde penuh 15 menit. Pada waktu itu JS-08 sudah selesai, sehingga dialog dan penanda kejadian ikut teruji, dan paket berbayar sudah aktif (Architecture 18 langkah 2), sehingga kuota tidak membatasi. Bila sebelum itu tersedia HP kelas bawah (misalnya milik keluarga atau rekan guru), uji bisa dimajukan di lingkungan uji dengan "Jejak: ruang coba" dan "Jejak: kendali ruang coba".
+- **Ambang otomatis AC-19** ditetapkan ulang di Plan JS-08 (usulan 10).
+
 ## Keputusan
 
-**Lulus dengan catatan.** AC-19 menunggu pemeriksaan manual ≥ 30 fps di HP Android kelas bawah di lingkungan uji. Ambang otomatisnya ditetapkan ulang di Plan berikutnya.
+**Lulus dengan catatan; JS-07 Selesai 9 November 2026.** Pemeriksaan manual pemilik proyek di lingkungan uji lancar di HP dan laptop. Uji ≥ 30 fps di HP Android kelas bawah selama satu ronde penuh dijadwalkan saat uji coba kelas, dan ambang otomatis AC-19 ditetapkan ulang di Plan JS-08 (usulan 10).

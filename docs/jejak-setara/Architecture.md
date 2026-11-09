@@ -75,7 +75,7 @@ ruang-setara/
 │  │  ├─ aturan.ts                   # skor, peringkat, skill, kotak, masa, batas
 │  │  ├─ gerak.ts · peta.ts          # gerak, tabrakan, pemeriksaan kecepatan; pembaca peta
 │  │  ├─ acak.ts                     # pembangkit acak berbenih
-│  │  └─ konten/skema.ts             # skema zod kejadian, rujukan, paket
+│  │  └─ konten/skema.ts             # skema zod kejadian, rujukan, paket; periksa.ts: aturan konten dan kode temuan (JS-05)
 │  ├─ pemain/                        # layar pemain
 │  │  ├─ App.tsx · Gabung.tsx · Lobi.tsx · Dunia.tsx · Hud.tsx · Rekap.tsx
 │  │  ├─ mesin/                      # loop, kamera, render kanvas, input, interpolasi
@@ -111,7 +111,7 @@ ruang-setara/
 │  ├─ bila-ada.mjs                   # penjalan skrip yang berkasnya belum ada (bagian 4.3)
 │  ├─ peta/kampung.txt · objek.json · build_peta.py   # sumber peta
 │  ├─ simulasi-beban.mjs             # 50 bot WebSocket
-│  └─ semai.mjs                      # menyemai bank awal ke D1
+│  └─ semai.mjs                      # menyemai bank awal ke D1, sekali per basis data (JS-05)
 ├─ e2e/jejak-setara/                 # uji Playwright multi-konteks
 ├─ vite.jejak.config.ts            # Vite dan plugin Cloudflare (JA-15)
 ├─ vitest.jejak.config.ts · playwright.jejak.config.ts   # uji unit dan uji ujung ke ujung Jejak Setara
@@ -343,18 +343,22 @@ Diperiksa skema `zod` yang sama untuk bank awal (`content:check:jejak`) dan untu
 | Bagian | Aturan |
 |---|---|
 | Judul | ≤ 32 karakter |
-| Situasi | 1–3 kalimat, ≤ 280 karakter |
+| Situasi | 1–3 kalimat, ≤ 280 karakter. Satu kalimat diakhiri `.`, `!`, atau `?` sebelum spasi atau akhir teks |
 | Pertanyaan Langkah 1 dan 2 | ≤ 100 karakter |
-| Opsi Langkah 1 | Tepat 4, masing-masing ≤ 90 karakter, tepat satu `benar` |
+| Opsi Langkah 1 | Tepat 4, masing-masing ≤ 90 karakter, tepat satu `benar`; id `1a`–`1d` dan teks tidak kembar |
 | Umpan balik Langkah 1 | ≤ 160 karakter per opsi |
-| Petunjuk | ≤ 120 karakter; tidak boleh menyalin teks opsi yang benar |
-| Opsi Langkah 2 | Tepat 3, masing-masing ≤ 140 karakter, sedikitnya satu `tepat` |
+| Petunjuk | ≤ 120 karakter; potongan yang sama dengan teks opsi yang benar paling banyak 20 karakter, tanpa membedakan huruf besar dan kecil |
+| Opsi Langkah 2 | Tepat 3, masing-masing ≤ 140 karakter, sedikitnya satu `tepat`; id `2a`–`2c` dan teks tidak kembar |
 | "Yang terjadi" | ≤ 160 karakter per opsi |
 | Hak dan kewajiban kartu | ≤ 120 karakter masing-masing |
-| Rujukan | 1–4 id yang ada di pustaka |
-| Teks | Teks polos: tanpa HTML, tanpa Markdown, tanpa tautan; huruf kapital hanya di awal kalimat diperiksa sebagai peringatan, bukan galat |
-| Set tokoh | Hanya kunci yang ada di manifest; paling banyak 4 tokoh |
-| Paket | Jumlah kejadian per zona tidak melebihi jumlah titik zona itu |
+| Topik | ≤ 40 karakter |
+| Rujukan | 1–4 id yang ada di pustaka, tanpa kembar |
+| Pustaka rujukan | Teks ≤ 160 karakter; sumber 1–3 alamat `https://` dipisah " · ", ≤ 400 karakter; catatan ≤ 600 karakter teks polos; bank awal tanpa kolom status |
+| Teks | Teks polos: tanpa HTML, tanpa Markdown, tanpa tautan; huruf kapital hanya di awal kalimat diperiksa sebagai peringatan, bukan galat, kecuali singkatan dan nama diri di `NAMA_DIRI` |
+| Set tokoh | 1–4 kunci tanpa kembar, berupa nama berkas aset Disetujui tanpa `.png`: `npc_…` dicocokkan ke `NPC` dan `obj_…` ke `OBJEK` tanpa awalan di manifest |
+| Paket | 1–64 kejadian tanpa kembar (batas rekap pesan `selesai`); nama ≤ 40 dan deskripsi ≤ 160 karakter; jumlah kejadian per zona tidak melebihi jumlah titik zona itu |
+
+Skema dan aturan ini ada di `inti/konten/skema.ts` dan `inti/konten/periksa.ts` (JS-05). Setiap temuan punya kode tetap; kalimat yang tampil di konsol ditetapkan di JS-12 (Permintaan A-7).
 
 ## 6. Protokol real-time
 
@@ -640,6 +644,7 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 - Setiap rujukan punya id `JR-xx`, teks, sumber JDIH, status, dan catatan. Kolom `kode_sehari` mencatat padanannya di `docs/sehari-setara/Verifikasi_Rujukan.md` (misalnya `R-03`) sebagai bantuan pemeriksa.
 - Bank awal disemai dengan semua rujukan berstatus `belum`. **Agen dan skrip tidak pernah menyemai status `terverifikasi`.**
 - Hanya akun bertanda Peninjau yang dapat menandai `terverifikasi`; nama dan tanggal dicatat otomatis.
+- Bank awal disemai sekali per basis data: `semai.mjs` menulis penanda `semai_bank_awal` di tabel `pengaturan`, dan setiap pernyataan hanya berlaku selama penanda belum ada, sehingga semai ulang tidak menimpa suntingan konsol, tanda Terverifikasi, atau kejadian yang dihapus (JS-05).
 
 ### 10.7 Statistik
 
@@ -860,7 +865,7 @@ Tangkapan layar uji: HP 731 × 411 (emulasi Android), laptop 1280 × 720, dan la
 - TypeScript mode ketat, komponen fungsi, tanpa `any`.
 - `inti/` murni: tanpa DOM, React, `Date.now()` langsung, atau API Workers. Waktu dan acak selalu masuk sebagai parameter.
 - Semua teks yang tampil ke pengguna berasal dari berkas teks (`app/jejak-setara/teks.ts`) atau dari konten, bukan ditulis langsung di komponen.
-- Semua akses D1 lewat `server/jejak-setara/src/db/` dengan kueri berparameter, tanpa menyambung string SQL.
+- Semua akses D1 lewat `server/jejak-setara/src/db/` dengan kueri berparameter, tanpa menyambung string SQL. Pengecualiannya hanya SQL semai bank awal (`scripts/jejak-setara/semai.mjs`), yang seperti berkas migrasi disusun sebagai teks dari berkas repositori lewat satu fungsi pengutip yang diuji (JS-05).
 - Setiap pesan protokol baru menambah skema di `inti/protokol.ts` dan ujinya.
 - Dependensi baru memerlukan izin tertulis pemilik proyek dan dicatat sebagai keputusan baru di bagian 1.
 
