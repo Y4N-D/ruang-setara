@@ -249,7 +249,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 - Penanda "!" terlihat bila titiknya tampak di layar pemain. Begitu terlihat, kejadian tercatat di peta mini pribadi.
 - Tombol "Periksa" aktif bila pemain berada paling jauh 1,5 ubin dari titik kejadian.
 - Satu pemain membuka satu dialog pada satu waktu. Selama dialog, avatarnya diam dengan gelembung "…" di atas kepala.
-- Menutup dialog **sebelum** Langkah 1 dikunci diperbolehkan tanpa akibat. Sesudah Langkah 1 dikunci, jawabannya tersimpan; bila dialog ditutup, pemeriksaan berikutnya langsung membuka Langkah 2 (keputusan terbuka KT-13).
+- Menutup dialog **sebelum** Langkah 1 dikunci diperbolehkan tanpa akibat. Sesudah Langkah 1 dikunci, jawabannya tersimpan; bila dialog ditutup, pemeriksaan berikutnya langsung membuka Langkah 2 (KT-13, dijawab 9 Nov 2026: tanpa pengurangan skor).
 - Langkah 1 boleh menanyakan hak yang terganggu, kewajiban yang diabaikan, atau peran lembaga, sesuai kejadiannya.
 - Setiap kejadian punya sedikitnya dua titik di zonanya. Penempatan diacak sekali per ruang dengan benih (*seed*) ruang, sehingga peta tidak bisa dihafal antarsesi, tetapi adil di dalam satu ruang.
 - Di ruang dengan batas pemain lebih dari 50, setiap kejadian aktif di dua titik zonanya sekaligus, agar pemain tidak menumpuk. Pemain boleh memeriksa di titik mana pun, dan kejadian tetap dijawab sekali (keputusan Gerbang 1 JS-03, Permintaan C-8).
@@ -534,7 +534,7 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | KT-10 | Nuansa lokal Bali di kejadian toleransi (misalnya hari suci tertentu) | Dijawab pemilik proyek (7 Nov 2026): K-02 memakai versi A, umum tanpa menyebut hari suci tertentu |
 | KT-11 | Kecocokan TP dengan RPM | Dikonfirmasi pemilik proyek |
 | KT-12 | Durasi bawaan 15 menit dan 16 kejadian | Ditinjau ulang sesudah uji coba kelas |
-| KT-13 | Langkah 2 tetap bisa dijawab sesudah dialog ditutup | Ya, tanpa pengurangan skor |
+| KT-13 | Langkah 2 tetap bisa dijawab sesudah dialog ditutup | Dijawab pemilik proyek (9 Nov 2026, Gerbang 1 JS-08): ya, tanpa pengurangan skor |
 
 ## 21. Catatan keputusan
 
@@ -552,3 +552,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 7 Nov 2026 | Permintaan Sesi B (A-1 sampai A-4) dan Sesi C (C-1 sampai C-7) diterapkan: tokoh Raka, Wayan, dan siswa umum; teks rujukan bagian 10; tiga masa; peta sekitar 160 × 100 ubin (Gerbang 1 JS-03) |
 | 7 Nov 2026 | Kapasitas ruang: bawaan 40, paling banyak 100 pemain; dua titik aktif per kejadian di ruang lebih dari 50 pemain (dibangun di JS-08); mode nomor absen hanya untuk ruang sampai 50 pemain; Paket inti 16 tetap untuk rilis 1.0 (Gerbang 1 JS-03, usulan 11a, Permintaan C-8) |
 | 7 Nov 2026 | KT-10 dijawab: K-02 memakai versi A, umum tanpa menyebut hari suci tertentu. Latar situasi harus ada di setiap titik kejadian zonanya (usulan 6a JS-05; Permintaan A-8) |
+| 9 Nov 2026 | Gerbang 1 JS-08: KT-13 dijawab ya, tanpa pengurangan skor; protokol naik ke versi 2; ruang coba memakai versi kerja Paket inti 16 sebagai ruang uji; dialog memakai tampilan ringkas di layar yang pendek; peringkat tampil "#–" selama skor 0 |

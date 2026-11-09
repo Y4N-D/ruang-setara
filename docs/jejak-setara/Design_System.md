@@ -92,7 +92,7 @@ Contoh skala: HP 412 × 915 CSS px dengan rasio piksel 2,625 dalam posisi mendat
 └─────────────────────────────────────────────────────────────┘
 ```
 
-- **Bilah atas** (tinggi 28 px CSS, menimpa tepi atas dunia): busur hari mini dengan tiga titik masa dan jam cerita di kiri, sisa waktu di tengah, skor dan peringkat di kanan.
+- **Bilah atas** (tinggi 28 px CSS, menimpa tepi atas dunia): busur hari mini dengan tiga titik masa dan jam cerita di kiri, sisa waktu di tengah, skor dan peringkat di kanan. Selama skor masih 0, peringkat tampil "#–" (keputusan Gerbang 1 JS-08).
 - **Peta mini** di kanan atas, 112 × 75 px CSS. Mengetuknya membuka peta besar yang menutupi dunia; permainan tetap berjalan.
 - **Joystick sentuh** muncul di titik sentuhan pertama pada separuh kiri layar (radius 48 px, kenop 24 px), dan hilang saat jari diangkat.
 - **Tombol Periksa** bulat 64 px di kanan bawah, dengan tiga **tombol skill** bulat 48 px di atasnya.
@@ -106,7 +106,7 @@ Tata letaknya sama, tetapi kontrol sentuh disembunyikan bila perangkat tidak mem
 
 ### 3.5 Dialog kejadian
 
-- **HP:** lembar yang menutupi seluruh area dunia. **Laptop:** panel di tengah selebar 70% pandangan. Dunia di belakangnya tetap berjalan, tetapi avatar pemain diam.
+- **HP:** lembar yang menutupi area dunia di bawah bilah atas, sehingga sisa waktu tetap terlihat (JS-08). **Laptop:** panel di tengah selebar 70% pandangan, di bawah bilah atas. Dunia di belakangnya tetap berjalan, tetapi avatar pemain diam.
 - **Kepala:** ikon zona, judul kejadian (Press Start 2P), dan chip langkah "Langkah 1 dari 2".
 - **Isi:** kotak situasi bergaya kotak narasi Sehari Setara, pertanyaan, lalu pilihan:
   - Langkah 1: empat tombol pilihan A–D, berbentuk kisi 2 × 2 di layar mendatar.
@@ -114,6 +114,7 @@ Tata letaknya sama, tetapi kontrol sentuh disembunyikan bila perangkat tidak mem
 - **Kaki:** "Tutup" di kiri, "Petunjuk (n)" di tengah (hanya Langkah 1), dan "Kunci jawaban" di kanan (nonaktif sampai ada pilihan).
 - **Sesudah Langkah 1:** pita umpan balik `leaf` dengan ikon hati ("Tepat") atau `mango` dengan ikon tanda tanya ("Belum tepat"), diikuti kalimat penjelasan, lalu tombol "Lanjut ke Langkah 2".
 - **Sesudah Langkah 2:** kartu dampak dengan susunan Sehari Setara (kepala berwarna tingkat dengan ikon dan tulisan tingkat, lalu "Yang terjadi", "Hak yang terdampak", "Kewajiban terkait", dan "Rujukan"), angka skor melayang, serta tombol "Lanjut menjelajah".
+- **Tampilan ringkas** (keputusan Gerbang 1 JS-08): dipakai bila tinggi area dialog kurang dari 560 px CSS, yaitu HP mendatar dan laptop yang dunianya 960 × 540. Kepala dan kaki dialog tetap. Langkah 1 dibagi dua tampilan: situasi dan pertanyaan dengan tombol "Lihat pilihan", lalu pertanyaan dan pilihan dengan tombol "Situasi". Umpan balik hanya menampilkan pita, pilihanmu, dan jawaban tepat. Langkah 2 menampilkan pertanyaan dan pilihan dengan tombol "Situasi". Kartu dampak boleh digulir, dengan tombol tetap terlihat. Rinciannya di spesifikasi JS-08.
 
 ### 3.6 Layar kelas (proyektor)
 
@@ -334,7 +335,7 @@ Setiap zona punya bangunan penanda dan bahan dominan agar pemain bisa mengenali 
 4. Rambu dan papan hanya memakai ikon, tanpa tulisan.
 5. **Jangan** memakai lambang palang merah atau bulan sabit merah untuk puskesmas, karena lambang itu dilindungi hukum. Pakai ikon hati atau tanda tambah berwarna `leaf`.
 6. Tempat ibadah tidak digambar sebagai penanda zona. Kejadian bertema toleransi terjadi di lingkungan rumah dan balai warga.
-7. Sekitar setiap titik kejadian disediakan ruang kosong 3 × 3 ubin untuk tokoh dan properti kejadian.
+7. Sekitar setiap titik kejadian disediakan ruang kosong 3 × 3 ubin untuk tokoh dan properti kejadian. Tokoh dan properti `setTokoh` ditata otomatis di ruang itu dan bisa dilewati (JS-08).
 
 ## 8. Tokoh tampak atas
 
@@ -446,7 +447,7 @@ Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 bl
 | Avatar | Jalan 8 fps, lari 12 fps, diam 2 fps |
 | Penanda kejadian | Naik-turun 1 piksel setiap 0,5 detik (2 bingkai) |
 | Ambil kotak | Pop 3 bingkai (kecil, besar berkilau, normal) masing-masing 80 ms |
-| Skor melayang | "+60" naik 4 piksel dalam dua langkah selama 240 ms, lalu hilang sesudah 1 detik |
+| Skor melayang | "+60" naik 4 piksel dalam dua langkah selama 240 ms di samping skor pada bilah atas, lalu hilang sesudah 1 detik (JS-08) |
 | Lari cepat | Debu 2 bingkai di belakang kaki |
 | Kompas | Panah berdenyut 2 bingkai setiap 0,5 detik |
 | Ganti masa | Palet peta dan warna bilah atas langsung berganti, tanpa sapuan |

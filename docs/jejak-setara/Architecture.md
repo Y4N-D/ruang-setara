@@ -101,9 +101,10 @@ ruang-setara/
 │  │  ├─ index.ts                    # router: aset, /api/*, /ws/*, tajuk keamanan
 │  │  ├─ ruang/RuangJejak.ts         # Durable Object (pembungkus tipis)
 │  │  ├─ ruang/inti-ruang.ts         # logika ruang murni (JA-11)
+│  │  ├─ ruang/kejadian-ruang.ts     # aturan kejadian murni: penempatan, keterlihatan, pilihan, poin (JS-08)
 │  │  ├─ api/                        # masuk, akun, kejadian, rujukan, paket, ruang, statistik, ekspor, pengaturan, log
 │  │  ├─ auth/                       # sandi, sesi, izin, tiket, pembatas percobaan
-│  │  └─ db/                         # kueri D1
+│  │  └─ db/                         # kueri D1 (ruang; konten dan jawaban sejak JS-08)
 │  ├─ migrations/0001_awal.sql …     # migrasi D1, hanya maju
 │  └─ seed/bank-awal.json            # bank kejadian awal (hasil fitur konten)
 ├─ scripts/game/art/                 # kit gambar bersama + atas_*.py dan build_jejak.py
@@ -329,12 +330,15 @@ Disimpan di SQLite milik Durable Object, sehingga tetap ada bila objek dikeluark
 | `pemain` | Token (hash), nama samaran, avatar, posisi terakhir, skor, waktu skor, muatan skill, waktu skill aktif, status sambungan, `dikeluarkan` |
 | `jawaban` | Seperti tabel D1, ditambah status per pemain per kejadian (`belum`, `langkah1`, `langkah2`, `selesai`) |
 | `kotak` | Waktu terakhir setiap pemain mengambil setiap kotak |
-| `kiriman` | Antrean baris yang belum terkirim ke D1 |
+| `kiriman` | Antrean baris yang belum terkirim ke D1 (sampai JS-07) |
+| `kejadian` | Salinan isi, versi, teks rujukan, dan titik aktif setiap kejadian ruang (JS-08) |
+| `terlihat` | Titik kejadian yang sudah terlihat oleh setiap pemain (JS-08) |
+| `antrean` | Antrean kiriman berkunci `jenis:id` yang diperbarui di tempat dan berversi (JS-08); menggantikan `kiriman` untuk baris baru |
 | `tiket_terpakai` | Tiket layar kelas yang sudah dipakai (dibersihkan sesudah kedaluwarsa) |
 
 Isi kejadian **disalin saat ruang dibuat**, sehingga penyuntingan di konsol tidak mengubah ruang yang sedang berjalan.
 
-JS-03 membuat tabel `meta`, `pemain`, dan `kiriman`; tabel lain ditambahkan fitur yang memakainya. Posisi pemain tidak ditulis pada setiap `gerak` (bagian 13.4).
+JS-03 membuat tabel `meta`, `pemain`, dan `kiriman`; tabel lain ditambahkan fitur yang memakainya. JS-08 menambah `kejadian`, `jawaban`, `terlihat`, dan `antrean`; keadaan dialog yang terbuka disimpan di lampiran sambungan (`serializeAttachment`), bukan di SQLite. Posisi pemain tidak ditulis pada setiap `gerak` (bagian 13.4).
 
 ### 5.4 Aturan validasi konten
 
@@ -373,7 +377,7 @@ Worker memeriksa tajuk `Origin` (hanya domain Jejak Setara sendiri dan `localhos
 
 ### 6.2 Amplop pesan
 
-Setiap pesan adalah objek JSON `{ "v": 1, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/protokol.ts`. Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
+Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
 
 ### 6.3 Pesan pemain
 
@@ -400,10 +404,10 @@ Setiap pesan adalah objek JSON `{ "v": 1, "t": "<tipe>", ...isi }`. `v` adalah `
 | `selamat_datang` | `pemainId`, `token`, status dan pengaturan ruang, `waktuServer`, versi peta, tiga saran nama samaran, avatar yang tersedia |
 | `saran_nama` | Paling banyak tiga saran nama samaran baru: jawaban `minta_nama`, atau sesudah galat `NAMA_DIPAKAI` (JS-03) |
 | `status_ruang` | `status`, `mulaiPada`, `berakhirPada`, `jedaSejak` |
-| `dunia` | `w` (waktu server), `p`: larik `[id, x, y, arah, jalan]` untuk pemain yang berubah di sekitar pemain ini, `n` (jumlah pemain) |
+| `dunia` | `w` (waktu server), `p`: larik `[id, x, y, arah, jalan, dialog]` untuk pemain yang berubah di sekitar pemain ini (`dialog` sejak versi 2, JS-08), `n` (jumlah pemain) |
 | `pemain_baru` · `pemain_pergi` | `id`, `nama`, `avatar`, `warnaTas` · `id` |
 | `pribadi` | `skor`, `peringkat`, `selesai` (id kejadian), `terlihat`, muatan skill, skill aktif, kotak yang belum muncul lagi |
-| `kejadian_terlihat` | `kejadianId`, `x`, `y` — posisi kejadian yang baru masuk pandangan pemain (atau terungkap Teropong) |
+| `kejadian_terlihat` | `kejadianId`, `x`, `y`, `setTokoh` — satu titik aktif yang baru masuk pandangan pemain (atau terungkap Teropong), beserta tokoh dan propertinya (`setTokoh` sejak versi 2, JS-08) |
 | `kompas` | `x`, `y`, `berakhirPada` — sasaran panah Kompas; dikirim ulang bila sasaran selesai sebelum waktunya habis |
 | `kejadian_terbuka` | `kejadianId`, `judul`, `situasi`, `setTokoh`, `pertanyaan1`, `opsi1` (id dan teks, sudah diacak), `langkah` (1 atau 2) |
 | `petunjuk` | `kejadianId`, `kalimat`, `opsiDicoret` |
@@ -411,7 +415,7 @@ Setiap pesan adalah objek JSON `{ "v": 1, "t": "<tipe>", ...isi }`. `v` adalah `
 | `hasil_2` | `tingkat`, `poin`, `terjadi`, `opsiTepat`, kartu (`hak`, `kewajiban`, `rujukan` berupa teks) |
 | `koreksi` | `x`, `y`, `seq` — posisi dari server bila laporan gerak ditolak |
 | `pemberitahuan` | `kode` (misalnya `dua_menit`) |
-| `selesai` | `skor`, `peringkat`, `jumlahPemain`, rekap pribadi |
+| `selesai` | `skor`, `peringkat`, `jumlahPemain`, rekap pribadi (kosong sampai JS-11) |
 | `galat` | `kode`, `pesan` (bagian 6.7) |
 | `pong` | `tKlien`, `waktuServer` |
 
@@ -439,7 +443,7 @@ Setiap pesan adalah objek JSON `{ "v": 1, "t": "<tipe>", ...isi }`. `v` adalah `
 | `dunia_kelas` | 4 per detik, semua pemain | ±1 KB untuk 40 pemain |
 | `papan` | ≤ 1 per detik, hanya bila berubah | ±1,5 KB |
 
-Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 MB naik, di bawah anggaran 3 MB (PRD bagian 12). Bila uji beban melampaui anggaran, `dunia` diturunkan ke 5 per detik. Percobaan Plan JS-03 (lokal, dengan batas 24 pemain terdekat): sekitar 1,5 MB untuk ruang 40 pemain dan 2,5 MB untuk ruang 100 pemain, per pemain per 15 menit.
+Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 MB naik, di bawah anggaran 3 MB (PRD bagian 12). Bila uji beban melampaui anggaran, `dunia` diturunkan ke 5 per detik. Percobaan Plan JS-03 (lokal, dengan batas 24 pemain terdekat): sekitar 1,5 MB untuk ruang 40 pemain dan 2,5 MB untuk ruang 100 pemain, per pemain per 15 menit. JS-08 menambah sekitar 50 KB pesan kejadian dan paling banyak sekitar 0,22 MB `pribadi` per pemain per 15 menit (Plan JS-08).
 
 ### 6.6 Validasi dan pembatasan
 
@@ -491,6 +495,8 @@ sequenceDiagram
   R->>D: kiriman berkala (idempoten)
 ```
 
+Sejak JS-08, dialog yang ditutup sesudah Langkah 1 dikunci dibuka lagi di Langkah 2 (KT-13): server mengirim `kejadian_terbuka` dengan `langkah` 2, lalu mengulang `hasil_1`. Kartu dampak tetap terbuka sampai pemain mengirim `tutup_dialog`.
+
 ## 7. Siklus ruang
 
 ```mermaid
@@ -509,13 +515,14 @@ stateDiagram-v2
 ```
 
 - **Pembuatan:** `POST /api/ruang` memeriksa izin, memilih versi terbit setiap kejadian di paket (semua rujukannya harus terverifikasi, kecuali ruang uji), membuat kode, membuat baris `ruang` di D1, lalu memanggil Durable Object baru dengan salinan isi, pengaturan, dan benih.
-- **Penempatan kejadian:** setiap kejadian diberi satu titik dari titik-titik zonanya dengan pengacakan berbenih; satu titik untuk satu kejadian.
+- **Penempatan kejadian:** setiap kejadian diberi satu titik dari titik-titik zonanya dengan pengacakan berbenih, atau dua titik berbeda di ruang dengan batas pemain lebih dari 50 (JS-08; keputusan Gerbang 1 JS-03, usulan 11a). Satu titik tidak dipakai dua kejadian.
 - **Lobi dan jeda:** tanpa pengatur waktu berkala, sehingga Durable Object boleh beristirahat (*hibernate*). Sejak JS-07 (Permintaan C-10), pemain boleh berjalan di halaman lobi selama `lobi` dan `hitung_mundur`, dengan sel gerbang lobi diperlakukan padat; `dunia` dikirim mengikuti `gerak` yang masuk (paling sering setiap 100 ms, dan langsung untuk laporan berhenti), jadi ruang tetap bisa beristirahat saat semua pemain diam. Sambungan memakai WebSocket Hibernation API; identitas sambungan disimpan dengan `serializeAttachment`. Kiriman ke D1 memakai pengatur waktu 30 detik hanya selama antreannya berisi, sehingga ruang tetap bisa beristirahat sesudahnya (JS-03).
 - **Main:** pengatur waktu 100 ms menyusun dan mengirim `dunia`, `pribadi`, dan `papan`. Alarm dipasang pada `berakhirPada`.
 - **Jeda:** jam berhenti; `berakhirPada` digeser sebesar lama jeda saat dilanjutkan.
 - **Selesai:** peringkat akhir dihitung, `selesai` dikirim ke setiap pemain, seluruh `kiriman` dikirim ke D1, dan `ringkasan_json` ditulis.
 - **Ditutup otomatis:** 3 jam tanpa sambungan apa pun, atau 6 jam sejak dibuat. Penyimpanan Durable Object dihapus 24 jam sesudah ditutup, setelah kiriman ke D1 dipastikan lengkap.
 - **Sejak JS-03:** siklus ini dijalankan inti ruang. Pesan layar kelas sampai ke ruang lewat rute `/ws/kelas/` di JS-10; di lingkungan lokal juga lewat kait uji `POST /api/ruang-coba/{KODE}/kelas`. Sejak JS-07, kait itu juga hidup di lingkungan uji dengan kunci sekali pakai `KUNCI_COBA`, dipanggil alur kerja "Jejak: kendali ruang coba", dan dipensiunkan di JS-10 bersama ruang coba.
+- **Ruang coba (JS-08):** ruang coba adalah ruang uji. Saat dibuat, ia membaca Paket inti 16 dari D1 lingkungannya dengan versi `kerja` setiap kejadian, mengisi `ruang.paket_id`, lalu menyalin isi dan teks rujukannya ke Durable Object. Bila bank awal belum disemai, ruang dibuat tanpa kejadian. Kait uji lokal `kejadian` dan `pindahkan` (hanya di `lokal`) dipakai uji ujung ke ujung dan dipensiunkan di JS-10.
 - **Satu alarm:** inti ruang menghitung tenggat terdekat dari semua jadwal (hitung mundur, akhir ronde, tutup otomatis, hapus penyimpanan, dan kiriman yang gagal), lalu pembungkus memasang alarm itu.
 
 ## 8. Aturan permainan di server
@@ -542,6 +549,11 @@ stateDiagram-v2
 - Id opsi yang dikirim ke pemain adalah id acak per pemain, bukan id asli, sehingga id tidak membocorkan jawaban yang benar.
 - Langkah 1 dan Langkah 2 hanya bisa dikunci sekali. Pesan kunci kedua diabaikan.
 - Waktu `dibuka_pada`, `langkah1_pada`, dan `langkah2_pada` dicatat dengan jam server.
+- Sejak JS-08: keterlihatan diperiksa hanya di status `main`, pada setiap putaran 100 ms. `kejadian_terlihat` dikirim sekali per pemain per titik aktif, dicatat di tabel `terlihat`, dan dikirim ulang sesudah sambung ulang.
+- Satu dialog terbuka per pemain. Selama dialog terbuka, `gerak` pemain itu ditolak (alasan `dialog`), dan butir `dunia`-nya bertanda `dialog`. Selama `jeda`, `periksa` dan kunci diabaikan; saat ronde selesai, semua dialog ditutup dan langkah yang belum dikunci tidak dihitung.
+- Bila dialog ditutup sesudah Langkah 1 dikunci, pemeriksaan berikutnya membuka Langkah 2 (KT-13, dijawab di Gerbang 1 JS-08).
+- `periksa` yang ditolak karena jarak dijawab `galat BUKAN_JANGKAUAN` dan `koreksi`. Klien menganggap kejadian dalam jangkauan pada 24 piksel logis, di bawah batas server 32.
+- Urutan dan id pilihan per pemain dibuat dari pembangkit berbenih (benih ruang, id pemain, kode kejadian), dan id unik di setiap kejadian. Benih ruang tidak pernah dikirim ke klien.
 
 ### 8.4 Skor dan peringkat
 
@@ -559,6 +571,7 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 
 - `waktuSkorMs` adalah waktu ronde (tanpa lama jeda) saat skor terakhir bertambah.
 - Peringkat dihitung ulang setiap skor berubah. Pemain menerima peringkatnya sendiri; layar kelas menerima seluruh daftar.
+- Sejak JS-08: `pribadi` dikirim langsung kepada pemain yang skornya berubah, dan kepada pemain lain yang peringkatnya berubah paling sering sekali per 2 detik. Layar pemain menampilkan "#–" selama skornya 0 (keputusan Gerbang 1 JS-08).
 
 ### 8.5 Skill dan kotak
 
@@ -572,6 +585,7 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 - Setiap perubahan penting (bergabung, jawaban, skor) ditulis lebih dulu ke SQLite Durable Object, lalu dimasukkan ke `kiriman`. Posisi pemain tidak ditulis pada setiap `gerak` (bagian 13.4); posisi disimpan saat pemain terputus dan bersama kiriman berkala.
 - Selama antrean berisi, setiap 30 detik (pengatur waktu, bukan alarm), dan saat ronde selesai, `kiriman` dikirim ke D1 dalam satu *batch* dengan `INSERT … ON CONFLICT DO UPDATE` berdasarkan id, sehingga pengiriman ulang aman.
 - Bila D1 gagal, kiriman dicoba lagi lewat alarm dengan jeda yang makin panjang, dan ruang tidak ditutup sebelum kiriman habis.
+- Sejak JS-08, antrean memakai tabel `antrean` berkunci `jenis:id`. Perubahan baris yang sama (misalnya satu jawaban yang dibuka lalu dikunci dua kali) memperbarui satu baris antrean, dan baris dihapus sesudah terkirim hanya bila versinya belum berubah. Urutan kirim: `ruang`, lalu `peserta`, lalu `jawaban`, agar kunci asing D1 terpenuhi. Skor pemain dihitung ulang dari tabel `jawaban` saat ruang dipulihkan, sehingga baris `pemain` tidak ditulis karena skor.
 
 ## 9. Klien pemain
 
@@ -586,6 +600,7 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 - **Label nama:** kanvas lapisan kedua dengan resolusi perangkat, agar teks tajam; paling banyak 8 label.
 - **Pramuat:** aset pemain dimuat sebelum tombol "Masuk" aktif; lembar ubin masa berikutnya dimuat di latar belakang.
 - **Tanpa penyimpanan lain:** hanya `token` di `sessionStorage` dan pengaturan pemain di memori.
+- **Kejadian (JS-08):** penanda, tokoh, dan properti digambar di titik yang sudah terlihat. Tokoh dan properti `setTokoh` ditata otomatis di ruang 3 × 3 sekitar titik dan bisa dilewati. Tombol Periksa tampil di perangkat sentuh, dan ajakan `E` di laptop. Dialog memakai komponen `bersama/` dengan mode ringkas bila tinggi area dialog kurang dari 560 px CSS. Angka fps tampil bila alamat diakhiri `#fps`.
 
 ## 10. Konsol admin dan layar kelas
 
@@ -616,6 +631,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `GET /api/bank/ekspor`; `POST /api/bank/impor` | Ekspor dan impor JSON bank | Admin |
 | `GET /api/publik/ruang/{KODE}` | Apakah kode ada dan apakah mode nomor absen aktif; dibaca dari D1 tanpa memanggil ruang (JS-03) | Umum, dibatasi frekuensinya |
 | `POST /api/ruang-coba`; `POST /api/ruang-coba/{KODE}/kelas`; `GET /api/ruang-coba/{KODE}/statistik` | Ruang coba di lingkungan `lokal` dan `uji` (di `uji` dengan kunci `KUNCI_COBA`); kait uji dan statistik ruang hanya di `lokal`. Dipensiunkan di JS-10 (JS-03) | Alur kerja "Jejak: ruang coba"; uji |
+| `GET /api/ruang-coba/{KODE}/kejadian`; `POST /api/ruang-coba/{KODE}/pindahkan` | Kait uji lokal JS-08: titik aktif setiap kejadian, dan memindahkan pemain bernama tertentu. Hanya di `lokal`; dipensiunkan di JS-10 | Uji |
 
 ### 10.3 Autentikasi dan sesi
 
@@ -843,6 +859,8 @@ Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* dan *Limits* 
 | Manual | Daftar periksa AGENTS | HP kelas bawah, proyektor dari 8 m, wifi sekolah, kurangi gerak, keyboard saja, uji coba kelas |
 
 Tangkapan layar uji: HP 731 × 411 (emulasi Android), laptop 1280 × 720, dan layar kelas 1024 × 768 serta 1920 × 1080.
+
+Ambang kinerja otomatis sejak JS-08 (AC-19), dari histogram waktu gambar di ukuran HP dengan 40 pemain tiruan: CPU normal p95 ≤ 4 ms, bingkai terlama ≤ 25 ms, dan sedikitnya 50 bingkai per detik; CPU 6× lebih lambat p95 ≤ 50 ms, bingkai 50 ms ke atas paling banyak 1%, dan tanpa bingkai 100 ms ke atas. Penentunya tetap ≥ 30 fps di HP Android kelas bawah (uji manual).
 
 ## 15. Operasional
 
