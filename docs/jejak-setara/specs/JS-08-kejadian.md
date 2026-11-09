@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Ditulis 9 November 2026 di tahap Specify, sesudah balasan `Setuju: JS-08` (semua saran a, usulan 1 sampai 10; KT-13 dijawab sesuai usulan 7a). Menunggu `Spesifikasi disetujui: JS-08` beserta pilihan DRAF D-1 sampai D-6. Build menunggu JS-05 Selesai |
+| Status | Ditulis 9 November 2026 di tahap Specify, sesudah balasan `Setuju: JS-08` (semua saran a, usulan 1 sampai 10; KT-13 dijawab sesuai usulan 7a). **Disetujui 9 November 2026** (balasan `Spesifikasi disetujui: JS-08`) dengan semua saran DRAF: D-1 sampai D-6 pilihan (a). Build menunggu JS-05 Selesai, lalu dimulai dari ZIP repositori terbaru |
 | Rencana | `PLAN.md`, bagian "JS-08 — Kejadian" |
 | Sesi | Sesi A (mesin) |
 | Bergantung pada | JS-07 (Selesai, 9 Nov 2026) dan JS-05 (Sesi B; Revisi 1 belum disetujui) |
@@ -402,6 +402,8 @@ Semua dari `manifest.ts`, Disetujui, dan tanpa aset baru:
 - Teropong dan daftar "Kejadian terdekat" untuk pembaca layar (JS-18).
 
 ## DRAF untuk ditinjau pemilik proyek
+
+Disetujui 9 November 2026: D-1 sampai D-6 memakai pilihan (a).
 
 - **D-1. Angka poin di dialog.** — (a, saran) pita "Tepat" menampilkan "+40", dan kepala kartu menampilkan "+60" atau "+25". Bila poinnya 0, tidak ada angka, agar nada tidak menghukum. (b) Selalu tampil, termasuk "+0".
 - **D-2. Umpan balik saat Langkah 1 keliru.** — (a, saran) pita memuat umpan balik pilihan pemain lalu umpan balik pilihan benar. Di mode ringkas isinya boleh digulir, dengan tombol tetap terlihat. (b) Hanya umpan balik pilihan benar: selalu muat tanpa digulir, tetapi siswa tidak tahu mengapa pilihannya keliru.
