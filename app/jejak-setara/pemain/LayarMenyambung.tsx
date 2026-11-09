@@ -1,4 +1,5 @@
-// Lapisan Menyambung ulang dan Dijeda (spesifikasi JS-03, P-29 dan bagian "Status antarmuka").
+// Lapisan Menyambung ulang dan Dijeda (spesifikasi JS-03, P-29 dan bagian "Status antarmuka"). Sejak JS-07 keduanya
+// tampil di atas dunia: lapisan ink 70% menutupi kanvas, dan pemain berhenti selama lapisan tampil (P-34, P-40).
 import { useEffect, useState } from "react";
 import { TEKS } from "../teks";
 

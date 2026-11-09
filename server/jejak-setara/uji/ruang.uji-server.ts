@@ -160,11 +160,18 @@ describe("siklus, kiriman ke D1, dan muat ulang Durable Object (AC-11, AC-14, AC
     let anak = await nyalakanServer(4321, ["--tanpa-build", "--keadaan", keadaan]);
     let kode = "";
     let a: Awaited<ReturnType<typeof masuk>>;
+    let awal = { x: 0, y: 0 };
     try {
       const { isi } = await buatRuang({}, 4321);
       kode = String(isi.kode);
       a = await masuk(kode, 3, 4321);
+      // JS-07: posisi di lobi ikut tersimpan saat terputus, dan ruang yang dipulihkan memakai peta kampung.
+      awal = (await a.k.tunggu((m) => m.t === "koreksi")) as { x: number; y: number };
+      await tidur(300); // anggaran jarak terkumpul sejak posisi awal (JS-07, P-52)
+      a.k.kirim({ v: 1, t: "gerak", x: awal.x + 6, y: awal.y, arah: "kanan", jalan: false, seq: 1 });
+      await tidur(300);
       a.k.ws.close();
+      await tidur(300);
     } finally {
       await matikanServer(anak);
     }
@@ -174,6 +181,7 @@ describe("siklus, kiriman ke D1, dan muat ulang Durable Object (AC-11, AC-14, AC
       ulang.kirim(halo({ token: a.token }));
       expect(await ulang.tunggu((m) => m.t === "selamat_datang")).toMatchObject({ pemainId: a.pemainId, saranNama: [] });
       expect(await ulang.tunggu((m) => m.t === "pemain_baru" && m.id === a.pemainId)).toMatchObject({ nama: a.nama, avatar: 3 });
+      expect(await ulang.tunggu((m) => m.t === "koreksi")).toMatchObject({ x: awal.x + 6, y: awal.y, seq: 0 });
     } finally {
       await matikanServer(anak);
     }

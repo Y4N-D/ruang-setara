@@ -2,6 +2,8 @@
 import { describe, expect, it } from "vitest";
 import { acakBerbenih, benih } from "../../inti/acak";
 import {
+  ANGGARAN_GERAK,
+  anggaranTersedia,
   arahDari,
   batasJarakGerak,
   DT_MAKS_MS,
@@ -12,6 +14,7 @@ import {
   langkahGerak,
   periksaGerak,
   posisiSah,
+  STATUS_GERAK,
   type LaporanGerak,
 } from "../../inti/gerak";
 import type { Arah, PetaJejak } from "../../inti/tipe";
@@ -179,8 +182,9 @@ describe("periksaGerak di server (P-26, P-27)", () => {
       [{ seq: 5 }, "seq"],
       [{ seq: 2 }, "seq"],
       [{ status: "jeda" }, "status"],
-      [{ status: "lobi" }, "status"],
       [{ status: "selesai" }, "status"],
+      [{ status: "pembahasan" }, "status"],
+      [{ status: "ditutup" }, "status"],
       [{ dialogTerbuka: true }, "dialog"],
       [{ dtMs: 0 }, "waktu"],
     ];
@@ -295,5 +299,74 @@ describe("50 pemain sekaligus", () => {
     const berselang = buat();
     for (let putaran = 0; putaran < 100; putaran++) for (const p of berselang) satuPutaran(p);
     expect(berselang.map((p) => [p.x, p.y, p.arah])).toEqual(berurutan.map((p) => [p.x, p.y, p.arah]));
+  });
+});
+
+describe("JS-07: status gerak dan anggaran jarak (P-45, P-52)", () => {
+  it("gerak sah di lobi, hitung mundur, dan main; status lain ditolak tanpa koreksi", () => {
+    expect(STATUS_GERAK).toEqual(["lobi", "hitung_mundur", "main"]);
+    for (const status of ["lobi", "hitung_mundur", "main"] as const) expect(lapor({ status, ke: [104, 100] }).diterima, status).toBe(true);
+    for (const status of ["jeda", "selesai", "pembahasan", "ditutup"] as const) {
+      const h = lapor({ status, ke: [104, 100] });
+      expect([h.alasan, koreksi(h)], status).toEqual(["status", null]);
+    }
+  });
+
+  it("anggaran bertambah kecepatan × 1,25 per detik, paling banyak setengah detik berjalan", () => {
+    expect(ANGGARAN_GERAK.detikMaks).toBe(0.5);
+    expect(anggaranTersedia(0, 100, false)).toBeCloseTo(9, 9);
+    expect(anggaranTersedia(0, 400, false)).toBeCloseTo(36, 9);
+    expect(anggaranTersedia(0, 1000, false)).toBe(45);
+    expect(anggaranTersedia(40, 100, false)).toBe(45);
+    expect(anggaranTersedia(0, 1000, true)).toBeCloseTo(72, 9);
+    expect(anggaranTersedia(10, -50, false)).toBe(10);
+    expect(anggaranTersedia(-3, 0, false)).toBe(0);
+  });
+
+  it("dengan anggaran, laporan berdempet (selang 0) diterima bila jaraknya ≤ anggaran + 4, lalu anggaran berkurang", () => {
+    const h = lapor({ ke: [120, 100], dtMs: 0, anggaranPx: 20 });
+    expect(h).toEqual({ diterima: true, x: 120, y: 100, arah: "kanan", seq: 6, alasan: null, anggaranPx: 0 });
+    expect(lapor({ ke: [116, 100], dtMs: 0, anggaranPx: 20 }).anggaranPx).toBe(4);
+    const tolak = lapor({ ke: [124.01, 100], dtMs: 0, anggaranPx: 20 });
+    expect([tolak.diterima, tolak.alasan, tolak.anggaranPx]).toEqual([false, "kecepatan", 20]);
+    expect(koreksi(tolak)).toEqual({ x: 100, y: 100, seq: 6 });
+    expect(lapor({ ke: [149, 100], dtMs: 5000, anggaranPx: 0 }).diterima).toBe(true);
+    expect(lapor({ ke: [149.01, 100], dtMs: 5000, anggaranPx: 0 }).alasan).toBe("kecepatan");
+  });
+
+  it("dengan anggaran, tabrakan, seq, status, dan dialog tetap diperiksa dan anggaran tidak berubah", () => {
+    const tabrak = lapor({ posisi: { x: 55, y: 40, arah: "kanan" }, ke: [62, 40], peta: BERDINDING, anggaranPx: 30 });
+    expect([tabrak.alasan, tabrak.anggaranPx]).toEqual(["tabrakan", 30]);
+    expect(lapor({ seq: 5, ke: [104, 100], anggaranPx: 30 }).alasan).toBe("seq");
+    expect(lapor({ status: "jeda", ke: [104, 100], anggaranPx: 30 }).alasan).toBe("status");
+    expect(lapor({ dialogTerbuka: true, ke: [104, 100], anggaranPx: 30 }).alasan).toBe("dialog");
+  });
+
+  it("gerak jujur 72 px/detik yang dilaporkan setiap 100 ms dan tiba berdempet tetap diterima dengan anggaran", () => {
+    // Satu laporan per 100 ms, tetapi tiba berpasangan: selang server 0 lalu 200 ms.
+    let posisi = { x: 100, y: 100, arah: "kanan" as Arah };
+    let anggaran = 0;
+    let seq = 0;
+    let ditolak = 0;
+    for (let i = 1; i <= 60; i++) {
+      const h = periksaGerak({
+        posisi,
+        laporan: { x: 100 + 7.2 * i, y: 100, arah: "kanan", seq: ++seq },
+        seqTerakhir: seq - 1,
+        dtMs: i % 2 === 0 ? 0 : 200,
+        lari: false,
+        status: "main",
+        dialogTerbuka: false,
+        peta: TERBUKA,
+        anggaranPx: anggaran,
+      });
+      if (!h.diterima) ditolak++;
+      else {
+        posisi = { x: h.x, y: h.y, arah: h.arah };
+        anggaran = h.anggaranPx ?? 0;
+      }
+    }
+    expect(ditolak).toBe(0);
+    expect(posisi.x).toBeCloseTo(532, 6);
   });
 });

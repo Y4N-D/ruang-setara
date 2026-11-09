@@ -5,6 +5,7 @@ import type { PesanServerPemain } from "../../inti/protokol";
 
 class SoketPalsu implements SoketMirip {
   readyState = 0;
+  bufferedAmount = 0;
   terkirim: Record<string, unknown>[] = [];
   onopen: SoketMirip["onopen"] = null;
   onmessage: SoketMirip["onmessage"] = null;
@@ -29,7 +30,7 @@ class SoketPalsu implements SoketMirip {
   }
 }
 
-function siapkan(simpanan: Record<string, string> = {}) {
+function siapkan(simpanan: Record<string, string> = {}, opsi: { versiPeta?: number } = {}) {
   let jam = 1000;
   let nomor = 0;
   const pewaktu: { id: number; pada: number; kerja: () => void }[] = [];
@@ -59,7 +60,7 @@ function siapkan(simpanan: Record<string, string> = {}) {
   };
   const pesan: PesanServerPemain[] = [];
   const keadaan: [KeadaanKlien, number | null][] = [];
-  const klien = new KlienRuang("ws://uji/ws/ruang/K7MPA", "K7MPA", null, dep, (p) => pesan.push(p), (k, kode) => keadaan.push([k, kode]));
+  const klien = new KlienRuang("ws://uji/ws/ruang/K7MPA", "K7MPA", null, dep, (p) => pesan.push(p), (k, kode) => keadaan.push([k, kode]), opsi);
   const majukan = (ms: number) => {
     const sampai = jam + ms;
     for (;;) {
@@ -202,5 +203,37 @@ describe("KlienRuang", () => {
     u.majukan(40);
     u.soket[0].terima({ v: 1, t: "pong", tKlien: ping.tKlien, waktuServer: ping.tKlien + 1020 });
     expect(u.klien.selisihJamMs).toBe(1000);
+  });
+});
+
+describe("JS-07: versi peta dan bufferedAmount (P-16, P-50)", () => {
+  it("selamat_datang dengan versiPeta berbeda: klien berhenti (4005), token disimpan, dan galat VERSI_BERBEDA muncul", () => {
+    const u = siapkan({}, { versiPeta: 2 });
+    u.klien.mulai();
+    u.soket[0].buka();
+    u.soket[0].terima(datang); // versiPeta 1
+    expect(u.klien.keadaan).toBe("berhenti");
+    expect(u.keadaan.at(-1)).toEqual(["berhenti", 4005]);
+    expect(u.pesan).toEqual([{ v: 1, t: "galat", kode: "VERSI_BERBEDA", pesan: "" }]);
+    expect(u.isi.get("jejak:token:K7MPA")).toBe(TOKEN);
+    u.majukan(60_000);
+    expect(u.soket).toHaveLength(1);
+  });
+
+  it("versi peta sama: tersambung seperti biasa", () => {
+    const u = siapkan({}, { versiPeta: 1 });
+    u.klien.mulai();
+    u.soket[0].buka();
+    u.soket[0].terima(datang);
+    expect(u.klien.keadaan).toBe("tersambung");
+  });
+
+  it("bufferedAmount dibaca dari soket yang tersambung, 0 bila tidak ada soket", () => {
+    const u = siapkan();
+    expect(u.klien.bufferedAmount).toBe(0);
+    u.klien.mulai();
+    u.soket[0].buka();
+    u.soket[0].bufferedAmount = 512;
+    expect(u.klien.bufferedAmount).toBe(512);
   });
 });

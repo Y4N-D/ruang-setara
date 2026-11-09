@@ -1,16 +1,22 @@
-// Halaman pemain Jejak Setara ("/"): alur gabung, lobi, dan layar sementara ronde (spesifikasi JS-03, bagian I).
+// Halaman pemain Jejak Setara ("/"): alur gabung (JS-03), lalu dunia untuk lobi, hitung mundur, ronde, dan jeda
+// (JS-07), serta layar selesai dan ditutup. Mesin dunia hidup di sini, agar pesan `dunia` dan `koreksi` diterima
+// walaupun layar dunia belum terpasang.
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { normalkanKode, POLA_KODE_RUANG } from "../inti/aturan";
-import type { KodeGalat, PesanServerPemain } from "../inti/protokol";
+import type { KodeGalat, PesanPemain, PesanServerPemain } from "../inti/protokol";
 import type { StatusRuang, WarnaTas } from "../inti/tipe";
 import { TEKS } from "../teks";
+import { buatKanvasPeramban, muatAsetDunia } from "./dunia/aset";
+import { penjagaPeramban } from "./dunia/layarMenyala";
+import { MesinDunia } from "./dunia/mesin";
+import { VERSI_PETA } from "./dunia/petaKampung";
 import { LayarAbsen, LayarIdentitas, LayarKode, LayarMenghubungkan } from "./Gabung";
 import { ketergantunganPeramban, KlienRuang, type KeadaanKlien } from "./jaringan";
+import LayarDunia from "./LayarDunia";
 import { LapisanJeda, LapisanMenyambung } from "./LayarMenyambung";
 import { LayarDitutup, LayarGalat, LayarRonde, type WaktuStatus } from "./LayarRonde";
-import Lobi from "./Lobi";
 
-type NamaLayar = "kode" | "absen" | "menghubungkan" | "identitas" | "lobi" | "ronde" | "ditutup" | "galat";
+type NamaLayar = "kode" | "absen" | "menghubungkan" | "identitas" | "dunia" | "ronde" | "ditutup" | "galat";
 
 interface PemainLobi {
   nama: string;
@@ -18,8 +24,9 @@ interface PemainLobi {
   warnaTas: WarnaTas;
 }
 
-const layarUntuk = (s: StatusRuang): NamaLayar => (s === "lobi" ? "lobi" : s === "ditutup" ? "ditutup" : "ronde");
-const LAYAR_BERSAMBUNG: readonly NamaLayar[] = ["menghubungkan", "identitas", "lobi", "ronde"];
+/** Lobi, hitung mundur, ronde, dan jeda tampil di dunia; selesai dan ditutup tetap layar HTML (JS-07, P-41). */
+const layarUntuk = (s: StatusRuang): NamaLayar => (s === "ditutup" ? "ditutup" : s === "selesai" || s === "pembahasan" ? "ronde" : "dunia");
+const LAYAR_BERSAMBUNG: readonly NamaLayar[] = ["menghubungkan", "identitas", "dunia", "ronde"];
 
 /** Pengumuman pembaca layar dengan jarak minimal 2 detik (P-54). */
 function usePengumuman(): [string, (teks: string) => void] {
@@ -59,6 +66,12 @@ export default function App() {
   const [koneksi, setKoneksi] = useState<KeadaanKlien>("menghubungkan");
   const [terputusSejak, setTerputusSejak] = useState<number | null>(null);
   const [galatKode, setGalatKode] = useState<KodeGalat | null>(null);
+  const [pengaturan, setPengaturan] = useState({ durasiMenit: 15, batasPemain: 40 });
+  const [asetSiap, setAsetSiap] = useState(false);
+  // Kode sah yang dikirim sebelum aset dunia termuat; diperiksa begitu aset siap (JS-07).
+  const [kodeTertunda, setKodeTertunda] = useState<string | null>(null);
+  const [mesin] = useState(() => new MesinDunia(buatKanvasPeramban));
+  const [penjaga] = useState(penjagaPeramban);
   const [pengumuman, umumkan] = usePengumuman();
   const klien = useRef<KlienRuang | null>(null);
   const pemainId = useRef<string | null>(null);
@@ -74,12 +87,14 @@ export default function App() {
 
   const tanganiPesan = useCallback(
     (p: PesanServerPemain) => {
+      mesin.terima(p, Date.now(), klien.current?.selisihJamMs ?? 0);
       switch (p.t) {
         case "selamat_datang":
           pemainId.current = p.pemainId;
           statusRef.current = p.status;
           setDiriId(p.pemainId);
           setPemain({});
+          setPengaturan({ durasiMenit: p.pengaturan.durasiMenit, batasPemain: p.pengaturan.batasPemain });
           setWaktu((w) => ({ ...w, status: p.status }));
           if (p.saranNama.length > 0) {
             beridentitas.current = false;
@@ -140,7 +155,7 @@ export default function App() {
           break;
       }
     },
-    [gantiLayar, umumkan],
+    [gantiLayar, mesin, umumkan],
   );
 
   const tanganiKeadaan = useCallback(
@@ -189,6 +204,7 @@ export default function App() {
         (s, kt) => {
           if (klien.current === c) tanganiKeadaan(s, kt);
         },
+        { versiPeta: VERSI_PETA },
       );
       klien.current = c;
       setKoneksi("menghubungkan");
@@ -251,12 +267,61 @@ export default function App() {
     gantiLayar("kode");
   };
 
-  // Alamat dengan ?kode= langsung diperiksa (P-50).
+  // Aset dunia dimuat lebih dulu; tombol "Masuk" baru aktif sesudahnya (JS-07, bagian "Status antarmuka").
   useEffect(() => {
-    if (!kodeAwal) return;
+    let aktif = true;
+    const coba = (sisa: number) => {
+      muatAsetDunia().then(
+        (aset) => {
+          mesin.pasangAset(aset);
+          if (aktif) setAsetSiap(true);
+        },
+        () => {
+          if (aktif && sisa > 0) window.setTimeout(() => coba(sisa - 1), 2000);
+        },
+      );
+    };
+    coba(2);
+    return () => {
+      aktif = false;
+    };
+  }, [mesin]);
+
+  // Alamat dengan ?kode= langsung diperiksa sesudah aset termuat (JS-03 P-50; JS-07).
+  useEffect(() => {
+    if (!kodeAwal || !asetSiap) return;
     const id = window.setTimeout(() => void periksaKode(kodeAwal), 0);
     return () => window.clearTimeout(id);
-  }, [kodeAwal, periksaKode]);
+  }, [kodeAwal, asetSiap, periksaKode]);
+
+  // Kode yang dikirim sebelum aset siap: format salah langsung dijawab, kode sah menunggu aset (P-50; JS-07).
+  const kirimKode = useCallback(
+    (masukan: string) => {
+      if (asetSiap || !POLA_KODE_RUANG.test(normalkanKode(masukan))) {
+        void periksaKode(masukan);
+        return;
+      }
+      setGalatForm(null);
+      setMemeriksa(true);
+      setKodeTertunda(masukan);
+    },
+    [asetSiap, periksaKode],
+  );
+  useEffect(() => {
+    if (!asetSiap || kodeTertunda === null) return;
+    const id = window.setTimeout(() => {
+      setKodeTertunda(null);
+      void periksaKode(kodeTertunda);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [asetSiap, kodeTertunda, periksaKode]);
+
+  // Layar tetap menyala selama dunia tampil; dilepas di layar selesai, ditutup, dan galat (P-44).
+  useEffect(() => {
+    if (layar === "dunia") void penjaga.nyalakan();
+    else void penjaga.matikan();
+  }, [layar, penjaga]);
+  useEffect(() => () => void penjaga.matikan(), [penjaga]);
 
   // Peramban kembali daring atau tab kembali terlihat: langsung coba lagi (P-29).
   useEffect(() => {
@@ -274,12 +339,15 @@ export default function App() {
   }, []);
 
   const selisihJam = useCallback(() => klien.current?.selisihJamMs ?? 0, []);
+  const kirimGerak = useCallback((p: Extract<PesanPemain, { t: "gerak" }>) => klien.current?.kirim(p) ?? false, []);
+  const bufferedAmount = useCallback(() => klien.current?.bufferedAmount ?? 0, []);
   const diri = diriId ? pemain[diriId] : undefined;
+  const tampilMenyambung = koneksi === "menyambung_ulang" && terputusSejak !== null && LAYAR_BERSAMBUNG.includes(layar);
 
   let isi: ReactNode;
   switch (layar) {
     case "kode":
-      isi = <LayarKode awal={kodeAwal} memeriksa={memeriksa} galat={galatForm} saatKirim={(k) => void periksaKode(k)} />;
+      isi = <LayarKode awal={kodeAwal} memeriksa={memeriksa} siap={asetSiap} galat={galatForm} saatKirim={kirimKode} />;
       break;
     case "absen":
       isi = <LayarAbsen galat={galatForm} saatKirim={kirimAbsen} />;
@@ -308,11 +376,26 @@ export default function App() {
         />
       );
       break;
-    case "lobi":
-      isi = <Lobi kode={kode} nama={diri?.nama ?? ""} avatar={diri?.avatar ?? 0} jumlah={Object.keys(pemain).length} />;
+    case "dunia":
+      isi = (
+        <LayarDunia
+          mesin={mesin}
+          status={waktu.status}
+          waktu={waktu}
+          durasiMenit={pengaturan.durasiMenit}
+          kode={kode}
+          diri={diri ? { nama: diri.nama, avatar: diri.avatar } : null}
+          jumlahPemain={Object.keys(pemain).length}
+          menyambung={tampilMenyambung}
+          selisihJam={selisihJam}
+          kirim={kirimGerak}
+          bufferedAmount={bufferedAmount}
+          umumkan={umumkan}
+        />
+      );
       break;
     case "ronde":
-      isi = <LayarRonde waktu={waktu} selisihJam={selisihJam} />;
+      isi = <LayarRonde />;
       break;
     case "ditutup":
       isi = <LayarDitutup saatKembali={kembali} />;
@@ -322,11 +405,10 @@ export default function App() {
       break;
   }
 
-  const tampilMenyambung = koneksi === "menyambung_ulang" && terputusSejak !== null && LAYAR_BERSAMBUNG.includes(layar);
   return (
     <>
       {isi}
-      {layar === "ronde" && waktu.status === "jeda" ? <LapisanJeda /> : null}
+      {layar === "dunia" && waktu.status === "jeda" ? <LapisanJeda /> : null}
       {tampilMenyambung ? <LapisanMenyambung sejak={terputusSejak} /> : null}
       <div className="js-sr" aria-live="polite">
         {pengumuman}

@@ -1,6 +1,8 @@
 // Gerak, tabrakan, dan pemeriksaan gerak (spesifikasi JS-02, P-24 sampai P-28; PRD 8.2; Architecture 8.2).
 // `langkahGerak` menggerakkan avatar di layar pemain (dan meluncur di dinding); `periksaGerak` dipakai
 // server untuk memeriksa setiap laporan `gerak`. Keduanya memakai kotak kaki dan grid tabrakan yang sama.
+// JS-07: gerak sah di status `lobi`, `hitung_mundur`, dan `main` (P-45), dan pemeriksaan jarak di server
+// memakai anggaran jarak yang terkumpul (P-52), karena laporan jujur yang tiba berdempet ditolak aturan JS-02.
 import { selPadat, UKURAN_UBIN } from "./peta";
 import type { Arah, HasilPeriksaGerak, PetaJejak, Posisi, StatusRuang } from "./tipe";
 
@@ -17,6 +19,13 @@ export const TOLERANSI_GERAK = { kali: 1.25, tambahPx: 4 } as const;
 export const DT_MAKS_MS = 1000;
 /** Langkah terpanjang saat menggerakkan atau menelusuri jalur, agar tidak ada yang menembus satu ubin. */
 export const LANGKAH_TELUSUR_PX = 4;
+/** Status ruang yang menerima laporan gerak: halaman lobi, hitung mundur, dan ronde (JS-07, P-45). */
+export const STATUS_GERAK: readonly StatusRuang[] = ["lobi", "hitung_mundur", "main"];
+/**
+ * Anggaran jarak (JS-07, P-52): bertambah kecepatan × 1,25 per detik sejak laporan diterima terakhir, paling
+ * banyak setengah detik berjalan (45 piksel pada kecepatan 72). Laporan diterima bila jaraknya ≤ anggaran + 4.
+ */
+export const ANGGARAN_GERAK = { detikMaks: 0.5 } as const;
 
 type PetaTabrakan = Pick<PetaJejak, "lebar" | "tinggi" | "tabrakan">;
 
@@ -122,15 +131,31 @@ export interface LaporanGerak {
   lari: boolean;
   status: StatusRuang;
   dialogTerbuka: boolean;
+  /** Grid sesuai status: grid lobi (gerbang padat) di `lobi` dan `hitung_mundur`, grid kampung di `main`. */
   peta: PetaTabrakan;
+  /**
+   * Anggaran jarak sesudah laporan diterima terakhir (P-52). Bila diisi, pemeriksaan jarak memakai anggaran,
+   * sehingga laporan yang tiba berdempet tetap diterima; bila tidak, memakai batas JS-02 per selang.
+   */
+  anggaranPx?: number;
+}
+
+/** Anggaran jarak yang tersedia sesudah `dtMs` sejak laporan diterima terakhir (P-52). */
+export function anggaranTersedia(anggaranPx: number, dtMs: number, lari: boolean): number {
+  const laju = kecepatan(lari) * TOLERANSI_GERAK.kali;
+  const dt = Number.isFinite(dtMs) ? Math.max(0, dtMs) : 0;
+  return Math.min(laju * ANGGARAN_GERAK.detikMaks, Math.max(0, anggaranPx) + (laju * dt) / 1000);
 }
 
 /**
- * Pemeriksaan server untuk satu laporan `gerak`. Ditolak bila seq tidak bertambah, status bukan `main`,
- * dialog terbuka, atau selang ≤ 0; bila jaraknya melebihi kecepatan × selang × 1,25 + 4 piksel (selang
- * paling lama 1 detik); atau bila tujuannya menabrak atau tidak bisa dicapai tanpa menembus ubin padat.
+ * Pemeriksaan server untuk satu laporan `gerak`. Ditolak bila seq tidak bertambah, status bukan `lobi`,
+ * `hitung_mundur`, atau `main`, atau dialog terbuka; bila jaraknya melebihi batas; atau bila tujuannya menabrak
+ * atau tidak bisa dicapai tanpa menembus ubin padat. Batas jarak: dengan anggaran (P-52), anggaran yang
+ * tersedia + 4 piksel; tanpa anggaran (JS-02), kecepatan × selang × 1,25 + 4 piksel (selang paling lama 1 detik,
+ * dan selang ≤ 0 ditolak). Bila ditolak, anggaran tidak berubah; bila diterima, anggaran berkurang sejauh jaraknya.
  */
 export function periksaGerak(m: LaporanGerak): HasilPeriksaGerak {
+  const pakaiAnggaran = m.anggaranPx !== undefined;
   const tolak = (alasan: NonNullable<HasilPeriksaGerak["alasan"]>): HasilPeriksaGerak => ({
     diterima: false,
     x: m.posisi.x,
@@ -138,15 +163,24 @@ export function periksaGerak(m: LaporanGerak): HasilPeriksaGerak {
     arah: m.posisi.arah,
     seq: m.laporan.seq,
     alasan,
+    ...(pakaiAnggaran ? { anggaranPx: m.anggaranPx } : {}),
   });
   if (!(m.laporan.seq > m.seqTerakhir)) return tolak("seq");
-  if (m.status !== "main") return tolak("status");
+  if (!STATUS_GERAK.includes(m.status)) return tolak("status");
   if (m.dialogTerbuka) return tolak("dialog");
-  if (!(m.dtMs > 0)) return tolak("waktu");
   const ke = { x: m.laporan.x, y: m.laporan.y };
-  if (!(Math.hypot(ke.x - m.posisi.x, ke.y - m.posisi.y) <= batasJarakGerak(m.dtMs, m.lari))) return tolak("kecepatan");
+  const jarakLapor = Math.hypot(ke.x - m.posisi.x, ke.y - m.posisi.y);
+  let sisa: number | undefined;
+  if (pakaiAnggaran) {
+    const tersedia = anggaranTersedia(m.anggaranPx ?? 0, m.dtMs, m.lari);
+    if (!(jarakLapor <= tersedia + TOLERANSI_GERAK.tambahPx)) return tolak("kecepatan");
+    sisa = Math.max(0, tersedia - jarakLapor);
+  } else {
+    if (!(m.dtMs > 0)) return tolak("waktu");
+    if (!(jarakLapor <= batasJarakGerak(m.dtMs, m.lari))) return tolak("kecepatan");
+  }
   if (!jalurAda(m.peta, m.posisi, ke)) return tolak("tabrakan");
-  return { diterima: true, x: ke.x, y: ke.y, arah: m.laporan.arah, seq: m.laporan.seq, alasan: null };
+  return { diterima: true, x: ke.x, y: ke.y, arah: m.laporan.arah, seq: m.laporan.seq, alasan: null, ...(sisa !== undefined ? { anggaranPx: sisa } : {}) };
 }
 
 /**

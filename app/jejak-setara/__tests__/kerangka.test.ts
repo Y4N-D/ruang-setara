@@ -93,8 +93,53 @@ describe("Worker kerangka", () => {
     const produksi = await coba("produksi", { "X-Jejak-Kunci-Coba": "kunci-benar" });
     expect(produksi.status).toBe(404);
     expect(await produksi.json()).toEqual({ galat: { kode: "BELUM_TERSEDIA", pesan: "Fitur ini belum tersedia." } });
-    const kaitDiUji = await worker.fetch(new Request("http://127.0.0.1/api/ruang-coba/K7MPA/kelas", { method: "POST", body: "{}" }), { ...env, LINGKUNGAN: "uji" } as typeof env);
-    expect(kaitDiUji.status).toBe(404);
+  });
+
+  it("JS-07: kait kelas di uji butuh kunci (403), di produksi 404; statistik dan putuskan tetap hanya lokal", async () => {
+    const kait = (lingkungan: string, jalur: string, tajuk: Record<string, string> = {}) =>
+      worker.fetch(new Request(`http://127.0.0.1/api/ruang-coba/K7MPA/${jalur}`, { method: "POST", headers: tajuk, body: "{}" }), {
+        ...env,
+        LINGKUNGAN: lingkungan,
+        KUNCI_COBA: "kunci-benar",
+      } as typeof env);
+    const tajukSalah: Record<string, string>[] = [{}, { "X-Jejak-Kunci-Coba": "kunci-salah" }, { "X-Jejak-Kunci-Coba": "kunci-benar!" }];
+    for (const tajuk of tajukSalah) {
+      const jawaban = await kait("uji", "kelas", tajuk);
+      expect(jawaban.status).toBe(403);
+      expect(await jawaban.json()).toEqual({ galat: { kode: "KUNCI_SALAH", pesan: "Kunci ruang coba tidak cocok." } });
+    }
+    for (const jalur of ["statistik", "putuskan"]) expect((await kait("uji", jalur, { "X-Jejak-Kunci-Coba": "kunci-benar" })).status, jalur).toBe(404);
+    const produksi = await kait("produksi", "kelas", { "X-Jejak-Kunci-Coba": "kunci-benar" });
+    expect(produksi.status).toBe(404);
+    expect(await produksi.json()).toEqual({ galat: { kode: "BELUM_TERSEDIA", pesan: "Fitur ini belum tersedia." } });
+  });
+
+  it("JS-07: kait kelas di uji dengan kunci benar diteruskan ke ruang, dan jawaban ruang (berisi status) dikembalikan", async () => {
+    const diteruskanKe: { url: string; body: string }[] = [];
+    const envUji = {
+      ...env,
+      LINGKUNGAN: "uji",
+      KUNCI_COBA: "kunci-benar",
+      DB: {
+        prepare: () => ({ bind: () => ({ first: async () => ({ id: "r-1", do_id: "do-1", pengaturan_json: "{}", status: "lobi" }) }) }),
+      },
+      RUANG: {
+        idFromString: (id: string) => id,
+        get: () => ({
+          fetch: async (url: string, init: RequestInit) => {
+            diteruskanKe.push({ url, body: String(init.body) });
+            return new Response(JSON.stringify({ ok: true, status: "hitung_mundur" }), { status: 200 });
+          },
+        }),
+      },
+    } as unknown as typeof env;
+    const jawaban = await worker.fetch(
+      new Request("http://127.0.0.1/api/ruang-coba/k7mpa/kelas", { method: "POST", headers: { "X-Jejak-Kunci-Coba": "kunci-benar" }, body: '{"v":1,"t":"mulai"}' }),
+      envUji,
+    );
+    expect(jawaban.status).toBe(200);
+    expect(await jawaban.json()).toEqual({ ok: true, status: "hitung_mundur" });
+    expect(diteruskanKe).toEqual([{ url: "https://ruang/kelas", body: '{"v":1,"t":"mulai"}' }]);
   });
 
   it("jalur lain diteruskan ke ASSETS dan jawabannya dikembalikan apa adanya", async () => {
@@ -116,7 +161,7 @@ describe("Worker kerangka", () => {
 });
 
 describe("Teks dan halaman", () => {
-  it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01 dan JS-03", () => {
+  it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01, JS-03, dan JS-07", () => {
     expect(TEKS).toEqual({
       judulTabPemain: "Jejak Setara",
       judulTabKonsol: "Konsol admin · Jejak Setara",
@@ -173,6 +218,22 @@ describe("Teks dan halaman", () => {
       menyambung: {
         judul: "Menyambung ulang…",
         lama: "Periksa wifi atau data selulermu.",
+      },
+      dunia: {
+        label: "Dunia permainan. Gerakkan avatar dengan W, A, S, D atau tombol panah.",
+        layarPenuh: "Layar penuh",
+        putarHp: "Putar HP ke posisi mendatar",
+        duaMenit: "Dua menit lagi",
+        jamCerita: "Jam cerita {jam}",
+        sisaWaktu: "Sisa waktu {waktu}",
+        masa: { pagi: "Pagi", siang: "Siang", sore: "Sore" },
+      },
+      peta: {
+        bukaBesar: "Buka peta besar",
+        judul: "Peta kampung",
+        tutup: "Tutup peta",
+        kamuDiSini: "Kamu di sini",
+        halte: "Halte",
       },
       tombol: { kembali: "Kembali", muatUlang: "Muat ulang" },
       pengumuman: {
@@ -296,6 +357,61 @@ describe("Token dan tajuk", () => {
         }
       }
     });
+  });
+});
+
+describe("JS-07: alur kerja kendali ruang coba (P-55 sampai P-57)", () => {
+  const kendali = baca(".github/workflows/jejak-kendali-coba.yml");
+  const coba = baca(".github/workflows/jejak-ruang-coba.yml");
+
+  it("\"Jejak: kendali ruang coba\": tombol Run workflow, masukan kode dan enam aksi, grup concurrency, batas 10 menit, izin baca", () => {
+    expect(kendali).toContain('name: "Jejak: kendali ruang coba"');
+    expect(kendali).toMatch(/on:\n  workflow_dispatch:\n/);
+    expect(kendali).not.toMatch(/\n  push:/);
+    expect(kendali).toContain('description: "Kode ruang (5 huruf atau angka)"');
+    const pilihan = kendali.slice(kendali.indexOf("options:"), kendali.indexOf("permissions:"));
+    expect([...pilihan.matchAll(/- "([^"]+)"/g)].map((m) => m[1])).toEqual(["mulai", "jeda", "lanjut", "tambah 1 menit", "akhiri", "tutup"]);
+    expect(kendali).toContain("permissions:\n  contents: read\n");
+    expect(kendali).toContain("concurrency:\n  group: jejak-cloudflare-uji\n  cancel-in-progress: false\n");
+    expect(coba).toContain("concurrency:\n  group: jejak-cloudflare-uji\n  cancel-in-progress: false\n");
+    expect(kendali).toContain("timeout-minutes: 10");
+  });
+
+  it("pesan layar kelas untuk setiap aksi, kunci sekali pakai yang disamarkan, dan percobaan ulang selama 403", () => {
+    for (const pesan of ['{"v":1,"t":"mulai"}', '{"v":1,"t":"jeda"}', '{"v":1,"t":"lanjut"}', '{"v":1,"t":"tambah_waktu","detik":60}', '{"v":1,"t":"akhiri"}', '{"v":1,"t":"tutup_ruang"}']) {
+      expect(kendali).toContain(`PESAN='${pesan}'`);
+    }
+    expect(kendali).toContain('echo "::add-mask::$KUNCI"');
+    expect(kendali).toContain("secret put KUNCI_COBA --name jejak-setara-uji");
+    expect(kendali).toContain('-H "X-Jejak-Kunci-Coba: $KUNCI"');
+    expect(kendali).toContain("for i in $(seq 1 10); do");
+    expect(kendali).toContain('if [ "$STATUS" != "403" ]; then break; fi');
+    expect(kendali).not.toMatch(/echo "[^"]*\$KUNCI[^"]*" >> "\$GITHUB_STEP_SUMMARY"/);
+  });
+
+  it("ringkasan: kode, aksi, dan status ruang dengan nama Bahasa Indonesia; galat kode tidak ditemukan", () => {
+    for (const teks of ['echo "Kode ruang: $KODE"', 'echo "Aksi: $AKSI"', 'echo "Status ruang sekarang: $NAMA"', "Kode ruang tidak ditemukan atau ruang sudah ditutup."]) {
+      expect(kendali).toContain(teks);
+    }
+    for (const [status, nama] of [
+      ["lobi", "Lobi"],
+      ["hitung_mundur", "Hitung mundur"],
+      ["main", "Ronde berjalan"],
+      ["jeda", "Dijeda"],
+      ["selesai", "Selesai"],
+      ["pembahasan", "Pembahasan"],
+      ["ditutup", "Ditutup"],
+    ]) {
+      expect(kendali).toContain(`"${status}") NAMA="${nama}" ;;`);
+    }
+  });
+
+  it("\"Jejak: ruang coba\" punya masukan Durasi ronde (menit): 10, 15 (bawaan), atau 20, dikirim sebagai durasiMenit", () => {
+    expect(coba).toContain('description: "Durasi ronde (menit)"');
+    expect(coba).toContain('default: "15"');
+    const durasi = coba.slice(coba.indexOf("durasi_menit:"), coba.indexOf("permissions:"));
+    expect([...durasi.matchAll(/- "(\d+)"/g)].map((m) => m[1])).toEqual(["10", "15", "20"]);
+    expect(coba).toContain("durasiMenit: $d");
   });
 });
 

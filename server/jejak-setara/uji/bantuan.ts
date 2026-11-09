@@ -16,6 +16,16 @@ export async function kelas(kode: string, pesan: unknown, port = 4320): Promise<
   return (await fetch(`${alamat(port)}/api/ruang-coba/${kode}/kelas`, { method: "POST", body: JSON.stringify(pesan) })).status;
 }
 
+/** Kait kelas beserta isi jawabannya (JS-07, P-54). */
+export async function kelasJson(kode: string, pesan: unknown, port = 4320): Promise<{ status: number; isi: Record<string, unknown> }> {
+  const j = await fetch(`${alamat(port)}/api/ruang-coba/${kode}/kelas`, { method: "POST", body: JSON.stringify(pesan) });
+  return { status: j.status, isi: (await j.json()) as Record<string, unknown> };
+}
+
+export async function statistikRuang(kode: string, port = 4320): Promise<Record<string, unknown>> {
+  return (await (await fetch(`${alamat(port)}/api/ruang-coba/${kode}/statistik`)).json()) as Record<string, unknown>;
+}
+
 export interface Klien {
   ws: WebSocket;
   masuk: Record<string, unknown>[];

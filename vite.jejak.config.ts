@@ -29,7 +29,13 @@ export default defineConfig(async () => {
         persistState: { path: process.env.JEJAK_KEADAAN ?? akar + ".wrangler/state" },
       }),
     ],
-    build: { outDir: akar + "dist-jejak", emptyOutDir: true },
+    build: {
+      outDir: akar + "dist-jejak",
+      emptyOutDir: true,
+      // Aset gambar Jejak Setara selalu menjadi berkas berhash, tidak diselipkan ke kode sebagai data URI
+      // (Architecture 11.2; Permintaan C-13, diterapkan di Build JS-07). Berkas lain memakai aturan bawaan Vite.
+      assetsInlineLimit: (jalur: string) => (jalur.replaceAll("\\", "/").includes("/app/jejak-setara/assets/") ? false : undefined),
+    },
     // Masukan dua halaman hanya untuk lingkungan klien. Bila ditulis di build teratas,
     // build Worker ikut membacanya dan gagal (UNRESOLVED_ENTRY, percobaan Plan JS-01).
     environments: {

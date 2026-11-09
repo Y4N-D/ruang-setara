@@ -28,7 +28,7 @@ import {
   type Simpanan,
   type WaktuRuang,
 } from "./inti-ruang";
-import { PETA_UJI } from "./peta-uji";
+import { PETA_KAMPUNG } from "./peta-kampung";
 import { bacaPesanPemain, catatPelanggaran, sambunganBaru, type KeadaanSambungan } from "./sambungan";
 
 interface Lampiran {
@@ -70,7 +70,17 @@ export class RuangJejak {
   private kirimanGagal: { percobaan: number; berikutnya: number } | null = null;
   private alarmTerpasang: number | null | undefined = undefined;
   private antrean: Promise<unknown> = Promise.resolve();
-  private readonly statistik = { masuk: 0, keluar: 0, byteKeluar: 0, barisDitulis: 0, putaran: 0, koreksi: 0, pelanggaran: 0 };
+  private readonly statistik = {
+    masuk: 0,
+    keluar: 0,
+    byteKeluar: 0,
+    barisDitulis: 0,
+    putaran: 0,
+    koreksi: 0,
+    pelanggaran: 0,
+    duniaLobi: 0,
+    koreksiAlasan: {} as Record<string, number>,
+  };
 
   constructor(ctx: DurableObjectState, env: Env) {
     this.ctx = ctx;
@@ -170,7 +180,7 @@ export class RuangJejak {
         pemain,
         sambungan,
       },
-      PETA_UJI,
+      PETA_KAMPUNG,
       sekarang,
     );
     if (this.keadaan.status === "main") this.mulaiPutaran();
@@ -229,7 +239,7 @@ export class RuangJejak {
   private async inisialisasi(request: Request): Promise<Response> {
     if (this.keadaan) return jawabJson({ ok: true }, 200);
     const data = (await request.json()) as DataRuang;
-    this.keadaan = buatKeadaan(data, PETA_UJI);
+    this.keadaan = buatKeadaan(data, PETA_KAMPUNG);
     this.tulisMeta("ruang", data);
     this.tulisMeta("status", this.keadaan.status);
     this.tulisMeta("waktu", this.keadaan.waktu);
@@ -249,7 +259,8 @@ export class RuangJejak {
     const hasil = skemaKelas.safeParse(data);
     if (!hasil.success || hasil.data.t === "halo") return jawabGalat("PESAN_SALAH", TEKS.api.PESAN_SALAH, 400);
     await this.terapkan(terimaKelas(k, hasil.data, Date.now()));
-    return jawabJson({ ok: true }, 200);
+    // Status ruang sesudah pesan; pesan yang tidak berlaku di status sekarang tidak mengubah apa pun (JS-07, P-54).
+    return jawabJson({ ok: true, status: this.keadaan?.status ?? "ditutup" }, 200);
   }
 
   /** Kait uji lokal: memutus semua sambungan pemain seperti jaringan putus (kode 1012, klien menyambung ulang). */
@@ -274,6 +285,7 @@ export class RuangJejak {
       antreanKiriman: this.sql.exec<{ n: number }>("SELECT COUNT(*) AS n FROM kiriman").one().n,
       menungguHalo: this.keadaan?.batasHalo.size ?? 0,
       alarm: this.alarmTerpasang ?? null,
+      pewaktuPutaran: this.pewaktuPutaran !== null,
     };
   }
 
@@ -411,6 +423,8 @@ export class RuangJejak {
     for (const t of o.tutup) this.tutupSoket(t.sambunganId, t.kode, t.alasan);
     if (o.kiriman.length > 0) this.antrekanKiriman(o.kiriman);
     this.statistik.koreksi += o.koreksi;
+    this.statistik.duniaLobi += o.duniaLobi;
+    if (o.alasanKoreksi) this.statistik.koreksiAlasan[o.alasanKoreksi] = (this.statistik.koreksiAlasan[o.alasanKoreksi] ?? 0) + 1;
     if (o.putaran === "mulai") this.mulaiPutaran();
     else if (o.putaran === "henti") this.hentiPutaran();
     if (o.kirimSekarang) await this.kirimKiriman();

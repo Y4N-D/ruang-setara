@@ -1,8 +1,19 @@
 // Uji pembaca peta dan RLE (spesifikasi JS-02, P-29 sampai P-32; AC-8).
 import { describe, expect, it } from "vitest";
-import { acakBerbenih } from "../../inti/acak";
+import { acakBerbenih, benih } from "../../inti/acak";
 import { GalatInti } from "../../inti/aturan";
-import { bacaPeta, pikselKeUbin, pusatUbin, selPadat, ubinKePiksel, UKURAN_PETA_MAKS, UKURAN_UBIN, uraiRle } from "../../inti/peta";
+import {
+  bacaPeta,
+  pikselKeUbin,
+  pusatUbin,
+  selPadat,
+  tutupGerbang,
+  ubinKePiksel,
+  UKURAN_PETA_MAKS,
+  UKURAN_UBIN,
+  uraiRle,
+  versiPeta,
+} from "../../inti/peta";
 import type { PetaJejak } from "../../inti/tipe";
 
 /** Penyandi RLE untuk uji, ditulis terpisah dari pengurainya. */
@@ -230,5 +241,28 @@ describe("selPadat dan bantuan ubin (P-31)", () => {
     expect(pikselKeUbin(47.99)).toBe(2);
     expect(pikselKeUbin(48)).toBe(3);
     expect(pikselKeUbin(-0.5)).toBe(-1);
+  });
+});
+
+describe("JS-07: tutupGerbang dan versiPeta (P-46, P-50)", () => {
+  it("tutupGerbang menyalin grid dan memadatkan semua sel gerbangLobi tanpa mengubah grid asal", () => {
+    const peta = bacaPeta(contohPeta());
+    const asal = Uint8Array.from(peta.tabrakan);
+    const lobi = tutupGerbang(peta);
+    expect(peta.tabrakan).toEqual(asal);
+    expect([selPadat(peta, 3, 5), selPadat(peta, 4, 5)]).toEqual([false, false]);
+    const gridLobi = { lebar: peta.lebar, tinggi: peta.tinggi, tabrakan: lobi };
+    expect([selPadat(gridLobi, 3, 5), selPadat(gridLobi, 4, 5)]).toEqual([true, true]);
+    let beda = 0;
+    for (let i = 0; i < lobi.length; i++) if (lobi[i] !== asal[i]) beda++;
+    expect(beda).toBe(2);
+  });
+
+  it("versiPeta = benih FNV-1a atas teks tabrakan mod 999.999 + 1; berubah bila tabrakan berubah", () => {
+    const p = contohPeta();
+    expect(versiPeta(p)).toBe((benih(p.tabrakan) % 999_999) + 1);
+    expect(versiPeta(p)).toBeGreaterThanOrEqual(1);
+    expect(versiPeta(p)).toBeLessThanOrEqual(999_999);
+    expect(versiPeta({ tabrakan: p.tabrakan.replace("1x9;", "1x10;") })).not.toBe(versiPeta(p));
   });
 });

@@ -1,4 +1,5 @@
 // Layar gabung pemain: Kode, Nomor absen, Menghubungkan, dan Identitas (spesifikasi JS-03, P-49 sampai P-53).
+// JS-07: tombol "Masuk" baru aktif sesudah aset dunia termuat.
 import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import PenandaServer from "../bersama/PenandaServer";
 import { normalkanKode, POLA_KODE_RUANG } from "../inti/aturan";
@@ -29,11 +30,14 @@ export function PitaGalat({ teks, id }: { teks: string | null; id?: string }) {
 export function LayarKode({
   awal,
   memeriksa,
+  siap = true,
   galat,
   saatKirim,
 }: {
   awal: string;
   memeriksa: boolean;
+  /** Aset dunia sudah termuat; sebelum itu tombol "Masuk" tampil belum aktif dan kode sah menunggu aset (JS-07). */
+  siap?: boolean;
   galat: string | null;
   saatKirim: (kode: string) => void;
 }) {
@@ -70,7 +74,7 @@ export function LayarKode({
           {memeriksa ? TEKS.kode.memeriksa : TEKS.kode.petunjuk}
         </p>
         <PitaGalat id="js-kode-galat" teks={galat} />
-        <button type="submit" className="js-tombol js-tombol-utama" aria-disabled={!sah || memeriksa}>
+        <button type="submit" className="js-tombol js-tombol-utama" aria-disabled={!sah || memeriksa || !siap}>
           {TEKS.kode.tombol}
         </button>
       </form>

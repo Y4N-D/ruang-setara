@@ -119,4 +119,6 @@ export interface HasilPeriksaGerak {
   arah: Arah;
   seq: number; // seq laporan yang diperiksa
   alasan: "seq" | "status" | "dialog" | "waktu" | "kecepatan" | "tabrakan" | null; // null bila diterima
+  /** Anggaran jarak sesudah laporan ini, hanya bila pemeriksaan memakai anggaran jarak (JS-07, P-52). */
+  anggaranPx?: number;
 }

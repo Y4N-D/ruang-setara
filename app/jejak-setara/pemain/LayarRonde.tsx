@@ -1,9 +1,14 @@
-// Layar sementara ronde, ruang ditutup, dan galat (spesifikasi JS-03, P-49, D-7). Diganti di JS-07 dan JS-11.
+// Layar ronde selesai, ruang ditutup, dan galat (spesifikasi JS-03, P-49, D-7), serta lapisan hitung mundur di atas
+// dunia (spesifikasi JS-07, P-29). Sejak JS-07, ronde yang berjalan dan jeda tampil di LayarDunia; layar selesai
+// dan ditutup tetap layar HTML tanpa dunia (P-41). Rekap pribadi dibuat di JS-11.
 import { useEffect, useState } from "react";
 import type { KodeGalat } from "../inti/protokol";
 import type { StatusRuang } from "../inti/tipe";
 import { TEKS } from "../teks";
+import { formatSisa } from "./dunia/langit";
 import { Panel } from "./Gabung";
+
+export { formatSisa };
 
 export interface WaktuStatus {
   status: StatusRuang;
@@ -12,36 +17,26 @@ export interface WaktuStatus {
   jedaSejak: number | null;
 }
 
-/** Sisa waktu "mm:ss", dibulatkan ke atas per detik. */
-export function formatSisa(ms: number): string {
-  const s = Math.max(0, Math.ceil(ms / 1000));
-  return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
-}
-
-export function LayarRonde({ waktu, selisihJam }: { waktu: WaktuStatus; selisihJam: () => number }) {
+/** "Bersiap" dan angka 3, 2, lalu 1 di tengah dunia, masing-masing satu detik menurut jam server (P-29). */
+export function LapisanHitungMundur({ mulaiPada, selisihJam }: { mulaiPada: number; selisihJam: () => number }) {
   const [kini, setKini] = useState(() => Date.now());
   useEffect(() => {
-    const id = window.setInterval(() => setKini(Date.now()), 250);
+    const id = window.setInterval(() => setKini(Date.now()), 100);
     return () => window.clearInterval(id);
   }, []);
-  const jamServer = kini + selisihJam();
-  if (waktu.status === "hitung_mundur") {
-    const n = Math.min(3, Math.max(1, Math.ceil(((waktu.mulaiPada ?? jamServer) - jamServer) / 1000)));
-    return (
-      <Panel judul={TEKS.ronde.bersiap}>
-        <p className="js-angka-besar">{n}</p>
-      </Panel>
-    );
-  }
-  if (waktu.status === "main" || waktu.status === "jeda") {
-    const acuan = waktu.status === "jeda" && waktu.jedaSejak !== null ? waktu.jedaSejak : jamServer;
-    return (
-      <Panel judul={TEKS.ronde.berjalan}>
-        <p className="js-label">{TEKS.ronde.sisaWaktu}</p>
-        <p className="js-angka-besar">{formatSisa((waktu.berakhirPada ?? acuan) - acuan)}</p>
-      </Panel>
-    );
-  }
+  const n = Math.min(3, Math.max(1, Math.ceil((mulaiPada - (kini + selisihJam())) / 1000)));
+  return (
+    <div className="js-hitung-mundur" role="status">
+      <p className="js-hitung-mundur-judul">{TEKS.ronde.bersiap}</p>
+      <p className="js-angka-besar" aria-hidden="true">
+        {n}
+      </p>
+    </div>
+  );
+}
+
+/** Layar sesudah ronde: "Ronde selesai" sampai rekap pribadi dibuat di JS-11. */
+export function LayarRonde() {
   return (
     <Panel judul={TEKS.ronde.selesai}>
       <p className="js-isi">{TEKS.ronde.selesaiIsi}</p>

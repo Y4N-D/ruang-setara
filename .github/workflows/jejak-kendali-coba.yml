@@ -1,0 +1,123 @@
+# Mengendalikan ruang coba di lingkungan uji seperti layar kelas (spesifikasi JS-07, P-53 sampai P-56): mulai, jeda,
+# lanjut, tambah 1 menit, akhiri, atau tutup. Kunci sekali pakai KUNCI_COBA dibuat ulang setiap kali dijalankan dan
+# tidak pernah tampil di log. Dipensiunkan di JS-10 bersama "Jejak: ruang coba".
+# Catatan: menyimpan rahasia Worker membuat versi Worker baru. Ruang yang sedang berjalan bisa pindah ke versi itu
+# dalam beberapa menit; pemain lalu menyambung ulang sebentar tanpa kehilangan posisi atau skor.
+name: "Jejak: kendali ruang coba"
+
+on:
+  workflow_dispatch:
+    inputs:
+      kode:
+        description: "Kode ruang (5 huruf atau angka)"
+        required: true
+      aksi:
+        description: "Aksi"
+        type: choice
+        required: true
+        default: "mulai"
+        options:
+          - "mulai"
+          - "jeda"
+          - "lanjut"
+          - "tambah 1 menit"
+          - "akhiri"
+          - "tutup"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jejak-cloudflare-uji
+  cancel-in-progress: false
+
+jobs:
+  kendali:
+    name: Kendalikan ruang coba
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: "false"
+      KODE_MASUK: ${{ inputs.kode }}
+      AKSI: ${{ inputs.aksi }}
+      ALAMAT_TETAP: ${{ vars.JEJAK_ALAMAT_UJI }}
+    steps:
+      - name: Periksa rahasia dan masukan
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Rahasia Cloudflare belum diisi (Architecture bagian 18, langkah 6)."
+            exit 1
+          fi
+          KODE=$(printf '%s' "$KODE_MASUK" | tr '[:lower:]' '[:upper:]' | tr -d ' -')
+          if ! printf '%s' "$KODE" | grep -Eq '^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{5}$'; then
+            echo "::error::Kode ruang berisi 5 huruf atau angka."
+            exit 1
+          fi
+          case "$AKSI" in
+            "mulai") PESAN='{"v":1,"t":"mulai"}' ;;
+            "jeda") PESAN='{"v":1,"t":"jeda"}' ;;
+            "lanjut") PESAN='{"v":1,"t":"lanjut"}' ;;
+            "tambah 1 menit") PESAN='{"v":1,"t":"tambah_waktu","detik":60}' ;;
+            "akhiri") PESAN='{"v":1,"t":"akhiri"}' ;;
+            "tutup") PESAN='{"v":1,"t":"tutup_ruang"}' ;;
+            *) echo "::error::Aksi tidak dikenal."; exit 1 ;;
+          esac
+          echo "KODE=$KODE" >> "$GITHUB_ENV"
+          echo "PESAN=$PESAN" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Simpan kunci sekali pakai
+        run: |
+          KUNCI=$(openssl rand -hex 32)
+          echo "::add-mask::$KUNCI"
+          echo "KUNCI=$KUNCI" >> "$GITHUB_ENV"
+          printf '%s' "$KUNCI" | npx -y wrangler@4.92.0 secret put KUNCI_COBA --name jejak-setara-uji
+
+      - name: Cari alamat lingkungan uji
+        run: |
+          if [ -n "$ALAMAT_TETAP" ]; then
+            ALAMAT="$ALAMAT_TETAP"
+          else
+            SUB=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
+            ALAMAT="https://jejak-setara-uji.$SUB.workers.dev"
+          fi
+          echo "ALAMAT=$ALAMAT" >> "$GITHUB_ENV"
+
+      - name: Kirim aksi
+        run: |
+          STATUS=0
+          for i in $(seq 1 10); do
+            STATUS=$(curl -sS -o jawaban.json -w '%{http_code}' -X POST "$ALAMAT/api/ruang-coba/$KODE/kelas" -H "X-Jejak-Kunci-Coba: $KUNCI" -H "Content-Type: application/json" -d "$PESAN" || true)
+            if [ "$STATUS" != "403" ]; then break; fi
+            sleep 3
+          done
+          if [ "$STATUS" = "404" ]; then
+            echo "::error::Kode ruang tidak ditemukan atau ruang sudah ditutup."
+            exit 1
+          fi
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Aksi gagal dikirim (status $STATUS)."
+            exit 1
+          fi
+          case "$(jq -r '.status' jawaban.json)" in
+            "lobi") NAMA="Lobi" ;;
+            "hitung_mundur") NAMA="Hitung mundur" ;;
+            "main") NAMA="Ronde berjalan" ;;
+            "jeda") NAMA="Dijeda" ;;
+            "selesai") NAMA="Selesai" ;;
+            "pembahasan") NAMA="Pembahasan" ;;
+            "ditutup") NAMA="Ditutup" ;;
+            *) NAMA="Tidak diketahui" ;;
+          esac
+          {
+            echo "Kode ruang: $KODE"
+            echo
+            echo "Aksi: $AKSI"
+            echo
+            echo "Status ruang sekarang: $NAMA"
+          } >> "$GITHUB_STEP_SUMMARY"

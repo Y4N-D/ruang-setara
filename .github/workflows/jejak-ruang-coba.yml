@@ -1,6 +1,7 @@
 # Membuat satu ruang coba di lingkungan uji, lalu menulis kode dan tautannya di ringkasan alur kerja
 # (spesifikasi JS-03, P-7 dan P-8). Kunci sekali pakai KUNCI_COBA dibuat ulang setiap kali dijalankan
-# dan tidak pernah tampil di log. Dipensiunkan di JS-10.
+# dan tidak pernah tampil di log. Sejak JS-07 (P-57) durasi ronde bisa dipilih; ronde dijalankan dengan
+# "Jejak: kendali ruang coba". Dipensiunkan di JS-10.
 name: "Jejak: ruang coba"
 
 on:
@@ -14,6 +15,14 @@ on:
         description: "Mode nomor absen"
         type: boolean
         default: false
+      durasi_menit:
+        description: "Durasi ronde (menit)"
+        type: choice
+        default: "15"
+        options:
+          - "10"
+          - "15"
+          - "20"
 
 permissions:
   contents: read
@@ -33,6 +42,7 @@ jobs:
       WRANGLER_SEND_METRICS: "false"
       BATAS_PEMAIN: ${{ inputs.batas_pemain }}
       MODE_NOMOR_ABSEN: ${{ inputs.mode_nomor_absen }}
+      DURASI_MENIT: ${{ inputs.durasi_menit }}
       ALAMAT_TETAP: ${{ vars.JEJAK_ALAMAT_UJI }}
     steps:
       - name: Periksa rahasia
@@ -43,6 +53,10 @@ jobs:
           fi
           case "$BATAS_PEMAIN" in
             ''|*[!0-9]*) echo "::error::Batas pemain harus angka 2–100."; exit 1 ;;
+          esac
+          case "$DURASI_MENIT" in
+            10|15|20) ;;
+            *) echo "::error::Durasi ronde harus 10, 15, atau 20 menit."; exit 1 ;;
           esac
 
       - uses: actions/setup-node@v4
@@ -68,7 +82,7 @@ jobs:
 
       - name: Buat ruang
         run: |
-          ISI=$(jq -cn --argjson b "$BATAS_PEMAIN" --argjson a "$MODE_NOMOR_ABSEN" '{batasPemain: $b, modeNomorAbsen: $a}')
+          ISI=$(jq -cn --argjson b "$BATAS_PEMAIN" --argjson a "$MODE_NOMOR_ABSEN" --argjson d "$DURASI_MENIT" '{batasPemain: $b, modeNomorAbsen: $a, durasiMenit: $d}')
           STATUS=0
           for i in $(seq 1 10); do
             STATUS=$(curl -sS -o jawaban.json -w '%{http_code}' -X POST "$ALAMAT/api/ruang-coba" -H "X-Jejak-Kunci-Coba: $KUNCI" -H "Content-Type: application/json" -d "$ISI" || true)

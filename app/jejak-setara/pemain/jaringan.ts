@@ -1,5 +1,7 @@
 // Klien WebSocket pemain (spesifikasi JS-03, P-18, P-25, P-29 sampai P-31, P-55).
 // Ketergantungan (soket, jam, pengatur waktu, penyimpanan) diberikan dari luar agar bisa diuji di Node.
+// JS-07: versi peta halaman dibandingkan dengan `selamat_datang.versiPeta` (P-50), dan bufferedAmount soket
+// dibaca agar `gerak` tidak diantrekan (P-16).
 import { BATAS } from "../inti/aturan";
 import { PROTOKOL_VERSI, skemaServerPemain, type KodeGalat, type PesanPemain, type PesanServerPemain } from "../inti/protokol";
 
@@ -35,6 +37,8 @@ export type KeadaanKlien = "menghubungkan" | "tersambung" | "menyambung_ulang" |
 
 export interface SoketMirip {
   readonly readyState: number;
+  /** Byte yang belum terkirim (WebSocket.bufferedAmount); tidak ada di soket tiruan lama. */
+  readonly bufferedAmount?: number;
   send(data: string): void;
   close(kode?: number, alasan?: string): void;
   onopen: ((ev: unknown) => void) | null;
@@ -78,6 +82,7 @@ export class KlienRuang {
   private readonly dep: Ketergantungan;
   private readonly saatPesan: (p: PesanServerPemain) => void;
   private readonly saatKeadaan: (k: KeadaanKlien, kodeTutup: number | null) => void;
+  private readonly versiPeta: number | null;
 
   constructor(
     alamat: string,
@@ -86,6 +91,7 @@ export class KlienRuang {
     dep: Ketergantungan,
     saatPesan: (p: PesanServerPemain) => void,
     saatKeadaan: (k: KeadaanKlien, kodeTutup: number | null) => void,
+    opsi: { versiPeta?: number } = {},
   ) {
     this.alamat = alamat;
     this.kode = kode;
@@ -93,10 +99,16 @@ export class KlienRuang {
     this.dep = dep;
     this.saatPesan = saatPesan;
     this.saatKeadaan = saatKeadaan;
+    this.versiPeta = opsi.versiPeta ?? null;
   }
 
   get selisihJamMs(): number {
     return selisihJam(this.sampel);
+  }
+
+  /** Byte yang belum terkirim di soket; 0 bila tidak tersambung (P-16). */
+  get bufferedAmount(): number {
+    return this.soket?.bufferedAmount ?? 0;
   }
 
   mulai(): void {
@@ -216,6 +228,14 @@ export class KlienRuang {
       return;
     }
     const p = hasil.data;
+    if (p.t === "selamat_datang" && this.versiPeta !== null && p.versiPeta !== this.versiPeta) {
+      // Peta di server lain dengan peta halaman: berhenti menyambung dan minta muat ulang (P-50). Token disimpan,
+      // agar sesudah muat ulang pemain kembali sebagai pemain yang sama.
+      this.dep.penyimpanan?.setItem(kunciToken(this.kode), p.token);
+      this.saatPesan({ v: 1, t: "galat", kode: "VERSI_BERBEDA", pesan: "" });
+      this.berhenti(4005);
+      return;
+    }
     if (p.t === "selamat_datang") {
       this.dep.penyimpanan?.setItem(kunciToken(this.kode), p.token);
       this.percobaan = 0;

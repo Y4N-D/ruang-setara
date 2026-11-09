@@ -1,8 +1,10 @@
 // Logika ruang Jejak Setara (spesifikasi JS-03, bagian D sampai H; Architecture 7 dan JA-11).
 // Murni: tanpa API Workers, jam, atau acak langsung. Pembungkus (RuangJejak.ts) memberi `sekarang`,
 // fungsi `acak`, dan id baru, lalu menjalankan Keluaran: pesan, penutupan, penyimpanan, dan kiriman ke D1.
+// JS-07: pemain berjalan di halaman lobi (P-45, P-47), kerangka penuh `dunia` (P-48), posisi awal lewat
+// `koreksi` (P-49), dan pemeriksaan gerak dengan anggaran jarak (P-52).
 import { BATAS, hitungPeringkat } from "../../../../app/jejak-setara/inti/aturan";
-import { koreksi, periksaGerak } from "../../../../app/jejak-setara/inti/gerak";
+import { koreksi, periksaGerak, posisiSah, STATUS_GERAK } from "../../../../app/jejak-setara/inti/gerak";
 import { UKURAN_UBIN } from "../../../../app/jejak-setara/inti/peta";
 import type { KodeGalat, PesanKelas, PesanPemain, PesanServerKelas, PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
 import type { Arah, PengaturanRuang, StatusRuang, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
@@ -34,6 +36,12 @@ export const URUTAN_WARNA_TAS: readonly WarnaTas[] = ["sun", "mango", "coral", "
 export const AVATAR_TERSEDIA: readonly number[] = [0, 1, 2, 3, 4, 5, 6, 7];
 /** Setengah kotak 480 × 270 piksel logis di sekitar pemain (P-43). */
 const SETENGAH_KOTAK = { x: 240, y: 135 } as const;
+/** Kiriman `dunia` di lobi dan hitung mundur (JS-07): jarak antarkiriman dan jarak antar-kerangka penuh. */
+export const DUNIA_LOBI = { jedaMs: 100, kerangkaPenuhMs: 1000 } as const;
+/** Di status `main`, kerangka penuh dikirim setiap putaran ke-10 (JS-07, P-48). */
+export const KERANGKA_PENUH_SETIAP = 10;
+/** Status ruang yang menampilkan dunia di layar pemain (JS-07): posisi awal dan kerangka penuh dikirim. */
+const STATUS_DUNIA: readonly StatusRuang[] = ["lobi", "hitung_mundur", "main", "jeda"];
 
 export interface DataRuang {
   ruangId: string;
@@ -48,6 +56,8 @@ export interface PetaRuang {
   lebar: number;
   tinggi: number;
   tabrakan: Uint8Array;
+  /** Grid lobi: tabrakan dengan sel gerbangLobi padat, dipakai di `lobi` dan `hitung_mundur` (JS-07, P-46). */
+  tabrakanLobi: Uint8Array;
   titikMuncul: readonly { x: number; y: number }[];
 }
 
@@ -79,6 +89,8 @@ interface GerakPemain {
   gerakTerakhirMs: number;
   jalan: boolean;
   berubah: boolean;
+  /** Anggaran jarak sesudah laporan diterima terakhir (JS-07, P-52). */
+  anggaranPx: number;
 }
 
 export interface WaktuRuang {
@@ -103,6 +115,11 @@ export interface KeadaanRuang {
   sambunganPemain: Map<string, string>; // pemainId → sambunganId
   batasHalo: Map<string, number>; // sambunganId → batas waktu halo (P-15)
   urutanBerikut: number;
+  // Hanya di memori (JS-07): waktu kiriman `dunia` lobi terakhir, kerangka penuh terakhir per pemain,
+  // dan nomor putaran `main`.
+  duniaLobiTerakhir: number | null;
+  kerangkaTerakhir: Map<string, number>;
+  putaranKe: number;
 }
 
 export type KunciMeta = "ruang" | "status" | "waktu" | "terkunci" | "ditutupPada" | "sambunganTerakhirPutus";
@@ -140,10 +157,27 @@ export interface Keluaran {
   kirimSekarang: boolean;
   hapusSemua: boolean;
   koreksi: number;
+  /** Jumlah pesan `dunia` yang dikirim di lobi dan hitung mundur (statistik kait uji, JS-07). */
+  duniaLobi: number;
+  /** Alasan penolakan gerak yang dijawab `koreksi` (statistik kait uji, JS-07). */
+  alasanKoreksi: string | null;
 }
 
 export function keluaranKosong(): Keluaran {
-  return { kirim: [], kelas: [], tutup: [], ikat: [], simpan: [], kiriman: [], putaran: null, kirimSekarang: false, hapusSemua: false, koreksi: 0 };
+  return {
+    kirim: [],
+    kelas: [],
+    tutup: [],
+    ikat: [],
+    simpan: [],
+    kiriman: [],
+    putaran: null,
+    kirimSekarang: false,
+    hapusSemua: false,
+    koreksi: 0,
+    duniaLobi: 0,
+    alasanKoreksi: null,
+  };
 }
 
 /** Calon pemain baru; id dan token dibuat pembungkus dengan sumber acak kriptografis. */
@@ -168,6 +202,9 @@ export function buatKeadaan(ruang: DataRuang, peta: PetaRuang): KeadaanRuang {
     sambunganPemain: new Map(),
     batasHalo: new Map(),
     urutanBerikut: 1,
+    duniaLobiTerakhir: null,
+    kerangkaTerakhir: new Map(),
+    putaranKe: 0,
   };
 }
 
@@ -206,8 +243,13 @@ export function pulihkanKeadaan(d: DataPulih, peta: PetaRuang, sekarang: number)
       k.batasHalo.set(s.sambunganId, (s.dibukaPada ?? sekarang) + BATAS.haloMs);
     }
   }
-  if (k.status === "main" || k.status === "jeda" || k.status === "hitung_mundur") {
-    for (const p of k.pemain.values()) siapkanGerak(k, p, sekarang);
+  if (STATUS_DUNIA.includes(k.status)) {
+    for (const p of k.pemain.values()) {
+      if (!berkeidentitas(p)) continue;
+      // Posisi dari peta lama (misalnya peta uji sebelum JS-07) yang tidak sah di peta ini diganti titik muncul.
+      if (p.posisi && !posisiSah(gridUntuk(k), p.posisi.x, p.posisi.y)) p.posisi = null;
+      siapkanGerak(k, p, sekarang);
+    }
   }
   return k;
 }
@@ -216,6 +258,17 @@ export function pulihkanKeadaan(d: DataPulih, peta: PetaRuang, sekarang: number)
 // Bantuan
 
 const berkeidentitas = (p: PemainRuang) => p.nama !== null && !p.dikeluarkan;
+
+/** Grid tabrakan sesuai status: grid lobi selama `lobi` dan `hitung_mundur`, grid kampung selain itu (P-45). */
+function gridUntuk(k: KeadaanRuang): { lebar: number; tinggi: number; tabrakan: Uint8Array } {
+  const lobi = k.status === "lobi" || k.status === "hitung_mundur";
+  return { lebar: k.peta.lebar, tinggi: k.peta.tinggi, tabrakan: lobi ? k.peta.tabrakanLobi : k.peta.tabrakan };
+}
+
+/** Pemain berkeidentitas yang punya posisi, menurut urutan bergabung. */
+function pemainAktif(k: KeadaanRuang): PemainRuang[] {
+  return urutPemain(k).filter((p) => berkeidentitas(p) && p.posisi !== null);
+}
 
 function urutPemain(k: KeadaanRuang): PemainRuang[] {
   return [...k.pemain.values()].sort((a, b) => a.urutan - b.urutan);
@@ -300,9 +353,85 @@ export function titikMuncul(k: KeadaanRuang, urutan: number): PosisiPemain {
   return { x: t.x * UKURAN_UBIN + UKURAN_UBIN / 2, y: t.y * UKURAN_UBIN + 12, arah: "bawah" };
 }
 
-function siapkanGerak(k: KeadaanRuang, p: PemainRuang, sekarang: number): void {
+/**
+ * Posisi awal (titik muncul) bila belum ada, dan keadaan gerak baru bila belum ada (JS-07, P-49). Posisi pemain
+ * baru langsung dikirim lewat kirimPosisiAwal, jadi keadaan baru tidak ditandai berubah.
+ */
+function siapkanGerak(k: KeadaanRuang, p: PemainRuang, sekarang: number): GerakPemain {
   if (!p.posisi) p.posisi = titikMuncul(k, p.urutan);
-  k.gerak.set(p.id, { seqTerakhir: -1, gerakTerakhirMs: sekarang, jalan: false, berubah: true });
+  let g = k.gerak.get(p.id);
+  if (!g) {
+    g = { seqTerakhir: -1, gerakTerakhirMs: sekarang, jalan: false, berubah: false, anggaranPx: 0 };
+    k.gerak.set(p.id, g);
+  }
+  return g;
+}
+
+type IsiDunia = [string, number, number, Arah, boolean];
+
+/** Paling banyak 24 pemain terdekat dari `calon` di dalam kotak 480 × 270 pemain `p`, tanpa `p` sendiri. */
+function isiDunia(k: KeadaanRuang, p: PemainRuang, calon: readonly PemainRuang[]): IsiDunia[] {
+  if (!p.posisi) return [];
+  const dekat: [number, PemainRuang][] = [];
+  for (const q of calon) {
+    if (q === p || !q.posisi) continue;
+    const dx = q.posisi.x - p.posisi.x;
+    const dy = q.posisi.y - p.posisi.y;
+    if (Math.abs(dx) <= SETENGAH_KOTAK.x && Math.abs(dy) <= SETENGAH_KOTAK.y) dekat.push([dx * dx + dy * dy, q]);
+  }
+  dekat.sort((a, b) => a[0] - b[0] || a[1].urutan - b[1].urutan);
+  return dekat.slice(0, BATAS.duniaTerdekat).map(([, q]): IsiDunia => {
+    const pos = q.posisi as PosisiPemain;
+    return [q.id, pos.x, pos.y, pos.arah, k.gerak.get(q.id)?.jalan ?? false];
+  });
+}
+
+/**
+ * Posisi awal sesudah memilih identitas atau tersambung ulang (P-48, P-49): `koreksi` berisi posisinya dengan
+ * `seq` gerak terakhir yang diterima (paling kecil 0), kerangka penuh untuk pemain itu, dan posisinya untuk
+ * pemain lain yang kotaknya memuat pemain itu.
+ */
+function kirimPosisiAwal(k: KeadaanRuang, o: Keluaran, p: PemainRuang, sid: string, sekarang: number): void {
+  if (!STATUS_DUNIA.includes(k.status) || !berkeidentitas(p)) return;
+  const g = siapkanGerak(k, p, sekarang);
+  const pos = p.posisi as PosisiPemain;
+  kirimKe(o, sid, { v: 1, t: "koreksi", x: pos.x, y: pos.y, seq: Math.max(0, g.seqTerakhir) });
+  const aktif = pemainAktif(k);
+  const isi = isiDunia(k, p, aktif);
+  k.kerangkaTerakhir.set(p.id, sekarang);
+  if (isi.length > 0) kirimKe(o, sid, { v: 1, t: "dunia", w: sekarang, p: isi, n: aktif.length });
+  const diri: IsiDunia = [p.id, pos.x, pos.y, pos.arah, g.jalan];
+  for (const q of aktif) {
+    const sidQ = k.sambunganPemain.get(q.id);
+    if (q === p || sidQ === undefined || !q.posisi) continue;
+    if (Math.abs(pos.x - q.posisi.x) <= SETENGAH_KOTAK.x && Math.abs(pos.y - q.posisi.y) <= SETENGAH_KOTAK.y) {
+      kirimKe(o, sidQ, { v: 1, t: "dunia", w: sekarang, p: [diri], n: aktif.length });
+    }
+  }
+}
+
+/**
+ * `dunia` di lobi dan hitung mundur (P-47, P-48): pemain yang berubah, ditambah kerangka penuh untuk pemain
+ * yang kerangka penuh terakhirnya sudah ≥ 1 detik. Dipanggil hanya sesudah `gerak` diterima, tanpa putaran.
+ */
+function kirimDuniaLobi(k: KeadaanRuang, o: Keluaran, sekarang: number): void {
+  const aktif = pemainAktif(k);
+  const berubah = aktif.filter((p) => k.gerak.get(p.id)?.berubah);
+  for (const p of aktif) {
+    const sid = k.sambunganPemain.get(p.id);
+    if (sid === undefined) continue;
+    const penuh = sekarang - (k.kerangkaTerakhir.get(p.id) ?? -Infinity) >= DUNIA_LOBI.kerangkaPenuhMs;
+    const isi = isiDunia(k, p, penuh ? aktif : berubah);
+    if (isi.length === 0) continue;
+    if (penuh) k.kerangkaTerakhir.set(p.id, sekarang);
+    kirimKe(o, sid, { v: 1, t: "dunia", w: sekarang, p: isi, n: aktif.length });
+    o.duniaLobi++;
+  }
+  for (const q of berubah) {
+    const g = k.gerak.get(q.id);
+    if (g) g.berubah = false;
+  }
+  k.duniaLobiTerakhir = sekarang;
 }
 
 /** Waktu ronde tanpa jeda sejak mulaiPada. */
@@ -424,6 +553,7 @@ export function terimaHalo(
       lama.terputusSejak = null;
       simpanPemain(o, lama);
       sambutan(k, o, sid, lama, pesan.token, sekarang);
+      kirimPosisiAwal(k, o, lama, sid, sekarang);
       o.kelas.push(pesanLobi(k));
       return o;
     }
@@ -462,7 +592,6 @@ export function terimaHalo(
     gabungPada: sekarang,
   };
   k.pemain.set(p.id, p);
-  if (k.status === "hitung_mundur" || k.status === "main" || k.status === "jeda") siapkanGerak(k, p, sekarang);
   ikat(k, o, sid, p);
   simpanPemain(o, p);
   sambutan(k, o, sid, p, calon.token, sekarang);
@@ -497,19 +626,17 @@ export function terimaPemain(k: KeadaanRuang, sid: string, pesan: PesanPemain, s
       p.avatar = pesan.avatar;
       p.warnaTas = warnaTasBaru(k);
       p.saran = [];
+      if (STATUS_DUNIA.includes(k.status)) siapkanGerak(k, p, sekarang);
       simpanPemain(o, p);
       o.kiriman.push(barisPeserta(k, p, null));
       kirimSemua(k, o, pesanPemainBaru(p));
+      kirimPosisiAwal(k, o, p, sid, sekarang);
       o.kelas.push(pesanLobi(k));
       return o;
     }
     case "gerak": {
-      if (p.nama === null || k.status !== "main" || !p.posisi) return o;
-      let g = k.gerak.get(p.id);
-      if (!g) {
-        g = { seqTerakhir: -1, gerakTerakhirMs: sekarang, jalan: false, berubah: false };
-        k.gerak.set(p.id, g);
-      }
+      if (p.nama === null || !STATUS_GERAK.includes(k.status) || !p.posisi) return o;
+      const g = k.gerak.get(p.id) ?? siapkanGerak(k, p, sekarang);
       const hasil = periksaGerak({
         posisi: p.posisi,
         laporan: { x: pesan.x, y: pesan.y, arah: pesan.arah, seq: pesan.seq },
@@ -518,20 +645,28 @@ export function terimaPemain(k: KeadaanRuang, sid: string, pesan: PesanPemain, s
         lari: false,
         status: k.status,
         dialogTerbuka: false,
-        peta: k.peta,
+        peta: gridUntuk(k),
+        anggaranPx: g.anggaranPx,
       });
       if (hasil.diterima) {
         p.posisi = { x: hasil.x, y: hasil.y, arah: hasil.arah };
         g.seqTerakhir = hasil.seq;
         g.gerakTerakhirMs = sekarang;
+        g.anggaranPx = hasil.anggaranPx ?? 0;
         g.jalan = pesan.jalan;
         g.berubah = true;
+        // Lobi dan hitung mundur tanpa putaran: `dunia` mengikuti gerak yang masuk (P-47).
+        if (k.status !== "main") {
+          const jeda = k.duniaLobiTerakhir === null ? Infinity : sekarang - k.duniaLobiTerakhir;
+          if (!pesan.jalan || jeda >= DUNIA_LOBI.jedaMs) kirimDuniaLobi(k, o, sekarang);
+        }
         return o;
       }
       const isi = koreksi(hasil);
       if (isi) {
         kirimKe(o, sid, { v: 1, t: "koreksi", ...isi });
         o.koreksi++;
+        o.alasanKoreksi = hasil.alasan;
       }
       return o;
     }
@@ -624,7 +759,7 @@ export function terimaKelas(k: KeadaanRuang, pesan: PesanKelas, sekarang: number
       const mulaiPada = sekarang + WAKTU.hitungMundurMs;
       k.status = "hitung_mundur";
       k.waktu = { mulaiPada, berakhirPada: mulaiPada + k.ruang.pengaturan.durasiMenit * 60_000, jedaSejak: null, jedaMs: 0, selesaiPada: null };
-      for (const p of k.pemain.values()) if (!p.dikeluarkan) siapkanGerak(k, p, sekarang);
+      for (const p of k.pemain.values()) if (berkeidentitas(p)) siapkanGerak(k, p, sekarang);
       ubahStatus(k, o);
       return o;
     }
@@ -674,32 +809,27 @@ export function terimaKelas(k: KeadaanRuang, pesan: PesanKelas, sekarang: number
   }
 }
 
-/** Putaran 100 ms selama status `main`: `dunia` berisi paling banyak 24 pemain terdekat yang berubah (P-43). */
+/**
+ * Putaran 100 ms selama status `main`: `dunia` berisi paling banyak 24 pemain terdekat yang berubah (P-43),
+ * dan setiap putaran ke-10 berupa kerangka penuh yang juga memuat pemain yang tidak berubah (JS-07, P-48, P-51).
+ */
 export function putaran(k: KeadaanRuang, sekarang: number): Keluaran {
   const o = keluaranKosong();
   if (k.status !== "main") {
     o.putaran = "henti";
     return o;
   }
-  const aktif = urutPemain(k).filter((p) => berkeidentitas(p) && p.posisi !== null);
+  k.putaranKe++;
+  const penuh = k.putaranKe % KERANGKA_PENUH_SETIAP === 0;
+  const aktif = pemainAktif(k);
   const berubah = aktif.filter((p) => k.gerak.get(p.id)?.berubah);
-  if (berubah.length === 0) return o;
+  if (berubah.length === 0 && !penuh) return o;
   for (const p of aktif) {
     const sid = k.sambunganPemain.get(p.id);
-    if (sid === undefined || !p.posisi) continue;
-    const dekat: [number, PemainRuang][] = [];
-    for (const q of berubah) {
-      if (q === p || !q.posisi) continue;
-      const dx = q.posisi.x - p.posisi.x;
-      const dy = q.posisi.y - p.posisi.y;
-      if (Math.abs(dx) <= SETENGAH_KOTAK.x && Math.abs(dy) <= SETENGAH_KOTAK.y) dekat.push([dx * dx + dy * dy, q]);
-    }
-    if (dekat.length === 0) continue;
-    dekat.sort((a, b) => a[0] - b[0] || a[1].urutan - b[1].urutan);
-    const isi = dekat.slice(0, BATAS.duniaTerdekat).map(([, q]): [string, number, number, Arah, boolean] => {
-      const pos = q.posisi as PosisiPemain;
-      return [q.id, pos.x, pos.y, pos.arah, k.gerak.get(q.id)?.jalan ?? false];
-    });
+    if (sid === undefined) continue;
+    const isi = isiDunia(k, p, penuh ? aktif : berubah);
+    if (penuh) k.kerangkaTerakhir.set(p.id, sekarang);
+    if (isi.length === 0) continue;
     kirimKe(o, sid, { v: 1, t: "dunia", w: sekarang, p: isi, n: aktif.length });
   }
   for (const q of berubah) {
@@ -725,7 +855,9 @@ export function alarm(k: KeadaanRuang, sekarang: number, antreanKosong: boolean)
   }
   if (k.status === "hitung_mundur" && k.waktu.mulaiPada !== null && sekarang >= k.waktu.mulaiPada) {
     k.status = "main";
-    for (const p of k.pemain.values()) if (!p.dikeluarkan) siapkanGerak(k, p, sekarang);
+    // Putaran pertama `main` mengirim semua pemain ke semua pemain di kotaknya.
+    for (const p of k.pemain.values()) if (berkeidentitas(p)) siapkanGerak(k, p, sekarang).berubah = true;
+    k.putaranKe = 0;
     o.putaran = "mulai";
     ubahStatus(k, o);
   }

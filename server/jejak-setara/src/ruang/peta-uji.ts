@@ -1,7 +1,7 @@
 // Peta uji 160 × 100 ubin (spesifikasi JS-03, P-41): dinding di tepi dan delapan blok padat 4 × 4.
-// Dipakai server untuk memeriksa gerak sampai kampung.json Sesi C dipakai di JS-07.
+// Sejak JS-07 server memakai peta kampung (peta-kampung.ts); berkas ini hanya dipakai uji (P-46).
 // Lapisan tabrakan dibentuk sebagai teks RLE lalu diurai dengan uraiRle, tanpa zod.
-import { uraiRle, UKURAN_UBIN } from "../../../../app/jejak-setara/inti/peta";
+import { tutupGerbang, uraiRle, UKURAN_UBIN } from "../../../../app/jejak-setara/inti/peta";
 import type { PetaJejak, ZonaId } from "../../../../app/jejak-setara/inti/tipe";
 
 export const LEBAR_UJI = 160;
@@ -72,11 +72,14 @@ export const PETA_UJI_JSON: PetaJejak<string> = {
   ],
 };
 
-/** Peta yang dipakai server: lapisan tabrakan terurai dan titik muncul. */
+const GRID_UJI = uraiRle(PETA_UJI_JSON.tabrakan, LEBAR_UJI * TINGGI_UJI);
+
+/** Peta uji dalam bentuk yang dipakai inti ruang: lapisan tabrakan terurai, grid lobi, dan titik muncul. */
 export const PETA_UJI = {
   versi: VERSI_PETA_UJI,
   lebar: LEBAR_UJI,
   tinggi: TINGGI_UJI,
-  tabrakan: uraiRle(PETA_UJI_JSON.tabrakan, LEBAR_UJI * TINGGI_UJI),
+  tabrakan: GRID_UJI,
+  tabrakanLobi: tutupGerbang({ lebar: LEBAR_UJI, tinggi: TINGGI_UJI, tabrakan: GRID_UJI, gerbangLobi: PETA_UJI_JSON.gerbangLobi }),
   titikMuncul: PETA_UJI_JSON.titikMuncul,
 };

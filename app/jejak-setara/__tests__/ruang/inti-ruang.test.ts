@@ -21,6 +21,9 @@ import {
   type Keluaran,
 } from "../../../../server/jejak-setara/src/ruang/inti-ruang";
 import { PETA_UJI } from "../../../../server/jejak-setara/src/ruang/peta-uji";
+import { PETA_KAMPUNG } from "../../../../server/jejak-setara/src/ruang/peta-kampung";
+import { posisiSah } from "../../inti/gerak";
+import { DUNIA_LOBI, KERANGKA_PENUH_SETIAP } from "../../../../server/jejak-setara/src/ruang/inti-ruang";
 
 const PENGATURAN: PengaturanRuang = { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: ["lari"], modeNomorAbsen: false, uji: true };
 const DIBUAT = 1_000_000;
@@ -296,10 +299,7 @@ describe("gerak, dunia, dan penyimpanan (P-41 sampai P-46)", () => {
     return k;
   }
 
-  it("gerak sah tidak ditulis ke SQLite; terlalu cepat dijawab koreksi; di lobi diabaikan", () => {
-    const lobi = ruang();
-    masuk(lobi, "s0");
-    expect(terimaPemain(lobi, "s0", { v: 1, t: "gerak", x: 1, y: 1, arah: "atas", jalan: true, seq: 1 }, DIBUAT, acak).kirim).toEqual([]);
+  it("gerak sah tidak ditulis ke SQLite; terlalu cepat dijawab koreksi (gerak di lobi: JS-07)", () => {
     const k = ruangMain(2);
     const t = k.waktu.mulaiPada!;
     const p = k.pemain.get(k.sambungan.get("s0")!)!;
@@ -348,5 +348,240 @@ describe("gerak, dunia, dan penyimpanan (P-41 sampai P-46)", () => {
     hitung(terimaKelas(k, { v: 1, t: "akhiri" }, t + 30_000));
     hitung(terimaKelas(k, { v: 1, t: "tutup_ruang" }, t + 40_000));
     expect(baris).toBeLessThan(500);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// JS-07: peta kampung, gerak di lobi, kiriman `dunia` di lobi, kerangka penuh, dan posisi awal.
+
+type Dunia = Extract<PesanServerPemain, { t: "dunia" }>;
+const duniaKe = (o: Keluaran, sid: string) => pesanKe(o, sid).filter((p): p is Dunia => p.t === "dunia");
+const idDi = (d: Dunia) => d.p.map((b) => b[0]).sort();
+
+function ruangKampung(atur: Partial<PengaturanRuang> = {}): KeadaanRuang {
+  return buatKeadaan({ ruangId: "r-7", kode: "K7MPA", pengaturan: { ...PENGATURAN, ...atur }, benih: 7, dibuatPada: DIBUAT }, PETA_KAMPUNG);
+}
+
+const gerak = (k: KeadaanRuang, sid: string, x: number, y: number, seq: number, t: number, jalan = true) =>
+  semuaSah(terimaPemain(k, sid, { v: 1, t: "gerak", x, y, arah: "kanan", jalan, seq }, t, acak));
+
+describe("JS-07: posisi awal dan kerangka penuh (P-47 sampai P-49)", () => {
+  it("memilih identitas di lobi: pemain_baru, lalu koreksi di titik muncul pertama dengan seq 0", () => {
+    const k = ruangKampung();
+    const a = masuk(k, "s1");
+    expect(jenis(pesanKe(a.o, "s1"))).toEqual(["pemain_baru", "koreksi"]);
+    const t0 = PETA_KAMPUNG.titikMuncul[0];
+    expect(pesanKe(a.o, "s1")[1]).toEqual({ v: 1, t: "koreksi", x: t0.x * 16 + 8, y: t0.y * 16 + 12, seq: 0 });
+    expect(k.pemain.get(a.id)?.posisi).toEqual({ x: t0.x * 16 + 8, y: t0.y * 16 + 12, arah: "bawah" });
+    expect(a.o.simpan.some((x) => x.jenis === "pemain" && x.pemain.posisi !== null)).toBe(true);
+  });
+
+  it("pemain kedua langsung menerima kerangka penuh, dan pemain pertama langsung melihat pemain kedua", () => {
+    const k = ruangKampung();
+    const a = masuk(k, "s1");
+    const b = masuk(k, "s2", DIBUAT + 2000);
+    expect(jenis(pesanKe(b.o, "s2"))).toEqual(["pemain_baru", "koreksi", "dunia"]);
+    expect(idDi(duniaKe(b.o, "s2")[0])).toEqual([a.id]);
+    expect(duniaKe(b.o, "s2")[0].n).toBe(2);
+    expect(duniaKe(b.o, "s1").map(idDi)).toEqual([[b.id]]);
+    const t1 = PETA_KAMPUNG.titikMuncul[1];
+    expect(duniaKe(b.o, "s1")[0].p[0]).toEqual([b.id, t1.x * 16 + 8, t1.y * 16 + 12, "bawah", false]);
+  });
+
+  it("titik muncul ke-((urutan − 1) mod 18): pemain ke-19 kembali ke titik pertama", () => {
+    const k = ruangKampung({ batasPemain: 30 });
+    expect(PETA_KAMPUNG.titikMuncul).toHaveLength(18);
+    const id: string[] = [];
+    for (let i = 0; i < 19; i++) id.push(masuk(k, `s${i}`, DIBUAT + i).id);
+    const pos = (n: number) => k.pemain.get(id[n])?.posisi;
+    expect([pos(18)?.x, pos(18)?.y]).toEqual([pos(0)?.x, pos(0)?.y]);
+    expect(new Set(id.slice(0, 18).map((x) => `${k.pemain.get(x)?.posisi?.x},${k.pemain.get(x)?.posisi?.y}`)).size).toBe(18);
+  });
+
+  it("sambung ulang: kembali di posisi terakhir dengan seq gerak terakhir yang diterima, dan langsung melihat sekitar", () => {
+    const k = ruangKampung();
+    const a = masuk(k, "s1");
+    const b = masuk(k, "s2");
+    const pa = k.pemain.get(a.id)!;
+    const x0 = pa.posisi!.x;
+    gerak(k, "s1", x0 + 5, pa.posisi!.y, 7, DIBUAT + 5000);
+    sambunganPutus(k, "s1", DIBUAT + 6000);
+    const ulang = halo(k, "s3", DIBUAT + 7000, { token: a.token });
+    const pesan = pesanKe(ulang.o, "s3");
+    expect(jenis(pesan)).toEqual(["selamat_datang", "status_ruang", "pemain_baru", "pemain_baru", "koreksi", "dunia"]);
+    expect(pesan[4]).toEqual({ v: 1, t: "koreksi", x: x0 + 5, y: pa.posisi!.y, seq: 7 });
+    expect(idDi(pesan[5] as Dunia)).toEqual([b.id]);
+    expect(duniaKe(ulang.o, "s2").map(idDi)).toEqual([[a.id]]);
+  });
+});
+
+describe("JS-07: gerak dan dunia di lobi tanpa putaran (P-45, P-47, P-48)", () => {
+  it("gerak di lobi diterima tanpa pengatur waktu dan dikirim ke pemain lain; tanpa gerak tidak ada kiriman", () => {
+    const k = ruangKampung();
+    const a = masuk(k, "s1");
+    const b = masuk(k, "s2");
+    const pa = k.pemain.get(a.id)!;
+    const o = gerak(k, "s1", pa.posisi!.x + 5, pa.posisi!.y, 1, DIBUAT + 10_000);
+    expect(o.putaran).toBeNull();
+    expect(pa.posisi!.x).toBe(PETA_KAMPUNG.titikMuncul[0].x * 16 + 13);
+    expect(duniaKe(o, "s2").map(idDi)).toEqual([[a.id]]);
+    expect(duniaKe(o, "s2")[0].p[0][4]).toBe(true);
+    expect(o.duniaLobi).toBeGreaterThan(0);
+    expect(semuaSah(putaran(k, DIBUAT + 10_050)).putaran).toBe("henti");
+    expect(tenggatBerikut(k, true)).toBe(DIBUAT + WAKTU.tutupSejakDibuatMs);
+    expect(b.id).not.toBe(a.id);
+  });
+
+  it("paling sering setiap 100 ms; laporan berhenti (jalan false) langsung dikirim", () => {
+    const k = ruangKampung();
+    const a = masuk(k, "s1");
+    masuk(k, "s2");
+    const pa = k.pemain.get(a.id)!;
+    const x0 = pa.posisi!.x;
+    const y0 = pa.posisi!.y;
+    const t = DIBUAT + 10_000;
+    expect(duniaKe(gerak(k, "s1", x0 + 3, y0, 1, t), "s2")).toHaveLength(1);
+    expect(duniaKe(gerak(k, "s1", x0 + 6, y0, 2, t + 50), "s2")).toHaveLength(0);
+    expect(duniaKe(gerak(k, "s1", x0 + 9, y0, 3, t + 100), "s2")).toHaveLength(1);
+    const henti = gerak(k, "s1", x0 + 9, y0, 4, t + 120, false);
+    expect(duniaKe(henti, "s2")).toHaveLength(1);
+    expect(duniaKe(henti, "s2")[0].p[0]).toEqual([a.id, x0 + 9, y0, "kanan", false]);
+    expect(DUNIA_LOBI).toEqual({ jedaMs: 100, kerangkaPenuhMs: 1000 });
+  });
+
+  it("kerangka penuh di lobi paling sering sekali per detik per pemain, memuat pemain yang diam", () => {
+    const k = ruangKampung();
+    const a = masuk(k, "s1");
+    const b = masuk(k, "s2");
+    const c = masuk(k, "s3");
+    const pa = k.pemain.get(a.id)!;
+    const x0 = pa.posisi!.x;
+    const y0 = pa.posisi!.y;
+    const t = DIBUAT + 1000;
+    // Kerangka penuh terakhir s2 dan s3 dikirim saat bergabung (DIBUAT + 1000); belum 1 detik.
+    const awal = gerak(k, "s1", x0 + 3, y0, 1, t + 500);
+    expect(duniaKe(awal, "s2").map(idDi)).toEqual([[a.id]]);
+    const penuh = gerak(k, "s1", x0 + 6, y0, 2, t + 1100);
+    expect(duniaKe(penuh, "s2").map(idDi)).toEqual([[a.id, c.id].sort()]);
+    expect(duniaKe(penuh, "s3").map(idDi)).toEqual([[a.id, b.id].sort()]);
+    expect(duniaKe(penuh, "s1").map(idDi)).toEqual([[b.id, c.id].sort()]);
+    const lagi = gerak(k, "s1", x0 + 9, y0, 3, t + 1300);
+    expect(duniaKe(lagi, "s2").map(idDi)).toEqual([[a.id]]);
+    expect(duniaKe(lagi, "s1")).toEqual([]);
+  });
+
+  it("gerbang padat selama lobi dan hitung mundur, terbuka sejak main, di grid yang sama dengan klien", () => {
+    const k = ruangKampung();
+    const a = masuk(k, "s1");
+    const pa = k.pemain.get(a.id)!;
+    const gb = { kiri: 79, atas: 61 };
+    const depan = { x: gb.kiri * 16 + 8, y: (gb.atas - 1) * 16 + 12 }; // di dalam halaman, tepat di depan gerbang
+    const lobi = { lebar: PETA_KAMPUNG.lebar, tinggi: PETA_KAMPUNG.tinggi, tabrakan: PETA_KAMPUNG.tabrakanLobi };
+    const kampung = { lebar: PETA_KAMPUNG.lebar, tinggi: PETA_KAMPUNG.tinggi, tabrakan: PETA_KAMPUNG.tabrakan };
+    expect([posisiSah(lobi, depan.x, depan.y), posisiSah(lobi, depan.x, depan.y + 8), posisiSah(kampung, depan.x, depan.y + 8)]).toEqual([true, false, true]);
+    pa.posisi = { ...depan, arah: "bawah" };
+    const tolak = gerak(k, "s1", depan.x, depan.y + 8, 1, DIBUAT + 10_000);
+    expect(pesanKe(tolak, "s1")).toEqual([{ v: 1, t: "koreksi", x: depan.x, y: depan.y, seq: 1 }]);
+    terimaKelas(k, { v: 1, t: "mulai" }, DIBUAT + 20_000);
+    expect(pesanKe(gerak(k, "s1", depan.x, depan.y + 8, 2, DIBUAT + 21_000), "s1")).toContainEqual({ v: 1, t: "koreksi", x: depan.x, y: depan.y, seq: 2 });
+    alarm(k, k.waktu.mulaiPada!, true);
+    expect(k.status).toBe("main");
+    const terima = gerak(k, "s1", depan.x, depan.y + 8, 3, k.waktu.mulaiPada! + 1000);
+    expect(pesanKe(terima, "s1")).toEqual([]);
+    expect(pa.posisi).toEqual({ x: depan.x, y: depan.y + 8, arah: "kanan" });
+  });
+
+  it("40 pemain diam di lobi: tidak ada kiriman dunia dan tidak ada putaran", () => {
+    const k = ruangKampung();
+    let dunia = 0;
+    for (let i = 0; i < 40; i++) {
+      const m = masuk(k, `s${i}`, DIBUAT + i);
+      expect(m.o.putaran).toBeNull();
+    }
+    for (let t = 0; t < 30; t++) {
+      const o = semuaSah(terimaPemain(k, "s0", { v: 1, t: "ping", tKlien: t }, DIBUAT + 5000 + t * 1000, acak));
+      dunia += o.kirim.filter((x) => x.pesan.t === "dunia").length;
+      expect(o.putaran).toBeNull();
+    }
+    expect(dunia).toBe(0);
+  });
+
+  it("jeda: gerak ditolak tanpa koreksi; selesai: tidak ada posisi awal saat sambung ulang", () => {
+    const k = ruangKampung();
+    const a = masuk(k, "s1");
+    terimaKelas(k, { v: 1, t: "mulai" }, DIBUAT + 10_000);
+    alarm(k, k.waktu.mulaiPada!, true);
+    terimaKelas(k, { v: 1, t: "jeda" }, k.waktu.mulaiPada! + 1000);
+    const pa = k.pemain.get(a.id)!;
+    expect(gerak(k, "s1", pa.posisi!.x + 3, pa.posisi!.y, 9, k.waktu.mulaiPada! + 2000).kirim).toEqual([]);
+    terimaKelas(k, { v: 1, t: "akhiri" }, k.waktu.mulaiPada! + 3000);
+    sambunganPutus(k, "s1", k.waktu.mulaiPada! + 4000);
+    const ulang = halo(k, "s2", k.waktu.mulaiPada! + 5000, { token: a.token });
+    expect(jenis(pesanKe(ulang.o, "s2"))).toEqual(["selamat_datang", "status_ruang", "pemain_baru"]);
+  });
+});
+
+describe("JS-07: putaran main dan pemulihan (P-46, P-51, P-52)", () => {
+  function ruangKampungMain(jumlah: number) {
+    const k = ruangKampung({ batasPemain: 100 });
+    for (let i = 0; i < jumlah; i++) masuk(k, `s${i}`, DIBUAT + i);
+    terimaKelas(k, { v: 1, t: "mulai" }, DIBUAT + 10_000);
+    alarm(k, k.waktu.mulaiPada!, true);
+    return k;
+  }
+
+  it("setiap putaran ke-10 adalah kerangka penuh: pemain diam juga dikirim; putaran biasa hanya yang berubah", () => {
+    const k = ruangKampungMain(3);
+    const t = k.waktu.mulaiPada!;
+    expect(KERANGKA_PENUH_SETIAP).toBe(10);
+    const pertama = semuaSah(putaran(k, t + 100));
+    expect(duniaKe(pertama, "s0")[0].p).toHaveLength(2); // awal main: semua dianggap berubah
+    for (let i = 2; i <= 9; i++) expect(semuaSah(putaran(k, t + i * 100)).kirim, `putaran ${i}`).toEqual([]);
+    const penuh = semuaSah(putaran(k, t + 1000));
+    for (const sid of ["s0", "s1", "s2"]) expect(duniaKe(penuh, sid)[0].p, sid).toHaveLength(2);
+    expect(duniaKe(penuh, "s0")[0].n).toBe(3);
+  });
+
+  it("100 pemain berdesakan: setiap dunia paling banyak 24 pemain, termasuk kerangka penuh", () => {
+    const k = ruangKampungMain(100);
+    const t = k.waktu.mulaiPada!;
+    for (let i = 1; i <= 10; i++) {
+      for (const { pesan } of semuaSah(putaran(k, t + i * 100)).kirim) if (pesan.t === "dunia") expect(pesan.p.length).toBeLessThanOrEqual(24);
+    }
+  });
+
+  it("ruang yang dipulihkan memakai peta kampung: posisi tidak sah diganti titik muncul, posisi sah tetap", () => {
+    const k = ruangKampung();
+    const a = masuk(k, "s1");
+    const b = masuk(k, "s2");
+    const pemain = [...k.pemain.values()].map((p) => ({ ...p, posisi: p.posisi ? { ...p.posisi } : null }));
+    const pa = pemain.find((p) => p.id === a.id)!;
+    pa.posisi = { x: 8, y: 12, arah: "bawah" }; // pojok peta, sel tepi selalu padat
+    const pb = pemain.find((p) => p.id === b.id)!;
+    const posB = { ...pb.posisi! };
+    const baru = pulihkanKeadaan(
+      { ruang: k.ruang, status: "lobi", waktu: k.waktu, terkunci: false, ditutupPada: null, sambunganTerakhirPutus: null, pemain, sambungan: [] },
+      PETA_KAMPUNG,
+      DIBUAT + 9000,
+    );
+    const t0 = PETA_KAMPUNG.titikMuncul[0];
+    expect(baru.pemain.get(a.id)?.posisi).toEqual({ x: t0.x * 16 + 8, y: t0.y * 16 + 12, arah: "bawah" });
+    expect(baru.pemain.get(b.id)?.posisi).toEqual(posB);
+    expect(baru.peta.versi).toBe(PETA_KAMPUNG.versi);
+  });
+
+  it("anggaran jarak: laporan jujur setiap 100 ms yang tiba berdempet tetap diterima", () => {
+    const k = ruangKampungMain(1);
+    const p = k.pemain.get(k.sambungan.get("s0")!)!;
+    let x = p.posisi!.x;
+    const y = p.posisi!.y;
+    let t = k.waktu.mulaiPada! + 2000;
+    let koreksi = 0;
+    for (let i = 1; i <= 20; i++) {
+      x += i % 2 ? 7.2 : -7.2; // bolak-balik di halaman lobi
+      t += i % 2 ? 200 : 0;
+      koreksi += semuaSah(terimaPemain(k, "s0", { v: 1, t: "gerak", x, y, arah: "kanan", jalan: true, seq: i }, t, acak)).koreksi;
+    }
+    expect(koreksi).toBe(0);
   });
 });

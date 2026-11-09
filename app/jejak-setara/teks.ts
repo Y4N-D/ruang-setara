@@ -1,4 +1,4 @@
-// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01 dan JS-03).
+// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01, JS-03, dan JS-07).
 // Kedua judul tab ditulis di index.html; nilainya di sini dipakai uji untuk memastikan keduanya sama.
 // Teks dengan {n} atau {kode} diisi lewat isiTeks().
 import type { KodeGalat } from "./inti/protokol";
@@ -59,6 +59,23 @@ export const TEKS = {
   menyambung: {
     judul: "Menyambung ulang…",
     lama: "Periksa wifi atau data selulermu.",
+  },
+  // JS-07: dunia, bilah atas, dan peta (spesifikasi JS-07, bagian "Teks yang tampil").
+  dunia: {
+    label: "Dunia permainan. Gerakkan avatar dengan W, A, S, D atau tombol panah.",
+    layarPenuh: "Layar penuh",
+    putarHp: "Putar HP ke posisi mendatar",
+    duaMenit: "Dua menit lagi",
+    jamCerita: "Jam cerita {jam}",
+    sisaWaktu: "Sisa waktu {waktu}",
+    masa: { pagi: "Pagi", siang: "Siang", sore: "Sore" },
+  },
+  peta: {
+    bukaBesar: "Buka peta besar",
+    judul: "Peta kampung",
+    tutup: "Tutup peta",
+    kamuDiSini: "Kamu di sini",
+    halte: "Halte",
   },
   tombol: { kembali: "Kembali", muatUlang: "Muat ulang" },
   pengumuman: {

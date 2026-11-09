@@ -1,5 +1,6 @@
 // Uji ujung ke ujung alur gabung Jejak Setara (spesifikasi JS-03, AC-17 dan AC-18). Beberapa konteks peramban
-// bermain di ruang coba lokal; siklus ronde dikendalikan lewat kait uji (P-9).
+// bermain di ruang coba lokal; siklus ronde dikendalikan lewat kait uji (P-9). Sejak JS-07 lobi dan ronde tampil di
+// atas dunia (panel lobi, bilah atas); uji dunia sendiri ada di dunia.uji.ts.
 import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
 
 const LAYAR = "test-results-jejak/layar";
@@ -197,10 +198,10 @@ test("mulai, jeda, lanjut, dikeluarkan, selesai, dan ditutup lewat kait uji (AC-
   await gabung(a.page, kode, 5);
   await gabung(b.page, kode, 6);
   await kelas(request, kode, { t: "mulai" });
-  await expect(a.page.getByRole("heading", { name: "Bersiap" })).toBeVisible();
-  await expect(a.page.getByRole("heading", { name: "Ronde berjalan" })).toBeVisible({ timeout: 6000 });
-  await expect(a.page.getByText("Sisa waktu")).toBeVisible();
-  await expect(a.page.getByText(/^1[45]:[0-5]\d$/)).toBeVisible();
+  // Sejak JS-07: hitung mundur dan ronde tampil di atas dunia (P-29, P-31).
+  await expect(a.page.getByText("Bersiap")).toBeVisible();
+  await expect(a.page.getByRole("heading", { name: "Ronde berjalan" })).toBeAttached({ timeout: 6000 });
+  await expect(a.page.locator(".js-sisa")).toHaveAttribute("aria-label", /^Sisa waktu 1[45]:[0-5]\d$/);
   await fotoEmpat(a.page, "ronde");
   await kelas(request, kode, { t: "jeda" });
   await expect(a.page.getByRole("dialog", { name: "Dijeda oleh guru" })).toBeVisible();

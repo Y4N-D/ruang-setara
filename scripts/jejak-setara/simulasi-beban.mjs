@@ -1,10 +1,15 @@
-// Simulasi beban Jejak Setara (spesifikasi JS-03, bagian "Skrip"; AC-20; Architecture 13.4 dan 14).
-// Bawaan: menyalakan Worker lokal (server-lokal.mjs, port 4330), yang tidak memakai kuota Cloudflare.
-//   node scripts/jejak-setara/simulasi-beban.mjs --ruang 1 --bot 50 --detik 60 [--jitter-ms 50] [--tanpa-build]
+// Simulasi beban Jejak Setara (spesifikasi JS-03, bagian "Skrip"; JS-07, rencana uji "Uji beban"; AC-20, AC-21;
+// Architecture 13.4 dan 14). Bawaan: menyalakan Worker lokal (server-lokal.mjs, port 4330), tanpa kuota Cloudflare.
+//   node scripts/jejak-setara/simulasi-beban.mjs --ruang 1 --bot 50 --detik 120 [--lobi-detik 30] [--diam-detik 5]
+//        [--latensi-ms 80 --jitter-eksp-ms 40] [--jitter-ms 50] [--tanpa-build]
+// JS-07: bot jujur berjalan 72 piksel per detik di sepanjang jalur ubin peta kampung (pencarian jalur di grid
+// tabrakan). Urutan: semua bot diam di lobi (memeriksa tidak ada kiriman dan pengatur waktu), berjalan di halaman
+// lobi, lalu `mulai` lewat kait lokal dan menjelajah kampung. Pilihan --latensi-ms dan --jitter-eksp-ms menunda
+// setiap pesan naik dan turun (urutan tetap, seperti TCP) untuk mengukur gerak jujur yang ditolak (P-52).
 // Lingkungan uji hanya dengan pilihan tertulis: --sasaran uji --alamat <URL> --saya-paham-kuota, serta
 // rahasia JEJAK_KUNCI_COBA; perkiraan permintaan Durable Object dicetak lebih dulu, dan lebih dari 20.000 ditolak.
 import { spawn } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,6 +23,10 @@ const RUANG = Number(ambil("--ruang", "1"));
 const BOT = Number(ambil("--bot", "50"));
 const DETIK = Number(ambil("--detik", "120"));
 const JITTER = Number(ambil("--jitter-ms", "0"));
+const LATENSI = Number(ambil("--latensi-ms", "0"));
+const JITTER_EKSP = Number(ambil("--jitter-eksp-ms", "0"));
+const LOBI_DETIK = Number(ambil("--lobi-detik", "30"));
+const DIAM_DETIK = Number(ambil("--diam-detik", "5"));
 const SASARAN = ambil("--sasaran", "lokal");
 const PORT = Number(ambil("--port", "4330"));
 const BATAS_PERMINTAAN_UJI = 20_000;
@@ -65,82 +74,188 @@ const kodeRuangIndeks = new Map();
 const kelas = (kode, pesan) => fetch(`${alamat}/api/ruang-coba/${kode}/kelas`, { method: "POST", body: JSON.stringify({ v: 1, ...pesan }) });
 const statistik = async (kode) => (await fetch(`${alamat}/api/ruang-coba/${kode}/statistik`)).json();
 
-// Bot bergerak di jalur bebas blok peta uji (ubin y 25–75), menuju titik acak lalu diam 4–10 detik.
-const TITIK = Array.from({ length: 16 }, (_, i) => [120 + (i % 8) * 300, 440 + Math.floor(i / 8) * 640]);
+// Peta kampung: grid tabrakan kampung dan grid lobi (sel gerbang padat), sama dengan server (P-46).
+const kampung = JSON.parse(readFileSync(join(akar, "app/jejak-setara/peta/kampung.json"), "utf8"));
+/** Mengurai RLE kampung.json: potongan "NILAIxJUMLAH;", sama dengan uraiRle di inti/peta.ts. */
+function uraiRle(teks, n) {
+  const hasil = new Uint8Array(n);
+  let i = 0;
+  for (const bagian of teks.split(";")) {
+    if (!bagian) continue;
+    const [nilai, jumlah] = bagian.split("x").map(Number);
+    hasil.fill(nilai, i, i + jumlah);
+    i += jumlah;
+  }
+  if (i !== n) throw new Error(`RLE berisi ${i} sel, bukan ${n}`);
+  return hasil;
+}
+const L = kampung.lebar;
+const T = kampung.tinggi;
+const GRID = uraiRle(kampung.tabrakan, L * T);
+const GRID_LOBI = Uint8Array.from(GRID);
+const gb = kampung.gerbangLobi;
+for (let y = gb.atas; y <= gb.bawah; y++) for (let x = gb.kiri; x <= gb.kanan; x++) GRID_LOBI[y * L + x] = 1;
+
+/** Ubin yang bisa dicapai dari titik muncul pertama: di grid lobi (halaman lobi) dan di grid kampung (jelajah). */
+function ubinTercapai(grid) {
+  const hasil = [];
+  const t = kampung.titikMuncul[0];
+  const lihat = new Uint8Array(L * T);
+  const antre = [t.y * L + t.x];
+  lihat[antre[0]] = 1;
+  for (let i = 0; i < antre.length; i++) {
+    const s = antre[i];
+    const x = s % L;
+    const y = Math.floor(s / L);
+    hasil.push([x, y]);
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= L || ny >= T) continue;
+      const n = ny * L + nx;
+      if (lihat[n] || grid[n]) continue;
+      lihat[n] = 1;
+      antre.push(n);
+    }
+  }
+  return hasil;
+}
+
+/** Pencarian jalur 4 arah dari ubin a ke ubin b; mengembalikan daftar ubin atau null. */
+function jalurUbin(grid, a, b) {
+  const asal = new Int32Array(L * T).fill(-1);
+  const mulai = a[1] * L + a[0];
+  const tuju = b[1] * L + b[0];
+  const antre = [mulai];
+  asal[mulai] = mulai;
+  for (let i = 0; i < antre.length; i++) {
+    const s = antre[i];
+    if (s === tuju) {
+      const hasil = [];
+      for (let t = s; ; t = asal[t]) {
+        hasil.unshift([t % L, Math.floor(t / L)]);
+        if (t === asal[t]) break;
+      }
+      return hasil;
+    }
+    const x = s % L;
+    const y = Math.floor(s / L);
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= L || ny >= T) continue;
+      const n = ny * L + nx;
+      if (asal[n] >= 0 || grid[n]) continue;
+      asal[n] = s;
+      antre.push(n);
+    }
+  }
+  return null;
+}
+
+const UBIN_LOBI = ubinTercapai(GRID_LOBI);
+const UBIN_JELAJAH = ubinTercapai(GRID);
+const pusatUbin = ([x, y]) => ({ x: x * 16 + 8, y: y * 16 + 12 });
+const acakDari = (larik) => larik[Math.floor(Math.random() * larik.length)];
+const eksponensial = (rata) => (rata > 0 ? -Math.log(1 - Math.random()) * rata : 0);
 
 function buatBot(kode, nomor) {
-  const b = { kode, nomor, ws: null, id: null, seq: 0, x: null, y: null, arah: "bawah", tujuan: null, diamSampai: 0, kirimTerakhir: 0,
-    naik: 0, turun: 0, byteTurun: 0, rtt: [], koreksi: 0, gerak: 0, tersinkron: false, antreKirim: 0, putus: false };
+  const b = { kode, nomor, ws: null, id: null, seq: 0, x: null, y: null, arah: "bawah", jalur: [], diamSampai: 0, kirimTerakhir: 0, majuTerakhir: 0,
+    jalan: false, naik: 0, turun: 0, byteTurun: 0, dunia: 0, rtt: [], koreksi: 0, gerak: 0, tersinkron: false, antreKirim: 0, antreTerima: 0, putus: false };
   return new Promise((ok, gagal) => {
     // Di lokal, setiap ruang dianggap sekolah sendiri (alamat IP berbeda) agar pembatas 300 sambungan per menit
     // per alamat (D-5) tidak menahan simulasi; di Cloudflare tajuk ini diisi jaringan Cloudflare, bukan klien.
     const tajuk = SASARAN === "lokal" ? { Origin: alamat, "CF-Connecting-IP": `10.0.0.${kodeRuangIndeks.get(kode) + 1}` } : { Origin: alamat };
     const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/ruang/${kode}`, { headers: tajuk });
     b.ws = ws;
+    const tundaNaik = LATENSI > 0 || JITTER_EKSP > 0 || JITTER > 0;
     const kirim = (p) => {
       b.naik++;
       const teks = JSON.stringify(p);
-      if (JITTER <= 0) return ws.readyState === 1 && ws.send(teks);
-      const pada = Math.max(b.antreKirim, Date.now() + Math.random() * JITTER);
+      if (!tundaNaik) return ws.readyState === 1 && ws.send(teks);
+      const pada = Math.max(b.antreKirim, Date.now() + LATENSI + eksponensial(JITTER_EKSP) + Math.random() * JITTER);
       b.antreKirim = pada;
       setTimeout(() => ws.readyState === 1 && ws.send(teks), pada - Date.now());
     };
     b.kirim = kirim;
-    ws.onopen = () => kirim({ v: 1, t: "halo", peran: "pemain" });
-    ws.onmessage = (e) => {
-      b.turun++;
-      b.byteTurun += String(e.data).length;
-      const m = JSON.parse(String(e.data));
+    const proses = (teks) => {
+      const m = JSON.parse(teks);
       if (m.t === "selamat_datang") {
         b.id = m.pemainId;
         kirim({ v: 1, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
       } else if (m.t === "saran_nama") kirim({ v: 1, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
-      else if (m.t === "pemain_baru" && m.id === b.id) ok(b);
+      else if (m.t === "dunia") b.dunia++;
       else if (m.t === "pong") b.rtt.push(Date.now() - m.tKlien);
       else if (m.t === "koreksi") {
+        // Koreksi pertama berisi posisi awal (P-49); sesudah itu koreksi berarti laporan jujur ditolak.
         if (b.tersinkron) b.koreksi++;
         b.x = m.x;
         b.y = m.y;
-        b.tersinkron = true;
+        b.seq = Math.max(b.seq, m.seq);
+        b.jalur = [];
+        if (!b.tersinkron) {
+          b.tersinkron = true;
+          ok(b);
+        }
       } else if (m.t === "galat" && m.kode !== "NAMA_DIPAKAI") gagal(new Error(m.kode));
+    };
+    ws.onopen = () => kirim({ v: 1, t: "halo", peran: "pemain" });
+    ws.onmessage = (e) => {
+      const teks = String(e.data);
+      b.turun++;
+      b.byteTurun += teks.length;
+      if (LATENSI <= 0 && JITTER_EKSP <= 0) return proses(teks);
+      const pada = Math.max(b.antreTerima, Date.now() + LATENSI + eksponensial(JITTER_EKSP));
+      b.antreTerima = pada;
+      setTimeout(() => proses(teks), pada - Date.now());
     };
     ws.onclose = () => (b.putus = true);
     ws.onerror = () => gagal(new Error("sambungan gagal"));
   });
 }
 
-function langkahBot(b, sekarang, hz) {
-  if (b.ws.readyState !== 1) return;
-  if (!b.tersinkron) {
-    // Laporan pertama sengaja salah tempat agar server menjawab koreksi berisi posisi muncul yang sebenarnya.
-    if (sekarang - b.kirimTerakhir >= 1000) {
-      b.kirimTerakhir = sekarang;
-      b.kirim({ v: 1, t: "gerak", x: 1, y: 1, arah: "bawah", jalan: false, seq: ++b.seq });
-    }
-    return;
+/** Satu langkah bot: maju 72 px/detik menurut jam dinding di sepanjang jalurnya, lalu mengirim gerak bila perlu. */
+function langkahBot(b, sekarang, hz, fase) {
+  if (b.ws.readyState !== 1 || !b.tersinkron) return;
+  const dt = b.majuTerakhir ? Math.min(250, sekarang - b.majuTerakhir) : 0;
+  b.majuTerakhir = sekarang;
+  if (fase === "diam") {
+    b.jalur = [];
+    b.diamSampai = sekarang + 1000;
+  } else if (b.jalur.length === 0 && sekarang >= b.diamSampai) {
+    const grid = fase === "lobi" ? GRID_LOBI : GRID;
+    const sasaran = acakDari(fase === "lobi" ? UBIN_LOBI : UBIN_JELAJAH);
+    const jalur = jalurUbin(grid, [Math.floor(b.x / 16), Math.floor(b.y / 16)], sasaran);
+    b.jalur = jalur ? jalur.map(pusatUbin) : [];
   }
-  if (!b.tujuan && sekarang >= b.diamSampai) b.tujuan = TITIK[Math.floor(Math.random() * TITIK.length)];
-  let jalan = false;
-  const selang = 1000 / hz;
-  if (b.tujuan && sekarang - b.kirimTerakhir >= selang) {
-    const dx = b.tujuan[0] - b.x;
-    const dy = b.tujuan[1] - b.y;
+  let sisa = (72 * dt) / 1000;
+  let berjalan = false;
+  while (sisa > 0 && b.jalur.length > 0) {
+    const t = b.jalur[0];
+    const dx = t.x - b.x;
+    const dy = t.y - b.y;
     const d = Math.hypot(dx, dy);
-    const s = Math.min(d, (72 * (sekarang - b.kirimTerakhir)) / 1000 || 72 / hz);
-    if (d < 4) {
-      b.tujuan = null;
-      b.diamSampai = sekarang + 4000 + Math.random() * 6000;
+    if (d <= sisa) {
+      b.x = t.x;
+      b.y = t.y;
+      sisa -= d;
+      b.jalur.shift();
     } else {
-      b.x += (dx / d) * Math.min(s, 72 / hz);
-      b.y += (dy / d) * Math.min(s, 72 / hz);
-      b.arah = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "kanan" : "kiri") : dy > 0 ? "bawah" : "atas";
-      jalan = true;
+      b.x += (dx / d) * sisa;
+      b.y += (dy / d) * sisa;
+      sisa = 0;
     }
+    if (d > 0) b.arah = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "kanan" : "kiri") : dy > 0 ? "bawah" : "atas";
+    berjalan = true;
   }
-  if (jalan || sekarang - b.kirimTerakhir >= 1000) {
+  if (b.jalur.length === 0 && berjalan) b.diamSampai = sekarang + 2000 + Math.random() * 6000;
+  const selang = 1000 / hz;
+  const berhenti = !berjalan && b.jalan;
+  if ((berjalan && sekarang - b.kirimTerakhir >= selang) || berhenti) {
     b.kirimTerakhir = sekarang;
+    b.jalan = berjalan;
     b.gerak++;
-    b.kirim({ v: 1, t: "gerak", x: Math.round(b.x * 10) / 10, y: Math.round(b.y * 10) / 10, arah: b.arah, jalan, seq: ++b.seq });
+    b.kirim({ v: 1, t: "gerak", x: Math.round(b.x * 10) / 10, y: Math.round(b.y * 10) / 10, arah: b.arah, jalan: berjalan, seq: ++b.seq });
   }
 }
 
@@ -148,6 +263,39 @@ const persen = (larik, q) => {
   const s = [...larik].sort((a, c) => a - c);
   return s.length ? s[Math.min(s.length - 1, Math.floor(q * s.length))] : null;
 };
+
+async function jalankanFase(bot, fase, detik, hz) {
+  for (const b of bot) {
+    b.naik = 0;
+    b.turun = 0;
+    b.byteTurun = 0;
+    b.dunia = 0;
+    b.majuTerakhir = 0;
+  }
+  const mulai = Date.now();
+  const akhir = mulai + detik * 1000;
+  let ping = 0;
+  while (Date.now() < akhir) {
+    const sekarang = Date.now();
+    for (const b of bot) langkahBot(b, sekarang, hz, fase);
+    if (sekarang - ping >= 5000) {
+      ping = sekarang;
+      for (const b of bot) if (b.ws.readyState === 1) b.kirim({ v: 1, t: "ping", tKlien: Date.now() });
+    }
+    await tidur(1000 / hz / 2);
+  }
+  const lama = (Date.now() - mulai) / 1000;
+  const jumlah = (f) => bot.reduce((s, b) => s + f(b), 0);
+  const turunByte = jumlah((b) => b.byteTurun) / bot.length / lama;
+  return {
+    detik: Math.round(lama),
+    pesanNaikPerPemainPerDetik: +(jumlah((b) => b.naik) / bot.length / lama).toFixed(2),
+    pesanTurunPerPemainPerDetik: +(jumlah((b) => b.turun) / bot.length / lama).toFixed(2),
+    duniaPerPemainPerDetik: +(jumlah((b) => b.dunia) / bot.length / lama).toFixed(2),
+    byteTurunPerPemainPerDetik: Math.round(turunByte),
+    mbTurunPerPemainPer15Menit: +((turunByte * 900) / 1e6).toFixed(2),
+  };
+}
 
 try {
   const kodeRuang = [];
@@ -160,27 +308,31 @@ try {
   const mulaiGabung = Date.now();
   for (const kode of kodeRuang) bot.push(...(await Promise.all(Array.from({ length: BOT }, (_, i) => buatBot(kode, i)))));
   const lamaGabung = Date.now() - mulaiGabung;
-  if (SASARAN === "lokal") for (const kode of kodeRuang) await kelas(kode, { t: "mulai" });
-  await tidur(3500);
-  for (const b of bot) {
-    b.naik = 0;
-    b.turun = 0;
-    b.byteTurun = 0;
-  }
   const hz = frekuensi(BOT);
-  const mulai = Date.now();
-  const akhir = mulai + DETIK * 1000;
-  let ping = 0;
-  while (Date.now() < akhir) {
-    const sekarang = Date.now();
-    for (const b of bot) langkahBot(b, sekarang, hz);
-    if (sekarang - ping >= 5000) {
-      ping = sekarang;
-      for (const b of bot) if (b.ws.readyState === 1) b.kirim({ v: 1, t: "ping", tKlien: Date.now() });
-    }
-    await tidur(1000 / hz / 2);
+  await tidur(1500);
+  // 1. Semua bot diam di lobi: tidak ada kiriman `dunia` dan tidak ada pengatur waktu putaran (P-47; AC-17, AC-20).
+  const statDiamAwal = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
+  const diam = await jalankanFase(bot, "diam", DIAM_DETIK, hz);
+  const statDiamAkhir = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
+  const lobiDiam = {
+    ...diam,
+    duniaLobiServer: statDiamAkhir.map((x, i) => x.duniaLobi - statDiamAwal[i].duniaLobi),
+    pewaktuPutaran: statDiamAkhir.map((x) => x.pewaktuPutaran),
+    putaranServer: statDiamAkhir.map((x, i) => x.putaran - statDiamAwal[i].putaran),
+  };
+  // 2. Berjalan di halaman lobi (P-45, P-47).
+  const lobi = await jalankanFase(bot, "lobi", LOBI_DETIK, hz);
+  const koreksiLobi = bot.reduce((s, b) => s + b.koreksi, 0);
+  const gerakLobi = bot.reduce((s, b) => s + b.gerak, 0);
+  // 3. Ronde: mulai lewat kait lokal, lalu menjelajah kampung.
+  if (SASARAN === "lokal") for (const kode of kodeRuang) await kelas(kode, { t: "mulai" });
+  await jalankanFase(bot, "diam", 3.5, hz);
+  for (const b of bot) {
+    b.koreksi = 0;
+    b.gerak = 0;
+    b.rtt = [];
   }
-  const detik = (Date.now() - mulai) / 1000;
+  const jelajah = await jalankanFase(bot, "jelajah", DETIK, hz);
   // Dihitung sebelum ruang diakhiri dan ditutup, karena penutupan ruang memutus semua bot dengan sengaja.
   const putusTakTerduga = bot.filter((b) => b.putus).length;
   const stat = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
@@ -189,28 +341,31 @@ try {
     await kelas(kode, { t: "tutup_ruang" });
   }
   const jumlah = (f) => bot.reduce((s, b) => s + f(b), 0);
-  const naikPerPemain = jumlah((b) => b.naik) / bot.length / detik;
-  const turunBytePerPemain = jumlah((b) => b.byteTurun) / bot.length / detik;
   const hasil = {
     waktu: new Date().toISOString(),
     sasaran: SASARAN,
     ruang: RUANG,
     botPerRuang: BOT,
-    detik: Math.round(detik),
-    jitterMs: JITTER,
+    latensiMs: LATENSI,
+    jitterEksponensialRataMs: JITTER_EKSP,
+    jitterSeragamMs: JITTER,
     gerakPerDetikSaatBergerak: hz,
     lamaSemuaBergabungMs: lamaGabung,
-    pesanNaikPerPemainPerDetik: +naikPerPemain.toFixed(2),
-    pesanTurunPerPemainPerDetik: +(jumlah((b) => b.turun) / bot.length / detik).toFixed(2),
-    byteTurunPerPemainPerDetik: Math.round(turunBytePerPemain),
-    mbTurunPerPemainPer15Menit: +((turunBytePerPemain * 900) / 1e6).toFixed(2),
-    rttMsP50: persen(bot.flatMap((b) => b.rtt), 0.5),
-    rttMsP95: persen(bot.flatMap((b) => b.rtt), 0.95),
-    gerakDikoreksiPersen: +((100 * jumlah((b) => b.koreksi)) / Math.max(1, jumlah((b) => b.gerak))).toFixed(3),
+    lobiDiam,
+    lobi: { ...lobi, gerakDikoreksiPersen: +((100 * koreksiLobi) / Math.max(1, gerakLobi)).toFixed(3) },
+    jelajah: {
+      ...jelajah,
+      rttMsP50: persen(bot.flatMap((b) => b.rtt), 0.5),
+      rttMsP95: persen(bot.flatMap((b) => b.rtt), 0.95),
+      gerakDikirim: jumlah((b) => b.gerak),
+      gerakDikoreksi: jumlah((b) => b.koreksi),
+      gerakDikoreksiPersen: +((100 * jumlah((b) => b.koreksi)) / Math.max(1, jumlah((b) => b.gerak))).toFixed(3),
+    },
     sambunganPutusTakTerduga: putusTakTerduga,
     pesanDitolakServer: stat.reduce((s, x) => s + (x.pelanggaran ?? 0), 0),
+    alasanKoreksiServer: stat.map((x) => x.koreksiAlasan ?? {}),
     barisSqliteDitulisPerRuang: stat.map((x) => x.barisDitulis),
-    perkiraanPermintaanDurableObjectPerSesi15MenitPerRuang: perkiraanPermintaan(naikPerPemain * BOT, BOT),
+    perkiraanPermintaanDurableObjectPerSesi15MenitPerRuang: perkiraanPermintaan(jelajah.pesanNaikPerPemainPerDetik * BOT, BOT),
   };
   mkdirSync(join(akar, "test-results-jejak"), { recursive: true });
   const berkas = join(akar, "test-results-jejak", `beban-${RUANG}x${BOT}-${Date.now()}.json`);

@@ -1,5 +1,6 @@
-// Rute ruang: ruang coba, pemeriksaan kode, kait uji lokal, dan sambungan WebSocket pemain
-// (spesifikasi JS-03, bagian A sampai C).
+// Rute ruang: ruang coba, pemeriksaan kode, kait uji, dan sambungan WebSocket pemain
+// (spesifikasi JS-03, bagian A sampai C). Sejak JS-07 kait `kelas` juga hidup di lingkungan uji dengan kunci
+// sekali pakai KUNCI_COBA, untuk alur kerja "Jejak: kendali ruang coba" (P-53); dipensiunkan di JS-10.
 import { z } from "zod";
 import { BATAS } from "../../../../app/jejak-setara/inti/aturan";
 import type { PengaturanRuang } from "../../../../app/jejak-setara/inti/tipe";
@@ -32,6 +33,12 @@ const skemaRuangCoba = () =>
     })
     .strict();
 
+/** Tajuk X-Jejak-Kunci-Coba sama dengan rahasia KUNCI_COBA, dibandingkan dengan waktu konstan. */
+function kunciCobaBenar(request: Request, env: Env): boolean {
+  const kunci = request.headers.get("X-Jejak-Kunci-Coba") ?? "";
+  return Boolean(env.KUNCI_COBA) && samaWaktuKonstan(kunci, env.KUNCI_COBA ?? "");
+}
+
 export async function tanganiApiRuang(request: Request, env: Env, url: URL): Promise<Response> {
   const jalur = url.pathname;
   if (jalur.startsWith("/api/publik/ruang/")) return periksaKode(request, env, jalur.slice("/api/publik/ruang/".length));
@@ -39,6 +46,11 @@ export async function tanganiApiRuang(request: Request, env: Env, url: URL): Pro
   if (jalur === "/api/ruang-coba") return buatRuangCoba(request, env, url);
   const kait = /^\/api\/ruang-coba\/([^/]+)\/(kelas|statistik|putuskan)$/.exec(jalur);
   if (kait && env.LINGKUNGAN === "lokal") return kaitUji(request, env, kait[1], kait[2] as "kelas" | "statistik" | "putuskan");
+  // Lingkungan uji: hanya kait `kelas`, dan hanya dengan kunci sekali pakai (P-53).
+  if (kait && kait[2] === "kelas") {
+    if (!kunciCobaBenar(request, env)) return jawabGalat("KUNCI_SALAH", TEKS.api.KUNCI_SALAH, 403);
+    return kaitUji(request, env, kait[1], "kelas");
+  }
   return belumTersedia();
 }
 
@@ -54,10 +66,7 @@ async function periksaKode(request: Request, env: Env, bagian: string): Promise<
 
 async function buatRuangCoba(request: Request, env: Env, url: URL): Promise<Response> {
   if (request.method !== "POST") return metodeSalah("POST");
-  if (env.LINGKUNGAN === "uji") {
-    const kunci = request.headers.get("X-Jejak-Kunci-Coba") ?? "";
-    if (!env.KUNCI_COBA || !samaWaktuKonstan(kunci, env.KUNCI_COBA)) return jawabGalat("KUNCI_SALAH", TEKS.api.KUNCI_SALAH, 403);
-  }
+  if (env.LINGKUNGAN === "uji" && !kunciCobaBenar(request, env)) return jawabGalat("KUNCI_SALAH", TEKS.api.KUNCI_SALAH, 403);
   let isi: unknown = {};
   const teks = await request.text();
   if (teks.trim() !== "") {

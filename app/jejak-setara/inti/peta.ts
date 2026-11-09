@@ -3,6 +3,7 @@
 // Skema zod dibuat di dalam `bacaPeta`, bukan di tingkat atas modul, agar layar yang hanya memakai
 // `selPadat` tidak ikut membawa zod.
 import { z } from "zod";
+import { benih } from "./acak";
 import { GalatInti } from "./aturan";
 import type { PetaJejak } from "./tipe";
 
@@ -176,4 +177,26 @@ export function pusatUbin(n: number): number {
 /** Ubin yang memuat koordinat piksel logis. */
 export function pikselKeUbin(px: number): number {
   return Math.floor(px / UKURAN_UBIN);
+}
+
+/**
+ * Grid lobi (JS-07, P-46): salinan lapisan tabrakan dengan semua sel `gerbangLobi` padat, dipakai selama
+ * status `lobi` dan `hitung_mundur` agar pemain tidak bisa keluar dari halaman lobi. Lapisan asal tidak diubah.
+ */
+export function tutupGerbang(peta: Pick<PetaJejak, "lebar" | "tinggi" | "tabrakan" | "gerbangLobi">): Uint8Array {
+  const hasil = Uint8Array.from(peta.tabrakan);
+  const g = peta.gerbangLobi;
+  for (let y = Math.max(0, g.atas); y <= Math.min(peta.tinggi - 1, g.bawah); y++) {
+    for (let x = Math.max(0, g.kiri); x <= Math.min(peta.lebar - 1, g.kanan); x++) hasil[y * peta.lebar + x] = 1;
+  }
+  return hasil;
+}
+
+/**
+ * Versi peta (JS-07, P-50): benih FNV-1a (JS-02) atas teks RLE lapisan `tabrakan` di kampung.json,
+ * mod 999.999, ditambah 1. Server mengirimnya di `selamat_datang.versiPeta`; layar pemain membandingkannya
+ * dengan versi peta yang dibawa halaman.
+ */
+export function versiPeta(peta: { tabrakan: string }): number {
+  return (benih(peta.tabrakan) % 999_999) + 1;
 }
