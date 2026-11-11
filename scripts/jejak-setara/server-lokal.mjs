@@ -1,7 +1,8 @@
 // Server lokal Jejak Setara untuk uji (spesifikasi JS-03, bagian "Skrip"): build, migrasi D1 ke folder
-// keadaan baru, lalu vite preview dengan JEJAK_KEADAAN menunjuk folder itu. Dipakai uji ujung ke ujung
-// (port 4310), uji server (4320), dan sim:beban (4330).
-//   node scripts/jejak-setara/server-lokal.mjs --port 4320 [--tanpa-build] [--keadaan <folder>] [--pakai-ulang]
+// keadaan baru, semai bank awal ke D1 lokal itu (JS-08, P-7; Permintaan A-5), lalu vite preview dengan JEJAK_KEADAAN
+// menunjuk folder itu. Dipakai uji ujung ke ujung (port 4310), uji server (4320), dan sim:beban (4330).
+//   node scripts/jejak-setara/server-lokal.mjs --port 4320 [--tanpa-build] [--keadaan <folder>] [--pakai-ulang] [--tanpa-semai]
+// --tanpa-semai: D1 lokal tanpa bank awal, untuk menguji ruang coba tanpa kejadian (JS-08, P-5).
 import { spawn, spawnSync } from "node:child_process";
 import { mkdirSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -29,6 +30,8 @@ if (!argumen.includes("--tanpa-build")) jalankan(vite, ["build", "--config", "vi
 if (!argumen.includes("--pakai-ulang")) rmSync(keadaan, { recursive: true, force: true });
 mkdirSync(keadaan, { recursive: true });
 jalankan(wrangler, ["d1", "migrations", "apply", "jejak-setara-lokal", "--local", "--persist-to", keadaan, "--config", "server/jejak-setara/wrangler.jsonc"]);
+// Semai sesudah migrasi, ke folder keadaan yang sama. Aman diulang: bank awal hanya ditulis sekali per basis data.
+if (!argumen.includes("--tanpa-semai")) jalankan(join(akar, "scripts", "jejak-setara", "semai.mjs"), ["--jalankan", "--", "--local", "--persist-to", keadaan]);
 
 const anak = spawn(process.execPath, [vite, "preview", "--config", "vite.jejak.config.ts", "--port", String(port), "--strictPort", "--host", "127.0.0.1"], {
   cwd: akar,

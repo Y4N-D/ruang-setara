@@ -27,6 +27,7 @@
     "test:e2e:jejak": "playwright test --config playwright.jejak.config.ts",
     "sim:beban": "node scripts/jejak-setara/simulasi-beban.mjs",
     "db:migrasi:lokal": "wrangler d1 migrations apply jejak-setara-lokal --local --persist-to .wrangler/state --config server/jejak-setara/wrangler.jsonc",
+    "db:semai:lokal": "node scripts/jejak-setara/semai.mjs --jalankan -- --local --persist-to .wrangler/state",
     "peta:build": "node scripts/jejak-setara/bila-ada.mjs scripts/jejak-setara/peta/build_peta.py \"dibuat di JS-06\" -- python scripts/jejak-setara/peta/build_peta.py",
     "assets:build:jejak": "node scripts/jejak-setara/bila-ada.mjs scripts/game/art/build_jejak.py \"dibuat Sesi C bersama aset tampak atas\" -- python scripts/game/art/build_jejak.py"
   },

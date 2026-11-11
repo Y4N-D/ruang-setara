@@ -102,6 +102,7 @@ ruang-setara/
 │  │  ├─ ruang/RuangJejak.ts         # Durable Object (pembungkus tipis)
 │  │  ├─ ruang/inti-ruang.ts         # logika ruang murni (JA-11)
 │  │  ├─ ruang/kejadian-ruang.ts     # aturan kejadian murni: penempatan, keterlihatan, pilihan, poin (JS-08)
+│  │  ├─ ruang/antrean.ts            # antrean kiriman berkunci dan berversi di SQLite ruang (JS-08)
 │  │  ├─ api/                        # masuk, akun, kejadian, rujukan, paket, ruang, statistik, ekspor, pengaturan, log
 │  │  ├─ auth/                       # sandi, sesi, izin, tiket, pembatas percobaan
 │  │  └─ db/                         # kueri D1 (ruang; konten dan jawaban sejak JS-08)
@@ -339,6 +340,8 @@ Disimpan di SQLite milik Durable Object, sehingga tetap ada bila objek dikeluark
 Isi kejadian **disalin saat ruang dibuat**, sehingga penyuntingan di konsol tidak mengubah ruang yang sedang berjalan.
 
 JS-03 membuat tabel `meta`, `pemain`, dan `kiriman`; tabel lain ditambahkan fitur yang memakainya. JS-08 menambah `kejadian`, `jawaban`, `terlihat`, dan `antrean`; keadaan dialog yang terbuka disimpan di lampiran sambungan (`serializeAttachment`), bukan di SQLite. Posisi pemain tidak ditulis pada setiap `gerak` (bagian 13.4).
+
+Sejak Build JS-08, nilai meta `waktu` juga memuat `riwayatJeda` (awal dan lama setiap jeda yang sudah dilanjutkan), agar waktu ronde tanpa jeda saat skor terakhir bertambah bisa dihitung ulang dari `jawaban` sesudah ruang dibangunkan. Ruang yang dibuat sebelumnya memakai `jedaMs`.
 
 ### 5.4 Aturan validasi konten
 
@@ -661,6 +664,7 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 - Bank awal disemai dengan semua rujukan berstatus `belum`. **Agen dan skrip tidak pernah menyemai status `terverifikasi`.**
 - Hanya akun bertanda Peninjau yang dapat menandai `terverifikasi`; nama dan tanggal dicatat otomatis.
 - Bank awal disemai sekali per basis data: `semai.mjs` menulis penanda `semai_bank_awal` di tabel `pengaturan`, dan setiap pernyataan hanya berlaku selama penanda belum ada, sehingga semai ulang tidak menimpa suntingan konsol, tanda Terverifikasi, atau kejadian yang dihapus (JS-05).
+- Id kejadian, versi `kerja`, dan paket bank awal berupa UUID versi 5 tetap, dihitung dari `DASAR_ID` di `semai.mjs` bersama kode kejadian atau nama paket (spesifikasi JS-05 P-40, D-6). `DASAR_ID` tidak boleh diubah sesudah semai pertama, karena data yang sudah disemai, ruang coba (Paket inti 16, JS-08), dan baris `jawaban` merujuk id itu.
 
 ### 10.7 Statistik
 
@@ -843,6 +847,7 @@ Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* dan *Limits* 
 - Dokumentasi menyebut rasio 20 : 1 untuk penagihan pesan masuk. Bila batas harian gratis ternyata menghitung pesan tanpa rasio itu, satu sesi 40 pemain sudah melewatinya. Karena itu percobaan dengan banyak perangkat di lingkungan uji ditunda sampai paket berbayar aktif.
 - `sim:beban` dijalankan terhadap Worker lokal (`vite preview`), yang tidak memakai kuota Cloudflare. Uji beban penuh di lingkungan uji (bagian 14) menunggu paket berbayar: satu kali uji 10 ruang × 50 bot selama 15 menit memakai sekitar 170.000 permintaan, melebihi kuota harian.
 - Ukuran Build JS-03 (`sim:beban` lokal, 50 detik, jeda acak 50 ms): ruang 50 pemain sekitar 7,0 pesan naik per pemain per detik, 1,7 MB turun per 15 menit, dan sekitar 15.900 permintaan Durable Object per sesi; ruang 100 pemain dengan `gerak` 6 per detik sekitar 4,1 pesan naik, 1,9 MB, dan sekitar 18.400 permintaan per sesi (sekitar lima sesi 100 pemain per hari di paket gratis).
+- Ukuran Build JS-08 (`sim:beban` lokal, 120 detik menjelajah dengan bot yang menjawab kejadian): ruang 50 pemain sekitar 8,0 pesan naik per pemain per detik, 1,7 MB turun per 15 menit, `pribadi` 0,18 per pemain per detik, dan sekitar 18.100 permintaan per sesi; ruang 100 pemain sekitar 4,9 pesan naik, 1,8 MB, `pribadi` 0,38, dan sekitar 22.200 permintaan per sesi. Baris tulis SQLite ruang bertambah karena jawaban, titik terlihat, dan antrean (sekitar 6.800 baris dalam 2,5 menit untuk 100 bot yang terus menjawab).
 - Satu Durable Object punya batas lunak sekitar 1.000 permintaan per detik. Ruang 100 pemain yang banyak bergerak mendekati batas itu (sekitar 740 pesan per detik di percobaan Plan JS-03).
 - Saat pindah ke paket berbayar, kode dan data tidak berubah; yang berubah hanya kuota (bagian 18, langkah 2).
 

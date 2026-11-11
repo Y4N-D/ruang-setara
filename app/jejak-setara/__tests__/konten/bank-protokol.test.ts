@@ -2,7 +2,7 @@
 // Pesan dibangun seperti yang akan dikirim server: id pilihan untuk pemain diacak (Architecture 8.3), dan
 // kartu dampak memuat teks rujukan dari pustaka.
 import { describe, expect, it } from "vitest";
-import { skemaServerKelas, skemaServerPemain } from "../../inti/protokol";
+import { PROTOKOL_VERSI, skemaServerKelas, skemaServerPemain } from "../../inti/protokol";
 import { bacaBankAwal } from "./naskah-urai";
 
 const { bank } = bacaBankAwal();
@@ -24,7 +24,7 @@ describe("pesan protokol dari setiap kejadian", () => {
       expect(benar && salah && tepat.length > 0).toBe(true);
       const pemain = [
         {
-          v: 1,
+          v: PROTOKOL_VERSI,
           t: "kejadian_terbuka",
           kejadianId: k.kode,
           judul: k.judul,
@@ -34,9 +34,9 @@ describe("pesan protokol dari setiap kejadian", () => {
           opsi1: k.langkah1.opsi.map((o, i) => ({ id: `o-${i}x`, teks: o.teks })),
           langkah: 1,
         },
-        { v: 1, t: "petunjuk", kejadianId: k.kode, kalimat: k.langkah1.petunjuk, opsiDicoret: "o-1x" },
+        { v: PROTOKOL_VERSI, t: "petunjuk", kejadianId: k.kode, kalimat: k.langkah1.petunjuk, opsiDicoret: "o-1x" },
         {
-          v: 1,
+          v: PROTOKOL_VERSI,
           t: "hasil_1",
           benar: false,
           opsiBenar: "o-0x",
@@ -46,11 +46,11 @@ describe("pesan protokol dari setiap kejadian", () => {
           pertanyaan2: k.langkah2.pertanyaan,
           opsi2: k.langkah2.opsi.map((o, i) => ({ id: `p-${i}x`, teks: o.teks })),
         },
-        { v: 1, t: "hasil_2", tingkat: "tepat", poin: 60, terjadi: tepat[0]?.terjadi, opsiTepat: tepat.map((_, i) => `p-${i}x`), kartu: kartu(k) },
+        { v: PROTOKOL_VERSI, t: "hasil_2", tingkat: "tepat", poin: 60, terjadi: tepat[0]?.terjadi, opsiTepat: tepat.map((_, i) => `p-${i}x`), kartu: kartu(k) },
       ];
       for (const p of pemain) expect(galatPertama(skemaServerPemain.safeParse(p)), `${k.kode} ${p.t}`).toBeNull();
       const pembahasan = {
-        v: 1,
+        v: PROTOKOL_VERSI,
         t: "data_pembahasan",
         kejadianId: k.kode,
         judul: k.judul,
@@ -78,6 +78,6 @@ describe("pesan protokol dari setiap kejadian", () => {
       poin: 0,
       rujukan: kartu(k).rujukan,
     }));
-    expect(galatPertama(skemaServerPemain.safeParse({ v: 1, t: "selesai", skor: 0, peringkat: 1, jumlahPemain: 50, rekap }))).toBeNull();
+    expect(galatPertama(skemaServerPemain.safeParse({ v: PROTOKOL_VERSI, t: "selesai", skor: 0, peringkat: 1, jumlahPemain: 50, rekap }))).toBeNull();
   });
 });

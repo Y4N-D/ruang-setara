@@ -1,6 +1,6 @@
 // Peta mini (spesifikasi JS-07, P-35 sampai P-37; DRAF D-4 pilihan a; Design System 3.3 dan 10): 112 × 75 px di
 // kanan atas, peta 0,7 px per ubin dengan delapan zona berwarna dominan, garis batas ink, halte, dan panah diri.
-// Peta mini adalah tombol untuk membuka peta besar. Lapisan penanda kejadian diisi di JS-08 (P-36).
+// Peta mini adalah tombol untuk membuka peta besar. JS-08 (P-18): penanda kejadian yang sudah terlihat, "!" atau ✓.
 import type { RefObject } from "react";
 import type { Arah, ZonaId } from "../inti/tipe";
 import { TEKS } from "../teks";
@@ -26,6 +26,15 @@ const BINGKAI_DIRI: Record<Arah, number> = { bawah: 0, atas: 1, kanan: 2, kiri: 
 export interface GambarPeta {
   tandaDiri: CanvasImageSource | null;
   halte: CanvasImageSource | null;
+  kejadian?: CanvasImageSource | null;
+  selesai?: CanvasImageSource | null;
+}
+
+/** Titik kejadian yang terlihat untuk peta (ubin), dan apakah kejadiannya selesai (JS-08, P-18, P-19). */
+export interface PenandaPeta {
+  x: number;
+  y: number;
+  selesai: boolean;
 }
 
 /** Zona berwarna dan garis batasnya, di kanvas dengan `s` piksel perangkat per ubin dan geser tegak `dy`. */
@@ -55,7 +64,13 @@ export function gambarZona(ctx: CanvasRenderingContext2D, s: number, dy: number,
  * Menggambar peta mini lengkap ke kanvas berukuran 112r × 75r piksel perangkat: zona, halte, lalu panah diri.
  * Ikon 7 × 7 digambar dengan skala bulat agar tetap tajam.
  */
-export function gambarPetaMini(ctx: CanvasRenderingContext2D, rasio: number, gambar: GambarPeta, diri: { x: number; y: number; arah: Arah } | null): void {
+export function gambarPetaMini(
+  ctx: CanvasRenderingContext2D,
+  rasio: number,
+  gambar: GambarPeta,
+  diri: { x: number; y: number; arah: Arah } | null,
+  kejadian: readonly PenandaPeta[] = [],
+): void {
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
   ctx.imageSmoothingEnabled = false;
@@ -69,6 +84,11 @@ export function gambarPetaMini(ctx: CanvasRenderingContext2D, rasio: number, gam
     for (const t of HALTE) {
       ctx.drawImage(gambar.halte, Math.round((t.x + 0.5) * s - ikon / 2), Math.round((t.y + 0.5) * s + dy - ikon / 2), ikon, ikon);
     }
+  }
+  // Penanda kejadian 7 × 7 berpusat di titiknya; yang selesai digambar lebih dulu (P-18).
+  for (const k of [...kejadian].sort((a, b) => Number(b.selesai) - Number(a.selesai))) {
+    const img = k.selesai ? gambar.selesai : gambar.kejadian;
+    if (img) ctx.drawImage(img, Math.round((k.x + 0.5) * s - ikon / 2), Math.round((k.y + 0.5) * s + dy - ikon / 2), ikon, ikon);
   }
   if (diri && gambar.tandaDiri) {
     const ux = diri.x / 16;

@@ -1,7 +1,7 @@
 // Aset gambar layar dunia (spesifikasi JS-07, P-5, P-6, P-21; Architecture 9 dan 11.2; Design System 7 dan 8).
 // Semua gambar dimuat dari manifest.ts, satu-satunya pintu masuk aset. Bagian murni (ganti warna tas, garis
 // siluet) bekerja pada larik piksel RGBA, sehingga bisa diuji di Node; bagian peramban memakai kanvas.
-import { AVATAR, IKON, KUNCI_TAS, OBJEK, TANDA, UBIN, WARNA_TAS } from "../../assets/manifest";
+import { AVATAR, IKON, KUNCI_TAS, NPC, OBJEK, TANDA, UBIN, WARNA_TAS } from "../../assets/manifest";
 import type { Arah, Masa, WarnaTas } from "../../inti/tipe";
 import { GERBANG, OBJEK_PETA } from "./petaKampung";
 
@@ -91,6 +91,8 @@ export interface AsetDunia {
   avatar: { arah: Record<"bawah" | "atas" | "kanan", Record<Pose, HTMLImageElement>> }[];
   ikon: Map<string, HTMLImageElement>;
   tanda: Map<string, HTMLImageElement>;
+  /** Tokoh bukan pemain untuk tokoh kejadian (JS-08, P-15), berkunci nama berkas tanpa .png. */
+  npc: Map<string, HTMLImageElement>;
 }
 
 /** Ikon dan tanda yang dipakai layar dunia JS-07 (bagian "Aset" spesifikasi). */
@@ -108,12 +110,31 @@ export const IKON_DUNIA = [
   "ikon_zona_6",
   "ikon_zona_7",
   "ikon_zona_8",
+  // JS-08: peta mini, skor, dan ikon emosi untuk pita umpan balik dan kepala kartu dampak.
+  "ikon_mini_kejadian",
+  "ikon_mini_selesai",
+  "ikon_bintang",
+  "ikon_emosi_hati",
+  "ikon_emosi_keringat",
+  "ikon_emosi_tanya",
+  "ikon_emosi_seru",
 ] as const;
-export const TANDA_DUNIA = ["tanda_diri"] as const;
+export const TANDA_DUNIA = ["tanda_diri", "tanda_kejadian", "tanda_dibuka", "tanda_selesai"] as const;
 
 /** Jenis objek yang digambar layar dunia: semua jenis di kampung.json, ditambah kedua gambar gerbang. */
 export function jenisObjekDunia(): string[] {
   return [...new Set([...OBJEK_PETA.map((o) => o.jenis), GERBANG.jenis, "gerbang_buka", "gerbang_tutup"])].sort();
+}
+
+/**
+ * Properti kejadian (JS-08, P-15): semua jenis OBJEK di manifest yang belum dimuat sebagai objek peta, karena kunci
+ * `setTokoh` kejadian baru diketahui saat kejadian terlihat. Semua tokoh bukan pemain dimuat dengan alasan yang sama.
+ */
+export function jenisObjekKejadian(): string[] {
+  const peta = new Set(jenisObjekDunia());
+  return Object.keys(OBJEK)
+    .filter((j) => !peta.has(j))
+    .sort();
 }
 
 /** Semua URL yang dimuat sebelum tombol "Masuk" aktif (Architecture 9; status antarmuka "Memuat aset"). */
@@ -131,6 +152,12 @@ export function daftarUrlDunia(): string[] {
   }
   for (const n of IKON_DUNIA) if (IKON[n]) url.push(IKON[n].url);
   for (const n of TANDA_DUNIA) if (TANDA[n]) url.push(TANDA[n].url);
+  for (const j of jenisObjekKejadian()) {
+    const o = OBJEK[j];
+    url.push(o.bawah.url);
+    if (o.atas) url.push(o.atas.url);
+  }
+  for (const n of Object.keys(NPC).sort()) url.push(NPC[n].url);
   return [...new Set(url)];
 }
 
@@ -162,10 +189,12 @@ export async function muatAsetDunia(): Promise<AsetDunia> {
   await Promise.all(daftarUrlDunia().map(muat));
   const ambil = (url: string) => cache.get(url) as HTMLImageElement;
   const objek = new Map<string, { bawah: HTMLImageElement; atas: HTMLImageElement | null }>();
-  for (const j of jenisObjekDunia()) {
+  for (const j of [...jenisObjekDunia(), ...jenisObjekKejadian()]) {
     const o = OBJEK[j];
     if (o) objek.set(j, { bawah: ambil(o.bawah.url), atas: o.atas ? ambil(o.atas.url) : null });
   }
+  const npc = new Map<string, HTMLImageElement>();
+  for (const n of Object.keys(NPC)) npc.set(n, ambil(NPC[n].url));
   const ikon = new Map<string, HTMLImageElement>();
   for (const n of IKON_DUNIA) if (IKON[n]) ikon.set(n, ambil(IKON[n].url));
   const tanda = new Map<string, HTMLImageElement>();
@@ -182,6 +211,7 @@ export async function muatAsetDunia(): Promise<AsetDunia> {
     })),
     ikon,
     tanda,
+    npc,
   };
 }
 

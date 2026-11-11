@@ -884,3 +884,517 @@ body {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------------------------
+   Kejadian JS-08 (spesifikasi JS-08; Design System 3.3 sampai 3.5, 5, 10, 11, dan 13).
+   Ukuran huruf: lembar (HP) judul 13, situasi 17, pilihan 16, label 13 px; panel (laptop) 16, 20, 18, 14 px. */
+
+/* Skor dan peringkat di kanan bilah atas (P-57); "#–" memakai Pixelify Sans karena Press Start 2P tanpa tanda minus. */
+.js-skor {
+  position: relative;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.js-bintang {
+  width: 16px;
+  height: 16px;
+  background-size: 48px 16px;
+  background-position: 0 0;
+  image-rendering: pixelated;
+}
+
+.js-peringkat {
+  font-family: "Press Start 2P", monospace;
+}
+
+.js-tanpa-peringkat {
+  font-family: "Pixelify Sans", monospace;
+  font-size: 16px;
+}
+
+/* Skor melayang (P-58): naik 4 px dalam dua langkah selama 240 ms, lalu hilang sesudah 1 detik. */
+.js-skor-melayang {
+  position: absolute;
+  right: 0;
+  top: 30px;
+  padding: 2px 4px;
+  border: 2px solid var(--js-ink);
+  background: var(--js-sun);
+  color: var(--js-ink);
+  font-size: 12px;
+  animation: js-melayang 240ms steps(2) forwards;
+}
+
+@keyframes js-melayang {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-skor-melayang {
+    display: none;
+  }
+}
+
+/* Tombol Periksa bulat 64 px, 16 px dari tepi kanan dan bawah dunia (P-22). */
+.js-tombol-periksa {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 4px solid var(--js-ink);
+  border-radius: 50%;
+  background: var(--js-mist);
+  color: var(--js-dusk);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.js-tombol-periksa[data-dekat="ya"] {
+  background: var(--js-sun);
+  color: var(--js-ink);
+}
+
+.js-tombol-periksa[data-ditekan="ya"],
+.js-tombol-periksa:active {
+  transform: translate(2px, 2px);
+}
+
+.js-tombol-periksa:focus-visible {
+  outline: 4px solid var(--js-sun);
+  outline-offset: 2px;
+}
+
+/* Ajakan "E Periksa" di tengah bawah dunia, 16 px di atas tepi bawah (P-23). */
+.js-ajakan-e {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border: 4px solid var(--js-ink);
+  background: var(--js-cream);
+  color: var(--js-ink);
+  font-size: 16px;
+}
+
+.js-ajakan-e kbd {
+  min-width: 24px;
+  padding: 2px 4px;
+  border: 2px solid var(--js-ink);
+  background: var(--js-sun);
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Angka fps (P-70), pojok kiri bawah dunia. */
+.js-fps {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  margin: 0;
+  padding: 2px 6px;
+  background: var(--js-ink);
+  color: var(--js-cream);
+  font-size: 13px;
+}
+
+/* Wadah dialog di bawah bilah atas (P-39): lembar menutupi area, panel 70% di tengah. */
+.js-dialog-wadah,
+.js-dialog-jeda {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.js-dialog-jeda {
+  background: var(--js-ink);
+}
+
+.js-dialog {
+  --js-px: 2px;
+  box-sizing: border-box;
+  display: flex;
+  max-height: calc(100% - 24px);
+  width: 70%;
+  outline: none;
+}
+
+.js-dialog[data-bentuk="lembar"] {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+}
+
+.js-dialog-bingkai {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: none; /* panel 70% dan lembar penuh (P-39), bukan batas 560 px panel layar HTML */
+  min-height: 0;
+  max-height: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--js-ink);
+}
+
+.js-dialog[data-bentuk="lembar"] .js-dialog-bingkai {
+  height: 100%;
+  padding: 6px 10px;
+}
+
+.js-dialog-kepala {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.js-ikon-zona {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+}
+
+.js-dialog[data-bentuk="lembar"] .js-ikon-zona {
+  width: 28px;
+  height: 28px;
+}
+
+.js-dialog-kepala h2 {
+  margin: 0;
+  flex: 1;
+  font-family: "Press Start 2P", monospace;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.js-dialog[data-bentuk="lembar"] .js-dialog-kepala h2 {
+  font-size: 13px;
+}
+
+.js-chip {
+  flex: none;
+  padding: 2px 8px;
+  border: 2px solid var(--js-ink);
+  background: var(--js-mist);
+  font-size: 14px;
+}
+
+.js-dialog[data-bentuk="lembar"] .js-chip {
+  font-size: 13px;
+}
+
+.js-dialog-isi {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 2px;
+  font-size: 18px;
+}
+
+.js-dialog[data-bentuk="lembar"] .js-dialog-isi {
+  gap: 6px;
+  padding: 6px 2px;
+  font-size: 16px;
+}
+
+.js-situasi {
+  margin: 0;
+  padding: 8px 10px;
+  border: 2px solid var(--js-ink);
+  background: var(--js-white);
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.js-dialog[data-bentuk="lembar"] .js-situasi {
+  padding: 6px 8px;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.js-pertanyaan {
+  margin: 0;
+  color: var(--js-dusk);
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.js-dialog[data-bentuk="lembar"] .js-pertanyaan {
+  font-size: 16px;
+}
+
+/* Pilihan Langkah 1: kisi 2 × 2; Langkah 2: bersusun (P-41, P-45). */
+.js-kisi-opsi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.js-susun-opsi {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.js-pilihan-dialog {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 48px;
+  margin: 0;
+  padding: 6px 10px;
+  border: 4px solid var(--js-ink);
+  border-radius: 0;
+  background: var(--js-cream);
+  color: var(--js-ink);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 18px;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.js-dialog[data-bentuk="lembar"] .js-pilihan-dialog {
+  padding: 4px 8px;
+  font-size: 16px;
+}
+
+.js-pilihan-dialog .js-huruf {
+  flex: none;
+  min-width: 2ch;
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.js-teks-pilihan {
+  flex: 1;
+}
+
+.js-pilihan-dialog[aria-pressed="true"] {
+  background: var(--js-sun);
+  box-shadow: inset 0 0 0 4px var(--js-white);
+}
+
+.js-pilihan-dialog:focus-visible {
+  outline: 4px solid var(--js-sun);
+  outline-offset: 2px;
+}
+
+.js-pilihan-dialog[aria-disabled="true"] {
+  cursor: wait;
+}
+
+/* Pilihan terkunci di umpan balik (P-44): benar leaf, pilihan pemain yang keliru mango, sisanya mist. */
+.js-pilihan-terkunci {
+  flex-wrap: wrap;
+  cursor: default;
+  background: var(--js-mist);
+  color: var(--js-dusk);
+}
+
+.js-pilihan-terkunci[data-label="tepat"] {
+  background: var(--js-leaf);
+  color: var(--js-ink);
+}
+
+.js-pilihan-terkunci[data-label="pilihanmu"] {
+  background: var(--js-mango);
+  color: var(--js-ink);
+}
+
+.js-label-pilihan {
+  flex-basis: 100%;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Pita umpan balik (P-44): leaf dengan ikon hati, atau mango dengan ikon tanda tanya; teks selalu ink. */
+.js-pita-umpan {
+  padding: 6px 10px;
+  border: 4px solid var(--js-ink);
+  background: var(--js-leaf);
+  color: var(--js-ink);
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.js-pita-umpan[data-benar="tidak"] {
+  background: var(--js-mango);
+}
+
+.js-pita-umpan p {
+  margin: 0 0 4px;
+}
+
+.js-pita-kepala {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 13px;
+}
+
+.js-pita-poin {
+  margin-left: auto;
+}
+
+.js-ikon-emosi {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+/* Kaki dialog: Tutup di kiri, tombol utama di kanan (P-41 sampai P-46). */
+.js-dialog-kaki {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex: none;
+  padding-top: 6px;
+}
+
+.js-tombol-dialog {
+  min-height: 48px;
+  padding: 6px 14px;
+  font-size: 16px;
+}
+
+.js-tombol-dialog.js-tombol-utama {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.js-tombol-dialog[data-aksi="situasi"] {
+  margin-left: auto;
+}
+
+.js-tombol-dialog[data-aksi="situasi"] + .js-tombol-utama {
+  margin-left: 0;
+}
+
+.js-dialog[data-mengunci="ya"] .js-tombol-dialog {
+  cursor: wait;
+}
+
+/* Kartu dampak (P-46): kepala berwarna tingkat; mode penuh dua kolom 1,1 : 1, mode ringkas satu kolom. */
+.js-kartu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.js-kartu-kepala {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 4px solid var(--js-ink);
+  background: var(--js-leaf);
+  color: var(--js-ink);
+  font-family: "Press Start 2P", monospace;
+  font-size: 13px;
+}
+
+.js-kartu[data-tingkat="kurang"] .js-kartu-kepala {
+  background: var(--js-mango);
+}
+
+.js-kartu[data-tingkat="berisiko"] .js-kartu-kepala {
+  background: var(--js-coral);
+}
+
+.js-kartu-poin {
+  margin-left: auto;
+}
+
+.js-kartu-isi {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 10px;
+}
+
+.js-kartu[data-kolom="1"] .js-kartu-isi {
+  grid-template-columns: 1fr;
+}
+
+.js-kartu section {
+  margin: 0 0 6px;
+}
+
+.js-kartu h3 {
+  margin: 0 0 2px;
+  color: var(--js-dusk);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 14px;
+}
+
+.js-kartu p,
+.js-kartu ul {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.js-kartu ul {
+  padding-left: 18px;
+}
+
+.js-catatan-uji {
+  margin-top: 6px;
+  color: var(--js-dusk);
+  font-size: 13px;
+}
+
+/* Peta besar (P-19): penanda kejadian 14 × 14 dan ringkasan di bawah judul. */
+.js-peta-kejadian {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  image-rendering: pixelated;
+}
+
+.js-ringkasan-kejadian {
+  margin: 2px 0 0;
+  color: var(--js-cream);
+  font-size: 14px;
+}
+
+/* Layar "Ronde selesai" (P-59). */
+.js-skor-akhir p {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.js-skor-akhir-angka {
+  font-family: "Press Start 2P", monospace;
+}

@@ -5,6 +5,7 @@ import { frekuensiGerak } from "../../inti/aturan";
 import { langkahGerak } from "../../inti/gerak";
 import type { PesanPemain } from "../../inti/protokol";
 import type { Arah, PetaJejak } from "../../inti/tipe";
+import { PROTOKOL_VERSI } from "../../inti/versi";
 
 export const LANGKAH_MS = 1000 / 60;
 /** Selang terpanjang yang dikejar dalam satu bingkai, agar tab yang lama tersembunyi tidak berjalan sendiri. */
@@ -97,7 +98,7 @@ export class GerakDiri {
     const berhenti = !isi.jalan && t !== null && t.jalan;
     if (!cukupLama && !berhenti) return null;
     if (bufferedAmount > 0) return null;
-    const pesan: PesanGerak = { v: 1, t: "gerak", ...isi, seq: this.seq + 1 };
+    const pesan: PesanGerak = { v: PROTOKOL_VERSI, t: "gerak", ...isi, seq: this.seq + 1 };
     if (!kirim(pesan)) return null;
     this.seq++;
     this.kirimTerakhirMs = sekarangMs;

@@ -182,6 +182,8 @@ export const PANDANGAN = { lebar: 320, tinggi: 180 } as const;
 
 /** 1,5 ubin (24 piksel) ditambah toleransi 8 piksel. */
 export const JANGKAUAN_PERIKSA_PX = 32;
+/** Layar pemain menganggap kejadian dalam jangkauan pada 24 piksel, di bawah batas server (JS-08, P-21). */
+export const JANGKAUAN_KLIEN_PX = 24;
 
 /** Jarak lurus dua titik dalam piksel logis. */
 export function jarak(a: Posisi, b: Posisi): number {
@@ -189,29 +191,36 @@ export function jarak(a: Posisi, b: Posisi): number {
 }
 
 /**
- * Memberi setiap kejadian satu titik di zonanya, tanpa titik terpakai dua kali. Kejadian diproses
- * menurut kode; titik dipilih dengan `kocok` berbenih (benihRuang, kode). Hasil mengikuti urutan
- * daftar masukan dan selalu sama untuk benih dan daftar yang sama.
+ * Memberi setiap kejadian satu titik di zonanya, atau dua titik berbeda bila `jumlahTitik` 2 (ruang lebih dari
+ * 50 pemain; JS-08, P-8), tanpa titik terpakai dua kali. Kejadian diproses menurut kode; calon titik dikocok
+ * dengan `kocok` berbenih (benihRuang, kode), lalu calon pertama (dan kedua) dipakai. Dengan `jumlahTitik` 1
+ * hasilnya sama persis dengan JS-02. Hasil mengikuti urutan daftar masukan dan selalu sama untuk benih dan
+ * daftar yang sama.
  */
 export function tempatkanKejadian(
   benihRuang: number | string,
   titikPerZona: Readonly<Partial<Record<ZonaId, readonly TitikPeta[]>>>,
   kejadian: readonly Pick<IsiKejadian, "kode" | "zona">[],
-): { kode: string; titik: TitikPeta }[] {
+  jumlahTitik: 1 | 2 = 1,
+): { kode: string; titik: TitikPeta; titikKedua?: TitikPeta }[] {
+  if (jumlahTitik !== 1 && jumlahTitik !== 2) throw new RangeError("tempatkanKejadian: jumlahTitik harus 1 atau 2");
   const terpakai = new Set<string>();
-  const hasil = new Map<string, TitikPeta>();
+  const hasil = new Map<string, TitikPeta[]>();
   const urut = kejadian.slice().sort((a, b) => (a.kode < b.kode ? -1 : a.kode > b.kode ? 1 : 0));
   for (const k of urut) {
     if (hasil.has(k.kode)) throw new RangeError(`tempatkanKejadian: kode ${k.kode} ganda`);
     const calon = (titikPerZona[k.zona] ?? []).filter((t) => !terpakai.has(t.id));
-    if (calon.length === 0) {
+    if (calon.length < jumlahTitik) {
       throw new GalatInti("TITIK_TIDAK_CUKUP", `zona ${k.zona} kekurangan titik untuk ${k.kode}`);
     }
-    const titik = kocok(calon, benih(benihRuang, k.kode))[0];
-    terpakai.add(titik.id);
-    hasil.set(k.kode, titik);
+    const pilihan = kocok(calon, benih(benihRuang, k.kode)).slice(0, jumlahTitik);
+    for (const t of pilihan) terpakai.add(t.id);
+    hasil.set(k.kode, pilihan);
   }
-  return kejadian.map((k) => ({ kode: k.kode, titik: hasil.get(k.kode) as TitikPeta }));
+  return kejadian.map((k) => {
+    const [titik, titikKedua] = hasil.get(k.kode) as TitikPeta[];
+    return jumlahTitik === 2 ? { kode: k.kode, titik, titikKedua } : { kode: k.kode, titik };
+  });
 }
 
 /**

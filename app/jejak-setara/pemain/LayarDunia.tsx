@@ -2,12 +2,16 @@
 // dengan skala bulat, garis pindai, kanvas label nama beresolusi perangkat, dan HUD React di atasnya (panel lobi,
 // hitung mundur, bilah atas, peta mini dan peta besar, joystick, ajakan putar HP). Satu loop requestAnimationFrame
 // memperbarui mesin dunia, menggambar, dan menulis ringkasan kecil di atribut data kanvas untuk uji.
+// JS-08: tombol Periksa dan ajakan E, dialog kejadian, skor di bilah atas, penanda di peta, kelompok histogram 100 ms,
+// dan angka fps bila alamat diakhiri #fps (P-18 sampai P-25, P-39, P-51 sampai P-54, P-57, P-68, P-70).
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as PointerEventReact } from "react";
 import { TANDA, IKON } from "../assets/manifest";
+import DialogKejadian, { type AksiDialog } from "../bersama/DialogKejadian";
+import { modeRingkas, TINGGI_BILAH_PX, type KeadaanDialog } from "../bersama/dialogKeadaan";
 import { PANDANGAN } from "../inti/aturan";
 import type { PesanPemain } from "../inti/protokol";
 import type { StatusRuang } from "../inti/tipe";
-import { TEKS } from "../teks";
+import { isiTeks, TEKS } from "../teks";
 import AjakanPutar from "./AjakanPutar";
 import BilahAtas from "./BilahAtas";
 import { KAKI } from "./dunia/penggambar";
@@ -19,14 +23,36 @@ import Joystick from "./Joystick";
 import { LapisanHitungMundur } from "./LayarRonde";
 import PanelLobi from "./PanelLobi";
 import PetaBesar from "./PetaBesar";
-import PetaMini, { gambarPetaMini } from "./PetaMini";
+import PetaMini, { gambarPetaMini, type PenandaPeta } from "./PetaMini";
+import { AjakanPeriksa, TombolPeriksa } from "./TombolPeriksa";
 
 type PesanGerak = Extract<PesanPemain, { t: "gerak" }>;
 
 /** Tinggi bilah atas (px CSS, Design System 3.3). */
-const TINGGI_BILAH = 28;
-/** Batas atas kelompok waktu kode gambar per bingkai (ms), untuk histogram di atribut data kanvas (AC-19). */
-export const KELOMPOK_WAKTU = [1, 2, 3, 4, 6, 8, 12, 16, 25, 50, Infinity] as const;
+const TINGGI_BILAH = TINGGI_BILAH_PX;
+/** Batas atas kelompok waktu kode gambar per bingkai (ms), untuk histogram di atribut data kanvas (AC-19; JS-08 P-68). */
+export const KELOMPOK_WAKTU = [1, 2, 3, 4, 6, 8, 12, 16, 25, 50, 100, Infinity] as const;
+
+/**
+ * Bentuk dan mode dialog (P-39): mode ringkas bila tinggi area dialog (dunia yang tampil dikurangi bilah atas) kurang
+ * dari 560 px CSS; lembar di perangkat sentuh dengan tinggi tampilan ≤ 500 px, selain itu panel 70%.
+ */
+export function areaDialog(lebar: number, tinggi: number, rasio: number, sentuh: boolean): { ringkas: boolean; bentuk: "lembar" | "panel" } {
+  const u = hitungSkala(lebar, tinggi, rasio);
+  const tinggiHud = Math.min(tinggi, u.atasCss + u.tinggiCss) - Math.max(0, u.atasCss);
+  return { ringkas: modeRingkas(tinggiHud - TINGGI_BILAH), bentuk: sentuh && tinggi <= 500 ? "lembar" : "panel" };
+}
+
+/** Kelompok histogram p95 untuk angka fps (P-70). */
+function kelompokP95(h: readonly number[]): number {
+  const total = h.reduce((a, b) => a + b, 0);
+  let k = 0;
+  for (let i = 0; i < h.length; i++) {
+    k += h[i];
+    if (k >= 0.95 * total) return KELOMPOK_WAKTU[i];
+  }
+  return KELOMPOK_WAKTU[KELOMPOK_WAKTU.length - 1];
+}
 /** Label nama: paling banyak 8 pemain lain terdekat (P-23, D-1a): Pixelify Sans 13 px, jarak dalam 2 px, garis 1 px. */
 const LABEL = { maks: 8, huruf: 13, jarak: 2, garis: 1 } as const;
 
@@ -53,10 +79,20 @@ export interface PropsLayarDunia {
   kirim: (p: PesanGerak) => boolean;
   bufferedAmount: () => number;
   umumkan: (teks: string) => void;
+  // JS-08
+  skor: number;
+  peringkat: number;
+  dialog: KeadaanDialog | null;
+  ruangUji: boolean;
+  menungguPeriksa: boolean;
+  saatDialog: (a: AksiDialog) => void;
+  saatPeriksa: (kejadianId: string) => void;
+  saatRingkas: (ringkas: boolean) => void;
 }
 
 export default function LayarDunia(props: PropsLayarDunia) {
   const { mesin, status, waktu, durasiMenit, kode, diri, jumlahPemain, menyambung, selisihJam, kirim, bufferedAmount, umumkan } = props;
+  const { skor, peringkat, dialog, ruangUji, menungguPeriksa, saatDialog, saatPeriksa, saatRingkas } = props;
   const [ukuran, setUkuran] = useState<UkuranDunia>(ukuranLayar);
   const [layar, setLayar] = useState(() => ({ lebar: window.innerWidth, tinggi: window.innerHeight, rasio: window.devicePixelRatio || 1 }));
   const sentuh = useMemo(() => perangkatSentuh(window), []);
@@ -72,12 +108,40 @@ export default function LayarDunia(props: PropsLayarDunia) {
   const tegak = sentuh && layar.tinggi > layar.lebar;
   const ronde = status === "main" || status === "jeda";
   const lobi = status === "lobi" || status === "hitung_mundur";
+  const adaDialog = dialog !== null;
+  const [jangkauan, setJangkauan] = useState<string | null>(null);
+  const [penanda, setPenanda] = useState<{ daftar: PenandaPeta[]; terlihat: number; selesai: number }>({ daftar: [], terlihat: 0, selesai: 0 });
+  const [fps, setFps] = useState<string | null>(null);
 
   // Nilai terbaru untuk loop bingkai tanpa memasang ulang loop.
-  const terbaru = useRef({ menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam });
+  const terbaru = useRef({ menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, menungguPeriksa });
   useEffect(() => {
-    terbaru.current = { menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam };
+    terbaru.current = { menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, menungguPeriksa };
   });
+
+  // Periksa (P-23, P-24): pemain berhenti dan laporan berhenti dikirim lebih dulu, lalu `periksa`.
+  const periksa = useCallback(() => {
+    const kodeKejadian = mesin.jangkauan;
+    const t = terbaru.current;
+    if (!kodeKejadian || t.adaDialog || t.menungguPeriksa || t.petaBesar || t.menyambung || t.tegak || status !== "main") return;
+    mesin.hentiUntukPeriksa(Date.now(), t.kirim);
+    saatPeriksa(kodeKejadian);
+  }, [mesin, saatPeriksa, status]);
+
+  // Pengumuman jangkauan sekali per pendekatan (P-25); jaraknya diatur antrean pengumuman (2 detik).
+  const jangkauanSebelum = useRef<string | null>(null);
+  useEffect(() => {
+    const sebelum = jangkauanSebelum.current;
+    jangkauanSebelum.current = jangkauan;
+    if (jangkauan && !sebelum) umumkan(TEKS.pengumuman.dekat);
+  }, [jangkauan, umumkan]);
+
+  // Dialog tertutup: fokus kembali ke dunia (P-47).
+  const dialogSebelum = useRef(adaDialog);
+  useEffect(() => {
+    if (dialogSebelum.current && !adaDialog) kanvas.current?.focus();
+    dialogSebelum.current = adaDialog;
+  }, [adaDialog]);
 
   // Ukuran jendela atau orientasi berubah: skala dihitung ulang (P-1).
   useEffect(() => {
@@ -147,6 +211,16 @@ export default function LayarDunia(props: PropsLayarDunia) {
       if (e.ctrlKey || e.altKey || e.metaKey) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
+      // Selama dialog terbuka, papan ketik milik dialog: avatar diam dan P tidak membuka peta besar (P-51).
+      if (terbaru.current.adaDialog) return;
+      // E, atau Enter pada dunia yang terfokus, memeriksa kejadian dalam jangkauan (P-23).
+      if ((e.code === "KeyE" && !(t && t.tagName === "BUTTON")) || (e.key === "Enter" && t === kanvas.current)) {
+        if (mesin.jangkauan && !e.repeat) {
+          e.preventDefault();
+          periksa();
+          return;
+        }
+      }
       if (e.code === "KeyP" && ronde) {
         e.preventDefault();
         if (terbaru.current.petaBesar) tutupPetaBesar();
@@ -179,7 +253,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
       document.removeEventListener("visibilitychange", terlihat);
       m.lepasSemua();
     };
-  }, [mesin, ronde, tutupPetaBesar]);
+  }, [mesin, ronde, tutupPetaBesar, periksa]);
 
   // Joystick sentuh (P-13): sentuhan pertama di separuh kiri dunia, bukan di tombol HUD.
   const titikDunia = (e: PointerEventReact<HTMLElement>) => {
@@ -187,7 +261,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
     return { x: e.clientX - (r?.left ?? 0), y: e.clientY - (r?.top ?? 0), lebar: r?.width ?? 0 };
   };
   const saatTurun = (e: PointerEventReact<HTMLElement>) => {
-    if (!sentuh || e.pointerType === "mouse" || petaBesar || tegak) return;
+    if (!sentuh || e.pointerType === "mouse" || petaBesar || tegak || adaDialog) return;
     if ((e.target as Element).closest("button, a, [role='dialog']")) return;
     const p = titikDunia(e);
     if (mesin.masukan.mulaiJoystick(e.pointerId, p.x, p.y, p.lebar)) {
@@ -224,6 +298,11 @@ export default function LayarDunia(props: PropsLayarDunia) {
     };
     gambarMini.tandaDiri = muatIkon(TANDA.tanda_diri.url);
     gambarMini.halte = muatIkon(IKON.ikon_mini_halte.url);
+    const gambarKejadian = { kejadian: muatIkon(IKON.ikon_mini_kejadian.url), selesai: muatIkon(IKON.ikon_mini_selesai.url) };
+    // Satu detik terakhir untuk angka fps (P-70).
+    const detik = { mulai: 0, bingkai: 0, histogram: KELOMPOK_WAKTU.map(() => 0) };
+    let kunciPenanda = "";
+    let jangkauanTampil: string | null = null;
     const catatan = { gambar: [] as number[], selang: [] as number[], tulis: 0, sebelum: 0, bagian: [0, 0, 0, 0, 0] };
     // Histogram kumulatif waktu kode gambar per bingkai sejak layar dipasang (AC-19).
     const histogram: number[] = KELOMPOK_WAKTU.map(() => 0);
@@ -247,7 +326,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
         jamLokal: Date.now(),
         jamPerforma: jam,
         selisihJam: t.selisihJam(),
-        bolehGerak: !t.menyambung && !t.petaBesar && !t.tegak,
+        bolehGerak: !t.menyambung && !t.petaBesar && !t.tegak && !t.adaDialog && !t.menungguPeriksa,
         kurangiGerak: t.kurangiGerak,
         bufferedAmount: t.bufferedAmount(),
         kirim: t.kirim,
@@ -312,13 +391,14 @@ export default function LayarDunia(props: PropsLayarDunia) {
         const km = mini.current;
         const cm = km?.getContext("2d");
         if (km && cm && gambarMini.tandaDiri?.complete && gambarMini.halte?.complete) {
-          // Peta mini digambar ulang hanya bila posisi (per ubin), arah, atau ukurannya berubah.
+          // Peta mini digambar ulang hanya bila posisi (per ubin), arah, ukuran, atau penanda kejadian berubah.
           const p = mesin.gerak.posisi;
-          const kunci = `${km.width}x${km.height}:${p ? `${Math.round(p.x / 16)},${Math.round(p.y / 16)},${mesin.gerak.arah}` : "-"}`;
+          const kunci = `${km.width}x${km.height}:${p ? `${Math.round(p.x / 16)},${Math.round(p.y / 16)},${mesin.gerak.arah}` : "-"}:${kunciPenanda}`;
           if (kunci !== kunciMini || km !== kanvasMini) {
             kunciMini = kunci;
             kanvasMini = km;
-            gambarPetaMini(cm, t.rasio, gambarMini, p ? { x: p.x, y: p.y, arah: mesin.gerak.arah } : null);
+            const daftar = mesin.kejadian.daftar().map((x) => ({ x: x.x, y: x.y, selesai: mesin.kejadian.selesai.has(x.kejadianId) }));
+            gambarPetaMini(cm, t.rasio, { ...gambarMini, ...gambarKejadian }, p ? { x: p.x, y: p.y, arah: mesin.gerak.arah } : null, daftar);
           }
         } else {
           kunciMini = "";
@@ -327,7 +407,32 @@ export default function LayarDunia(props: PropsLayarDunia) {
       }
       const akhir = performance.now();
       catatan.gambar.push(akhir - mulai);
-      histogram[KELOMPOK_WAKTU.findIndex((b) => akhir - mulai < b)]++;
+      const kelompok = KELOMPOK_WAKTU.findIndex((b) => akhir - mulai < b);
+      histogram[kelompok]++;
+      // Jangkauan Periksa dan penanda peta hanya memicu React bila berubah (P-19, P-21).
+      if (mesin.jangkauan !== jangkauanTampil) {
+        jangkauanTampil = mesin.jangkauan;
+        setJangkauan(jangkauanTampil);
+      }
+      const kunciBaru = `${mesin.kejadian.jumlahTitik}:${mesin.kejadian.selesai.size}`;
+      if (kunciBaru !== kunciPenanda) {
+        kunciPenanda = kunciBaru;
+        setPenanda({
+          daftar: mesin.kejadian.daftar().map((x) => ({ x: x.x, y: x.y, selesai: mesin.kejadian.selesai.has(x.kejadianId) })),
+          terlihat: mesin.kejadian.kodeTerlihat().size,
+          selesai: mesin.kejadian.selesai.size,
+        });
+      }
+      // Angka fps untuk satu detik terakhir, hanya bila alamat diakhiri #fps; tidak ada yang disimpan atau dikirim (P-70).
+      detik.bingkai++;
+      detik.histogram[kelompok]++;
+      if (akhir - detik.mulai >= 1000) {
+        const tampilFps = window.location.hash === "#fps";
+        setFps(tampilFps ? isiTeks(TEKS.dunia.fps, { fps: Math.round((detik.bingkai * 1000) / Math.max(1, akhir - detik.mulai)), kelompok: kelompokP95(detik.histogram) }) : null);
+        detik.mulai = akhir;
+        detik.bingkai = 0;
+        detik.histogram = KELOMPOK_WAKTU.map(() => 0);
+      }
       if (catatan.sebelum > 0) catatan.selang.push(jam - catatan.sebelum);
       catatan.sebelum = jam;
       // Ringkasan setiap 500 ms di atribut data kanvas, untuk uji ujung ke ujung (AC-19) dan pemeriksaan.
@@ -349,6 +454,13 @@ export default function LayarDunia(props: PropsLayarDunia) {
         kv.dataset.selangMaks = Math.max(0, ...catatan.selang).toFixed(1);
         kv.dataset.bingkai = String(catatan.gambar.length);
         kv.dataset.histogram = histogram.join(",");
+        // JS-08 (P-20): titik kejadian terlihat, kejadian selesai, kejadian dalam jangkauan, gelembung pemain lain,
+        // serta tokoh dan properti kejadian yang tergambar.
+        kv.dataset.kejadian = String(mesin.kejadian.jumlahTitik);
+        kv.dataset.selesai = String(mesin.kejadian.selesai.size);
+        kv.dataset.jangkauan = mesin.jangkauan ?? "";
+        kv.dataset.dialogLain = String(mesin.jumlahDialogLain);
+        kv.dataset.tokohKejadian = String(mesin.jumlahTokohKejadian);
         // Rata-rata per bingkai: perbarui, gambar, perbesar, label, peta mini (ms).
         kv.dataset.rincian = catatan.bagian.map((v) => (v / Math.max(1, catatan.gambar.length)).toFixed(2)).join(",");
         catatan.bagian = [0, 0, 0, 0, 0];
@@ -359,6 +471,14 @@ export default function LayarDunia(props: PropsLayarDunia) {
     id = requestAnimationFrame(bingkai);
     return () => cancelAnimationFrame(id);
   }, [mesin]);
+
+  // Ukuran layar berubah saat dialog terbuka: mode ringkas mengikuti (P-39).
+  const ringkasKini = modeRingkas(Math.min(layar.tinggi, ukuran.atasCss + ukuran.tinggiCss) - Math.max(0, ukuran.atasCss) - TINGGI_BILAH);
+  useEffect(() => {
+    if (!dialog || dialog.ringkas === ringkasKini) return;
+    const id = window.setTimeout(() => saatRingkas(ringkasKini), 0);
+    return () => window.clearTimeout(id);
+  }, [dialog, ringkasKini, saatRingkas]);
 
   // Kotak dunia di layar (px CSS) dan kotak HUD: irisan kotak dunia dengan jendela.
   const kiri = ukuran.kiriCss;
@@ -371,6 +491,9 @@ export default function LayarDunia(props: PropsLayarDunia) {
   };
   const hitungMundur = status === "hitung_mundur" && waktu.mulaiPada !== null;
   const p = mesin.gerak.posisi;
+  const ringkas = modeRingkas(hud.height - TINGGI_BILAH);
+  const bentuk: "lembar" | "panel" = sentuh && layar.tinggi <= 500 ? "lembar" : "panel";
+  const tampilPeriksa = status === "main" && !adaDialog && !petaBesar && !menyambung && !tegak;
 
   return (
     <main
@@ -406,8 +529,27 @@ export default function LayarDunia(props: PropsLayarDunia) {
       <div className="js-hud" style={hud}>
         {lobi ? <PanelLobi kode={kode} nama={diri?.nama ?? ""} avatar={diri?.avatar ?? 0} jumlah={jumlahPemain} umumkan={umumkan} /> : null}
         {hitungMundur ? <LapisanHitungMundur mulaiPada={waktu.mulaiPada as number} selisihJam={selisihJam} /> : null}
-        {ronde ? <BilahAtas langit={langit} denyut={langit.duaMenit && !kurangiGerak && status === "main"} /> : null}
-        {ronde && !petaBesar ? <PetaMini kanvasRef={mini} rasio={layar.rasio} saatBuka={() => setPetaBesar(true)} /> : null}
+        {ronde ? (
+          <BilahAtas langit={langit} denyut={langit.duaMenit && !kurangiGerak && status === "main"} skor={skor} peringkat={peringkat} kurangiGerak={kurangiGerak} />
+        ) : null}
+        {ronde && !petaBesar && !(adaDialog && bentuk === "lembar") ? <PetaMini kanvasRef={mini} rasio={layar.rasio} saatBuka={() => setPetaBesar(true)} /> : null}
+        {tampilPeriksa && sentuh ? <TombolPeriksa dekat={jangkauan !== null} ditekan={menungguPeriksa} saatTekan={periksa} /> : null}
+        {tampilPeriksa && !sentuh && jangkauan ? <AjakanPeriksa /> : null}
+        {fps ? (
+          <p className="js-fps" aria-hidden="true">
+            {fps}
+          </p>
+        ) : null}
+        {dialog && ronde ? (
+          status === "jeda" ? (
+            // Selama jeda, dialog disembunyikan tanpa ditutup di bawah lapisan pekat (P-52, D-6).
+            <div className="js-dialog-jeda" style={{ top: TINGGI_BILAH }} aria-hidden="true" />
+          ) : (
+            <div className="js-dialog-wadah" data-bentuk={bentuk} data-ringkas={ringkas ? "ya" : "tidak"} style={{ top: TINGGI_BILAH }}>
+              <DialogKejadian d={dialog} bentuk={bentuk} ruangUji={ruangUji} saatAksi={saatDialog} />
+            </div>
+          )
+        ) : null}
         {pita ? (
           <p className="js-pita" role="status">
             {TEKS.dunia.duaMenit}
@@ -421,6 +563,8 @@ export default function LayarDunia(props: PropsLayarDunia) {
               rasio={layar.rasio}
               diri={p ? { x: p.x, y: p.y, arah: mesin.gerak.arah } : null}
               saatTutup={tutupPetaBesar}
+              kejadian={penanda.daftar}
+              ringkasan={{ terlihat: penanda.terlihat, selesai: penanda.selesai }}
             />
           </div>
         ) : null}

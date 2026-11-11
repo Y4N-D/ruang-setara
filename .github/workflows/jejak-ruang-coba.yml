@@ -1,7 +1,7 @@
 # Membuat satu ruang coba di lingkungan uji, lalu menulis kode dan tautannya di ringkasan alur kerja
 # (spesifikasi JS-03, P-7 dan P-8). Kunci sekali pakai KUNCI_COBA dibuat ulang setiap kali dijalankan
 # dan tidak pernah tampil di log. Sejak JS-07 (P-57) durasi ronde bisa dipilih; ronde dijalankan dengan
-# "Jejak: kendali ruang coba". Dipensiunkan di JS-10.
+# "Jejak: kendali ruang coba". Sejak JS-08 (P-6) ringkasan menulis jumlah kejadian di ruang. Dipensiunkan di JS-10.
 name: "Jejak: ruang coba"
 
 on:
@@ -93,10 +93,17 @@ jobs:
           if [ "$STATUS" != "201" ]; then echo "::error::Ruang coba gagal dibuat (status $STATUS)."; exit 1; fi
           KODE=$(jq -r '.kode' jawaban.json)
           TAUTAN=$(jq -r '.tautan' jawaban.json)
+          JUMLAH=$(jq -r '.kejadian // 0' jawaban.json)
           {
             echo "Kode ruang: $KODE"
             echo
             echo "Tautan: $TAUTAN"
+            echo
+            if [ "$JUMLAH" -gt 0 ] 2>/dev/null; then
+              echo "Kejadian di ruang: $JUMLAH"
+            else
+              echo 'Bank awal belum disemai, jadi ruang ini belum punya kejadian. Jalankan ulang "Jejak: uji" agar bank awal disemai, lalu buat ruang coba baru.'
+            fi
             echo
             echo "Ruang ini tertutup sendiri 6 jam sesudah dibuat, atau 3 jam sesudah tidak ada yang tersambung."
           } >> "$GITHUB_STEP_SUMMARY"

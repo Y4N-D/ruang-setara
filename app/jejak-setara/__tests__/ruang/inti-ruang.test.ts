@@ -1,7 +1,7 @@
 // Inti ruang (spesifikasi JS-03, bagian D sampai H; AC-7 sampai AC-15).
 import { describe, expect, it } from "vitest";
 import { acakBerbenih } from "../../inti/acak";
-import { skemaServerKelas, skemaServerPemain, type PesanPemain, type PesanServerPemain } from "../../inti/protokol";
+import { PROTOKOL_VERSI, skemaServerKelas, skemaServerPemain, type PesanPemain, type PesanServerPemain } from "../../inti/protokol";
 import type { PengaturanRuang } from "../../inti/tipe";
 import {
   alarm,
@@ -47,7 +47,7 @@ function halo(k: KeadaanRuang, sid: string, sekarang: number, opsi: { token?: st
   if (!k.sambungan.has(sid)) sambunganMasuk(k, sid, sekarang);
   nomor++;
   const calon = { pemainId: `p${nomor}`, token: token(nomor), hashToken: `h:${token(nomor)}` };
-  const pesan: Extract<PesanPemain, { t: "halo" }> = { v: 1, t: "halo", peran: "pemain", ...opsi };
+  const pesan: Extract<PesanPemain, { t: "halo" }> = { v: PROTOKOL_VERSI, t: "halo", peran: "pemain", ...opsi };
   const o = semuaSah(terimaHalo(k, sid, pesan, sekarang, acak, calon, opsi.token ? `h:${opsi.token}` : null));
   return { o, calon };
 }
@@ -59,7 +59,7 @@ const jenis = (daftar: PesanServerPemain[]) => daftar.map((p) => p.t);
 function masuk(k: KeadaanRuang, sid: string, sekarang = DIBUAT + 1000, avatar = 0) {
   const { o, calon } = halo(k, sid, sekarang);
   const datang = pesanKe(o, sid)[0] as Extract<PesanServerPemain, { t: "selamat_datang" }>;
-  const p = semuaSah(terimaPemain(k, sid, { v: 1, t: "pilih_identitas", nama: datang.saranNama[0], avatar }, sekarang, acak));
+  const p = semuaSah(terimaPemain(k, sid, { v: PROTOKOL_VERSI, t: "pilih_identitas", nama: datang.saranNama[0], avatar }, sekarang, acak));
   return { id: calon.pemainId, token: calon.token, nama: datang.saranNama[0], o: p };
 }
 
@@ -80,7 +80,7 @@ describe("bergabung (P-18 sampai P-25)", () => {
     const k = ruang();
     const { o } = halo(k, "s1", DIBUAT);
     const lama = (pesanKe(o, "s1")[0] as Extract<PesanServerPemain, { t: "selamat_datang" }>).saranNama;
-    const baru = semuaSah(terimaPemain(k, "s1", { v: 1, t: "minta_nama" }, DIBUAT + 1, acak));
+    const baru = semuaSah(terimaPemain(k, "s1", { v: PROTOKOL_VERSI, t: "minta_nama" }, DIBUAT + 1, acak));
     const saran = (pesanKe(baru, "s1")[0] as Extract<PesanServerPemain, { t: "saran_nama" }>).saranNama;
     expect(saran).toHaveLength(3);
     for (const n of saran) expect(lama).not.toContain(n);
@@ -105,21 +105,21 @@ describe("bergabung (P-18 sampai P-25)", () => {
     halo(k, "s2", DIBUAT);
     const p2 = [...k.pemain.values()].find((p) => p.nama === null)!;
     p2.saran = [a.nama, "Jalak Biru", "Anoa Hijau"];
-    const o = semuaSah(terimaPemain(k, "s2", { v: 1, t: "pilih_identitas", nama: a.nama, avatar: 1 }, DIBUAT, acak));
+    const o = semuaSah(terimaPemain(k, "s2", { v: PROTOKOL_VERSI, t: "pilih_identitas", nama: a.nama, avatar: 1 }, DIBUAT, acak));
     expect(jenis(pesanKe(o, "s2"))).toEqual(["galat", "saran_nama"]);
     expect(pesanKe(o, "s2")[0]).toMatchObject({ kode: "NAMA_DIPAKAI" });
-    const o2 = semuaSah(terimaPemain(k, "s2", { v: 1, t: "pilih_identitas", nama: "Bukan Saran", avatar: 1 }, DIBUAT, acak));
+    const o2 = semuaSah(terimaPemain(k, "s2", { v: PROTOKOL_VERSI, t: "pilih_identitas", nama: "Bukan Saran", avatar: 1 }, DIBUAT, acak));
     expect(pesanKe(o2, "s2")[0]).toMatchObject({ kode: "NAMA_DIPAKAI" });
   });
 
   it("pesan sebelum halo menutup sambungan 4002; ping dijawab pong", () => {
     const k = ruang();
     sambunganMasuk(k, "s9", DIBUAT);
-    const o = terimaPemain(k, "s9", { v: 1, t: "ping", tKlien: 1 }, DIBUAT, acak);
+    const o = terimaPemain(k, "s9", { v: PROTOKOL_VERSI, t: "ping", tKlien: 1 }, DIBUAT, acak);
     expect(o.tutup).toEqual([{ sambunganId: "s9", kode: KODE_TUTUP.tanpaHalo, alasan: "perlu halo" }]);
     halo(k, "s1", DIBUAT);
-    const pong = semuaSah(terimaPemain(k, "s1", { v: 1, t: "ping", tKlien: 5 }, DIBUAT + 7, acak));
-    expect(pesanKe(pong, "s1")).toEqual([{ v: 1, t: "pong", tKlien: 5, waktuServer: DIBUAT + 7 }]);
+    const pong = semuaSah(terimaPemain(k, "s1", { v: PROTOKOL_VERSI, t: "ping", tKlien: 5 }, DIBUAT + 7, acak));
+    expect(pesanKe(pong, "s1")).toEqual([{ v: PROTOKOL_VERSI, t: "pong", tKlien: 5, waktuServer: DIBUAT + 7 }]);
   });
 
   it("pemain tanpa identitas yang terputus lebih dari 5 menit dilepas, sehingga tempatnya kembali", () => {
@@ -141,7 +141,7 @@ describe("batas masuk (P-19, P-20)", () => {
     masuk(k, "s2");
     sambunganPutus(k, "s2", DIBUAT + 5);
     const { o } = halo(k, "s3", DIBUAT + 10);
-    expect(pesanKe(o, "s3")).toEqual([{ v: 1, t: "galat", kode: "RUANG_PENUH", pesan: "Ruang sudah penuh. Beri tahu gurumu." }]);
+    expect(pesanKe(o, "s3")).toEqual([{ v: PROTOKOL_VERSI, t: "galat", kode: "RUANG_PENUH", pesan: "Ruang sudah penuh. Beri tahu gurumu." }]);
     expect(o.tutup[0]).toMatchObject({ sambunganId: "s3", kode: KODE_TUTUP.ditolak });
   });
 
@@ -149,7 +149,7 @@ describe("batas masuk (P-19, P-20)", () => {
     const k = ruang();
     const a = masuk(k, "s1");
     sambunganPutus(k, "s1", DIBUAT + 5);
-    terimaKelas(k, { v: 1, t: "kunci_ruang", kunci: true }, DIBUAT + 6);
+    terimaKelas(k, { v: PROTOKOL_VERSI, t: "kunci_ruang", kunci: true }, DIBUAT + 6);
     expect(pesanKe(halo(k, "s2", DIBUAT + 7).o, "s2")[0]).toMatchObject({ kode: "RUANG_TERKUNCI" });
     const ulang = halo(k, "s3", DIBUAT + 8, { token: a.token });
     expect(jenis(pesanKe(ulang.o, "s3"))[0]).toBe("selamat_datang");
@@ -159,12 +159,12 @@ describe("batas masuk (P-19, P-20)", () => {
   it("terlambat: boleh sampai batasTerlambatMenit sejak mulai, lalu TERLAMBAT; selesai selalu TERLAMBAT", () => {
     const k = ruang();
     masuk(k, "s1");
-    terimaKelas(k, { v: 1, t: "mulai" }, DIBUAT + 10_000);
+    terimaKelas(k, { v: PROTOKOL_VERSI, t: "mulai" }, DIBUAT + 10_000);
     const mulai = k.waktu.mulaiPada!;
     alarm(k, mulai, true);
     expect(jenis(pesanKe(halo(k, "s2", mulai + 4 * 60_000).o, "s2"))[0]).toBe("selamat_datang");
     expect(pesanKe(halo(k, "s3", mulai + 5 * 60_000 + 1).o, "s3")[0]).toMatchObject({ kode: "TERLAMBAT" });
-    terimaKelas(k, { v: 1, t: "akhiri" }, mulai + 6 * 60_000);
+    terimaKelas(k, { v: PROTOKOL_VERSI, t: "akhiri" }, mulai + 6 * 60_000);
     expect(pesanKe(halo(k, "s4", mulai + 6 * 60_000).o, "s4")[0]).toMatchObject({ kode: "TERLAMBAT" });
   });
 
@@ -175,7 +175,7 @@ describe("batas masuk (P-19, P-20)", () => {
     expect(jenis(pesanKe(halo(k, "s2", DIBUAT, { nomorAbsen: 12 }).o, "s2"))[0]).toBe("selamat_datang");
     const ganda = halo(k, "s3", DIBUAT, { nomorAbsen: 12 });
     expect(pesanKe(ganda.o, "s3")).toEqual([
-      { v: 1, t: "galat", kode: "NOMOR_ABSEN_DIPAKAI", pesan: "Nomor absen ini sudah dipakai di ruang ini. Periksa lagi nomormu." },
+      { v: PROTOKOL_VERSI, t: "galat", kode: "NOMOR_ABSEN_DIPAKAI", pesan: "Nomor absen ini sudah dipakai di ruang ini. Periksa lagi nomormu." },
     ]);
     expect(ganda.o.tutup).toEqual([]);
     expect(jenis(pesanKe(halo(k, "s3", DIBUAT, { nomorAbsen: 13 }).o, "s3"))[0]).toBe("selamat_datang");
@@ -208,10 +208,10 @@ describe("sambung ulang dan keluarkan (P-26 sampai P-28, P-37)", () => {
     const k = ruang();
     const a = masuk(k, "s1");
     masuk(k, "s2");
-    const o = semuaSah(terimaKelas(k, { v: 1, t: "keluarkan", pemainId: a.id }, DIBUAT + 100));
+    const o = semuaSah(terimaKelas(k, { v: PROTOKOL_VERSI, t: "keluarkan", pemainId: a.id }, DIBUAT + 100));
     expect(pesanKe(o, "s1")[0]).toMatchObject({ kode: "DIKELUARKAN" });
     expect(o.tutup).toEqual([{ sambunganId: "s1", kode: KODE_TUTUP.dikeluarkan, alasan: "dikeluarkan" }]);
-    expect(pesanKe(o, "s2")).toEqual([{ v: 1, t: "pemain_pergi", id: a.id }]);
+    expect(pesanKe(o, "s2")).toEqual([{ v: PROTOKOL_VERSI, t: "pemain_pergi", id: a.id }]);
     const ulang = halo(k, "s3", DIBUAT + 200, { token: a.token });
     expect(pesanKe(ulang.o, "s3")[0]).toMatchObject({ kode: "DIKELUARKAN" });
     expect(ulang.o.tutup[0]).toMatchObject({ kode: KODE_TUTUP.dikeluarkan });
@@ -248,7 +248,7 @@ describe("siklus ruang dan alarm (P-31 sampai P-40)", () => {
     const k = ruang();
     masuk(k, "s1");
     const t0 = DIBUAT + 60_000;
-    semuaSah(terimaKelas(k, { v: 1, t: "mulai" }, t0));
+    semuaSah(terimaKelas(k, { v: PROTOKOL_VERSI, t: "mulai" }, t0));
     expect(k.status).toBe("hitung_mundur");
     expect(k.waktu.mulaiPada).toBe(t0 + 3000);
     expect(k.waktu.berakhirPada).toBe(t0 + 3000 + 15 * 60_000);
@@ -256,17 +256,17 @@ describe("siklus ruang dan alarm (P-31 sampai P-40)", () => {
     const main = semuaSah(alarm(k, t0 + 3000, true));
     expect([k.status, main.putaran]).toEqual(["main", "mulai"]);
     expect(tenggatBerikut(k, true)).toBe(t0 + 3000 + 15 * 60_000);
-    expect(semuaSah(terimaKelas(k, { v: 1, t: "jeda" }, t0 + 63_000)).putaran).toBe("henti");
-    semuaSah(terimaKelas(k, { v: 1, t: "lanjut" }, t0 + 93_000));
+    expect(semuaSah(terimaKelas(k, { v: PROTOKOL_VERSI, t: "jeda" }, t0 + 63_000)).putaran).toBe("henti");
+    semuaSah(terimaKelas(k, { v: PROTOKOL_VERSI, t: "lanjut" }, t0 + 93_000));
     expect([k.status, k.waktu.jedaMs, k.waktu.berakhirPada]).toEqual(["main", 30_000, t0 + 3000 + 15 * 60_000 + 30_000]);
-    semuaSah(terimaKelas(k, { v: 1, t: "tambah_waktu", detik: 120 }, t0 + 100_000));
+    semuaSah(terimaKelas(k, { v: PROTOKOL_VERSI, t: "tambah_waktu", detik: 120 }, t0 + 100_000));
     const akhir = k.waktu.berakhirPada!;
     expect(akhir).toBe(t0 + 3000 + 15 * 60_000 + 150_000);
     const selesai = semuaSah(alarm(k, akhir, true));
     expect([k.status, selesai.kirimSekarang, selesai.putaran]).toEqual(["selesai", true, "henti"]);
     expect(selesai.kiriman.filter((b) => b.jenis === "peserta")[0]).toMatchObject({ isi: { peringkatAkhir: 1 } });
     expect(selesai.kiriman.find((b) => b.jenis === "ruang")).toMatchObject({ isi: { status: "selesai", selesaiPada: akhir } });
-    const tutup = semuaSah(terimaKelas(k, { v: 1, t: "tutup_ruang" }, akhir + 1000));
+    const tutup = semuaSah(terimaKelas(k, { v: PROTOKOL_VERSI, t: "tutup_ruang" }, akhir + 1000));
     expect(k.status).toBe("ditutup");
     expect(tutup.tutup).toEqual([{ sambunganId: "s1", kode: KODE_TUTUP.ditutup, alasan: "ruang ditutup" }]);
     expect(tenggatBerikut(k, false)).toBeNull();
@@ -294,7 +294,7 @@ describe("gerak, dunia, dan penyimpanan (P-41 sampai P-46)", () => {
   function ruangMain(jumlah: number) {
     const k = ruang({ batasPemain: 100 });
     for (let i = 0; i < jumlah; i++) masuk(k, `s${i}`, DIBUAT + i);
-    terimaKelas(k, { v: 1, t: "mulai" }, DIBUAT + 10_000);
+    terimaKelas(k, { v: PROTOKOL_VERSI, t: "mulai" }, DIBUAT + 10_000);
     alarm(k, k.waktu.mulaiPada!, true);
     return k;
   }
@@ -304,10 +304,10 @@ describe("gerak, dunia, dan penyimpanan (P-41 sampai P-46)", () => {
     const t = k.waktu.mulaiPada!;
     const p = k.pemain.get(k.sambungan.get("s0")!)!;
     const awal = { ...p.posisi! };
-    const sah = terimaPemain(k, "s0", { v: 1, t: "gerak", x: awal.x + 5, y: awal.y, arah: "kanan", jalan: true, seq: 1 }, t + 100, acak);
+    const sah = terimaPemain(k, "s0", { v: PROTOKOL_VERSI, t: "gerak", x: awal.x + 5, y: awal.y, arah: "kanan", jalan: true, seq: 1 }, t + 100, acak);
     expect([sah.kirim, sah.simpan, p.posisi?.x]).toEqual([[], [], awal.x + 5]);
-    const cepat = semuaSah(terimaPemain(k, "s0", { v: 1, t: "gerak", x: awal.x + 400, y: awal.y, arah: "kanan", jalan: true, seq: 2 }, t + 200, acak));
-    expect(pesanKe(cepat, "s0")).toEqual([{ v: 1, t: "koreksi", x: awal.x + 5, y: awal.y, seq: 2 }]);
+    const cepat = semuaSah(terimaPemain(k, "s0", { v: PROTOKOL_VERSI, t: "gerak", x: awal.x + 400, y: awal.y, arah: "kanan", jalan: true, seq: 2 }, t + 200, acak));
+    expect(pesanKe(cepat, "s0")).toEqual([{ v: PROTOKOL_VERSI, t: "koreksi", x: awal.x + 5, y: awal.y, seq: 2 }]);
     expect(cepat.koreksi).toBe(1);
   });
 
@@ -332,21 +332,21 @@ describe("gerak, dunia, dan penyimpanan (P-41 sampai P-46)", () => {
       const { o } = halo(k, `s${i}`, DIBUAT + i);
       hitung(o);
       const datang = pesanKe(o, `s${i}`)[0] as Extract<PesanServerPemain, { t: "selamat_datang" }>;
-      hitung(terimaPemain(k, `s${i}`, { v: 1, t: "pilih_identitas", nama: datang.saranNama[0], avatar: i % 8 }, DIBUAT + i, acak));
+      hitung(terimaPemain(k, `s${i}`, { v: PROTOKOL_VERSI, t: "pilih_identitas", nama: datang.saranNama[0], avatar: i % 8 }, DIBUAT + i, acak));
     }
-    hitung(terimaKelas(k, { v: 1, t: "mulai" }, DIBUAT + 60_000));
+    hitung(terimaKelas(k, { v: PROTOKOL_VERSI, t: "mulai" }, DIBUAT + 60_000));
     const t = k.waktu.mulaiPada!;
     hitung(alarm(k, t, true));
     for (let langkah = 1; langkah <= 100; langkah++) {
       for (let i = 0; i < 40; i++) {
         const p = k.pemain.get(k.sambungan.get(`s${i}`)!)!;
-        hitung(terimaPemain(k, `s${i}`, { v: 1, t: "gerak", x: p.posisi!.x, y: p.posisi!.y, arah: "bawah", jalan: false, seq: langkah }, t + langkah * 100, acak));
+        hitung(terimaPemain(k, `s${i}`, { v: PROTOKOL_VERSI, t: "gerak", x: p.posisi!.x, y: p.posisi!.y, arah: "bawah", jalan: false, seq: langkah }, t + langkah * 100, acak));
       }
       hitung(putaran(k, t + langkah * 100));
     }
     for (let i = 0; i < 40; i += 4) hitung(sambunganPutus(k, `s${i}`, t + 20_000));
-    hitung(terimaKelas(k, { v: 1, t: "akhiri" }, t + 30_000));
-    hitung(terimaKelas(k, { v: 1, t: "tutup_ruang" }, t + 40_000));
+    hitung(terimaKelas(k, { v: PROTOKOL_VERSI, t: "akhiri" }, t + 30_000));
+    hitung(terimaKelas(k, { v: PROTOKOL_VERSI, t: "tutup_ruang" }, t + 40_000));
     expect(baris).toBeLessThan(500);
   });
 });
@@ -363,7 +363,7 @@ function ruangKampung(atur: Partial<PengaturanRuang> = {}): KeadaanRuang {
 }
 
 const gerak = (k: KeadaanRuang, sid: string, x: number, y: number, seq: number, t: number, jalan = true) =>
-  semuaSah(terimaPemain(k, sid, { v: 1, t: "gerak", x, y, arah: "kanan", jalan, seq }, t, acak));
+  semuaSah(terimaPemain(k, sid, { v: PROTOKOL_VERSI, t: "gerak", x, y, arah: "kanan", jalan, seq }, t, acak));
 
 describe("JS-07: posisi awal dan kerangka penuh (P-47 sampai P-49)", () => {
   it("memilih identitas di lobi: pemain_baru, lalu koreksi di titik muncul pertama dengan seq 0", () => {
@@ -371,7 +371,7 @@ describe("JS-07: posisi awal dan kerangka penuh (P-47 sampai P-49)", () => {
     const a = masuk(k, "s1");
     expect(jenis(pesanKe(a.o, "s1"))).toEqual(["pemain_baru", "koreksi"]);
     const t0 = PETA_KAMPUNG.titikMuncul[0];
-    expect(pesanKe(a.o, "s1")[1]).toEqual({ v: 1, t: "koreksi", x: t0.x * 16 + 8, y: t0.y * 16 + 12, seq: 0 });
+    expect(pesanKe(a.o, "s1")[1]).toEqual({ v: PROTOKOL_VERSI, t: "koreksi", x: t0.x * 16 + 8, y: t0.y * 16 + 12, seq: 0 });
     expect(k.pemain.get(a.id)?.posisi).toEqual({ x: t0.x * 16 + 8, y: t0.y * 16 + 12, arah: "bawah" });
     expect(a.o.simpan.some((x) => x.jenis === "pemain" && x.pemain.posisi !== null)).toBe(true);
   });
@@ -385,7 +385,7 @@ describe("JS-07: posisi awal dan kerangka penuh (P-47 sampai P-49)", () => {
     expect(duniaKe(b.o, "s2")[0].n).toBe(2);
     expect(duniaKe(b.o, "s1").map(idDi)).toEqual([[b.id]]);
     const t1 = PETA_KAMPUNG.titikMuncul[1];
-    expect(duniaKe(b.o, "s1")[0].p[0]).toEqual([b.id, t1.x * 16 + 8, t1.y * 16 + 12, "bawah", false]);
+    expect(duniaKe(b.o, "s1")[0].p[0]).toEqual([b.id, t1.x * 16 + 8, t1.y * 16 + 12, "bawah", false, false]);
   });
 
   it("titik muncul ke-((urutan − 1) mod 18): pemain ke-19 kembali ke titik pertama", () => {
@@ -409,7 +409,7 @@ describe("JS-07: posisi awal dan kerangka penuh (P-47 sampai P-49)", () => {
     const ulang = halo(k, "s3", DIBUAT + 7000, { token: a.token });
     const pesan = pesanKe(ulang.o, "s3");
     expect(jenis(pesan)).toEqual(["selamat_datang", "status_ruang", "pemain_baru", "pemain_baru", "koreksi", "dunia"]);
-    expect(pesan[4]).toEqual({ v: 1, t: "koreksi", x: x0 + 5, y: pa.posisi!.y, seq: 7 });
+    expect(pesan[4]).toEqual({ v: PROTOKOL_VERSI, t: "koreksi", x: x0 + 5, y: pa.posisi!.y, seq: 7 });
     expect(idDi(pesan[5] as Dunia)).toEqual([b.id]);
     expect(duniaKe(ulang.o, "s2").map(idDi)).toEqual([[a.id]]);
   });
@@ -445,7 +445,7 @@ describe("JS-07: gerak dan dunia di lobi tanpa putaran (P-45, P-47, P-48)", () =
     expect(duniaKe(gerak(k, "s1", x0 + 9, y0, 3, t + 100), "s2")).toHaveLength(1);
     const henti = gerak(k, "s1", x0 + 9, y0, 4, t + 120, false);
     expect(duniaKe(henti, "s2")).toHaveLength(1);
-    expect(duniaKe(henti, "s2")[0].p[0]).toEqual([a.id, x0 + 9, y0, "kanan", false]);
+    expect(duniaKe(henti, "s2")[0].p[0]).toEqual([a.id, x0 + 9, y0, "kanan", false, false]);
     expect(DUNIA_LOBI).toEqual({ jedaMs: 100, kerangkaPenuhMs: 1000 });
   });
 
@@ -481,9 +481,9 @@ describe("JS-07: gerak dan dunia di lobi tanpa putaran (P-45, P-47, P-48)", () =
     expect([posisiSah(lobi, depan.x, depan.y), posisiSah(lobi, depan.x, depan.y + 8), posisiSah(kampung, depan.x, depan.y + 8)]).toEqual([true, false, true]);
     pa.posisi = { ...depan, arah: "bawah" };
     const tolak = gerak(k, "s1", depan.x, depan.y + 8, 1, DIBUAT + 10_000);
-    expect(pesanKe(tolak, "s1")).toEqual([{ v: 1, t: "koreksi", x: depan.x, y: depan.y, seq: 1 }]);
-    terimaKelas(k, { v: 1, t: "mulai" }, DIBUAT + 20_000);
-    expect(pesanKe(gerak(k, "s1", depan.x, depan.y + 8, 2, DIBUAT + 21_000), "s1")).toContainEqual({ v: 1, t: "koreksi", x: depan.x, y: depan.y, seq: 2 });
+    expect(pesanKe(tolak, "s1")).toEqual([{ v: PROTOKOL_VERSI, t: "koreksi", x: depan.x, y: depan.y, seq: 1 }]);
+    terimaKelas(k, { v: PROTOKOL_VERSI, t: "mulai" }, DIBUAT + 20_000);
+    expect(pesanKe(gerak(k, "s1", depan.x, depan.y + 8, 2, DIBUAT + 21_000), "s1")).toContainEqual({ v: PROTOKOL_VERSI, t: "koreksi", x: depan.x, y: depan.y, seq: 2 });
     alarm(k, k.waktu.mulaiPada!, true);
     expect(k.status).toBe("main");
     const terima = gerak(k, "s1", depan.x, depan.y + 8, 3, k.waktu.mulaiPada! + 1000);
@@ -499,7 +499,7 @@ describe("JS-07: gerak dan dunia di lobi tanpa putaran (P-45, P-47, P-48)", () =
       expect(m.o.putaran).toBeNull();
     }
     for (let t = 0; t < 30; t++) {
-      const o = semuaSah(terimaPemain(k, "s0", { v: 1, t: "ping", tKlien: t }, DIBUAT + 5000 + t * 1000, acak));
+      const o = semuaSah(terimaPemain(k, "s0", { v: PROTOKOL_VERSI, t: "ping", tKlien: t }, DIBUAT + 5000 + t * 1000, acak));
       dunia += o.kirim.filter((x) => x.pesan.t === "dunia").length;
       expect(o.putaran).toBeNull();
     }
@@ -509,15 +509,16 @@ describe("JS-07: gerak dan dunia di lobi tanpa putaran (P-45, P-47, P-48)", () =
   it("jeda: gerak ditolak tanpa koreksi; selesai: tidak ada posisi awal saat sambung ulang", () => {
     const k = ruangKampung();
     const a = masuk(k, "s1");
-    terimaKelas(k, { v: 1, t: "mulai" }, DIBUAT + 10_000);
+    terimaKelas(k, { v: PROTOKOL_VERSI, t: "mulai" }, DIBUAT + 10_000);
     alarm(k, k.waktu.mulaiPada!, true);
-    terimaKelas(k, { v: 1, t: "jeda" }, k.waktu.mulaiPada! + 1000);
+    terimaKelas(k, { v: PROTOKOL_VERSI, t: "jeda" }, k.waktu.mulaiPada! + 1000);
     const pa = k.pemain.get(a.id)!;
     expect(gerak(k, "s1", pa.posisi!.x + 3, pa.posisi!.y, 9, k.waktu.mulaiPada! + 2000).kirim).toEqual([]);
-    terimaKelas(k, { v: 1, t: "akhiri" }, k.waktu.mulaiPada! + 3000);
+    terimaKelas(k, { v: PROTOKOL_VERSI, t: "akhiri" }, k.waktu.mulaiPada! + 3000);
     sambunganPutus(k, "s1", k.waktu.mulaiPada! + 4000);
     const ulang = halo(k, "s2", k.waktu.mulaiPada! + 5000, { token: a.token });
-    expect(jenis(pesanKe(ulang.o, "s2"))).toEqual(["selamat_datang", "status_ruang", "pemain_baru"]);
+    // JS-08 (P-36): sambung ulang sesudah ronde selesai menerima `selesai` lagi, tetap tanpa posisi awal.
+    expect(jenis(pesanKe(ulang.o, "s2"))).toEqual(["selamat_datang", "status_ruang", "pemain_baru", "selesai"]);
   });
 });
 
@@ -525,7 +526,7 @@ describe("JS-07: putaran main dan pemulihan (P-46, P-51, P-52)", () => {
   function ruangKampungMain(jumlah: number) {
     const k = ruangKampung({ batasPemain: 100 });
     for (let i = 0; i < jumlah; i++) masuk(k, `s${i}`, DIBUAT + i);
-    terimaKelas(k, { v: 1, t: "mulai" }, DIBUAT + 10_000);
+    terimaKelas(k, { v: PROTOKOL_VERSI, t: "mulai" }, DIBUAT + 10_000);
     alarm(k, k.waktu.mulaiPada!, true);
     return k;
   }
@@ -580,7 +581,7 @@ describe("JS-07: putaran main dan pemulihan (P-46, P-51, P-52)", () => {
     for (let i = 1; i <= 20; i++) {
       x += i % 2 ? 7.2 : -7.2; // bolak-balik di halaman lobi
       t += i % 2 ? 200 : 0;
-      koreksi += semuaSah(terimaPemain(k, "s0", { v: 1, t: "gerak", x, y, arah: "kanan", jalan: true, seq: i }, t, acak)).koreksi;
+      koreksi += semuaSah(terimaPemain(k, "s0", { v: PROTOKOL_VERSI, t: "gerak", x, y, arah: "kanan", jalan: true, seq: i }, t, acak)).koreksi;
     }
     expect(koreksi).toBe(0);
   });

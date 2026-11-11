@@ -1,8 +1,9 @@
 // Batas per sambungan (spesifikasi JS-03, P-16 dan P-17; AC-6).
+import { PROTOKOL_VERSI } from "../../inti/versi";
 import { describe, expect, it } from "vitest";
 import { ambilToken, bacaPesanPemain, catatPelanggaran, panjangUtf8, sambunganBaru } from "../../../../server/jejak-setara/src/ruang/sambungan";
 
-const halo = JSON.stringify({ v: 1, t: "halo", peran: "pemain" });
+const halo = JSON.stringify({ v: PROTOKOL_VERSI, t: "halo", peran: "pemain" });
 
 describe("ukuran UTF-8", () => {
   it("1, 2, 3, dan 4 byte per karakter", () => {
@@ -46,19 +47,21 @@ describe("membaca pesan mentah", () => {
   it("biner, lebih dari 2.048 byte, JSON cacat, dan gagal skema adalah pelanggaran", () => {
     const k = sambunganBaru(0);
     expect(bacaPesanPemain(k, new ArrayBuffer(4), 0).jenis).toBe("pelanggaran");
-    expect(bacaPesanPemain(k, JSON.stringify({ v: 1, t: "ping", tKlien: 1, x: "a".repeat(2100) }), 0).jenis).toBe("pelanggaran");
+    expect(bacaPesanPemain(k, JSON.stringify({ v: PROTOKOL_VERSI, t: "ping", tKlien: 1, x: "a".repeat(2100) }), 0).jenis).toBe("pelanggaran");
     expect(bacaPesanPemain(k, "{bukan json", 0).jenis).toBe("pelanggaran");
-    expect(bacaPesanPemain(k, JSON.stringify({ v: 1, t: "terbang" }), 0).jenis).toBe("pelanggaran");
+    expect(bacaPesanPemain(k, JSON.stringify({ v: PROTOKOL_VERSI, t: "terbang" }), 0).jenis).toBe("pelanggaran");
   });
 
   it("halo dengan versi lain dilaporkan sebagai versi berbeda", () => {
-    expect(bacaPesanPemain(sambunganBaru(0), JSON.stringify({ v: 2, t: "halo", peran: "pemain" }), 0).jenis).toBe("versi");
+    // Klien versi 1 (sebelum JS-08) dan versi yang lebih baru sama-sama berbeda (JS-08, P-65).
+    expect(bacaPesanPemain(sambunganBaru(0), JSON.stringify({ v: 1, t: "halo", peran: "pemain" }), 0).jenis).toBe("versi");
+    expect(bacaPesanPemain(sambunganBaru(0), JSON.stringify({ v: PROTOKOL_VERSI + 1, t: "halo", peran: "pemain" }), 0).jenis).toBe("versi");
   });
 
   it("pesan sah dikembalikan dengan isinya; ember kosong menjadi pelanggaran", () => {
     const k = sambunganBaru(0);
     const hasil = bacaPesanPemain(k, halo, 0);
-    expect(hasil).toEqual({ jenis: "sah", pesan: { v: 1, t: "halo", peran: "pemain" } });
+    expect(hasil).toEqual({ jenis: "sah", pesan: { v: PROTOKOL_VERSI, t: "halo", peran: "pemain" } });
     for (let i = 0; i < 39; i++) bacaPesanPemain(k, halo, 0);
     expect(bacaPesanPemain(k, halo, 0).jenis).toBe("pelanggaran");
   });

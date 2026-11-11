@@ -2,15 +2,16 @@
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { AKAR, alamat, buatRuang, d1, kelas, klien, matikanServer, nyalakanServer, tidur, upgradeMentah } from "./bantuan";
+import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/versi";
 
 const B = alamat();
-const halo = (opsi: Record<string, unknown> = {}) => ({ v: 1, t: "halo", peran: "pemain", ...opsi });
+const halo = (opsi: Record<string, unknown> = {}) => ({ v: PROTOKOL_VERSI, t: "halo", peran: "pemain", ...opsi });
 
 async function masuk(kode: string, avatar = 0, port = 4320) {
   const k = await klien(kode, port);
   k.kirim(halo());
   const datang = (await k.tunggu((m) => m.t === "selamat_datang")) as { pemainId: string; token: string; saranNama: string[] };
-  k.kirim({ v: 1, t: "pilih_identitas", nama: datang.saranNama[0], avatar });
+  k.kirim({ v: PROTOKOL_VERSI, t: "pilih_identitas", nama: datang.saranNama[0], avatar });
   await k.tunggu((m) => m.t === "pemain_baru" && m.id === datang.pemainId);
   return { k, ...datang, nama: datang.saranNama[0] };
 }
@@ -40,7 +41,9 @@ describe("ruang coba dan pemeriksaan kode (AC-2, AC-4)", () => {
     expect(isi.kode).toMatch(/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{5}$/);
     expect(isi.tautan).toBe(`${B}/?kode=${isi.kode}`);
     const [baris] = d1<Record<string, unknown>>(`SELECT label_kelas, pemilik_id, paket_id, status, uji, pengaturan_json FROM ruang WHERE kode = '${isi.kode}'`);
-    expect(baris).toMatchObject({ label_kelas: "Ruang coba", pemilik_id: null, paket_id: null, status: "lobi", uji: 1 });
+    // Sejak JS-08 server uji menyemai bank awal, jadi ruang coba memuat Paket inti 16 (P-3, P-4).
+    expect(isi.kejadian).toBe(16);
+    expect(baris).toMatchObject({ label_kelas: "Ruang coba", pemilik_id: null, paket_id: "9880c4d5-8294-51c9-971a-e95531a2e039", status: "lobi", uji: 1 });
     expect(JSON.parse(String(baris.pengaturan_json))).toEqual({ durasiMenit: 15, batasPemain: 30, batasTerlambatMenit: 5, skillAktif: ["lari", "kompas", "petunjuk"], modeNomorAbsen: false, uji: true });
   });
 
@@ -123,12 +126,12 @@ describe("sambungan, bergabung, dan sambung ulang (AC-6 sampai AC-9)", () => {
     const kode = String(isi.kode);
     const a = await masuk(kode);
     const b = await masuk(kode);
-    expect(await kelas(kode, { v: 1, t: "keluarkan", pemainId: a.pemainId })).toBe(200);
+    expect(await kelas(kode, { v: PROTOKOL_VERSI, t: "keluarkan", pemainId: a.pemainId })).toBe(200);
     await a.k.tunggu((m) => m.t === "galat" && m.kode === "DIKELUARKAN");
     await b.k.tunggu((m) => m.t === "pemain_pergi" && m.id === a.pemainId);
     for (let i = 0; i < 40 && a.k.tutupKode === null; i++) await tidur(50);
     expect(a.k.tutupKode).toBe(4004);
-    expect(await kelas(kode, { v: 1, t: "halo", peran: "guru" })).toBe(400);
+    expect(await kelas(kode, { v: PROTOKOL_VERSI, t: "halo", peran: "guru" })).toBe(400);
   });
 });
 
@@ -137,9 +140,9 @@ describe("siklus, kiriman ke D1, dan muat ulang Durable Object (AC-11, AC-14, AC
     const { isi } = await buatRuang();
     const kode = String(isi.kode);
     const a = await masuk(kode);
-    await kelas(kode, { v: 1, t: "mulai" });
+    await kelas(kode, { v: PROTOKOL_VERSI, t: "mulai" });
     await a.k.tunggu((m) => m.t === "status_ruang" && m.status === "main", 6000);
-    await kelas(kode, { v: 1, t: "akhiri" });
+    await kelas(kode, { v: PROTOKOL_VERSI, t: "akhiri" });
     await a.k.tunggu((m) => m.t === "status_ruang" && m.status === "selesai");
     await tidur(300);
     const [r] = d1<Record<string, unknown>>(
@@ -168,7 +171,7 @@ describe("siklus, kiriman ke D1, dan muat ulang Durable Object (AC-11, AC-14, AC
       // JS-07: posisi di lobi ikut tersimpan saat terputus, dan ruang yang dipulihkan memakai peta kampung.
       awal = (await a.k.tunggu((m) => m.t === "koreksi")) as { x: number; y: number };
       await tidur(300); // anggaran jarak terkumpul sejak posisi awal (JS-07, P-52)
-      a.k.kirim({ v: 1, t: "gerak", x: awal.x + 6, y: awal.y, arah: "kanan", jalan: false, seq: 1 });
+      a.k.kirim({ v: PROTOKOL_VERSI, t: "gerak", x: awal.x + 6, y: awal.y, arah: "kanan", jalan: false, seq: 1 });
       await tidur(300);
       a.k.ws.close();
       await tidur(300);

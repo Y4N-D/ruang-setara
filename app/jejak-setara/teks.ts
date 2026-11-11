@@ -1,4 +1,4 @@
-// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01, JS-03, dan JS-07).
+// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01, JS-03, JS-07, dan JS-08).
 // Kedua judul tab ditulis di index.html; nilainya di sini dipakai uji untuk memastikan keduanya sama.
 // Teks dengan {n} atau {kode} diisi lewat isiTeks().
 import type { KodeGalat } from "./inti/protokol";
@@ -55,6 +55,9 @@ export const TEKS = {
     selesaiIsi: "Tunggu arahan guru.",
     ditutup: "Ruang ditutup",
     ditutupIsi: "Terima kasih sudah bermain.",
+    skorAkhir: "Skormu {skor}",
+    peringkatAkhir: "Peringkat {n} dari {jumlah}",
+    tanpaSkor: "Belum ada kejadian yang kamu jawab di ronde ini.",
   },
   menyambung: {
     judul: "Menyambung ulang…",
@@ -69,6 +72,7 @@ export const TEKS = {
     jamCerita: "Jam cerita {jam}",
     sisaWaktu: "Sisa waktu {waktu}",
     masa: { pagi: "Pagi", siang: "Siang", sore: "Sore" },
+    fps: "{fps} fps · p95 ≤ {kelompok} ms",
   },
   peta: {
     bukaBesar: "Buka peta besar",
@@ -76,8 +80,42 @@ export const TEKS = {
     tutup: "Tutup peta",
     kamuDiSini: "Kamu di sini",
     halte: "Halte",
+    ringkasanKejadian: "Kejadian terlihat {n}, selesai {m}.",
   },
   tombol: { kembali: "Kembali", muatUlang: "Muat ulang" },
+  // JS-08: kejadian, dialog dua langkah, kartu dampak, dan skor (spesifikasi JS-08, bagian "Teks yang tampil").
+  kejadian: {
+    periksa: "Periksa",
+    periksaLabel: "Periksa kejadian",
+    periksaJauh: "Periksa. Dekati penanda kejadian dulu.",
+  },
+  dialog: {
+    langkah: "Langkah {n} dari 2",
+    tutup: "Tutup",
+    kunci: "Kunci jawaban",
+    lihatPilihan: "Lihat pilihan",
+    situasi: "Situasi",
+    lanjutLangkah2: "Lanjut ke Langkah 2",
+    lanjutMenjelajah: "Lanjut menjelajah",
+    jawabanTepat: "Jawaban tepat",
+    pilihanmu: "Pilihanmu",
+    tepat: "Tepat",
+    belumTepat: "Belum tepat",
+    poin: "+{poin}",
+  },
+  kartu: {
+    tingkat: { tepat: "Tepat", kurang: "Kurang tepat", berisiko: "Berisiko" },
+    terjadi: "Yang terjadi",
+    hak: "Hak yang terdampak",
+    kewajiban: "Kewajiban terkait",
+    pilihanTepat: "Pilihan yang tepat",
+    rujukan: "Rujukan",
+    rujukanUji: "Rujukan di ruang uji belum tentu sudah diverifikasi Peninjau.",
+  },
+  skor: {
+    label: "Skor {skor}, peringkat {n}",
+    labelTanpaPeringkat: "Skor {skor}, belum ada peringkat",
+  },
   pengumuman: {
     lobi: "Kamu sudah masuk lobi.",
     mulai: "Ronde dimulai.",
@@ -86,6 +124,12 @@ export const TEKS = {
     selesai: "Ronde selesai.",
     menyambung: "Menyambung ulang.",
     tersambung: "Tersambung kembali.",
+    terlihat: "Kejadian baru terlihat.",
+    dekat: "Kejadian di dekatmu. Tekan E atau tombol Periksa.",
+    langkah1Tepat: "Langkah 1 tepat. Tambah 40 poin.",
+    langkah1Belum: "Langkah 1 belum tepat.",
+    kartu: "Kartu dampak: {tingkat}.",
+    tambahPoin: "Tambah {poin} poin.",
   },
   galat: {
     RUANG_TIDAK_ADA: "Kode ruang tidak ditemukan. Periksa lagi kodenya.",

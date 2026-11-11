@@ -180,7 +180,7 @@ export class KlienRuang {
 
   private kirimHalo(): void {
     const token = this.dep.penyimpanan?.getItem(kunciToken(this.kode)) ?? null;
-    const halo: PesanPemain = { v: 1, t: "halo", peran: "pemain" };
+    const halo: PesanPemain = { v: PROTOKOL_VERSI, t: "halo", peran: "pemain" };
     if (token) halo.token = token;
     if (this.nomorAbsen !== null) halo.nomorAbsen = this.nomorAbsen;
     this.kirim(halo);
@@ -189,7 +189,7 @@ export class KlienRuang {
   private mulaiPing(): void {
     this.hentiPing();
     const ping = () => {
-      this.kirim({ v: 1, t: "ping", tKlien: this.dep.jam() });
+      this.kirim({ v: PROTOKOL_VERSI, t: "ping", tKlien: this.dep.jam() });
       this.pewaktuPing = this.dep.pasang(ping, BATAS.pingMs);
     };
     ping();
@@ -220,7 +220,7 @@ export class KlienRuang {
     if (!hasil.success) {
       const d = json as { t?: unknown; v?: unknown } | null;
       if (d && d.t === "galat" && d.v !== PROTOKOL_VERSI) {
-        this.saatPesan({ v: 1, t: "galat", kode: "VERSI_BERBEDA", pesan: "" });
+        this.saatPesan({ v: PROTOKOL_VERSI, t: "galat", kode: "VERSI_BERBEDA", pesan: "" });
         this.berhenti();
       } else {
         this.pesanCacat++;
@@ -232,7 +232,7 @@ export class KlienRuang {
       // Peta di server lain dengan peta halaman: berhenti menyambung dan minta muat ulang (P-50). Token disimpan,
       // agar sesudah muat ulang pemain kembali sebagai pemain yang sama.
       this.dep.penyimpanan?.setItem(kunciToken(this.kode), p.token);
-      this.saatPesan({ v: 1, t: "galat", kode: "VERSI_BERBEDA", pesan: "" });
+      this.saatPesan({ v: PROTOKOL_VERSI, t: "galat", kode: "VERSI_BERBEDA", pesan: "" });
       this.berhenti(4005);
       return;
     }

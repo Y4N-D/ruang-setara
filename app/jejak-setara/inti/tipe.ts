@@ -122,3 +122,15 @@ export interface HasilPeriksaGerak {
   /** Anggaran jarak sesudah laporan ini, hanya bila pemeriksaan memakai anggaran jarak (JS-07, P-52). */
   anggaranPx?: number;
 }
+
+/**
+ * Satu kejadian di ruang (JS-08, P-3 dan P-9): isi versi yang disalin saat ruang dibuat, id versinya di D1,
+ * teks rujukan menurut urutan `kartu.rujukan`, dan titik aktifnya (satu, atau dua di ruang lebih dari 50 pemain).
+ */
+export interface KejadianRuang {
+  kode: string;
+  versiId: string;
+  isi: IsiKejadian;
+  rujukan: string[];
+  titik: TitikPeta[];
+}

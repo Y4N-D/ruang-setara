@@ -2,8 +2,10 @@
 // Pembungkus tipis di sekitar inti-ruang.ts: WebSocket Hibernation API, SQLite, satu alarm,
 // pengatur waktu putaran dan kiriman, serta kiriman ke D1. Kelas biasa tanpa `cloudflare:workers`,
 // agar Worker tetap bisa diimpor uji Node; komunikasi dari Worker lewat fetch internal.
-import { skemaKelas, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
-import type { Arah, StatusRuang, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
+// JS-08: tabel `kejadian`, `jawaban`, `terlihat`, dan `antrean`, dialog di lampiran sambungan, pemulihan dari
+// tabel itu, kait uji lokal `kejadian` dan `pindahkan`, dan kiriman berkunci berversi (P-60 sampai P-63, P-66, P-67).
+import { PROTOKOL_VERSI, skemaKelas, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
+import type { Arah, KejadianRuang, StatusRuang, Tingkat, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
 import { TEKS } from "../../../../app/jejak-setara/teks";
 import { kirimKeD1 } from "../db/ruang";
 import type { Env } from "../env";
@@ -12,6 +14,7 @@ import {
   alarm,
   buatKeadaan,
   KODE_TUTUP,
+  pindahkanPemain,
   pulihkanKeadaan,
   putaran,
   sambunganMasuk,
@@ -20,6 +23,7 @@ import {
   terimaHalo,
   terimaKelas,
   terimaPemain,
+  titikKejadianRuang,
   type BarisKiriman,
   type DataRuang,
   type KeadaanRuang,
@@ -28,14 +32,33 @@ import {
   type Simpanan,
   type WaktuRuang,
 } from "./inti-ruang";
-import { PETA_KAMPUNG } from "./peta-kampung";
+import { ambilAntrean, antrekan, hapusTerkirim, jumlahAntrean, SQL_TABEL_ANTREAN } from "./antrean";
+import { jumlahTitikRuang, tempatkanRuang, type JawabanRuang, type KejadianMasuk, type StatusJawaban } from "./kejadian-ruang";
+import { PETA_KAMPUNG, TITIK_PER_ZONA } from "./peta-kampung";
 import { bacaPesanPemain, catatPelanggaran, sambunganBaru, type KeadaanSambungan } from "./sambungan";
 
 interface Lampiran {
   sambunganId: string;
   pemainId: string | null;
   dibukaPada: number;
+  /** Kode kejadian yang dialognya terbuka di sambungan ini (JS-08, P-30). */
+  dialog?: string | null;
 }
+
+type BarisJawabanSql = {
+  pemain_id: string;
+  kode: string;
+  urutan_json: string;
+  status: string;
+  langkah1_opsi: string | null;
+  langkah1_benar: number | null;
+  langkah2_opsi: string | null;
+  tingkat: string | null;
+  poin: number;
+  dibuka_pada: number;
+  langkah1_pada: number | null;
+  langkah2_pada: number | null;
+};
 
 type BarisPemainSql = {
   id: string;
@@ -80,6 +103,8 @@ export class RuangJejak {
     pelanggaran: 0,
     duniaLobi: 0,
     koreksiAlasan: {} as Record<string, number>,
+    jawabanSelesai: 0,
+    pribadi: 0,
   };
 
   constructor(ctx: DurableObjectState, env: Env) {
@@ -101,6 +126,8 @@ export class RuangJejak {
     if (url.pathname === "/kelas" && request.method === "POST") return this.antre(() => this.pesanKelas(request));
     if (url.pathname === "/statistik") return jawabJson(this.ringkasanStatistik(), 200);
     if (url.pathname === "/putuskan" && request.method === "POST") return this.antre(() => this.putuskanSemua());
+    if (url.pathname === "/kejadian") return jawabJson({ kejadian: this.keadaan ? titikKejadianRuang(this.keadaan) : [] }, 200);
+    if (url.pathname === "/pindahkan" && request.method === "POST") return this.antre(() => this.pindahkan(request));
     return jawabGalat("BELUM_TERSEDIA", "Fitur ini belum tersedia.", 404);
   }
 
@@ -152,6 +179,21 @@ export class RuangJejak {
     this.sql.exec(
       "CREATE TABLE IF NOT EXISTS kiriman (id INTEGER PRIMARY KEY AUTOINCREMENT, jenis TEXT NOT NULL, isi_json TEXT NOT NULL, dibuat_pada INTEGER NOT NULL)",
     );
+    // JS-08 (P-60). IF NOT EXISTS, sehingga ruang yang dibuat sebelum JS-08 tetap jalan.
+    this.sql.exec(
+      "CREATE TABLE IF NOT EXISTS kejadian (kode TEXT PRIMARY KEY, urutan INTEGER NOT NULL, versi_id TEXT NOT NULL, isi_json TEXT NOT NULL, " +
+        "rujukan_json TEXT NOT NULL, titik_json TEXT NOT NULL)",
+    );
+    this.sql.exec(
+      "CREATE TABLE IF NOT EXISTS jawaban (pemain_id TEXT NOT NULL, kode TEXT NOT NULL, urutan_json TEXT NOT NULL, status TEXT NOT NULL, " +
+        "langkah1_opsi TEXT, langkah1_benar INTEGER, langkah2_opsi TEXT, tingkat TEXT, poin INTEGER NOT NULL, dibuka_pada INTEGER NOT NULL, " +
+        "langkah1_pada INTEGER, langkah2_pada INTEGER, PRIMARY KEY (pemain_id, kode))",
+    );
+    this.sql.exec(
+      "CREATE TABLE IF NOT EXISTS terlihat (pemain_id TEXT NOT NULL, titik_id TEXT NOT NULL, kode TEXT NOT NULL, pada INTEGER NOT NULL, " +
+        "PRIMARY KEY (pemain_id, titik_id))",
+    );
+    this.sql.exec(SQL_TABEL_ANTREAN);
   }
 
   private pulihkan(): void {
@@ -161,14 +203,33 @@ export class RuangJejak {
     if (!ruang) return;
     const pemain = this.sql.exec<BarisPemainSql>("SELECT * FROM pemain").toArray().map(barisKePemain);
     const sekarang = Date.now();
-    const sambungan: { sambunganId: string; pemainId: string | null; dibukaPada?: number }[] = [];
+    const sambungan: { sambunganId: string; pemainId: string | null; dibukaPada?: number; dialog?: string | null }[] = [];
     for (const ws of this.ctx.getWebSockets("pemain")) {
       const l = ws.deserializeAttachment() as Lampiran | null;
       if (!l) continue;
       this.soket.set(l.sambunganId, ws);
       this.batas.set(l.sambunganId, sambunganBaru(sekarang));
-      sambungan.push({ sambunganId: l.sambunganId, pemainId: l.pemainId, dibukaPada: l.dibukaPada });
+      sambungan.push({ sambunganId: l.sambunganId, pemainId: l.pemainId, dibukaPada: l.dibukaPada, dialog: l.dialog ?? null });
     }
+    const kejadian = this.sql
+      .exec<{ kode: string; versi_id: string; isi_json: string; rujukan_json: string; titik_json: string }>(
+        "SELECT kode, versi_id, isi_json, rujukan_json, titik_json FROM kejadian ORDER BY urutan",
+      )
+      .toArray()
+      .map(
+        (r): KejadianRuang => ({
+          kode: r.kode,
+          versiId: r.versi_id,
+          isi: JSON.parse(r.isi_json) as KejadianRuang["isi"],
+          rujukan: JSON.parse(r.rujukan_json) as string[],
+          titik: JSON.parse(r.titik_json) as TitikPeta[],
+        }),
+      );
+    const jawaban = this.sql.exec<BarisJawabanSql>("SELECT * FROM jawaban").toArray().map(barisKeJawaban);
+    const terlihat = this.sql
+      .exec<{ pemain_id: string; titik_id: string }>("SELECT pemain_id, titik_id FROM terlihat")
+      .toArray()
+      .map((r) => ({ pemainId: r.pemain_id, titikId: r.titik_id }));
     this.keadaan = pulihkanKeadaan(
       {
         ruang,
@@ -179,6 +240,9 @@ export class RuangJejak {
         sambunganTerakhirPutus: (meta.get("sambunganTerakhirPutus") as number | undefined) ?? null,
         pemain,
         sambungan,
+        kejadian,
+        jawaban,
+        terlihat,
       },
       PETA_KAMPUNG,
       sekarang,
@@ -202,6 +266,18 @@ export class RuangJejak {
 
   private tulisSimpanan(s: Simpanan): void {
     if (s.jenis === "meta") return this.tulisMeta(s.kunci, s.nilai);
+    if (s.jenis === "jawaban") return this.tulisJawaban(s.jawaban);
+    if (s.jenis === "terlihat") {
+      const c = this.sql.exec(
+        "INSERT INTO terlihat (pemain_id, titik_id, kode, pada) VALUES (?, ?, ?, ?) ON CONFLICT(pemain_id, titik_id) DO NOTHING",
+        s.pemainId,
+        s.titikId,
+        s.kode,
+        s.pada,
+      );
+      this.catatTulis(c.rowsWritten);
+      return;
+    }
     if (s.jenis === "hapus_pemain") {
       this.catatTulis(this.sql.exec("DELETE FROM pemain WHERE id = ?", s.id).rowsWritten);
       return;
@@ -229,8 +305,32 @@ export class RuangJejak {
     this.catatTulis(c.rowsWritten);
   }
 
+  /** Satu baris jawaban SQLite ruang, ditulis saat pembukaan pertama dan setiap kunci (P-61). */
+  private tulisJawaban(j: JawabanRuang): void {
+    const c = this.sql.exec(
+      "INSERT INTO jawaban (pemain_id, kode, urutan_json, status, langkah1_opsi, langkah1_benar, langkah2_opsi, tingkat, poin, dibuka_pada, " +
+        "langkah1_pada, langkah2_pada) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(pemain_id, kode) DO UPDATE SET status = excluded.status, " +
+        "langkah1_opsi = excluded.langkah1_opsi, langkah1_benar = excluded.langkah1_benar, langkah2_opsi = excluded.langkah2_opsi, " +
+        "tingkat = excluded.tingkat, poin = excluded.poin, langkah1_pada = excluded.langkah1_pada, langkah2_pada = excluded.langkah2_pada",
+      j.pemainId,
+      j.kode,
+      JSON.stringify({ urutan1: j.urutan1, urutan2: j.urutan2, id1: j.id1, id2: j.id2 }),
+      j.status,
+      j.langkah1Opsi,
+      j.langkah1Benar === null ? null : j.langkah1Benar ? 1 : 0,
+      j.langkah2Opsi,
+      j.tingkat,
+      j.poin,
+      j.dibukaPada,
+      j.langkah1Pada,
+      j.langkah2Pada,
+    );
+    this.catatTulis(c.rowsWritten);
+  }
+
+  /** Antrean kosong: tabel `kiriman` lama dan tabel `antrean` (JS-08) sama-sama kosong. */
   private antreanKosong(): boolean {
-    return this.sql.exec<{ n: number }>("SELECT COUNT(*) AS n FROM kiriman").one().n === 0;
+    return this.sql.exec<{ n: number }>("SELECT COUNT(*) AS n FROM kiriman").one().n === 0 && jumlahAntrean(this.sql) === 0;
   }
 
   // -------------------------------------------------------------------------------------------
@@ -238,8 +338,28 @@ export class RuangJejak {
 
   private async inisialisasi(request: Request): Promise<Response> {
     if (this.keadaan) return jawabJson({ ok: true }, 200);
-    const data = (await request.json()) as DataRuang;
-    this.keadaan = buatKeadaan(data, PETA_KAMPUNG);
+    const { kejadian: masuk, ...isi } = (await request.json()) as DataRuang & { kejadian?: KejadianMasuk[] };
+    const data: DataRuang = { ruangId: isi.ruangId, kode: isi.kode, pengaturan: isi.pengaturan, benih: isi.benih, dibuatPada: isi.dibuatPada };
+    // Penempatan sekali per ruang dengan benih ruang (P-9). Worker sudah membuang kejadian yang kehabisan titik (P-2).
+    let kejadian: KejadianRuang[] = [];
+    try {
+      kejadian = tempatkanRuang(data.benih, TITIK_PER_ZONA, masuk ?? [], jumlahTitikRuang(data.pengaturan.batasPemain));
+    } catch {
+      kejadian = [];
+    }
+    kejadian.forEach((k, i) => {
+      const c = this.sql.exec(
+        "INSERT INTO kejadian (kode, urutan, versi_id, isi_json, rujukan_json, titik_json) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(kode) DO NOTHING",
+        k.kode,
+        i,
+        k.versiId,
+        JSON.stringify(k.isi),
+        JSON.stringify(k.rujukan),
+        JSON.stringify(k.titik),
+      );
+      this.catatTulis(c.rowsWritten);
+    });
+    this.keadaan = buatKeadaan(data, PETA_KAMPUNG, kejadian);
     this.tulisMeta("ruang", data);
     this.tulisMeta("status", this.keadaan.status);
     this.tulisMeta("waktu", this.keadaan.waktu);
@@ -276,13 +396,32 @@ export class RuangJejak {
     return jawabJson({ ok: true }, 200);
   }
 
+  /** Kait uji lokal: memindahkan pemain bernama tertentu ke sebuah ubin (JS-08, P-67). */
+  private async pindahkan(request: Request): Promise<Response> {
+    const k = this.keadaan;
+    if (!k) return jawabGalat("RUANG_TIDAK_ADA", TEKS.api.RUANG_TIDAK_ADA, 404);
+    let isi: { nama?: unknown; x?: unknown; y?: unknown } = {};
+    try {
+      isi = (await request.json()) as typeof isi;
+    } catch {
+      isi = {};
+    }
+    const bulat = (v: unknown) => typeof v === "number" && Number.isInteger(v) && v >= 0 && v < 512;
+    if (typeof isi.nama !== "string" || !bulat(isi.x) || !bulat(isi.y)) return jawabGalat("PESAN_SALAH", TEKS.api.PESAN_SALAH, 400);
+    const hasil = pindahkanPemain(k, isi.nama, isi.x as number, isi.y as number, Date.now());
+    if (hasil === "tidak_ada") return jawabGalat("PEMAIN_TIDAK_ADA", TEKS.api.PESAN_SALAH, 404);
+    if (hasil === "padat") return jawabGalat("SEL_PADAT", TEKS.api.PESAN_SALAH, 400);
+    await this.terapkan(hasil);
+    return jawabJson({ ok: true }, 200);
+  }
+
   private ringkasanStatistik() {
     return {
       ...this.statistik,
       status: this.keadaan?.status ?? null,
       pemain: this.keadaan?.pemain.size ?? 0,
       sambungan: this.ctx.getWebSockets("pemain").length,
-      antreanKiriman: this.sql.exec<{ n: number }>("SELECT COUNT(*) AS n FROM kiriman").one().n,
+      antreanKiriman: this.sql.exec<{ n: number }>("SELECT COUNT(*) AS n FROM kiriman").one().n + jumlahAntrean(this.sql),
       menungguHalo: this.keadaan?.batasHalo.size ?? 0,
       alarm: this.alarmTerpasang ?? null,
       pewaktuPutaran: this.pewaktuPutaran !== null,
@@ -368,7 +507,7 @@ export class RuangJejak {
     if (hasil.jenis === "pelanggaran") {
       this.statistik.pelanggaran++;
       const c = catatPelanggaran(batas, sekarang);
-      if (c.kirimGalat) this.kirimSoket(ws, { v: 1, t: "galat", kode: "TERLALU_CEPAT", pesan: TEKS.galat.TERLALU_CEPAT });
+      if (c.kirimGalat) this.kirimSoket(ws, { v: PROTOKOL_VERSI, t: "galat", kode: "TERLALU_CEPAT", pesan: TEKS.galat.TERLALU_CEPAT });
       if (c.tutup) {
         this.tutupSoket(sid, KODE_TUTUP.pelanggaran, "pelanggaran");
         await this.terapkan(sambunganPutus(k, sid, sekarang));
@@ -376,7 +515,7 @@ export class RuangJejak {
       return;
     }
     if (hasil.jenis === "versi") {
-      this.kirimSoket(ws, { v: 1, t: "galat", kode: "VERSI_BERBEDA", pesan: TEKS.galat.VERSI_BERBEDA });
+      this.kirimSoket(ws, { v: PROTOKOL_VERSI, t: "galat", kode: "VERSI_BERBEDA", pesan: TEKS.galat.VERSI_BERBEDA });
       this.tutupSoket(sid, KODE_TUTUP.versi, "versi berbeda");
       await this.terapkan(sambunganPutus(k, sid, sekarang));
       return;
@@ -416,6 +555,12 @@ export class RuangJejak {
       const l = ws?.deserializeAttachment() as Lampiran | null | undefined;
       if (ws && l) ws.serializeAttachment({ ...l, pemainId } satisfies Lampiran);
     }
+    // Dialog yang terbuka atau tertutup disimpan di lampiran sambungan, bukan di SQLite (P-30).
+    for (const { sambunganId, kode } of o.dialog) {
+      const ws = this.cariSoket(sambunganId);
+      const l = ws?.deserializeAttachment() as Lampiran | null | undefined;
+      if (ws && l) ws.serializeAttachment({ ...l, dialog: kode } satisfies Lampiran);
+    }
     for (const { sambunganId, pesan } of o.kirim) {
       const ws = this.cariSoket(sambunganId);
       if (ws) this.kirimSoket(ws, pesan);
@@ -424,6 +569,8 @@ export class RuangJejak {
     if (o.kiriman.length > 0) this.antrekanKiriman(o.kiriman);
     this.statistik.koreksi += o.koreksi;
     this.statistik.duniaLobi += o.duniaLobi;
+    this.statistik.jawabanSelesai += o.jawabanSelesai;
+    this.statistik.pribadi += o.pribadi;
     if (o.alasanKoreksi) this.statistik.koreksiAlasan[o.alasanKoreksi] = (this.statistik.koreksiAlasan[o.alasanKoreksi] ?? 0) + 1;
     if (o.putaran === "mulai") this.mulaiPutaran();
     else if (o.putaran === "henti") this.hentiPutaran();
@@ -474,12 +621,9 @@ export class RuangJejak {
   // -------------------------------------------------------------------------------------------
   // Kiriman ke D1 (P-47)
 
+  /** Sejak JS-08 baris baru masuk tabel `antrean` berkunci `jenis:id` (P-61), bukan tabel `kiriman`. */
   private antrekanKiriman(baris: readonly BarisKiriman[]): void {
-    const sekarang = Date.now();
-    for (const b of baris) {
-      const c = this.sql.exec("INSERT INTO kiriman (jenis, isi_json, dibuat_pada) VALUES (?, ?, ?)", b.jenis, JSON.stringify(b.isi), sekarang);
-      this.catatTulis(c.rowsWritten);
-    }
+    this.catatTulis(antrekan(this.sql, baris, Date.now()));
     this.jadwalkanKiriman();
   }
 
@@ -494,31 +638,66 @@ export class RuangJejak {
     }, JEDA_KIRIMAN_MS);
   }
 
+  /**
+   * Kiriman ke D1 (P-62): baris tabel `kiriman` lama (ruang sebelum JS-08) dikuras lebih dulu, lalu tabel `antrean`
+   * menurut urutan (ruang, peserta, jawaban) dan waktu dibuat. Baris antrean dihapus sesudah terkirim hanya bila
+   * versinya belum berubah.
+   */
   private async kirimKiriman(): Promise<void> {
     if (this.pewaktuKiriman) clearTimeout(this.pewaktuKiriman);
     this.pewaktuKiriman = null;
-    const baris = this.sql.exec<{ id: number; jenis: string; isi_json: string }>("SELECT id, jenis, isi_json FROM kiriman ORDER BY id").toArray();
-    if (baris.length === 0) {
+    const lama = this.sql.exec<{ id: number; jenis: string; isi_json: string }>("SELECT id, jenis, isi_json FROM kiriman ORDER BY id").toArray();
+    const antrean = ambilAntrean(this.sql);
+    if (lama.length === 0 && antrean.length === 0) {
       this.kirimanGagal = null;
       return;
     }
     const terakhir = new Map<string, BarisKiriman>();
-    for (const b of baris) {
+    for (const b of lama) {
       const kiriman = { jenis: b.jenis, isi: JSON.parse(b.isi_json) } as BarisKiriman;
-      const kunci = kiriman.jenis === "peserta" ? `peserta:${kiriman.isi.id}` : `ruang:${kiriman.isi.ruangId}`;
+      const kunci = kiriman.jenis === "ruang" ? `ruang:${kiriman.isi.ruangId}` : `${kiriman.jenis}:${kiriman.isi.id}`;
       terakhir.delete(kunci);
       terakhir.set(kunci, kiriman);
     }
     try {
-      await kirimKeD1(this.env.DB, [...terakhir.values()]);
-      const c = this.sql.exec("DELETE FROM kiriman WHERE id <= ?", baris[baris.length - 1].id);
-      this.catatTulis(c.rowsWritten);
+      if (lama.length > 0) {
+        await kirimKeD1(this.env.DB, [...terakhir.values()]);
+        this.catatTulis(this.sql.exec("DELETE FROM kiriman WHERE id <= ?", lama[lama.length - 1].id).rowsWritten);
+      }
+      if (antrean.length > 0) {
+        await kirimKeD1(
+          this.env.DB,
+          antrean.map((a) => a.baris),
+        );
+        this.catatTulis(hapusTerkirim(this.sql, antrean));
+      }
       this.kirimanGagal = null;
     } catch {
       const percobaan = (this.kirimanGagal?.percobaan ?? 0) + 1;
       this.kirimanGagal = { percobaan, berikutnya: Date.now() + JEDA_ULANG_KIRIMAN_MS[Math.min(percobaan, JEDA_ULANG_KIRIMAN_MS.length) - 1] };
     }
   }
+}
+
+function barisKeJawaban(r: BarisJawabanSql): JawabanRuang {
+  const u = JSON.parse(r.urutan_json) as { urutan1: number[]; urutan2: number[]; id1: string[]; id2: string[] };
+  return {
+    pemainId: r.pemain_id,
+    kode: r.kode,
+    urutan1: u.urutan1,
+    urutan2: u.urutan2,
+    id1: u.id1,
+    id2: u.id2,
+    status: r.status as StatusJawaban,
+    langkah1Opsi: r.langkah1_opsi,
+    langkah1Benar: r.langkah1_benar === null ? null : r.langkah1_benar === 1,
+    langkah2Opsi: r.langkah2_opsi,
+    tingkat: r.tingkat as Tingkat | null,
+    poin: r.poin,
+    dibukaPada: r.dibuka_pada,
+    langkah1Pada: r.langkah1_pada,
+    langkah2Pada: r.langkah2_pada,
+  };
 }
 
 function barisKePemain(r: BarisPemainSql): PemainRuang {

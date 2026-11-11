@@ -1,14 +1,21 @@
 // Rute ruang: ruang coba, pemeriksaan kode, kait uji, dan sambungan WebSocket pemain
 // (spesifikasi JS-03, bagian A sampai C). Sejak JS-07 kait `kelas` juga hidup di lingkungan uji dengan kunci
 // sekali pakai KUNCI_COBA, untuk alur kerja "Jejak: kendali ruang coba" (P-53); dipensiunkan di JS-10.
+// JS-08: ruang coba memuat Paket inti 16 (versi kerja) dari D1 (P-1 sampai P-5), dan kait uji lokal `kejadian` dan
+// `pindahkan` (P-66, P-67), keduanya hanya di lingkungan lokal.
 import { z } from "zod";
 import { BATAS } from "../../../../app/jejak-setara/inti/aturan";
+import { skemaIsiKejadian } from "../../../../app/jejak-setara/inti/konten/skema";
+import { PANJANG_TEKS } from "../../../../app/jejak-setara/inti/protokol";
 import type { PengaturanRuang } from "../../../../app/jejak-setara/inti/tipe";
 import { TEKS } from "../../../../app/jejak-setara/teks";
+import { bacaPaketKerja, bacaTeksRujukan } from "../db/konten";
 import { cariRuangAktif, sisipkanRuangCoba, tandaiRuangDitutup } from "../db/ruang";
 import type { Env } from "../env";
 import { asalDiizinkan, bolehLewat, jawabGalat, jawabJson, kodeAcak, normalkanKode, POLA_KODE_RUANG, samaWaktuKonstan } from "../keamanan";
 import type { DataRuang } from "../ruang/inti-ruang";
+import { jumlahTitikRuang, PAKET_RUANG_COBA, saringMenurutTitik, type KejadianMasuk } from "../ruang/kejadian-ruang";
+import { TITIK_PER_ZONA } from "../ruang/peta-kampung";
 
 const belumTersedia = () => jawabGalat("BELUM_TERSEDIA", "Fitur ini belum tersedia.", 404);
 const metodeSalah = (allow: string) => jawabGalat("METODE_TIDAK_DIDUKUNG", "Metode ini tidak didukung.", 405, { Allow: allow });
@@ -44,14 +51,46 @@ export async function tanganiApiRuang(request: Request, env: Env, url: URL): Pro
   if (jalur.startsWith("/api/publik/ruang/")) return periksaKode(request, env, jalur.slice("/api/publik/ruang/".length));
   if (env.LINGKUNGAN !== "lokal" && env.LINGKUNGAN !== "uji") return belumTersedia();
   if (jalur === "/api/ruang-coba") return buatRuangCoba(request, env, url);
-  const kait = /^\/api\/ruang-coba\/([^/]+)\/(kelas|statistik|putuskan)$/.exec(jalur);
-  if (kait && env.LINGKUNGAN === "lokal") return kaitUji(request, env, kait[1], kait[2] as "kelas" | "statistik" | "putuskan");
+  const kait = /^\/api\/ruang-coba\/([^/]+)\/(kelas|statistik|putuskan|kejadian|pindahkan)$/.exec(jalur);
+  if (kait && env.LINGKUNGAN === "lokal") return kaitUji(request, env, kait[1], kait[2] as JenisKait);
   // Lingkungan uji: hanya kait `kelas`, dan hanya dengan kunci sekali pakai (P-53).
   if (kait && kait[2] === "kelas") {
     if (!kunciCobaBenar(request, env)) return jawabGalat("KUNCI_SALAH", TEKS.api.KUNCI_SALAH, 403);
     return kaitUji(request, env, kait[1], "kelas");
   }
   return belumTersedia();
+}
+
+type JenisKait = "kelas" | "statistik" | "putuskan" | "kejadian" | "pindahkan";
+
+/**
+ * Isi kejadian ruang coba (P-1, P-2): kejadian Paket inti 16 berversi `kerja` menurut urutan paket. Isi yang tidak
+ * lolos skemaIsiKejadian (JS-05), rujukan tanpa teks, dan kejadian yang zonanya kehabisan titik dilewati.
+ */
+async function muatKejadianRuangCoba(db: D1Database, batasPemain: number): Promise<KejadianMasuk[]> {
+  const baris = await bacaPaketKerja(db, PAKET_RUANG_COBA);
+  const calon: { kode: string; versiId: string; isi: KejadianMasuk["isi"] }[] = [];
+  for (const b of baris) {
+    let json: unknown;
+    try {
+      json = JSON.parse(b.isi_json);
+    } catch {
+      continue;
+    }
+    const hasil = skemaIsiKejadian.safeParse(json);
+    if (hasil.success && hasil.data.kode === b.kode) calon.push({ kode: b.kode, versiId: b.versi_id, isi: hasil.data });
+  }
+  const teks = await bacaTeksRujukan(
+    db,
+    calon.flatMap((c) => c.isi.kartu.rujukan),
+  );
+  const sah: KejadianMasuk[] = [];
+  for (const c of calon) {
+    const rujukan = c.isi.kartu.rujukan.map((id) => teks.get(id) ?? "");
+    if (rujukan.some((r) => r.length === 0 || r.length > PANJANG_TEKS.rujukan)) continue;
+    sah.push({ ...c, rujukan });
+  }
+  return saringMenurutTitik(sah, TITIK_PER_ZONA, jumlahTitikRuang(batasPemain));
 }
 
 async function periksaKode(request: Request, env: Env, bagian: string): Promise<Response> {
@@ -90,40 +129,50 @@ async function buatRuangCoba(request: Request, env: Env, url: URL): Promise<Resp
     return jawabGalat("PENGATURAN_SALAH", TEKS.api.PENGATURAN_ABSEN, 400);
   }
   const benih = crypto.getRandomValues(new Uint32Array(1))[0];
+  const kejadian = await muatKejadianRuangCoba(env.DB, pengaturan.batasPemain);
   for (let i = 0; i < 5; i++) {
     const kode = kodeAcak((n) => crypto.getRandomValues(new Uint8Array(n)));
     const ruangId = crypto.randomUUID();
     const doId = env.RUANG.newUniqueId();
     const dibuatPada = Date.now();
-    const sisip = await sisipkanRuangCoba(env.DB, { id: ruangId, kode, pengaturanJson: JSON.stringify(pengaturan), benih, doId: doId.toString(), dibuatPada });
+    const sisip = await sisipkanRuangCoba(env.DB, {
+      id: ruangId,
+      kode,
+      pengaturanJson: JSON.stringify(pengaturan),
+      benih,
+      doId: doId.toString(),
+      dibuatPada,
+      paketId: kejadian.length > 0 ? PAKET_RUANG_COBA : null,
+    });
     if (sisip === "bentrok") continue;
     const data: DataRuang = { ruangId, kode, pengaturan, benih, dibuatPada };
     try {
       const jawaban = await env.RUANG.get(doId, { locationHint: "apac" }).fetch("https://ruang/inisialisasi", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, kejadian }),
       });
       if (!jawaban.ok) throw new Error(`inisialisasi ${jawaban.status}`);
     } catch {
       await tandaiRuangDitutup(env.DB, ruangId, Date.now());
       return jawabGalat("RUANG_GAGAL", TEKS.api.RUANG_GAGAL, 503);
     }
-    return jawabJson({ ruangId, kode, tautan: `${url.origin}/?kode=${kode}` }, 201);
+    return jawabJson({ ruangId, kode, tautan: `${url.origin}/?kode=${kode}`, kejadian: kejadian.length }, 201);
   }
   return jawabGalat("KODE_HABIS", TEKS.api.KODE_HABIS, 503);
 }
 
-async function kaitUji(request: Request, env: Env, bagian: string, jenis: "kelas" | "statistik" | "putuskan"): Promise<Response> {
+async function kaitUji(request: Request, env: Env, bagian: string, jenis: JenisKait): Promise<Response> {
   const kode = kodeDariJalur(bagian);
   const ruang = kode ? await cariRuangAktif(env.DB, kode) : null;
   if (!ruang) return ruangTidakAda();
   const stub = env.RUANG.get(env.RUANG.idFromString(ruang.do_id));
-  if (jenis === "statistik") {
+  if (jenis === "statistik" || jenis === "kejadian") {
     if (request.method !== "GET") return metodeSalah("GET");
-    return stub.fetch("https://ruang/statistik");
+    return stub.fetch(`https://ruang/${jenis}`);
   }
   if (request.method !== "POST") return metodeSalah("POST");
   if (jenis === "putuskan") return stub.fetch("https://ruang/putuskan", { method: "POST" });
+  if (jenis === "pindahkan") return stub.fetch("https://ruang/pindahkan", { method: "POST", body: await request.text() });
   return stub.fetch("https://ruang/kelas", { method: "POST", body: await request.text() });
 }
 

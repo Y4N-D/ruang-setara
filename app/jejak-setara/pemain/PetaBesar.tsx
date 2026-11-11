@@ -1,12 +1,13 @@
 // Peta besar (spesifikasi JS-07, P-37 sampai P-39; DRAF D-3 dan D-4 pilihan a): menutupi dunia di bawah bilah atas,
 // dengan skala bulat terbesar yang muat (paling kecil 2 px per ubin), zona berwarna, nama dan ikon setiap zona di
-// tengahnya, halte, dan panah diri berlabel "Kamu di sini". Ditutup dengan tombol, P, atau Esc.
+// tengahnya, halte, dan panah diri berlabel "Kamu di sini". Ditutup dengan tombol, P, atau Esc. JS-08 (P-19): penanda
+// kejadian yang terlihat 14 × 14 px dan ringkasan "Kejadian terlihat n, selesai m." di bawah judul.
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { IKON, TANDA } from "../assets/manifest";
 import type { Arah } from "../inti/tipe";
-import { TEKS } from "../teks";
+import { isiTeks, TEKS } from "../teks";
 import { HALTE, UKURAN_PETA, ZONA } from "./dunia/petaKampung";
-import { gambarZona } from "./PetaMini";
+import { gambarZona, type PenandaPeta } from "./PetaMini";
 
 /** Ruang untuk judul dan tombol Tutup peta (px CSS), di atas peta. */
 const KEPALA = 56;
@@ -23,12 +24,16 @@ export default function PetaBesar({
   rasio,
   diri,
   saatTutup,
+  kejadian = [],
+  ringkasan = { terlihat: 0, selesai: 0 },
 }: {
   lebar: number;
   tinggi: number;
   rasio: number;
   diri: { x: number; y: number; arah: Arah } | null;
   saatTutup: () => void;
+  kejadian?: readonly PenandaPeta[];
+  ringkasan?: { terlihat: number; selesai: number };
 }) {
   const s = skalaPetaBesar(lebar, tinggi);
   const kanvas = useRef<HTMLCanvasElement | null>(null);
@@ -46,7 +51,10 @@ export default function PetaBesar({
   return (
     <div className="js-peta-besar" role="dialog" aria-modal="true" aria-labelledby="js-peta-besar-judul">
       <div className="js-peta-besar-kepala">
-        <h2 id="js-peta-besar-judul">{TEKS.peta.judul}</h2>
+        <div className="js-peta-besar-judul">
+          <h2 id="js-peta-besar-judul">{TEKS.peta.judul}</h2>
+          <p className="js-ringkasan-kejadian">{isiTeks(TEKS.peta.ringkasanKejadian, { n: ringkasan.terlihat, m: ringkasan.selesai })}</p>
+        </div>
         <button ref={tutup} type="button" className="js-tombol" onClick={saatTutup}>
           {TEKS.peta.tutup}
         </button>
@@ -71,6 +79,21 @@ export default function PetaBesar({
             style={{ left: (h.x + 0.5) * s - ikonHalte / 2, top: (h.y + 0.5) * s - ikonHalte / 2 }}
           />
         ))}
+        {[...kejadian]
+          .sort((a, b) => Number(b.selesai) - Number(a.selesai))
+          .map((k) => (
+            // eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js
+            <img
+              key={`${k.x},${k.y}`}
+              className="js-peta-kejadian"
+              data-selesai={k.selesai ? "ya" : undefined}
+              src={k.selesai ? IKON.ikon_mini_selesai.url : IKON.ikon_mini_kejadian.url}
+              alt=""
+              width={14}
+              height={14}
+              style={{ left: (k.x + 0.5) * s - 7, top: (k.y + 0.5) * s - 7 }}
+            />
+          ))}
         {ZONA.map((z) => {
           const n = Number(z.id.slice(1));
           return (

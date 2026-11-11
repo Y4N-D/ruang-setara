@@ -1,20 +1,37 @@
 // Halaman pemain Jejak Setara ("/"): alur gabung (JS-03), lalu dunia untuk lobi, hitung mundur, ronde, dan jeda
 // (JS-07), serta layar selesai dan ditutup. Mesin dunia hidup di sini, agar pesan `dunia` dan `koreksi` diterima
-// walaupun layar dunia belum terpasang.
+// walaupun layar dunia belum terpasang. JS-08: keadaan dialog kejadian, skor dan peringkat pribadi, skor akhir, dan
+// pesan periksa, kunci, dan tutup dialog (P-13, P-24, P-28, P-43 sampai P-59).
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import type { AksiDialog } from "../bersama/DialogKejadian";
+import {
+  aturRingkas,
+  bolehTekan,
+  bukaDialog,
+  kunci,
+  pilih,
+  pilihNomor,
+  pindah,
+  terimaHasil1,
+  terimaHasil2,
+  type KeadaanDialog,
+} from "../bersama/dialogKeadaan";
 import { normalkanKode, POLA_KODE_RUANG } from "../inti/aturan";
 import type { KodeGalat, PesanPemain, PesanServerPemain } from "../inti/protokol";
+import { PROTOKOL_VERSI } from "../inti/versi";
 import type { StatusRuang, WarnaTas } from "../inti/tipe";
-import { TEKS } from "../teks";
+import { isiTeks, TEKS } from "../teks";
 import { buatKanvasPeramban, muatAsetDunia } from "./dunia/aset";
 import { penjagaPeramban } from "./dunia/layarMenyala";
+import { nomorZona } from "./dunia/kejadian";
+import { perangkatSentuh } from "./dunia/masukan";
 import { MesinDunia } from "./dunia/mesin";
 import { VERSI_PETA } from "./dunia/petaKampung";
 import { LayarAbsen, LayarIdentitas, LayarKode, LayarMenghubungkan } from "./Gabung";
 import { ketergantunganPeramban, KlienRuang, type KeadaanKlien } from "./jaringan";
-import LayarDunia from "./LayarDunia";
+import LayarDunia, { areaDialog } from "./LayarDunia";
 import { LapisanJeda, LapisanMenyambung } from "./LayarMenyambung";
-import { LayarDitutup, LayarGalat, LayarRonde, type WaktuStatus } from "./LayarRonde";
+import { LayarDitutup, LayarGalat, LayarRonde, type SkorAkhir, type WaktuStatus } from "./LayarRonde";
 
 type NamaLayar = "kode" | "absen" | "menghubungkan" | "identitas" | "dunia" | "ronde" | "ditutup" | "galat";
 
@@ -79,6 +96,30 @@ export default function App() {
   const statusRef = useRef<StatusRuang>("lobi");
   const layarRef = useRef<NamaLayar>("kode");
   const terputusRef = useRef<number | null>(null);
+  // JS-08: dialog kejadian, skor dan peringkat pribadi, skor akhir, dan periksa yang menunggu jawaban server.
+  const [dialog, setDialogState] = useState<KeadaanDialog | null>(null);
+  const dialogRef = useRef<KeadaanDialog | null>(null);
+  const [pribadi, setPribadi] = useState({ skor: 0, peringkat: 1 });
+  const pribadiRef = useRef({ skor: 0, peringkat: 1 });
+  const [akhir, setAkhir] = useState<SkorAkhir | null>(null);
+  const [menungguPeriksa, setMenungguPeriksa] = useState(false);
+  const pewaktuPeriksa = useRef<number | null>(null);
+  const [ruangUji, setRuangUji] = useState(false);
+  const jumlahPemainRef = useRef(0);
+
+  const aturDialog = useCallback(
+    (d: KeadaanDialog | null) => {
+      dialogRef.current = d;
+      mesin.aturDialog(d?.kejadianId ?? null);
+      setDialogState(d);
+    },
+    [mesin],
+  );
+  const hentiMenunggu = useCallback(() => {
+    if (pewaktuPeriksa.current !== null) window.clearTimeout(pewaktuPeriksa.current);
+    pewaktuPeriksa.current = null;
+    setMenungguPeriksa(false);
+  }, []);
 
   const gantiLayar = useCallback((l: NamaLayar) => {
     layarRef.current = l;
@@ -87,6 +128,8 @@ export default function App() {
 
   const tanganiPesan = useCallback(
     (p: PesanServerPemain) => {
+      // Kejadian yang pertama kali terlihat di layar ini diumumkan (P-13); dicek sebelum mesin mencatatnya.
+      const terlihatBaru = p.t === "kejadian_terlihat" && !mesin.kejadian.kodeTerlihat().has(p.kejadianId);
       mesin.terima(p, Date.now(), klien.current?.selisihJamMs ?? 0);
       switch (p.t) {
         case "selamat_datang":
@@ -94,6 +137,9 @@ export default function App() {
           statusRef.current = p.status;
           setDiriId(p.pemainId);
           setPemain({});
+          setRuangUji(p.pengaturan.uji);
+          aturDialog(null);
+          hentiMenunggu();
           setPengaturan({ durasiMenit: p.pengaturan.durasiMenit, batasPemain: p.pengaturan.batasPemain });
           setWaktu((w) => ({ ...w, status: p.status }));
           if (p.saranNama.length > 0) {
@@ -107,8 +153,17 @@ export default function App() {
           const sebelum = statusRef.current;
           statusRef.current = p.status;
           setWaktu({ status: p.status, mulaiPada: p.mulaiPada, berakhirPada: p.berakhirPada, jedaSejak: p.jedaSejak });
-          if (beridentitas.current && p.status !== sebelum) {
+          if (p.status === "selesai" || p.status === "pembahasan" || p.status === "ditutup") {
+            aturDialog(null);
+            hentiMenunggu();
+            if (p.status === "selesai") setAkhir((a) => a ?? { ...pribadiRef.current, jumlah: Math.max(1, jumlahPemainRef.current) });
+          }
+          // Layar juga diganti bila status sudah berubah selama terputus (misalnya ronde selesai saat HP menyambung
+          // ulang): selamat_datang sudah membawa status baru, jadi status_ruang sesudahnya tidak tampak berubah (JS-08, P-36).
+          if (beridentitas.current && (p.status !== sebelum || layarRef.current !== layarUntuk(p.status))) {
             gantiLayar(layarUntuk(p.status));
+          }
+          if (beridentitas.current && p.status !== sebelum) {
             if (p.status === "main") umumkan(sebelum === "jeda" ? TEKS.pengumuman.lanjut : TEKS.pengumuman.mulai);
             else if (p.status === "jeda") umumkan(TEKS.pengumuman.jeda);
             else if (p.status === "selesai") umumkan(TEKS.pengumuman.selesai);
@@ -135,6 +190,43 @@ export default function App() {
           setSaran(p.saranNama);
           setPilihNama(null);
           break;
+        case "kejadian_terlihat":
+          if (terlihatBaru && beridentitas.current) umumkan(TEKS.pengumuman.terlihat);
+          break;
+        case "kejadian_terbuka": {
+          hentiMenunggu();
+          const titik = mesin.kejadian.daftar().find((x) => x.kejadianId === p.kejadianId);
+          const area = areaDialog(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1, perangkatSentuh(window));
+          const ada = dialogRef.current;
+          // Pesan pembukaan yang dikirim ulang untuk dialog yang sama tidak mengulang tampilan (P-26, P-28).
+          if (ada && ada.kejadianId === p.kejadianId && (p.langkah === 1 || ada.hasil1)) break;
+          aturDialog(bukaDialog(p, titik ? nomorZona(titik.x, titik.y) : 1, area.ringkas, Date.now()));
+          break;
+        }
+        case "hasil_1": {
+          const d = dialogRef.current;
+          if (!d) break;
+          if (!d.bukaLangkah2) umumkan(p.benar ? TEKS.pengumuman.langkah1Tepat : TEKS.pengumuman.langkah1Belum);
+          aturDialog(terimaHasil1(d, p, Date.now()));
+          break;
+        }
+        case "hasil_2": {
+          const d = dialogRef.current;
+          if (!d) break;
+          const tingkat = TEKS.kartu.tingkat[p.tingkat];
+          umumkan(isiTeks(TEKS.pengumuman.kartu, { tingkat }) + (p.poin > 0 ? ` ${isiTeks(TEKS.pengumuman.tambahPoin, { poin: p.poin })}` : ""));
+          aturDialog(terimaHasil2(d, p, Date.now()));
+          break;
+        }
+        case "pribadi":
+          pribadiRef.current = { skor: p.skor, peringkat: p.peringkat };
+          setPribadi(pribadiRef.current);
+          break;
+        case "selesai":
+          aturDialog(null);
+          hentiMenunggu();
+          setAkhir({ skor: p.skor, peringkat: p.peringkat, jumlah: p.jumlahPemain });
+          break;
         case "galat":
           if (p.kode === "NAMA_DIPAKAI") {
             setGalatForm(TEKS.galat.NAMA_DIPAKAI);
@@ -155,13 +247,16 @@ export default function App() {
           break;
       }
     },
-    [gantiLayar, mesin, umumkan],
+    [aturDialog, gantiLayar, hentiMenunggu, mesin, umumkan],
   );
 
   const tanganiKeadaan = useCallback(
     (k: KeadaanKlien, kodeTutup: number | null) => {
       setKoneksi(k);
       if (k === "menyambung_ulang") {
+        // Saat menyambung ulang dialog tertutup; penanda dan skor dipulihkan dari pesan yang dikirim ulang (P-54).
+        aturDialog(null);
+        hentiMenunggu();
         if (terputusRef.current === null) {
           terputusRef.current = Date.now();
           setTerputusSejak(terputusRef.current);
@@ -180,7 +275,7 @@ export default function App() {
         }
       }
     },
-    [gantiLayar, umumkan],
+    [aturDialog, gantiLayar, hentiMenunggu, umumkan],
   );
 
   const sambungkan = useCallback(
@@ -192,6 +287,9 @@ export default function App() {
       setTerputusSejak(null);
       setPemain({});
       setGalatForm(null);
+      setAkhir(null);
+      pribadiRef.current = { skor: 0, peringkat: 1 };
+      setPribadi(pribadiRef.current);
       const alamat = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/ruang/${k}`;
       const c: KlienRuang = new KlienRuang(
         alamat,
@@ -338,6 +436,59 @@ export default function App() {
     };
   }, []);
 
+  // Aksi dialog (P-43 sampai P-48): aturan pilihan, kunci, pindah tampilan, dan masa tunggu ada di dialogKeadaan.ts.
+  const aksiDialog = useCallback(
+    (a: AksiDialog) => {
+      const d = dialogRef.current;
+      if (!d) return;
+      const kini = Date.now();
+      switch (a.jenis) {
+        case "tutup":
+        case "jelajah":
+          if (!bolehTekan(d, kini)) return;
+          klien.current?.kirim({ v: PROTOKOL_VERSI, t: "tutup_dialog", kejadianId: d.kejadianId });
+          aturDialog(null);
+          return;
+        case "pilih":
+          aturDialog(pilih(d, a.id, kini));
+          return;
+        case "nomor":
+          aturDialog(pilihNomor(d, a.n, kini));
+          return;
+        case "kunci": {
+          const hasil = kunci(d, kini);
+          if (!hasil.pesan) return;
+          if (klien.current?.kirim({ v: PROTOKOL_VERSI, ...hasil.pesan })) aturDialog(hasil.d);
+          return;
+        }
+        default:
+          aturDialog(pindah(d, a.jenis, kini));
+      }
+    },
+    [aturDialog],
+  );
+  const periksa = useCallback(
+    (kejadianId: string) => {
+      if (!klien.current?.kirim({ v: PROTOKOL_VERSI, t: "periksa", kejadianId })) return;
+      setMenungguPeriksa(true);
+      if (pewaktuPeriksa.current !== null) window.clearTimeout(pewaktuPeriksa.current);
+      // Tombol tampak ditekan sampai kejadian_terbuka tiba, paling lama 2 detik (P-24).
+      pewaktuPeriksa.current = window.setTimeout(hentiMenunggu, 2000);
+    },
+    [hentiMenunggu],
+  );
+  const ringkasDialog = useCallback(
+    (ringkas: boolean) => {
+      const d = dialogRef.current;
+      if (d) aturDialog(aturRingkas(d, ringkas));
+    },
+    [aturDialog],
+  );
+  useEffect(() => () => hentiMenunggu(), [hentiMenunggu]);
+  useEffect(() => {
+    jumlahPemainRef.current = Object.keys(pemain).length;
+  }, [pemain]);
+
   const selisihJam = useCallback(() => klien.current?.selisihJamMs ?? 0, []);
   const kirimGerak = useCallback((p: Extract<PesanPemain, { t: "gerak" }>) => klien.current?.kirim(p) ?? false, []);
   const bufferedAmount = useCallback(() => klien.current?.bufferedAmount ?? 0, []);
@@ -366,12 +517,12 @@ export default function App() {
           saatPilihAvatar={setPilihAvatar}
           saatAcak={() => {
             setGalatForm(null);
-            klien.current?.kirim({ v: 1, t: "minta_nama" });
+            klien.current?.kirim({ v: PROTOKOL_VERSI, t: "minta_nama" });
           }}
           saatGabung={() => {
             if (pilihNama === null || pilihAvatar === null) return;
             setGalatForm(null);
-            klien.current?.kirim({ v: 1, t: "pilih_identitas", nama: pilihNama, avatar: pilihAvatar });
+            klien.current?.kirim({ v: PROTOKOL_VERSI, t: "pilih_identitas", nama: pilihNama, avatar: pilihAvatar });
           }}
         />
       );
@@ -391,11 +542,19 @@ export default function App() {
           kirim={kirimGerak}
           bufferedAmount={bufferedAmount}
           umumkan={umumkan}
+          skor={pribadi.skor}
+          peringkat={pribadi.peringkat}
+          dialog={dialog}
+          ruangUji={ruangUji}
+          menungguPeriksa={menungguPeriksa}
+          saatDialog={aksiDialog}
+          saatPeriksa={periksa}
+          saatRingkas={ringkasDialog}
         />
       );
       break;
     case "ronde":
-      isi = <LayarRonde />;
+      isi = <LayarRonde akhir={akhir} />;
       break;
     case "ditutup":
       isi = <LayarDitutup saatKembali={kembali} />;

@@ -91,11 +91,15 @@ export interface InfoPemain {
 interface CatatanPemain {
   butir: Butir[];
   terlihatLokal: number; // jam lokal saat terakhir muncul di `dunia`
+  /** Tanda `dialog` butir `dunia` terakhir (JS-08, P-17). */
+  dialog: boolean;
 }
 
 export interface PemainTampil extends Tampilan {
   id: string;
   info: InfoPemain;
+  /** Pemain ini sedang membuka dialog kejadian: gelembung "…" di atas kepalanya (JS-08, P-17). */
+  dialog: boolean;
 }
 
 /** Semua pemain lain yang dikenal layar ini. */
@@ -131,16 +135,17 @@ export class PemainLain {
   }
 
   /** Butir `dunia` disimpan per pemain bersama waktu server, paling banyak 10 terbaru (P-19, P-20). */
-  terimaDunia(w: number, p: readonly (readonly [string, number, number, Arah, boolean])[], jamLokal: number, selisihJam: number): void {
+  terimaDunia(w: number, p: readonly (readonly [string, number, number, Arah, boolean, boolean?])[], jamLokal: number, selisihJam: number): void {
     this.tunda.tambah(jamLokal + selisihJam - w);
-    for (const [id, x, y, arah, jalan] of p) {
+    for (const [id, x, y, arah, jalan, dialog] of p) {
       if (id === this.diriId) continue;
       let c = this.catatan.get(id);
       if (!c) {
-        c = { butir: [], terlihatLokal: jamLokal };
+        c = { butir: [], terlihatLokal: jamLokal, dialog: false };
         this.catatan.set(id, c);
       }
       c.terlihatLokal = jamLokal;
+      c.dialog = dialog === true;
       const daftar = c.butir;
       if (daftar.length > 0 && w < daftar[daftar.length - 1].w) continue; // butir lama yang tertukar urutan
       if (daftar.length > 0 && w === daftar[daftar.length - 1].w) daftar.pop();
@@ -166,7 +171,7 @@ export class PemainLain {
       if (!info || id === this.diriId) continue;
       if (status === "main" && jamLokal - c.terlihatLokal > SEMBUNYI_MS) continue;
       const pos = posisiPada(c.butir, t);
-      if (pos) hasil.push({ id, info, x: pos.x, y: pos.y, arah: pos.arah, jalan: pos.jalan });
+      if (pos) hasil.push({ id, info, x: pos.x, y: pos.y, arah: pos.arah, jalan: pos.jalan, dialog: c.dialog });
     }
     return hasil;
   }

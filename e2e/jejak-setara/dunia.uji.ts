@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { posisiSah } from "../../app/jejak-setara/inti/gerak";
 import { tutupGerbang, uraiRle } from "../../app/jejak-setara/inti/peta";
+import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
 
 const LAYAR = "test-results-jejak/layar";
 /** Ukuran laptop diambil dari satu halaman yang diubah ukurannya; ukuran HP dari konteks HP sungguhan (r 2,625). */
@@ -49,7 +50,7 @@ async function buatRuang(request: APIRequestContext, isi: Record<string, unknown
   return ((await j.json()) as { kode: string }).kode;
 }
 const kelas = async (request: APIRequestContext, kode: string, pesan: Record<string, unknown>) => {
-  const j = await request.post(`/api/ruang-coba/${kode}/kelas`, { data: { v: 1, ...pesan } });
+  const j = await request.post(`/api/ruang-coba/${kode}/kelas`, { data: { v: PROTOKOL_VERSI, ...pesan } });
   expect(j.status()).toBe(200);
   return ((await j.json()) as { status: string }).status;
 };
@@ -114,12 +115,12 @@ async function bot(baseURL: string, kode: string, nomor: number) {
   const ws = new WebSocket(`${baseURL.replace(/^http/, "ws")}/ws/ruang/${kode}`, { headers: { Origin: baseURL } } as unknown as string[]);
   const b = { ws, x: 0, y: 0, seq: 0, arah: nomor % 2 ? 1 : -1, siap: false };
   await new Promise<void>((ok, gagal) => {
-    ws.onopen = () => ws.send(JSON.stringify({ v: 1, t: "halo", peran: "pemain" }));
+    ws.onopen = () => ws.send(JSON.stringify({ v: PROTOKOL_VERSI, t: "halo", peran: "pemain" }));
     ws.onerror = () => gagal(new Error("bot gagal tersambung"));
     ws.onmessage = (e) => {
       const m = JSON.parse(String(e.data)) as Record<string, unknown>;
       if (m.t === "selamat_datang" || m.t === "saran_nama") {
-        ws.send(JSON.stringify({ v: 1, t: "pilih_identitas", nama: (m.saranNama as string[])[0], avatar: nomor % 8 }));
+        ws.send(JSON.stringify({ v: PROTOKOL_VERSI, t: "pilih_identitas", nama: (m.saranNama as string[])[0], avatar: nomor % 8 }));
       } else if (m.t === "koreksi") {
         b.x = m.x as number;
         b.y = m.y as number;
@@ -143,7 +144,7 @@ function langkahBot(b: Awaited<ReturnType<typeof bot>>) {
     if (!posisiSah(GRID_LOBI, x, b.y)) return;
   }
   b.x = Math.round(x * 10) / 10;
-  b.ws.send(JSON.stringify({ v: 1, t: "gerak", x: b.x, y: b.y, arah: b.arah > 0 ? "kanan" : "kiri", jalan: true, seq: ++b.seq }));
+  b.ws.send(JSON.stringify({ v: PROTOKOL_VERSI, t: "gerak", x: b.x, y: b.y, arah: b.arah > 0 ? "kanan" : "kiri", jalan: true, seq: ++b.seq }));
 }
 
 test("dua pemain saling melihat di lobi tanpa bergerak; berjalan dengan keyboard terlihat pemain lain (AC-1 sampai AC-3, AC-6, AC-9 sampai AC-11)", async ({
@@ -372,8 +373,8 @@ test("gerbang tertutup di lobi, terbuka sesudah mulai; menyambung ulang di atas 
   await ctx.close();
 });
 
-/** Histogram kumulatif waktu kode gambar dari atribut data kanvas (batas kelompok: KELOMPOK_WAKTU). */
-const BATAS_KELOMPOK = [1, 2, 3, 4, 6, 8, 12, 16, 25, 50, Infinity];
+/** Histogram kumulatif waktu kode gambar dari atribut data kanvas (batas kelompok: KELOMPOK_WAKTU, JS-08 P-68). */
+const BATAS_KELOMPOK = [1, 2, 3, 4, 6, 8, 12, 16, 25, 50, 100, Infinity];
 const histogram = async (page: Page) => ((await dunia(page).getAttribute("data-histogram")) ?? "").split(",").map(Number);
 function ringkasHistogram(awal: number[], akhir: number[]) {
   const n = akhir.map((v, i) => v - (awal[i] ?? 0));
@@ -388,26 +389,35 @@ function ringkasHistogram(awal: number[], akhir: number[]) {
     }
   }
   const terakhir = n.findLastIndex((v) => v > 0);
-  return { bingkai: total, p95Paling: p95, maksPaling: terakhir >= 0 ? BATAS_KELOMPOK[terakhir] : 0, kelompok: n };
+  // Bingkai 50 ms ke atas (kelompok 50–100 dan ≥ 100) dan 100 ms ke atas (P-69).
+  const i50 = BATAS_KELOMPOK.indexOf(100);
+  const lambat50 = n.slice(i50).reduce((a, b) => a + b, 0);
+  const lambat100 = n.slice(i50 + 1).reduce((a, b) => a + b, 0);
+  return { bingkai: total, p95Paling: p95, maksPaling: terakhir >= 0 ? BATAS_KELOMPOK[terakhir] : 0, persen50: total ? (100 * lambat50) / total : 0, lambat100, kelompok: n };
 }
 
-test("kinerja: 40 pemain tiruan dan CPU 6× lebih lambat di ukuran HP, termasuk pergantian masa (AC-19; ± 4 menit)", async ({
+test("kinerja: 40 pemain tiruan di ukuran HP; CPU normal dan CPU 6× lebih lambat di lobi, berjalan, dekat kejadian, dan pergantian masa (JS-07 AC-19 dengan ambang JS-08 P-69; ± 4 menit)", async ({
   browser,
   baseURL,
   request,
 }) => {
-  test.setTimeout(300_000);
+  test.setTimeout(330_000);
   const kode = await buatRuang(request, { batasPemain: 45, durasiMenit: 10 });
   const hp = await konteks(browser, baseURL!, true);
-  await gabung(hp.page, kode, 7);
+  const namaHp = await gabung(hp.page, kode, 7);
   const bots: Awaited<ReturnType<typeof bot>>[] = [];
   for (let i = 0; i < 40; i++) bots.push(await bot(baseURL!, kode, i));
   const putaran = setInterval(() => bots.forEach(langkahBot), 100);
   const cdp = await hp.ctx.newCDPSession(hp.page);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 });
   try {
+    // CPU normal: 40 pemain berjalan di lobi (P-69 butir 1).
     await hp.page.waitForTimeout(3000);
     let awal = await histogram(hp.page);
+    await hp.page.waitForTimeout(5000);
+    const normal = { ...ringkasHistogram(awal, await histogram(hp.page)), detik: 5 };
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 });
+    await hp.page.waitForTimeout(2000);
+    awal = await histogram(hp.page);
     await hp.page.waitForTimeout(10_000); // lobi penuh: 40 pemain berjalan di sekitar pemain
     const lobi = { ...ringkasHistogram(awal, await histogram(hp.page)), lain: Number(await dunia(hp.page).getAttribute("data-lain")) };
     expect(await kelas(request, kode, { t: "mulai" })).toBe("hitung_mundur");
@@ -421,19 +431,32 @@ test("kinerja: 40 pemain tiruan dan CPU 6× lebih lambat di ukuran HP, termasuk 
     await hp.page.keyboard.up("ArrowDown");
     await hp.page.keyboard.up("ArrowRight");
     const jalan = { ...ringkasHistogram(awal, await histogram(hp.page)), diri: await dunia(hp.page).getAttribute("data-diri") };
+    // Berdiri dekat kejadian K-13: penanda, tiga tokoh, dan bangku antrean tergambar (P-69 keadaan keempat).
+    const titik = ((await (await request.get(`/api/ruang-coba/${kode}/kejadian`)).json()) as { kejadian: { kejadianId: string; titik: { x: number; y: number }[] }[] }).kejadian;
+    const t13 = titik.find((k) => k.kejadianId === "K-13")!.titik[0];
+    expect((await request.post(`/api/ruang-coba/${kode}/pindahkan`, { data: { nama: namaHp, x: t13.x, y: t13.y + 1 } })).status()).toBe(200);
+    await expect(dunia(hp.page)).toHaveAttribute("data-tokoh-kejadian", "4", { timeout: 8000 });
+    awal = await histogram(hp.page);
+    await hp.page.waitForTimeout(8000);
+    const dekat = { ...ringkasHistogram(awal, await histogram(hp.page)), tokoh: await dunia(hp.page).getAttribute("data-tokoh-kejadian") };
     // Pergantian pagi ke siang di kemajuan 0,3 (3 menit pada ronde 10 menit), dengan waktu sungguhan.
     await hp.page.waitForTimeout(Math.max(0, mulaiMain + 168_000 - Date.now()));
     awal = await histogram(hp.page);
     await hp.page.waitForTimeout(20_000);
     const masa = { ...ringkasHistogram(awal, await histogram(hp.page)), masa: await dunia(hp.page).getAttribute("data-masa") };
-    console.log("KINERJA", JSON.stringify({ lobi, jalan, masa }));
+    console.log("KINERJA", JSON.stringify({ normal, lobi, jalan, dekat, masa }));
     expect(lobi.lain).toBeGreaterThanOrEqual(30);
     expect(masa.masa).toBe("siang");
-    expect(lobi.p95Paling, "lobi: kode gambar p95").toBeLessThanOrEqual(4);
-    expect(jalan.p95Paling, "jalan: kode gambar p95").toBeLessThanOrEqual(4);
-    expect(masa.p95Paling, "masa berganti: kode gambar p95").toBeLessThanOrEqual(4);
-    expect(jalan.maksPaling, "jalan: bingkai terlama").toBeLessThanOrEqual(50);
-    expect(masa.maksPaling, "masa berganti: bingkai terlama").toBeLessThanOrEqual(50);
+    // CPU normal (P-69 butir 1): p95 ≤ 4 ms, bingkai terlama ≤ 25 ms, sedikitnya 50 bingkai per detik.
+    expect(normal.p95Paling, "normal: p95").toBeLessThanOrEqual(4);
+    expect(normal.maksPaling, "normal: bingkai terlama").toBeLessThanOrEqual(25);
+    expect(normal.bingkai / normal.detik, "normal: bingkai per detik").toBeGreaterThanOrEqual(50);
+    // CPU 6× (P-69 butir 2): p95 ≤ 50 ms, bingkai 50 ms ke atas paling banyak 1%, tanpa bingkai 100 ms ke atas.
+    for (const [nama, r] of Object.entries({ lobi, jalan, dekat, masa })) {
+      expect(r.p95Paling, `${nama}: p95`).toBeLessThanOrEqual(50);
+      expect(r.persen50, `${nama}: bingkai 50 ms ke atas (%)`).toBeLessThanOrEqual(1);
+      expect(r.lambat100, `${nama}: bingkai 100 ms ke atas`).toBe(0);
+    }
   } finally {
     clearInterval(putaran);
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 }).catch(() => undefined);

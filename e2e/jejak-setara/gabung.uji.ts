@@ -2,6 +2,7 @@
 // bermain di ruang coba lokal; siklus ronde dikendalikan lewat kait uji (P-9). Sejak JS-07 lobi dan ronde tampil di
 // atas dunia (panel lobi, bilah atas); uji dunia sendiri ada di dunia.uji.ts.
 import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
 
 const LAYAR = "test-results-jejak/layar";
 const UKURAN = [
@@ -40,7 +41,7 @@ async function buatRuang(request: APIRequestContext, isi: Record<string, unknown
 }
 
 const kelas = async (request: APIRequestContext, kode: string, pesan: Record<string, unknown>) =>
-  expect((await request.post(`/api/ruang-coba/${kode}/kelas`, { data: { v: 1, ...pesan } })).status()).toBe(200);
+  expect((await request.post(`/api/ruang-coba/${kode}/kelas`, { data: { v: PROTOKOL_VERSI, ...pesan } })).status()).toBe(200);
 
 async function konteks(browser: Browser, baseURL: string, hp = false): Promise<{ ctx: BrowserContext; page: Page }> {
   const ctx = await browser.newContext({

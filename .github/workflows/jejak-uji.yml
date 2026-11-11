@@ -101,6 +101,11 @@ jobs:
         if: steps.rahasia.outputs.siap == 'ya'
         run: npx wrangler d1 migrations apply jejak-setara-uji --remote --env uji --config server/jejak-setara/wrangler.jsonc
 
+      # Bank awal disemai sekali per basis data (JS-05); aman dijalankan di setiap deploy (JS-08, P-7; Permintaan A-5).
+      - name: Semai bank awal
+        if: steps.rahasia.outputs.siap == 'ya'
+        run: node scripts/jejak-setara/semai.mjs --jalankan -- --remote --env uji
+
       - name: Deploy Worker uji
         if: steps.rahasia.outputs.siap == 'ya'
         working-directory: web/jejak-setara

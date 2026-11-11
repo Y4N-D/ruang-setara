@@ -43,7 +43,7 @@ describe("Worker kerangka", () => {
     const jawaban = await minta("/api/sehat");
     expect(jawaban.status).toBe(200);
     periksaTajukJson(jawaban);
-    expect(await jawaban.text()).toBe('{"ok":true,"protokol":1,"lingkungan":"lokal"}');
+    expect(await jawaban.text()).toBe(`{"ok":true,"protokol":${PROTOKOL_VERSI},"lingkungan":"lokal"}`);
   });
 
   it.each(["POST", "PUT", "DELETE"])("%s /api/sehat menjawab 405 dengan Allow: GET (AC-4)", async (metode) => {
@@ -134,12 +134,12 @@ describe("Worker kerangka", () => {
       },
     } as unknown as typeof env;
     const jawaban = await worker.fetch(
-      new Request("http://127.0.0.1/api/ruang-coba/k7mpa/kelas", { method: "POST", headers: { "X-Jejak-Kunci-Coba": "kunci-benar" }, body: '{"v":1,"t":"mulai"}' }),
+      new Request("http://127.0.0.1/api/ruang-coba/k7mpa/kelas", { method: "POST", headers: { "X-Jejak-Kunci-Coba": "kunci-benar" }, body: JSON.stringify({ v: PROTOKOL_VERSI, t: "mulai" }) }),
       envUji,
     );
     expect(jawaban.status).toBe(200);
     expect(await jawaban.json()).toEqual({ ok: true, status: "hitung_mundur" });
-    expect(diteruskanKe).toEqual([{ url: "https://ruang/kelas", body: '{"v":1,"t":"mulai"}' }]);
+    expect(diteruskanKe).toEqual([{ url: "https://ruang/kelas", body: JSON.stringify({ v: PROTOKOL_VERSI, t: "mulai" }) }]);
   });
 
   it("jalur lain diteruskan ke ASSETS dan jawabannya dikembalikan apa adanya", async () => {
@@ -153,15 +153,15 @@ describe("Worker kerangka", () => {
     }
   });
 
-  it("PROTOKOL_VERSI bernilai 1 dan sama dengan protokol jawaban Worker", async () => {
-    expect(PROTOKOL_VERSI).toBe(1);
+  it("PROTOKOL_VERSI bernilai 2 (JS-08) dan sama dengan protokol jawaban Worker", async () => {
+    expect(PROTOKOL_VERSI).toBe(2);
     const isi = (await (await minta("/api/sehat")).json()) as { protokol: number };
     expect(isi.protokol).toBe(PROTOKOL_VERSI);
   });
 });
 
 describe("Teks dan halaman", () => {
-  it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01, JS-03, dan JS-07", () => {
+  it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01, JS-03, JS-07, dan JS-08", () => {
     expect(TEKS).toEqual({
       judulTabPemain: "Jejak Setara",
       judulTabKonsol: "Konsol admin · Jejak Setara",
@@ -214,6 +214,9 @@ describe("Teks dan halaman", () => {
         selesaiIsi: "Tunggu arahan guru.",
         ditutup: "Ruang ditutup",
         ditutupIsi: "Terima kasih sudah bermain.",
+        skorAkhir: "Skormu {skor}",
+        peringkatAkhir: "Peringkat {n} dari {jumlah}",
+        tanpaSkor: "Belum ada kejadian yang kamu jawab di ronde ini.",
       },
       menyambung: {
         judul: "Menyambung ulang…",
@@ -227,6 +230,7 @@ describe("Teks dan halaman", () => {
         jamCerita: "Jam cerita {jam}",
         sisaWaktu: "Sisa waktu {waktu}",
         masa: { pagi: "Pagi", siang: "Siang", sore: "Sore" },
+        fps: "{fps} fps · p95 ≤ {kelompok} ms",
       },
       peta: {
         bukaBesar: "Buka peta besar",
@@ -234,8 +238,34 @@ describe("Teks dan halaman", () => {
         tutup: "Tutup peta",
         kamuDiSini: "Kamu di sini",
         halte: "Halte",
+        ringkasanKejadian: "Kejadian terlihat {n}, selesai {m}.",
       },
       tombol: { kembali: "Kembali", muatUlang: "Muat ulang" },
+      kejadian: { periksa: "Periksa", periksaLabel: "Periksa kejadian", periksaJauh: "Periksa. Dekati penanda kejadian dulu." },
+      dialog: {
+        langkah: "Langkah {n} dari 2",
+        tutup: "Tutup",
+        kunci: "Kunci jawaban",
+        lihatPilihan: "Lihat pilihan",
+        situasi: "Situasi",
+        lanjutLangkah2: "Lanjut ke Langkah 2",
+        lanjutMenjelajah: "Lanjut menjelajah",
+        jawabanTepat: "Jawaban tepat",
+        pilihanmu: "Pilihanmu",
+        tepat: "Tepat",
+        belumTepat: "Belum tepat",
+        poin: "+{poin}",
+      },
+      kartu: {
+        tingkat: { tepat: "Tepat", kurang: "Kurang tepat", berisiko: "Berisiko" },
+        terjadi: "Yang terjadi",
+        hak: "Hak yang terdampak",
+        kewajiban: "Kewajiban terkait",
+        pilihanTepat: "Pilihan yang tepat",
+        rujukan: "Rujukan",
+        rujukanUji: "Rujukan di ruang uji belum tentu sudah diverifikasi Peninjau.",
+      },
+      skor: { label: "Skor {skor}, peringkat {n}", labelTanpaPeringkat: "Skor {skor}, belum ada peringkat" },
       pengumuman: {
         lobi: "Kamu sudah masuk lobi.",
         mulai: "Ronde dimulai.",
@@ -244,6 +274,12 @@ describe("Teks dan halaman", () => {
         selesai: "Ronde selesai.",
         menyambung: "Menyambung ulang.",
         tersambung: "Tersambung kembali.",
+        terlihat: "Kejadian baru terlihat.",
+        dekat: "Kejadian di dekatmu. Tekan E atau tombol Periksa.",
+        langkah1Tepat: "Langkah 1 tepat. Tambah 40 poin.",
+        langkah1Belum: "Langkah 1 belum tepat.",
+        kartu: "Kartu dampak: {tingkat}.",
+        tambahPoin: "Tambah {poin} poin.",
       },
       galat: {
         RUANG_TIDAK_ADA: "Kode ruang tidak ditemukan. Periksa lagi kodenya.",
@@ -378,7 +414,9 @@ describe("JS-07: alur kerja kendali ruang coba (P-55 sampai P-57)", () => {
   });
 
   it("pesan layar kelas untuk setiap aksi, kunci sekali pakai yang disamarkan, dan percobaan ulang selama 403", () => {
-    for (const pesan of ['{"v":1,"t":"mulai"}', '{"v":1,"t":"jeda"}', '{"v":1,"t":"lanjut"}', '{"v":1,"t":"tambah_waktu","detik":60}', '{"v":1,"t":"akhiri"}', '{"v":1,"t":"tutup_ruang"}']) {
+    // Versi amplop mengikuti PROTOKOL_VERSI (JS-08: versi 2), agar alur kerja tidak ditolak sesudah protokol naik.
+    const V = PROTOKOL_VERSI;
+    for (const pesan of [`{"v":${V},"t":"mulai"}`, `{"v":${V},"t":"jeda"}`, `{"v":${V},"t":"lanjut"}`, `{"v":${V},"t":"tambah_waktu","detik":60}`, `{"v":${V},"t":"akhiri"}`, `{"v":${V},"t":"tutup_ruang"}`]) {
       expect(kendali).toContain(`PESAN='${pesan}'`);
     }
     expect(kendali).toContain('echo "::add-mask::$KUNCI"');
@@ -412,6 +450,62 @@ describe("JS-07: alur kerja kendali ruang coba (P-55 sampai P-57)", () => {
     const durasi = coba.slice(coba.indexOf("durasi_menit:"), coba.indexOf("permissions:"));
     expect([...durasi.matchAll(/- "(\d+)"/g)].map((m) => m[1])).toEqual(["10", "15", "20"]);
     expect(coba).toContain("durasiMenit: $d");
+  });
+});
+
+describe("JS-08: semai bank awal, ringkasan ruang coba, dan kait uji lokal (P-6, P-7, P-66, P-67; AC-1, AC-2, AC-23)", () => {
+  const uji = baca(".github/workflows/jejak-uji.yml");
+  const coba = baca(".github/workflows/jejak-ruang-coba.yml");
+
+  it("skrip db:semai:lokal menyemai .wrangler/state yang sama dengan db:migrasi:lokal", () => {
+    const { scripts } = JSON.parse(baca("package.json")) as { scripts: Record<string, string> };
+    expect(scripts["db:semai:lokal"]).toBe("node scripts/jejak-setara/semai.mjs --jalankan -- --local --persist-to .wrangler/state");
+    expect(scripts["db:migrasi:lokal"]).toContain("--persist-to .wrangler/state");
+  });
+
+  it("server-lokal.mjs menyemai folder keadaan sesudah migrasi, kecuali dengan --tanpa-semai", () => {
+    const s = baca("scripts/jejak-setara/server-lokal.mjs");
+    const migrasi = s.indexOf('"migrations", "apply"');
+    const semai = s.indexOf('"semai.mjs"), ["--jalankan", "--", "--local", "--persist-to", keadaan]');
+    const pratinjau = s.indexOf('"preview"');
+    expect(migrasi).toBeGreaterThan(0);
+    expect(semai).toBeGreaterThan(migrasi);
+    expect(pratinjau).toBeGreaterThan(semai);
+    expect(s).toContain('if (!argumen.includes("--tanpa-semai"))');
+  });
+
+  it("job Deploy uji: Semai bank awal tepat sesudah Migrasi D1 uji, dengan syarat yang sama", () => {
+    const langkah = [...uji.matchAll(/\n      - name: ([^\n]+)\n        if: ([^\n]+)\n/g)].map((m) => [m[1], m[2]]);
+    const nama = langkah.map((l) => l[0]);
+    const i = nama.indexOf("Migrasi D1 uji");
+    expect(i).toBeGreaterThan(0);
+    expect(nama[i + 1]).toBe("Semai bank awal");
+    expect(langkah[i + 1][1]).toBe(langkah[i][1]);
+    expect(langkah[i + 1][1]).toBe("steps.rahasia.outputs.siap == 'ya'");
+    expect(uji).toContain("        run: node scripts/jejak-setara/semai.mjs --jalankan -- --remote --env uji\n");
+  });
+
+  it("ringkasan Jejak: ruang coba menulis jumlah kejadian, atau peringatan bila bank awal belum disemai", () => {
+    expect(coba).toContain("JUMLAH=$(jq -r '.kejadian // 0' jawaban.json)");
+    expect(coba).toContain('echo "Kejadian di ruang: $JUMLAH"');
+    expect(coba).toContain(
+      `echo 'Bank awal belum disemai, jadi ruang ini belum punya kejadian. Jalankan ulang "Jejak: uji" agar bank awal disemai, lalu buat ruang coba baru.'`,
+    );
+  });
+
+  it("kait kejadian dan pindahkan hanya di lokal: 404 di uji (walaupun dengan kunci) dan di produksi, tanpa menyentuh D1", async () => {
+    for (const [jalur, metode] of [
+      ["kejadian", "GET"],
+      ["pindahkan", "POST"],
+    ] as const) {
+      for (const lingkungan of ["uji", "produksi"]) {
+        const j = await worker.fetch(
+          new Request(`http://127.0.0.1/api/ruang-coba/K7MPA/${jalur}`, { method: metode, headers: { "X-Jejak-Kunci-Coba": "kunci-benar" }, ...(metode === "POST" ? { body: "{}" } : {}) }),
+          { ...env, LINGKUNGAN: lingkungan, KUNCI_COBA: "kunci-benar" } as typeof env,
+        );
+        expect(j.status, `${jalur} ${lingkungan}`).toBe(404);
+      }
+    }
   });
 });
 

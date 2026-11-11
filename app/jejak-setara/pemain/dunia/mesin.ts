@@ -1,14 +1,19 @@
 // Mesin dunia layar pemain (spesifikasi JS-07; Architecture 9). Keadaan dunia disimpan di luar React, agar pesan
 // `dunia` dan `koreksi` diterima walaupun layar dunia belum terpasang, dan agar 10 pesan per detik tidak memicu
 // render React. Setiap bingkai: gerak sendiri, kiriman `gerak`, kamera, pemain lain, potongan peta, lalu gambar.
+// JS-08: kejadian yang terlihat (penanda, tokoh, dan properti), gelembung "…" pemain lain, jangkauan Periksa, dan
+// laporan berhenti sebelum `periksa` (P-14 sampai P-24).
+import { NPC, OBJEK } from "../../assets/manifest";
+import { PANDANGAN } from "../../inti/aturan";
 import type { PesanPemain, PesanServerPemain } from "../../inti/protokol";
 import type { Masa, StatusRuang } from "../../inti/tipe";
-import { buatSetAvatar, buatSetSiluet, type AsetDunia, type BuatKanvas, type SetStrip } from "./aset";
+import { buatSetAvatar, buatSetSiluet, type AsetDunia, type BuatKanvas, type SetStrip, type Strip } from "./aset";
 import { GerakDiri, selangKirim } from "./gerakDiri";
 import { ikutiKamera, kameraPusat, type Kamera } from "./kamera";
 import { hitungLangit, type Langit, type WaktuRuangKlien } from "./langit";
 import { Masukan } from "./masukan";
-import { bingkaiTokoh, gambarBingkai, type GerbangGambar, type TokohGambar } from "./penggambar";
+import { kejadianDalamJangkauan, KejadianKlien, tataLetakKejadian, type LetakTokoh } from "./kejadian";
+import { bingkaiTokoh, gambarBingkai, type EkstraGambar, type GerbangGambar, type SpriteGambar, type TokohGambar } from "./penggambar";
 import { PemainLain, type InfoPemain } from "./pemainLain";
 import { GERBANG, GRID_KAMPUNG, GRID_LOBI, LAPISAN_GAMBAR, OBJEK_PETA, TITIK_MUNCUL, UKURAN_PETA } from "./petaKampung";
 import { PengelolaPotongan, type ObjekGambar } from "./potongan";
@@ -62,6 +67,18 @@ export class MesinDunia {
   /** Tokoh yang digambar bingkai terakhir; label nama dihitung dari sini. */
   tokoh: (TokohGambar & { nama: string; diri: boolean })[] = [];
   siluetTerakhir = false;
+  /** Kejadian yang terlihat dan selesai di layar ini (JS-08). */
+  readonly kejadian = new KejadianKlien();
+  /** Kode kejadian yang dialognya terbuka di layar ini; penandanya menjadi "…" (P-16). */
+  dialogKode: string | null = null;
+  /** Kejadian dalam jangkauan Periksa pada bingkai terakhir (P-21). */
+  jangkauan: string | null = null;
+  /** Gambar kejadian bingkai terakhir, dan hitungan untuk atribut uji kanvas (P-20). */
+  private ekstra: EkstraGambar = { bawah: [], tengah: [], atas: [], efek: [] };
+  jumlahTokohKejadian = 0;
+  jumlahDialogLain = 0;
+  private readonly letak = new Map<string, LetakTokoh[]>();
+  private tokohLain: { id: string; x: number; y: number; dialog: boolean }[] = [];
   private aset: AsetDunia | null = null;
   private potongan: PengelolaPotongan | null = null;
   private readonly buat: BuatKanvas;
@@ -129,7 +146,9 @@ export class MesinDunia {
         if (this.diriId !== p.pemainId) {
           this.gerak.posisi = null;
           this.kamera = kameraPusat(tengahLobi(), UKURAN_PETA.lebarPx, UKURAN_PETA.tinggiPx);
+          this.kejadian.kosongkan();
         }
+        this.dialogKode = null;
         this.diriId = p.pemainId;
         this.lain.kosongkan();
         this.lain.aturDiri(p.pemainId);
@@ -157,6 +176,15 @@ export class MesinDunia {
       case "koreksi":
         this.gerak.terapkanKoreksi(p);
         if (this.gerak.posisi) this.kamera = kameraPusat(this.gerak.posisi, UKURAN_PETA.lebarPx, UKURAN_PETA.tinggiPx);
+        break;
+      case "kejadian_terlihat":
+        this.kejadian.terima({ kejadianId: p.kejadianId, x: p.x, y: p.y, setTokoh: p.setTokoh });
+        break;
+      case "pribadi":
+        this.kejadian.aturSelesai(p.selesai);
+        break;
+      case "hasil_2":
+        if (this.dialogKode) this.kejadian.tandaiSelesai(this.dialogKode);
         break;
       default:
         break;
@@ -209,7 +237,9 @@ export class MesinDunia {
     this.potongan?.perbarui(this.kamera, this.masa, berikut);
     // Tokoh: pemain lain yang dikenal dan pemain sendiri.
     const tokoh: (TokohGambar & { nama: string; diri: boolean })[] = [];
-    for (const q of this.lain.tampil(jamServer, o.jamLokal, this.status)) {
+    const lain = this.lain.tampil(jamServer, o.jamLokal, this.status);
+    this.tokohLain = lain;
+    for (const q of lain) {
       const set = this.setStrip(q.info);
       if (!set) continue;
       const pose = q.jalan ? "jalan" : "diam";
@@ -232,6 +262,108 @@ export class MesinDunia {
       }
     }
     this.tokoh = tokoh;
+    this.siapkanKejadian(o.jamLokal, o.kurangiGerak);
+  }
+
+  /**
+   * Laporan berhenti sebelum `periksa` (P-24): pemain sendiri dihentikan, dan bila posisi atau langkah terakhir yang
+   * dikirim berbeda (misalnya masih berjalan), satu laporan `gerak` dengan `jalan: false` langsung dikirim.
+   */
+  hentiUntukPeriksa(jamLokal: number, kirim: (p: PesanGerak) => boolean): void {
+    this.masukan.lepasSemua();
+    this.gerak.jalan = false;
+    this.gerak.kirimBila(jamLokal, 0, 0, kirim);
+  }
+
+  /** Dialog kejadian di layar ini dibuka (kode) atau ditutup (null): penandanya menjadi "…" selama terbuka (P-16). */
+  aturDialog(kode: string | null): void {
+    this.dialogKode = kode;
+  }
+
+  /** Gambar kejadian bingkai terakhir per lapisan (untuk uji). */
+  get gambarKejadian(): EkstraGambar {
+    return this.ekstra;
+  }
+
+  /** Strip satu gambar statis (properti dan penanda). */
+  private stripGambar(img: HTMLImageElement | undefined, bingkai = 1): Strip | null {
+    if (!img) return null;
+    return { gambar: img, lebar: Math.round(img.width / bingkai), tinggi: img.height, bingkai };
+  }
+
+  /**
+   * Penanda, tokoh, dan properti kejadian di setiap titik yang terlihat (P-15, P-16), gelembung "…" pemain lain
+   * (P-17), dan jangkauan Periksa (P-21). Tokoh dan properti bisa dilewati: tidak masuk grid tabrakan.
+   */
+  private siapkanKejadian(jamLokal: number, kurangiGerak: boolean): void {
+    const ekstra: { bawah: SpriteGambar[]; tengah: SpriteGambar[]; atas: SpriteGambar[]; efek: SpriteGambar[] } = { bawah: [], tengah: [], atas: [], efek: [] };
+    const aset = this.aset;
+    const k = this.kamera;
+    const dalamPandangan = (s: SpriteGambar) => s.x + s.strip.lebar > k.x && s.x < k.x + PANDANGAN.lebar && s.y + s.strip.tinggi > k.y && s.y < k.y + PANDANGAN.tinggi;
+    let tokohKejadian = 0;
+    if (aset) {
+      const naik = !kurangiGerak && Math.floor(jamLokal / 500) % 2 === 1 ? 1 : 0;
+      const bingkaiNpc = kurangiGerak ? 0 : Math.floor(jamLokal / 500) % 2;
+      for (const t of this.kejadian.daftar()) {
+        let letak = this.letak.get(t.kejadianId);
+        if (!letak) {
+          letak = tataLetakKejadian(t.setTokoh, OBJEK);
+          this.letak.set(t.kejadianId, letak);
+        }
+        for (const l of letak) {
+          const sx = t.x + l.dx;
+          const sy = t.y + l.dy;
+          if (l.jenis === "obj") {
+            const g = aset.objek.get(l.kunci.slice(4));
+            if (!g) continue;
+            const tinggiAtas = g.atas ? g.atas.height : 0;
+            const bawah = this.stripGambar(g.bawah);
+            if (!bawah) continue;
+            const sb: SpriteGambar = { id: `${t.kejadianId}:${l.kunci}`, urutY: (sy + l.tinggi) * 16, x: sx * 16 - 1, y: sy * 16 - 1 + tinggiAtas, strip: bawah, bingkai: 0 };
+            ekstra.bawah.push(sb);
+            if (dalamPandangan(sb)) tokohKejadian++;
+            const atas = this.stripGambar(g.atas ?? undefined);
+            if (atas) ekstra.atas.push({ id: `${sb.id}:atas`, urutY: sb.urutY, x: sx * 16 - 1, y: sy * 16 - 1, strip: atas, bingkai: 0 });
+          } else {
+            const meta = NPC[l.kunci];
+            const img = aset.npc.get(l.kunci);
+            if (!meta || !img) continue;
+            const kakiX = sx * 16 + 8;
+            const kakiY = sy * 16 + 12;
+            const s: SpriteGambar = {
+              id: `${t.kejadianId}:${l.kunci}`,
+              urutY: kakiY,
+              x: kakiX - meta.kakiX,
+              y: kakiY - meta.kakiY,
+              strip: { gambar: img, lebar: meta.lebar, tinggi: meta.tinggi, bingkai: meta.bingkai },
+              bingkai: bingkaiNpc,
+            };
+            ekstra.tengah.push(s);
+            if (dalamPandangan(s)) tokohKejadian++;
+          }
+        }
+        const nama = this.kejadian.selesai.has(t.kejadianId) ? "tanda_selesai" : this.dialogKode === t.kejadianId ? "tanda_dibuka" : "tanda_kejadian";
+        const strip = this.stripGambar(aset.tanda.get(nama));
+        if (strip) {
+          const angkat = nama === "tanda_kejadian" ? naik : 0;
+          ekstra.tengah.push({ id: `${t.kejadianId}@${t.x},${t.y}:tanda`, urutY: t.y * 16 + 16, x: t.x * 16 + 8 - Math.floor(strip.lebar / 2), y: t.y * 16 - 2 - strip.tinggi - angkat, strip, bingkai: 0 });
+        }
+      }
+      const gelembung = this.stripGambar(aset.tanda.get("tanda_dibuka"));
+      if (gelembung) {
+        for (const q of this.tokohLain) {
+          if (!q.dialog) continue;
+          const s: SpriteGambar = { id: `${q.id}:gelembung`, urutY: q.y, x: Math.round(q.x) - Math.floor(gelembung.lebar / 2), y: Math.round(q.y) - 22 - gelembung.tinggi, strip: gelembung, bingkai: 0 };
+          ekstra.efek.push(s);
+        }
+      }
+    }
+    this.ekstra = ekstra;
+    this.jumlahTokohKejadian = tokohKejadian;
+    this.jumlahDialogLain = ekstra.efek.filter((s) => s.x + s.strip.lebar > k.x && s.x < k.x + PANDANGAN.lebar && s.y + s.strip.tinggi > k.y && s.y < k.y + PANDANGAN.tinggi).length;
+    const p = this.gerak.posisi;
+    this.jangkauan =
+      this.status === "main" && p && !this.gerak.menungguAwal && this.dialogKode === null ? kejadianDalamJangkauan(p, this.kejadian.daftar(), this.kejadian.selesai) : null;
   }
 
   /** Gerbang lobi: tertutup selama lobi dan hitung mundur, terbuka sejak ronde berjalan (P-28). */
@@ -256,7 +388,7 @@ export class MesinDunia {
         diri = { x: diriTokoh.x, y: diriTokoh.y, siluet: sil[this.gerak.arah][pose], bingkai: bingkaiTokoh(this.gerak.jalan, jamLokal, kurangiGerak) };
       }
     }
-    this.siluetTerakhir = gambarBingkai(ctx, this.kamera, this.potongan, this.masa, this.gerbang(), this.tokoh, diri);
+    this.siluetTerakhir = gambarBingkai(ctx, this.kamera, this.potongan, this.masa, this.gerbang(), this.tokoh, diri, this.ekstra);
   }
 
   /** Paling banyak `maks` pemain lain terdekat yang terlihat di pandangan, untuk label nama (P-23). */

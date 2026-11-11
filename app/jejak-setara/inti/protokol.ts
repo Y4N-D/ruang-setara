@@ -1,5 +1,5 @@
 // Protokol real-time Jejak Setara (Architecture 6; spesifikasi JS-02, P-33 sampai P-38).
-// Satu sumber skema zod untuk klien dan server (JA-07). Setiap pesan berbentuk { v: 1, t: "<tipe>", … };
+// Satu sumber skema zod untuk klien dan server (JA-07). Setiap pesan berbentuk { v: PROTOKOL_VERSI, t: "<tipe>", … };
 // kunci tambahan ditolak (.strict()). Batas ukuran 2 KB dan frekuensi pesan diperiksa di tingkat
 // sambungan (JS-03), bukan di sini.
 //
@@ -103,7 +103,7 @@ const pengaturan = () =>
     })
     .strict();
 
-/** Skema satu pesan: amplop { v: 1, t } ditambah isi, tanpa kunci tambahan. */
+/** Skema satu pesan: amplop { v: PROTOKOL_VERSI, t } ditambah isi, tanpa kunci tambahan (versi 2 sejak JS-08). */
 function pesan<T extends string, S extends z.ZodRawShape>(t: T, isi: () => S) {
   return z.object({ v: z.literal(PROTOKOL_VERSI), t: z.literal(t), ...isi() }).strict();
 }
@@ -200,7 +200,8 @@ const sSelamatDatang = /* @__PURE__ */ pesan("selamat_datang", () => ({
 const sStatusRuang = /* @__PURE__ */ pesan("status_ruang", isiStatusRuang);
 const sDunia = /* @__PURE__ */ pesan("dunia", () => ({
   w: waktu(),
-  p: z.array(z.tuple([id(), koordinatPx(), koordinatPx(), arah(), z.boolean()])).max(BATAS_PESAN.duniaMaks),
+  // [id, x, y, arah, jalan, dialog]; unsur keenam `dialog` sejak versi 2 (JS-08, P-64).
+  p: z.array(z.tuple([id(), koordinatPx(), koordinatPx(), arah(), z.boolean(), z.boolean()])).max(BATAS_PESAN.duniaMaks),
   n: angkaBulat(0, BATAS_PESAN.pemainMaks), // jumlah pemain berkeidentitas di ruang
 }));
 const sPemainBaru = /* @__PURE__ */ pesan("pemain_baru", () => ({ id: id(), nama: nama(), avatar: avatar(), warnaTas: warnaTas() }));
@@ -234,6 +235,7 @@ const sKejadianTerlihat = /* @__PURE__ */ pesan("kejadian_terlihat", () => ({
   kejadianId: id(),
   x: koordinatUbin(),
   y: koordinatUbin(),
+  setTokoh: z.array(id()).min(1).max(4), // tokoh dan properti di titik itu, sejak versi 2 (JS-08, P-64)
 }));
 const sKompas = /* @__PURE__ */ pesan("kompas", () => ({ x: koordinatUbin(), y: koordinatUbin(), berakhirPada: waktu() }));
 const sKejadianTerbuka = /* @__PURE__ */ pesan("kejadian_terbuka", () => ({

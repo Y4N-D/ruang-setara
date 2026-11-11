@@ -1,5 +1,7 @@
 // Penggambar satu bingkai dunia (spesifikasi JS-07, P-2, P-4 sampai P-6; Design System 7, lapisan 0–60).
 // Semua digambar di kanvas logis 320 × 180, lalu kanvas itu diperbesar sekali ke kanvas layar tanpa penghalusan.
+// JS-08 (P-15 sampai P-17): bagian bawah properti kejadian sesudah lapis bawah, tokoh kejadian dan penanda bersama
+// avatar menurut y, bagian atas properti sesudah lapis atas, lalu gelembung "…" pemain lain di lapisan efek.
 import { PANDANGAN } from "../../inti/aturan";
 import type { Masa } from "../../inti/tipe";
 import type { Strip } from "./aset";
@@ -22,6 +24,25 @@ export interface GerbangGambar {
   y: number;
   bawah: CanvasImageSource & { width: number; height: number };
   atas: (CanvasImageSource & { width: number; height: number }) | null;
+}
+
+/** Sprite bebas ukuran (tokoh dan properti kejadian, penanda, gelembung) dengan kiri-atas dalam piksel logis. */
+export interface SpriteGambar {
+  id: string;
+  /** y untuk urutan di lapisan tokoh (titik kaki tokoh, atau 16y + 16 untuk penanda; P-16). */
+  urutY: number;
+  x: number;
+  y: number;
+  strip: Strip;
+  bingkai: number;
+}
+
+/** Gambar kejadian per lapisan (JS-08): bawah (lapisan 20), tengah (30, bersama tokoh), atas (40), efek (50). */
+export interface EkstraGambar {
+  bawah: readonly SpriteGambar[];
+  tengah: readonly SpriteGambar[];
+  atas: readonly SpriteGambar[];
+  efek: readonly SpriteGambar[];
 }
 
 export interface DiriGambar {
@@ -60,6 +81,7 @@ export function gambarBingkai(
   gerbang: GerbangGambar | null,
   tokoh: readonly TokohGambar[],
   diri: DiriGambar | null,
+  ekstra: EkstraGambar | null = null,
 ): boolean {
   ctx.imageSmoothingEnabled = false;
   const lihat = potongan.terlihat(kamera);
@@ -68,14 +90,29 @@ export function gambarBingkai(
   const tinggiAtasGerbang = gerbang?.atas ? gerbang.atas.height : 0;
   if (gerbang) ctx.drawImage(gerbang.bawah, gerbang.x * UBIN - 1 - kamera.x, gerbang.y * UBIN - 1 + tinggiAtasGerbang - kamera.y);
   const pandangan = { x: kamera.x, y: kamera.y, w: PANDANGAN.lebar, h: PANDANGAN.tinggi };
-  for (const t of urutTokoh(tokoh)) {
-    const k = kotakTokoh(t.x, t.y);
-    if (!beririsan(k, pandangan)) continue;
-    const b = Math.min(t.strip.bingkai - 1, Math.max(0, t.bingkai));
-    ctx.drawImage(t.strip.gambar, b * t.strip.lebar, 0, t.strip.lebar, t.strip.tinggi, k.x - kamera.x, k.y - kamera.y, t.strip.lebar, t.strip.tinggi);
-  }
+  const sprite = (s: SpriteGambar) => {
+    if (!beririsan({ x: s.x, y: s.y, w: s.strip.lebar, h: s.strip.tinggi }, pandangan)) return;
+    const b = Math.min(s.strip.bingkai - 1, Math.max(0, s.bingkai));
+    ctx.drawImage(s.strip.gambar, b * s.strip.lebar, 0, s.strip.lebar, s.strip.tinggi, Math.round(s.x) - kamera.x, Math.round(s.y) - kamera.y, s.strip.lebar, s.strip.tinggi);
+  };
+  for (const s of ekstra?.bawah ?? []) sprite(s);
+  // Tokoh (avatar) dan sprite lapisan tokoh diurutkan bersama menurut y, lalu id (P-4, P-15, P-16).
+  const tengah: { y: number; id: string; gambar: () => void }[] = tokoh.map((t) => ({
+    y: t.y,
+    id: t.id,
+    gambar: () => {
+      const k = kotakTokoh(t.x, t.y);
+      if (!beririsan(k, pandangan)) return;
+      const b = Math.min(t.strip.bingkai - 1, Math.max(0, t.bingkai));
+      ctx.drawImage(t.strip.gambar, b * t.strip.lebar, 0, t.strip.lebar, t.strip.tinggi, k.x - kamera.x, k.y - kamera.y, t.strip.lebar, t.strip.tinggi);
+    },
+  }));
+  for (const s of ekstra?.tengah ?? []) tengah.push({ y: s.urutY, id: s.id, gambar: () => sprite(s) });
+  for (const t of urutTokoh(tengah)) t.gambar();
   for (const l of lapis) if (l.atas) ctx.drawImage(l.atas as CanvasImageSource, l.cx * UKURAN_POTONGAN - kamera.x, l.cy * UKURAN_POTONGAN - kamera.y);
   if (gerbang?.atas) ctx.drawImage(gerbang.atas, gerbang.x * UBIN - 1 - kamera.x, gerbang.y * UBIN - 1 - kamera.y);
+  for (const s of ekstra?.atas ?? []) sprite(s);
+  for (const s of ekstra?.efek ?? []) sprite(s);
   if (!diri?.siluet) return false;
   const kd = kotakTokoh(diri.x, diri.y);
   const atasGerbang = gerbang?.atas ? { x: gerbang.x * UBIN - 1, y: gerbang.y * UBIN - 1, w: gerbang.atas.width, h: gerbang.atas.height } : null;

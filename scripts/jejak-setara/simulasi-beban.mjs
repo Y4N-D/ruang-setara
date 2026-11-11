@@ -6,6 +6,8 @@
 // tabrakan). Urutan: semua bot diam di lobi (memeriksa tidak ada kiriman dan pengatur waktu), berjalan di halaman
 // lobi, lalu `mulai` lewat kait lokal dan menjelajah kampung. Pilihan --latensi-ms dan --jitter-eksp-ms menunda
 // setiap pesan naik dan turun (urutan tetap, seperti TCP) untuk mengukur gerak jujur yang ditolak (P-52).
+// JS-08 (P-71): saat menjelajah, bot berjalan ke kejadian yang terlihat dalam 12 ubin, memeriksa pada jarak 20 piksel,
+// menjawab kedua langkah dengan jeda 1–3 detik secara acak, lalu menutup dialog sesudah 1 detik.
 // Lingkungan uji hanya dengan pilihan tertulis: --sasaran uji --alamat <URL> --saya-paham-kuota, serta
 // rahasia JEJAK_KUNCI_COBA; perkiraan permintaan Durable Object dicetak lebih dulu, dan lebih dari 20.000 ditolak.
 import { spawn } from "node:child_process";
@@ -65,13 +67,19 @@ if (SASARAN === "uji") {
 }
 
 const tajukKunci = SASARAN === "uji" ? { "X-Jejak-Kunci-Coba": process.env.JEJAK_KUNCI_COBA } : {};
+/** Versi protokol server, dibaca dari /api/sehat, agar skrip tidak perlu diubah saat protokol naik (JS-08: versi 2). */
+const V = (await (await fetch(`${alamat}/api/sehat`)).json()).protokol;
 async function buatRuang() {
   const j = await fetch(`${alamat}/api/ruang-coba`, { method: "POST", headers: tajukKunci, body: JSON.stringify({ batasPemain: Math.max(2, Math.min(100, BOT)) }) });
   if (j.status !== 201) throw new Error(`ruang coba ${j.status}`);
-  return (await j.json()).kode;
+  const isi = await j.json();
+  kejadianRuang.push(isi.kejadian ?? 0);
+  return isi.kode;
 }
 const kodeRuangIndeks = new Map();
-const kelas = (kode, pesan) => fetch(`${alamat}/api/ruang-coba/${kode}/kelas`, { method: "POST", body: JSON.stringify({ v: 1, ...pesan }) });
+/** Jumlah kejadian setiap ruang coba yang dibuat (JS-08, P-4). */
+const kejadianRuang = [];
+const kelas = (kode, pesan) => fetch(`${alamat}/api/ruang-coba/${kode}/kelas`, { method: "POST", body: JSON.stringify({ v: V, ...pesan }) });
 const statistik = async (kode) => (await fetch(`${alamat}/api/ruang-coba/${kode}/statistik`)).json();
 
 // Peta kampung: grid tabrakan kampung dan grid lobi (sel gerbang padat), sama dengan server (P-46).
@@ -161,7 +169,9 @@ const eksponensial = (rata) => (rata > 0 ? -Math.log(1 - Math.random()) * rata :
 
 function buatBot(kode, nomor) {
   const b = { kode, nomor, ws: null, id: null, seq: 0, x: null, y: null, arah: "bawah", jalur: [], diamSampai: 0, kirimTerakhir: 0, majuTerakhir: 0,
-    jalan: false, naik: 0, turun: 0, byteTurun: 0, dunia: 0, rtt: [], koreksi: 0, gerak: 0, tersinkron: false, antreKirim: 0, antreTerima: 0, putus: false };
+    jalan: false, naik: 0, turun: 0, byteTurun: 0, dunia: 0, rtt: [], koreksi: 0, gerak: 0, tersinkron: false, antreKirim: 0, antreTerima: 0, putus: false,
+    // JS-08: kejadian yang terlihat dan selesai, sasaran, dialog yang terbuka, dan hitungan.
+    lihat: new Map(), selesai: new Set(), sasaran: null, dialog: null, menungguSampai: 0, terlihat: 0, terbuka: 0, jawaban: 0, pribadi: 0, poin: 0 };
   return new Promise((ok, gagal) => {
     // Di lokal, setiap ruang dianggap sekolah sendiri (alamat IP berbeda) agar pembatas 300 sambungan per menit
     // per alamat (D-5) tidak menahan simulasi; di Cloudflare tajuk ini diisi jaringan Cloudflare, bukan klien.
@@ -182,10 +192,42 @@ function buatBot(kode, nomor) {
       const m = JSON.parse(teks);
       if (m.t === "selamat_datang") {
         b.id = m.pemainId;
-        kirim({ v: 1, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
-      } else if (m.t === "saran_nama") kirim({ v: 1, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
+        kirim({ v: V, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
+      } else if (m.t === "saran_nama") kirim({ v: V, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
       else if (m.t === "dunia") b.dunia++;
       else if (m.t === "pong") b.rtt.push(Date.now() - m.tKlien);
+      else if (m.t === "kejadian_terlihat") {
+        b.terlihat++;
+        if (!b.selesai.has(m.kejadianId)) b.lihat.set(`${m.kejadianId}@${m.x},${m.y}`, { kode: m.kejadianId, x: m.x, y: m.y });
+      } else if (m.t === "pribadi") {
+        b.pribadi++;
+        for (const kode of m.selesai) b.selesai.add(kode);
+      } else if (m.t === "kejadian_terbuka") {
+        b.terbuka++;
+        b.dialog = { kode: m.kejadianId };
+        b.menungguSampai = 0;
+        const opsi = m.opsi1[Math.floor(Math.random() * m.opsi1.length)].id;
+        setTimeout(() => b.kirim({ v: V, t: "kunci_1", kejadianId: m.kejadianId, opsiId: opsi }), 1000 + Math.random() * 2000);
+      } else if (m.t === "hasil_1") {
+        if (b.dialog) {
+          const kode = b.dialog.kode;
+          const opsi = m.opsi2[Math.floor(Math.random() * m.opsi2.length)].id;
+          setTimeout(() => b.kirim({ v: V, t: "kunci_2", kejadianId: kode, opsiId: opsi }), 1000 + Math.random() * 2000);
+        }
+      } else if (m.t === "hasil_2") {
+        b.jawaban++;
+        b.poin += m.poin;
+        if (b.dialog) {
+          const kode = b.dialog.kode;
+          b.selesai.add(kode);
+          setTimeout(() => {
+            b.kirim({ v: V, t: "tutup_dialog", kejadianId: kode });
+            b.dialog = null;
+            b.sasaran = null;
+            b.jalur = [];
+          }, 1000);
+        }
+      }
       else if (m.t === "koreksi") {
         // Koreksi pertama berisi posisi awal (P-49); sesudah itu koreksi berarti laporan jujur ditolak.
         if (b.tersinkron) b.koreksi++;
@@ -199,7 +241,7 @@ function buatBot(kode, nomor) {
         }
       } else if (m.t === "galat" && m.kode !== "NAMA_DIPAKAI") gagal(new Error(m.kode));
     };
-    ws.onopen = () => kirim({ v: 1, t: "halo", peran: "pemain" });
+    ws.onopen = () => kirim({ v: V, t: "halo", peran: "pemain" });
     ws.onmessage = (e) => {
       const teks = String(e.data);
       b.turun++;
@@ -219,6 +261,43 @@ function langkahBot(b, sekarang, hz, fase) {
   if (b.ws.readyState !== 1 || !b.tersinkron) return;
   const dt = b.majuTerakhir ? Math.min(250, sekarang - b.majuTerakhir) : 0;
   b.majuTerakhir = sekarang;
+  // JS-08: selama dialog terbuka atau periksa menunggu jawaban, bot diam dan tidak mengirim gerak.
+  if (b.dialog || sekarang < b.menungguSampai) return;
+  if (fase === "jelajah" && b.sasaran && b.selesai.has(b.sasaran.kode)) b.sasaran = null;
+  if (fase === "jelajah" && b.sasaran && Math.hypot(b.x - (b.sasaran.x * 16 + 8), b.y - (b.sasaran.y * 16 + 8)) <= 20) {
+    // Sampai di titik: laporan berhenti lebih dulu bila masih tercatat berjalan, lalu periksa (P-24).
+    b.jalur = [];
+    if (b.jalan) {
+      b.jalan = false;
+      b.gerak++;
+      b.kirimTerakhir = sekarang;
+      b.kirim({ v: V, t: "gerak", x: Math.round(b.x * 10) / 10, y: Math.round(b.y * 10) / 10, arah: b.arah, jalan: false, seq: ++b.seq });
+      return;
+    }
+    b.kirim({ v: V, t: "periksa", kejadianId: b.sasaran.kode });
+    b.menungguSampai = sekarang + 2000;
+    b.sasaran = null;
+    return;
+  }
+  if (fase === "jelajah" && b.jalur.length === 0) {
+    // Kejadian terlihat yang belum selesai, paling jauh 12 ubin (atau sasaran yang jalurnya terputus koreksi):
+    // jalur ke ubin titiknya.
+    const ux = Math.floor(b.x / 16);
+    const uy = Math.floor(b.y / 16);
+    const dekat =
+      b.sasaran ??
+      [...b.lihat.values()]
+        .filter((k) => !b.selesai.has(k.kode) && Math.max(Math.abs(k.x - ux), Math.abs(k.y - uy)) <= 12)
+        .sort((a, c) => Math.hypot(a.x - ux, a.y - uy) - Math.hypot(c.x - ux, c.y - uy))[0];
+    if (dekat) {
+      const jalur = jalurUbin(GRID, [ux, uy], [dekat.x, dekat.y]);
+      b.sasaran = jalur ? dekat : null;
+      if (jalur) {
+        b.jalur = jalur.map(pusatUbin);
+        b.diamSampai = 0;
+      }
+    }
+  }
   if (fase === "diam") {
     b.jalur = [];
     b.diamSampai = sekarang + 1000;
@@ -245,17 +324,19 @@ function langkahBot(b, sekarang, hz, fase) {
       b.y += (dy / d) * sisa;
       sisa = 0;
     }
-    if (d > 0) b.arah = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "kanan" : "kiri") : dy > 0 ? "bawah" : "atas";
-    berjalan = true;
+    if (d > 0) {
+      b.arah = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "kanan" : "kiri") : dy > 0 ? "bawah" : "atas";
+      berjalan = true;
+    }
   }
-  if (b.jalur.length === 0 && berjalan) b.diamSampai = sekarang + 2000 + Math.random() * 6000;
+  if (b.jalur.length === 0 && berjalan) b.diamSampai = b.sasaran ? sekarang : sekarang + 2000 + Math.random() * 6000;
   const selang = 1000 / hz;
   const berhenti = !berjalan && b.jalan;
   if ((berjalan && sekarang - b.kirimTerakhir >= selang) || berhenti) {
     b.kirimTerakhir = sekarang;
     b.jalan = berjalan;
     b.gerak++;
-    b.kirim({ v: 1, t: "gerak", x: Math.round(b.x * 10) / 10, y: Math.round(b.y * 10) / 10, arah: b.arah, jalan: berjalan, seq: ++b.seq });
+    b.kirim({ v: V, t: "gerak", x: Math.round(b.x * 10) / 10, y: Math.round(b.y * 10) / 10, arah: b.arah, jalan: berjalan, seq: ++b.seq });
   }
 }
 
@@ -271,6 +352,7 @@ async function jalankanFase(bot, fase, detik, hz) {
     b.byteTurun = 0;
     b.dunia = 0;
     b.majuTerakhir = 0;
+    b.pribadi = 0;
   }
   const mulai = Date.now();
   const akhir = mulai + detik * 1000;
@@ -280,7 +362,7 @@ async function jalankanFase(bot, fase, detik, hz) {
     for (const b of bot) langkahBot(b, sekarang, hz, fase);
     if (sekarang - ping >= 5000) {
       ping = sekarang;
-      for (const b of bot) if (b.ws.readyState === 1) b.kirim({ v: 1, t: "ping", tKlien: Date.now() });
+      for (const b of bot) if (b.ws.readyState === 1) b.kirim({ v: V, t: "ping", tKlien: Date.now() });
     }
     await tidur(1000 / hz / 2);
   }
@@ -294,6 +376,7 @@ async function jalankanFase(bot, fase, detik, hz) {
     duniaPerPemainPerDetik: +(jumlah((b) => b.dunia) / bot.length / lama).toFixed(2),
     byteTurunPerPemainPerDetik: Math.round(turunByte),
     mbTurunPerPemainPer15Menit: +((turunByte * 900) / 1e6).toFixed(2),
+    pribadiPerPemainPerDetik: +(jumlah((b) => b.pribadi) / bot.length / lama).toFixed(3),
   };
 }
 
@@ -360,6 +443,18 @@ try {
       gerakDikirim: jumlah((b) => b.gerak),
       gerakDikoreksi: jumlah((b) => b.koreksi),
       gerakDikoreksiPersen: +((100 * jumlah((b) => b.koreksi)) / Math.max(1, jumlah((b) => b.gerak))).toFixed(3),
+    },
+    // JS-08 (P-71): kejadian dibuka dan dijawab bot, serta hitungan server.
+    kejadian: {
+      kejadianPerRuang: kejadianRuang,
+      terlihatDiterima: jumlah((b) => b.terlihat),
+      dibuka: jumlah((b) => b.terbuka),
+      dijawabKeduaLangkah: jumlah((b) => b.jawaban),
+      botYangMenjawab: bot.filter((b) => b.jawaban > 0).length,
+      poinRataPerBot: +(jumlah((b) => b.poin) / bot.length).toFixed(1),
+      jawabanSelesaiServer: stat.map((x) => x.jawabanSelesai ?? 0),
+      pribadiServer: stat.map((x) => x.pribadi ?? 0),
+      antreanKirimanSaatAkhir: stat.map((x) => x.antreanKiriman ?? 0),
     },
     sambunganPutusTakTerduga: putusTakTerduga,
     pesanDitolakServer: stat.reduce((s, x) => s + (x.pelanggaran ?? 0), 0),

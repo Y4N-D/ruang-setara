@@ -338,6 +338,30 @@ describe("penempatan, keterlihatan, dan jangkauan kejadian (P-20 sampai P-23)", 
     expect(() => tempatkanKejadian(1, TITIK, [KEJADIAN[0], KEJADIAN[0]])).toThrow(RangeError);
   });
 
+  it("JS-08 (P-8): jumlahTitik 1 sama persis dengan JS-02; jumlahTitik 2 memberi dua titik berbeda di zona yang sama", () => {
+    for (const b of [1, 777, "ruang-x"]) {
+      expect(tempatkanKejadian(b, TITIK, KEJADIAN, 1)).toEqual(tempatkanKejadian(b, TITIK, KEJADIAN));
+      for (const p of tempatkanKejadian(b, TITIK, KEJADIAN, 1)) expect(Object.keys(p).sort()).toEqual(["kode", "titik"]);
+    }
+    const sedikit = KEJADIAN.slice(0, 2);
+    const dua = tempatkanKejadian(99, TITIK, sedikit, 2);
+    expect(tempatkanKejadian(99, TITIK, sedikit, 2)).toEqual(dua);
+    const dipakai = dua.flatMap((p) => [p.titik.id, p.titikKedua?.id]);
+    expect(new Set(dipakai).size).toBe(dipakai.length);
+    for (const p of dua) {
+      const zona = sedikit.find((k) => k.kode === p.kode)?.zona;
+      expect(p.titik.zona).toBe(zona);
+      expect(p.titikKedua?.zona).toBe(zona);
+      expect(p.titikKedua?.id).not.toBe(p.titik.id);
+      // Titik pertama sama dengan penempatan satu titik bila kejadian sebelumnya di zona yang sama tidak ada.
+    }
+    // Zona yang hanya punya satu titik tersisa tidak cukup untuk dua titik.
+    const satuTitik = { z1: [TITIK.z1![0]] };
+    expect(() => tempatkanKejadian(1, satuTitik, [{ kode: "K-01", zona: "z1" }], 2)).toThrow("TITIK_TIDAK_CUKUP");
+    expect(() => tempatkanKejadian(1, satuTitik, [{ kode: "K-01", zona: "z1" }], 1)).not.toThrow();
+    expect(() => tempatkanKejadian(1, TITIK, sedikit, 3 as 2)).toThrow(RangeError);
+  });
+
   it("keterlihatan: kotak 320 × 180 berpusat di pemain, tepi termasuk", () => {
     const p = { x: 1000, y: 600 };
     expect(terlihatDiLayar(p, { x: 1000, y: 600 }, 1920, 1280)).toBe(true);

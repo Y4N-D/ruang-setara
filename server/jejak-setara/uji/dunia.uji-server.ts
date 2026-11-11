@@ -6,8 +6,9 @@ import { bacaPeta, tutupGerbang, versiPeta } from "../../../app/jejak-setara/int
 import kampung from "../../../app/jejak-setara/peta/kampung.json";
 import { PETA_KAMPUNG } from "../src/ruang/peta-kampung";
 import { buatRuang, kelasJson, klien, statistikRuang, tidur, type Klien } from "./bantuan";
+import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/versi";
 
-const halo = (opsi: Record<string, unknown> = {}) => ({ v: 1, t: "halo", peran: "pemain", ...opsi });
+const halo = (opsi: Record<string, unknown> = {}) => ({ v: PROTOKOL_VERSI, t: "halo", peran: "pemain", ...opsi });
 type Grid = { lebar: number; tinggi: number; tabrakan: Uint8Array };
 const LOBI: Grid = { lebar: PETA_KAMPUNG.lebar, tinggi: PETA_KAMPUNG.tinggi, tabrakan: PETA_KAMPUNG.tabrakanLobi };
 const KAMPUNG: Grid = { lebar: PETA_KAMPUNG.lebar, tinggi: PETA_KAMPUNG.tinggi, tabrakan: PETA_KAMPUNG.tabrakan };
@@ -16,7 +17,7 @@ async function masuk(kode: string, avatar = 0) {
   const k = await klien(kode);
   k.kirim(halo());
   const datang = (await k.tunggu((m) => m.t === "selamat_datang")) as { pemainId: string; token: string; saranNama: string[]; versiPeta: number };
-  k.kirim({ v: 1, t: "pilih_identitas", nama: datang.saranNama[0], avatar });
+  k.kirim({ v: PROTOKOL_VERSI, t: "pilih_identitas", nama: datang.saranNama[0], avatar });
   const awal = (await k.tunggu((m) => m.t === "koreksi")) as { x: number; y: number; seq: number };
   return { k, ...datang, awal };
 }
@@ -71,7 +72,7 @@ async function jalan(k: Klien, titik: { x: number; y: number }[], seqAwal: numbe
   const sebelum = k.masuk.length;
   for (const p of titik) {
     seq++;
-    k.kirim({ v: 1, t: "gerak", x: p.x, y: p.y, arah: "bawah", jalan: true, seq });
+    k.kirim({ v: PROTOKOL_VERSI, t: "gerak", x: p.x, y: p.y, arah: "bawah", jalan: true, seq });
     await tidur(100);
     const kor = k.masuk.slice(sebelum).find((m) => m.t === "koreksi");
     if (kor && henti) return { seq, koreksi: kor };
@@ -126,7 +127,7 @@ describe("gerak dan dunia di lobi (P-45, P-47 sampai P-49; AC-11, AC-16, AC-17)"
     const kor = lobi.koreksi as { x: number; y: number; seq: number };
     expect(posisiSah(LOBI, kor.x, kor.y)).toBe(true);
     expect(kor.y).toBeLessThanOrEqual(gb.atas * 16);
-    expect((await kelasJson(kode, { v: 1, t: "mulai" })).isi).toEqual({ ok: true, status: "hitung_mundur" });
+    expect((await kelasJson(kode, { v: PROTOKOL_VERSI, t: "mulai" })).isi).toEqual({ ok: true, status: "hitung_mundur" });
     await a.k.tunggu((m) => m.t === "status_ruang" && m.status === "main", 6000);
     const iKoreksi = titik.findIndex((p) => p.x === kor.x && p.y === kor.y);
     expect(iKoreksi).toBeGreaterThanOrEqual(0);
@@ -156,7 +157,7 @@ describe("gerak dan dunia di lobi (P-45, P-47 sampai P-49; AC-11, AC-16, AC-17)"
     await tidur(2000);
     expect((await statistikRuang(kode)).duniaLobi).toBe(awal.duniaLobi);
     expect(b.k.masuk.filter((m) => m.t === "dunia").length).toBe(jumlahDunia);
-    a.k.kirim({ v: 1, t: "gerak", x: a.awal.x + 5, y: a.awal.y, arah: "kanan", jalan: false, seq: 1 });
+    a.k.kirim({ v: PROTOKOL_VERSI, t: "gerak", x: a.awal.x + 5, y: a.awal.y, arah: "kanan", jalan: false, seq: 1 });
     await b.k.tunggu((m) => m.t === "dunia" && (m.p as unknown[][]).some((x) => x[0] === a.pemainId && x[1] === a.awal.x + 5));
     const sesudah = await statistikRuang(kode);
     expect(Number(sesudah.duniaLobi)).toBeGreaterThan(Number(awal.duniaLobi));
@@ -168,7 +169,7 @@ describe("gerak dan dunia di lobi (P-45, P-47 sampai P-49; AC-11, AC-16, AC-17)"
     const kode = String(isi.kode);
     const a = await masuk(kode);
     await tidur(300); // anggaran jarak terkumpul sejak posisi awal (P-52)
-    a.k.kirim({ v: 1, t: "gerak", x: a.awal.x + 6, y: a.awal.y, arah: "kanan", jalan: false, seq: 1 });
+    a.k.kirim({ v: PROTOKOL_VERSI, t: "gerak", x: a.awal.x + 6, y: a.awal.y, arah: "kanan", jalan: false, seq: 1 });
     await tidur(300);
     a.k.ws.close();
     await tidur(300);
@@ -182,7 +183,7 @@ describe("kait kendali ruang coba (P-53, P-54; AC-18)", () => {
   it("keenam aksi menjawab 200 dengan status ruang sesudahnya; pesan yang tidak berlaku tidak mengubah apa pun", async () => {
     const { isi } = await buatRuang({ durasiMenit: 10 });
     const kode = String(isi.kode);
-    const aksi = async (pesan: Record<string, unknown>) => kelasJson(kode, { v: 1, ...pesan });
+    const aksi = async (pesan: Record<string, unknown>) => kelasJson(kode, { v: PROTOKOL_VERSI, ...pesan });
     expect(await aksi({ t: "jeda" })).toEqual({ status: 200, isi: { ok: true, status: "lobi" } });
     expect(await aksi({ t: "mulai" })).toEqual({ status: 200, isi: { ok: true, status: "hitung_mundur" } });
     expect((await aksi({ t: "lanjut" })).isi.status).toBe("hitung_mundur");

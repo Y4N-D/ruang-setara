@@ -1,6 +1,7 @@
 // Uji ujung ke ujung kerangka Jejak Setara (spesifikasi JS-01, Rencana uji bagian "Uji ujung ke ujung").
 // Dijalankan terhadap hasil build lewat vite preview (runtime Workers lokal), lihat playwright.jejak.config.ts.
 import { expect, test, type BrowserContextOptions, type Page, type Route } from "@playwright/test";
+import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
 
 const LAYAR = "test-results-jejak/layar";
 
@@ -171,7 +172,7 @@ test("tajuk halaman dan jawaban Worker (AC-3, AC-4, AC-8)", async ({ request }) 
 
   const sehat = await request.get("/api/sehat");
   expect(sehat.status()).toBe(200);
-  expect(await sehat.text()).toBe('{"ok":true,"protokol":1,"lingkungan":"lokal"}');
+  expect(await sehat.text()).toBe(`{"ok":true,"protokol":${PROTOKOL_VERSI},"lingkungan":"lokal"}`);
   for (const [nama, nilai] of Object.entries(TAJUK_JSON)) expect(sehat.headers()[nama], nama).toBe(nilai);
 
   const kirim = await request.post("/api/sehat");

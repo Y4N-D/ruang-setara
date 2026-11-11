@@ -13,7 +13,7 @@ import {
 } from "../../inti/protokol";
 
 type Pesan = Record<string, unknown>;
-const pesan = (t: string, isi: Pesan = {}): Pesan => ({ v: 1, t, ...isi });
+const pesan = (t: string, isi: Pesan = {}): Pesan => ({ v: PROTOKOL_VERSI, t, ...isi });
 const dengan = (dasar: Pesan, ubah: Pesan): Pesan => ({ ...dasar, ...ubah });
 const huruf = (n: number) => "a".repeat(n);
 
@@ -110,12 +110,13 @@ const SERVER_KE_PEMAIN: Record<string, [Pesan, Pesan]> = {
     pesan("dunia", {
       w: 5000,
       p: [
-        ["p-01", 100.5, 200, "bawah", true],
-        ["p-02", 300, 40, "kiri", false],
+        ["p-01", 100.5, 200, "bawah", true, false],
+        ["p-02", 300, 40, "kiri", false, true],
       ],
       n: 23,
     }),
-    pesan("dunia", { w: 5000, p: [["p-01", 100.5, 200, "bawah"]], n: 23 }),
+    // Versi 2 (JS-08, P-64): butir lima unsur tanpa `dialog` ditolak.
+    pesan("dunia", { w: 5000, p: [["p-01", 100.5, 200, "bawah", true]], n: 23 }),
   ],
   pemain_baru: [
     pesan("pemain_baru", { id: "p-03", nama: "Anoa Hijau", avatar: 7, warnaTas: "teal" }),
@@ -143,8 +144,9 @@ const SERVER_KE_PEMAIN: Record<string, [Pesan, Pesan]> = {
     }),
   ],
   kejadian_terlihat: [
+    pesan("kejadian_terlihat", { kejadianId: "K-13", x: 88, y: 41, setTokoh: ["npc_ibubayi_bawah_diam", "obj_bangku_antrean"] }),
+    // Versi 2 (JS-08, P-64): tanpa `setTokoh` ditolak.
     pesan("kejadian_terlihat", { kejadianId: "K-13", x: 88, y: 41 }),
-    pesan("kejadian_terlihat", { kejadianId: "K-13", x: 88.5, y: 41 }),
   ],
   kompas: [pesan("kompas", { x: 88, y: 41, berakhirPada: 126000 }), pesan("kompas", { x: 88, y: 512, berakhirPada: 126000 })],
   kejadian_terbuka: [
@@ -274,8 +276,23 @@ const KELOMPOK = [
 ] as const;
 
 describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
-  it("PROTOKOL_VERSI tetap 1", () => {
-    expect(PROTOKOL_VERSI).toBe(1);
+  it("PROTOKOL_VERSI 2 sejak JS-08 (P-64)", () => {
+    expect(PROTOKOL_VERSI).toBe(2);
+  });
+
+  it("JS-08 (P-64): kejadian_terlihat dengan setTokoh 1–4 id; butir dunia enam unsur dengan dialog boolean", () => {
+    const sahPemain = (x: unknown) => skemaServerPemain.safeParse(x).success;
+    const terlihat = (setTokoh: unknown) => pesan("kejadian_terlihat", { kejadianId: "K-01", x: 3, y: 4, setTokoh });
+    expect(sahPemain(terlihat(["npc_nara_bawah_diam"]))).toBe(true);
+    expect(sahPemain(terlihat(["a", "b", "c", "d"]))).toBe(true);
+    expect(sahPemain(terlihat([]))).toBe(false);
+    expect(sahPemain(terlihat(["a", "b", "c", "d", "e"]))).toBe(false);
+    expect(sahPemain(terlihat(["bukan id"]))).toBe(false);
+    const dunia = (butir: unknown[]) => pesan("dunia", { w: 1, p: [butir], n: 2 });
+    expect(sahPemain(dunia(["p-1", 1, 1, "atas", false, true]))).toBe(true);
+    expect(sahPemain(dunia(["p-1", 1, 1, "atas", false]))).toBe(false);
+    expect(sahPemain(dunia(["p-1", 1, 1, "atas", false, "ya"]))).toBe(false);
+    expect(sahPemain(dunia(["p-1", 1, 1, "atas", false, true, 0]))).toBe(false);
   });
 
   it("setiap skema memuat tepat pesan Architecture 6.3 dan 6.4", () => {
@@ -345,11 +362,12 @@ for (const k of KELOMPOK) {
         expect(k.skema.safeParse(cacat).success).toBe(false);
       });
 
-      it(`${tipe}: v selain 1, tanpa v, dan kunci tambahan ditolak`, () => {
-        expect(k.skema.safeParse(dengan(sah, { v: 2 })).success).toBe(false);
-        expect(k.skema.safeParse(dengan(sah, { v: "1" })).success).toBe(false);
+      it(`${tipe}: v selain ${PROTOKOL_VERSI} (termasuk versi 1 sebelum JS-08), tanpa v, dan kunci tambahan ditolak`, () => {
+        expect(k.skema.safeParse(dengan(sah, { v: 1 })).success).toBe(false);
+        expect(k.skema.safeParse(dengan(sah, { v: PROTOKOL_VERSI + 1 })).success).toBe(false);
+        expect(k.skema.safeParse(dengan(sah, { v: String(PROTOKOL_VERSI) })).success).toBe(false);
         const { v, ...tanpaV } = sah;
-        expect(v).toBe(1);
+        expect(v).toBe(PROTOKOL_VERSI);
         expect(k.skema.safeParse(tanpaV).success).toBe(false);
         expect(k.skema.safeParse(dengan(sah, { tambahan: 1 })).success).toBe(false);
       });
@@ -403,7 +421,7 @@ describe("batas nilai (P-34 sampai P-38)", () => {
   });
 
   it("dunia paling banyak 64 pemain dengan n sampai 100; lobi, papan, dan dunia kelas paling banyak 100 (JS-03, C-8)", () => {
-    const isiDunia = (n: number) => Array.from({ length: n }, (_, i) => [`p-${i}`, 10, 10, "atas", false]);
+    const isiDunia = (n: number) => Array.from({ length: n }, (_, i) => [`p-${i}`, 10, 10, "atas", false, false]);
     expect(lolos(skemaServerPemain, pesan("dunia", { w: 1, p: isiDunia(64), n: 64 }))).toBe(true);
     expect(lolos(skemaServerPemain, pesan("dunia", { w: 1, p: isiDunia(65), n: 64 }))).toBe(false);
     expect(lolos(skemaServerPemain, pesan("dunia", { w: 1, p: isiDunia(24), n: 100 }))).toBe(true);

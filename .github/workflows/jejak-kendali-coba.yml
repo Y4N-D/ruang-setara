@@ -56,12 +56,12 @@ jobs:
             exit 1
           fi
           case "$AKSI" in
-            "mulai") PESAN='{"v":1,"t":"mulai"}' ;;
-            "jeda") PESAN='{"v":1,"t":"jeda"}' ;;
-            "lanjut") PESAN='{"v":1,"t":"lanjut"}' ;;
-            "tambah 1 menit") PESAN='{"v":1,"t":"tambah_waktu","detik":60}' ;;
-            "akhiri") PESAN='{"v":1,"t":"akhiri"}' ;;
-            "tutup") PESAN='{"v":1,"t":"tutup_ruang"}' ;;
+            "mulai") PESAN='{"v":2,"t":"mulai"}' ;;
+            "jeda") PESAN='{"v":2,"t":"jeda"}' ;;
+            "lanjut") PESAN='{"v":2,"t":"lanjut"}' ;;
+            "tambah 1 menit") PESAN='{"v":2,"t":"tambah_waktu","detik":60}' ;;
+            "akhiri") PESAN='{"v":2,"t":"akhiri"}' ;;
+            "tutup") PESAN='{"v":2,"t":"tutup_ruang"}' ;;
             *) echo "::error::Aksi tidak dikenal."; exit 1 ;;
           esac
           echo "KODE=$KODE" >> "$GITHUB_ENV"
