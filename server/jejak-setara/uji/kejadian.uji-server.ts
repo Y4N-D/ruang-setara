@@ -184,6 +184,7 @@ describe("Durable Object dibangunkan ulang di tengah ronde (P-63; AC-16)", () =>
     const keadaan = "test-results-jejak/keadaan-4324";
     let anak = await nyalakanServer(4324, ["--tanpa-build", "--keadaan", keadaan]);
     let token = "";
+    let nama = "";
     let kode = "";
     let k1 = { kejadianId: "", titik: [{ x: 0, y: 0 }] };
     let skor = 0;
@@ -192,6 +193,7 @@ describe("Durable Object dibangunkan ulang di tengah ronde (P-63; AC-16)", () =>
       kode = String(isi.kode);
       const a = await gabung(kode, 4324);
       token = a.token;
+      nama = a.nama;
       await mulaiRonde(kode, 4324, [a.k]);
       [k1] = await titikKejadian(kode, 4324);
       const buka = await periksa(a, kode, k1.kejadianId, k1.titik[0], 4324);
@@ -199,6 +201,7 @@ describe("Durable Object dibangunkan ulang di tengah ronde (P-63; AC-16)", () =>
       skor = (await a.k.tunggu((m) => m.t === "hasil_1")).benar ? 40 : 0;
       await a.k.tunggu((m) => m.t === "pribadi" && m.skor === skor);
       a.k.ws.close();
+      await tidur(300); // beri waktu ruang memproses sambungan putus, seperti uji JS-03
     } finally {
       await matikanServer(anak);
     }
@@ -210,6 +213,12 @@ describe("Durable Object dibangunkan ulang di tengah ronde (P-63; AC-16)", () =>
       expect(pr.skor).toBe(skor);
       expect(pr.terlihat).toContain(k1.kejadianId);
       expect(b.masuk.some((m) => m.t === "kejadian_terlihat" && m.kejadianId === k1.kejadianId)).toBe(true);
+      // Posisi bukan bagian pemulihan P-63, dan posisi hanya tersimpan bila ruang sempat memproses sambungan putus
+      // sebelum server dimatikan. Di mesin GitHub (11 Nov 2026) server mati lebih dulu, sehingga pemain kembali di
+      // titik muncul dan periksa dijawab BUKAN_JANGKAUAN. Pemain dipindah lagi ke dekat titik sebelum memeriksa.
+      b.masuk.length = 0;
+      expect(await pindahkan(kode, nama, k1.titik[0].x, k1.titik[0].y + 1, 4324)).toBe(200);
+      await b.tunggu((m) => m.t === "koreksi");
       b.masuk.length = 0;
       b.kirim({ v: V, t: "periksa", kejadianId: k1.kejadianId });
       expect((await b.tunggu((m) => m.t === "kejadian_terbuka")).langkah).toBe(2);

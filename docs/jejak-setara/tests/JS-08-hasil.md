@@ -117,6 +117,12 @@ Di folder [JS-08/](JS-08/): dunia dengan penanda dan tokoh K-13, Langkah 1, umpa
 
 Belum. Dilakukan pemilik proyek sesudah ZIP di-push dan "Jejak: uji" hijau: satu kejadian dari awal sampai akhir di HP (tombol Periksa, dialog dua langkah, kartu dampak, skor, dan peringkat), dengan merek dan tipe HP dicatat untuk laporan JS-07 dan JS-08.
 
+## Perbaikan uji sesudah push (11 November 2026)
+
+- **Gejala.** Sesudah ZIP Build JS-08 di-push, "Jejak: uji" merah di mesin GitHub: `test:jejak:server` 23 dari 24 lulus. Uji "server dimatikan lalu dinyalakan lagi dengan keadaan yang sama: skor, titik terlihat, dan status jawaban pulih" gagal dengan `pesan yang ditunggu tidak datang: ["galat","koreksi"]`. Di lingkungan agen uji ini lulus.
+- **Penyebab.** Kode JS-08 tidak salah; uji itu bergantung pada urutan waktu. Posisi pemain disimpan ke SQLite ruang saat sambungan putus diproses, bukan pada setiap `gerak` (Architecture 13.4). Uji menutup sambungan lalu langsung mematikan server. Di mesin GitHub, server mati sebelum ruang memproses putusnya sambungan, sehingga posisi dekat titik tidak tersimpan. Sesudah dinyalakan lagi, pemain berada di titik muncul, dan `periksa` dijawab `BUKAN_JANGKAUAN` (galat lalu `koreksi`, P-26). Skor, titik terlihat, dan status jawaban tetap pulih. Penyebab ini dipastikan dengan menjalankan uji lama tanpa sambungan diputus sebelum server dimatikan: galatnya sama persis dengan di mesin GitHub.
+- **Perbaikan (hanya berkas uji).** Uji kini menunggu 300 ms sesudah menutup sambungan, seperti uji JS-03 yang serupa. Sesudah tersambung lagi, pemain dipindah ke dekat titik lewat kait `pindahkan` sebelum memeriksa, karena posisi bukan bagian pemulihan P-63. Uji yang diperbaiki lulus, juga pada kasus terburuk (server dimatikan tanpa sambungan diputus lebih dulu). `test:jejak:server` lulus 24 uji.
+
 ## Keputusan
 
 **Lulus dengan catatan AC-24.** Semua kriteria otomatis lulus. Satu uji Sesi B diubah angka versinya atas keputusan pemilik proyek. JS-08 Selesai sesudah ZIP di-push, "Jejak: uji" hijau, dan pemeriksaan manual pemilik proyek di lingkungan uji.
