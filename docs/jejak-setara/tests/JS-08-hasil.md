@@ -6,7 +6,7 @@
 | Spesifikasi | [specs/JS-08-kejadian.md](../specs/JS-08-kejadian.md), disetujui 9 November 2026 (`Spesifikasi disetujui: JS-08`) dengan saran D-1 sampai D-6 |
 | Tanggal | 11 November 2026 |
 | Lingkungan | Lingkungan agen: Node 22.23.4, pnpm 11.25.0, `wrangler` 4.92.0, Chromium 153 tanpa GPU; 1 vCPU, 4 GB. ZIP `main` 10 November 2026 (sesudah JS-05 Selesai) |
-| Keputusan | **Lulus dengan catatan AC-24**: satu uji Sesi B (`bank-protokol.test.ts`) diubah angka versinya atas keputusan pemilik proyek, karena protokol versi 2 menolak amplop versi 1. Selesai sesudah ZIP di-push, "Jejak: uji" hijau (termasuk "Semai bank awal" yang pertama), dan pemilik proyek mencoba satu kejadian di lingkungan uji |
+| Keputusan | **Lulus dengan catatan AC-24**, ditutup 13 November 2026: satu uji Sesi B (`bank-protokol.test.ts`) diubah angka versinya atas keputusan pemilik proyek, karena protokol versi 2 menolak amplop versi 1. ZIP sudah di-push, "Jejak: uji" hijau (termasuk "Semai bank awal" yang pertama), dan percobaan pemilik proyek di lingkungan uji berhasil (bagian "Pemeriksaan manual di lingkungan uji"). Uji yang kadang gagal karena letak kejadian diacak (satu uji server dan dua uji ujung ke ujung) diperbaiki tanpa mengubah kode game (dua bagian "Perbaikan uji … yang kadang gagal") |
 
 ## Perintah resmi
 
@@ -15,10 +15,10 @@
 | `install --frozen-lockfile` | Lulus; lockfile tidak berubah, tanpa dependensi baru |
 | `content:check:jejak` | Lulus: 10 berkas, 254 uji (sesudah perubahan angka versi di `bank-protokol.test.ts`; sebelumnya 17 uji merah, lihat AC-24) |
 | `test:jejak` | Lulus: 38 berkas, 766 uji (garis dasar 33 berkas dan 705 uji). Berkas baru: `ruang/kejadian-ruang.test.ts`, `ruang/inti-ruang-kejadian.test.ts`, `ruang/antrean.test.ts`, `bersama/dialogKeadaan.test.ts`, dan `dunia/kejadian.test.ts`. Uji lama yang disesuaikan: amplop versi 2, butir `dunia` enam unsur, `selesai` saat sambung ulang sesudah ronde selesai (P-36), dan tabel teks |
-| `test:jejak:server` | Lulus: 3 berkas, 24 uji lewat HTTP dan WebSocket sungguhan (19 lama, satu disesuaikan karena ruang coba kini memuat Paket inti 16, dan 5 baru di `kejadian.uji-server.ts`) |
+| `test:jejak:server` | Lulus: 3 berkas, 24 uji lewat HTTP dan WebSocket sungguhan (19 lama, satu disesuaikan karena ruang coba kini memuat Paket inti 16, dan 5 baru di `kejadian.uji-server.ts`). Sesudah perbaikan uji 13 November 2026: 6 kali berturut-turut lulus 24 dari 24 |
 | `build:jejak` | Lulus. Lihat bagian "Anggaran ukuran dan kinerja" |
 | Build `CLOUDFLARE_ENV=uji` dan `wrangler deploy --dry-run` | Binding `RUANG`, `DB` (`jejak-setara-uji`), `BATAS_PUBLIK`, `BATAS_WS`, `ASSETS`, dan `LINGKUNGAN` = `uji`; unggahan 220,54 KiB, 51,29 KiB gzip (JS-07: 175,37 dan 39,28 KiB) |
-| `test:e2e:jejak` (`JEJAK_CHROMIUM`) | Lulus: 28 uji (14 kerangka JS-01, 5 gabung JS-03, 5 dunia JS-07 termasuk uji kinerja dengan ambang baru, dan 4 kejadian JS-08). Dijalankan dalam beberapa bagian karena batas sekitar 300 detik per perintah |
+| `test:e2e:jejak` (`JEJAK_CHROMIUM`) | Lulus: 28 uji (14 kerangka JS-01, 5 gabung JS-03, 5 dunia JS-07 termasuk uji kinerja dengan ambang baru, dan 4 kejadian JS-08). Dijalankan dalam beberapa bagian karena batas sekitar 300 detik per perintah. Sesudah perbaikan uji 13 November 2026: 28 dari 28 dalam satu jalan |
 | `sim:beban` | Lulus; lihat bagian "Simulasi beban" |
 | `build:pages` | Lulus; ke-178 berkas identik byte dengan garis dasar, sesudah kode dan sesudah semua dokumen |
 | `tsc --noEmit` | 0 galat |
@@ -115,7 +115,36 @@ Di folder [JS-08/](JS-08/): dunia dengan penanda dan tokoh K-13, Langkah 1, umpa
 
 ## Pemeriksaan manual di lingkungan uji
 
-Belum. Dilakukan pemilik proyek sesudah ZIP di-push dan "Jejak: uji" hijau: satu kejadian dari awal sampai akhir di HP (tombol Periksa, dialog dua langkah, kartu dampak, skor, dan peringkat), dengan merek dan tipe HP dicatat untuk laporan JS-07 dan JS-08.
+Sesudah ZIP Build JS-08 di-push (11 November 2026, 21.31 WITA, dan perbaikan uji 22.02 WITA), pemilik proyek mengulang perintah resmi di luar sesi agen (12 November 2026) dan mencoba lingkungan uji. Hasilnya dikirim 13 November 2026.
+
+| Hal | Hasil |
+|---|---|
+| "Jejak: uji" untuk push 22.02 | Hijau, termasuk "Semai bank awal" yang pertama. Ruang coba di lingkungan uji memuat kejadian dari D1 uji, terbukti dari penanda yang ditemukan di HP |
+| `/api/sehat` lingkungan uji | `{"ok":true,"protokol":2,"lingkungan":"uji"}` |
+| Perintah resmi (12 November 2026) | `content:check:jejak` 254 dari 254, `test:jejak` 766 dari 766, dan `build:jejak` berhasil. `test:jejak:server` 24 dari 24 dalam 3 dari 4 percobaan; satu kali gagal di kelompok "periksa, dua langkah, skor, dan kiriman D1" (bagian berikut) |
+| HP | iQOO 15R. Menurut situs spesifikasi, HP ini memakai RAM 12 GB, jauh di atas profil HP kelas bawah PRD 4 dan 12 (RAM sekitar 3 GB) |
+| Bergabung dari HP | Berhasil |
+| Menemukan penanda kejadian dan membuka dialog | Berhasil |
+| Langkah 1, Langkah 2, dan kartu dampak | Berhasil |
+| Skor dan peringkat tampil | Berhasil |
+| Catatan lain | Tidak ada |
+
+- **AC-19, bagian manual:** butir AGENTS 9 "Lancar (≥ 30 fps) di HP Android kelas bawah selama satu ronde penuh" tetap terbuka, karena iQOO 15R bukan HP kelas bawah. Uji itu tetap dijadwalkan saat uji coba kelas (laporan JS-07).
+
+## Perbaikan uji server yang kadang gagal (13 November 2026)
+
+- **Gejala.** Di salah satu dari empat percobaan pemilik proyek (12 November 2026), uji pertama kelompok "periksa, dua langkah, skor, dan kiriman D1" di `kejadian.uji-server.ts` gagal dengan `pesan yang ditunggu tidak datang: [kejadian_terbuka, hasil_1, hasil_2, pribadi, koreksi, dunia, ...]`.
+- **Penyebab.** Kode JS-08 tidak salah; uji bergantung pada urutan kedatangan pesan. Server mengirim `kejadian_terlihat` sekali per titik (P-10, P-11). K-01 dan K-02 sama-sama di zona 1, dan letaknya diacak per ruang. Bila titik K-02 sudah tampak di layar saat pemain berdiri di bawah titik K-01, pesan K-02 datang bersama pesan K-01, lalu terbuang ketika uji mengosongkan daftar pesan sebelum memeriksa K-01. Saat uji kemudian menunggu `kejadian_terlihat` K-02, pesan itu tidak pernah datang lagi. Dari 132 pasangan titik zona 1 yang mungkin, 7 pasangan (5,3%) memicu keadaan ini; di server lokal, 17 dari 400 ruang baru (4,25%).
+- **Bukti.** Uji sementara (tidak disimpan di repositori) membuat ruang sampai ditemukan pasangan titik seperti itu. Uji lama di ruang itu gagal dengan pesan yang sama persis dengan percobaan pemilik proyek. Uji yang diperbaiki lulus di tiga ruang seperti itu.
+- **Perbaikan (hanya berkas uji).** `uji/bantuan.ts`: klien uji kini menyimpan `riwayat` semua pesan yang tidak pernah dikosongkan, beserta `tungguRiwayat`, dan fungsi `tungguSampai` untuk menunggu suatu keadaan tanpa jeda tetap. `uji/kejadian.uji-server.ts`: pembantu `periksa` mencari `kejadian_terlihat` di `riwayat`; jeda tetap 1,5 detik sebelum membaca D1 diganti dengan menunggu sampai kedua peserta punya peringkat akhir (peserta dibaca lebih dulu, karena kiriman akhir ronde satu batch D1); dan uji kini juga memastikan setiap titik terlihat dikirim sekali saja (AC-4). Kode game, protokol, dan uji lain tidak berubah.
+- **Hasil.** `test:jejak:server` dijalankan 6 kali berturut-turut di lingkungan agen: setiap kali 3 berkas dan 24 uji lulus.
+
+## Perbaikan uji ujung ke ujung yang kadang gagal (13 November 2026)
+
+- **Gejala.** Saat memeriksa ulang perintah resmi sesudah perbaikan di atas, `test:e2e:jejak` lulus 27 dari 28 uji. Uji "laptop: penanda, ajakan E, dialog dengan papan ketik saja, …" gagal karena `data-tokoh-kejadian` bernilai 6, bukan 4, dengan dua titik kejadian terlihat.
+- **Penyebab.** Sama jenisnya dengan uji server: uji menganggap hanya tokoh K-13 yang tampak saat pemain berdiri di bawah titik K-13, padahal letak kejadian diacak per ruang. Pada sekitar 17% ruang (simulasi 50.000 ruang), titik kejadian lain ikut tampak di layar itu, paling sering K-14 dari zona yang sama (12,3%), sehingga tokohnya ikut terhitung. Uji kinerja di `dunia.uji.ts` memakai anggapan yang sama ("berdiri dekat kejadian K-13", 4 tokoh). Kode game tidak salah: tokoh setiap kejadian yang terlihat memang digambar.
+- **Perbaikan (hanya berkas uji).** Berkas baru `e2e/jejak-setara/ruang-kejadian.ts` membuat ruang coba ulang sampai tidak ada titik kejadian lain di dalam pandangan kamera di sekitar titik K-13, ditambah tepi 3 ubin untuk tokoh dan properti (rata-rata sekitar 1,7 ruang). Kedua uji memakai bantuan ini; isi pemeriksaannya tidak berubah.
+- **Hasil.** Uji laptop kejadian lulus 5 kali berturut-turut, dan `test:e2e:jejak` lulus 28 dari 28.
 
 ## Perbaikan uji sesudah push (11 November 2026)
 
@@ -125,4 +154,4 @@ Belum. Dilakukan pemilik proyek sesudah ZIP di-push dan "Jejak: uji" hijau: satu
 
 ## Keputusan
 
-**Lulus dengan catatan AC-24.** Semua kriteria otomatis lulus. Satu uji Sesi B diubah angka versinya atas keputusan pemilik proyek. JS-08 Selesai sesudah ZIP di-push, "Jejak: uji" hijau, dan pemeriksaan manual pemilik proyek di lingkungan uji.
+**Lulus dengan catatan AC-24.** Semua kriteria otomatis lulus. Satu uji Sesi B diubah angka versinya atas keputusan pemilik proyek. **JS-08 Selesai 13 November 2026:** ZIP sudah di-push, "Jejak: uji" hijau, dan pemeriksaan manual pemilik proyek di lingkungan uji berhasil. Uji server dan uji ujung ke ujung yang kadang gagal sudah diperbaiki tanpa mengubah kode game.

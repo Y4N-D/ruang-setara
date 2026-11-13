@@ -6,6 +6,7 @@ import { expect, test, type APIRequestContext, type Browser, type BrowserContext
 import { posisiSah } from "../../app/jejak-setara/inti/gerak";
 import { tutupGerbang, uraiRle } from "../../app/jejak-setara/inti/peta";
 import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
+import { ruangKejadianSendiri } from "./ruang-kejadian";
 
 const LAYAR = "test-results-jejak/layar";
 /** Ukuran laptop diambil dari satu halaman yang diubah ukurannya; ukuran HP dari konteks HP sungguhan (r 2,625). */
@@ -402,7 +403,8 @@ test("kinerja: 40 pemain tiruan di ukuran HP; CPU normal dan CPU 6× lebih lamba
   request,
 }) => {
   test.setTimeout(330_000);
-  const kode = await buatRuang(request, { batasPemain: 45, durasiMenit: 10 });
+  // Ruang yang titik K-13-nya tidak berdekatan dengan titik kejadian lain, agar hanya tokoh K-13 yang terhitung.
+  const { kode, titik: t13 } = await ruangKejadianSendiri(request, "K-13", { batasPemain: 45, durasiMenit: 10 });
   const hp = await konteks(browser, baseURL!, true);
   const namaHp = await gabung(hp.page, kode, 7);
   const bots: Awaited<ReturnType<typeof bot>>[] = [];
@@ -432,8 +434,6 @@ test("kinerja: 40 pemain tiruan di ukuran HP; CPU normal dan CPU 6× lebih lamba
     await hp.page.keyboard.up("ArrowRight");
     const jalan = { ...ringkasHistogram(awal, await histogram(hp.page)), diri: await dunia(hp.page).getAttribute("data-diri") };
     // Berdiri dekat kejadian K-13: penanda, tiga tokoh, dan bangku antrean tergambar (P-69 keadaan keempat).
-    const titik = ((await (await request.get(`/api/ruang-coba/${kode}/kejadian`)).json()) as { kejadian: { kejadianId: string; titik: { x: number; y: number }[] }[] }).kejadian;
-    const t13 = titik.find((k) => k.kejadianId === "K-13")!.titik[0];
     expect((await request.post(`/api/ruang-coba/${kode}/pindahkan`, { data: { nama: namaHp, x: t13.x, y: t13.y + 1 } })).status()).toBe(200);
     await expect(dunia(hp.page)).toHaveAttribute("data-tokoh-kejadian", "4", { timeout: 8000 });
     awal = await histogram(hp.page);

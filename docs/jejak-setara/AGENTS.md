@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan **Jejak Setara** di repositori `ruang-setara`. Baca seluruh file ini, lalu PRD, Design System, dan Architecture Jejak Setara, sebelum mengubah apa pun.
 
+Versi 0.4 (13 November 2026): mode folder lokal (aplikasi Claude desktop) di bagian 11.5, berdampingan dengan mode ZIP; penyesuaian kecil di bagian 4, 4.1, 11, 11.3, 13, dan 14 (penutupan JS-08).
 Versi 0.3 (7 November 2026): paket gratis Cloudflare sampai JS-14 (bagian 0, 5, 6, dan 7; Plan JS-03).
 Versi 0.2 (5 November 2026): langkah Windows di bagian 11.4, daftar skrip final di bagian 6, dan tempat rencana Sesi B dan C di bagian 4.1 (Gerbang 1 JS-01).
 Versi 0.1 (4 November 2026): dokumen pertama.
@@ -79,7 +80,7 @@ flowchart TD
   T --> G3{"Gerbang 3<br>semua kriteria lulus?"}
   G3 -- "gagal: kesalahan kode" --> B
   G3 -- "gagal: spesifikasi kurang jelas" --> S
-  G3 -- lulus --> D["Selesai<br>ZIP diserahkan, pemilik commit dan push"]
+  G3 -- lulus --> D["Selesai<br>hasil diserahkan (ZIP atau folder lokal),<br>pemilik commit dan push"]
   D --> U["Lingkungan uji<br>diperbarui otomatis"]
 ```
 
@@ -88,7 +89,7 @@ flowchart TD
 | | |
 |---|---|
 | Tujuan | Memilih **satu** fitur terkecil yang bernilai dan siap dikerjakan, lalu mengukur risikonya sebelum ada kode |
-| Masukan | Backlog di bagian 5, `docs/jejak-setara/PLAN.md`, PRD bagian 7 dan 20 (keputusan terbuka), ZIP repositori terbaru dari pemilik proyek |
+| Masukan | Backlog di bagian 5, `docs/jejak-setara/PLAN.md`, PRD bagian 7 dan 20 (keputusan terbuka), ZIP repositori terbaru dari pemilik proyek, atau folder repositori dalam mode folder lokal (bagian 11.5) |
 | Langkah | 1) Pastikan fitur sebelumnya berstatus "Selesai" dan laporannya "Lulus". 2) Pilih fitur pertama yang semua dependensinya selesai. 3) Sebutkan kebutuhan PRD yang dipenuhi (JFR-xx). 4) Daftar file yang akan dibuat atau diubah. 5) Daftar aset dan statusnya. 6) Ukur risiko dengan percobaan **di luar repositori** (maket di empat ukuran layar, prototipe kecil, ukuran bundel, simulasi beban kecil, uji jaringan) dan laporkan angkanya. 7) Tulis usulan bernomor, masing-masing dengan alternatif dan saran. 8) Sebut keputusan terbuka (KT-xx) yang perlu dijawab di gerbang ini. 9) Bila perlu dependensi baru, minta izin dengan frasa `Izinkan dependensi: nama versi`. 10) Perkirakan ukuran (S/M/L) |
 | Keluaran | Entri baru di `PLAN.md` (templat 12.1). Plan pertama sekaligus membuat `PLAN.md` berisi backlog bagian 5. Untuk fitur Sesi B dan C (JS-05 dan JS-06), entri ditulis di berkas status sesi itu (`naskah/STATUS.md` atau `Daftar_Aset.md`), karena `PLAN.md` hanya diubah Sesi A. Permintaan perubahan pada berkas Sesi A ditulis di berkas status yang sama di bawah judul "Permintaan untuk Sesi A" (`PLAN.md`, bagian "Pembagian kerja tiga sesi") |
 | Selesai bila | Manusia membalas `Setuju: JS-xx` (boleh dengan pilihan untuk usulan tertentu) |
@@ -244,6 +245,13 @@ Sebuah fitur dianggap selesai bila:
 
 Bagian ini **wajib** di setiap tahap, karena pemilik proyek memasukkan hasil ke repositori sendiri lewat GitHub Desktop.
 
+Ada dua cara kerja, dan pemilik proyek menyebut caranya di awal sesi:
+
+- **Mode ZIP** (bagian 11.1 sampai 11.4): pemilik proyek melampirkan ZIP repositori, dan agen menyerahkan ZIP berisi berkas baru dan berubah.
+- **Mode folder lokal** (bagian 11.5): folder repositori di komputer pemilik proyek terhubung ke chat di aplikasi Claude desktop, dan agen mengubah berkas langsung di folder itu.
+
+Isi serah terima sama di kedua cara: daftar berkas, tangkapan layar, pesan commit, dan langkah GitHub Desktop. Yang berbeda hanya cara berkas sampai ke folder repositori.
+
 ### 11.1 Sesudah Test lulus
 
 1. **Satu ZIP** bernama `JS-xx-nama.zip` berisi **hanya berkas baru dan berubah**, dengan struktur folder persis seperti di repositori. Termasuk `PLAN.md`, spesifikasi, laporan uji, dan tangkapan layar yang disimpan di repositori.
@@ -260,7 +268,7 @@ Serahkan **ZIP kecil** berisi dokumen yang berubah (`PLAN.md` di Gerbang 1, spes
 
 ### 11.3 Menentukan berkas yang berubah
 
-Bandingkan hasil kerja dengan **ZIP repositori terbaru** yang dilampirkan pemilik proyek. Bila ZIP itu tampak bukan versi terbaru (misalnya `PLAN.md` belum memuat fitur yang menurut pemilik proyek sudah selesai), **tanyakan dulu** sebelum bekerja.
+Bandingkan hasil kerja dengan **ZIP repositori terbaru** yang dilampirkan pemilik proyek. Bila ZIP itu tampak bukan versi terbaru (misalnya `PLAN.md` belum memuat fitur yang menurut pemilik proyek sudah selesai), **tanyakan dulu** sebelum bekerja. Dalam mode folder lokal, berkas yang berubah adalah yang tampil di tab **Changes** GitHub Desktop (bagian 11.5).
 
 ### 11.4 Contoh langkah di GitHub Desktop
 
@@ -272,6 +280,32 @@ Bandingkan hasil kerja dengan **ZIP repositori terbaru** yang dilampirkan pemili
 6. Tempel isi **Summary** dan **Description**, lalu klik **Commit to main**.
 7. Klik **Push origin**.
 8. Buka tab **Actions** di halaman GitHub repositori dan pastikan alur kerja "Jejak: uji" berwarna hijau. Bila merah, kirim tangkapan layarnya kepada agen.
+
+### 11.5 Mode folder lokal (aplikasi Claude desktop)
+
+Dipakai bila pemilik proyek menghubungkan folder repositori di komputernya ke chat di aplikasi Claude desktop, misalnya `C:\Users\ACER\Documents\ALL THINGS IN SMSTR 5\Pembelajaran Mikro\Ruang_Setara_Source_Code_v8\ruang-setara`. Untuk sesi itu, cara ini menggantikan ZIP di bagian 11.1 sampai 11.4 (keputusan pemilik proyek, 13 November 2026).
+
+1. **Awal sesi.** Pemilik proyek sudah menekan **Pull origin** di GitHub Desktop, dan tab **Changes** kosong. Bila tab Changes tidak kosong atau folder tampak bukan versi terbaru, agen bertanya dulu (bagian 13).
+2. **Bekerja langsung di folder.** Agen membaca dan mengubah berkas langsung di folder itu. Agen tidak membuat ZIP.
+3. **Git.** Agen tidak menjalankan `git commit`, `git push`, atau perintah git lain yang mengubah riwayat atau membuang perubahan, misalnya `git reset`, `git checkout`, `git stash`, dan `git clean`. Perintah yang hanya membaca, misalnya `git status`, `git diff`, dan `git log`, boleh dipakai untuk menyusun daftar berkas. Pemilik proyek yang melakukan commit dan push lewat GitHub Desktop.
+4. **Menghapus berkas.** Agen tidak menghapus berkas sebelum menyebutkannya kepada pemilik proyek beserta alasannya.
+5. **Uji.** Agen menjalankan uji sesuai bagian 4.4. Bila Node.js, pnpm, atau Python belum ada di komputer pemilik proyek, agen mengatakannya dulu sebelum memasang apa pun. Agen juga boleh menyalin berkas ke ruang kerjanya sendiri untuk menjalankan uji, lalu menulis hasil akhirnya ke folder.
+6. **Sambungan terputus.** Bila sambungan ke folder terputus, agen boleh bekerja dari salinan `main` di GitHub, yang sama dengan folder bila pemilik proyek sudah Pull dan tab Changes kosong. Hasilnya ditulis ke folder sesudah sambungan pulih. Agen tidak pernah menimpa folder dengan salinan yang lebih lama daripada isi folder. Bila sambungan tidak pulih di sesi itu, pemilik proyek boleh memilih ZIP sekali itu (bagian 11.1 sampai 11.4).
+7. **Setiap kali berhenti untuk commit**, agen menyerahkan:
+   - daftar berkas baru dan berubah, dengan berkas lama yang diubah ditandai beserta alasannya (seperti bagian 11.1 butir 2), ditambah berkas yang dihapus bila ada;
+   - tangkapan layar bila ada tampilan yang berubah, ditampilkan di balasan sebelum commit;
+   - pesan commit untuk kotak **Summary** dan **Description**;
+   - langkah GitHub Desktop: periksa tab Changes, commit, push, dan cek tab Actions (contoh di bawah).
+
+   Semuanya memakai istilah Windows dan bahasa sederhana (bagian 11.1 butir 7).
+
+**Contoh langkah di GitHub Desktop (mode folder lokal)**
+
+1. Buka GitHub Desktop dan pilih repositori **ruang-setara**. Pastikan **Current Branch: main**.
+2. Buka tab **Changes** dan cocokkan daftarnya dengan daftar berkas dari agen. Berkas baru bertanda plus hijau, berkas yang diubah bertanda titik kuning, dan berkas yang dihapus bertanda minus merah. Bila ada berkas yang tidak ada di daftar agen, jangan commit dulu dan tanyakan kepada agen.
+3. Tempel isi **Summary** dan **Description**, lalu klik **Commit to main**.
+4. Klik **Push origin**.
+5. Buka tab **Actions** di halaman GitHub repositori dan pastikan alur kerja "Jejak: uji" berwarna hijau. Bila merah, kirim tangkapan layarnya kepada agen.
 
 ## 12. Templat
 
@@ -352,9 +386,11 @@ Hentikan pekerjaan dan tanyakan kepada pemilik proyek bila:
 - Token warna, huruf, atau tata letak di Design System tidak cukup.
 - Anggaran ukuran, kinerja, atau biaya tidak bisa dipenuhi.
 - Konfigurasi Cloudflare di dokumentasi resmi berbeda dengan Architecture.
-- ZIP repositori yang dilampirkan tampak bukan versi terbaru.
+- ZIP repositori yang dilampirkan, atau folder repositori dalam mode folder lokal, tampak bukan versi terbaru.
 
 ## 14. Contoh perintah untuk memulai sesi agen
+
+Contoh di bawah memakai mode ZIP. Dalam mode folder lokal (bagian 11.5), kalimat "ZIP repositori terbaru saya lampirkan" diganti "Repositori ada di folder yang terhubung ke chat ini dan sudah saya Pull", dan "Serahkan satu ZIP" diganti "Serahkan sesuai bagian 11.5".
 
 **Plan**
 

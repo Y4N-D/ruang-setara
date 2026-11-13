@@ -4,6 +4,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
+import { ruangKejadianSendiri } from "./ruang-kejadian";
 
 const LAYAR = "test-results-jejak/layar";
 const UKURAN = [
@@ -116,15 +117,14 @@ test("laptop: penanda, ajakan E, dialog dengan papan ketik saja, skor dan pering
   request,
 }) => {
   test.setTimeout(150_000);
-  const kode = await buatRuang(request);
+  // Ruang yang titik K-13-nya tidak berdekatan dengan titik kejadian lain, agar hanya tokoh K-13 yang terhitung.
+  const { kode, titik: t } = await ruangKejadianSendiri(request, "K-13");
   const a = await konteks(browser, baseURL!);
   const b = await konteks(browser, baseURL!);
   const catatan = [await pantau(a.page), await pantau(b.page)];
   const namaA = await gabung(a.page, kode, 1);
   const namaB = await gabung(b.page, kode, 4);
   await mulai(request, kode, [a.page, b.page]);
-  const titik = await titikKejadian(request, kode);
-  const t = titik.get("K-13")!;
   // Skor 0: bilah atas menampilkan "#–" dan label pembaca layar tanpa peringkat (P-57).
   await expect(a.page.locator(".js-skor")).toHaveAttribute("aria-label", "Skor 0, belum ada peringkat");
   await expect(a.page.locator(".js-skor")).toContainText("#–");

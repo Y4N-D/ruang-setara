@@ -3,7 +3,7 @@
 // tanpa semai (4323) dan server yang dinyalakan ulang di tengah ronde (4324).
 import { describe, expect, it } from "vitest";
 import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/versi";
-import { alamat, buatRuang, d1, kelas, klien, matikanServer, nyalakanServer, tidur, type Klien } from "./bantuan";
+import { alamat, buatRuang, d1, kelas, klien, matikanServer, nyalakanServer, tidur, tungguSampai, type Klien } from "./bantuan";
 
 const V = PROTOKOL_VERSI;
 type Pesan = Record<string, unknown>;
@@ -34,10 +34,15 @@ async function mulaiRonde(kode: string, port = 4320, pemain: Klien[] = []): Prom
   for (const p of pemain) await p.tunggu((m) => m.t === "status_ruang" && m.status === "main", 6000);
 }
 
-/** Pindah ke bawah titik, menunggu kejadian terlihat, lalu memeriksa; mengembalikan kejadian_terbuka. */
+/**
+ * Pindah ke bawah titik, memastikan titik itu sudah terlihat, lalu memeriksa; mengembalikan kejadian_terbuka.
+ * `kejadian_terlihat` dikirim sekali per titik (P-10, P-11) dan bisa sudah datang lebih awal, misalnya titik K-02 yang
+ * tampak dari bawah titik K-01 (7 dari 132 pasangan titik zona 1), lalu terbuang saat `masuk` dikosongkan. Karena itu
+ * pesan ini dicari di `riwayat`, bukan di `masuk` (perbaikan uji 13 Nov 2026).
+ */
 async function periksa(p: { k: Klien; nama: string }, kode: string, kejadianId: string, t: { x: number; y: number }, port = 4320): Promise<Pesan> {
   expect(await pindahkan(kode, p.nama, t.x, t.y + 1, port)).toBe(200);
-  await p.k.tunggu((m) => m.t === "kejadian_terlihat" && m.kejadianId === kejadianId && m.x === t.x && m.y === t.y);
+  await p.k.tungguRiwayat((m) => m.t === "kejadian_terlihat" && m.kejadianId === kejadianId && m.x === t.x && m.y === t.y);
   p.k.masuk.length = 0;
   p.k.kirim({ v: V, t: "periksa", kejadianId });
   return p.k.tunggu((m) => m.t === "kejadian_terbuka" && m.kejadianId === kejadianId);
@@ -131,9 +136,22 @@ describe("periksa, dua langkah, skor, dan kiriman D1 (AC-4, AC-7, AC-9 sampai AC
     const selesaiB = await b.k.tunggu((m) => m.t === "selesai");
     expect(selesaiB).toMatchObject({ skor: 0, jumlahPemain: 2 });
     if (akhirSkor > 0) expect([selesai.peringkat, selesaiB.peringkat]).toEqual([1, 2]);
-    await tidur(1500);
-    const jawaban = d1<Record<string, unknown>>(
-      `SELECT j.id, j.peserta_id, j.kejadian_versi_id, j.urutan_opsi_json, j.langkah1_opsi, j.langkah1_benar, j.langkah2_opsi, j.tingkat, j.poin, j.petunjuk_dipakai, v.isi_json FROM jawaban j JOIN kejadian_versi v ON v.id = j.kejadian_versi_id WHERE j.ruang_id = '${String(isi.ruangId)}' ORDER BY j.id`,
+    // AC-4: setiap titik terlihat dikirim sekali saja, juga bila titik K-02 sudah tampak dari titik K-01.
+    const lihatA = a.k.riwayat.filter((m) => m.t === "kejadian_terlihat").map((m) => `${String(m.kejadianId)}@${String(m.x)},${String(m.y)}`);
+    expect(new Set(lihatA).size).toBe(lihatA.length);
+    expect(lihatA).toEqual(expect.arrayContaining([`${k1.kejadianId}@${k1.titik[0].x},${k1.titik[0].y}`, `${k2.kejadianId}@${k2.titik[0].x},${k2.titik[0].y}`]));
+    // Kiriman akhir ronde ke D1 berjalan sesudah `selesai` terkirim. Tunggu sampai kedua peserta punya peringkat akhir,
+    // bukan jeda tetap. Peserta dibaca lebih dulu: kiriman akhir satu batch D1, jadi jawaban yang dibaca sesudahnya
+    // sudah versi akhir.
+    const { jawaban, peserta } = await tungguSampai(
+      () => {
+        const barisPeserta = d1<Record<string, unknown>>(`SELECT id, skor, langkah1_benar, jumlah_kejadian, peringkat_akhir FROM peserta WHERE ruang_id = '${String(isi.ruangId)}' ORDER BY id`);
+        const barisJawaban = d1<Record<string, unknown>>(
+          `SELECT j.id, j.peserta_id, j.kejadian_versi_id, j.urutan_opsi_json, j.langkah1_opsi, j.langkah1_benar, j.langkah2_opsi, j.tingkat, j.poin, j.petunjuk_dipakai, v.isi_json FROM jawaban j JOIN kejadian_versi v ON v.id = j.kejadian_versi_id WHERE j.ruang_id = '${String(isi.ruangId)}' ORDER BY j.id`,
+        );
+        return { jawaban: barisJawaban, peserta: barisPeserta };
+      },
+      (h) => h.peserta.length === 2 && h.peserta.every((p) => p.peringkat_akhir !== null) && h.jawaban.length === 2,
     );
     expect(jawaban.map((j) => j.id)).toEqual([`${a.id}:${k1.kejadianId}`, `${a.id}:${k2.kejadianId}`]);
     const [j1, j2] = jawaban;
@@ -145,7 +163,6 @@ describe("periksa, dua langkah, skor, dan kiriman D1 (AC-4, AC-7, AC-9 sampai AC
     expect([...urutan.langkah1].sort()).toEqual(["1a", "1b", "1c", "1d"]);
     expect(urutan.langkah1[0]).toBe(j1.langkah1_opsi); // pilihan pertama yang tampil = pilihan yang dikunci
     expect(urutan.langkah2[0]).toBe(j1.langkah2_opsi);
-    const peserta = d1<Record<string, unknown>>(`SELECT id, skor, langkah1_benar, jumlah_kejadian, peringkat_akhir FROM peserta WHERE ruang_id = '${String(isi.ruangId)}' ORDER BY id`);
     expect(peserta.find((p) => p.id === a.id)).toMatchObject({ skor: akhirSkor, jumlah_kejadian: 1, peringkat_akhir: selesai.peringkat });
     expect(peserta.find((p) => p.id === b.id)).toMatchObject({ skor: 0, jumlah_kejadian: 0, peringkat_akhir: selesaiB.peringkat });
     a.k.ws.close();

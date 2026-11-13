@@ -119,10 +119,10 @@ Sesudah ZIP JS-07 di-push (9 November 2026, 12.34 WITA), pemilik proyek mengulan
 |---|---|
 | Perintah resmi | `content:check:jejak` 254 dari 254, `test:jejak` 703 dari 703, `test:jejak:server` 19 dari 19, `build:jejak` berhasil, dan `build:pages` 178 berkas identik dengan rilis F-11. Diulang Sesi A di awal Plan JS-08 dengan hasil yang sama |
 | Lingkungan uji di HP dan laptop | Lancar, menurut pemilik proyek |
-| Merek dan tipe HP | Belum dicatat; dilengkapi di Gerbang 2 JS-08 |
-| Butir yang dicek | Belum dicatat; dilengkapi bersama tipe HP |
+| Merek dan tipe HP | iQOO 15R, dikirim pemilik proyek 13 November 2026 bersama hasil percobaan JS-08 |
+| Butir yang dicek | Tidak dikirim terpisah. Percobaan JS-08 (13 November 2026) ikut memakai penjelajah: bergabung dari HP lalu berjalan sampai menemukan penanda kejadian, berhasil (laporan JS-08) |
 
-- **AC-19, bagian manual:** lancar di HP dan laptop pemilik proyek. Karena tipe HP belum dicatat, belum bisa dipastikan apakah HP itu termasuk kelas bawah menurut PRD 4 dan 12 (RAM sekitar 3 GB, Android 10 ke atas). Butir AGENTS 9 "Lancar (≥ 30 fps) di HP Android kelas bawah selama satu ronde penuh" tetap terbuka.
+- **AC-19, bagian manual:** lancar di HP dan laptop pemilik proyek. HP itu iQOO 15R, yang menurut situs spesifikasi memakai RAM 12 GB, jadi bukan HP kelas bawah menurut PRD 4 dan 12 (RAM sekitar 3 GB, Android 10 ke atas). Butir AGENTS 9 "Lancar (≥ 30 fps) di HP Android kelas bawah selama satu ronde penuh" tetap terbuka.
 - **Saran waktu uji HP kelas bawah:** saat uji coba kelas, dengan dua atau tiga HP siswa yang paling sederhana, selama satu ronde penuh 15 menit. Pada waktu itu JS-08 sudah selesai, sehingga dialog dan penanda kejadian ikut teruji, dan paket berbayar sudah aktif (Architecture 18 langkah 2), sehingga kuota tidak membatasi. Bila sebelum itu tersedia HP kelas bawah (misalnya milik keluarga atau rekan guru), uji bisa dimajukan di lingkungan uji dengan "Jejak: ruang coba" dan "Jejak: kendali ruang coba".
 - **Ambang otomatis AC-19** ditetapkan ulang di Plan JS-08 (usulan 10).
 
