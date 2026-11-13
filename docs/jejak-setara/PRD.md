@@ -526,7 +526,7 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | KT-02 | Mode nomor absen untuk statistik per siswa | Disediakan, mati secara bawaan, dinyalakan guru per ruang |
 | KT-03 | Siapa yang boleh menyunting draf kejadian | Admin dan guru; hanya admin yang menerbitkan |
 | KT-04 | Tambahan warna khusus peta bila 36 warna tidak cukup | Coba dulu dengan 36 warna; tambahan paling banyak 4 warna lewat persetujuan |
-| KT-05 | Huruf sistem untuk tabel dan formulir konsol admin | Ya; judul dan tombol tetap Pixelify Sans |
+| KT-05 | Huruf sistem untuk tabel dan formulir konsol admin | Dijawab pemilik proyek (14 Nov 2026, Gerbang 1 JS-04): ya; judul, menu, dan tombol tetap Pixelify Sans |
 | KT-06 | Domain sendiri | Ya, sebelum uji coba kelas |
 | KT-07 | Dependensi baru (QR dan alat uji Workers) | Diputuskan di Plan fitur terkait dengan izin tertulis |
 | KT-08 | Pintu masuk dari galeri dan dari layar judul Sehari Setara | Galeri: ya; layar judul Sehari Setara: diputuskan sesudah F-11 |
@@ -553,3 +553,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 7 Nov 2026 | Kapasitas ruang: bawaan 40, paling banyak 100 pemain; dua titik aktif per kejadian di ruang lebih dari 50 pemain (dibangun di JS-08); mode nomor absen hanya untuk ruang sampai 50 pemain; Paket inti 16 tetap untuk rilis 1.0 (Gerbang 1 JS-03, usulan 11a, Permintaan C-8) |
 | 7 Nov 2026 | KT-10 dijawab: K-02 memakai versi A, umum tanpa menyebut hari suci tertentu. Latar situasi harus ada di setiap titik kejadian zonanya (usulan 6a JS-05; Permintaan A-8) |
 | 9 Nov 2026 | Gerbang 1 JS-08: KT-13 dijawab ya, tanpa pengurangan skor; protokol naik ke versi 2; ruang coba memakai versi kerja Paket inti 16 sebagai ruang uji; dialog memakai tampilan ringkas di layar yang pendek; peringkat tampil "#–" selama skor 0 |
+| 14 Nov 2026 | Gerbang 1 JS-04: KT-05 dijawab ya (huruf sistem untuk tabel dan formulir konsol); sandi di-hash PBKDF2-HMAC-SHA256 dengan kunci tambahan, 15.000 iterasi selama paket gratis dan 100.000 sesudah paket berbayar; akun admin pertama dibuat atau dipulihkan lewat alur kerja "Jejak: admin awal"; sandi sementara guru dibuat server dan tampil sekali; akun hanya dinonaktifkan, tidak dihapus; menu konsol hanya memuat halaman yang sudah ada |

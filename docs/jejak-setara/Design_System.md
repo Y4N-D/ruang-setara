@@ -179,6 +179,8 @@ Memakai satuan `--u: min(1vh, 0.5625vw)` dan skala huruf proyektor Sehari Setara
 - Lebar ≥ 1280 px: navigasi samping 240 px dan isi paling lebar 1.200 px. Lebar 768–1279 px: navigasi bisa diciutkan. HP: dasbor dan hasil bisa dilihat, sedangkan penyuntingan disarankan di laptop.
 - Penyunting kejadian dibagi dua kolom: formulir di kiri, **pratinjau HP** di kanan yang memakai komponen dialog kejadian yang sama dengan layar pemain.
 - Halaman **layar kelas** dibuka dari konsol di tab atau jendela baru, untuk ditampilkan di proyektor.
+- **Halaman masuk** (JS-04): panel bingkai piksel di tengah layar `ink` berisi merek "Jejak Setara", kolom email dan sandi, dan tombol Masuk; di bawahnya penanda server dan kredit bagian 15.
+- **Kerangka** (JS-04): navigasi samping `ink`, kepala `cream` dengan judul halaman, nama dan peran, serta tombol Keluar, dan area isi `white` dengan panel `cream`. Menu hanya memuat halaman yang sudah dibangun (Gerbang 1 JS-04). Navigasi samping tampil di lebar 1024 px ke atas; di bawahnya diganti tombol "Menu" di kepala (spesifikasi JS-04, D-2).
 
 ## 4. Warna
 
@@ -265,7 +267,7 @@ Aturan praktis Sehari Setara tetap berlaku: **teks di atas warna aksen selalu `i
 |---|---|---|
 | Judul layar, judul kejadian, angka (skor, waktu, kode ruang) | **Press Start 2P** | Maksimal 6 kata; tidak untuk paragraf; tidak memuat tanda minus (pakai Pixelify Sans untuk angka negatif) |
 | Situasi, pilihan, label, tombol | **Pixelify Sans** | |
-| Tabel dan formulir konsol admin | Huruf sistem (`system-ui, "Segoe UI", Roboto, "Noto Sans", sans-serif`) | Keputusan terbuka KT-05. Bila tidak disetujui, Pixelify Sans dengan ukuran minimal 16 px |
+| Tabel dan formulir konsol admin | Huruf sistem (`system-ui, "Segoe UI", Roboto, "Noto Sans", sans-serif`) | Diputuskan pemilik proyek 14 Nov 2026 (KT-05, Gerbang 1 JS-04): ya. Judul, menu, dan tombol tetap Pixelify Sans |
 | Cadangan | `monospace` | Bila huruf gagal dimuat |
 
 ### Skala ukuran

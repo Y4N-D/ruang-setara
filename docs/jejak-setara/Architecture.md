@@ -14,6 +14,8 @@ Pemeriksaan pertama dilakukan di Plan JS-01 (5 November 2026) terhadap `wrangler
 
 Pemeriksaan kedua dilakukan di Plan JS-03 (7 November 2026) terhadap halaman harga dan batas Durable Objects, D1, dan Workers untuk paket gratis. Hasilnya ada di bagian 13.4 dan entri JS-03 `PLAN.md`.
 
+Pemeriksaan ketiga dilakukan di Plan JS-04 (14 November 2026) terhadap batas CPU Workers, batas iterasi PBKDF2 di Cloudflare, dan `wrangler deploy --secrets-file`. Hasilnya ada di bagian 4.4, 4.5, dan 10.3, serta entri JS-04 `PLAN.md`.
+
 ---
 
 ## 1. Keputusan utama
@@ -75,16 +77,17 @@ ruang-setara/
 │  │  ├─ aturan.ts                   # skor, peringkat, skill, kotak, masa, batas
 │  │  ├─ gerak.ts · peta.ts          # gerak, tabrakan, pemeriksaan kecepatan; pembaca peta
 │  │  ├─ acak.ts                     # pembangkit acak berbenih
+│  │  ├─ akun.ts                     # skema zod API akun, batas panjang, dan aturan sandi (JS-04)
 │  │  └─ konten/skema.ts             # skema zod kejadian, rujukan, paket; periksa.ts: aturan konten dan kode temuan (JS-05)
 │  ├─ pemain/                        # layar pemain
 │  │  ├─ App.tsx · Gabung.tsx · Lobi.tsx · Dunia.tsx · Hud.tsx · Rekap.tsx
 │  │  ├─ mesin/                      # loop, kamera, render kanvas, input, interpolasi
 │  │  └─ jaringan.ts                 # klien WebSocket, sambung ulang, sinkron jam
 │  ├─ admin/                         # konsol admin
-│  │  ├─ App.tsx · rute.ts · api.ts
-│  │  ├─ halaman/                    # Dasbor, Ruang, Riwayat, Kejadian, Penyunting, Paket, Rujukan, Statistik, Akun, Pengaturan, Log
+│  │  ├─ App.tsx · rute.ts · api.ts · Kerangka.tsx · Dialog.tsx
+│  │  ├─ halaman/                    # Masuk, GantiSandi, Dasbor, Akun (JS-04); Ruang, Riwayat, Kejadian, Penyunting, Paket, Rujukan, Statistik, Pengaturan, Log
 │  │  └─ kelas/                      # layar kelas: Lobi, Langsung, Podium, Pembahasan
-│  ├─ bersama/                       # komponen untuk pemain dan konsol: bingkai, tombol pilihan, dialog kejadian, kartu dampak; HalamanKerangka (halaman kosong JS-01)
+│  ├─ bersama/                       # komponen untuk pemain dan konsol: bingkai, tombol pilihan, dialog kejadian, kartu dampak; PenandaServer (penanda lingkungan JS-01). HalamanKerangka JS-01 dihapus di JS-04
 │  ├─ teks.ts                        # semua teks yang tampil (bagian 17)
 │  ├─ peta/kampung.json              # hasil build_peta.py; jangan disunting manual
 │  ├─ peta/kampung_gambar.json       # hasil build_peta.py: nomor ubin per lapisan untuk layar pemain (C-9)
@@ -171,6 +174,8 @@ JS-01, hanya lingkungan lokal:
 
 JS-03 (isi lengkap di spesifikasi JS-03, bagian "Konfigurasi"): Durable Object `RuangJejak` (binding `RUANG`) dengan migrasi `v1` kelas SQLite; D1 (binding `DB`: `jejak-setara-lokal` di lokal, `jejak-setara-uji` di lingkungan `uji`); dua pembatas percobaan, `BATAS_PUBLIK` dan `BATAS_WS` (300 per menit per alamat IP); pemicu harian `0 19 * * *` (03.00 WITA); dan lingkungan bernama `uji` (Worker `jejak-setara-uji`). Lingkungan `produksi` ditambahkan menjelang rilis. Binding, variabel, dan pembatas ditulis ulang di setiap lingkungan karena tidak diwariskan dari lingkungan teratas, sedangkan migrasi Durable Object diwariskan (percobaan Plan JS-03). Plugin Vite memakai folder keadaan lokal `JEJAK_KEADAAN` (bawaan `.wrangler/state`), sama dengan `db:migrasi:lokal`.
 
+JS-04 (spesifikasi JS-04, P-33): variabel `ITERASI_SANDI` (`15000` di `lokal` dan `uji`) dan pembatas `BATAS_MASUK` (100 per menit di `lokal`, 10 per menit di `uji`). Lingkungan teratas (lokal) juga memuat kunci tiruan `KUNCI_SANDI`, `KUNCI_IP`, dan `KUNCI_ADMIN` yang nilainya berakhiran "bukan-rahasia"; di `uji`, ketiganya rahasia Worker (bagian 4.5).
+
 - Lingkungan teratas hanya untuk pengembangan lokal. Dengan plugin Vite, lingkungan dipilih saat build lewat `CLOUDFLARE_ENV` (misalnya `CLOUDFLARE_ENV=uji`), dan `--env` saat deploy tidak berpengaruh. Build yang lupa memilih lingkungan menghasilkan Worker lokal, jadi tidak pernah menyentuh produksi.
 - `compatibility_date` mengikuti runtime `workerd` yang terpasang (kini 1.20260515, batas 22 Mei 2026). Tanggal yang lebih baru membuat `wrangler dev` dan uji lokal berhenti dengan galat, jadi tanggal dinaikkan bersama `wrangler` dengan izin dependensi.
 - Plugin Vite mengabaikan `assets.directory`; folder aset adalah hasil build halaman (`dist-jejak/client/`).
@@ -200,10 +205,10 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 
 | Berkas | Nama di tab Actions | Pemicu | Langkah |
 |---|---|---|---|
-| `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara (daftar jalur di berkasnya), atau tombol "Run workflow" | Sejak JS-01: pasang → `content:check:jejak` → `test:jejak` → `build:jejak`. Sejak JS-03 ditambah "Uji server Jejak", lalu pekerjaan "Deploy uji" di cabang `main` (push atau tombol): build dengan `CLOUDFLARE_ENV=uji`, migrasi D1 jarak jauh, `wrangler deploy` di folder `web/jejak-setara`, dan pemeriksaan `/api/sehat`. Deploy dilewati dengan pemberitahuan bila rahasia atau Database ID uji belum diisi |
+| `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara (daftar jalur di berkasnya), atau tombol "Run workflow" | Sejak JS-01: pasang → `content:check:jejak` → `test:jejak` → `build:jejak`. Sejak JS-03 ditambah "Uji server Jejak", lalu pekerjaan "Deploy uji" di cabang `main` (push atau tombol): build dengan `CLOUDFLARE_ENV=uji`, migrasi D1 jarak jauh, `wrangler deploy` di folder `web/jejak-setara`, dan pemeriksaan `/api/sehat`. Deploy dilewati dengan pemberitahuan bila rahasia atau Database ID uji belum diisi. Sejak JS-08 ditambah "Semai bank awal". Sejak JS-04 ditambah "Siapkan kunci Worker": `KUNCI_SANDI` dan `KUNCI_IP` yang belum ada dibuat acak, lalu ikut versi yang sama lewat `wrangler deploy --secrets-file` |
 | `jejak-ruang-coba.yml` | Jejak: ruang coba | Tombol "Run workflow" | Membuat satu ruang coba di lingkungan uji dengan kunci sekali pakai `KUNCI_COBA`, lalu menulis kode dan tautannya di ringkasan alur kerja (JS-03; dipensiunkan di JS-10) |
 | `jejak-produksi.yml` | Jejak: produksi | Tombol "Run workflow" oleh pemilik proyek | Sama, untuk produksi (build dengan `CLOUDFLARE_ENV=produksi`); berhenti bila ada ruang produksi berstatus `main` atau `jeda` (dicek lewat API) |
-| `jejak-admin-awal.yml` | Jejak: admin awal | Tombol "Run workflow" | Membuat akun admin pertama, atau mengatur ulang sandi admin dengan sandi sementara dari rahasia GitHub |
+| `jejak-admin-awal.yml` | Jejak: admin awal | Tombol "Run workflow" dengan masukan nama tampilan | Menyimpan kunci sekali pakai `KUNCI_ADMIN`, memanggil `POST /api/admin-awal` untuk membuat akun admin pertama atau memulihkan akun admin dengan email dan sandi sementara dari rahasia GitHub, lalu mengganti kunci itu dengan nilai acak baru agar rute tertutup lagi (JS-04) |
 
 `deploy-pages.yml` yang sudah ada tidak diubah.
 
@@ -215,13 +220,15 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 | `JEJAK_ADMIN_EMAIL`, `JEJAK_ADMIN_SANDI_SEMENTARA` | Rahasia GitHub | Untuk `jejak-admin-awal.yml` |
 | `KUNCI_TIKET` | Rahasia Worker (`wrangler secret`) | Kunci HMAC tiket layar kelas |
 | `KUNCI_SANDI` | Rahasia Worker | Kunci tambahan (*pepper*) hash sandi |
-| `KUNCI_IP` | Rahasia Worker | Garam harian untuk hash IP pada pembatas percobaan masuk |
+| `KUNCI_IP` | Rahasia Worker | Kunci HMAC untuk kunci pembatas percobaan masuk (email, dan alamat IP ditambah tanggal) |
+| `KUNCI_ADMIN` | Rahasia Worker | Kunci sekali pakai untuk `POST /api/admin-awal`, dibuat lalu diganti nilai acak baru setiap "Jejak: admin awal" dijalankan (JS-04) |
 | `KUNCI_COBA` | Rahasia Worker lingkungan uji | Kunci sekali pakai untuk `POST /api/ruang-coba`, dibuat ulang setiap "Jejak: ruang coba" dijalankan (JS-03) |
 | `LINGKUNGAN` | Variabel Worker | `lokal` (pengembangan dan uji di mesin agen), `uji`, atau `produksi` |
+| `ITERASI_SANDI` | Variabel Worker | Jumlah iterasi PBKDF2 untuk hash baru: 15.000 selama paket gratis, 100.000 sesudah paket berbayar aktif (JS-04) |
 
 Rahasia tidak pernah ditulis di repositori, log, atau pesan galat.
 
-Ketiga kunci Worker dibuat **sekali** oleh alur kerja deploy dengan nilai acak bila belum ada, dan tidak pernah diganti otomatis. Mengganti `KUNCI_SANDI` membuat semua sandi tidak berlaku, sehingga penggantiannya hanya lewat keputusan pemilik proyek dan diikuti pengaturan ulang sandi semua akun.
+Kunci Worker dibuat **sekali** oleh langkah "Siapkan kunci Worker" di alur kerja deploy dengan nilai acak bila belum ada (`KUNCI_SANDI` dan `KUNCI_IP` sejak JS-04, `KUNCI_TIKET` sejak JS-10), dan tidak pernah diganti otomatis. Di lingkungan lokal, kunci-kunci itu dan `KUNCI_ADMIN` berupa nilai tiruan di `wrangler.jsonc`. Mengganti `KUNCI_SANDI` membuat semua sandi tidak berlaku, sehingga penggantiannya hanya lewat keputusan pemilik proyek dan diikuti pengaturan ulang sandi semua akun.
 
 ## 5. Model data
 
@@ -609,7 +616,7 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 
 ### 10.1 Rute konsol
 
-Satu halaman di `/admin/` dengan rute *hash*: `#/dasbor`, `#/ruang`, `#/ruang/{id}` (hasil), `#/kelas/{id}` (layar kelas, dibuka di tab baru), `#/kejadian`, `#/kejadian/{id}`, `#/paket`, `#/rujukan`, `#/statistik`, `#/akun`, `#/pengaturan`, `#/log`, dan `#/masuk`. Router kecil ditulis sendiri, tanpa dependensi baru.
+Satu halaman di `/admin/` dengan rute *hash*: `#/dasbor`, `#/ruang`, `#/ruang/{id}` (hasil), `#/kelas/{id}` (layar kelas, dibuka di tab baru), `#/kejadian`, `#/kejadian/{id}`, `#/paket`, `#/rujukan`, `#/statistik`, `#/akun`, `#/sandi` (ganti sandi; JS-04), `#/pengaturan`, `#/log`, dan `#/masuk`. Router kecil ditulis sendiri, tanpa dependensi baru. Menu hanya memuat halaman yang sudah dibangun, dan rute yang belum ada dialihkan ke `#/dasbor` (JS-04).
 
 ### 10.2 API
 
@@ -617,9 +624,11 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 
 | Metode dan jalur | Fungsi | Izin |
 |---|---|---|
-| `POST /api/masuk` · `POST /api/keluar` · `GET /api/saya` | Masuk, keluar, akun saat ini | Umum · masuk · masuk |
+| `POST /api/masuk` · `POST /api/keluar` · `GET /api/saya` | Masuk, keluar, akun saat ini. `GET /api/saya` selalu menjawab 200 dengan `masuk` benar atau salah (JS-04) | Umum · umum · umum |
 | `POST /api/sandi` | Ganti sandi sendiri | Masuk |
 | `GET` · `POST /api/akun`; `PATCH /api/akun/{id}` | Daftar, buat, ubah, nonaktifkan, atur ulang sandi | Admin |
+| `GET /api/dasbor` | Isi dasbor; sejak JS-04 jumlah rujukan yang belum diverifikasi | Admin, guru |
+| `POST /api/admin-awal` | Membuat atau memulihkan akun admin; hanya dengan kunci sekali pakai `KUNCI_ADMIN` (JS-04) | Alur kerja "Jejak: admin awal" |
 | `GET` · `POST /api/kejadian`; `GET` · `PATCH /api/kejadian/{id}` | Daftar, buat draf, baca, simpan versi kerja | Admin, guru |
 | `POST /api/kejadian/{id}/ajukan` · `/terbitkan` · `/arsipkan` | Ubah status | Admin, guru · admin · admin |
 | `GET /api/kejadian/{id}/versi` | Riwayat versi | Admin, guru |
@@ -638,16 +647,16 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 
 ### 10.3 Autentikasi dan sesi
 
-- **Hash sandi:** PBKDF2-HMAC-SHA256 lewat WebCrypto dengan garam acak 16 byte dan kunci tambahan `KUNCI_SANDI`. Jumlah iterasi setinggi yang diizinkan runtime Workers (sumber komunitas menyebut batas 100.000; diukur ulang di Plan fitur autentikasi), disimpan per akun agar bisa dinaikkan. Pembandingan memakai waktu konstan. Bila pemilik proyek ingin hash yang lebih kuat, Argon2id lewat pustaka WASM bisa dipakai dengan izin dependensi. Selama paket gratis berlaku (CPU 10 ms per permintaan, bagian 13.4), jumlah iterasi dipilih agar satu hash muat dalam batas itu. Percobaan Plan JS-03 di Node 22: 50.000 iterasi sekitar 7,8 ms CPU dan 100.000 iterasi sekitar 15 ms; `workerd` lokal menerima 600.000 iterasi, jadi batas 100.000 dari sumber komunitas diperiksa ulang. Angkanya ditetapkan di Plan JS-04 lewat pengukuran di lingkungan uji, lalu dinaikkan sesudah paket berbayar aktif; hash lama diperbarui saat pengguna berhasil masuk.
-- **Sandi:** minimal 12 karakter; sandi sementara wajib diganti saat masuk pertama.
-- **Pembatas percobaan:** 5 kali gagal dalam 15 menit per email, atau 20 kali per hash IP harian, mengunci percobaan selama 15 menit. Pesan galat selalu sama ("Email atau sandi salah"), agar tidak membocorkan email mana yang terdaftar.
-- **Sesi:** token acak 32 byte di cookie `__Host-jejak_sesi` dengan `HttpOnly`, `Secure`, `SameSite=Lax`, dan `Path=/`. D1 hanya menyimpan hash-nya. Sesi berakhir sesudah 8 jam tidak dipakai, dan paling lama 7 hari. Keluar dan ganti sandi menghapus sesi.
+- **Hash sandi** (ditetapkan JS-04): sandi dinormalkan NFC, lalu di-hash PBKDF2-HMAC-SHA256 lewat WebCrypto dengan garam acak 16 byte, dan hasilnya di-HMAC-SHA256 dengan kunci tambahan `KUNCI_SANDI` (saran OWASP: kunci tambahan disimpan terpisah dari basis data). Iterasi disimpan per akun, dan hash baru memakai variabel Worker `ITERASI_SANDI`: 15.000 selama paket gratis, lalu 100.000 sesudah paket berbayar aktif. Cloudflare membatasi PBKDF2 pada 100.000 iterasi, walaupun `workerd` lokal menerima lebih (isu cloudflare/workerd #1346). Hash lama diperbarui saat pemiliknya berhasil masuk. Satu permintaan paling banyak menghitung dua hash (ganti sandi); dengan 15.000 iterasi, satu hash sekitar 3,5 ms dan dua hash sekitar 6,5 ms CPU di runtime lokal (pengukuran Plan JS-04), di bawah CPU 10 ms paket gratis (bagian 13.4). Pembandingan memakai waktu konstan. Argon2id lewat pustaka WASM memerlukan izin dependensi dan tidak muat dalam 10 ms.
+- **Sandi:** 12 sampai 128 karakter dan tidak sama dengan email; sandi sementara wajib diganti saat masuk pertama. Sandi sementara akun guru dibuat server (16 karakter dari abjad kode ruang dalam empat kelompok) dan hanya tampil sekali (JS-04).
+- **Pembatas percobaan:** 5 kali gagal dalam 15 menit per email, atau 20 kali per hash IP harian, mengunci percobaan selama 15 menit. Kunci pembatas berupa HMAC `KUNCI_IP` atas email, atau atas alamat IP dan tanggal UTC, sehingga alamat IP tidak tersimpan. Email tidak terdaftar dan akun nonaktif tetap melewati satu hash tiruan, dan pesan galatnya selalu sama ("Email atau sandi salah."), agar tidak membocorkan email mana yang terdaftar. Selama terkunci, Worker tidak menghitung hash dan menjawab "Terlalu banyak percobaan masuk. Tunggu 15 menit, lalu coba lagi." Ditambah pembatas Workers `BATAS_MASUK` per alamat (JS-04).
+- **Sesi:** token acak 32 byte di cookie `__Host-jejak_sesi` dengan `HttpOnly`, `Secure`, `SameSite=Lax`, dan `Path=/`. D1 hanya menyimpan hash-nya. Sesi berakhir sesudah 8 jam tidak dipakai, dan paling lama 7 hari. Keluar dan ganti sandi menghapus sesi. Sejak JS-04: cookie tanpa masa berlaku, sehingga hilang saat peramban ditutup (spesifikasi JS-04, D-1); `terakhir_dipakai` ditulis paling sering sekali per 5 menit; ganti sandi menghapus semua sesi akun lalu membuat sesi baru untuk perangkat yang dipakai; menonaktifkan akun dan mengatur ulang sandi menghapus semua sesi akun itu.
 - **CSRF:** permintaan yang mengubah data wajib membawa tajuk `X-Jejak: 1` dan `Origin` yang sama dengan domain sendiri.
 - **Pemulihan admin:** alur kerja `jejak-admin-awal.yml` (bagian 15).
 
 ### 10.4 Izin
 
-Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.ts` yang dipanggil setiap rute API. Guru hanya bisa mengakses ruang miliknya. Setiap perubahan konten, akun, pengaturan, dan penghapusan data dicatat di `log_audit`.
+Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.ts` yang dipanggil setiap rute API. Guru hanya bisa mengakses ruang miliknya. Setiap perubahan konten, akun, pengaturan, dan penghapusan data dicatat di `log_audit`. JS-04 mengisi aksi `dasbor.lihat` dan `sandi.sendiri` (admin dan guru) serta `akun.kelola` (admin), dan menulis log audit `admin_awal`, `akun.buat`, `akun.ubah`, `akun.atur_ulang_sandi`, dan `sandi.ganti` tanpa sandi, hash, token, atau alamat IP. Admin tidak bisa menurunkan peran, menonaktifkan, atau mengatur ulang sandi akunnya sendiri, dan sedikitnya satu admin aktif selalu ada.
 
 ### 10.5 Bank kejadian dan versi
 
@@ -873,7 +882,7 @@ Ambang kinerja otomatis sejak JS-08 (AC-19), dari histogram waktu gambar di ukur
 - **Migrasi D1:** hanya maju dan tidak merusak. Perubahan yang menghapus kolom dilakukan dalam dua rilis (berhenti memakai dulu, baru menghapus).
 - **Kembali ke versi sebelumnya:** versi Worker sebelumnya dipulihkan dengan fitur *rollback* Workers. Data D1 dapat dipulihkan ke titik waktu sampai 7 hari ke belakang di paket gratis dan 30 hari di paket berbayar (*Time Travel*).
 - **Cadangan konten:** admin mengunduh ekspor bank (JSON) setiap akhir bulan; agen juga boleh menyimpannya ke repositori atas permintaan pemilik proyek.
-- **Pemulihan akun admin:** isi rahasia `JEJAK_ADMIN_SANDI_SEMENTARA` dengan sandi baru, jalankan `jejak-admin-awal.yml`, masuk, lalu ganti sandi.
+- **Pemulihan akun admin:** isi rahasia `JEJAK_ADMIN_SANDI_SEMENTARA` dengan sandi baru, jalankan `jejak-admin-awal.yml`, masuk, lalu ganti sandi. Alur kerja itu juga mengaktifkan kembali akun tersebut sebagai admin dan mengeluarkannya dari semua perangkat (JS-04).
 - **Pemantauan:** selama paket gratis, pemakaian harian dicek di dasbor Cloudflare sesudah percobaan dengan banyak perangkat. Sesudah paket berbayar aktif, pemakaian dan tagihan dicek setiap bulan, dan pemberitahuan penagihan diaktifkan bila tersedia di akun.
 - **Sebelum kelas:** buat ruang uji, masuk dengan satu HP lewat wifi sekolah, lalu tutup ruang uji.
 
@@ -914,7 +923,7 @@ Langkah ini dikerjakan pemilik proyek, dengan pendampingan agen dalam bahasa sed
 6. **Simpan rahasia di GitHub:** buka repositori `ruang-setara` → Settings → Secrets and variables → Actions → New repository secret. Sebelum Build JS-03: `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`. Sebelum Build JS-04: `JEJAK_ADMIN_EMAIL` dan `JEJAK_ADMIN_SANDI_SEMENTARA` (minimal 12 karakter).
 7. **(Disarankan) Domain sendiri:** beli domain, tambahkan ke Cloudflare (paket gratis cukup untuk DNS), ganti *nameserver* di tempat membeli domain, lalu sambungkan domain ke Worker `jejak-setara` lewat Settings → Domains & Routes.
 8. **Deploy pertama** ke lingkungan uji terjadi otomatis sesudah perubahan fitur server di-push ke `main`. Bila deploy pertama gagal karena akun belum punya subdomain `workers.dev`, buka Workers & Pages, pilih nama subdomain, lalu jalankan ulang alur kerja; agen memberi langkahnya. Agen memberi tahu alamat lingkungan uji.
-9. **Buat akun admin pertama:** buka tab Actions di GitHub → "Jejak: admin awal" → Run workflow. Masuk ke `/admin/`, lalu ganti sandi.
+9. **Buat akun admin pertama:** buka tab Actions di GitHub → "Jejak: admin awal" → Run workflow, isi "Nama tampilan", lalu klik tombol hijau Run workflow. Buka alamat konsol di ringkasan alur kerja, masuk dengan email `JEJAK_ADMIN_EMAIL` dan sandi sementara, lalu buat sandi baru.
 10. **Terbitkan ke produksi:** Actions → "Jejak: produksi" → Run workflow.
 
 Kunci rahasia Worker (`KUNCI_TIKET`, `KUNCI_SANDI`, `KUNCI_IP`) dibuat oleh alur kerja deploy dengan nilai acak, sehingga pemilik proyek tidak perlu mengetiknya (bagian 4.5).
