@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan **Jejak Setara** di repositori `ruang-setara`. Baca seluruh file ini, lalu PRD, Design System, dan Architecture Jejak Setara, sebelum mengubah apa pun.
 
+Versi 0.6 (14 November 2026): JS-22 Pengaman biaya ditambahkan ke backlog bagian 5 (usulan 14a JS-10).
 Versi 0.5 (14 November 2026): berkas alur kerja GitHub dan folder `Claude outputs/` dalam mode folder lokal (bagian 11.5, butir 8; penutupan JS-04).
 Versi 0.4 (13 November 2026): mode folder lokal (aplikasi Claude desktop) di bagian 11.5, berdampingan dengan mode ZIP; penyesuaian kecil di bagian 4, 4.1, 11, 11.3, 13, dan 14 (penutupan JS-08).
 Versi 0.3 (7 November 2026): paket gratis Cloudflare sampai JS-14 (bagian 0, 5, 6, dan 7; Plan JS-03).
@@ -156,6 +157,7 @@ flowchart TD
 | JS-14 | Pengaturan pemain, aksesibilitas, privasi, dan suara | JFR-55, 56, 57 | M | JS-09 |
 | JS-15 | Uji beban dan ketahanan jaringan, anggaran ukuran, perbaikan kinerja | PRD bagian 12 | M | JS-11 |
 | JS-16 | Tautan dari galeri, panduan guru satu halaman, uji coba kelas, rilis 1.0 | KT-08; PRD bagian 16 | S | JS-13, JS-14, JS-15 |
+| JS-22 | Pengaman biaya: pengaman alarm dan percobaan ulang, alur kerja "Jejak: hentikan", penghitung pemakaian per ruang, serta peringatan anggaran dan batas biaya (ditambahkan 14 Nov 2026, usulan 14a JS-10) | Architecture 12.1 dan 13 | M | JS-10 |
 
 **Versi 1.1 (P1):** JS-17 kode QR dan kode masuk ulang (JFR-03, 07); JS-18 Teropong, Angkot, dan bantuan gerak (JFR-13, 25); JS-19 log audit, pengaturan umum, ruang uji, impor dan ekspor bank (JFR-39, 40, 47, 48); JS-20 statistik kelas dan per siswa serta cetak ringkasan (JFR-51, 52, 54); JS-21 musik latar.
 

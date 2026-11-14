@@ -6,7 +6,7 @@
 | Spesifikasi | [specs/JS-04-akun.md](../specs/JS-04-akun.md), disetujui 14 November 2026 (`Spesifikasi disetujui: JS-04`) dengan saran D-1a sampai D-4a |
 | Tanggal | 14 November 2026 |
 | Lingkungan | Lingkungan agen: Node 22.23.4, pnpm 11.25.0, `wrangler` 4.92.0, `workerd` 1.20260515, dan Chromium untuk Playwright 1.56.1 (`JEJAK_CHROMIUM`). Salinan folder repositori pemilik proyek pada commit `5f9030a` (mode folder lokal, AGENTS 11.5) |
-| Keputusan | **Kembali ke Build untuk AC-20 (penutupan, 14 November 2026)**: langkah pemilik proyek di lingkungan uji berhasil tanpa galat, tetapi permintaan dua hash memakai sekitar 12,7–14,8 ms CPU, melewati batas AC-20 (7 ms). `ITERASI_SANDI` sudah diturunkan ke 4.000, dan AC-20 diukur ulang sesudah push (bagian "Penutupan"). Kriteria lain lulus. Keputusan Build semula: Lulus dengan catatan AC-20. Tiga penyesuaian kecil terhadap rincian berkas di spesifikasi dijelaskan di bagian "Temuan": teks konsol di `teks-konsol.ts`, ikon konsol tanpa `manifest.ts`, dan berkas tambahan `admin/Formulir.tsx` |
+| Keputusan | **Lulus (14 November 2026)**: AC-20 ditutup dengan kriteria yang diperjelas atas keputusan pemilik proyek (bagian "Penutupan"). Kriteria lain lulus. Keputusan sebelumnya: Lulus dengan catatan AC-20 (Build), lalu Kembali ke Build untuk AC-20 (penutupan). Tiga penyesuaian kecil terhadap rincian berkas di spesifikasi dijelaskan di bagian "Temuan": teks konsol di `teks-konsol.ts`, ikon konsol tanpa `manifest.ts`, dan berkas tambahan `admin/Formulir.tsx` |
 
 ## Perintah resmi
 
@@ -48,7 +48,7 @@
 | AC-17 Tampilan dan teks | Lulus | `kerangka.test.ts`: `TEKS_KONSOL` sama persis dengan bagian "Teks yang tampil (final)" (diurai dari tabel spesifikasi lalu dibandingkan), dan `TEKS` tanpa `konsolJudul` dan `konsolIsi`. E2E: huruf sistem di tabel, Pixelify Sans di judul, Press Start 2P di merek dan sandi sementara 16 px; tombol Menu di bawah 1024 px dan navigasi samping di 1024 px (D-2a); tangkapan layar empat ukuran tanpa luapan ke samping. Warna hanya token `--js-` |
 | AC-18 Aksesibilitas | Lulus | E2E: semua tombol, tautan, kolom, dan kotak centang yang tampil setinggi sedikitnya 48 px di keempat ukuran; garis fokus `ink` 2 px dan `sun` 6 px (4 px di luar garis `ink`), kontras `ink` terhadap `cream` sekitar 13 : 1 dan `sun` terhadap `ink` sekitar 10 : 1; galat terhubung lewat `aria-describedby` dan `role="alert"`; pemberitahuan berhasil di wilayah `aria-live="polite"`; dialog `role="dialog"`, `aria-modal`, dan judulnya, dengan fokus terkurung dan kembali ke tombol pembukanya; masuk, ganti sandi, dan dialog akun baru dengan papan ketik saja |
 | AC-19 Ukuran | Lulus | Kode konsol 82,15 KB gzip, jauh di bawah 350 KB. Kode layar pemain naik 0,18 KB gzip (batas 0,5 KB). Lihat bagian "Anggaran ukuran dan kinerja" dan temuan 1 dan 2 |
-| AC-20 CPU di lingkungan uji | **Gagal pada pengukuran pertama; diperbaiki, menunggu ukur ulang** | Grafik CPU time Worker `jejak-setara-uji` (24 jam sampai 14 Nov 2026 pukul 12.00 WITA): di selang 15 menit sekitar pukul 11.45 WITA, saat pemilik proyek mencoba akun, P999 sekitar 14,8 ms, P90 sekitar 12,7 ms, dan P50 sekitar 2,3 ms. Permintaan dua hash melewati batas 7 ms dan CPU 10 ms paket gratis. Grafik Errors by version: 0 galat. `ITERASI_SANDI` diturunkan ke 4.000 (bagian "Penutupan"). Angka Plan di `workerd` lokal: masuk 3,3–3,5 ms dan ganti sandi sukarela 6,2–6,5 ms CPU Worker |
+| AC-20 CPU di lingkungan uji | **Lulus dengan kriteria yang diperjelas (keputusan pemilik proyek, 14 Nov 2026)** | Grafik CPU time Worker `jejak-setara-uji` (24 jam sampai 14 Nov 2026 pukul 12.00 WITA): di selang 15 menit sekitar pukul 11.45 WITA, saat pemilik proyek mencoba akun, P999 sekitar 14,8 ms, P90 sekitar 12,7 ms, dan P50 sekitar 2,3 ms. Permintaan dua hash melewati batas 7 ms dan CPU 10 ms paket gratis. Grafik Errors by version: 0 galat. `ITERASI_SANDI` diturunkan ke 4.000 (bagian "Penutupan"). Angka Plan di `workerd` lokal: masuk 3,3–3,5 ms dan ganti sandi sukarela 6,2–6,5 ms CPU Worker. Penutupan: lonjakan 7–23 ms berasal dari permintaan pertama di isolat yang baru dimulai, bukan dari hash; permintaan hash yang hangat 1–6 ms; 0 galat dari 66 pemanggilan (bagian "Penutupan") |
 | AC-21 Kode dan lingkungan | Lulus | Perintah di atas; `PROTOKOL_VERSI` tetap 2, dan uji JS-03, JS-05, JS-06, JS-07, dan JS-08 tetap lulus; galeri 178 berkas identik. E2E tanpa galat konsol, pelanggaran CSP, permintaan ke alamat lain, atau respons 4xx dan 5xx selain jawaban galat yang sengaja diuji (401, 403, 409, dan 429 dari rute akun) |
 | AC-22 Dokumen | Lulus | Architecture, Design System, dan PRD diubah di Gerbang 2. Di Build: Architecture 3 (`Formulir.tsx` dan `teks-konsol.ts`) dan 17 (tempat teks konsol dan ikon konsol), serta `PLAN.md` |
 
@@ -168,6 +168,24 @@ Evaluasi modul Worker hasil build (lingkup global) di Node: 19,2 ms CPU.
 - Pembacaan: puncak 10–15 ms di lingkungan uji tidak berubah walau iterasi turun hampir empat kali (14,87 ms dengan 15.000 dan 14,46 ms dengan 4.000), jadi penyebabnya bukan hash. Permintaan pertama di isolat yang baru dimulai membayar biaya awal (evaluasi modul dan kode yang baru pertama kali dijalankan), dan Worker yang jarang dipakai sering mendapat isolat baru, terutama sesudah deploy dan sesudah sepi beberapa saat. Penurunan iterasi tetap berguna untuk permintaan hangat.
 - Usulan penutupan AC-20 ada di `PLAN.md`, bagian "Penutupan JS-04".
 
-## Keputusan: Kembali ke Build untuk AC-20 (perbaikan sudah diterapkan)
+**Data Cloudflare (14 Nov 2026).** Diambil pemilik proyek lewat Claude yang terhubung ke akun Cloudflare-nya, hanya dengan membaca. Id akun tidak disalin ke repositori.
 
-Kriteria lain lulus, dan langkah pemilik proyek di lingkungan uji berhasil tanpa galat. AC-20 gagal pada pengukuran pertama; perbaikannya sudah diterapkan dan diuji di lingkungan agen. Percobaan bersih menunjukkan bahwa puncak berasal dari isolat yang baru dimulai, bukan dari hash, tanpa galat. Keputusan akhir menunggu jawaban pemilik proyek atas usulan penutupan AC-20 di `PLAN.md`.
+| Data | Isi |
+|---|---|
+| Versi Worker | v24 sampai v33; startup 5–7 ms; ukuran kode 225.830 byte (sebelum JS-04) dan 269.929 byte (sejak JS-04) |
+| GraphQL per menit dan per versi (13 Nov 12.00 sampai 14 Nov 08.00 UTC, tanpa sampel) | 66 pemanggilan, 0 galat, tidak ada `exceededCpu` atau `exceededResources` |
+| Permintaan pertama sesudah setiap deploy (cek kesehatan) | 0,34–0,57 ms, jadi startup tidak dihitung ke permintaan |
+| Admin awal (tepat satu hash) pada versi yang baru dibuat | 6,77 ms (15.000 iterasi, v27) dan 10,35 ms (4.000 iterasi, v30) |
+| Menit yang berisi masuk ke konsol | 10,38 dan 14,87 ms (15.000); 7,20, 10,08, 14,46, dan 14,42 ms (4.000) |
+| Ganti sandi saat hangat (05.31 UTC, satu pemanggilan) | 3,77 ms (4.000) |
+| Workers Logs (dinyalakan di dasbor 09.50.52 UTC) | `POST /api/sandi` 23 ms sebagai permintaan pertama sesudah pengaturan berubah, `POST /api/keluar` 1 ms, `GET /api/sehat` 0 ms, `POST /api/masuk` 6 ms, `GET /api/dasbor` 3 ms |
+| Durable Object dan D1 (14 Nov 03.00–07.00 UTC, per jam) | Durable Object tanpa data (tidak dipakai); D1 50–267 baris dibaca dan 16–40 baris ditulis |
+
+- Pembacaan: lonjakan berasal dari permintaan pertama di isolat yang baru dimulai, yaitu kode yang baru pertama kali dijalankan, bukan dari hash (iterasi lebih kecil tidak menurunkan puncak) dan bukan dari startup. Pembacaan per selang 15 menit sebelumnya, bahwa puncak pukul 12.15 dan 12.45 berasal dari hash 15.000 iterasi, terbantah oleh data ini.
+- Waktu tunggu 190–520 ms pada permintaan yang memakai D1 adalah perjalanan jaringan ke basis data, bukan beban CPU.
+
+**Keputusan pemilik proyek (14 Nov 2026):** AC-20 (a), ditutup dengan kriteria yang diperjelas: hash sandi bukan penyebab lonjakan, permintaan hash yang sudah hangat 1–6 ms, dan tidak ada galat. Iterasi (a): `ITERASI_SANDI` tetap 4.000 selama paket gratis, lalu 100.000 saat paket berbayar aktif. Pengurangan biaya permintaan pertama di isolat baru masuk JS-22.
+
+## Keputusan: Lulus
+
+Semua kriteria lulus. AC-20 lulus dengan kriteria yang diperjelas atas keputusan pemilik proyek pada 14 November 2026. JS-04 Selesai.
