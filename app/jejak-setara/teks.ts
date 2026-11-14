@@ -1,4 +1,5 @@
-// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01, JS-03, JS-07, dan JS-08).
+// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01, JS-03, JS-07, JS-08, dan JS-04).
+// Teks konsol ada di teks-konsol.ts (TEKS_KONSOL, JS-04 P-51), yang tidak diimpor layar pemain.
 // Kedua judul tab ditulis di index.html; nilainya di sini dipakai uji untuk memastikan keduanya sama.
 // Teks dengan {n} atau {kode} diisi lewat isiTeks().
 import type { KodeGalat } from "./inti/protokol";
@@ -7,8 +8,6 @@ export const TEKS = {
   judulTabPemain: "Jejak Setara",
   judulTabKonsol: "Konsol admin · Jejak Setara",
   judul: "Jejak Setara",
-  konsolJudul: "Konsol admin",
-  konsolIsi: "Konsol sedang disiapkan.",
   serverMemeriksa: "Memeriksa server…",
   serverSiap: "Server siap",
   serverBelum: "Server belum tersambung",

@@ -1,0 +1,159 @@
+# Menguji Jejak Setara setiap ada perubahan berkas Jejak Setara yang di-push ke branch "main",
+# lalu memperbarui lingkungan uji di Cloudflare (spesifikasi JS-03, P-8; Architecture 4.4).
+# Deploy dilewati dengan pemberitahuan selama rahasia Cloudflare atau Database ID uji belum diisi.
+# Sejak JS-04 (P-32) kunci Worker KUNCI_SANDI dan KUNCI_IP yang belum ada dibuat sekali dan ikut deploy yang sama.
+name: "Jejak: uji"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/jejak-setara/**"
+      - "web/jejak-setara/**"
+      - "server/jejak-setara/**"
+      - "scripts/jejak-setara/**"
+      - "scripts/game/art/**"
+      - "e2e/jejak-setara/**"
+      - "docs/jejak-setara/**"
+      - "vite.jejak.config.ts"
+      - "vitest.jejak.config.ts"
+      - "vitest.jejak-server.config.ts"
+      - "playwright.jejak.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/jejak-uji.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  uji:
+    name: Uji
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: jejak-uji-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Pasang dependensi
+        run: npx -y pnpm@11.25.0 install --frozen-lockfile
+
+      - name: Periksa konten Jejak
+        run: npx -y pnpm@11.25.0 content:check:jejak
+
+      - name: Uji Jejak
+        run: npx -y pnpm@11.25.0 test:jejak
+
+      - name: Uji server Jejak
+        run: npx -y pnpm@11.25.0 test:jejak:server
+
+      - name: Build Jejak
+        run: npx -y pnpm@11.25.0 build:jejak
+
+  deploy-uji:
+    name: Deploy uji
+    needs: uji
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: jejak-cloudflare-uji
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Periksa rahasia
+        id: rahasia
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || grep -q "ISI_DATABASE_ID_UJI" server/jejak-setara/wrangler.jsonc; then
+            echo "::notice::Deploy dilewati: rahasia Cloudflare atau Database ID uji belum diisi (Architecture bagian 18)."
+            echo "siap=tidak" >> "$GITHUB_OUTPUT"
+          else
+            echo "siap=ya" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.rahasia.outputs.siap == 'ya'
+        with:
+          node-version: 22
+
+      - name: Pasang dependensi
+        if: steps.rahasia.outputs.siap == 'ya'
+        run: npx -y pnpm@11.25.0 install --frozen-lockfile
+
+      - name: Build Jejak (uji)
+        if: steps.rahasia.outputs.siap == 'ya'
+        run: npx -y pnpm@11.25.0 build:jejak
+        env:
+          CLOUDFLARE_ENV: uji
+
+      - name: Migrasi D1 uji
+        if: steps.rahasia.outputs.siap == 'ya'
+        run: npx wrangler d1 migrations apply jejak-setara-uji --remote --env uji --config server/jejak-setara/wrangler.jsonc
+
+      # Bank awal disemai sekali per basis data (JS-05); aman dijalankan di setiap deploy (JS-08, P-7; Permintaan A-5).
+      - name: Semai bank awal
+        if: steps.rahasia.outputs.siap == 'ya'
+        run: node scripts/jejak-setara/semai.mjs --jalankan -- --remote --env uji
+
+      # Kunci yang belum ada dibuat acak dan ikut deploy lewat --secrets-file; kunci yang sudah ada tidak pernah diganti,
+      # dan isinya tidak pernah dicetak (spesifikasi JS-04, P-32). Bila daftar rahasia gagal dibaca, langkah ini gagal.
+      - name: Siapkan kunci Worker
+        if: steps.rahasia.outputs.siap == 'ya'
+        run: |
+          set -euo pipefail
+          ADA=$(npx wrangler secret list --name jejak-setara-uji --format json | jq -r '.[].name')
+          ISI='{}'
+          BARU=""
+          for NAMA in KUNCI_SANDI KUNCI_IP; do
+            if ! printf '%s\n' "$ADA" | grep -qx "$NAMA"; then
+              NILAI=$(openssl rand -hex 32)
+              echo "::add-mask::$NILAI"
+              ISI=$(NILAI="$NILAI" jq -c --arg k "$NAMA" '. + {($k): env.NILAI}' <<< "$ISI")
+              BARU="${BARU:+$BARU, }$NAMA"
+            fi
+          done
+          if [ -n "$BARU" ]; then
+            umask 077
+            printf '%s' "$ISI" > "$RUNNER_TEMP/kunci-worker.json"
+            chmod 600 "$RUNNER_TEMP/kunci-worker.json"
+            echo "Kunci Worker baru: $BARU."
+          else
+            echo "Kunci Worker sudah lengkap."
+          fi
+
+      - name: Deploy Worker uji
+        if: steps.rahasia.outputs.siap == 'ya'
+        working-directory: web/jejak-setara
+        run: |
+          trap 'rm -f "$RUNNER_TEMP/kunci-worker.json"' EXIT
+          if [ -f "$RUNNER_TEMP/kunci-worker.json" ]; then
+            npx wrangler deploy --secrets-file "$RUNNER_TEMP/kunci-worker.json" | tee "$RUNNER_TEMP/deploy.log"
+          else
+            npx wrangler deploy | tee "$RUNNER_TEMP/deploy.log"
+          fi
+
+      - name: Periksa lingkungan uji
+        if: steps.rahasia.outputs.siap == 'ya'
+        run: |
+          ALAMAT=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' "$RUNNER_TEMP/deploy.log" | head -1)
+          for i in $(seq 1 10); do
+            if curl -fsS "$ALAMAT/api/sehat" | grep -q '"lingkungan":"uji"'; then
+              echo "Lingkungan uji: $ALAMAT" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::Lingkungan uji tidak menjawab /api/sehat dengan lingkungan uji."
+          exit 1

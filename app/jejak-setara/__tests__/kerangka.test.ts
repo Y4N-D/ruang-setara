@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import worker from "../../../server/jejak-setara/src/index";
 import { PROTOKOL_VERSI } from "../inti/protokol";
 import { TEKS } from "../teks";
+import { TEKS_KONSOL } from "../teks-konsol";
 
 const AKAR = new URL("../../../", import.meta.url);
 // Akhir baris dinormalkan, agar uji tetap lulus di salinan Windows.
@@ -161,13 +162,13 @@ describe("Worker kerangka", () => {
 });
 
 describe("Teks dan halaman", () => {
-  it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01, JS-03, JS-07, dan JS-08", () => {
+  it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01, JS-03, JS-07, dan JS-08 (tanpa konsolJudul dan konsolIsi sejak JS-04)", () => {
+    expect(TEKS).not.toHaveProperty("konsolJudul");
+    expect(TEKS).not.toHaveProperty("konsolIsi");
     expect(TEKS).toEqual({
       judulTabPemain: "Jejak Setara",
       judulTabKonsol: "Konsol admin · Jejak Setara",
       judul: "Jejak Setara",
-      konsolJudul: "Konsol admin",
-      konsolIsi: "Konsol sedang disiapkan.",
       serverMemeriksa: "Memeriksa server…",
       serverSiap: "Server siap",
       serverBelum: "Server belum tersambung",
@@ -308,6 +309,178 @@ describe("Teks dan halaman", () => {
     });
   });
 
+  it("JS-04: TEKS_KONSOL sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-04 (P-51)", () => {
+    expect(TEKS_KONSOL).toEqual({
+      merek: "Jejak Setara",
+      subjudul: "Konsol guru dan admin",
+      memuat: "Memuat konsol…",
+      serverTidakMenjawab: "Server belum tersambung. Periksa internet, lalu muat ulang halaman.",
+      muatUlang: "Muat ulang",
+      peran: {
+        admin: "Admin",
+        guru: "Guru",
+      },
+      pengguna: "{nama} · {peran}",
+      keluar: "Keluar",
+      menu: {
+        label: "Menu konsol",
+        tombol: "Menu",
+        dasbor: "Dasbor",
+        akun: "Akun",
+        sandi: "Sandi saya",
+      },
+      sesiBerakhir: "Sesi berakhir. Silakan masuk lagi.",
+      hanyaAdmin: "Halaman ini hanya untuk admin.",
+      keDasbor: "Ke dasbor",
+      tampilkan: "Tampilkan",
+      sembunyikan: "Sembunyikan",
+      batal: "Batal",
+      masuk: {
+        email: "Email",
+        sandi: "Sandi",
+        tombol: "Masuk",
+        memeriksa: "Memeriksa…",
+        isiKosong: "Isi email dan sandi.",
+        kreditAset: "Aset visual digambar dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN.",
+        kreditHuruf: "Huruf Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.",
+      },
+      sandi: {
+        judulWajib: "Buat sandi baru",
+        penjelasanWajib: "Anda masuk dengan sandi sementara. Buat sandi baru sebelum memakai konsol.",
+        judul: "Sandi saya",
+        sekarang: "Sandi sekarang",
+        baru: "Sandi baru",
+        ulangi: "Ulangi sandi baru",
+        petunjuk: "Minimal 12 karakter. Kalimat pendek yang mudah Anda ingat lebih kuat daripada kata acak yang pendek.",
+        simpan: "Simpan sandi",
+        menyimpan: "Menyimpan…",
+        berhasil: "Sandi baru tersimpan.",
+        berhasilLain: "Sandi baru tersimpan. Akun ini sudah dikeluarkan dari perangkat lain.",
+        tidakSama: "Kedua sandi baru tidak sama.",
+      },
+      dasbor: {
+        judul: "Dasbor",
+        salam: "Selamat datang, {nama}.",
+        peringatan: "Peringatan",
+        rujukanBelum: "{n} rujukan belum diverifikasi. Kejadian belum bisa terbit sampai semua rujukannya diverifikasi Peninjau.",
+        tanpaPeringatan: "Tidak ada peringatan.",
+        ruang: "Ruang yang sedang berjalan",
+        ruangKosong: "Belum ada ruang yang berjalan.",
+        sesi: "Sesi terakhir",
+        sesiKosong: "Belum ada sesi kelas.",
+        memuat: "Memuat…",
+        gagal: "Data dasbor gagal dimuat.",
+        cobaLagi: "Coba lagi",
+      },
+      akun: {
+        judul: "Akun",
+        ringkasan: "{n} akun · {m} aktif",
+        baru: "+ Akun baru",
+        kolomNama: "Nama",
+        kolomEmail: "Email",
+        kolomPeran: "Peran",
+        kolomStatus: "Status",
+        kolomMasuk: "Masuk terakhir",
+        peninjau: "Peninjau",
+        aktif: "Aktif",
+        nonaktif: "Nonaktif",
+        belumGanti: "Belum ganti sandi",
+        belumPernah: "Belum pernah",
+        anda: "(Anda)",
+        ubah: "Ubah",
+        ubahLabel: "Ubah akun {nama}",
+        gagal: "Daftar akun gagal dimuat.",
+      },
+      akunBaru: {
+        judul: "Akun baru",
+        email: "Email",
+        nama: "Nama tampilan",
+        namaPetunjuk: "Nama yang tampil di konsol, misalnya Bu Sari.",
+        peran: "Peran",
+        peninjau: "Peninjau (boleh menandai rujukan terverifikasi)",
+        buat: "Buat akun",
+        membuat: "Membuat…",
+      },
+      sementara: {
+        judulBaru: "Akun baru dibuat",
+        judulAturUlang: "Sandi diatur ulang",
+        berhasilBaru: "Akun {nama} ({peran}) sudah dibuat.",
+        berhasilAturUlang: "Sandi {nama} sudah diatur ulang.",
+        label: "Sandi sementara",
+        catatan: "Berikan sandi ini langsung kepada pemilik akun. Sandi hanya tampil sekali dan wajib diganti saat masuk pertama.",
+        salin: "Salin sandi",
+        tersalin: "Sandi disalin.",
+        gagalSalin: "Sandi gagal disalin. Pilih teksnya, lalu salin manual.",
+        selesai: "Selesai",
+      },
+      ubah: {
+        judul: "Ubah akun {nama}",
+        simpan: "Simpan perubahan",
+        menyimpan: "Menyimpan…",
+        diri: "Anda tidak bisa menurunkan peran, menonaktifkan, atau mengatur ulang sandi akun sendiri. Ganti sandi Anda lewat Sandi saya.",
+        nonaktifkan: "Nonaktifkan akun",
+        aktifkan: "Aktifkan akun",
+        aturUlang: "Atur ulang sandi",
+        tersimpan: "Perubahan tersimpan.",
+        aktifLagi: "Akun {nama} aktif lagi.",
+      },
+      konfirmasi: {
+        nonaktifJudul: "Nonaktifkan akun {nama}?",
+        nonaktifIsi: "{nama} tidak bisa masuk lagi dan dikeluarkan dari semua perangkat. Akun bisa diaktifkan kembali kapan saja.",
+        nonaktifTombol: "Nonaktifkan",
+        aturUlangJudul: "Atur ulang sandi {nama}?",
+        aturUlangIsi: "Sandi lama tidak berlaku lagi, dan {nama} dikeluarkan dari semua perangkat. Sandi sementara baru hanya tampil sekali.",
+        aturUlangTombol: "Atur ulang sandi",
+      },
+      galat: {
+        MASUK_SALAH: "Email atau sandi salah.",
+        TERKUNCI: "Terlalu banyak percobaan masuk. Tunggu 15 menit, lalu coba lagi.",
+        TERLALU_SERING: "Terlalu banyak percobaan. Tunggu sebentar.",
+        PERLU_MASUK: "Silakan masuk dulu.",
+        WAJIB_GANTI_SANDI: "Ganti sandi sementara dulu.",
+        TIDAK_BERWENANG: "Anda tidak berwenang melakukan ini.",
+        ASAL_DITOLAK: "Permintaan ditolak.",
+        PERMINTAAN_SALAH: "Permintaan tidak sah.",
+        KONSOL_BELUM_SIAP: "Konsol belum siap. Coba lagi beberapa menit lagi.",
+        SANDI_LAMA_SALAH: "Sandi sekarang tidak cocok.",
+        SANDI_PENDEK: "Sandi baru minimal 12 karakter.",
+        SANDI_PANJANG: "Sandi baru paling banyak 128 karakter.",
+        SANDI_SAMA_EMAIL: "Sandi baru tidak boleh sama dengan email.",
+        SANDI_SAMA: "Sandi baru harus berbeda dari sandi sekarang.",
+        EMAIL_SALAH: "Tulis email yang benar, misalnya nama@sekolah.sch.id.",
+        EMAIL_DIPAKAI: "Email ini sudah dipakai akun lain.",
+        NAMA_SALAH: "Nama tampilan harus 1 sampai 40 karakter.",
+        AKUN_TIDAK_ADA: "Akun tidak ditemukan.",
+        TIDAK_BOLEH_DIRI: "Anda tidak bisa menurunkan peran, menonaktifkan, atau mengatur ulang sandi akun sendiri.",
+        ADMIN_TERAKHIR: "Harus ada sedikitnya satu admin aktif.",
+        KUNCI_ADMIN_SALAH: "Kunci admin awal tidak cocok.",
+        JARINGAN: "Gagal menghubungi server. Periksa internet, lalu coba lagi.",
+        UMUM: "Terjadi kesalahan. Coba lagi.",
+      },
+      alurAdminAwal: {
+        dibuat: "Akun admin dibuat.",
+        dipulihkan: "Akun admin dipulihkan: sandi sementara baru berlaku, dan semua sesi lama sudah keluar.",
+        alamat: "Alamat konsol: {alamat}/admin/",
+        petunjuk: "Masuk dengan email di rahasia JEJAK_ADMIN_EMAIL dan sandi sementara di rahasia JEJAK_ADMIN_SANDI_SEMENTARA, lalu buat sandi baru.",
+        rahasiaCloudflare: "Rahasia Cloudflare belum diisi (Architecture bagian 18, langkah 6).",
+        rahasiaAdmin: "Rahasia JEJAK_ADMIN_EMAIL atau JEJAK_ADMIN_SANDI_SEMENTARA belum diisi (Architecture bagian 18, langkah 6).",
+        emailSalah: "JEJAK_ADMIN_EMAIL bukan alamat email.",
+        sandiSalah: "JEJAK_ADMIN_SANDI_SEMENTARA harus 12 sampai 128 karakter. Isi ulang rahasianya, lalu jalankan lagi.",
+        namaSalah: "Nama tampilan harus 1 sampai 40 karakter.",
+        belumSiap: "Konsol belum siap: kunci Worker belum dibuat. Jalankan ulang \"Jejak: uji\", lalu coba lagi.",
+        gagal: "Akun admin gagal dibuat (status {status}).",
+        kunciBaru: "Kunci Worker baru: {nama}.",
+        kunciLengkap: "Kunci Worker sudah lengkap.",
+      },
+    });
+  });
+
+  it("JS-04: teks konsol tidak diimpor layar pemain (P-51, AC-19)", () => {
+    const pemain = baca("app/jejak-setara/teks.ts");
+    expect(pemain).not.toContain("TEKS_KONSOL =");
+    expect(pemain).not.toMatch(/from "\.\/teks-konsol"/);
+  });
+
   it.each([
     ["web/jejak-setara/index.html", TEKS.judulTabPemain, "../../app/jejak-setara/assets/ikon/ikon_jejak.png"],
     ["web/jejak-setara/admin/index.html", TEKS.judulTabKonsol, "../../../app/jejak-setara/assets/ikon/ikon_jejak.png"],
@@ -364,7 +537,7 @@ describe("Token dan tajuk", () => {
     );
   });
 
-  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi), dengan Database ID uji yang sudah diisi", () => {
+  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi) dan JS-04 (P-33), dengan Database ID uji yang sudah diisi", () => {
     expect(JSON.parse(baca("server/jejak-setara/wrangler.jsonc"))).toEqual({
       "$schema": "../../node_modules/wrangler/config-schema.json",
       "name": "jejak-setara-lokal",
@@ -376,19 +549,27 @@ describe("Token dan tajuk", () => {
       "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-lokal", "database_id": "00000000-0000-4000-8000-000000000000", "migrations_dir": "migrations" }],
       "ratelimits": [
         { "name": "BATAS_PUBLIK", "namespace_id": "3001", "simple": { "limit": 300, "period": 60 } },
-        { "name": "BATAS_WS", "namespace_id": "3002", "simple": { "limit": 300, "period": 60 } }
+        { "name": "BATAS_WS", "namespace_id": "3002", "simple": { "limit": 300, "period": 60 } },
+        { "name": "BATAS_MASUK", "namespace_id": "3003", "simple": { "limit": 100, "period": 60 } }
       ],
       "triggers": { "crons": ["0 19 * * *"] },
-      "vars": { "LINGKUNGAN": "lokal" },
+      "vars": {
+        "LINGKUNGAN": "lokal",
+        "ITERASI_SANDI": "15000",
+        "KUNCI_SANDI": "lokal-kunci-sandi-bukan-rahasia",
+        "KUNCI_IP": "lokal-kunci-ip-bukan-rahasia",
+        "KUNCI_ADMIN": "lokal-kunci-admin-bukan-rahasia"
+      },
       "env": {
         "uji": {
           "name": "jejak-setara-uji",
-          "vars": { "LINGKUNGAN": "uji" },
+          "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "15000" },
           "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
           "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "8870d944-5d38-4c97-b8bf-819f7676eeb1", "migrations_dir": "migrations" }],
           "ratelimits": [
             { "name": "BATAS_PUBLIK", "namespace_id": "3101", "simple": { "limit": 300, "period": 60 } },
-            { "name": "BATAS_WS", "namespace_id": "3102", "simple": { "limit": 300, "period": 60 } }
+            { "name": "BATAS_WS", "namespace_id": "3102", "simple": { "limit": 300, "period": 60 } },
+            { "name": "BATAS_MASUK", "namespace_id": "3103", "simple": { "limit": 10, "period": 60 } }
           ]
         }
       }
@@ -506,6 +687,91 @@ describe("JS-08: semai bank awal, ringkasan ruang coba, dan kait uji lokal (P-6,
         expect(j.status, `${jalur} ${lingkungan}`).toBe(404);
       }
     }
+  });
+});
+
+describe("JS-04: alur kerja admin awal dan kunci Worker (P-29, P-32; AC-10)", () => {
+  const awal = baca(".github/workflows/jejak-admin-awal.yml");
+  const uji = baca(".github/workflows/jejak-uji.yml");
+  const namaLangkah = (isi: string) => [...isi.matchAll(/\n      - name: ([^\n]+)\n/g)].map((m) => m[1]);
+  const t = TEKS_KONSOL.alurAdminAwal;
+
+  it("\"Jejak: admin awal\": tombol Run workflow dengan masukan nama_tampilan (bawaan Admin), grup concurrency, izin baca", () => {
+    expect(awal).toContain('name: "Jejak: admin awal"');
+    expect(awal).toMatch(/on:\n  workflow_dispatch:\n    inputs:\n      nama_tampilan:\n/);
+    expect(awal).not.toMatch(/\n  push:/);
+    expect(awal).toContain('default: "Admin"');
+    expect(awal).toContain("permissions:\n  contents: read\n");
+    expect(awal).toContain("concurrency:\n  group: jejak-cloudflare-uji\n  cancel-in-progress: false\n");
+    expect(awal).toContain("timeout-minutes: 10");
+  });
+
+  it("langkah P-29 berurutan; langkah penutup selalu dijalankan sesudah kunci disimpan", () => {
+    expect(namaLangkah(awal)).toEqual([
+      "Periksa rahasia dan masukan",
+      "Simpan kunci sekali pakai",
+      "Cari alamat lingkungan uji",
+      "Buat atau pulihkan akun",
+      "Tutup kembali rute admin awal",
+    ]);
+    expect(awal).toContain("      - name: Simpan kunci sekali pakai\n        id: kunci\n");
+    expect(awal).toContain("      - name: Tutup kembali rute admin awal\n        if: always() && steps.kunci.outcome != 'skipped'\n");
+    expect(awal).toContain("        run: openssl rand -hex 32 | tr -d '\\n' | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name jejak-setara-uji\n");
+  });
+
+  it("kunci sekali pakai disamarkan; isi JSON disusun jq dari variabel lingkungan ke berkas 600; ulang 10 kali dengan jeda 3 detik", () => {
+    expect(awal).toContain("KUNCI=$(openssl rand -hex 32)");
+    expect(awal).toContain('echo "::add-mask::$KUNCI"');
+    expect(awal).toContain('printf \'%s\' "$KUNCI" | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name jejak-setara-uji');
+    expect(awal).toContain("jq -n '{email: env.JEJAK_ADMIN_EMAIL, sandi: env.JEJAK_ADMIN_SANDI_SEMENTARA, namaTampilan: env.NAMA_TAMPILAN}' > \"$ISI\"");
+    expect(awal).toContain('chmod 600 "$ISI"');
+    expect(awal).toContain("trap 'rm -f \"$ISI\" \"$JAWABAN\"' EXIT");
+    expect(awal).toContain('-H "X-Jejak-Kunci-Admin: $KUNCI"');
+    expect(awal).toContain("for i in $(seq 1 10); do");
+    expect(awal).toContain("sleep 3");
+    expect(awal).toContain('if [ "$STATUS" = "503" ] && [ "$KODE" = "KONSOL_BELUM_SIAP" ]; then');
+    // Semua wrangler terkunci di versi 4.92.0.
+    expect([...awal.matchAll(/npx -y wrangler@(\S+)/g)].map((m) => m[1])).toEqual(["4.92.0", "4.92.0"]);
+  });
+
+  it("isi rahasia tidak pernah dicetak, dan ringkasan tanpa email dan sandi", () => {
+    const cetak = awal.split("\n").filter((b) => /\becho\b|print\(/.test(b));
+    expect(cetak.length).toBeGreaterThan(10);
+    for (const baris of cetak) {
+      // Nama rahasia boleh tertulis di pesan; nilainya (variabel lingkungan, isi berkas) tidak.
+      expect(baris).not.toMatch(/\$\{?(JEJAK_ADMIN_|NAMA_TAMPILAN|ISI\b|JAWABAN\b)|os\.environ|\b(email|sandi|nama)\)/);
+      if (baris.includes("$KUNCI")) expect(baris).toMatch(/::add-mask::\$KUNCI|KUNCI=\$KUNCI" >> "\$GITHUB_ENV"/);
+    }
+  });
+
+  it("teks ringkasan dan galat sama dengan TEKS_KONSOL.alurAdminAwal", () => {
+    for (const teks of [t.dibuat, t.dipulihkan, t.petunjuk, t.rahasiaCloudflare, t.rahasiaAdmin, t.emailSalah, t.sandiSalah, t.namaSalah, t.belumSiap]) {
+      expect(awal).toContain(teks);
+    }
+    expect(awal).toContain(`echo "${t.alamat.replace("{alamat}", "$ALAMAT")}"`);
+    expect(awal).toContain(`echo "::error::${t.gagal.replace("{status}", "$STATUS")}"`);
+  });
+
+  it("jejak-uji.yml: Siapkan kunci Worker di antara Semai bank awal dan Deploy Worker uji, dengan syarat yang sama", () => {
+    const langkah = [...uji.matchAll(/\n      - name: ([^\n]+)\n        if: ([^\n]+)\n/g)].map((m) => [m[1], m[2]]);
+    const nama = langkah.map((l) => l[0]);
+    const i = nama.indexOf("Siapkan kunci Worker");
+    expect(nama[i - 1]).toBe("Semai bank awal");
+    expect(nama[i + 1]).toBe("Deploy Worker uji");
+    expect(langkah[i][1]).toBe("steps.rahasia.outputs.siap == 'ya'");
+  });
+
+  it("jejak-uji.yml: hanya kunci yang belum ada yang dibuat; deploy memakai --secrets-file; tidak ada rahasia yang dihapus", () => {
+    expect(uji).toContain("ADA=$(npx wrangler secret list --name jejak-setara-uji --format json | jq -r '.[].name')");
+    expect(uji).toContain("for NAMA in KUNCI_SANDI KUNCI_IP; do");
+    expect(uji).toContain("NILAI=$(openssl rand -hex 32)");
+    expect(uji).toContain('echo "::add-mask::$NILAI"');
+    expect(uji).toContain('chmod 600 "$RUNNER_TEMP/kunci-worker.json"');
+    expect(uji).toContain(`echo "${t.kunciBaru.replace("{nama}", "$BARU")}"`);
+    expect(uji).toContain(`echo "${t.kunciLengkap}"`);
+    expect(uji).toContain('npx wrangler deploy --secrets-file "$RUNNER_TEMP/kunci-worker.json" | tee "$RUNNER_TEMP/deploy.log"');
+    expect(uji).toContain("trap 'rm -f \"$RUNNER_TEMP/kunci-worker.json\"' EXIT");
+    expect(uji).not.toMatch(/secret (delete|put)/);
   });
 });
 

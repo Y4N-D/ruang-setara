@@ -1,5 +1,6 @@
-// Tajuk, kode ruang, pembanding waktu konstan, dan hash token (spesifikasi JS-03, P-2, P-10 sampai P-14).
-// Tidak menulis log: token, nama, nomor absen, dan alamat IP tidak pernah dicatat (Architecture 12.3).
+// Tajuk, kode ruang, pembanding waktu konstan, dan hash token (spesifikasi JS-03, P-2, P-10 sampai P-14), serta
+// pemeriksaan CSRF dan pembaca isi permintaan berbatas untuk rute akun (JS-04, P-10 dan P-11).
+// Tidak menulis log: token, nama, nomor absen, email, sandi, dan alamat IP tidak pernah dicatat (Architecture 12.3).
 import { ABJAD_KODE } from "../../../app/jejak-setara/inti/aturan";
 import type { PembatasLaju } from "./env";
 
@@ -57,6 +58,52 @@ export function asalDiizinkan(asal: string | null, url: URL, lingkungan: string)
   if (!asal) return false;
   if (asal === url.origin) return true;
   return lingkungan === "lokal" && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(asal);
+}
+
+/**
+ * Permintaan yang mengubah data (JS-04, P-10) wajib membawa `X-Jejak: 1` dan `Origin` yang lolos asalDiizinkan.
+ * Tajuk buatan sendiri memaksa peramban meminta izin dulu (preflight) untuk permintaan dari asal lain.
+ */
+export function lolosCsrf(request: Request, url: URL, lingkungan: string): boolean {
+  return request.headers.get("X-Jejak") === "1" && asalDiizinkan(request.headers.get("Origin"), url, lingkungan);
+}
+
+/** Batas isi permintaan rute akun (JS-04, P-11). */
+export const BATAS_ISI_BYTE = 4096;
+
+/**
+ * Isi JSON paling banyak 4.096 byte (JS-04, P-11). Hasil `{ ok: false }` bila lebih panjang, bukan UTF-8, atau bukan
+ * JSON; isi yang terlalu panjang berhenti dibaca begitu melewati batas.
+ */
+export async function bacaIsiJson(request: Request): Promise<{ ok: true; isi: unknown } | { ok: false }> {
+  const panjang = Number(request.headers.get("Content-Length") ?? "0");
+  if (panjang > BATAS_ISI_BYTE) return { ok: false };
+  const potongan: Uint8Array[] = [];
+  let total = 0;
+  if (request.body) {
+    const pembaca = request.body.getReader();
+    for (;;) {
+      const { done, value } = await pembaca.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > BATAS_ISI_BYTE) {
+        await pembaca.cancel().catch(() => undefined);
+        return { ok: false };
+      }
+      potongan.push(value);
+    }
+  }
+  const byte = new Uint8Array(total);
+  let i = 0;
+  for (const p of potongan) {
+    byte.set(p, i);
+    i += p.byteLength;
+  }
+  try {
+    return { ok: true, isi: JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(byte)) };
+  } catch {
+    return { ok: false };
+  }
 }
 
 /** Alamat IP hanya dipakai sesaat sebagai kunci pembatas, tidak disimpan (P-13). */

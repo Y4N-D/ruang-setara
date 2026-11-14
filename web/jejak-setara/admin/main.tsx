@@ -1,4 +1,4 @@
-// Titik masuk konsol admin Jejak Setara ("/admin/"). JS-01: halaman kosong.
+// Titik masuk konsol guru dan admin Jejak Setara ("/admin/"). Isinya admin/App.tsx (sejak JS-04).
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 // Huruf piksel dari paket @fontsource, hanya subset latin berbobot 400, seperti Sehari Setara (keputusan A11).

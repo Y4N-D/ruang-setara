@@ -13,14 +13,14 @@ const UKURAN = [
 ] as const;
 
 // Sejak JS-03 halaman pemain adalah alur gabung (gabung.uji.ts); uji penanda server di "/" tetap di bawah.
+// Sejak JS-04 konsol "/admin/" membuka halaman masuk (spesifikasi JS-04, P-39); alurnya diuji di konsol.uji.ts.
 const HALAMAN = [
   {
     jalur: "/admin/",
     berkas: "konsol",
     judulTab: "Konsol admin · Jejak Setara",
-    atas: "Jejak Setara",
-    judul: "Konsol admin",
-    isi: "Konsol sedang disiapkan.",
+    judul: "Jejak Setara",
+    subjudul: "Konsol guru dan admin",
   },
 ] as const;
 
@@ -82,9 +82,9 @@ for (const halaman of HALAMAN) {
       await expect(page.locator("html")).toHaveAttribute("lang", "id");
       await expect(page).toHaveTitle(halaman.judulTab);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(halaman.judul);
-      await expect(page.locator(".js-isi")).toHaveText(halaman.isi);
-      if (halaman.atas) await expect(page.locator(".js-atas")).toHaveText(halaman.atas);
-      else await expect(page.locator(".js-atas")).toHaveCount(0);
+      await expect(page.locator(".js-konsol-subjudul")).toHaveText(halaman.subjudul);
+      await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+      await expect(page.getByLabel("Sandi", { exact: true })).toBeVisible();
 
       const huruf = await page.evaluate(async () => {
         await document.fonts.ready;

@@ -1,8 +1,12 @@
-// Worker Jejak Setara (spesifikasi JS-01 dan JS-03). Menjawab /api/sehat, rute ruang, dan sambungan
-// WebSocket pemain; jalur /api/* dan /ws/* lain belum tersedia. Jalur lain disajikan lapisan aset
-// Cloudflare; yang sampai ke sini diteruskan ke ASSETS. Tidak menulis log permintaan (Architecture 12.3).
+// Worker Jejak Setara (spesifikasi JS-01, JS-03, dan JS-04). Menjawab /api/sehat, rute ruang, sambungan WebSocket
+// pemain, serta rute akun dan dasbor konsol (JS-04); jalur /api/* dan /ws/* lain belum tersedia. Jalur lain disajikan
+// lapisan aset Cloudflare; yang sampai ke sini diteruskan ke ASSETS. Tidak menulis log permintaan (Architecture 12.3).
 import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/protokol";
+import { jalurAkun, tanganiApiAkun } from "./api/akun";
+import { tanganiApiDasbor } from "./api/dasbor";
+import { JALUR_MASUK, tanganiApiMasuk } from "./api/masuk";
 import { tanganiApiRuang, tanganiWsRuang } from "./api/ruang";
+import { bersihkanAkun } from "./db/akun";
 import { tandaiRuangLama } from "./db/ruang";
 import type { Env } from "./env";
 import { jawabGalat, jawabJson } from "./keamanan";
@@ -24,14 +28,20 @@ export default {
     if (pathname.startsWith("/api/publik/ruang/") || pathname === "/api/ruang-coba" || pathname.startsWith("/api/ruang-coba/")) {
       return tanganiApiRuang(request, env, url);
     }
+    if (JALUR_MASUK.has(pathname)) return tanganiApiMasuk(request, env, url);
+    if (jalurAkun(pathname)) return tanganiApiAkun(request, env, url);
+    if (pathname === "/api/dasbor") return tanganiApiDasbor(request, env);
     if (pathname.startsWith("/api/") || pathname.startsWith("/ws/")) {
       return jawabGalat("BELUM_TERSEDIA", "Fitur ini belum tersedia.", 404);
     }
     return env.ASSETS.fetch(request);
   },
 
-  // Pemicu harian 03.00 WITA: jaring pengaman untuk ruang yang tidak sempat ditutup Durable Object-nya.
+  // Pemicu harian 03.00 WITA: jaring pengaman untuk ruang yang tidak sempat ditutup Durable Object-nya, lalu
+  // pembersihan sesi dan catatan pembatas percobaan masuk yang sudah lama (JS-04, P-35).
   async scheduled(_pengendali: ScheduledController, env: Env): Promise<void> {
-    await tandaiRuangLama(env.DB, Date.now());
+    const sekarang = Date.now();
+    await tandaiRuangLama(env.DB, sekarang);
+    await bersihkanAkun(env.DB, sekarang);
   },
 } satisfies ExportedHandler<Env>;

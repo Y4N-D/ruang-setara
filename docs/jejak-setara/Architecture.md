@@ -84,11 +84,12 @@ ruang-setara/
 │  │  ├─ mesin/                      # loop, kamera, render kanvas, input, interpolasi
 │  │  └─ jaringan.ts                 # klien WebSocket, sambung ulang, sinkron jam
 │  ├─ admin/                         # konsol admin
-│  │  ├─ App.tsx · rute.ts · api.ts · Kerangka.tsx · Dialog.tsx
+│  │  ├─ App.tsx · rute.ts · api.ts · Kerangka.tsx · Dialog.tsx · Formulir.tsx
 │  │  ├─ halaman/                    # Masuk, GantiSandi, Dasbor, Akun (JS-04); Ruang, Riwayat, Kejadian, Penyunting, Paket, Rujukan, Statistik, Pengaturan, Log
 │  │  └─ kelas/                      # layar kelas: Lobi, Langsung, Podium, Pembahasan
 │  ├─ bersama/                       # komponen untuk pemain dan konsol: bingkai, tombol pilihan, dialog kejadian, kartu dampak; PenandaServer (penanda lingkungan JS-01). HalamanKerangka JS-01 dihapus di JS-04
 │  ├─ teks.ts                        # semua teks yang tampil (bagian 17)
+│  ├─ teks-konsol.ts                 # teks konsol, galat API akun, dan ringkasan "Jejak: admin awal" (JS-04)
 │  ├─ peta/kampung.json              # hasil build_peta.py; jangan disunting manual
 │  ├─ peta/kampung_gambar.json       # hasil build_peta.py: nomor ubin per lapisan untuk layar pemain (C-9)
 │  ├─ assets/                        # manifest.ts, CREDITS.md, ubin/, obj/, ava/, npc/, ikon/, sfx/
@@ -896,7 +897,7 @@ Ambang kinerja otomatis sejak JS-08 (AC-19), dari histogram waktu gambar di ukur
 
 - TypeScript mode ketat, komponen fungsi, tanpa `any`.
 - `inti/` murni: tanpa DOM, React, `Date.now()` langsung, atau API Workers. Waktu dan acak selalu masuk sebagai parameter.
-- Semua teks yang tampil ke pengguna berasal dari berkas teks (`app/jejak-setara/teks.ts`) atau dari konten, bukan ditulis langsung di komponen.
+- Semua teks yang tampil ke pengguna berasal dari berkas teks (`app/jejak-setara/teks.ts`) atau dari konten, bukan ditulis langsung di komponen. Teks konsol ada di `teks-konsol.ts`, yang tidak diimpor layar pemain: modul yang diimpor kedua halaman masuk ke potongan kode bersama yang juga dimuat layar pemain (Build JS-04). Karena alasan yang sama, konsol tidak mengimpor `assets/manifest.ts`; keempat ikon konsol diimpor langsung dari berkas PNG yang sama.
 - Semua akses D1 lewat `server/jejak-setara/src/db/` dengan kueri berparameter, tanpa menyambung string SQL. Pengecualiannya hanya SQL semai bank awal (`scripts/jejak-setara/semai.mjs`), yang seperti berkas migrasi disusun sebagai teks dari berkas repositori lewat satu fungsi pengutip yang diuji (JS-05).
 - Setiap pesan protokol baru menambah skema di `inti/protokol.ts` dan ujinya.
 - Dependensi baru memerlukan izin tertulis pemilik proyek dan dicatat sebagai keputusan baru di bagian 1.
