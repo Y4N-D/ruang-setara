@@ -140,8 +140,34 @@ Dikerjakan dalam mode ZIP (AGENTS 11.1 sampai 11.4) dari ZIP `main` 14 November 
 | Pukul 12.45 (push pukul 12.43 dan "Jejak: admin awal" pukul 12.46; 4.000 iterasi) | `838a9989`, `a88860e8`, dan `ab5cd37f` | Sekitar 3,4 ms | Sekitar 10,35 ms (tooltip sebelum data lengkap: 10,35 ms) | 0 |
 
 - Pembacaan: puncak 10,4 ms di kedua selang cocok dengan satu kali masuk yang menghitung hash 15.000 iterasi di isolat yang baru dimulai (sekitar 2–3 ms awal isolat, 1–2 ms pekerjaan rute, dan sekitar 6 ms hash). Permintaan dua hash di selang 11.45 berlangsung beruntun, jadi isolatnya sudah hangat. Di selang 12.45, akun admin masih ber-hash 15.000 iterasi sampai "Jejak: admin awal" memulihkannya, sehingga satu kali masuk sebelum langkah itu menghasilkan puncak yang sama. Dengan 4.000 iterasi, perkiraan paling berat sekitar 6–7,7 ms, dan P50 3,4 ms cocok dengan perkiraan itu.
-- Grafik dasbor tidak memisahkan jenis permintaan, jadi pembacaan ini belum cukup untuk AC-20. Sejak ukur ulang pertama, akun admin sudah ber-hash 4.000 iterasi dan akun guru percobaan nonaktif, sehingga satu percobaan bersih (masuk, ganti sandi lewat "Sandi saya", lalu keluar; langkahnya di `PLAN.md`, bagian "Penutupan JS-04") memberi angka yang hanya berasal dari 4.000 iterasi.
+- Grafik dasbor tidak memisahkan jenis permintaan, jadi pembacaan ini belum cukup untuk AC-20. Pembacaan "hash 15.000 iterasi" di atas kemudian terbantah oleh percobaan bersih di bawah. Sejak ukur ulang pertama, akun admin sudah ber-hash 4.000 iterasi dan akun guru percobaan nonaktif, sehingga satu percobaan bersih (masuk, ganti sandi lewat "Sandi saya", lalu keluar; langkahnya di `PLAN.md`, bagian "Penutupan JS-04") memberi angka yang hanya berasal dari 4.000 iterasi.
+
+**Percobaan bersih (14 Nov 2026 pukul 13.30 WITA).** Pemilik proyek masuk dengan sandi admin (hash 4.000 iterasi), mengganti sandi lewat "Sandi saya", keluar, lalu masuk lagi; semuanya berhasil.
+
+| Tangkapan layar | P50 | P90 | P99 dan P999 | Galat |
+|---|---|---|---|---|
+| Tepat sesudah percobaan (data belum lengkap) | 1,81 ms | 7,2 ms | 7,2 ms | 0 |
+| Puluhan menit kemudian (di antaranya ZIP Plan JS-10 di-push dan Worker uji dideploy ulang) | 1,81 ms | 10,08 ms | 14,46 ms | 0 |
+
+**Percobaan lokal CPU awal (14 Nov 2026).** Node 22.23.4 dengan D1 tiruan di proses yang sama (angka mutlak lebih besar daripada Worker saja), satu proses baru untuk setiap jumlah iterasi:
+
+| Permintaan | 4.000 iterasi | 15.000 iterasi |
+|---|---|---|
+| `/api/sehat` pertama sesudah proses dimulai | 29,45 ms | 31,59 ms |
+| `/api/sehat` kedua | 0,31 ms | 0,31 ms |
+| Admin awal pertama | 7,41 ms | 9,49 ms |
+| Masuk pertama | 3,90 ms | 5,63 ms |
+| Ganti sandi wajib pertama | 3,86 ms | 7,45 ms |
+| Ganti sandi sukarela pertama | 2,98 ms | 7,16 ms |
+| Hangat, median 12 ulangan: masuk | 1,75 ms | 3,60 ms |
+| Hangat, median 12 ulangan: ganti sandi sukarela | 2,75 ms | 6,36 ms |
+| Hangat, median 12 ulangan: `/api/saya` | 0,31 ms | 0,27 ms |
+
+Evaluasi modul Worker hasil build (lingkup global) di Node: 19,2 ms CPU.
+
+- Pembacaan: puncak 10–15 ms di lingkungan uji tidak berubah walau iterasi turun hampir empat kali (14,87 ms dengan 15.000 dan 14,46 ms dengan 4.000), jadi penyebabnya bukan hash. Permintaan pertama di isolat yang baru dimulai membayar biaya awal (evaluasi modul dan kode yang baru pertama kali dijalankan), dan Worker yang jarang dipakai sering mendapat isolat baru, terutama sesudah deploy dan sesudah sepi beberapa saat. Penurunan iterasi tetap berguna untuk permintaan hangat.
+- Usulan penutupan AC-20 ada di `PLAN.md`, bagian "Penutupan JS-04".
 
 ## Keputusan: Kembali ke Build untuk AC-20 (perbaikan sudah diterapkan)
 
-Kriteria lain lulus, dan langkah pemilik proyek di lingkungan uji berhasil tanpa galat. AC-20 gagal pada pengukuran pertama; perbaikannya sudah diterapkan dan diuji di lingkungan agen. Bila percobaan bersih menunjukkan persentil tertinggi ≤ 7 ms tanpa galat, keputusan menjadi **Lulus** dan JS-04 Selesai.
+Kriteria lain lulus, dan langkah pemilik proyek di lingkungan uji berhasil tanpa galat. AC-20 gagal pada pengukuran pertama; perbaikannya sudah diterapkan dan diuji di lingkungan agen. Percobaan bersih menunjukkan bahwa puncak berasal dari isolat yang baru dimulai, bukan dari hash, tanpa galat. Keputusan akhir menunggu jawaban pemilik proyek atas usulan penutupan AC-20 di `PLAN.md`.
