@@ -1,6 +1,7 @@
 # Menguji Jejak Setara setiap ada perubahan berkas Jejak Setara yang di-push ke branch "main",
 # lalu memperbarui lingkungan uji di Cloudflare (spesifikasi JS-03, P-8; Architecture 4.4).
 # Deploy dilewati dengan pemberitahuan selama rahasia Cloudflare atau Database ID uji belum diisi.
+# Sejak JS-04 (P-32) kunci Worker KUNCI_SANDI dan KUNCI_IP yang belum ada dibuat sekali dan ikut deploy yang sama.
 name: "Jejak: uji"
 
 on:
@@ -106,10 +107,42 @@ jobs:
         if: steps.rahasia.outputs.siap == 'ya'
         run: node scripts/jejak-setara/semai.mjs --jalankan -- --remote --env uji
 
+      # Kunci yang belum ada dibuat acak dan ikut deploy lewat --secrets-file; kunci yang sudah ada tidak pernah diganti,
+      # dan isinya tidak pernah dicetak (spesifikasi JS-04, P-32). Bila daftar rahasia gagal dibaca, langkah ini gagal.
+      - name: Siapkan kunci Worker
+        if: steps.rahasia.outputs.siap == 'ya'
+        run: |
+          set -euo pipefail
+          ADA=$(npx wrangler secret list --name jejak-setara-uji --format json | jq -r '.[].name')
+          ISI='{}'
+          BARU=""
+          for NAMA in KUNCI_SANDI KUNCI_IP; do
+            if ! printf '%s\n' "$ADA" | grep -qx "$NAMA"; then
+              NILAI=$(openssl rand -hex 32)
+              echo "::add-mask::$NILAI"
+              ISI=$(NILAI="$NILAI" jq -c --arg k "$NAMA" '. + {($k): env.NILAI}' <<< "$ISI")
+              BARU="${BARU:+$BARU, }$NAMA"
+            fi
+          done
+          if [ -n "$BARU" ]; then
+            umask 077
+            printf '%s' "$ISI" > "$RUNNER_TEMP/kunci-worker.json"
+            chmod 600 "$RUNNER_TEMP/kunci-worker.json"
+            echo "Kunci Worker baru: $BARU."
+          else
+            echo "Kunci Worker sudah lengkap."
+          fi
+
       - name: Deploy Worker uji
         if: steps.rahasia.outputs.siap == 'ya'
         working-directory: web/jejak-setara
-        run: npx wrangler deploy | tee "$RUNNER_TEMP/deploy.log"
+        run: |
+          trap 'rm -f "$RUNNER_TEMP/kunci-worker.json"' EXIT
+          if [ -f "$RUNNER_TEMP/kunci-worker.json" ]; then
+            npx wrangler deploy --secrets-file "$RUNNER_TEMP/kunci-worker.json" | tee "$RUNNER_TEMP/deploy.log"
+          else
+            npx wrangler deploy | tee "$RUNNER_TEMP/deploy.log"
+          fi
 
       - name: Periksa lingkungan uji
         if: steps.rahasia.outputs.siap == 'ya'
