@@ -100,7 +100,7 @@ describe("admin awal (P-28, P-30, P-31; AC-9)", () => {
     const [baris] = d1<Record<string, unknown>>(
       `SELECT id, email, nama_tampilan, peran, peninjau, wajib_ganti_sandi, aktif, iterasi, length(garam) AS g, length(hash_sandi) AS h FROM pengguna WHERE email = ${sql(email.toLowerCase())}`,
     );
-    expect(baris).toMatchObject({ email: email.toLowerCase(), nama_tampilan: "YAN", peran: "admin", peninjau: 0, wajib_ganti_sandi: 1, aktif: 1, iterasi: 15_000, g: 24, h: 44 });
+    expect(baris).toMatchObject({ email: email.toLowerCase(), nama_tampilan: "YAN", peran: "admin", peninjau: 0, wajib_ganti_sandi: 1, aktif: 1, iterasi: 4_000, g: 24, h: 44 });
     expect(d1(`SELECT pengguna_id, aksi, rincian_json FROM log_audit WHERE sasaran = ${sql(String(baris.id))}`)).toEqual([
       { pengguna_id: null, aksi: "admin_awal", rincian_json: '{"hasil":"dibuat"}' },
     ]);
@@ -529,19 +529,19 @@ describe("kelola akun (P-20 sampai P-27; AC-7, AC-8)", () => {
 describe("hash ulang (P-2; AC-1)", () => {
   const ip = ipBaru();
 
-  it("akun dengan iterasi 5.000 menjadi 15.000 sesudah masuk, lalu tetap bisa masuk lagi", async () => {
+  it("akun dengan iterasi 2.000 menjadi 4.000 (target ITERASI_SANDI) sesudah masuk, lalu tetap bisa masuk lagi", async () => {
     const email = unik("iterasi.lama");
     const id = crypto.randomUUID();
     const garam = randomBytes(16);
     const sandi = "sandi dengan iterasi lama";
-    const hash = createHmac("sha256", KUNCI_SANDI).update(pbkdf2Sync(Buffer.from(sandi.normalize("NFC")), garam, 5_000, 32, "sha256")).digest("base64");
+    const hash = createHmac("sha256", KUNCI_SANDI).update(pbkdf2Sync(Buffer.from(sandi.normalize("NFC")), garam, 2_000, 32, "sha256")).digest("base64");
     d1(
       `INSERT INTO pengguna (id, email, nama_tampilan, peran, peninjau, hash_sandi, garam, iterasi, wajib_ganti_sandi, aktif, dibuat_pada) ` +
-        `VALUES (${sql(id)}, ${sql(email)}, 'Lama', 'guru', 0, '${hash}', '${garam.toString("base64")}', 5000, 0, 1, ${Date.now()})`,
+        `VALUES (${sql(id)}, ${sql(email)}, 'Lama', 'guru', 0, '${hash}', '${garam.toString("base64")}', 2000, 0, 1, ${Date.now()})`,
     );
     await masuk(ip, email, sandi);
     const [baru] = d1<{ iterasi: number; garam: string; hash_sandi: string }>(`SELECT iterasi, garam, hash_sandi FROM pengguna WHERE id = ${sql(id)}`);
-    expect(baru.iterasi).toBe(15_000);
+    expect(baru.iterasi).toBe(4_000);
     expect(baru.garam).not.toBe(garam.toString("base64"));
     expect(baru.hash_sandi).not.toBe(hash);
     await masuk(ip, email, sandi);

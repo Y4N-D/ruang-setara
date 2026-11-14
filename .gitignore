@@ -58,3 +58,6 @@ __pycache__/
 .wrangler/
 .dev.vars*
 /test-results-jejak/
+
+# Salinan serah terima dari mode folder lokal; tidak di-commit (docs/jejak-setara/AGENTS.md 11.5 butir 8, penutupan JS-04)
+/Claude outputs/

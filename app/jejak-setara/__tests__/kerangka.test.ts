@@ -537,7 +537,7 @@ describe("Token dan tajuk", () => {
     );
   });
 
-  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi) dan JS-04 (P-33), dengan Database ID uji yang sudah diisi", () => {
+  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi) dan JS-04 (P-33, dengan ITERASI_SANDI 4000 sejak penutupan JS-04), dengan Database ID uji yang sudah diisi", () => {
     expect(JSON.parse(baca("server/jejak-setara/wrangler.jsonc"))).toEqual({
       "$schema": "../../node_modules/wrangler/config-schema.json",
       "name": "jejak-setara-lokal",
@@ -555,7 +555,7 @@ describe("Token dan tajuk", () => {
       "triggers": { "crons": ["0 19 * * *"] },
       "vars": {
         "LINGKUNGAN": "lokal",
-        "ITERASI_SANDI": "15000",
+        "ITERASI_SANDI": "4000",
         "KUNCI_SANDI": "lokal-kunci-sandi-bukan-rahasia",
         "KUNCI_IP": "lokal-kunci-ip-bukan-rahasia",
         "KUNCI_ADMIN": "lokal-kunci-admin-bukan-rahasia"
@@ -563,7 +563,7 @@ describe("Token dan tajuk", () => {
       "env": {
         "uji": {
           "name": "jejak-setara-uji",
-          "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "15000" },
+          "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "4000" },
           "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
           "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "8870d944-5d38-4c97-b8bf-819f7676eeb1", "migrations_dir": "migrations" }],
           "ratelimits": [

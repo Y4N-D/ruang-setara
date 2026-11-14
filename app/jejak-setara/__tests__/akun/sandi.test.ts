@@ -21,7 +21,7 @@ import {
 } from "../../../../server/jejak-setara/src/auth/sandi";
 
 const KUNCI = "kunci-sandi-uji";
-const ITERASI = 1_000; // cukup untuk uji bentuk; nilai target 15.000 diuji di uji server
+const ITERASI = 1_000; // cukup untuk uji bentuk; nilai target 4.000 (penutupan JS-04) diuji di uji server
 
 /** Pembanding mandiri: base64(HMAC-SHA256(kunci, PBKDF2-HMAC-SHA256(NFC(sandi), garam, iterasi, 32 byte))). */
 function hashPembanding(sandi: string, garam: Uint8Array, iterasi: number, kunci: string): string {

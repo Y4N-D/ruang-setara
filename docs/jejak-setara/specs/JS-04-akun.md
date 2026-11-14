@@ -582,3 +582,11 @@ Admin dibuat lewat `POST /api/admin-awal` dengan kunci lokal sebelum uji.
 - Sesudah push: "Jejak: uji" hijau dengan langkah "Siapkan kunci Worker", lalu langkah pemilik proyek di `PLAN.md` (bagian "Langkah pemilik proyek" entri JS-04), termasuk AC-20.
 - Konsol bisa dipakai sampai akhir hanya dengan papan ketik di laptop.
 - Tampilan rapi di 1024 × 768 dan 1920 × 1080, dan dasbor terbaca di HP.
+
+## Catatan penutupan (14 November 2026)
+
+Ditulis Sesi A sesudah langkah pemilik proyek di lingkungan uji (laporan JS-04, bagian "Penutupan"). Bagian lain spesifikasi ini tidak berubah.
+
+- **P-2 dan P-33.** `ITERASI_SANDI` di lingkungan `lokal` dan `uji` diturunkan dari `15000` ke `4000`, sesuai AC-20: di grafik CPU time Worker `jejak-setara-uji`, permintaan dua hash dengan 15.000 iterasi memakai sekitar 12,7–14,8 ms, melewati batas AC-20 (7 ms) dan CPU 10 ms paket gratis. Tidak ada galat di grafik Errors. Aturan lain P-2 tetap: nilai di luar 1.000–100.000 ditolak, akun yang iterasinya lebih kecil dari target di-hash ulang saat masuk, akun yang iterasinya lebih besar tidak diubah, dan target 100.000 dipakai sesudah paket berbayar aktif.
+- **P-3.** Jumlah hash per permintaan tidak berubah. Dengan 4.000 iterasi, permintaan dua hash diperkirakan sekitar 5–6 ms CPU di lingkungan uji.
+- **AC-20** diukur ulang sesudah perubahan ini di-push, dengan batas yang sama (persentil tertinggi ≤ 7 ms).

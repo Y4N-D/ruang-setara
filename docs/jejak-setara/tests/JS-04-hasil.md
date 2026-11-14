@@ -6,7 +6,7 @@
 | Spesifikasi | [specs/JS-04-akun.md](../specs/JS-04-akun.md), disetujui 14 November 2026 (`Spesifikasi disetujui: JS-04`) dengan saran D-1a sampai D-4a |
 | Tanggal | 14 November 2026 |
 | Lingkungan | Lingkungan agen: Node 22.23.4, pnpm 11.25.0, `wrangler` 4.92.0, `workerd` 1.20260515, dan Chromium untuk Playwright 1.56.1 (`JEJAK_CHROMIUM`). Salinan folder repositori pemilik proyek pada commit `5f9030a` (mode folder lokal, AGENTS 11.5) |
-| Keputusan | **Lulus dengan catatan AC-20**: pemeriksaan CPU di lingkungan uji baru bisa dijalankan pemilik proyek sesudah push (bagian "Langkah pemilik proyek" di `PLAN.md`). Kriteria lain lulus. Tiga penyesuaian kecil terhadap rincian berkas di spesifikasi dijelaskan di bagian "Temuan": teks konsol di `teks-konsol.ts`, ikon konsol tanpa `manifest.ts`, dan berkas tambahan `admin/Formulir.tsx` |
+| Keputusan | **Kembali ke Build untuk AC-20 (penutupan, 14 November 2026)**: langkah pemilik proyek di lingkungan uji berhasil tanpa galat, tetapi permintaan dua hash memakai sekitar 12,7–14,8 ms CPU, melewati batas AC-20 (7 ms). `ITERASI_SANDI` sudah diturunkan ke 4.000, dan AC-20 diukur ulang sesudah push (bagian "Penutupan"). Kriteria lain lulus. Keputusan Build semula: Lulus dengan catatan AC-20. Tiga penyesuaian kecil terhadap rincian berkas di spesifikasi dijelaskan di bagian "Temuan": teks konsol di `teks-konsol.ts`, ikon konsol tanpa `manifest.ts`, dan berkas tambahan `admin/Formulir.tsx` |
 
 ## Perintah resmi
 
@@ -38,7 +38,7 @@
 | AC-7 Izin | Lulus | `izin.test.ts`: tabel tiga aksi untuk admin dan guru, akun nonaktif, wajib ganti sandi, dan tanda Peninjau. Uji server: guru 403 `TIDAK_BERWENANG` di ketiga rute akun dan 200 di dasbor; tanpa sesi 401 di lima rute; admin yang perannya diturunkan saat masuk mendapat 403 pada permintaan berikutnya |
 | AC-8 Kelola akun | Lulus | Uji server: akun baru dengan email dinormalkan dan sandi sementara; `EMAIL_DIPAKAI`, `EMAIL_SALAH`, `NAMA_SALAH`, dan peran tidak dikenal; daftar dengan kolom P-22 tanpa hash dan urutan P-22; setiap kolom ubah; nonaktif menghapus sesi sasaran; atur ulang memberi sandi sementara baru, sandi lama tidak berlaku, dan catatan pembatas email terhapus; perlindungan diri untuk ketiga perubahan; dua admin yang saling menurunkan peran bersamaan menyisakan tepat satu admin; satu baris log audit per perubahan dengan rincian P-26 dan tanpa baris untuk ubah yang tidak mengubah apa pun. `api-akun.test.ts`: admin terakhir saat perubahan lain datang tepat sebelum batch (409, tanpa audit, sesi tetap) |
 | AC-9 Admin awal | Lulus | `api-akun.test.ts`: tanpa `KUNCI_ADMIN` 404 `BELUM_TERSEDIA` untuk metode apa pun tanpa menyentuh D1; kunci salah atau tidak ada 403. Uji server: `dibuat` (admin, Peninjau mati, wajib ganti sandi, log audit `admin_awal` tanpa pelaku), `dipulihkan` untuk guru nonaktif (admin aktif, nama dan Peninjau tetap, sesi dan catatan pembatas email terhapus, sandi sementara lama tidak berlaku), dan galat 400 untuk sandi, email, dan nama |
-| AC-10 Alur kerja dan kunci Worker | Lulus | `kerangka.test.ts` (7 uji baru): nama, tombol dengan masukan `nama_tampilan`, `concurrency`, urutan langkah P-29, langkah penutup `if: always() && steps.kunci.outcome != 'skipped'`, `wrangler@4.92.0`, isi JSON dari variabel lingkungan ke berkas 600, tanpa cetakan isi rahasia, teks `alurAdminAwal`, langkah "Siapkan kunci Worker" di antara "Semai bank awal" dan "Deploy Worker uji" dengan syarat yang sama, dan `--secrets-file`. Percobaan dengan `wrangler` tiruan di bagian "Perintah resmi" |
+| AC-10 Alur kerja dan kunci Worker | Lulus | `kerangka.test.ts` (7 uji baru): nama, tombol dengan masukan `nama_tampilan`, `concurrency`, urutan langkah P-29, langkah penutup `if: always() && steps.kunci.outcome != 'skipped'`, `wrangler@4.92.0`, isi JSON dari variabel lingkungan ke berkas 600, tanpa cetakan isi rahasia, teks `alurAdminAwal`, langkah "Siapkan kunci Worker" di antara "Semai bank awal" dan "Deploy Worker uji" dengan syarat yang sama, dan `--secrets-file`. Percobaan dengan `wrangler` tiruan di bagian "Perintah resmi". Sesudah push (penutupan): kedua berkas di `main`, yang diganti manual pemilik proyek karena Build berjalan dalam mode folder lokal, sama persis dengan isi yang diserahkan dan sesuai P-29 dan P-32 |
 | AC-11 Konfigurasi | Lulus | `kerangka.test.ts`: isi `wrangler.jsonc` sesuai P-33. `api-akun.test.ts`: 503 `KONSOL_BELUM_SIAP` di kelima rute yang memakai kunci untuk enam keadaan kunci atau iterasi yang tidak sah, sedangkan `GET /api/saya`, `GET /api/akun`, `GET /api/dasbor`, `PATCH` tanpa atur ulang, dan keluar tetap berjalan |
 | AC-12 Pembersihan harian | Lulus | `api-akun.test.ts` dengan jam tiruan dan `worker.scheduled`: sesi kedaluwarsa dan sesi lebih dari 8 jam tidak dipakai terhapus; sesi tepat 8 jam dan sesi sah tetap; catatan pembatas lebih dari 24 jam terhapus, kecuali yang masih terkunci |
 | AC-13 Dasbor | Lulus | Uji server: `rujukanBelum` 23 di D1 lokal yang disemai. E2E: kartu Peringatan untuk admin dan guru (D-4a), kedua kartu keadaan kosong, "Memuat…", serta "Data dasbor gagal dimuat." dengan "Coba lagi" |
@@ -48,7 +48,7 @@
 | AC-17 Tampilan dan teks | Lulus | `kerangka.test.ts`: `TEKS_KONSOL` sama persis dengan bagian "Teks yang tampil (final)" (diurai dari tabel spesifikasi lalu dibandingkan), dan `TEKS` tanpa `konsolJudul` dan `konsolIsi`. E2E: huruf sistem di tabel, Pixelify Sans di judul, Press Start 2P di merek dan sandi sementara 16 px; tombol Menu di bawah 1024 px dan navigasi samping di 1024 px (D-2a); tangkapan layar empat ukuran tanpa luapan ke samping. Warna hanya token `--js-` |
 | AC-18 Aksesibilitas | Lulus | E2E: semua tombol, tautan, kolom, dan kotak centang yang tampil setinggi sedikitnya 48 px di keempat ukuran; garis fokus `ink` 2 px dan `sun` 6 px (4 px di luar garis `ink`), kontras `ink` terhadap `cream` sekitar 13 : 1 dan `sun` terhadap `ink` sekitar 10 : 1; galat terhubung lewat `aria-describedby` dan `role="alert"`; pemberitahuan berhasil di wilayah `aria-live="polite"`; dialog `role="dialog"`, `aria-modal`, dan judulnya, dengan fokus terkurung dan kembali ke tombol pembukanya; masuk, ganti sandi, dan dialog akun baru dengan papan ketik saja |
 | AC-19 Ukuran | Lulus | Kode konsol 82,15 KB gzip, jauh di bawah 350 KB. Kode layar pemain naik 0,18 KB gzip (batas 0,5 KB). Lihat bagian "Anggaran ukuran dan kinerja" dan temuan 1 dan 2 |
-| AC-20 CPU di lingkungan uji | **Menunggu** | Dijalankan pemilik proyek sesudah push (langkah 6 di serah terima dan di `PLAN.md`). Angka Plan di `workerd` lokal: masuk 3,3–3,5 ms dan ganti sandi sukarela 6,2–6,5 ms CPU Worker |
+| AC-20 CPU di lingkungan uji | **Gagal pada pengukuran pertama; diperbaiki, menunggu ukur ulang** | Grafik CPU time Worker `jejak-setara-uji` (24 jam sampai 14 Nov 2026 pukul 12.00 WITA): di selang 15 menit sekitar pukul 11.45 WITA, saat pemilik proyek mencoba akun, P999 sekitar 14,8 ms, P90 sekitar 12,7 ms, dan P50 sekitar 2,3 ms. Permintaan dua hash melewati batas 7 ms dan CPU 10 ms paket gratis. Grafik Errors by version: 0 galat. `ITERASI_SANDI` diturunkan ke 4.000 (bagian "Penutupan"). Angka Plan di `workerd` lokal: masuk 3,3–3,5 ms dan ganti sandi sukarela 6,2–6,5 ms CPU Worker |
 | AC-21 Kode dan lingkungan | Lulus | Perintah di atas; `PROTOKOL_VERSI` tetap 2, dan uji JS-03, JS-05, JS-06, JS-07, dan JS-08 tetap lulus; galeri 178 berkas identik. E2E tanpa galat konsol, pelanggaran CSP, permintaan ke alamat lain, atau respons 4xx dan 5xx selain jawaban galat yang sengaja diuji (401, 403, 409, dan 429 dari rute akun) |
 | AC-22 Dokumen | Lulus | Architecture, Design System, dan PRD diubah di Gerbang 2. Di Build: Architecture 3 (`Formulir.tsx` dan `teks-konsol.ts`) dan 17 (tempat teks konsol dan ikon konsol), serta `PLAN.md` |
 
@@ -74,7 +74,7 @@ CPU hash sandi di lingkungan uji diperiksa lewat AC-20.
 - [x] Konsol bisa dipakai sampai akhir hanya dengan papan ketik di laptop (E2E "papan ketik saja").
 - [x] Tampilan rapi di 1024 × 768 dan 1920 × 1080 (tangkapan layar di [tests/JS-04/](JS-04/)). Tabel akun muat tanpa digulir ke samping di 1024 × 768 dengan 10 akun.
 - [x] Dasbor terbaca di HP 731 × 411. Tabel akun di HP digulir ke samping di dalam kotaknya, sesuai Design System 3.7 (penyuntingan disarankan di laptop).
-- [ ] Lingkungan uji: "Jejak: uji" hijau dengan langkah "Siapkan kunci Worker", "Jejak: admin awal", masuk, dan AC-20. Dijalankan pemilik proyek sesudah push.
+- [x] Lingkungan uji (dilaporkan pemilik proyek, 14 Nov 2026): "Jejak: uji" hijau, "Jejak: admin awal" berhasil, masuk dan ganti sandi sementara berhasil, dan akun guru percobaan dibuat, dipakai masuk, diganti sandinya, lalu dinonaktifkan. AC-20 belum lulus (bagian "Penutupan").
 
 ## Temuan
 
@@ -87,6 +87,53 @@ CPU hash sandi di lingkungan uji diperiksa lewat AC-20.
 7. **Sesi berakhir di uji ujung ke ujung.** Rencana uji menulis "sesudah memuat ulang". `GET /api/saya` tidak pernah menjawab 401 (P-16), jadi memuat ulang halaman hanya membuka halaman masuk tanpa pemberitahuan. Uji memakai permintaan berikutnya (pindah ke Dasbor), sesuai P-48 dan bagian "Beberapa pengguna sekaligus".
 8. **Gaya bersama naik 1,42 KB gzip.** Gaya konsol ada di `jejak.css` (P-49), yang juga dimuat layar pemain. Kode layar pemain tetap dalam batas AC-19.
 
-## Keputusan: Lulus dengan catatan AC-20
+## Penutupan (14 November 2026)
 
-Semua kriteria yang bisa diuji di lingkungan agen lulus. AC-20 diperiksa pemilik proyek di lingkungan uji sesudah push. Bila persentil tertinggi CPU lebih dari 7 ms, `ITERASI_SANDI` diturunkan lewat commit kecil.
+Dikerjakan dalam mode ZIP (AGENTS 11.1 sampai 11.4) dari ZIP `main` 14 November 2026, yang sudah memuat commit "perbaikan JS-04".
+
+**Uji ulang sebelum perubahan.** Pemilik proyek (14 Nov 2026, di luar sesi): `content:check:jejak` 254/254, `test:jejak` 879/879, `test:jejak:server` 47/47, dan `build:jejak` berhasil. Sesi A di ZIP yang sama: `content:check:jejak` 254 dan `test:jejak` 879; `build:pages` 178 berkas.
+
+**Alur kerja.** `jejak-admin-awal.yml` dan `jejak-uji.yml` diganti manual pemilik proyek, karena Build berjalan dalam mode folder lokal dan agen tidak bisa menulis ke `.github/workflows/`. Isi keduanya sama persis dengan salinan yang diserahkan, dan sesuai spesifikasi: masukan `nama_tampilan` bawaan `Admin`, pemeriksaan rahasia dan masukan tanpa mencetak isinya, kunci sekali pakai yang disamarkan dan disimpan dengan `wrangler@4.92.0`, isi permintaan dari variabel lingkungan ke berkas berizin 600, ulangan paling banyak 10 kali dengan jeda 3 detik, penutupan rute dengan `if: always() && steps.kunci.outcome != 'skipped'`, dan ringkasan tanpa email dan sandi (P-29); serta langkah "Siapkan kunci Worker" di antara "Semai bank awal" dan "Deploy Worker uji", dengan syarat yang sama dan `--secrets-file` (P-32). Berkas kosong `.uji-tulis` sudah dihapus.
+
+**Langkah pemilik proyek di lingkungan uji** (dilaporkan 14 Nov 2026):
+
+| Langkah | Hasil |
+|---|---|
+| 1. "Jejak: uji" | Hijau. Teks langkah "Siapkan kunci Worker" tidak disalin, tetapi kedua kunci terbukti ada, karena admin awal dan masuk tidak dijawab 503 `KONSOL_BELUM_SIAP` |
+| 2. "Jejak: admin awal" | Berhasil |
+| 3–4. Masuk dan ganti sandi sementara | Berhasil |
+| 5. Akun guru percobaan (buat, masuk, ganti sandi, nonaktifkan) | Berhasil |
+| 6. Tangkapan layar CPU time | Dikirim; angkanya di bawah |
+| Galat | Grafik Errors by version: 0 galat di keenam versi Worker selama 24 jam, jadi tidak ada permintaan yang dihentikan. Bagan "Invocation Statuses" tidak ditemukan di dasbor pemilik proyek |
+
+**Pengukuran CPU (AC-20).** Grafik CPU time Worker `jejak-setara-uji`, 24 jam sampai 14 Nov 2026 pukul 12.00 WITA. Angka dibaca dari piksel garis, dengan ketelitian sekitar 0,2 ms. Jumlah pemanggilan dari grafik Invocations.
+
+| Selang | Pemanggilan | P50 | P90 | P99 dan P999 |
+|---|---|---|---|---|
+| Sekitar pukul 11.45 WITA (pemilik proyek mencoba akun; tanda "3 deployments") | 22 | Sekitar 2,3 ms | Sekitar 12,7 ms | Sekitar 14,8 ms |
+| Sisa 24 jam | 5 | — | — | Paling tinggi sekitar 1,7 ms |
+
+- Angka di samping legenda grafik (P50 1,26, P90 3,57, P99 3,99, dan P999 3,99) bukan nilai puncak: dengan 27 pemanggilan sehari, P999 seharusnya hampir sama dengan permintaan terberat. Yang dibaca adalah puncak garisnya.
+- Di selang itu, P90 dari 22 pemanggilan jatuh di kelompok tiga permintaan teratas, yang hampir pasti berupa permintaan dua hash (ganti sandi wajib akun admin dan akun guru, serta ganti sandi lewat "Sandi saya"). Jadi satu permintaan dua hash memakai sekitar 12,7–14,8 ms di Cloudflare, sekitar dua kali angka `workerd` lokal di Plan JS-04 (6,2–6,5 ms), dan permintaan tanpa hash sekitar 2 ms.
+- Dokumentasi Cloudflare (halaman "Metrics and analytics" dan "Limits", dibaca 14 Nov 2026): persentil tinggi bisa tampak melewati batas CPU tanpa galat, karena runtime memberi kelonggaran CPU dari permintaan yang hemat, tetapi Worker yang terus melewati batas dihentikan dengan Error 1102. Jadi 0 galat tidak berarti 15.000 iterasi aman.
+
+**Perbaikan (usulan 10a dan AC-20).** `ITERASI_SANDI` diturunkan dari 15.000 ke 4.000 di lingkungan `lokal` dan `uji` (`wrangler.jsonc`).
+
+- Di mesin agen hari ini, PBKDF2 15.000 iterasi memakai 2,39 ms dan 4.000 iterasi 0,74 ms CPU (Node, median 25 ulangan). Bila satu hash 15.000 iterasi di Cloudflare sekitar 5–6,5 ms dan sisa pekerjaan permintaan sekitar 2–3 ms, permintaan dua hash dengan 4.000 iterasi sekitar 5–6 ms, sedangkan dengan 5.000 iterasi sekitar 6–7 ms, terlalu dekat dengan batas AC-20.
+- Kekuatan hash tetap bertumpu pada kunci tambahan `KUNCI_SANDI`, yang disimpan terpisah dari basis data, dan pada pembatas percobaan masuk. Selama paket gratis hanya ada akun percobaan, dan target naik ke 100.000 sesudah paket berbayar aktif (catatan Plan JS-15 di `PLAN.md`).
+- Akun admin dan akun guru percobaan masih ber-hash 15.000 iterasi. Akun admin tetap bisa masuk (satu hash, perkiraan sekitar 8 ms), dan hash-nya baru memakai 4.000 iterasi saat sandinya diganti atau dipulihkan. Karena itu ukur ulang dimulai dengan "Jejak: admin awal". Akun guru percobaan sudah nonaktif; bila diaktifkan lagi, sandinya diatur ulang lebih dulu.
+
+**Berkas yang diubah di penutupan:** `server/jejak-setara/wrangler.jsonc`; uji `app/jejak-setara/__tests__/kerangka.test.ts` (isi `wrangler.jsonc`), `server/jejak-setara/uji/akun.uji-server.ts` (iterasi akun baru 4.000, dan hash ulang dari 2.000 ke 4.000), dan `app/jejak-setara/__tests__/akun/sandi.test.ts` (komentar); laporan ini, `PLAN.md`, Architecture (bagian awal, 4.2, 4.5, 10.3, dan 13.4), PRD 21, catatan penutupan spesifikasi JS-04, dan AGENTS 0.5 (11.5 butir 8); serta `.gitignore` (`/Claude outputs/`).
+
+**Uji sesudah perbaikan** (lingkungan agen, 14 Nov 2026): `content:check:jejak` 10 berkas, 254 uji; `test:jejak` 45 berkas, 879 uji; `test:jejak:server` 4 berkas, 47 uji (206 detik); `build:jejak` berhasil; build `CLOUDFLARE_ENV=uji` dan `wrangler deploy --dry-run`: `ITERASI_SANDI` = `4000`, `LINGKUNGAN` = `uji`, `BATAS_MASUK` 10 per 60 detik, unggahan 263,60 KiB (63,36 KiB gzip, sama dengan Build JS-04); `tsc --noEmit` 0 galat; ESLint pada berkas yang diubah 0 masalah; `build:pages` 178 berkas identik byte dengan build ZIP `main`. `test:e2e:jejak` tidak dijalankan ulang, karena kode halaman dan Worker tidak berubah; yang berubah hanya nilai variabel.
+
+**Temuan penutupan.**
+
+1. Folder `Claude outputs/` ter-commit di akar repositori. Isinya enam gambar maket Gerbang 1, yang menurut rencana tidak disimpan di repositori, dan salinan kedua alur kerja. Folder itu tidak mengubah galeri (build dengan dan tanpa folder itu identik byte). Penghapusannya menjadi langkah tersendiri di serah terima, dan `.gitignore` kini mengabaikannya.
+2. `server/jejak-setara/seed/kontrak-d1.sql` (berkas Sesi B) masih ada dan tetap tidak dipakai kode mana pun. Penghapusannya disebut lagi di serah terima.
+
+**Ukur ulang AC-20** dijalankan pemilik proyek sesudah ZIP penutupan di-push (langkahnya di `PLAN.md`, bagian "Penutupan JS-04").
+
+## Keputusan: Kembali ke Build untuk AC-20 (perbaikan sudah diterapkan)
+
+Kriteria lain lulus, dan langkah pemilik proyek di lingkungan uji berhasil tanpa galat. AC-20 gagal pada pengukuran pertama; perbaikannya sudah diterapkan dan diuji di lingkungan agen. Bila ukur ulang menunjukkan persentil tertinggi ≤ 7 ms tanpa galat, keputusan menjadi **Lulus** dan JS-04 Selesai.

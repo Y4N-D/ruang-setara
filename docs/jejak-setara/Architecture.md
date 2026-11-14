@@ -16,6 +16,8 @@ Pemeriksaan kedua dilakukan di Plan JS-03 (7 November 2026) terhadap halaman har
 
 Pemeriksaan ketiga dilakukan di Plan JS-04 (14 November 2026) terhadap batas CPU Workers, batas iterasi PBKDF2 di Cloudflare, dan `wrangler deploy --secrets-file`. Hasilnya ada di bagian 4.4, 4.5, dan 10.3, serta entri JS-04 `PLAN.md`.
 
+Pengukuran pertama di lingkungan uji dilakukan di penutupan JS-04 (14 November 2026) lewat grafik CPU time Worker `jejak-setara-uji`. Hasilnya ada di bagian 4.2, 4.5, 10.3, dan 13.4, serta laporan JS-04.
+
 ---
 
 ## 1. Keputusan utama
@@ -175,7 +177,7 @@ JS-01, hanya lingkungan lokal:
 
 JS-03 (isi lengkap di spesifikasi JS-03, bagian "Konfigurasi"): Durable Object `RuangJejak` (binding `RUANG`) dengan migrasi `v1` kelas SQLite; D1 (binding `DB`: `jejak-setara-lokal` di lokal, `jejak-setara-uji` di lingkungan `uji`); dua pembatas percobaan, `BATAS_PUBLIK` dan `BATAS_WS` (300 per menit per alamat IP); pemicu harian `0 19 * * *` (03.00 WITA); dan lingkungan bernama `uji` (Worker `jejak-setara-uji`). Lingkungan `produksi` ditambahkan menjelang rilis. Binding, variabel, dan pembatas ditulis ulang di setiap lingkungan karena tidak diwariskan dari lingkungan teratas, sedangkan migrasi Durable Object diwariskan (percobaan Plan JS-03). Plugin Vite memakai folder keadaan lokal `JEJAK_KEADAAN` (bawaan `.wrangler/state`), sama dengan `db:migrasi:lokal`.
 
-JS-04 (spesifikasi JS-04, P-33): variabel `ITERASI_SANDI` (`15000` di `lokal` dan `uji`) dan pembatas `BATAS_MASUK` (100 per menit di `lokal`, 10 per menit di `uji`). Lingkungan teratas (lokal) juga memuat kunci tiruan `KUNCI_SANDI`, `KUNCI_IP`, dan `KUNCI_ADMIN` yang nilainya berakhiran "bukan-rahasia"; di `uji`, ketiganya rahasia Worker (bagian 4.5).
+JS-04 (spesifikasi JS-04, P-33): variabel `ITERASI_SANDI` (`4000` di `lokal` dan `uji` sejak penutupan JS-04; semula `15000`) dan pembatas `BATAS_MASUK` (100 per menit di `lokal`, 10 per menit di `uji`). Lingkungan teratas (lokal) juga memuat kunci tiruan `KUNCI_SANDI`, `KUNCI_IP`, dan `KUNCI_ADMIN` yang nilainya berakhiran "bukan-rahasia"; di `uji`, ketiganya rahasia Worker (bagian 4.5).
 
 - Lingkungan teratas hanya untuk pengembangan lokal. Dengan plugin Vite, lingkungan dipilih saat build lewat `CLOUDFLARE_ENV` (misalnya `CLOUDFLARE_ENV=uji`), dan `--env` saat deploy tidak berpengaruh. Build yang lupa memilih lingkungan menghasilkan Worker lokal, jadi tidak pernah menyentuh produksi.
 - `compatibility_date` mengikuti runtime `workerd` yang terpasang (kini 1.20260515, batas 22 Mei 2026). Tanggal yang lebih baru membuat `wrangler dev` dan uji lokal berhenti dengan galat, jadi tanggal dinaikkan bersama `wrangler` dengan izin dependensi.
@@ -225,7 +227,7 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 | `KUNCI_ADMIN` | Rahasia Worker | Kunci sekali pakai untuk `POST /api/admin-awal`, dibuat lalu diganti nilai acak baru setiap "Jejak: admin awal" dijalankan (JS-04) |
 | `KUNCI_COBA` | Rahasia Worker lingkungan uji | Kunci sekali pakai untuk `POST /api/ruang-coba`, dibuat ulang setiap "Jejak: ruang coba" dijalankan (JS-03) |
 | `LINGKUNGAN` | Variabel Worker | `lokal` (pengembangan dan uji di mesin agen), `uji`, atau `produksi` |
-| `ITERASI_SANDI` | Variabel Worker | Jumlah iterasi PBKDF2 untuk hash baru: 15.000 selama paket gratis, 100.000 sesudah paket berbayar aktif (JS-04) |
+| `ITERASI_SANDI` | Variabel Worker | Jumlah iterasi PBKDF2 untuk hash baru: 4.000 selama paket gratis (diturunkan dari 15.000 di penutupan JS-04, bagian 10.3), 100.000 sesudah paket berbayar aktif (JS-04) |
 
 Rahasia tidak pernah ditulis di repositori, log, atau pesan galat.
 
@@ -648,7 +650,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 
 ### 10.3 Autentikasi dan sesi
 
-- **Hash sandi** (ditetapkan JS-04): sandi dinormalkan NFC, lalu di-hash PBKDF2-HMAC-SHA256 lewat WebCrypto dengan garam acak 16 byte, dan hasilnya di-HMAC-SHA256 dengan kunci tambahan `KUNCI_SANDI` (saran OWASP: kunci tambahan disimpan terpisah dari basis data). Iterasi disimpan per akun, dan hash baru memakai variabel Worker `ITERASI_SANDI`: 15.000 selama paket gratis, lalu 100.000 sesudah paket berbayar aktif. Cloudflare membatasi PBKDF2 pada 100.000 iterasi, walaupun `workerd` lokal menerima lebih (isu cloudflare/workerd #1346). Hash lama diperbarui saat pemiliknya berhasil masuk. Satu permintaan paling banyak menghitung dua hash (ganti sandi); dengan 15.000 iterasi, satu hash sekitar 3,5 ms dan dua hash sekitar 6,5 ms CPU di runtime lokal (pengukuran Plan JS-04), di bawah CPU 10 ms paket gratis (bagian 13.4). Pembandingan memakai waktu konstan. Argon2id lewat pustaka WASM memerlukan izin dependensi dan tidak muat dalam 10 ms.
+- **Hash sandi** (ditetapkan JS-04): sandi dinormalkan NFC, lalu di-hash PBKDF2-HMAC-SHA256 lewat WebCrypto dengan garam acak 16 byte, dan hasilnya di-HMAC-SHA256 dengan kunci tambahan `KUNCI_SANDI` (saran OWASP: kunci tambahan disimpan terpisah dari basis data). Iterasi disimpan per akun, dan hash baru memakai variabel Worker `ITERASI_SANDI`: 4.000 selama paket gratis, lalu 100.000 sesudah paket berbayar aktif. Cloudflare membatasi PBKDF2 pada 100.000 iterasi, walaupun `workerd` lokal menerima lebih (isu cloudflare/workerd #1346). Hash lama diperbarui saat pemiliknya berhasil masuk. Satu permintaan paling banyak menghitung dua hash (ganti sandi). Dengan 15.000 iterasi, dua hash memakai sekitar 6,5 ms CPU di runtime lokal (pengukuran Plan JS-04), tetapi sekitar 12,7–14,8 ms di lingkungan uji Cloudflare (grafik CPU time, penutupan JS-04), di atas CPU 10 ms paket gratis (bagian 13.4), walaupun tidak ada permintaan yang gagal. Karena itu nilainya diturunkan ke 4.000, dengan perkiraan sekitar 5–6 ms untuk permintaan dua hash. Akun yang iterasinya lebih besar dari target tetap bisa masuk (satu hash 15.000 iterasi diperkirakan sekitar 8 ms), dan hash-nya baru diganti saat sandi diganti atau diatur ulang. Pembandingan memakai waktu konstan. Argon2id lewat pustaka WASM memerlukan izin dependensi dan tidak muat dalam 10 ms.
 - **Sandi:** 12 sampai 128 karakter dan tidak sama dengan email; sandi sementara wajib diganti saat masuk pertama. Sandi sementara akun guru dibuat server (16 karakter dari abjad kode ruang dalam empat kelompok) dan hanya tampil sekali (JS-04).
 - **Pembatas percobaan:** 5 kali gagal dalam 15 menit per email, atau 20 kali per hash IP harian, mengunci percobaan selama 15 menit. Kunci pembatas berupa HMAC `KUNCI_IP` atas email, atau atas alamat IP dan tanggal UTC, sehingga alamat IP tidak tersimpan. Email tidak terdaftar dan akun nonaktif tetap melewati satu hash tiruan, dan pesan galatnya selalu sama ("Email atau sandi salah."), agar tidak membocorkan email mana yang terdaftar. Selama terkunci, Worker tidak menghitung hash dan menjawab "Terlalu banyak percobaan masuk. Tunggu 15 menit, lalu coba lagi." Ditambah pembatas Workers `BATAS_MASUK` per alamat (JS-04).
 - **Sesi:** token acak 32 byte di cookie `__Host-jejak_sesi` dengan `HttpOnly`, `Secure`, `SameSite=Lax`, dan `Path=/`. D1 hanya menyimpan hash-nya. Sesi berakhir sesudah 8 jam tidak dipakai, dan paling lama 7 hari. Keluar dan ganti sandi menghapus sesi. Sejak JS-04: cookie tanpa masa berlaku, sehingga hilang saat peramban ditutup (spesifikasi JS-04, D-1); `terakhir_dipakai` ditulis paling sering sekali per 5 menit; ganti sandi menghapus semua sesi akun lalu membuat sesi baru untuk perangkat yang dipakai; menonaktifkan akun dan mengatur ulang sandi menghapus semua sesi akun itu.
@@ -844,7 +846,7 @@ Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* dan *Limits* 
 
 | Layanan | Batas paket gratis | Akibat untuk Jejak Setara |
 |---|---|---|
-| Workers | 100.000 permintaan per hari; CPU 10 ms per permintaan | Aset statis tidak dihitung. Hash sandi JS-04 harus muat dalam 10 ms (bagian 10.3) |
+| Workers | 100.000 permintaan per hari; CPU 10 ms per permintaan | Aset statis tidak dihitung. Hash sandi JS-04 harus muat dalam 10 ms (bagian 10.3). Di lingkungan uji, permintaan dua hash memakai sekitar dua kali CPU yang diukur di runtime lokal, dan permintaan ringan sekitar 2 ms (penutupan JS-04) |
 | Durable Objects: permintaan | 100.000 per hari. Satu sambungan WebSocket dihitung 1 permintaan, pesan masuk dihitung 20 : 1, setiap alarm dihitung 1 permintaan, sedangkan pesan keluar dan ping protokol gratis | Sekitar 13.600 permintaan per sesi 40 pemain dan 33.500 per sesi 100 pemain (percobaan Plan JS-03) |
 | Durable Objects: CPU | Sama dengan Workers: 10 ms per peristiwa (permintaan, pesan WebSocket, atau alarm). Sisa CPU dihitung ulang setiap ada pesan masuk | Pekerjaan berkala di antara dua pesan masuk harus jauh di bawah 10 ms. Satu putaran 100 ms untuk 100 pemain sekitar 0,16 ms di Node (percobaan Plan JS-03) |
 | Durable Objects: durasi | 13.000 GB-detik per hari | Sekitar 150 GB-detik per sesi; bukan hambatan bila lobi dan jeda bisa beristirahat (*hibernate*) |

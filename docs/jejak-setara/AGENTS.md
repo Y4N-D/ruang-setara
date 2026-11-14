@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan **Jejak Setara** di repositori `ruang-setara`. Baca seluruh file ini, lalu PRD, Design System, dan Architecture Jejak Setara, sebelum mengubah apa pun.
 
+Versi 0.5 (14 November 2026): berkas alur kerja GitHub dan folder `Claude outputs/` dalam mode folder lokal (bagian 11.5, butir 8; penutupan JS-04).
 Versi 0.4 (13 November 2026): mode folder lokal (aplikasi Claude desktop) di bagian 11.5, berdampingan dengan mode ZIP; penyesuaian kecil di bagian 4, 4.1, 11, 11.3, 13, dan 14 (penutupan JS-08).
 Versi 0.3 (7 November 2026): paket gratis Cloudflare sampai JS-14 (bagian 0, 5, 6, dan 7; Plan JS-03).
 Versi 0.2 (5 November 2026): langkah Windows di bagian 11.4, daftar skrip final di bagian 6, dan tempat rencana Sesi B dan C di bagian 4.1 (Gerbang 1 JS-01).
@@ -298,6 +299,11 @@ Dipakai bila pemilik proyek menghubungkan folder repositori di komputernya ke ch
    - langkah GitHub Desktop: periksa tab Changes, commit, push, dan cek tab Actions (contoh di bawah).
 
    Semuanya memakai istilah Windows dan bahasa sederhana (bagian 11.1 butir 7).
+8. **Berkas alur kerja GitHub.** Dalam mode folder lokal, agen mungkin tidak bisa menulis ke `.github/workflows/` (ditemukan di Build JS-04). Bila begitu, agen menulis isi lengkap setiap berkas alur kerja yang baru atau berubah di balasan, satu blok kode per berkas, dan pemilik proyek menggantinya manual:
+   - berkas yang sudah ada: buka berkasnya dari folder `.github\workflows` dengan Notepad, tekan `Ctrl+A`, tempel isi dari balasan, lalu simpan dengan `Ctrl+S`;
+   - berkas baru: buka Notepad, tempel isinya, pilih **File → Save as**, buka folder `.github\workflows`, pilih **Save as type: All files (\*.\*)**, ketik nama berkas persis seperti di balasan (misalnya `jejak-admin-awal.yml`), lalu klik **Save**.
+
+   Di daftar berkas, agen menandai berkas itu "diganti manual", dan sesi berikutnya memeriksa isinya di ZIP atau folder terbaru (seperti di penutupan JS-04). Agen tidak meninggalkan berkas percobaan tulis (misalnya `.uji-tulis`) di folder repositori. Salinan berkas yang dibuat agen di luar jalurnya, misalnya di folder `Claude outputs/`, tidak di-commit; folder itu diabaikan git sejak penutupan JS-04.
 
 **Contoh langkah di GitHub Desktop (mode folder lokal)**
 
