@@ -110,7 +110,7 @@ Dikerjakan dalam mode ZIP (AGENTS 11.1 sampai 11.4) dari ZIP `main` 14 November 
 
 | Selang | Pemanggilan | P50 | P90 | P99 dan P999 |
 |---|---|---|---|---|
-| Sekitar pukul 11.45 WITA (pemilik proyek mencoba akun; tanda "3 deployments") | 22 | Sekitar 2,3 ms | Sekitar 12,7 ms | Sekitar 14,8 ms |
+| Sekitar pukul 11.45 WITA (pemilik proyek mencoba akun; tanda "3 deployments") | 22 | 2,45 ms (tooltip dasbor; dari piksel sekitar 2,3 ms) | 12,76 ms (tooltip; piksel sekitar 12,7 ms) | 14,87 ms (tooltip; piksel sekitar 14,8 ms) |
 | Sisa 24 jam | 5 | — | — | Paling tinggi sekitar 1,7 ms |
 
 - Angka di samping legenda grafik (P50 1,26, P90 3,57, P99 3,99, dan P999 3,99) bukan nilai puncak: dengan 27 pemanggilan sehari, P999 seharusnya hampir sama dengan permintaan terberat. Yang dibaca adalah puncak garisnya.
@@ -132,8 +132,16 @@ Dikerjakan dalam mode ZIP (AGENTS 11.1 sampai 11.4) dari ZIP `main` 14 November 
 1. Folder `Claude outputs/` ter-commit di akar repositori. Isinya enam gambar maket Gerbang 1, yang menurut rencana tidak disimpan di repositori, dan salinan kedua alur kerja. Folder itu tidak mengubah galeri (build dengan dan tanpa folder itu identik byte). Penghapusannya menjadi langkah tersendiri di serah terima, dan `.gitignore` kini mengabaikannya.
 2. `server/jejak-setara/seed/kontrak-d1.sql` (berkas Sesi B) masih ada dan tetap tidak dipakai kode mana pun. Penghapusannya disebut lagi di serah terima.
 
-**Ukur ulang AC-20** dijalankan pemilik proyek sesudah ZIP penutupan di-push (langkahnya di `PLAN.md`, bagian "Penutupan JS-04").
+**Ukur ulang pertama (14 Nov 2026, sesudah push pukul 12.43 WITA).**
+
+| Selang | Versi Worker | P50 | P90 sampai P999 | Galat |
+|---|---|---|---|---|
+| Pukul 12.15 (sebelum push, 15.000 iterasi) | `0a335c5e` | Sekitar 1,5 ms | Sekitar 10,4 ms | 0 |
+| Pukul 12.45 (push pukul 12.43 dan "Jejak: admin awal" pukul 12.46; 4.000 iterasi) | `838a9989`, `a88860e8`, dan `ab5cd37f` | Sekitar 3,4 ms | Sekitar 10,35 ms (tooltip sebelum data lengkap: 10,35 ms) | 0 |
+
+- Pembacaan: puncak 10,4 ms di kedua selang cocok dengan satu kali masuk yang menghitung hash 15.000 iterasi di isolat yang baru dimulai (sekitar 2–3 ms awal isolat, 1–2 ms pekerjaan rute, dan sekitar 6 ms hash). Permintaan dua hash di selang 11.45 berlangsung beruntun, jadi isolatnya sudah hangat. Di selang 12.45, akun admin masih ber-hash 15.000 iterasi sampai "Jejak: admin awal" memulihkannya, sehingga satu kali masuk sebelum langkah itu menghasilkan puncak yang sama. Dengan 4.000 iterasi, perkiraan paling berat sekitar 6–7,7 ms, dan P50 3,4 ms cocok dengan perkiraan itu.
+- Grafik dasbor tidak memisahkan jenis permintaan, jadi pembacaan ini belum cukup untuk AC-20. Sejak ukur ulang pertama, akun admin sudah ber-hash 4.000 iterasi dan akun guru percobaan nonaktif, sehingga satu percobaan bersih (masuk, ganti sandi lewat "Sandi saya", lalu keluar; langkahnya di `PLAN.md`, bagian "Penutupan JS-04") memberi angka yang hanya berasal dari 4.000 iterasi.
 
 ## Keputusan: Kembali ke Build untuk AC-20 (perbaikan sudah diterapkan)
 
-Kriteria lain lulus, dan langkah pemilik proyek di lingkungan uji berhasil tanpa galat. AC-20 gagal pada pengukuran pertama; perbaikannya sudah diterapkan dan diuji di lingkungan agen. Bila ukur ulang menunjukkan persentil tertinggi ≤ 7 ms tanpa galat, keputusan menjadi **Lulus** dan JS-04 Selesai.
+Kriteria lain lulus, dan langkah pemilik proyek di lingkungan uji berhasil tanpa galat. AC-20 gagal pada pengukuran pertama; perbaikannya sudah diterapkan dan diuji di lingkungan agen. Bila percobaan bersih menunjukkan persentil tertinggi ≤ 7 ms tanpa galat, keputusan menjadi **Lulus** dan JS-04 Selesai.
