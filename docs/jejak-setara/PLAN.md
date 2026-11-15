@@ -20,7 +20,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-14 | Belum direncanakan | — | — |
 | JS-15 | Belum direncanakan | — | — |
 | JS-16 | Belum direncanakan | — | — |
-| JS-22 | Direncanakan (15 Nov 2026); menunggu `Setuju: JS-22` | — | — |
+| JS-22 | Spesifikasi ditulis (15 Nov 2026); menunggu `Spesifikasi disetujui: JS-22` | [JS-22-biaya.md](specs/JS-22-biaya.md) | — |
 
 ## Backlog
 
@@ -170,6 +170,7 @@ Keputusan pemilik proyek, 14 November 2026: sesudah JS-04, Sesi A mengerjakan **
 - Plan JS-22 (dari penutupan JS-04): Workers Logs dan traces di lingkungan uji dinyalakan pemilik proyek di dasbor pada 14 Nov 2026 pukul 09.50.52 UTC, tanpa deploy. Sebelum ada guru atau siswa lain di lingkungan uji, periksa apakah log menyimpan header `cookie` atau `cf-connecting-ip`; bila ya, matikan log, atau atur lewat `wrangler.jsonc` agar hanya data yang perlu tercatat. Deploy lewat Wrangler mungkin mematikan setelan dasbor, jadi periksa sesudah push.
 - Plan JS-11 (dari Build JS-10): halaman `#/ruang/{id}` sudah ada sebagai detail ruang (pemain, kunci, keluarkan, tutup); hasil per ruang, peringkat lengkap, dan ekspor CSV ditambahkan di halaman yang sama. Podium layar kelas hanya menampilkan pemain berskor.
 - Plan JS-11 (dari lingkungan uji JS-10): tanda ✓ (`kelas.selesaiJumlah`) tampil seperti √ di peramban Windows karena Pixelify Sans tidak punya glif itu; ganti dengan ikon `ikon_centang` di 10 besar layar kelas saat papan dan peringkat dikerjakan.
+- Plan JS-15 (dari Plan JS-22, usulan 10a dan 6a): sesudah Workers Paid aktif, pasang `limits.cpu_ms` 1.000 ms untuk Worker uji dan produksi; sebelum mengaktifkannya, jalankan langkah Spend Management di spesifikasi JS-22 (P-19): peringatan anggaran 3 USD, lalu batas pakai Workers dan Durable Objects masing-masing 5 USD. Tambahkan pilihan `produksi` ke "Jejak: hentikan".
 - Plan JS-12 (dari Build JS-10): kesiapan paket untuk ruang biasa dihitung `paketSiapRuangBiasa` di `db/konten.ts` (semua kejadian terbit dan semua rujukan versi terbitnya terverifikasi). Penerbitan dan verifikasi di bank kejadian langsung membuka ruang biasa di dialog "Ruang baru".
 - Plan JS-22 (dari Build JS-10): `sim:beban` di lingkungan uji butuh akun konsol di `JEJAK_UJI_EMAIL` dan `JEJAK_UJI_SANDI`. Penghitung pemakaian per ruang bisa memakai statistik Durable Object yang sudah ada (`keluarKelas`, `byteKelas`, `barisDitulis`).
 - Semua fitur konsol (dari Build JS-10): gaya khusus konsol ditaruh di `styles/kelas.css` (diimpor `web/jejak-setara/admin/main.tsx`), bukan `jejak.css`, agar CSS layar pemain tidak membesar; uji ujung ke ujung membuat ruang lewat `e2e/jejak-setara/ruang-uji.ts`.
@@ -847,7 +848,7 @@ Dibangun dalam mode ZIP. Rinciannya di [JS-10-hasil.md](tests/JS-10-hasil.md).
 
 ## JS-22 — Pengaman biaya
 
-- Status: **Direncanakan (15 Nov 2026)**: menunggu `Setuju: JS-22`. Dibuat lewat usulan 14a JS-10 (14 Nov 2026); dikerjakan Sesi A sebelum JS-12, sehingga pengaman sudah ada sebelum uji coba kelas dan sebelum paket berbayar aktif.
+- Status: **Spesifikasi ditulis (15 Nov 2026)**: [JS-22-biaya.md](specs/JS-22-biaya.md), menunggu `Spesifikasi disetujui: JS-22` beserta pilihan DRAF D-1 sampai D-3. Plan disetujui 15 Nov 2026 (`Setuju: JS-22`, usulan 1a sampai 10a). Sebelumnya: **Direncanakan (15 Nov 2026)**. Dibuat lewat usulan 14a JS-10 (14 Nov 2026); dikerjakan Sesi A sebelum JS-12, sehingga pengaman sudah ada sebelum uji coba kelas dan sebelum paket berbayar aktif.
 - Memenuhi: usulan 14a JS-10 butir 1, 2, 4, dan 5; catatan penutupan JS-04 (biaya permintaan pertama di isolat baru) dan Plan JS-22 (Workers Logs); catatan Build JS-10 (`sim:beban` di lingkungan uji).
 - Bergantung pada: JS-10 (Selesai 15 Nov 2026).
 - Ukuran: M.
