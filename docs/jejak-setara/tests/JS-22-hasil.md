@@ -84,3 +84,25 @@ Perubahan tidak dipertahankan: perbedaannya di dalam rentang derau, jauh di bawa
 ## Keputusan
 
 Semua kriteria lulus kecuali catatan AC-18: kode layar pemain naik 0,59 KB gzip, lebih dari perkiraan 0,3 KB di spesifikasi. Pilihan: (a, saran) terima kenaikan ini, karena itu logika pengaman di HP (pemeriksaan ruang, batas 10 menit, dan layar berhenti) dan masih jauh di bawah anggaran ukuran; (b) kembali ke Build untuk memangkasnya.
+
+## Perbaikan alur kerja sesudah push (15 November 2026)
+
+**Yang terjadi.** Sesudah ZIP Build JS-22 di-push (commit `d2afc0f`), "Jejak: uji" (run 43712263826) merah di langkah `actions/setup-node@v5` dengan pesan "Unable to locate executable file: pnpm". Langkah uji dan build sesudahnya tidak sempat berjalan, dan job "Deploy uji" dilewati, jadi kode JS-22 belum masuk lingkungan uji. "Terbitkan ke GitHub Pages" di push yang sama hijau.
+
+**Penyebab.** P-22 menaikkan `actions/setup-node` dari v4 ke v5. Versi 5 punya masukan baru `package-manager-cache` yang menyala secara bawaan: bila `package.json` memuat `packageManager`, setup-node menyiapkan cache untuk pengelola paket itu. `package.json` memuat `"packageManager": "pnpm@11.25.0"`, jadi setup-node memanggil pnpm, padahal di mesin GitHub pnpm baru dijalankan lewat `npx` sesudah langkah itu. Versi 4 tidak punya cache otomatis. Uji AC-16 hanya memeriksa versi aksi dan runner, dan uji di mesin agen tidak menjalankan aksi GitHub, jadi kesalahan ini baru terlihat sesudah push.
+
+**Perbaikan.** Kedua langkah `actions/setup-node@v5` di `jejak-uji.yml` (job "Uji" dan "Deploy uji") memakai `package-manager-cache: false`, sehingga perilakunya sama dengan v4. Versi aksi dan runner tetap sesuai P-22. `jejak-admin-awal.yml` dan `jejak-hentikan.yml` tidak diubah: keduanya tidak mengambil repositori (tanpa `actions/checkout`), sehingga setup-node tidak menemukan `package.json`. Uji baru di `kerangka.test.ts` memeriksa setiap langkah setup-node di berkas `jejak-*.yml` yang mengambil repositori. `setup-node@v6` hanya menyalakan cache otomatis untuk npm, tetapi tidak dipakai agar versi tetap sesuai P-22.
+
+**Bukti.** Kode setup-node v5.0.0 (`src/main.ts`) diperiksa: cache otomatis memakai `packageManager` dan hanya dilewati bila `package-manager-cache` bernilai false. Uji baru gagal dengan `jejak-uji.yml` lama dan lulus dengan yang baru. Langkah job "Uji" diulang di mesin agen dengan Node 22.23.4 (sama dengan mesin GitHub) dan pnpm 11.25.0:
+
+| Perintah | Hasil |
+|---|---|
+| `install --frozen-lockfile` | Berhasil |
+| `content:check:jejak` | 10 berkas, 254 uji lulus |
+| `test:jejak` | 52 berkas, 934 uji lulus (933 ditambah 1 uji baru) |
+| `test:jejak:server` | 6 berkas, 54 uji lulus |
+| `build:jejak` | Berhasil |
+| `tsc --noEmit`, ESLint (`kerangka.test.ts`), actionlint 1.7.12 (`jejak-uji.yml`) | 0 galat, 0 masalah |
+| `build:pages` | 178 berkas, identik byte dengan `main` |
+
+Bukti terakhir adalah "Jejak: uji" hijau sesudah perbaikan ini di-push (pemeriksaan manual di atas).

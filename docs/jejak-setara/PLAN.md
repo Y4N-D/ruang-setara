@@ -176,6 +176,7 @@ Keputusan pemilik proyek, 14 November 2026: sesudah JS-04, Sesi A mengerjakan **
 - Plan JS-22 (dari Build JS-10): `sim:beban` di lingkungan uji butuh akun konsol di `JEJAK_UJI_EMAIL` dan `JEJAK_UJI_SANDI`. Penghitung pemakaian per ruang bisa memakai statistik Durable Object yang sudah ada (`keluarKelas`, `byteKelas`, `barisDitulis`).
 - Semua fitur konsol (dari Build JS-10): gaya khusus konsol ditaruh di `styles/kelas.css` (diimpor `web/jejak-setara/admin/main.tsx`), bukan `jejak.css`, agar CSS layar pemain tidak membesar; uji ujung ke ujung membuat ruang lewat `e2e/jejak-setara/ruang-uji.ts`.
 - Semua sesi (dari penutupan JS-04): dalam mode folder lokal, berkas alur kerja mungkin harus diganti manual oleh pemilik proyek (AGENTS 11.5 butir 8), dan folder `Claude outputs/` diabaikan git.
+- Semua fitur (dari push Build JS-22, 15 Nov 2026): `package.json` memuat `"packageManager": "pnpm@11.25.0"`, sedangkan alur kerja memanggil pnpm lewat `npx`. Setiap langkah `actions/setup-node@v5` di alur kerja yang mengambil repositori memakai `package-manager-cache: false`, termasuk alur kerja produksi di JS-15. `kerangka.test.ts` memeriksa semua berkas `jejak-*.yml`, tetapi uji di mesin agen tidak menjalankan aksi GitHub, jadi perubahan versi aksi baru terbukti di "Jejak: uji" sesudah push.
 
 ## JS-01 — Kerangka
 
@@ -849,7 +850,7 @@ Dibangun dalam mode ZIP. Rinciannya di [JS-10-hasil.md](tests/JS-10-hasil.md).
 
 ## JS-22 — Pengaman biaya
 
-- Status: **Dibangun dan diuji (15 Nov 2026)**: laporan [JS-22-hasil.md](tests/JS-22-hasil.md) lulus dengan catatan AC-18 (ukuran kode); menunggu keputusan pemilik proyek, push, dan langkah di lingkungan uji. Spesifikasi disetujui 15 Nov 2026 (D-1 sampai D-3 = a). Sebelumnya: **Spesifikasi ditulis (15 Nov 2026)**. Plan disetujui 15 Nov 2026 (`Setuju: JS-22`, usulan 1a sampai 10a). Sebelumnya: **Direncanakan (15 Nov 2026)**. Dibuat lewat usulan 14a JS-10 (14 Nov 2026); dikerjakan Sesi A sebelum JS-12, sehingga pengaman sudah ada sebelum uji coba kelas dan sebelum paket berbayar aktif.
+- Status: **Dibangun dan diuji (15 Nov 2026)**: laporan [JS-22-hasil.md](tests/JS-22-hasil.md) lulus dengan catatan AC-18 (ukuran kode); menunggu keputusan pemilik proyek, push, dan langkah di lingkungan uji. Spesifikasi disetujui 15 Nov 2026 (D-1 sampai D-3 = a). Sebelumnya: **Spesifikasi ditulis (15 Nov 2026)**. Plan disetujui 15 Nov 2026 (`Setuju: JS-22`, usulan 1a sampai 10a). Sebelumnya: **Direncanakan (15 Nov 2026)**. Dibuat lewat usulan 14a JS-10 (14 Nov 2026); dikerjakan Sesi A sebelum JS-12, sehingga pengaman sudah ada sebelum uji coba kelas dan sebelum paket berbayar aktif. **Perbaikan alur kerja 15 Nov 2026:** "Jejak: uji" sesudah push Build merah di langkah `actions/setup-node@v5` ("Unable to locate executable file: pnpm"), sebelum uji mana pun berjalan, karena setup-node v5 menyiapkan cache pnpm otomatis dari `packageManager` di `package.json`. Kedua langkah setup-node di `jejak-uji.yml` kini memakai `package-manager-cache: false`, dan `kerangka.test.ts` memeriksanya (laporan, bagian "Perbaikan alur kerja sesudah push").
 - Memenuhi: usulan 14a JS-10 butir 1, 2, 4, dan 5; catatan penutupan JS-04 (biaya permintaan pertama di isolat baru) dan Plan JS-22 (Workers Logs); catatan Build JS-10 (`sim:beban` di lingkungan uji).
 - Bergantung pada: JS-10 (Selesai 15 Nov 2026).
 - Ukuran: M.

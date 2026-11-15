@@ -1,6 +1,6 @@
 // Uji unit kerangka Jejak Setara (spesifikasi JS-01, Rencana uji bagian "Uji unit"). Berjalan di Node, tanpa runtime Workers.
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -621,6 +621,23 @@ describe("JS-22: alur kerja Jejak (P-11 sampai P-14, P-22)", () => {
       expect(isi, berkas).toContain("actions/setup-node@v5");
     }
     expect(baca(".github/workflows/deploy-pages.yml")).toContain("ubuntu-latest");
+  });
+
+  // setup-node@v5 membaca "packageManager" di package.json lalu menyiapkan cache pnpm, padahal pnpm dijalankan lewat npx
+  // dan belum terpasang. "Jejak: uji" sesudah push Build JS-22 gagal karena itu, sebelum satu uji pun berjalan (15 Nov 2026).
+  it("setup-node@v5 di alur kerja Jejak yang mengambil repositori mematikan cache otomatis (package.json memuat packageManager pnpm)", () => {
+    expect((JSON.parse(baca("package.json")) as { packageManager: string }).packageManager).toMatch(/^pnpm@/);
+    const alurKerja = readdirSync(new URL(".github/workflows/", AKAR)).filter((b) => /^jejak-.*\.yml$/.test(b));
+    let diperiksa = 0;
+    for (const berkas of alurKerja) {
+      const isi = baca(`.github/workflows/${berkas}`).replace(/^\s*#.*\n/gm, "");
+      if (!isi.includes("actions/checkout@")) continue;
+      for (const langkah of isi.split("\n      - ").filter((l) => l.includes("actions/setup-node@"))) {
+        expect(langkah, berkas).toMatch(/^\s+package-manager-cache: false$/m);
+        diperiksa += 1;
+      }
+    }
+    expect(diperiksa).toBeGreaterThanOrEqual(2);
   });
 });
 

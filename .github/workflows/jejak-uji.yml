@@ -39,9 +39,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # setup-node@v5 menyalakan cache otomatis untuk pengelola paket di "packageManager" package.json (pnpm), lalu gagal
+      # karena pnpm belum terpasang: pnpm dijalankan lewat npx sesudah langkah ini. Cache itu dimatikan (perbaikan JS-22).
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          package-manager-cache: false
 
       - name: Pasang dependensi
         run: npx -y pnpm@11.25.0 install --frozen-lockfile
@@ -84,10 +87,12 @@ jobs:
             echo "siap=ya" >> "$GITHUB_OUTPUT"
           fi
 
+      # Cache otomatis setup-node@v5 dimatikan; alasannya di job Uji.
       - uses: actions/setup-node@v5
         if: steps.rahasia.outputs.siap == 'ya'
         with:
           node-version: 22
+          package-manager-cache: false
 
       - name: Pasang dependensi
         if: steps.rahasia.outputs.siap == 'ya'
