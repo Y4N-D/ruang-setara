@@ -3,8 +3,20 @@
 // lokal `kejadian` dan `pindahkan`, dan ronde dikendalikan lewat kait `kelas`.
 import { readFileSync } from "node:fs";
 import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
-import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
 import { ruangKejadianSendiri } from "./ruang-kejadian";
+import { buatRuang as buatRuangUji, kejadianRuang, kelas, pindahkanPemain, putuskan } from "./ruang-uji";
+
+async function buatRuang(request: APIRequestContext, isiRuang: Record<string, unknown> = {}): Promise<string> {
+  const kode = await buatRuangUji(request, isiRuang);
+  expect((await kejadianRuang(request, kode)).length).toBe(16);
+  return kode;
+}
+async function titikKejadian(request: APIRequestContext, kode: string): Promise<Map<string, { x: number; y: number }>> {
+  return new Map((await kejadianRuang(request, kode)).map((k) => [k.kejadianId, k.titik[0]]));
+}
+const pindahkan = async (request: APIRequestContext, kode: string, nama: string, x: number, y: number) => {
+  expect((await pindahkanPemain(request, kode, nama, x, y)).status()).toBe(200);
+};
 
 const LAYAR = "test-results-jejak/layar";
 const UKURAN = [
@@ -36,26 +48,6 @@ async function pantau(page: Page): Promise<Catatan> {
 }
 const csp = (page: Page) => page.evaluate(() => (window as unknown as { __csp?: string[] }).__csp ?? []);
 
-async function buatRuang(request: APIRequestContext, isiRuang: Record<string, unknown> = {}): Promise<string> {
-  const j = await request.post("/api/ruang-coba", { data: isiRuang });
-  expect(j.status()).toBe(201);
-  const hasil = (await j.json()) as { kode: string; kejadian: number };
-  expect(hasil.kejadian).toBe(16);
-  return hasil.kode;
-}
-const kelas = async (request: APIRequestContext, kode: string, pesan: Record<string, unknown>) => {
-  const j = await request.post(`/api/ruang-coba/${kode}/kelas`, { data: { v: PROTOKOL_VERSI, ...pesan } });
-  expect(j.status()).toBe(200);
-};
-async function titikKejadian(request: APIRequestContext, kode: string): Promise<Map<string, { x: number; y: number }>> {
-  const j = await request.get(`/api/ruang-coba/${kode}/kejadian`);
-  const daftar = ((await j.json()) as { kejadian: { kejadianId: string; titik: { x: number; y: number }[] }[] }).kejadian;
-  return new Map(daftar.map((k) => [k.kejadianId, k.titik[0]]));
-}
-const pindahkan = async (request: APIRequestContext, kode: string, nama: string, x: number, y: number) => {
-  const j = await request.post(`/api/ruang-coba/${kode}/pindahkan`, { data: { nama, x, y } });
-  expect(j.status()).toBe(200);
-};
 
 async function konteks(browser: Browser, baseURL: string, hp = false): Promise<{ ctx: BrowserContext; page: Page }> {
   const ctx = await browser.newContext({
@@ -349,7 +341,7 @@ test("KT-13, jeda saat dialog terbuka, putus di tengah dialog, dan akhir ronde d
   await kelas(request, kode, { t: "lanjut" });
   await expect(dialog(a.page)).toBeVisible();
   // Putus di tengah dialog: dialog tertutup dan lapisan menyambung tampil; sesudah tersambung, penanda dan skor pulih (P-54).
-  expect((await a.page.request.post(`/api/ruang-coba/${kode}/putuskan`)).status()).toBe(200);
+  expect((await putuskan(a.page.request, kode)).status()).toBe(200);
   await expect(dialog(a.page)).toHaveCount(0);
   await expect(a.page.getByText("Menyambung ulang…")).toBeVisible();
   await expect(a.page.getByText("Menyambung ulang…")).toBeHidden({ timeout: 15_000 });
@@ -358,7 +350,7 @@ test("KT-13, jeda saat dialog terbuka, putus di tengah dialog, dan akhir ronde d
   await expect(dunia(a.page)).toHaveAttribute("data-jangkauan", "K-01");
   // Putus lagi, dan ronde berakhir selama HP terputus: sesudah tersambung, layar "Ronde selesai" tampil dengan skor dan
   // peringkat (P-36, P-59, D-5); poin Langkah 1 tetap dihitung walaupun Langkah 2 belum dijawab.
-  expect((await a.page.request.post(`/api/ruang-coba/${kode}/putuskan`)).status()).toBe(200);
+  expect((await putuskan(a.page.request, kode)).status()).toBe(200);
   await kelas(request, kode, { t: "akhiri" });
   await expect(a.page.getByRole("heading", { name: "Ronde selesai" })).toBeVisible({ timeout: 15_000 });
   await expect(a.page.getByText("Skormu 40")).toBeVisible();

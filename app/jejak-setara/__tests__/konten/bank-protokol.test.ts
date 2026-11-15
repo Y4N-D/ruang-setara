@@ -2,7 +2,8 @@
 // Pesan dibangun seperti yang akan dikirim server: id pilihan untuk pemain diacak (Architecture 8.3), dan
 // kartu dampak memuat teks rujukan dari pustaka.
 import { describe, expect, it } from "vitest";
-import { PROTOKOL_VERSI, skemaServerKelas, skemaServerPemain } from "../../inti/protokol";
+import { PROTOKOL_VERSI, skemaServerPemain } from "../../inti/protokol";
+import { skemaServerKelas } from "../../inti/protokol-kelas";
 import { bacaBankAwal } from "./naskah-urai";
 
 const { bank } = bacaBankAwal();

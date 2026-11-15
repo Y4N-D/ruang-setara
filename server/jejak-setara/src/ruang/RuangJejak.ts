@@ -4,7 +4,9 @@
 // agar Worker tetap bisa diimpor uji Node; komunikasi dari Worker lewat fetch internal.
 // JS-08: tabel `kejadian`, `jawaban`, `terlihat`, dan `antrean`, dialog di lampiran sambungan, pemulihan dari
 // tabel itu, kait uji lokal `kejadian` dan `pindahkan`, dan kiriman berkunci berversi (P-60 sampai P-63, P-66, P-67).
-import { PROTOKOL_VERSI, skemaKelas, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
+import { PROTOKOL_VERSI, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
+import { skemaKelas, type PesanKelas } from "../../../../app/jejak-setara/inti/protokol-kelas";
+import { skemaKelola, STATUS_BOLEH_TUTUP } from "../../../../app/jejak-setara/inti/ruang";
 import type { Arah, KejadianRuang, StatusRuang, Tingkat, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
 import { TEKS } from "../../../../app/jejak-setara/teks";
 import { kirimKeD1 } from "../db/ruang";
@@ -31,11 +33,22 @@ import {
   type PemainRuang,
   type Simpanan,
   type WaktuRuang,
+  sambutanKelas,
 } from "./inti-ruang";
 import { ambilAntrean, antrekan, hapusTerkirim, jumlahAntrean, SQL_TABEL_ANTREAN } from "./antrean";
 import { jumlahTitikRuang, tempatkanRuang, type JawabanRuang, type KejadianMasuk, type StatusJawaban } from "./kejadian-ruang";
 import { PETA_KAMPUNG, TITIK_PER_ZONA } from "./peta-kampung";
 import { bacaPesanPemain, catatPelanggaran, sambunganBaru, type KeadaanSambungan } from "./sambungan";
+
+/** Lampiran sambungan layar kelas (JS-10, P-13): asal Worker untuk tautan di lobi. */
+interface LampiranKelas {
+  kelas: true;
+  asal: string;
+  dibukaPada: number;
+}
+
+/** Batas ukuran satu pesan dari layar kelas. */
+const PESAN_KELAS_MAKS = 2048;
 
 interface Lampiran {
   sambunganId: string;
@@ -105,6 +118,8 @@ export class RuangJejak {
     koreksiAlasan: {} as Record<string, number>,
     jawabanSelesai: 0,
     pribadi: 0,
+    keluarKelas: 0,
+    byteKelas: 0,
   };
 
   constructor(ctx: DurableObjectState, env: Env) {
@@ -121,9 +136,13 @@ export class RuangJejak {
 
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    if (request.headers.get("Upgrade")?.toLowerCase() === "websocket") return this.antre(() => this.terimaSambungan(request));
+    if (request.headers.get("Upgrade")?.toLowerCase() === "websocket") {
+      if (url.pathname === "/ws-kelas") return this.antre(() => this.terimaSambunganKelas(request));
+      return this.antre(() => this.terimaSambungan(request));
+    }
     if (url.pathname === "/inisialisasi" && request.method === "POST") return this.antre(() => this.inisialisasi(request));
-    if (url.pathname === "/kelas" && request.method === "POST") return this.antre(() => this.pesanKelas(request));
+    if (url.pathname === "/kelola" && request.method === "GET") return jawabJson(this.keadaanLangsung(), this.keadaan ? 200 : 404);
+    if (url.pathname === "/kelola" && request.method === "POST") return this.antre(() => this.aksiKelola(request));
     if (url.pathname === "/statistik") return jawabJson(this.ringkasanStatistik(), 200);
     if (url.pathname === "/putuskan" && request.method === "POST") return this.antre(() => this.putuskanSemua());
     if (url.pathname === "/kejadian") return jawabJson({ kejadian: this.keadaan ? titikKejadianRuang(this.keadaan) : [] }, 200);
@@ -132,14 +151,23 @@ export class RuangJejak {
   }
 
   async webSocketMessage(ws: WebSocket, pesan: string | ArrayBuffer): Promise<void> {
+    if (lampiranKelas(ws)) {
+      await this.antre(() => this.tanganiPesanKelas(ws, pesan));
+      return;
+    }
     await this.antre(() => this.tanganiPesan(ws, pesan));
   }
 
   async webSocketClose(ws: WebSocket, kode: number): Promise<void> {
+    if (lampiranKelas(ws)) {
+      tutupAman(ws, kode >= 1000 && kode < 5000 && kode !== 1005 && kode !== 1006 && kode !== 1015 ? kode : 1000, "selesai");
+      return;
+    }
     await this.antre(() => this.tanganiPutus(ws, kode));
   }
 
   async webSocketError(ws: WebSocket): Promise<void> {
+    if (lampiranKelas(ws)) return;
     await this.antre(() => this.tanganiPutus(ws, 1011));
   }
 
@@ -171,6 +199,8 @@ export class RuangJejak {
 
   private siapkanTabel(): void {
     this.sql.exec("CREATE TABLE IF NOT EXISTS meta (kunci TEXT PRIMARY KEY, nilai TEXT NOT NULL)");
+    // JS-10 (P-13): nonce tiket layar kelas yang sudah dipakai, agar tiket hanya sekali pakai.
+    this.sql.exec("CREATE TABLE IF NOT EXISTS tiket_terpakai (nonce TEXT PRIMARY KEY, kedaluwarsa INTEGER NOT NULL)");
     this.sql.exec(
       "CREATE TABLE IF NOT EXISTS pemain (id TEXT PRIMARY KEY, hash_token TEXT NOT NULL UNIQUE, urutan INTEGER NOT NULL, nama TEXT, " +
         "avatar INTEGER, warna_tas TEXT, nomor_absen INTEGER, saran_json TEXT NOT NULL, terhubung INTEGER NOT NULL, terputus_sejak INTEGER, " +
@@ -340,6 +370,7 @@ export class RuangJejak {
     if (this.keadaan) return jawabJson({ ok: true }, 200);
     const { kejadian: masuk, ...isi } = (await request.json()) as DataRuang & { kejadian?: KejadianMasuk[] };
     const data: DataRuang = { ruangId: isi.ruangId, kode: isi.kode, pengaturan: isi.pengaturan, benih: isi.benih, dibuatPada: isi.dibuatPada };
+    if (typeof isi.labelKelas === "string") data.labelKelas = isi.labelKelas; // JS-10, P-5
     // Penempatan sekali per ruang dengan benih ruang (P-9). Worker sudah membuang kejadian yang kehabisan titik (P-2).
     let kejadian: KejadianRuang[] = [];
     try {
@@ -365,22 +396,6 @@ export class RuangJejak {
     this.tulisMeta("waktu", this.keadaan.waktu);
     await this.pasangAlarm();
     return jawabJson({ ok: true }, 200);
-  }
-
-  private async pesanKelas(request: Request): Promise<Response> {
-    const k = this.keadaan;
-    if (!k) return jawabGalat("RUANG_TIDAK_ADA", TEKS.api.RUANG_TIDAK_ADA, 404);
-    let data: unknown = null;
-    try {
-      data = await request.json();
-    } catch {
-      data = null;
-    }
-    const hasil = skemaKelas.safeParse(data);
-    if (!hasil.success || hasil.data.t === "halo") return jawabGalat("PESAN_SALAH", TEKS.api.PESAN_SALAH, 400);
-    await this.terapkan(terimaKelas(k, hasil.data, Date.now()));
-    // Status ruang sesudah pesan; pesan yang tidak berlaku di status sekarang tidak mengubah apa pun (JS-07, P-54).
-    return jawabJson({ ok: true, status: this.keadaan?.status ?? "ditutup" }, 200);
   }
 
   /** Kait uji lokal: memutus semua sambungan pemain seperti jaringan putus (kode 1012, klien menyambung ulang). */
@@ -421,6 +436,7 @@ export class RuangJejak {
       status: this.keadaan?.status ?? null,
       pemain: this.keadaan?.pemain.size ?? 0,
       sambungan: this.ctx.getWebSockets("pemain").length,
+      sambunganKelas: this.ctx.getWebSockets("kelas").length,
       antreanKiriman: this.sql.exec<{ n: number }>("SELECT COUNT(*) AS n FROM kiriman").one().n + jumlahAntrean(this.sql),
       menungguHalo: this.keadaan?.batasHalo.size ?? 0,
       alarm: this.alarmTerpasang ?? null,
@@ -546,6 +562,111 @@ export class RuangJejak {
   }
 
   // -------------------------------------------------------------------------------------------
+  // Layar kelas (JS-10, P-8, P-10, dan P-13)
+
+  /** Sambungan layar kelas dari Worker (tiket sudah diperiksa): nonce sekali pakai, lalu satu layar kelas per ruang. */
+  private async terimaSambunganKelas(request: Request): Promise<Response> {
+    const k = this.keadaan;
+    if (request.headers.get("X-Jejak-Peran") !== "guru" || !k || k.status === "ditutup") {
+      return jawabGalat("RUANG_TIDAK_ADA", TEKS.api.RUANG_TIDAK_ADA, 404);
+    }
+    const nonce = request.headers.get("X-Jejak-Nonce") ?? "";
+    const kedaluwarsa = Number(request.headers.get("X-Jejak-Kedaluwarsa"));
+    const asal = request.headers.get("X-Jejak-Asal") ?? "";
+    const sekarang = Date.now();
+    if (!/^[A-Za-z0-9_-]{22}$/.test(nonce) || !Number.isFinite(kedaluwarsa) || kedaluwarsa < sekarang || !/^https?:\/\//.test(asal)) {
+      return jawabGalat("TIKET_DITOLAK", "Tiket layar kelas ditolak.", 403);
+    }
+    this.catatTulis(this.sql.exec("DELETE FROM tiket_terpakai WHERE kedaluwarsa < ?", sekarang).rowsWritten);
+    if (this.sql.exec("SELECT nonce FROM tiket_terpakai WHERE nonce = ?", nonce).toArray().length > 0) {
+      return jawabGalat("TIKET_DITOLAK", "Tiket layar kelas ditolak.", 403);
+    }
+    this.catatTulis(this.sql.exec("INSERT INTO tiket_terpakai (nonce, kedaluwarsa) VALUES (?, ?)", nonce, kedaluwarsa).rowsWritten);
+    for (const lama of this.ctx.getWebSockets("kelas")) tutupAman(lama, KODE_TUTUP.diganti, "layar kelas diganti");
+    const pasangan = new WebSocketPair();
+    this.ctx.acceptWebSocket(pasangan[1], ["kelas"]);
+    pasangan[1].serializeAttachment({ kelas: true, asal, dibukaPada: sekarang } satisfies LampiranKelas);
+    return new Response(null, { status: 101, webSocket: pasangan[0] });
+  }
+
+  private async tanganiPesanKelas(ws: WebSocket, pesan: string | ArrayBuffer): Promise<void> {
+    const k = this.keadaan;
+    const l = lampiranKelas(ws);
+    if (!k || !l) {
+      tutupAman(ws, KODE_TUTUP.ditutup, "ruang tidak ada");
+      return;
+    }
+    if (typeof pesan !== "string" || pesan.length > PESAN_KELAS_MAKS) return;
+    let data: unknown = null;
+    try {
+      data = JSON.parse(pesan);
+    } catch {
+      return;
+    }
+    const hasil = skemaKelas.safeParse(data);
+    if (!hasil.success) return;
+    this.statistik.masuk++;
+    if (hasil.data.t === "halo") await this.terapkan(sambutanKelas(k, l.asal, Date.now()));
+    else await this.terapkan(terimaKelas(k, hasil.data, Date.now()));
+  }
+
+  private kirimKelas(pesan: readonly unknown[]): void {
+    const soket = this.ctx.getWebSockets("kelas");
+    if (soket.length === 0) return;
+    for (const m of pesan) {
+      const teks = JSON.stringify(m);
+      for (const ws of soket) {
+        try {
+          ws.send(teks);
+          this.statistik.keluarKelas++;
+          this.statistik.byteKelas += teks.length;
+        } catch {
+          // Sambungan sudah tertutup.
+        }
+      }
+    }
+  }
+
+  /** Keadaan langsung untuk halaman detail ruang di konsol (P-8); tautan ditambahkan Worker. */
+  private keadaanLangsung() {
+    const k = this.keadaan;
+    if (!k) return { galat: { kode: "RUANG_TIDAK_ADA" } };
+    const pemain = [...k.pemain.values()]
+      .filter((p) => p.nama !== null && !p.dikeluarkan)
+      .sort((a, b) => a.urutan - b.urutan)
+      .map((p) => ({ id: p.id, nama: p.nama ?? "", avatar: p.avatar ?? 0, terhubung: p.terhubung }));
+    return { status: k.status, terkunci: k.terkunci, mulaiPada: k.waktu.mulaiPada, berakhirPada: k.waktu.berakhirPada, jedaSejak: k.waktu.jedaSejak, pemain };
+  }
+
+  /** Aksi kelola dari konsol (P-10), diterjemahkan menjadi pesan kelas yang setara. */
+  private async aksiKelola(request: Request): Promise<Response> {
+    const k = this.keadaan;
+    if (!k) return jawabJson({ galat: { kode: "RUANG_TIDAK_ADA" } }, 404);
+    let data: unknown = null;
+    try {
+      data = await request.json();
+    } catch {
+      data = null;
+    }
+    const hasil = skemaKelola.safeParse(data);
+    if (!hasil.success) return jawabJson({ galat: { kode: "ISI_SALAH" } }, 400);
+    const { aksi, pemainId } = hasil.data;
+    const V = PROTOKOL_VERSI;
+    let pesan: PesanKelas;
+    if (aksi === "kunci" || aksi === "buka_kunci") pesan = { v: V, t: "kunci_ruang", kunci: aksi === "kunci" };
+    else if (aksi === "keluarkan") {
+      const p = pemainId ? k.pemain.get(pemainId) : undefined;
+      if (!p || p.nama === null || p.dikeluarkan || !pemainId) return jawabJson({ galat: { kode: "PEMAIN_TIDAK_ADA" } }, 404);
+      pesan = { v: V, t: "keluarkan", pemainId };
+    } else {
+      if (!STATUS_BOLEH_TUTUP.includes(k.status)) return jawabJson({ galat: { kode: "STATUS_TIDAK_SESUAI" } }, 409);
+      pesan = { v: V, t: "tutup_ruang" };
+    }
+    await this.terapkan(terimaKelas(k, pesan, Date.now()));
+    return jawabJson({ ok: true }, 200);
+  }
+
+  // -------------------------------------------------------------------------------------------
   // Menjalankan keluaran inti ruang
 
   private async terapkan(o: Keluaran): Promise<void> {
@@ -566,6 +687,10 @@ export class RuangJejak {
       if (ws) this.kirimSoket(ws, pesan);
     }
     for (const t of o.tutup) this.tutupSoket(t.sambunganId, t.kode, t.alasan);
+    if (o.kelas.length > 0) this.kirimKelas(o.kelas);
+    if (this.keadaan?.status === "ditutup" || o.hapusSemua) {
+      for (const ws of this.ctx.getWebSockets("kelas")) tutupAman(ws, KODE_TUTUP.ditutup, "ruang ditutup");
+    }
     if (o.kiriman.length > 0) this.antrekanKiriman(o.kiriman);
     this.statistik.koreksi += o.koreksi;
     this.statistik.duniaLobi += o.duniaLobi;
@@ -716,4 +841,17 @@ function barisKePemain(r: BarisPemainSql): PemainRuang {
     dikeluarkan: r.dikeluarkan === 1,
     gabungPada: r.gabung_pada,
   };
+}
+
+function lampiranKelas(ws: WebSocket): LampiranKelas | null {
+  const l = ws.deserializeAttachment() as Partial<LampiranKelas> | null;
+  return l && l.kelas === true && typeof l.asal === "string" ? (l as LampiranKelas) : null;
+}
+
+function tutupAman(ws: WebSocket, kode: number, alasan: string): void {
+  try {
+    ws.close(kode, alasan);
+  } catch {
+    // Sudah tertutup.
+  }
 }

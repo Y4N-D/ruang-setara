@@ -1,16 +1,8 @@
 // Uji skema protokol v1 (spesifikasi JS-02, P-33 sampai P-38; AC-9; Architecture 6.3, 6.4, 6.7).
 import { describe, expect, it } from "vitest";
 import { BATAS } from "../../inti/aturan";
-import {
-  BATAS_PESAN,
-  KODE_GALAT,
-  PANJANG_TEKS,
-  PROTOKOL_VERSI,
-  skemaKelas,
-  skemaPemain,
-  skemaServerKelas,
-  skemaServerPemain,
-} from "../../inti/protokol";
+import { BATAS_PESAN, KODE_GALAT, PANJANG_TEKS, PROTOKOL_VERSI, skemaPemain, skemaServerPemain } from "../../inti/protokol";
+import { skemaKelas, skemaServerKelas } from "../../inti/protokol-kelas";
 
 type Pesan = Record<string, unknown>;
 const pesan = (t: string, isi: Pesan = {}): Pesan => ({ v: PROTOKOL_VERSI, t, ...isi });
@@ -44,7 +36,7 @@ const OPSI2 = [
 ];
 const STATUS = { status: "main", mulaiPada: 1000, berakhirPada: 901000, jedaSejak: null };
 const GALAT = { kode: "RUANG_PENUH", pesan: "Ruang sudah penuh. Beri tahu gurumu." };
-const PEMAIN_PAPAN = { id: "p-01", nama: "Kancil Jingga", avatar: 2, warnaTas: "sun", skor: 340, peringkat: 1 };
+const PEMAIN_PAPAN = { id: "p-01", nama: "Kancil Jingga", avatar: 2, warnaTas: "sun", skor: 340, peringkat: 1, selesai: 3 }; // JS-10, P-18
 const PEMAIN_LOBI = { id: "p-01", nama: "Kancil Jingga", avatar: 2, warnaTas: "sun", terhubung: true };
 
 // Satu contoh sah dan satu contoh cacat untuk setiap pesan (Architecture 6.3 dan 6.4).
@@ -240,7 +232,33 @@ const SERVER_KE_KELAS: Record<string, [Pesan, Pesan]> = {
     pesan("dunia_kelas", { w: 5000, p: [["p-01", 10, 20, true]] }),
     pesan("dunia_kelas", { w: 5000, p: [["p-01", 10, 20, "ya"]] }),
   ],
-  papan: [pesan("papan", { pemain: [PEMAIN_PAPAN] }), pesan("papan", { pemain: [{ ...PEMAIN_PAPAN, peringkat: 0 }] })],
+  papan: [pesan("papan", { pemain: [PEMAIN_PAPAN], jumlahPemain: 23 }), pesan("papan", { pemain: [{ ...PEMAIN_PAPAN, peringkat: 0 }], jumlahPemain: 23 })],
+  info_kelas: [
+    pesan("info_kelas", {
+      labelKelas: "IX B",
+      kode: "K7MPA",
+      tautan: "https://jejak-setara-uji.ruangsetara.workers.dev",
+      durasiMenit: 15,
+      batasPemain: 40,
+      uji: true,
+      terkunci: false,
+      waktuServer: 1_700_000_000_000,
+      jumlahKejadian: 1,
+      kejadian: [{ id: "K-13", judul: "Antrean puskesmas", zona: 7 }],
+    }),
+    pesan("info_kelas", {
+      labelKelas: "Label kelas yang terlalu panjang",
+      kode: "K7MPA",
+      tautan: "https://jejak-setara-uji.ruangsetara.workers.dev",
+      durasiMenit: 15,
+      batasPemain: 40,
+      uji: true,
+      terkunci: false,
+      waktuServer: 1_700_000_000_000,
+      jumlahKejadian: 1,
+      kejadian: [{ id: "K-13", judul: "Antrean puskesmas", zona: 7 }],
+    }),
+  ],
   kemajuan: [pesan("kemajuan", { terjawab: 120, kemungkinan: 640 }), pesan("kemajuan", { terjawab: -1, kemungkinan: 640 })],
   data_pembahasan: [
     pesan("data_pembahasan", {
@@ -325,7 +343,7 @@ describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
         "saran_nama",
       ].sort(),
     );
-    expect(tipe(skemaServerKelas)).toEqual(["lobi", "dunia_kelas", "papan", "kemajuan", "data_pembahasan", "status_ruang", "galat"].sort());
+    expect(tipe(skemaServerKelas)).toEqual(["info_kelas", "lobi", "dunia_kelas", "papan", "kemajuan", "data_pembahasan", "status_ruang", "galat"].sort());
     for (const k of KELOMPOK) expect(Object.keys(k.contoh).sort(), k.nama).toEqual(tipe(k.skema));
   });
 
@@ -429,8 +447,10 @@ describe("batas nilai (P-34 sampai P-38)", () => {
     const banyak = <T>(n: number, x: T) => Array.from({ length: n }, () => x);
     expect(lolos(skemaServerKelas, pesan("lobi", { pemain: banyak(100, PEMAIN_LOBI) }))).toBe(true);
     expect(lolos(skemaServerKelas, pesan("lobi", { pemain: banyak(101, PEMAIN_LOBI) }))).toBe(false);
-    expect(lolos(skemaServerKelas, pesan("papan", { pemain: banyak(100, PEMAIN_PAPAN) }))).toBe(true);
-    expect(lolos(skemaServerKelas, pesan("papan", { pemain: banyak(101, PEMAIN_PAPAN) }))).toBe(false);
+    // JS-10 (P-18): papan layar kelas hanya 10 besar ditambah jumlah pemain.
+    expect(lolos(skemaServerKelas, pesan("papan", { pemain: banyak(10, PEMAIN_PAPAN), jumlahPemain: 100 }))).toBe(true);
+    expect(lolos(skemaServerKelas, pesan("papan", { pemain: banyak(11, PEMAIN_PAPAN), jumlahPemain: 100 }))).toBe(false);
+    expect(lolos(skemaServerKelas, pesan("papan", { pemain: [], jumlahPemain: 101 }))).toBe(false);
     expect(lolos(skemaServerKelas, pesan("dunia_kelas", { w: 1, p: banyak(100, ["p-1", 1, 1, true]) }))).toBe(true);
     expect(lolos(skemaServerKelas, pesan("dunia_kelas", { w: 1, p: banyak(101, ["p-1", 1, 1, true]) }))).toBe(false);
   });

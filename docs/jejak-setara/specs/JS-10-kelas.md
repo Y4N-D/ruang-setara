@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Ditulis 14 November 2026 di tahap Specify, sesudah balasan `Setuju: JS-10 (usulan 1a sampai 13a)` dan `Usulan 14: a`. Menunggu `Spesifikasi disetujui: JS-10` beserta pilihan DRAF D-1 sampai D-4 |
+| Status | Disetujui 14 November 2026 (`Spesifikasi disetujui: JS-10. D-1 a, D-2 a, D-3 a, D-4 a.`). Dibangun dan diuji 14 November 2026; penyesuaian saat Build ada di bagian "Catatan Build" |
 | Rencana | `PLAN.md`, bagian "JS-10 — Layar kelas" |
 | Sesi | Sesi A (mesin) |
 | Bergantung pada | JS-04 (Selesai, 14 Nov 2026) dan JS-08 (Selesai, 13 Nov 2026) |
@@ -391,6 +391,19 @@ Semua teks ada di `TEKS_KONSOL` (`app/jejak-setara/teks-konsol.ts`). Teks dengan
 | `kelas.umumTambah` / `kelas.umumSelesai` | Waktu ditambah 2 menit. / Ronde selesai. |
 | `kelas.umumKunci` / `kelas.umumBuka` | Ruang dikunci. / Kunci ruang dibuka. |
 
+**Pesan galat API ruang** (ditambahkan saat Build; bagian "Catatan Build")
+
+| Kunci | Teks |
+|---|---|
+| `galatRuang.ISI_SALAH` | Isian ruang tidak sesuai. Periksa lagi isiannya. |
+| `galatRuang.RUANG_MASIH_ADA` | Anda masih punya ruang yang belum ditutup. Tutup ruang itu dulu. |
+| `galatRuang.PAKET_BELUM_SIAP` | Paket ini belum siap untuk ruang biasa. Centang Ruang uji. |
+| `galatRuang.SERVER_PENUH` | Server sedang penuh. Tutup ruang yang tidak dipakai atau coba lagi nanti. |
+| `galatRuang.RUANG_GAGAL_DIBUAT` | Ruang gagal dibuat. Coba lagi. |
+| `galatRuang.RUANG_TIDAK_ADA` | Ruang tidak ditemukan atau sudah dihapus. |
+| `galatRuang.PEMAIN_TIDAK_ADA` | Pemain tidak ditemukan di ruang ini. |
+| `galatRuang.STATUS_TIDAK_SESUAI` | Ruang hanya bisa ditutup di lobi, sesudah ronde selesai, atau saat pembahasan. |
+
 ## Data, protokol, API, dan migrasi
 
 **Rute API baru** (semua jawaban JSON, galat berbentuk `{ galat: { kode, pesan } }` seperti JS-04; semua `POST` memeriksa CSRF):
@@ -512,3 +525,17 @@ Tidak ada aset gambar baru. Dipakai: `ikon_ava_1` sampai `ikon_ava_8`, `ikon_zon
 2. Pemilik proyek menghapus rahasia `KUNCI_COBA` di dasbor Cloudflare (Workers & Pages → `jejak-setara-uji` → Settings → Variables and Secrets).
 3. Pemilik proyek masuk ke konsol, membuat ruang, membuka layar kelas di laptop yang tersambung ke proyektor atau layar lebar, lalu bergabung dengan dua atau tiga HP dan menjalankan satu ronde pendek sampai pembahasan.
 4. Tangkapan layar layar kelas dari proyektor (atau foto) dan dari HP dikirim bersama laporan.
+
+## Catatan Build (14 November 2026)
+
+Ditulis Sesi A saat Build. Bagian lain spesifikasi ini tidak berubah kecuali tabel "Pesan galat API ruang".
+
+- **P-34, `RUANG_AKTIF_MAKS` lokal 1000 (bukan 20).** Uji server, uji ujung ke ujung, dan `sim:beban` membuat puluhan ruang dalam satu keadaan D1 lokal, sehingga batas 20 menabrak `SERVER_PENUH`. Nilai uji tetap 3 dan produksi 20. Perilaku `SERVER_PENUH`, termasuk dua permintaan serentak, diuji di uji unit dengan D1 tiruan dan batas kecil (`__tests__/kelas/api-ruang.test.ts`).
+- **Teks: pesan galat API ruang.** Tabel teks spesifikasi belum memuat pesan untuk kode galat API baru. Tabel "Pesan galat API ruang" (`galatRuang.*`) ditambahkan di bagian "Teks yang tampil (final)", dan uji AC-25 membacanya. Penolakan tiket di sambungan WebSocket memakai kode `TIKET_DITOLAK` dengan pesan server "Tiket layar kelas ditolak."; pesan ini tidak pernah tampil di layar.
+- **Berkas tambahan:** `admin/kelas/tampilan-kelas.ts` (perhitungan murni yang diuji di Node), `admin/kelas/ikon-kelas.ts` (ikon diimpor langsung dari PNG), `styles/kelas.css` (gaya halaman ruang dan layar kelas, hanya diimpor konsol lewat `web/jejak-setara/admin/main.tsx`, agar CSS layar pemain tidak membesar), dan `e2e/jejak-setara/ruang-uji.ts` (pembantu uji ujung ke ujung pengganti ruang coba).
+- **P-29, pembahasan.** Batang persen menjadi latar kotak opsinya, sehingga setiap opsi hanya satu blok. Dengan susunan awal (batang di baris sendiri), kartu kanan perlu digulir di layar 16:9 untuk kejadian bank awal.
+- **P-26, warna tas di peta kelas.** Rose (#FF8FB8) dan berry (#9B5DE5) belum punya token CSS, jadi `kelas.css` memakai nilai palet aksen Design System bagian 8; enam warna lain memakai token.
+- **P-28, podium.** Yang tampil hanya pemain yang sudah mendapat skor (tafsiran "pemain berskor"); balok naik dalam 3 langkah selama 300 ms (Design System 10) dan diam bila "kurangi gerak".
+- **P-35 dan AC-23, aturan impor.** Halaman masuk konsol JS-04 sudah memakai `bersama/PenandaServer`, jadi uji aturan impor hanya memeriksa kode baru JS-10 (`admin/kelas/`, `Ruang.tsx`, dan `DetailRuang.tsx`).
+- **P-30, pintasan.** Penangan papan ketik dipasang ulang dengan `useLayoutEffect` sesudah setiap render. Dengan `useEffect`, tombol yang ditekan cepat sempat memakai keadaan lama (L kedua mengunci lagi, padahal seharusnya membuka kunci).
+- **`sim:beban` di lingkungan uji** kini butuh akun konsol di `JEJAK_UJI_EMAIL` dan `JEJAK_UJI_SANDI`, menggantikan `JEJAK_KUNCI_COBA`.

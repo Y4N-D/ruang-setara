@@ -1,0 +1,681 @@
+/* Gaya halaman Ruang, detail ruang, dan layar kelas (spesifikasi JS-10, P-7, P-9, P-23 sampai P-31). Hanya diimpor
+   konsol (web/jejak-setara/admin/main.tsx), sehingga layar pemain tidak memuatnya (P-35). Token ada di jejak.css. */
+
+/* ---------------------------------------------------------------------------------------------
+   JS-10: halaman Ruang dan detail ruang di konsol */
+
+.js-ruang-kode {
+  font-family: "Press Start 2P", monospace;
+  font-size: 14px;
+  letter-spacing: 3px;
+}
+.js-ruang-kode-besar {
+  margin: 4px 0 12px;
+  font-size: 28px;
+  letter-spacing: 6px;
+}
+.js-konsol-sel-aksi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.js-konsol-angka-kecil {
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+}
+.js-ruang-pilih {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.js-ruang-pilih .js-konsol-tombol[aria-pressed="true"] {
+  background: var(--js-sun);
+  font-weight: 600;
+}
+.js-ruang-dua {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+.js-ruang-kepala {
+  max-width: none;
+}
+.js-ruang-kepala h2,
+.js-ruang-pemain h2 {
+  margin: 0 0 8px;
+  font-family: "Pixelify Sans", sans-serif;
+}
+.js-ruang-aksi {
+  justify-content: flex-start;
+  margin: 16px 0 8px;
+}
+.js-ruang-pemain ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.js-ruang-pemain li {
+  display: grid;
+  grid-template-columns: 32px 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px solid var(--js-mist);
+}
+.js-ruang-pemain li img {
+  image-rendering: pixelated;
+}
+.js-ruang-pemain li[data-terhubung="tidak"] img,
+.js-ruang-pemain li[data-terhubung="tidak"] .js-ruang-nama {
+  opacity: 0.5;
+}
+.js-konsol-daftar-ruang {
+  margin: 0;
+  padding-left: 20px;
+}
+.js-konsol-daftar-ruang li + li {
+  margin-top: 6px;
+}
+@media (max-width: 1023px) {
+  .js-ruang-tabel thead {
+    display: none;
+  }
+  .js-ruang-tabel tr {
+    display: block;
+    padding: 8px 0;
+    border-top: 2px solid var(--js-mist);
+  }
+  .js-ruang-tabel td {
+    display: block;
+    padding: 2px 0;
+    border: 0;
+  }
+  .js-ruang-dua {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   JS-10: layar kelas (Design System 3.6). Ukuran memakai --u agar sama di 1024 x 768 sampai 1920 x 1080. */
+
+.js-kelas {
+  --u: min(1vh, 0.5625vw);
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--js-cream);
+  color: var(--js-ink);
+  font-family: "Pixelify Sans", sans-serif;
+}
+.js-kelas-layar {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: calc(1.6 * var(--u));
+  height: 100%;
+  padding: calc(2 * var(--u));
+}
+.js-kelas-tengah {
+  align-items: center;
+  justify-content: center;
+}
+.js-kelas-malam {
+  background: var(--js-malam);
+  color: var(--js-cream);
+}
+.js-kelas-bingkai {
+  box-sizing: border-box;
+  border: calc(0.5 * var(--u)) solid var(--js-ink);
+  background: var(--js-cream);
+  color: var(--js-ink);
+  box-shadow: inset 0 calc(0.3 * var(--u)) 0 0 var(--js-white);
+  padding: calc(1.6 * var(--u));
+  min-height: 0;
+}
+.js-kelas-kepala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(1.2 * var(--u)) calc(2 * var(--u));
+  background: var(--js-ink);
+  color: var(--js-cream);
+}
+.js-kelas-kepala-malam {
+  background: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+.js-kelas-judul {
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(2.8 * var(--u));
+}
+.js-kelas-tanda-kepala {
+  display: flex;
+  align-items: center;
+  gap: calc(1.4 * var(--u));
+}
+.js-kelas-tanda {
+  font-size: calc(2.5 * var(--u));
+  border: calc(0.3 * var(--u)) solid currentColor;
+  padding: calc(0.2 * var(--u)) calc(0.8 * var(--u));
+}
+.js-kelas-besar {
+  font-size: calc(3.6 * var(--u));
+  margin: 0;
+}
+.js-kelas-label {
+  margin: 0 0 calc(0.6 * var(--u));
+  font-size: calc(2.5 * var(--u));
+  color: var(--js-dusk);
+}
+.js-kelas-malam .js-kelas-kontrol .js-kelas-label {
+  color: var(--js-mist);
+}
+.js-kelas-angka {
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(2.8 * var(--u));
+}
+.js-kelas-tombol {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(1 * var(--u));
+  min-height: calc(7 * var(--u));
+  padding: calc(1 * var(--u)) calc(2.6 * var(--u));
+  border: calc(0.5 * var(--u)) solid var(--js-ink);
+  background: var(--js-cream);
+  color: var(--js-ink);
+  font-family: "Pixelify Sans", sans-serif;
+  font-weight: 600;
+  font-size: calc(3.1 * var(--u));
+  text-decoration: none;
+  cursor: pointer;
+}
+.js-kelas-tombol:focus-visible,
+.js-kelas-layar-penuh:focus-visible {
+  outline: 3px solid var(--js-ink);
+  outline-offset: 3px;
+}
+.js-kelas-malam .js-kelas-tombol:focus-visible {
+  outline-color: var(--js-cream);
+}
+.js-kelas-tombol:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.js-kelas-tombol-utama {
+  background: var(--js-sun);
+}
+.js-kelas-tombol-bahaya {
+  background: var(--js-coral);
+}
+.js-kelas-tombol kbd {
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(1.6 * var(--u));
+  border: calc(0.3 * var(--u)) solid var(--js-ink);
+  padding: calc(0.4 * var(--u)) calc(0.6 * var(--u));
+  background: var(--js-white);
+}
+.js-kelas-tombol-grup {
+  display: flex;
+  gap: calc(1.6 * var(--u));
+  align-items: center;
+}
+.js-kelas-kontrol {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: calc(1.6 * var(--u));
+}
+.js-kelas-layar-penuh {
+  position: absolute;
+  top: calc(0.4 * var(--u));
+  right: calc(0.4 * var(--u));
+  z-index: 3;
+  padding: calc(0.4 * var(--u));
+  border: 0;
+  background: transparent;
+  opacity: 0.6;
+  cursor: pointer;
+}
+.js-kelas-layar-penuh img {
+  width: calc(3 * var(--u));
+  height: calc(3 * var(--u));
+  image-rendering: pixelated;
+}
+.js-kelas-pita {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  margin: 0;
+  padding: calc(0.6 * var(--u));
+  background: var(--js-mango);
+  color: var(--js-ink);
+  text-align: center;
+  font-size: calc(2.8 * var(--u));
+}
+.js-kelas img {
+  image-rendering: pixelated;
+}
+
+/* Lobi (P-24) */
+.js-kelas-lobi-atas {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: calc(1.6 * var(--u));
+}
+.js-kelas-tautan {
+  margin: 0 0 calc(1.6 * var(--u));
+  font-size: calc(3.6 * var(--u));
+  overflow-wrap: anywhere;
+}
+.js-kelas-kode {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(10 * var(--u));
+  letter-spacing: calc(2.4 * var(--u));
+  line-height: 1.1;
+}
+.js-kelas-cara ol {
+  margin: 0;
+  padding-left: calc(3.5 * var(--u));
+}
+.js-kelas-cara li {
+  font-size: calc(3.1 * var(--u));
+  margin-bottom: calc(1 * var(--u));
+}
+.js-kelas-daftar {
+  flex: 1;
+  overflow: hidden;
+}
+.js-kelas-daftar ul {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: calc(1 * var(--u)) calc(2 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.js-kelas-daftar li {
+  display: flex;
+  align-items: center;
+  gap: calc(1 * var(--u));
+  min-width: 0;
+  font-size: calc(2.8 * var(--u));
+}
+.js-kelas-daftar li img {
+  width: calc(4.4 * var(--u));
+  height: calc(4.4 * var(--u));
+  flex: none;
+}
+.js-kelas-daftar li[data-terhubung="tidak"] {
+  opacity: 0.45;
+}
+.js-kelas-nama {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.js-kelas-daftar .js-kelas-nama[data-panjang="ya"] {
+  font-size: calc(2.5 * var(--u));
+}
+.js-kelas-menunggu {
+  font-size: calc(3.1 * var(--u));
+  color: var(--js-dusk);
+}
+.js-kelas-hitung {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(16 * var(--u));
+}
+
+/* Saat bermain dan jeda (P-26, P-27) */
+.js-kelas-bilah {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(1 * var(--u)) calc(2 * var(--u));
+  border: calc(0.5 * var(--u)) solid var(--js-ink);
+}
+.js-kelas-masa-pagi {
+  background: #FFD9A8;
+}
+.js-kelas-masa-siang {
+  background: #6EC6F2;
+}
+.js-kelas-masa-sore {
+  background: #FFC27A;
+}
+.js-kelas-busur {
+  display: flex;
+  align-items: center;
+  gap: calc(1.6 * var(--u));
+  font-size: calc(3.1 * var(--u));
+}
+.js-kelas-lintasan {
+  position: relative;
+  display: inline-block;
+  width: calc(22 * var(--u));
+  height: calc(0.5 * var(--u));
+  background: var(--js-ink);
+}
+.js-kelas-lintasan img {
+  position: absolute;
+  top: 50%;
+  width: calc(3.6 * var(--u));
+  height: calc(3.6 * var(--u));
+  transform: translate(-50%, -50%);
+}
+.js-kelas-sisa {
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(4.4 * var(--u));
+}
+.js-kelas-isi-langsung {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: calc(1.6 * var(--u));
+  min-height: 0;
+}
+.js-kelas-kotak-peta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.js-kelas-peta {
+  display: block;
+  width: 100%;
+  max-height: 100%;
+  aspect-ratio: 160 / 100;
+  border: calc(0.4 * var(--u)) solid var(--js-ink);
+}
+.js-kelas-zona {
+  opacity: 0.55;
+}
+.js-kelas-zona-1 { fill: var(--js-coral); }
+.js-kelas-zona-2 { fill: var(--js-sky-d); }
+.js-kelas-zona-3 { fill: var(--js-mist); }
+.js-kelas-zona-4 { fill: var(--js-mango); }
+.js-kelas-zona-5 { fill: var(--js-wood); }
+.js-kelas-zona-6 { fill: var(--js-teal); }
+.js-kelas-zona-7 { fill: var(--js-leaf); }
+.js-kelas-zona-8 { fill: var(--js-sun); }
+.js-kelas-titik {
+  stroke: var(--js-ink);
+  stroke-width: 0.5;
+  transition: transform 0.5s linear;
+}
+.js-kelas-titik[data-terhubung="tidak"] {
+  opacity: 0.4;
+}
+/* Warna tas (Design System bagian 8): enam dari token, dua dari palet aksen. */
+.js-kelas-tas-sun { fill: var(--js-sun); }
+.js-kelas-tas-mango { fill: var(--js-mango); }
+.js-kelas-tas-coral { fill: var(--js-coral); }
+.js-kelas-tas-rose { fill: #FF8FB8; }
+.js-kelas-tas-berry { fill: #9B5DE5; }
+.js-kelas-tas-teal { fill: var(--js-teal); }
+.js-kelas-tas-leaf { fill: var(--js-leaf); }
+.js-kelas-tas-sky-d { fill: var(--js-sky-d); }
+.js-kelas-papan ol,
+.js-kelas-daftar-akhir {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.js-kelas-papan li,
+.js-kelas-daftar-akhir li {
+  display: grid;
+  grid-template-columns: calc(5.5 * var(--u)) calc(5 * var(--u)) minmax(0, 1fr) auto calc(7 * var(--u));
+  align-items: center;
+  gap: calc(0.8 * var(--u));
+  padding: calc(0.25 * var(--u)) 0;
+  font-size: calc(3.1 * var(--u));
+  border-bottom: calc(0.2 * var(--u)) dashed var(--js-mist);
+}
+.js-kelas-papan li img,
+.js-kelas-daftar-akhir li img {
+  width: calc(4.4 * var(--u));
+  height: calc(4.4 * var(--u));
+}
+.js-kelas-selesai {
+  text-align: right;
+  font-size: calc(2.6 * var(--u));
+  color: var(--js-dusk);
+}
+.js-kelas-kemajuan {
+  display: flex;
+  align-items: center;
+  gap: calc(1.6 * var(--u));
+}
+.js-kelas-blok {
+  display: flex;
+  gap: calc(0.5 * var(--u));
+}
+.js-kelas-blok i {
+  display: block;
+  width: calc(2.6 * var(--u));
+  height: calc(4 * var(--u));
+  border: calc(0.4 * var(--u)) solid var(--js-ink);
+  background: var(--js-white);
+}
+.js-kelas-blok i[data-isi="ya"] {
+  background: var(--js-leaf);
+}
+.js-kelas-jeda {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(3 * var(--u));
+  background: rgba(31, 42, 68, 0.7);
+  color: var(--js-cream);
+}
+.js-kelas-dijeda {
+  margin: 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(4.4 * var(--u));
+}
+
+/* Podium (P-28) */
+.js-kelas-isi-podium {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: calc(1.6 * var(--u));
+  align-items: end;
+  min-height: 0;
+}
+.js-kelas-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: calc(2 * var(--u));
+  height: 100%;
+}
+.js-kelas-tiang {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(0.8 * var(--u));
+  width: calc(24 * var(--u));
+}
+.js-kelas-tiang img {
+  width: calc(9 * var(--u));
+  height: calc(9 * var(--u));
+}
+.js-kelas-tiang .js-kelas-nama {
+  max-width: 100%;
+  font-size: calc(3.1 * var(--u));
+}
+.js-kelas-balok {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-top: calc(1.5 * var(--u));
+  border: calc(0.5 * var(--u)) solid var(--js-ink);
+  color: var(--js-ink);
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(5 * var(--u));
+}
+.js-kelas-tiang-1 .js-kelas-balok { height: calc(22 * var(--u)); background: var(--js-sun); }
+.js-kelas-tiang-2 .js-kelas-balok { height: calc(16 * var(--u)); background: var(--js-mist); }
+.js-kelas-tiang-3 .js-kelas-balok { height: calc(11 * var(--u)); background: var(--js-wood); }
+.js-kelas-daftar-akhir {
+  align-self: stretch;
+  box-sizing: border-box;
+  padding: calc(1.4 * var(--u));
+  border: calc(0.4 * var(--u)) solid var(--js-cream);
+}
+.js-kelas-daftar-akhir li {
+  grid-template-columns: calc(5.5 * var(--u)) calc(5 * var(--u)) minmax(0, 1fr) auto;
+  border-bottom-color: rgba(255, 246, 224, 0.25);
+}
+.js-kelas-podium-kosong {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(3.6 * var(--u));
+}
+
+/* Pembahasan (P-29) */
+.js-kelas-isi-bahas {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: calc(1.6 * var(--u));
+  min-height: 0;
+  outline: none;
+}
+.js-kelas-kartu {
+  overflow-y: auto;
+}
+.js-kelas-kartu h2 {
+  display: flex;
+  align-items: center;
+  gap: calc(1 * var(--u));
+  margin: 0 0 calc(1 * var(--u));
+  font-family: "Press Start 2P", monospace;
+  font-size: calc(2.8 * var(--u));
+}
+.js-kelas-kartu h2 img {
+  width: calc(4 * var(--u));
+  height: calc(4 * var(--u));
+}
+.js-kelas-kartu > p:not(.js-kelas-label) {
+  margin: 0 0 calc(1 * var(--u));
+  font-size: calc(3.1 * var(--u));
+  line-height: 1.3;
+}
+.js-kelas-kartu > .js-kelas-label {
+  margin: calc(0.6 * var(--u)) 0;
+  font-size: calc(2.5 * var(--u));
+  line-height: 1.25;
+}
+.js-kelas-dampak {
+  padding: calc(1 * var(--u)) calc(1.4 * var(--u));
+  border: calc(0.4 * var(--u)) solid var(--js-ink);
+  background: var(--js-white);
+  font-size: calc(2.6 * var(--u));
+  line-height: 1.3;
+}
+.js-kelas-dampak b {
+  display: block;
+  font-size: calc(2.5 * var(--u));
+  color: var(--js-dusk);
+}
+.js-kelas-dampak p {
+  margin: 0 0 calc(0.6 * var(--u));
+}
+.js-kelas-grafik {
+  display: grid;
+  grid-template-columns: calc(4 * var(--u)) 1fr calc(7.5 * var(--u));
+  gap: calc(1 * var(--u));
+  align-items: center;
+  margin-bottom: calc(0.7 * var(--u));
+  font-size: calc(2.6 * var(--u));
+}
+.js-kelas-grafik img {
+  width: calc(3 * var(--u));
+  height: calc(3 * var(--u));
+}
+/* Batang persen menjadi latar opsinya, agar setiap opsi hanya satu blok (P-29). */
+.js-kelas-opsi {
+  position: relative;
+  display: block;
+  padding: calc(0.4 * var(--u)) calc(0.8 * var(--u));
+  border: calc(0.3 * var(--u)) solid var(--js-ink);
+  background: var(--js-white);
+  line-height: 1.2;
+}
+.js-kelas-batang {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--js-sky-d);
+  opacity: 0.35;
+}
+.js-kelas-opsi-teks {
+  position: relative;
+}
+.js-kelas-batang[data-benar="ya"],
+.js-kelas-batang-tepat {
+  background: var(--js-leaf);
+  opacity: 0.55;
+}
+.js-kelas-batang-kurang {
+  background: var(--js-mango);
+  opacity: 0.55;
+}
+.js-kelas-batang-berisiko {
+  background: var(--js-coral);
+  opacity: 0.55;
+}
+.js-kelas-grafik .js-kelas-angka {
+  font-size: calc(2.2 * var(--u));
+  text-align: right;
+}
+.js-kelas-tepat {
+  margin-left: calc(0.8 * var(--u));
+  padding: 0 calc(0.6 * var(--u));
+  border: calc(0.3 * var(--u)) solid var(--js-ink);
+  background: var(--js-leaf);
+  font-size: calc(2.4 * var(--u));
+  font-weight: 600;
+}
+.js-kelas-grafik:last-child {
+  margin-bottom: 0;
+}
+
+/* Podium: balok naik dalam 3 langkah selama 300 ms, sekali (Design System 10); diam bila "kurangi gerak". */
+@keyframes js-kelas-naik {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.js-kelas-balok {
+  transform-origin: bottom;
+  animation: js-kelas-naik 300ms steps(3) 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js-kelas-balok {
+    animation: none;
+  }
+  .js-kelas-titik {
+    transition: none;
+  }
+}

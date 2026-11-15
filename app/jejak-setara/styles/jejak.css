@@ -6,6 +6,7 @@
   --js-sun: #FFD23F;  --js-mango: #FF9F1C; --js-coral: #FF6B5B;
   --js-leaf: #8AD95B; --js-teal: #2EC4B6;  --js-sky-d: #3A86D9;
   --js-malam: #4A4F9C;
+  --js-wood: #C98B4F; /* JS-10: balok podium ke-3 (Design System 3.6) */
 
   /* Peran */
   --js-surface: var(--js-cream);

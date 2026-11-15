@@ -1,8 +1,8 @@
 // Uji ujung ke ujung alur gabung Jejak Setara (spesifikasi JS-03, AC-17 dan AC-18). Beberapa konteks peramban
 // bermain di ruang coba lokal; siklus ronde dikendalikan lewat kait uji (P-9). Sejak JS-07 lobi dan ronde tampil di
 // atas dunia (panel lobi, bilah atas); uji dunia sendiri ada di dunia.uji.ts.
-import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
-import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
+import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { buatRuang, kelas, putuskan } from "./ruang-uji";
 
 const LAYAR = "test-results-jejak/layar";
 const UKURAN = [
@@ -34,14 +34,6 @@ async function pantau(page: Page, izinkan: RegExp[] = []): Promise<Catatan> {
 // Teks galat juga diumumkan di wilayah aria-live, jadi pencarian teks dibatasi ke <main>.
 const csp = (page: Page) => page.evaluate(() => (window as unknown as { __csp?: string[] }).__csp ?? []);
 
-async function buatRuang(request: APIRequestContext, isi: Record<string, unknown> = {}): Promise<string> {
-  const j = await request.post("/api/ruang-coba", { data: isi });
-  expect(j.status()).toBe(201);
-  return ((await j.json()) as { kode: string }).kode;
-}
-
-const kelas = async (request: APIRequestContext, kode: string, pesan: Record<string, unknown>) =>
-  expect((await request.post(`/api/ruang-coba/${kode}/kelas`, { data: { v: PROTOKOL_VERSI, ...pesan } })).status()).toBe(200);
 
 async function konteks(browser: Browser, baseURL: string, hp = false): Promise<{ ctx: BrowserContext; page: Page }> {
   const ctx = await browser.newContext({
@@ -169,7 +161,7 @@ test("putus, menyambung ulang, dan muat ulang kembali ke lobi dengan nama yang s
   const kode = await buatRuang(request);
   const nama = await gabung(page, kode, 4);
   await context.setOffline(true);
-  await request.post(`/api/ruang-coba/${kode}/putuskan`);
+  await putuskan(request, kode);
   const lapisan = page.getByRole("dialog", { name: "Menyambung ulang…" });
   await expect(lapisan).toBeVisible();
   await fotoEmpat(page, "menyambung");

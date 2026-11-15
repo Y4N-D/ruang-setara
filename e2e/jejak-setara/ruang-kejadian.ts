@@ -7,6 +7,7 @@
 import { readFileSync } from "node:fs";
 import { expect, type APIRequestContext } from "@playwright/test";
 import { PANDANGAN } from "../../app/jejak-setara/inti/aturan";
+import { buatRuang, kejadianRuang } from "./ruang-uji";
 
 type Titik = { x: number; y: number };
 
@@ -32,14 +33,12 @@ export function adaTitikLainDiPandangan(t: Titik, lain: readonly Titik[]): boole
   });
 }
 
-/** Membuat ruang coba (16 kejadian) sampai titik pertama `kejadianId` tidak berdekatan dengan titik kejadian lain. */
+/** Membuat ruang uji (16 kejadian) lewat POST /api/ruang sampai titik pertama `kejadianId` tidak berdekatan dengan titik kejadian lain. */
 export async function ruangKejadianSendiri(request: APIRequestContext, kejadianId: string, isiRuang: Record<string, unknown> = {}): Promise<{ kode: string; titik: Titik }> {
   for (let i = 0; i < 20; i++) {
-    const j = await request.post("/api/ruang-coba", { data: isiRuang });
-    expect(j.status()).toBe(201);
-    const ruang = (await j.json()) as { kode: string; kejadian: number };
-    expect(ruang.kejadian).toBe(16);
-    const daftar = ((await (await request.get(`/api/ruang-coba/${ruang.kode}/kejadian`)).json()) as { kejadian: { kejadianId: string; titik: Titik[] }[] }).kejadian;
+    const ruang = { kode: await buatRuang(request, isiRuang) };
+    const daftar = await kejadianRuang(request, ruang.kode);
+    expect(daftar.length).toBe(16);
     const titik = daftar.find((k) => k.kejadianId === kejadianId)!.titik[0];
     const lain = daftar.filter((k) => k.kejadianId !== kejadianId).flatMap((k) => k.titik);
     if (!adaTitikLainDiPandangan(titik, lain)) return { kode: ruang.kode, titik };

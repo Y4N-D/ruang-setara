@@ -2,7 +2,8 @@
 // AC-4, AC-7, AC-9 sampai AC-16). Jam tiruan: waktu selalu diberikan uji.
 import { describe, expect, it } from "vitest";
 import { acakBerbenih } from "../../inti/acak";
-import { PROTOKOL_VERSI, skemaServerKelas, skemaServerPemain, type PesanPemain, type PesanServerPemain } from "../../inti/protokol";
+import { PROTOKOL_VERSI, skemaServerPemain, type PesanPemain, type PesanServerPemain } from "../../inti/protokol";
+import { skemaServerKelas } from "../../inti/protokol-kelas";
 import type { PengaturanRuang, TitikPeta } from "../../inti/tipe";
 import {
   alarm,

@@ -1,6 +1,6 @@
 // Uji unit kerangka Jejak Setara (spesifikasi JS-01, Rencana uji bagian "Uji unit"). Berjalan di Node, tanpa runtime Workers.
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -56,7 +56,7 @@ describe("Worker kerangka", () => {
   });
 
   it.each([
-    ["/api/ruang", {}],
+    ["/api/bank", {}],
     ["/api/", {}],
     ["/api/sehat/lagi", {}],
     ["/ws/lain", {}],
@@ -82,65 +82,49 @@ describe("Worker kerangka", () => {
     }
   });
 
-  it("JS-03: ruang coba di uji butuh kunci (403) dan tidak ada di produksi (404), tanpa menyentuh D1", async () => {
-    const coba = (lingkungan: string, tajuk: Record<string, string> = {}) =>
-      worker.fetch(new Request("http://127.0.0.1/api/ruang-coba", { method: "POST", headers: tajuk, body: "{}" }), { ...env, LINGKUNGAN: lingkungan, KUNCI_COBA: "kunci-benar" } as typeof env);
-    const tajukSalah: Record<string, string>[] = [{}, { "X-Jejak-Kunci-Coba": "kunci-salah" }];
-    for (const tajuk of tajukSalah) {
-      const jawaban = await coba("uji", tajuk);
-      expect(jawaban.status).toBe(403);
-      expect(await jawaban.json()).toEqual({ galat: { kode: "KUNCI_SALAH", pesan: "Kunci ruang coba tidak cocok." } });
+  it("JS-10 (P-32): ruang coba dan kait lamanya 404 di semua lingkungan, tanpa menyentuh D1", async () => {
+    for (const lingkungan of ["lokal", "uji", "produksi"]) {
+      for (const jalur of ["/api/ruang-coba", "/api/ruang-coba/K7MPA/kelas", "/api/ruang-coba/K7MPA/statistik"]) {
+        const j = await worker.fetch(new Request(`http://127.0.0.1${jalur}`, { method: "POST", headers: { "X-Jejak-Kunci-Coba": "kunci" }, body: "{}" }), {
+          ...env,
+          LINGKUNGAN: lingkungan,
+        } as typeof env);
+        expect(j.status, `${jalur} ${lingkungan}`).toBe(404);
+        expect(await j.json()).toEqual({ galat: { kode: "BELUM_TERSEDIA", pesan: "Fitur ini belum tersedia." } });
+      }
     }
-    const produksi = await coba("produksi", { "X-Jejak-Kunci-Coba": "kunci-benar" });
-    expect(produksi.status).toBe(404);
-    expect(await produksi.json()).toEqual({ galat: { kode: "BELUM_TERSEDIA", pesan: "Fitur ini belum tersedia." } });
   });
 
-  it("JS-07: kait kelas di uji butuh kunci (403), di produksi 404; statistik dan putuskan tetap hanya lokal", async () => {
-    const kait = (lingkungan: string, jalur: string, tajuk: Record<string, string> = {}) =>
-      worker.fetch(new Request(`http://127.0.0.1/api/ruang-coba/K7MPA/${jalur}`, { method: "POST", headers: tajuk, body: "{}" }), {
-        ...env,
-        LINGKUNGAN: lingkungan,
-        KUNCI_COBA: "kunci-benar",
-      } as typeof env);
-    const tajukSalah: Record<string, string>[] = [{}, { "X-Jejak-Kunci-Coba": "kunci-salah" }, { "X-Jejak-Kunci-Coba": "kunci-benar!" }];
-    for (const tajuk of tajukSalah) {
-      const jawaban = await kait("uji", "kelas", tajuk);
-      expect(jawaban.status).toBe(403);
-      expect(await jawaban.json()).toEqual({ galat: { kode: "KUNCI_SALAH", pesan: "Kunci ruang coba tidak cocok." } });
+  it("JS-10 (P-32): kait uji baru /api/uji/ruang/{KODE}/… hanya di lokal; 404 di uji dan produksi tanpa menyentuh D1", async () => {
+    for (const [jalur, metode] of [
+      ["statistik", "GET"],
+      ["putuskan", "POST"],
+      ["kejadian", "GET"],
+      ["pindahkan", "POST"],
+    ] as const) {
+      for (const lingkungan of ["uji", "produksi"]) {
+        const j = await worker.fetch(new Request(`http://127.0.0.1/api/uji/ruang/K7MPA/${jalur}`, { method: metode, ...(metode === "POST" ? { body: "{}" } : {}) }), {
+          ...env,
+          LINGKUNGAN: lingkungan,
+        } as typeof env);
+        expect(j.status, `${jalur} ${lingkungan}`).toBe(404);
+      }
     }
-    for (const jalur of ["statistik", "putuskan"]) expect((await kait("uji", jalur, { "X-Jejak-Kunci-Coba": "kunci-benar" })).status, jalur).toBe(404);
-    const produksi = await kait("produksi", "kelas", { "X-Jejak-Kunci-Coba": "kunci-benar" });
-    expect(produksi.status).toBe(404);
-    expect(await produksi.json()).toEqual({ galat: { kode: "BELUM_TERSEDIA", pesan: "Fitur ini belum tersedia." } });
   });
 
-  it("JS-07: kait kelas di uji dengan kunci benar diteruskan ke ruang, dan jawaban ruang (berisi status) dikembalikan", async () => {
-    const diteruskanKe: { url: string; body: string }[] = [];
-    const envUji = {
-      ...env,
-      LINGKUNGAN: "uji",
-      KUNCI_COBA: "kunci-benar",
-      DB: {
-        prepare: () => ({ bind: () => ({ first: async () => ({ id: "r-1", do_id: "do-1", pengaturan_json: "{}", status: "lobi" }) }) }),
-      },
-      RUANG: {
-        idFromString: (id: string) => id,
-        get: () => ({
-          fetch: async (url: string, init: RequestInit) => {
-            diteruskanKe.push({ url, body: String(init.body) });
-            return new Response(JSON.stringify({ ok: true, status: "hitung_mundur" }), { status: 200 });
-          },
-        }),
-      },
-    } as unknown as typeof env;
-    const jawaban = await worker.fetch(
-      new Request("http://127.0.0.1/api/ruang-coba/k7mpa/kelas", { method: "POST", headers: { "X-Jejak-Kunci-Coba": "kunci-benar" }, body: JSON.stringify({ v: PROTOKOL_VERSI, t: "mulai" }) }),
-      envUji,
-    );
-    expect(jawaban.status).toBe(200);
-    expect(await jawaban.json()).toEqual({ ok: true, status: "hitung_mundur" });
-    expect(diteruskanKe).toEqual([{ url: "https://ruang/kelas", body: JSON.stringify({ v: PROTOKOL_VERSI, t: "mulai" }) }]);
+  it("JS-10 (P-13): /ws/kelas tanpa Upgrade 426, Origin asing 403, tiket tidak sah 403, dan id bukan UUID 404, tanpa menyentuh D1", async () => {
+    const envTiket = { ...env, KUNCI_TIKET: "kunci-tiket-uji" } as typeof env;
+    const id = "0b2f6a9e-1c3d-4e5f-8a7b-9c0d1e2f3a4b";
+    const tanpaUpgrade = await worker.fetch(new Request(`http://127.0.0.1/ws/kelas/${id}?tiket=x`), envTiket);
+    expect(tanpaUpgrade.status).toBe(426);
+    const asing = await worker.fetch(new Request(`http://127.0.0.1/ws/kelas/${id}?tiket=x`, { headers: { Upgrade: "websocket", Origin: "https://contoh.test" } }), envTiket);
+    expect(asing.status).toBe(403);
+    const asal = { Upgrade: "websocket", Origin: "http://127.0.0.1" };
+    const tiketSalah = await worker.fetch(new Request(`http://127.0.0.1/ws/kelas/${id}?tiket=x.y`, { headers: asal }), envTiket);
+    expect(tiketSalah.status).toBe(403);
+    expect(await tiketSalah.json()).toEqual({ galat: { kode: "TIKET_DITOLAK", pesan: "Tiket layar kelas ditolak." } });
+    const bukanUuid = await worker.fetch(new Request("http://127.0.0.1/ws/kelas/bukan-uuid?tiket=x.y", { headers: asal }), envTiket);
+    expect(bukanUuid.status).toBe(404);
   });
 
   it("jalur lain diteruskan ke ASSETS dan jawabannya dikembalikan apa adanya", async () => {
@@ -309,8 +293,17 @@ describe("Teks dan halaman", () => {
     });
   });
 
-  it("JS-04: TEKS_KONSOL sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-04 (P-51)", () => {
-    expect(TEKS_KONSOL).toEqual({
+  it("JS-10: TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-10 (AC-25)", () => {
+    const harapan = uraiTabelTeks(baca("docs/jejak-setara/specs/JS-10-kelas.md"));
+    expect(Object.keys(harapan).length).toBeGreaterThan(150);
+    const datar = ratakanTeks(TEKS_KONSOL);
+    for (const [kunci, teks] of Object.entries(harapan)) expect(datar[kunci], kunci).toBe(teks);
+    const kunciJs10 = Object.keys(datar).filter((k) => KUNCI_JS10.some((awal) => k === awal || k.startsWith(`${awal}.`)));
+    expect(kunciJs10.sort()).toEqual(Object.keys(harapan).sort());
+  });
+
+  it("JS-04: TEKS_KONSOL sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-04 (P-51), di luar teks JS-10", () => {
+    expect(tanpaKunciJs10(TEKS_KONSOL)).toEqual({
       merek: "Jejak Setara",
       subjudul: "Konsol guru dan admin",
       memuat: "Memuat konsol…",
@@ -497,6 +490,8 @@ const TOKEN_DASAR: Record<string, string> = {
   ink: "#1F2A44", dusk: "#3A4A6B", mist: "#C9D4E5", cream: "#FFF6E0", white: "#FFFFFF", sun: "#FFD23F",
   mango: "#FF9F1C", coral: "#FF6B5B", leaf: "#8AD95B", teal: "#2EC4B6", "sky-d": "#3A86D9", malam: "#4A4F9C",
 };
+/** JS-10: warna palet wood untuk balok podium ke-3 (Design System 3.6 dan 4); hanya di Jejak Setara. */
+const TOKEN_JS10: Record<string, string> = { wood: "#C98B4F" };
 const TOKEN_PERAN: Record<string, string> = {
   surface: "var(--js-cream)", text: "var(--js-ink)", "text-2": "var(--js-dusk)", focus: "var(--js-sun)",
   "tier-tepat": "var(--js-leaf)", "tier-kurang": "var(--js-mango)", "tier-berisiko": "var(--js-coral)",
@@ -516,7 +511,7 @@ function tokenRoot(css: string, awalan: string): Record<string, string> {
 
 describe("Token dan tajuk", () => {
   it("jejak.css memuat semua token Design System bagian 4 dengan nilai persis", () => {
-    expect(tokenRoot(baca("app/jejak-setara/styles/jejak.css"), "js")).toEqual({ ...TOKEN_DASAR, ...TOKEN_PERAN });
+    expect(tokenRoot(baca("app/jejak-setara/styles/jejak.css"), "js")).toEqual({ ...TOKEN_DASAR, ...TOKEN_JS10, ...TOKEN_PERAN });
   });
 
   it("token dasar sama dengan token --ss- Sehari Setara (malam hanya ada di Jejak Setara)", () => {
@@ -558,12 +553,14 @@ describe("Token dan tajuk", () => {
         "ITERASI_SANDI": "4000",
         "KUNCI_SANDI": "lokal-kunci-sandi-bukan-rahasia",
         "KUNCI_IP": "lokal-kunci-ip-bukan-rahasia",
-        "KUNCI_ADMIN": "lokal-kunci-admin-bukan-rahasia"
+        "KUNCI_ADMIN": "lokal-kunci-admin-bukan-rahasia",
+        "KUNCI_TIKET": "lokal-kunci-tiket-bukan-rahasia",
+        "RUANG_AKTIF_MAKS": "1000"
       },
       "env": {
         "uji": {
           "name": "jejak-setara-uji",
-          "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "4000" },
+          "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "4000", "RUANG_AKTIF_MAKS": "3" },
           "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
           "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "8870d944-5d38-4c97-b8bf-819f7676eeb1", "migrations_dir": "migrations" }],
           "ratelimits": [
@@ -577,66 +574,19 @@ describe("Token dan tajuk", () => {
   });
 });
 
-describe("JS-07: alur kerja kendali ruang coba (P-55 sampai P-57)", () => {
-  const kendali = baca(".github/workflows/jejak-kendali-coba.yml");
-  const coba = baca(".github/workflows/jejak-ruang-coba.yml");
-
-  it("\"Jejak: kendali ruang coba\": tombol Run workflow, masukan kode dan enam aksi, grup concurrency, batas 10 menit, izin baca", () => {
-    expect(kendali).toContain('name: "Jejak: kendali ruang coba"');
-    expect(kendali).toMatch(/on:\n  workflow_dispatch:\n/);
-    expect(kendali).not.toMatch(/\n  push:/);
-    expect(kendali).toContain('description: "Kode ruang (5 huruf atau angka)"');
-    const pilihan = kendali.slice(kendali.indexOf("options:"), kendali.indexOf("permissions:"));
-    expect([...pilihan.matchAll(/- "([^"]+)"/g)].map((m) => m[1])).toEqual(["mulai", "jeda", "lanjut", "tambah 1 menit", "akhiri", "tutup"]);
-    expect(kendali).toContain("permissions:\n  contents: read\n");
-    expect(kendali).toContain("concurrency:\n  group: jejak-cloudflare-uji\n  cancel-in-progress: false\n");
-    expect(coba).toContain("concurrency:\n  group: jejak-cloudflare-uji\n  cancel-in-progress: false\n");
-    expect(kendali).toContain("timeout-minutes: 10");
+describe("JS-10: alur kerja ruang coba dipensiunkan; KUNCI_TIKET dibuat langkah Siapkan kunci Worker (P-32, P-34)", () => {
+  it("jejak-ruang-coba.yml dan jejak-kendali-coba.yml tidak ada lagi", () => {
+    expect(existsSync(new URL(".github/workflows/jejak-ruang-coba.yml", AKAR))).toBe(false);
+    expect(existsSync(new URL(".github/workflows/jejak-kendali-coba.yml", AKAR))).toBe(false);
   });
 
-  it("pesan layar kelas untuk setiap aksi, kunci sekali pakai yang disamarkan, dan percobaan ulang selama 403", () => {
-    // Versi amplop mengikuti PROTOKOL_VERSI (JS-08: versi 2), agar alur kerja tidak ditolak sesudah protokol naik.
-    const V = PROTOKOL_VERSI;
-    for (const pesan of [`{"v":${V},"t":"mulai"}`, `{"v":${V},"t":"jeda"}`, `{"v":${V},"t":"lanjut"}`, `{"v":${V},"t":"tambah_waktu","detik":60}`, `{"v":${V},"t":"akhiri"}`, `{"v":${V},"t":"tutup_ruang"}`]) {
-      expect(kendali).toContain(`PESAN='${pesan}'`);
-    }
-    expect(kendali).toContain('echo "::add-mask::$KUNCI"');
-    expect(kendali).toContain("secret put KUNCI_COBA --name jejak-setara-uji");
-    expect(kendali).toContain('-H "X-Jejak-Kunci-Coba: $KUNCI"');
-    expect(kendali).toContain("for i in $(seq 1 10); do");
-    expect(kendali).toContain('if [ "$STATUS" != "403" ]; then break; fi');
-    expect(kendali).not.toMatch(/echo "[^"]*\$KUNCI[^"]*" >> "\$GITHUB_STEP_SUMMARY"/);
-  });
-
-  it("ringkasan: kode, aksi, dan status ruang dengan nama Bahasa Indonesia; galat kode tidak ditemukan", () => {
-    for (const teks of ['echo "Kode ruang: $KODE"', 'echo "Aksi: $AKSI"', 'echo "Status ruang sekarang: $NAMA"', "Kode ruang tidak ditemukan atau ruang sudah ditutup."]) {
-      expect(kendali).toContain(teks);
-    }
-    for (const [status, nama] of [
-      ["lobi", "Lobi"],
-      ["hitung_mundur", "Hitung mundur"],
-      ["main", "Ronde berjalan"],
-      ["jeda", "Dijeda"],
-      ["selesai", "Selesai"],
-      ["pembahasan", "Pembahasan"],
-      ["ditutup", "Ditutup"],
-    ]) {
-      expect(kendali).toContain(`"${status}") NAMA="${nama}" ;;`);
-    }
-  });
-
-  it("\"Jejak: ruang coba\" punya masukan Durasi ronde (menit): 10, 15 (bawaan), atau 20, dikirim sebagai durasiMenit", () => {
-    expect(coba).toContain('description: "Durasi ronde (menit)"');
-    expect(coba).toContain('default: "15"');
-    const durasi = coba.slice(coba.indexOf("durasi_menit:"), coba.indexOf("permissions:"));
-    expect([...durasi.matchAll(/- "(\d+)"/g)].map((m) => m[1])).toEqual(["10", "15", "20"]);
-    expect(coba).toContain("durasiMenit: $d");
+  it("langkah Siapkan kunci Worker juga membuat KUNCI_TIKET", () => {
+    expect(baca(".github/workflows/jejak-uji.yml")).toContain("for NAMA in KUNCI_SANDI KUNCI_IP KUNCI_TIKET; do");
   });
 });
 
-describe("JS-08: semai bank awal, ringkasan ruang coba, dan kait uji lokal (P-6, P-7, P-66, P-67; AC-1, AC-2, AC-23)", () => {
+describe("JS-08: semai bank awal (P-6, P-7; AC-1, AC-2)", () => {
   const uji = baca(".github/workflows/jejak-uji.yml");
-  const coba = baca(".github/workflows/jejak-ruang-coba.yml");
 
   it("skrip db:semai:lokal menyemai .wrangler/state yang sama dengan db:migrasi:lokal", () => {
     const { scripts } = JSON.parse(baca("package.json")) as { scripts: Record<string, string> };
@@ -666,28 +616,6 @@ describe("JS-08: semai bank awal, ringkasan ruang coba, dan kait uji lokal (P-6,
     expect(uji).toContain("        run: node scripts/jejak-setara/semai.mjs --jalankan -- --remote --env uji\n");
   });
 
-  it("ringkasan Jejak: ruang coba menulis jumlah kejadian, atau peringatan bila bank awal belum disemai", () => {
-    expect(coba).toContain("JUMLAH=$(jq -r '.kejadian // 0' jawaban.json)");
-    expect(coba).toContain('echo "Kejadian di ruang: $JUMLAH"');
-    expect(coba).toContain(
-      `echo 'Bank awal belum disemai, jadi ruang ini belum punya kejadian. Jalankan ulang "Jejak: uji" agar bank awal disemai, lalu buat ruang coba baru.'`,
-    );
-  });
-
-  it("kait kejadian dan pindahkan hanya di lokal: 404 di uji (walaupun dengan kunci) dan di produksi, tanpa menyentuh D1", async () => {
-    for (const [jalur, metode] of [
-      ["kejadian", "GET"],
-      ["pindahkan", "POST"],
-    ] as const) {
-      for (const lingkungan of ["uji", "produksi"]) {
-        const j = await worker.fetch(
-          new Request(`http://127.0.0.1/api/ruang-coba/K7MPA/${jalur}`, { method: metode, headers: { "X-Jejak-Kunci-Coba": "kunci-benar" }, ...(metode === "POST" ? { body: "{}" } : {}) }),
-          { ...env, LINGKUNGAN: lingkungan, KUNCI_COBA: "kunci-benar" } as typeof env,
-        );
-        expect(j.status, `${jalur} ${lingkungan}`).toBe(404);
-      }
-    }
-  });
 });
 
 describe("JS-04: alur kerja admin awal dan kunci Worker (P-29, P-32; AC-10)", () => {
@@ -763,7 +691,7 @@ describe("JS-04: alur kerja admin awal dan kunci Worker (P-29, P-32; AC-10)", ()
 
   it("jejak-uji.yml: hanya kunci yang belum ada yang dibuat; deploy memakai --secrets-file; tidak ada rahasia yang dihapus", () => {
     expect(uji).toContain("ADA=$(npx wrangler secret list --name jejak-setara-uji --format json | jq -r '.[].name')");
-    expect(uji).toContain("for NAMA in KUNCI_SANDI KUNCI_IP; do");
+    expect(uji).toContain("for NAMA in KUNCI_SANDI KUNCI_IP KUNCI_TIKET; do");
     expect(uji).toContain("NILAI=$(openssl rand -hex 32)");
     expect(uji).toContain('echo "::add-mask::$NILAI"');
     expect(uji).toContain('chmod 600 "$RUNNER_TEMP/kunci-worker.json"');
@@ -823,3 +751,41 @@ describe("Skrip", () => {
     });
   });
 });
+
+// JS-10 (AC-25): kunci yang ditambahkan JS-10 ke TEKS_KONSOL, dan pengurai tabel "Teks yang tampil (final)".
+const KUNCI_JS10 = ["menu.ruang", "status", "dasbor.ruangItem", "dasbor.ruangSemua", "ruang", "ruangBaru", "detail", "kelas", "galatRuang"];
+
+function ratakanTeks(o: unknown, awalan = ""): Record<string, string> {
+  const hasil: Record<string, string> = {};
+  for (const [k, v] of Object.entries(o as Record<string, unknown>)) {
+    const kunci = awalan ? `${awalan}.${k}` : k;
+    if (typeof v === "string") hasil[kunci] = v;
+    else Object.assign(hasil, ratakanTeks(v, kunci));
+  }
+  return hasil;
+}
+
+function tanpaKunciJs10(teks: object): unknown {
+  const salin = JSON.parse(JSON.stringify(teks)) as Record<string, Record<string, unknown>>;
+  for (const k of KUNCI_JS10) {
+    const [atas, bawah] = k.split(".");
+    if (bawah) delete salin[atas][bawah];
+    else delete salin[atas];
+  }
+  return salin;
+}
+
+function uraiTabelTeks(isi: string): Record<string, string> {
+  const mulai = isi.indexOf("## Teks yang tampil (final)");
+  const akhir = isi.indexOf("\n## ", mulai + 5);
+  const hasil: Record<string, string> = {};
+  for (const baris of isi.slice(mulai, akhir).split("\n")) {
+    const m = /^\| (`[^|]+`) \| (.+) \|$/.exec(baris);
+    if (!m) continue;
+    const kunci = [...m[1].matchAll(/`([^`]+)`/g)].map((x) => x[1]);
+    const teks = kunci.length > 1 ? m[2].split(" / ") : [m[2]];
+    expect(teks.length, baris).toBe(kunci.length);
+    kunci.forEach((k, i) => (hasil[k] = teks[i]));
+  }
+  return hasil;
+}

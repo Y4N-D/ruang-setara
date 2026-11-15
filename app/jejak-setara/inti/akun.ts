@@ -3,6 +3,7 @@
 // Skema isi permintaan hanya memeriksa bentuk (`.strict()`); aturan isi (email, nama, sandi) diperiksa fungsi di bawah,
 // agar server bisa memberi kode galat yang tepat. Panjang teks dibatasi batas isi permintaan 4.096 byte di server.
 import { z } from "zod";
+import { skemaRingkasanRuang } from "./ruang";
 
 export const SANDI_MIN = 12;
 export const SANDI_MAKS = 128;
@@ -139,7 +140,12 @@ export const skemaJawabanSaya = z.union([
 export const skemaJawabanAkunSaya = z.object({ akun: skemaSaya });
 export const skemaDaftarAkun = z.object({ akun: z.array(skemaAkun) });
 export const skemaJawabanAkun = z.object({ akun: skemaAkun, sandiSementara: z.string().optional() });
-export const skemaDasbor = z.object({ rujukanBelum: z.number().int().min(0) });
+export const skemaDasbor = z.object({
+  rujukanBelum: z.number().int().min(0),
+  // JS-10 (P-11): ruang yang sedang berjalan untuk kartu dasbor.
+  ruang: z.array(skemaRingkasanRuang).default([]),
+  jumlahRuang: z.number().int().min(0).default(0),
+});
 export const skemaHasilAdminAwal = z.object({ hasil: z.enum(["dibuat", "dipulihkan"]) });
 export const skemaGalat = z.object({ galat: z.object({ kode: z.string(), pesan: z.string() }) });
 

@@ -6,6 +6,9 @@ export const IZIN = {
   "dasbor.lihat": ["admin", "guru"],
   "sandi.sendiri": ["admin", "guru"],
   "akun.kelola": ["admin"],
+  // JS-10 (P-33): untuk guru, ruang.kelola juga mensyaratkan kepemilikan ruang (diperiksa di api/ruang.ts).
+  "ruang.buat": ["admin", "guru"],
+  "ruang.kelola": ["admin", "guru"],
 } as const satisfies Record<string, readonly Peran[]>;
 
 export type Aksi = keyof typeof IZIN;

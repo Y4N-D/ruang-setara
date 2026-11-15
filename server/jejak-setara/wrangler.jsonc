@@ -18,12 +18,14 @@
     "ITERASI_SANDI": "4000",
     "KUNCI_SANDI": "lokal-kunci-sandi-bukan-rahasia",
     "KUNCI_IP": "lokal-kunci-ip-bukan-rahasia",
-    "KUNCI_ADMIN": "lokal-kunci-admin-bukan-rahasia"
+    "KUNCI_ADMIN": "lokal-kunci-admin-bukan-rahasia",
+    "KUNCI_TIKET": "lokal-kunci-tiket-bukan-rahasia",
+    "RUANG_AKTIF_MAKS": "1000"
   },
   "env": {
     "uji": {
       "name": "jejak-setara-uji",
-      "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "4000" },
+      "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "4000", "RUANG_AKTIF_MAKS": "3" },
       "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
       "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "8870d944-5d38-4c97-b8bf-819f7676eeb1", "migrations_dir": "migrations" }],
       "ratelimits": [

@@ -8,26 +8,122 @@ export const AKAR = fileURLToPath(new URL("../../../", import.meta.url));
 export const alamat = (port = 4320) => `http://127.0.0.1:${port}`;
 export const tidur = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export async function buatRuang(isi: unknown = {}, port = 4320): Promise<{ status: number; isi: Record<string, unknown> }> {
-  const j = await fetch(`${alamat(port)}/api/ruang-coba`, { method: "POST", body: JSON.stringify(isi) });
-  return { status: j.status, isi: (await j.json()) as Record<string, unknown> };
+type Pesan = Record<string, unknown>;
+
+// JS-10 (P-32): ruang dibuat lewat jalur guru (admin awal lokal, masuk, lalu POST /api/ruang), dan dikendalikan lewat
+// layar kelas bertiket. Bentuk jawaban buatRuang meniru ruang coba lama agar uji JS-03, JS-07, dan JS-08 tetap sama.
+const PAKET_INTI = "9880c4d5-8294-51c9-971a-e95531a2e039";
+const KUNCI_ADMIN_LOKAL = "lokal-kunci-admin-bukan-rahasia";
+const SANDI_SEMENTARA = "sandi sementara uji server";
+const SANDI_UJI = "kalimat sandi uji server";
+const sesiPort = new Map<number, string>();
+const idRuang = new Map<string, string>();
+
+const tajukCsrf = (port: number, ip: string) => ({ "X-Jejak": "1", Origin: alamat(port), "Content-Type": "application/json", "CF-Connecting-IP": ip });
+
+/** Cookie sesi admin uji untuk server di port ini (dibuat sekali). */
+export async function sesiAdmin(port = 4320): Promise<string> {
+  const ada = sesiPort.get(port);
+  if (ada) return ada;
+  const ip = `10.9.${port % 250}.7`;
+  const email = `admin-uji-${port}@sekolah.sch.id`;
+  const awal = await fetch(`${alamat(port)}/api/admin-awal`, {
+    method: "POST",
+    headers: { "X-Jejak-Kunci-Admin": KUNCI_ADMIN_LOKAL, "Content-Type": "application/json", "CF-Connecting-IP": ip },
+    body: JSON.stringify({ email, sandi: SANDI_SEMENTARA, namaTampilan: "Admin uji" }),
+  });
+  if (awal.status !== 200) throw new Error(`admin awal ${awal.status}`);
+  const masuk = await fetch(`${alamat(port)}/api/masuk`, { method: "POST", headers: tajukCsrf(port, ip), body: JSON.stringify({ email, sandi: SANDI_SEMENTARA }) });
+  const sementara = (masuk.headers.get("set-cookie") ?? "").split(";")[0];
+  const ganti = await fetch(`${alamat(port)}/api/sandi`, { method: "POST", headers: { ...tajukCsrf(port, ip), Cookie: sementara }, body: JSON.stringify({ sandiBaru: SANDI_UJI }) });
+  const cookie = (ganti.headers.get("set-cookie") ?? "").split(";")[0];
+  if (ganti.status !== 200 || !cookie) throw new Error(`ganti sandi ${ganti.status}`);
+  sesiPort.set(port, cookie);
+  return cookie;
 }
 
+/** Permintaan konsol dengan sesi admin uji. */
+export async function konsol(metode: string, jalur: string, isi?: unknown, port = 4320): Promise<{ status: number; isi: Record<string, unknown> }> {
+  const cookie = await sesiAdmin(port);
+  const j = await fetch(`${alamat(port)}${jalur}`, {
+    method: metode,
+    headers: { ...tajukCsrf(port, `10.9.${port % 250}.7`), Cookie: cookie },
+    ...(isi === undefined ? {} : { body: typeof isi === "string" ? isi : JSON.stringify(isi) }),
+  });
+  const teks = await j.text();
+  return { status: j.status, isi: teks ? (JSON.parse(teks) as Record<string, unknown>) : {} };
+}
+
+/** Membuat ruang uji lewat POST /api/ruang; `isi` menimpa bawaan (durasiMenit, batasPemain, modeNomorAbsen, …). */
+export async function buatRuang(isi: Record<string, unknown> = {}, port = 4320): Promise<{ status: number; isi: Record<string, unknown> }> {
+  const badan = { labelKelas: "Ruang uji", paketId: PAKET_INTI, durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, modeNomorAbsen: false, uji: true, ...isi };
+  const j = await konsol("POST", "/api/ruang", badan, port);
+  if (j.status !== 201) return j;
+  const ruang = j.isi.ruang as { id: string; kode: string };
+  idRuang.set(`${port}:${ruang.kode}`, ruang.id);
+  const kejadian = (await (await fetch(`${alamat(port)}/api/uji/ruang/${ruang.kode}/kejadian`)).json()) as { kejadian: unknown[] };
+  return { status: 201, isi: { ruangId: ruang.id, kode: ruang.kode, tautan: `${alamat(port)}/?kode=${ruang.kode}`, kejadian: kejadian.kejadian.length, ruang } };
+}
+
+export interface KlienKelas {
+  ws: WebSocket;
+  riwayat: Pesan[];
+  status: string | null;
+  tutupKode: number | null;
+}
+const kelasPort = new Map<string, KlienKelas>();
+
+/** Membuka layar kelas bertiket untuk ruang yang dibuat buatRuang (P-12, P-13), lalu mengirim halo. */
+export async function klienKelas(kode: string, port = 4320): Promise<KlienKelas | null> {
+  const kunci = `${port}:${kode}`;
+  const ada = kelasPort.get(kunci);
+  if (ada && ada.tutupKode === null) return ada;
+  const id = idRuang.get(kunci);
+  if (!id) return null;
+  const t = await konsol("POST", `/api/ruang/${id}/tiket`, {}, port);
+  if (t.status !== 200) return null;
+  const ws = new WebSocket(`ws://127.0.0.1:${port}/ws/kelas/${id}?tiket=${encodeURIComponent(String(t.isi.tiket))}`, { headers: { Origin: alamat(port) } } as unknown as string[]);
+  const k: KlienKelas = { ws, riwayat: [], status: null, tutupKode: null };
+  ws.onmessage = (e) => {
+    const m = JSON.parse(String(e.data)) as Pesan;
+    k.riwayat.push(m);
+    if (m.t === "status_ruang") k.status = String(m.status);
+  };
+  ws.onclose = (e) => (k.tutupKode = e.code);
+  await new Promise<void>((ok, gagal) => {
+    ws.onopen = () => ok();
+    ws.onerror = () => gagal(new Error("sambungan layar kelas gagal"));
+  });
+  ws.send(JSON.stringify({ v: 2, t: "halo", peran: "guru" }));
+  await tungguSampai(() => k.status, (s) => s !== null, 5000, 50);
+  kelasPort.set(kunci, k);
+  return k;
+}
+
+/** Pesan layar kelas lewat WebSocket bertiket (pengganti kait `kelas` lama): 200, 400 untuk halo, 404 tanpa ruang. */
 export async function kelas(kode: string, pesan: unknown, port = 4320): Promise<number> {
-  return (await fetch(`${alamat(port)}/api/ruang-coba/${kode}/kelas`, { method: "POST", body: JSON.stringify(pesan) })).status;
+  if ((pesan as Pesan).t === "halo") return 400;
+  const k = await klienKelas(kode, port);
+  if (!k) return 404;
+  const sebelum = k.riwayat.length;
+  k.ws.send(JSON.stringify(pesan));
+  await tidur(250);
+  if (k.riwayat.length === sebelum) await tidur(250);
+  return 200;
 }
 
-/** Kait kelas beserta isi jawabannya (JS-07, P-54). */
+/** Pesan layar kelas beserta status ruang sesudahnya (pengganti kait `kelas` lama, JS-07 P-54). */
 export async function kelasJson(kode: string, pesan: unknown, port = 4320): Promise<{ status: number; isi: Record<string, unknown> }> {
-  const j = await fetch(`${alamat(port)}/api/ruang-coba/${kode}/kelas`, { method: "POST", body: JSON.stringify(pesan) });
-  return { status: j.status, isi: (await j.json()) as Record<string, unknown> };
+  const status = await kelas(kode, pesan, port);
+  const k = kelasPort.get(`${port}:${kode}`);
+  return { status, isi: status === 200 ? { ok: true, status: k?.status ?? "ditutup" } : {} };
 }
 
 export async function statistikRuang(kode: string, port = 4320): Promise<Record<string, unknown>> {
-  return (await (await fetch(`${alamat(port)}/api/ruang-coba/${kode}/statistik`)).json()) as Record<string, unknown>;
+  return (await (await fetch(`${alamat(port)}/api/uji/ruang/${kode}/statistik`)).json()) as Record<string, unknown>;
 }
 
-type Pesan = Record<string, unknown>;
+
 
 export interface Klien {
   ws: WebSocket;

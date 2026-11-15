@@ -1,7 +1,8 @@
 # Menguji Jejak Setara setiap ada perubahan berkas Jejak Setara yang di-push ke branch "main",
 # lalu memperbarui lingkungan uji di Cloudflare (spesifikasi JS-03, P-8; Architecture 4.4).
 # Deploy dilewati dengan pemberitahuan selama rahasia Cloudflare atau Database ID uji belum diisi.
-# Sejak JS-04 (P-32) kunci Worker KUNCI_SANDI dan KUNCI_IP yang belum ada dibuat sekali dan ikut deploy yang sama.
+# Sejak JS-04 (P-32) kunci Worker KUNCI_SANDI dan KUNCI_IP yang belum ada dibuat sekali dan ikut deploy yang sama;
+# sejak JS-10 (P-34) juga KUNCI_TIKET untuk tiket layar kelas.
 name: "Jejak: uji"
 
 on:
@@ -116,7 +117,7 @@ jobs:
           ADA=$(npx wrangler secret list --name jejak-setara-uji --format json | jq -r '.[].name')
           ISI='{}'
           BARU=""
-          for NAMA in KUNCI_SANDI KUNCI_IP; do
+          for NAMA in KUNCI_SANDI KUNCI_IP KUNCI_TIKET; do
             if ! printf '%s\n' "$ADA" | grep -qx "$NAMA"; then
               NILAI=$(openssl rand -hex 32)
               echo "::add-mask::$NILAI"

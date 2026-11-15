@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import "@fontsource/press-start-2p/latin-400.css";
 import "@fontsource/pixelify-sans/latin-400.css";
 import "../../../app/jejak-setara/styles/jejak.css";
+import "../../../app/jejak-setara/styles/kelas.css";
 import App from "../../../app/jejak-setara/admin/App";
 
 createRoot(document.getElementById("root")!).render(

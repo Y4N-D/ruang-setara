@@ -11,6 +11,8 @@ describe("tabel izin JS-04 (P-20)", () => {
       "dasbor.lihat": ["admin", "guru"],
       "sandi.sendiri": ["admin", "guru"],
       "akun.kelola": ["admin"],
+      "ruang.buat": ["admin", "guru"],
+      "ruang.kelola": ["admin", "guru"],
     });
   });
 

@@ -3,7 +3,7 @@
 // tanpa semai (4323) dan server yang dinyalakan ulang di tengah ronde (4324).
 import { describe, expect, it } from "vitest";
 import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/versi";
-import { alamat, buatRuang, d1, kelas, klien, matikanServer, nyalakanServer, tidur, tungguSampai, type Klien } from "./bantuan";
+import { alamat, buatRuang, d1, kelas, klien, konsol, matikanServer, nyalakanServer, tidur, tungguSampai, type Klien } from "./bantuan";
 
 const V = PROTOKOL_VERSI;
 type Pesan = Record<string, unknown>;
@@ -20,13 +20,13 @@ async function gabung(kode: string, port = 4320): Promise<{ k: Klien; id: string
 }
 
 async function titikKejadian(kode: string, port = 4320): Promise<{ kejadianId: string; titik: { x: number; y: number }[] }[]> {
-  const j = await fetch(`${alamat(port)}/api/ruang-coba/${kode}/kejadian`);
+  const j = await fetch(`${alamat(port)}/api/uji/ruang/${kode}/kejadian`);
   expect(j.status).toBe(200);
   return ((await j.json()) as { kejadian: { kejadianId: string; titik: { x: number; y: number }[] }[] }).kejadian;
 }
 
 async function pindahkan(kode: string, nama: string, x: number, y: number, port = 4320): Promise<number> {
-  return (await fetch(`${alamat(port)}/api/ruang-coba/${kode}/pindahkan`, { method: "POST", body: JSON.stringify({ nama, x, y }) })).status;
+  return (await fetch(`${alamat(port)}/api/uji/ruang/${kode}/pindahkan`, { method: "POST", body: JSON.stringify({ nama, x, y }) })).status;
 }
 
 async function mulaiRonde(kode: string, port = 4320, pemain: Klien[] = []): Promise<void> {
@@ -62,20 +62,15 @@ describe("ruang coba memuat Paket inti 16 (P-1 sampai P-5; AC-1)", () => {
     for (const k of await titikKejadian(String(besar.isi.kode))) expect(k.titik).toHaveLength(2);
   });
 
-  it("D1 tanpa semai: kejadian 0, paket_id kosong, dan ruang tetap berjalan", async () => {
+  it("D1 tanpa semai: tidak ada paket aktif, jadi pilihan ruang kosong dan POST /api/ruang dijawab 400 (JS-10, P-2 dan P-6)", async () => {
     const keadaan = "test-results-jejak/keadaan-4323";
     const anak = await nyalakanServer(4323, ["--tanpa-build", "--tanpa-semai", "--keadaan", keadaan]);
     try {
+      expect(await konsol("GET", "/api/ruang/pilihan", undefined, 4323)).toEqual({ status: 200, isi: { paket: [] } });
       const { status, isi } = await buatRuang({}, 4323);
-      expect(status).toBe(201);
-      expect(isi.kejadian).toBe(0);
-      expect(d1<{ paket_id: string | null }>(`SELECT paket_id FROM ruang WHERE kode = '${String(isi.kode)}'`, keadaan)[0].paket_id).toBeNull();
-      expect(await titikKejadian(String(isi.kode), 4323)).toEqual([]);
-      const a = await gabung(String(isi.kode), 4323);
-      await mulaiRonde(String(isi.kode), 4323, [a.k]);
-      await tidur(400);
-      expect(a.k.masuk.filter((m) => m.t === "kejadian_terlihat")).toEqual([]);
-      a.k.ws.close();
+      expect(status).toBe(400);
+      expect(isi).toEqual({ galat: { kode: "ISI_SALAH", pesan: "Isian ruang tidak sesuai. Periksa lagi isiannya." } });
+      expect(d1<{ n: number }>("SELECT COUNT(*) AS n FROM ruang", keadaan)[0].n).toBe(0);
     } finally {
       await matikanServer(anak);
     }
@@ -179,7 +174,7 @@ describe("periksa, dua langkah, skor, dan kiriman D1 (AC-4, AC-7, AC-9 sampai AC
     a.k.kirim({ v: V, t: "kunci_1", kejadianId: k1.kejadianId, opsiId: (buka.opsi1 as { id: string }[])[0].id });
     const h1 = await a.k.tunggu((m) => m.t === "hasil_1");
     // Putus di tengah dialog, lalu tersambung lagi dengan token.
-    expect((await fetch(`${alamat()}/api/ruang-coba/${kode}/putuskan`, { method: "POST" })).status).toBe(200);
+    expect((await fetch(`${alamat()}/api/uji/ruang/${kode}/putuskan`, { method: "POST" })).status).toBe(200);
     const b = await klien(kode);
     b.kirim({ v: V, t: "halo", peran: "pemain", token: a.token });
     await b.tunggu((m) => m.t === "selamat_datang");

@@ -2,11 +2,12 @@
 // AC-23, AC-24). Beberapa konteks peramban dan bot WebSocket bermain di ruang coba lokal; ronde dikendalikan lewat
 // kait uji. Ringkasan keadaan dunia dibaca dari atribut data kanvas dunia (ditulis setiap 500 ms).
 import { readFileSync } from "node:fs";
-import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { posisiSah } from "../../app/jejak-setara/inti/gerak";
 import { tutupGerbang, uraiRle } from "../../app/jejak-setara/inti/peta";
 import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
 import { ruangKejadianSendiri } from "./ruang-kejadian";
+import { buatRuang, kelas, pindahkanPemain, putuskan } from "./ruang-uji";
 
 const LAYAR = "test-results-jejak/layar";
 /** Ukuran laptop diambil dari satu halaman yang diubah ukurannya; ukuran HP dari konteks HP sungguhan (r 2,625). */
@@ -45,16 +46,6 @@ async function pantau(page: Page, izinkan: RegExp[] = []): Promise<Catatan> {
 }
 const csp = (page: Page) => page.evaluate(() => (window as unknown as { __csp?: string[] }).__csp ?? []);
 
-async function buatRuang(request: APIRequestContext, isi: Record<string, unknown> = {}): Promise<string> {
-  const j = await request.post("/api/ruang-coba", { data: isi });
-  expect(j.status()).toBe(201);
-  return ((await j.json()) as { kode: string }).kode;
-}
-const kelas = async (request: APIRequestContext, kode: string, pesan: Record<string, unknown>) => {
-  const j = await request.post(`/api/ruang-coba/${kode}/kelas`, { data: { v: PROTOKOL_VERSI, ...pesan } });
-  expect(j.status()).toBe(200);
-  return ((await j.json()) as { status: string }).status;
-};
 
 async function konteks(browser: Browser, baseURL: string, hp = false): Promise<{ ctx: BrowserContext; page: Page }> {
   const ctx = await browser.newContext({
@@ -363,7 +354,7 @@ test("gerbang tertutup di lobi, terbuka sesudah mulai; menyambung ulang di atas 
   const lewat = await posisi(page);
   expect(lewat.y).toBeGreaterThan((gb.bawah + 1) * 16);
   // Menyambung ulang: lapisan di atas dunia, lalu kembali di posisi terakhir.
-  await request.post(`/api/ruang-coba/${kode}/putuskan`);
+  await putuskan(request, kode);
   const lapisan = page.getByRole("dialog", { name: "Menyambung ulang…" });
   await expect(lapisan).toBeVisible();
   await expect(dunia(page)).toBeVisible();
@@ -434,7 +425,7 @@ test("kinerja: 40 pemain tiruan di ukuran HP; CPU normal dan CPU 6× lebih lamba
     await hp.page.keyboard.up("ArrowRight");
     const jalan = { ...ringkasHistogram(awal, await histogram(hp.page)), diri: await dunia(hp.page).getAttribute("data-diri") };
     // Berdiri dekat kejadian K-13: penanda, tiga tokoh, dan bangku antrean tergambar (P-69 keadaan keempat).
-    expect((await request.post(`/api/ruang-coba/${kode}/pindahkan`, { data: { nama: namaHp, x: t13.x, y: t13.y + 1 } })).status()).toBe(200);
+    expect((await pindahkanPemain(request, kode, namaHp, t13.x, t13.y + 1)).status()).toBe(200);
     await expect(dunia(hp.page)).toHaveAttribute("data-tokoh-kejadian", "4", { timeout: 8000 });
     awal = await histogram(hp.page);
     await hp.page.waitForTimeout(8000);

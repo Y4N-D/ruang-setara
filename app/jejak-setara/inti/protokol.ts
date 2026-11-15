@@ -1,4 +1,5 @@
-// Protokol real-time Jejak Setara (Architecture 6; spesifikasi JS-02, P-33 sampai P-38).
+// Protokol real-time Jejak Setara (Architecture 6; spesifikasi JS-02, P-33 sampai P-38). Sejak JS-10 (P-16) pesan
+// layar kelas ada di `protokol-kelas.ts`, yang hanya diimpor server dan konsol; pembantu skema di sini diekspor untuknya.
 // Satu sumber skema zod untuk klien dan server (JA-07). Setiap pesan berbentuk { v: PROTOKOL_VERSI, t: "<tipe>", … };
 // kunci tambahan ditolak (.strict()). Batas ukuran 2 KB dan frekuensi pesan diperiksa di tingkat
 // sambungan (JS-03), bukan di sini.
@@ -63,24 +64,24 @@ const POLA_TOKEN = /^[A-Za-z0-9_-]{43}$/;
 const POLA_KODE = /^[a-z0-9_]{1,32}$/;
 
 // Pembuat skema kecil. Berupa fungsi agar tidak ada panggilan zod di tingkat atas modul.
-const id = () => z.string().regex(POLA_ID);
-const teks = (maks: number) => z.string().min(1).max(maks);
-const angkaBulat = (min: number, maks: number) => z.number().int().min(min).max(maks);
-const waktu = () => z.number().finite().nonnegative(); // milidetik
-const waktuAtauKosong = () => waktu().nullable();
-const koordinatPx = () => z.number().finite().min(0).max(BATAS_PESAN.koordinatPxMaks);
+export const id = () => z.string().regex(POLA_ID);
+export const teks = (maks: number) => z.string().min(1).max(maks);
+export const angkaBulat = (min: number, maks: number) => z.number().int().min(min).max(maks);
+export const waktu = () => z.number().finite().nonnegative(); // milidetik
+export const waktuAtauKosong = () => waktu().nullable();
+export const koordinatPx = () => z.number().finite().min(0).max(BATAS_PESAN.koordinatPxMaks);
 const koordinatUbin = () => angkaBulat(0, BATAS_PESAN.koordinatUbinMaks);
 const arah = () => z.enum(["bawah", "atas", "kanan", "kiri"]);
 const skill = () => z.enum(["lari", "kompas", "petunjuk", "teropong", "angkot"]);
-const tingkat = () => z.enum(["tepat", "kurang", "berisiko"]);
-const avatar = () => angkaBulat(0, BATAS_PESAN.avatarMaks);
-const warnaTas = () => z.enum(["sun", "mango", "coral", "rose", "berry", "teal", "leaf", "sky-d"]);
-const statusRuang = () => z.enum(["lobi", "hitung_mundur", "main", "jeda", "selesai", "pembahasan", "ditutup"]);
-const nama = () => teks(PANJANG_TEKS.nama);
-const skor = () => angkaBulat(0, 1_000_000);
-const peringkat = () => angkaBulat(1, BATAS_PESAN.pemainMaks);
+export const tingkat = () => z.enum(["tepat", "kurang", "berisiko"]);
+export const avatar = () => angkaBulat(0, BATAS_PESAN.avatarMaks);
+export const warnaTas = () => z.enum(["sun", "mango", "coral", "rose", "berry", "teal", "leaf", "sky-d"]);
+export const statusRuang = () => z.enum(["lobi", "hitung_mundur", "main", "jeda", "selesai", "pembahasan", "ditutup"]);
+export const nama = () => teks(PANJANG_TEKS.nama);
+export const skor = () => angkaBulat(0, 1_000_000);
+export const peringkat = () => angkaBulat(1, BATAS_PESAN.pemainMaks);
 const poin = () => angkaBulat(0, 100);
-const kartu = () =>
+export const kartu = () =>
   z
     .object({
       hak: teks(PANJANG_TEKS.hak),
@@ -104,7 +105,7 @@ const pengaturan = () =>
     .strict();
 
 /** Skema satu pesan: amplop { v: PROTOKOL_VERSI, t } ditambah isi, tanpa kunci tambahan (versi 2 sejak JS-08). */
-function pesan<T extends string, S extends z.ZodRawShape>(t: T, isi: () => S) {
+export function pesan<T extends string, S extends z.ZodRawShape>(t: T, isi: () => S) {
   return z.object({ v: z.literal(PROTOKOL_VERSI), t: z.literal(t), ...isi() }).strict();
 }
 
@@ -148,44 +149,15 @@ export const skemaPemain = /* @__PURE__ */ z.discriminatedUnion("t", [
 ]);
 
 // ---------------------------------------------------------------------------------------------
-// Layar kelas → server (Architecture 6.4)
-
-const kHalo = /* @__PURE__ */ pesan("halo", () => ({ peran: z.literal("guru") }));
-const kMulai = /* @__PURE__ */ pesan("mulai", () => ({}));
-const kJeda = /* @__PURE__ */ pesan("jeda", () => ({}));
-const kLanjut = /* @__PURE__ */ pesan("lanjut", () => ({}));
-const kAkhiri = /* @__PURE__ */ pesan("akhiri", () => ({}));
-const kTambahWaktu = /* @__PURE__ */ pesan("tambah_waktu", () => ({ detik: angkaBulat(1, BATAS_PESAN.tambahWaktuDetikMaks) }));
-const kKunciRuang = /* @__PURE__ */ pesan("kunci_ruang", () => ({ kunci: z.boolean() }));
-const kKeluarkan = /* @__PURE__ */ pesan("keluarkan", () => ({ pemainId: id() }));
-const kKodeMasukUlang = /* @__PURE__ */ pesan("kode_masuk_ulang", () => ({ pemainId: id() }));
-const kPembahasan = /* @__PURE__ */ pesan("pembahasan", () => ({ kejadianId: id() }));
-const kTutupRuang = /* @__PURE__ */ pesan("tutup_ruang", () => ({}));
-
-export const skemaKelas = /* @__PURE__ */ z.discriminatedUnion("t", [
-  kHalo,
-  kMulai,
-  kJeda,
-  kLanjut,
-  kAkhiri,
-  kTambahWaktu,
-  kKunciRuang,
-  kKeluarkan,
-  kKodeMasukUlang,
-  kPembahasan,
-  kTutupRuang,
-]);
-
-// ---------------------------------------------------------------------------------------------
 // Server → pemain (Architecture 6.3)
 
-const isiStatusRuang = () => ({
+export const isiStatusRuang = () => ({
   status: statusRuang(),
   mulaiPada: waktuAtauKosong(),
   berakhirPada: waktuAtauKosong(),
   jedaSejak: waktuAtauKosong(),
 });
-const isiGalat = () => ({ kode: z.enum(KODE_GALAT), pesan: z.string().max(PANJANG_TEKS.pesanGalat) });
+export const isiGalat = () => ({ kode: z.enum(KODE_GALAT), pesan: z.string().max(PANJANG_TEKS.pesanGalat) });
 
 const sSelamatDatang = /* @__PURE__ */ pesan("selamat_datang", () => ({
   pemainId: id(),
@@ -326,69 +298,5 @@ export const skemaServerPemain = /* @__PURE__ */ z.discriminatedUnion("t", [
   sSaranNama,
 ]);
 
-// ---------------------------------------------------------------------------------------------
-// Server → layar kelas (Architecture 6.4)
-
-const kelasLobi = /* @__PURE__ */ pesan("lobi", () => ({
-  pemain: z
-    .array(z.object({ id: id(), nama: nama(), avatar: avatar(), warnaTas: warnaTas(), terhubung: z.boolean() }).strict())
-    .max(BATAS_PESAN.pemainMaks),
-}));
-const kelasDunia = /* @__PURE__ */ pesan("dunia_kelas", () => ({
-  w: waktu(),
-  p: z.array(z.tuple([id(), koordinatPx(), koordinatPx(), z.boolean()])).max(BATAS_PESAN.pemainMaks), // [id, x, y, terhubung]
-}));
-const kelasPapan = /* @__PURE__ */ pesan("papan", () => ({
-  pemain: z
-    .array(
-      z.object({ id: id(), nama: nama(), avatar: avatar(), warnaTas: warnaTas(), skor: skor(), peringkat: peringkat() }).strict(),
-    )
-    .max(BATAS_PESAN.pemainMaks),
-}));
-const kelasKemajuan = /* @__PURE__ */ pesan("kemajuan", () => ({
-  terjawab: angkaBulat(0, 1_000_000),
-  kemungkinan: angkaBulat(0, 1_000_000),
-}));
-const kelasDataPembahasan = /* @__PURE__ */ pesan("data_pembahasan", () => ({
-  kejadianId: id(),
-  judul: teks(PANJANG_TEKS.judul),
-  situasi: teks(PANJANG_TEKS.situasi),
-  pertanyaan1: teks(PANJANG_TEKS.pertanyaan),
-  opsi1: z
-    .array(
-      z.object({ id: id(), teks: teks(PANJANG_TEKS.opsi1), benar: z.boolean(), jumlah: angkaBulat(0, BATAS_PESAN.pemainMaks) }).strict(),
-    )
-    .length(4),
-  pertanyaan2: teks(PANJANG_TEKS.pertanyaan),
-  opsi2: z
-    .array(
-      z
-        .object({
-          id: id(),
-          teks: teks(PANJANG_TEKS.opsi2),
-          tingkat: tingkat(),
-          terjadi: teks(PANJANG_TEKS.terjadi),
-          jumlah: angkaBulat(0, BATAS_PESAN.pemainMaks),
-        })
-        .strict(),
-    )
-    .length(3),
-  kartu: kartu(),
-}));
-const kelasStatusRuang = /* @__PURE__ */ pesan("status_ruang", isiStatusRuang);
-const kelasGalat = /* @__PURE__ */ pesan("galat", isiGalat);
-
-export const skemaServerKelas = /* @__PURE__ */ z.discriminatedUnion("t", [
-  kelasLobi,
-  kelasDunia,
-  kelasPapan,
-  kelasKemajuan,
-  kelasDataPembahasan,
-  kelasStatusRuang,
-  kelasGalat,
-]);
-
 export type PesanPemain = z.infer<typeof skemaPemain>;
-export type PesanKelas = z.infer<typeof skemaKelas>;
 export type PesanServerPemain = z.infer<typeof skemaServerPemain>;
-export type PesanServerKelas = z.infer<typeof skemaServerKelas>;

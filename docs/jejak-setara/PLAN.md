@@ -13,7 +13,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-07 | Selesai (9 Nov 2026) | [JS-07-penjelajah.md](specs/JS-07-penjelajah.md) | [JS-07-hasil.md](tests/JS-07-hasil.md), lulus dengan catatan AC-19 (diterima pemilik proyek; uji HP Android kelas bawah saat uji coba kelas) |
 | JS-08 | Selesai (13 Nov 2026); dibangun dan diuji 11 Nov 2026, "Jejak: uji" hijau, dan percobaan pemilik proyek di lingkungan uji berhasil | [JS-08-kejadian.md](specs/JS-08-kejadian.md) | [JS-08-hasil.md](tests/JS-08-hasil.md), lulus dengan catatan AC-24 (satu uji Sesi B diubah atas keputusan pemilik proyek); uji server yang kadang gagal diperbaiki 13 Nov 2026 |
 | JS-09 | Belum direncanakan | — | — |
-| JS-10 | Spesifikasi ditulis (14 Nov 2026); menunggu `Spesifikasi disetujui: JS-10` | [JS-10-kelas.md](specs/JS-10-kelas.md) | — |
+| JS-10 | Dibangun dan diuji (14 Nov 2026); menunggu push, "Jejak: uji" hijau, dan langkah pemilik proyek di lingkungan uji | [JS-10-kelas.md](specs/JS-10-kelas.md) | [JS-10-hasil.md](tests/JS-10-hasil.md), lulus (AC-19 dengan catatan) |
 | JS-11 | Belum direncanakan | — | — |
 | JS-12 | Belum direncanakan | — | — |
 | JS-13 | Belum direncanakan | — | — |
@@ -168,6 +168,10 @@ Keputusan pemilik proyek, 14 November 2026: sesudah JS-04, Sesi A mengerjakan **
 - Plan JS-19 (dari Build JS-04): rincian log audit akun berbentuk JSON: `admin_awal` `{"hasil":…}`, `akun.buat` `{"peran":…,"peninjau":…}`, `akun.ubah` berisi nama kolom D1 yang berubah (`nama_tampilan`, `peran`, `peninjau`, `aktif`) beserta nilai barunya, `akun.atur_ulang_sandi` `{}`, dan `sandi.ganti` `{"wajib":…}`.
 - Semua fitur server (dari penutupan JS-04, diperbaiki sesudah data Cloudflare 14 Nov 2026): di lingkungan uji, permintaan yang sudah hangat memakai 0–6 ms CPU, tetapi permintaan pertama di isolat yang baru dimulai bisa 10–23 ms, sedangkan startup tiap versi (5–7 ms) tidak dihitung ke permintaan. Rancang rute agar tetap jauh di bawah 10 ms saat hangat, dan anggap puncak pada permintaan pertama sebagai hal biasa selama paket gratis (ditanggung kelonggaran CPU Cloudflare; 0 galat di semua pengukuran). CPU per permintaan dibaca dari Workers Logs (Workers & Pages → `jejak-setara-uji` → Observability) atau data GraphQL per menit.
 - Plan JS-22 (dari penutupan JS-04): Workers Logs dan traces di lingkungan uji dinyalakan pemilik proyek di dasbor pada 14 Nov 2026 pukul 09.50.52 UTC, tanpa deploy. Sebelum ada guru atau siswa lain di lingkungan uji, periksa apakah log menyimpan header `cookie` atau `cf-connecting-ip`; bila ya, matikan log, atau atur lewat `wrangler.jsonc` agar hanya data yang perlu tercatat. Deploy lewat Wrangler mungkin mematikan setelan dasbor, jadi periksa sesudah push.
+- Plan JS-11 (dari Build JS-10): halaman `#/ruang/{id}` sudah ada sebagai detail ruang (pemain, kunci, keluarkan, tutup); hasil per ruang, peringkat lengkap, dan ekspor CSV ditambahkan di halaman yang sama. Podium layar kelas hanya menampilkan pemain berskor.
+- Plan JS-12 (dari Build JS-10): kesiapan paket untuk ruang biasa dihitung `paketSiapRuangBiasa` di `db/konten.ts` (semua kejadian terbit dan semua rujukan versi terbitnya terverifikasi). Penerbitan dan verifikasi di bank kejadian langsung membuka ruang biasa di dialog "Ruang baru".
+- Plan JS-22 (dari Build JS-10): `sim:beban` di lingkungan uji butuh akun konsol di `JEJAK_UJI_EMAIL` dan `JEJAK_UJI_SANDI`. Penghitung pemakaian per ruang bisa memakai statistik Durable Object yang sudah ada (`keluarKelas`, `byteKelas`, `barisDitulis`).
+- Semua fitur konsol (dari Build JS-10): gaya khusus konsol ditaruh di `styles/kelas.css` (diimpor `web/jejak-setara/admin/main.tsx`), bukan `jejak.css`, agar CSS layar pemain tidak membesar; uji ujung ke ujung membuat ruang lewat `e2e/jejak-setara/ruang-uji.ts`.
 - Semua sesi (dari penutupan JS-04): dalam mode folder lokal, berkas alur kerja mungkin harus diganti manual oleh pemilik proyek (AGENTS 11.5 butir 8), dan folder `Claude outputs/` diabaikan git.
 
 ## JS-01 — Kerangka
@@ -736,7 +740,7 @@ Dikerjakan dalam mode ZIP dari ZIP `main` 14 Nov 2026, yang sudah memuat commit 
 
 ## JS-10 — Layar kelas
 
-- Status: **Spesifikasi ditulis (14 Nov 2026)**: [JS-10-kelas.md](specs/JS-10-kelas.md), menunggu `Spesifikasi disetujui: JS-10` beserta pilihan DRAF D-1 sampai D-4. Plan disetujui: usulan 1a–13a (`Setuju: JS-10 (usulan 1a sampai 13a)`) dan usulan 14a (`Usulan 14: a`), 14 Nov 2026. JS-04 Selesai 14 Nov 2026, jadi Build bisa dimulai sesudah spesifikasi disetujui. Sebelumnya: **Plan disetujui untuk usulan 1–13**, usulan 14 menunggu jawaban. Semula: **Direncanakan (14 Nov 2026)**, menunggu `Setuju: JS-10`. Diperiksa sebelum Plan: JS-08 Selesai (13 Nov 2026) dengan laporan Lulus dengan catatan AC-24. JS-04, dependensi kedua, belum Selesai: perbaikan AC-20 sudah di-push, tetapi ukur ulang CPU belum lengkap (bagian "Penutupan JS-04"). Plan ini tetap dijalankan atas instruksi pemilik proyek (Bagian 2 sesi 14 Nov 2026), dan Build JS-10 baru dimulai sesudah JS-04 Selesai. Urutan JS-10, JS-12, JS-11, lalu JS-09 ditetapkan pemilik proyek 14 Nov 2026 (bagian "Keputusan urutan fitur"). Dikerjakan dalam mode ZIP. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare.
+- Status: **Dibangun dan diuji (14 Nov 2026)**: spesifikasi disetujui 14 Nov 2026 (D-1 sampai D-4 = a); laporan [JS-10-hasil.md](tests/JS-10-hasil.md) lulus; menunggu push dan langkah pemilik proyek (bagian "Hasil Build dan Test JS-10"). Sebelumnya: **Spesifikasi ditulis (14 Nov 2026)**. Plan disetujui: usulan 1a–13a (`Setuju: JS-10 (usulan 1a sampai 13a)`) dan usulan 14a (`Usulan 14: a`), 14 Nov 2026. JS-04 Selesai 14 Nov 2026, jadi Build bisa dimulai sesudah spesifikasi disetujui. Sebelumnya: **Plan disetujui untuk usulan 1–13**, usulan 14 menunggu jawaban. Semula: **Direncanakan (14 Nov 2026)**, menunggu `Setuju: JS-10`. Diperiksa sebelum Plan: JS-08 Selesai (13 Nov 2026) dengan laporan Lulus dengan catatan AC-24. JS-04, dependensi kedua, belum Selesai: perbaikan AC-20 sudah di-push, tetapi ukur ulang CPU belum lengkap (bagian "Penutupan JS-04"). Plan ini tetap dijalankan atas instruksi pemilik proyek (Bagian 2 sesi 14 Nov 2026), dan Build JS-10 baru dimulai sesudah JS-04 Selesai. Urutan JS-10, JS-12, JS-11, lalu JS-09 ditetapkan pemilik proyek 14 Nov 2026 (bagian "Keputusan urutan fitur"). Dikerjakan dalam mode ZIP. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare.
 - Memenuhi: JFR-01 (guru atau admin membuat ruang dari konsol), JFR-02 (kode dan tautan tampil di lobi; kodenya sudah dari JS-03), JFR-05 (layar kelas menampilkan jumlah dan nama samaran pemain), JFR-06 (mengunci ruang dan mengeluarkan pemain dengan konfirmasi), JFR-27 (lobi), JFR-28 (saat bermain), JFR-29 (kontrol guru), JFR-30 (podium), JFR-31 (pembahasan), dan kartu "Ruang yang sedang berjalan" di dasbor (bagian JFR-37). Ditambah Architecture 6.1 (`/ws/kelas/` dan tiket), 6.4, 7 (siklus sampai pembahasan dan ditutup), 10.1 (`#/ruang`, `#/ruang/{id}`, `#/kelas/{id}`), 10.2 (rute ruang), 10.9, dan 12.1 (tiket), serta Design System 3.6 dan 10 ("Layar kelas").
 - Bergantung pada: JS-04 (perbaikan AC-20 di-push 14 Nov 2026, menunggu ukur ulang) dan JS-08 (Selesai, 13 Nov 2026).
 - File yang dibuat/diubah (rencana; dipastikan di Specify):
@@ -827,3 +831,20 @@ Dibaca dari ZIP `main` 14 Nov 2026: `naskah/STATUS.md` (terakhir diubah 10 Nov 2
 - Memenuhi: usulan 14a JS-10 butir 1 (pengaman alarm dan percobaan ulang, `limits.cpu_ms`, dan biaya permintaan pertama di isolat baru), butir 2 (alur kerja "Jejak: hentikan"), butir 4 (penghitung pemakaian per ruang), dan butir 5 (peringatan anggaran dan alur kerja "Jejak: batas biaya"). Butir 3 (batas ruang aktif sekaligus) dan layar kelas yang berhenti menyambung ulang ada di JS-10.
 - Bergantung pada: JS-10.
 - Ukuran: M
+
+### Hasil Build dan Test JS-10 (14 Nov 2026)
+
+Dibangun dalam mode ZIP. Rinciannya di [JS-10-hasil.md](tests/JS-10-hasil.md).
+
+- **Perintah resmi:** `content:check:jejak` 254, `test:jejak` 911, `test:jejak:server` 52, dan `test:e2e:jejak` 42 uji lulus (dijalankan per kelompok); `build:jejak` berhasil; `build:pages` 178 berkas identik; `tsc` dan ESLint bersih.
+- **Beban:** 1 ruang × 50 bot dan 1 ruang × 100 bot dengan layar kelas tersambung: 0 putus dan 0 pesan ditolak; `dunia_kelas` 2 kali per detik (±1,4 KB dan ±2,8 KB), `papan` hanya saat berubah (±1,1 KB).
+- **Ukuran kode:** layar pemain naik 0,48 KB gzip (batas 0,5 KB); konsol 98 KB gzip.
+- **Penyesuaian:** bagian "Catatan Build" spesifikasi JS-10.
+
+**Langkah pemilik proyek sesudah ZIP Build JS-10 di-push:**
+
+1. Pastikan "Jejak: uji" hijau, dan langkah "Siapkan kunci Worker" menulis "Kunci Worker baru: KUNCI_TIKET.".
+2. Hapus rahasia `KUNCI_COBA` dari Worker uji: dasbor Cloudflare → **Workers & Pages** → `jejak-setara-uji` → **Settings** → **Variables and Secrets**.
+3. Masuk ke konsol, buka **Ruang**, buat ruang, lalu klik **Buka layar kelas** di laptop yang tersambung ke proyektor atau layar lebar.
+4. Gabung dengan dua atau tiga HP, jalankan satu ronde pendek sampai pembahasan, lalu tutup ruang.
+5. Kirim foto layar kelas dan catatan bila ada yang aneh.

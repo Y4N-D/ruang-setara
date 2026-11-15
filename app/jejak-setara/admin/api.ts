@@ -16,20 +16,35 @@ import {
   type IsiUbahAkun,
   type KodeGalatAkun,
 } from "../inti/akun";
+import {
+  KODE_GALAT_RUANG,
+  skemaDaftarRuang,
+  skemaDetailRuang,
+  skemaJawabanRuangBaru,
+  skemaPilihanRuang,
+  skemaTiket,
+  type AksiKelola,
+  type IsiRuangBaru,
+  type KodeGalatRuang,
+} from "../inti/ruang";
 import { TEKS_KONSOL } from "../teks-konsol";
 
 export interface GalatApi {
   ok: false;
-  kode: KodeGalatAkun;
+  kode: KodeGalatAkun | KodeGalatRuang;
   pesan: string;
   status: number;
+  /** Isi jawaban galat apa adanya, misalnya ruang yang masih aktif pada RUANG_MASIH_ADA (JS-10, P-4). */
+  isi?: unknown;
 }
 export type HasilApi<T> = { ok: true; data: T } | GalatApi;
 
 const kodeDikenal = (kode: string): kode is KodeGalatAkun => (KODE_GALAT_AKUN as readonly string[]).includes(kode);
+const kodeRuang = (kode: string): kode is KodeGalatRuang => (KODE_GALAT_RUANG as readonly string[]).includes(kode);
 
-export function galatDari(kode: KodeGalatAkun, status = 0): GalatApi {
-  return { ok: false, kode, pesan: TEKS_KONSOL.galat[kode], status };
+export function galatDari(kode: KodeGalatAkun | KodeGalatRuang, status = 0, isi?: unknown): GalatApi {
+  const pesan = kodeRuang(kode) ? TEKS_KONSOL.galatRuang[kode] : TEKS_KONSOL.galat[kode];
+  return { ok: false, kode, pesan, status, isi };
 }
 
 async function panggil<T>(metode: "GET" | "POST" | "PATCH", jalur: string, isi: unknown, skema: z.ZodType<T>): Promise<HasilApi<T>> {
@@ -56,8 +71,9 @@ async function panggil<T>(metode: "GET" | "POST" | "PATCH", jalur: string, isi: 
   }
   if (!jawaban.ok) {
     const galat = skemaGalat.safeParse(json);
-    const kode = galat.success && kodeDikenal(galat.data.galat.kode) ? galat.data.galat.kode : "UMUM";
-    return galatDari(kode, jawaban.status);
+    const mentah = galat.success ? galat.data.galat.kode : "";
+    const kode = kodeDikenal(mentah) || kodeRuang(mentah) ? mentah : "UMUM";
+    return galatDari(kode, jawaban.status, json);
   }
   const hasil = skema.safeParse(json);
   return hasil.success ? { ok: true, data: hasil.data } : galatDari("UMUM", jawaban.status);
@@ -74,6 +90,13 @@ export const api = {
   daftarAkun: () => panggil("GET", "/api/akun", undefined, skemaDaftarAkun),
   buatAkun: (isi: IsiAkunBaru) => panggil("POST", "/api/akun", isi, skemaJawabanAkun),
   ubahAkun: (id: string, isi: IsiUbahAkun) => panggil("PATCH", `/api/akun/${encodeURIComponent(id)}`, isi, skemaJawabanAkun),
+  // JS-10 (P-2 sampai P-12)
+  pilihanRuang: () => panggil("GET", "/api/ruang/pilihan", undefined, skemaPilihanRuang),
+  daftarRuang: () => panggil("GET", "/api/ruang", undefined, skemaDaftarRuang),
+  buatRuang: (isi: IsiRuangBaru) => panggil("POST", "/api/ruang", isi, skemaJawabanRuangBaru),
+  detailRuang: (id: string) => panggil("GET", `/api/ruang/${encodeURIComponent(id)}`, undefined, skemaDetailRuang),
+  kelolaRuang: (id: string, aksi: AksiKelola, pemainId?: string) => panggil("POST", `/api/ruang/${encodeURIComponent(id)}/kelola`, { aksi, pemainId }, skemaKeluar),
+  tiketRuang: (id: string) => panggil("POST", `/api/ruang/${encodeURIComponent(id)}/tiket`, {}, skemaTiket),
 };
 
 export type Muatan<T> = { jenis: "memuat" } | { jenis: "gagal" } | { jenis: "ada"; data: T };

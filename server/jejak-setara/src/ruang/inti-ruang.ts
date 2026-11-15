@@ -8,7 +8,8 @@
 import { BATAS, hitungPeringkat } from "../../../../app/jejak-setara/inti/aturan";
 import { koreksi, periksaGerak, posisiSah, STATUS_GERAK } from "../../../../app/jejak-setara/inti/gerak";
 import { UKURAN_UBIN } from "../../../../app/jejak-setara/inti/peta";
-import { PROTOKOL_VERSI, type KodeGalat, type PesanKelas, type PesanPemain, type PesanServerKelas, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
+import { PROTOKOL_VERSI, type KodeGalat, type PesanPemain, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
+import type { PesanKelas, PesanServerKelas } from "../../../../app/jejak-setara/inti/protokol-kelas";
 import type { Arah, KejadianRuang, PengaturanRuang, StatusRuang, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
 import { TEKS } from "../../../../app/jejak-setara/teks";
 import {
@@ -71,6 +72,8 @@ export interface DataRuang {
   pengaturan: PengaturanRuang;
   benih: number;
   dibuatPada: number;
+  /** Label kelas dari konsol (JS-10, P-5); ruang lama tanpa label. */
+  labelKelas?: string;
 }
 
 export interface PetaRuang {
@@ -144,6 +147,11 @@ export interface KeadaanRuang {
   duniaLobiTerakhir: number | null;
   kerangkaTerakhir: Map<string, number>;
   putaranKe: number;
+  // JS-10 (hanya di memori): alamat untuk layar kelas (dari sambungan kelas terakhir), serta isi `papan` dan
+  // `kemajuan` terakhir yang dikirim ke layar kelas, agar hanya dikirim bila berubah (P-18, P-19).
+  tautan: string | null;
+  papanTerakhir: string | null;
+  kemajuanTerakhir: string | null;
   // JS-08. Kejadian ruang menurut urutan paket, jawaban per pemain per kode, skor per pemain (dihitung dari
   // jawaban), titik yang sudah terlihat per pemain, dan dialog yang terbuka (hanya di memori dan lampiran
   // sambungan, P-30). Peringkat disimpan sampai ada skor atau pemain yang berubah.
@@ -250,6 +258,9 @@ export function buatKeadaan(ruang: DataRuang, peta: PetaRuang, kejadian: readonl
     duniaLobiTerakhir: null,
     kerangkaTerakhir: new Map(),
     putaranKe: 0,
+    tautan: null,
+    papanTerakhir: null,
+    kemajuanTerakhir: null,
     kejadian: [...kejadian],
     jawaban: new Map(),
     skor: new Map(),
@@ -413,6 +424,7 @@ function ubahStatus(k: KeadaanRuang, o: Keluaran): void {
   simpanMeta(o, "status", k.status);
   simpanMeta(o, "waktu", k.waktu);
   kirimSemua(k, o, pesanStatus(k));
+  o.kelas.push(pesanStatusKelas(k));
   o.kiriman.push(barisRuang(k));
 }
 
@@ -1029,6 +1041,7 @@ function akhiriRonde(k: KeadaanRuang, o: Keluaran, sekarang: number): void {
     o.kiriman.push(barisPeserta(k, p, p.dikeluarkan ? null : (peringkat.get(p.id) ?? null)));
   }
   ubahStatus(k, o);
+  kirimPapanKelas(k, o, true); // JS-10, P-18
   for (const p of urutPemain(k)) {
     const sid = k.sambunganPemain.get(p.id);
     if (sid !== undefined && berkeidentitas(p)) kirimKe(o, sid, pesanSelesai(k, p));
@@ -1119,16 +1132,29 @@ export function terimaKelas(k: KeadaanRuang, pesan: PesanKelas, sekarang: number
       if (k.status !== "ditutup") {
         k.terkunci = pesan.kunci;
         simpanMeta(o, "terkunci", k.terkunci);
+        if (k.tautan !== null) o.kelas.push(pesanInfoKelas(k, sekarang)); // JS-10, P-17
       }
       return o;
     case "keluarkan":
       keluarkan(k, o, pesan.pemainId);
       return o;
     case "tutup_ruang":
-      if (k.status === "selesai" || k.status === "pembahasan") tutupRuang(k, o, sekarang);
+      // JS-10 (P-10): ruang yang belum dimulai juga bisa ditutup.
+      if (k.status === "lobi" || k.status === "selesai" || k.status === "pembahasan") tutupRuang(k, o, sekarang);
       return o;
+    case "pembahasan": {
+      // JS-10 (P-22): status menjadi `pembahasan`, lalu sebaran pilihan kelas untuk kejadian itu.
+      const kj = k.kejadian.find((x) => x.kode === pesan.kejadianId);
+      if (!kj || (k.status !== "selesai" && k.status !== "pembahasan")) return o;
+      if (k.status === "selesai") {
+        k.status = "pembahasan";
+        ubahStatus(k, o);
+      }
+      o.kelas.push(pesanDataPembahasan(k, kj));
+      return o;
+    }
     default:
-      return o; // halo, kode_masuk_ulang (JS-17), pembahasan (JS-11)
+      return o; // halo dan kode_masuk_ulang (JS-17)
   }
 }
 
@@ -1163,6 +1189,9 @@ export function putaran(k: KeadaanRuang, sekarang: number): Keluaran {
   }
   periksaKeterlihatan(k, o, aktif, sekarang);
   jadwalPribadi(k, o, sekarang);
+  // JS-10: peta kelas 2 kali per detik (P-20), papan dan kemajuan paling sering sekali per detik (P-18, P-19).
+  if (k.putaranKe % DUNIA_KELAS_SETIAP === 0) o.kelas.push(pesanDuniaKelas(k, sekarang));
+  if (k.putaranKe % PAPAN_KELAS_SETIAP === 0) kirimPapanKelas(k, o, false);
   return o;
 }
 
@@ -1237,4 +1266,138 @@ export function tenggatBerikut(k: KeadaanRuang, antreanKosong: boolean): number 
     t.push(k.ditutupPada + WAKTU.hapusSesudahTutupMs);
   }
   return t.length > 0 ? Math.min(...t) : null;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Layar kelas (spesifikasi JS-10, P-13 dan P-17 sampai P-22)
+
+/** `dunia_kelas` dikirim setiap putaran ke-5 (2 kali per detik); `papan` dan `kemajuan` diperiksa setiap putaran ke-10. */
+export const DUNIA_KELAS_SETIAP = 5;
+export const PAPAN_KELAS_SETIAP = 10;
+const PAPAN_KELAS_ISI = 10;
+
+/** Pemain yang dihitung untuk layar kelas: berkeidentitas dan tidak dikeluarkan, menurut urutan bergabung. */
+function pemainKelas(k: KeadaanRuang): PemainRuang[] {
+  return urutPemain(k).filter(berkeidentitas);
+}
+
+function pesanStatusKelas(k: KeadaanRuang): PesanServerKelas {
+  return { v: V, t: "status_ruang", status: k.status, mulaiPada: k.waktu.mulaiPada, berakhirPada: k.waktu.berakhirPada, jedaSejak: k.waktu.jedaSejak };
+}
+
+/** P-17. Hanya dipanggil bila `k.tautan` sudah diisi sambungan kelas. */
+export function pesanInfoKelas(k: KeadaanRuang, sekarang: number): PesanServerKelas {
+  return {
+    v: V,
+    t: "info_kelas",
+    labelKelas: k.ruang.labelKelas ?? "Ruang",
+    kode: k.ruang.kode,
+    tautan: k.tautan ?? "",
+    durasiMenit: k.ruang.pengaturan.durasiMenit,
+    batasPemain: k.ruang.pengaturan.batasPemain,
+    uji: k.ruang.pengaturan.uji,
+    terkunci: k.terkunci,
+    waktuServer: sekarang,
+    jumlahKejadian: k.kejadian.length,
+    kejadian: k.kejadian.map((kj) => ({ id: kj.kode, judul: kj.isi.judul, zona: Number(kj.isi.zona.slice(1)) })),
+  };
+}
+
+function jumlahSelesai(k: KeadaanRuang, pemainId: string): number {
+  let n = 0;
+  for (const j of k.jawaban.get(pemainId)?.values() ?? []) if (j.status === "selesai") n++;
+  return n;
+}
+
+/** P-18: 10 besar menurut peringkat ruang (JS-08), dengan jumlah kejadian yang kedua langkahnya selesai. */
+export function pesanPapanKelas(k: KeadaanRuang): PesanServerKelas {
+  const peringkat = peringkatRuang(k);
+  const daftar = pemainKelas(k)
+    .map((p) => ({ p, r: peringkat.get(p.id) ?? Number.MAX_SAFE_INTEGER }))
+    .sort((a, b) => a.r - b.r || a.p.urutan - b.p.urutan);
+  return {
+    v: V,
+    t: "papan",
+    pemain: daftar.slice(0, PAPAN_KELAS_ISI).map(({ p, r }) => ({
+      id: p.id,
+      nama: p.nama ?? "",
+      avatar: p.avatar ?? 0,
+      warnaTas: p.warnaTas ?? "sun",
+      skor: skorDari(k, p.id).skor,
+      peringkat: r,
+      selesai: jumlahSelesai(k, p.id),
+    })),
+    jumlahPemain: daftar.length,
+  };
+}
+
+/** P-19: jawaban yang kedua langkahnya selesai, dibanding pemain × kejadian ruang. */
+export function pesanKemajuan(k: KeadaanRuang): PesanServerKelas {
+  const pemain = pemainKelas(k);
+  const terjawab = pemain.reduce((n, p) => n + jumlahSelesai(k, p.id), 0);
+  return { v: V, t: "kemajuan", terjawab, kemungkinan: pemain.length * k.kejadian.length };
+}
+
+/** P-20: posisi semua pemain berkeidentitas yang punya posisi, dibulatkan ke piksel. */
+export function pesanDuniaKelas(k: KeadaanRuang, sekarang: number): PesanServerKelas {
+  const p: [string, number, number, boolean][] = [];
+  for (const q of pemainKelas(k)) if (q.posisi) p.push([q.id, Math.round(q.posisi.x), Math.round(q.posisi.y), q.terhubung]);
+  return { v: V, t: "dunia_kelas", w: sekarang, p: p.slice(0, 100) };
+}
+
+/** `papan` dan `kemajuan` ke layar kelas bila isinya berubah, atau selalu bila `paksa` (ronde selesai). */
+function kirimPapanKelas(k: KeadaanRuang, o: Keluaran, paksa: boolean): void {
+  const papan = pesanPapanKelas(k);
+  const teksPapan = JSON.stringify(papan);
+  if (paksa || teksPapan !== k.papanTerakhir) {
+    k.papanTerakhir = teksPapan;
+    o.kelas.push(papan);
+  }
+  const kemajuan = pesanKemajuan(k);
+  const teksKemajuan = JSON.stringify(kemajuan);
+  if (paksa || teksKemajuan !== k.kemajuanTerakhir) {
+    k.kemajuanTerakhir = teksKemajuan;
+    o.kelas.push(kemajuan);
+  }
+}
+
+/** P-22: sebaran pilihan kelas untuk satu kejadian, menurut urutan asli opsi; pemain yang dikeluarkan tidak dihitung. */
+export function pesanDataPembahasan(k: KeadaanRuang, kj: KejadianRuang): PesanServerKelas {
+  const hitung1 = new Map<string, number>();
+  const hitung2 = new Map<string, number>();
+  for (const p of pemainKelas(k)) {
+    const j = k.jawaban.get(p.id)?.get(kj.kode);
+    if (!j) continue;
+    if (j.langkah1Opsi) hitung1.set(j.langkah1Opsi, (hitung1.get(j.langkah1Opsi) ?? 0) + 1);
+    if (j.langkah2Opsi) hitung2.set(j.langkah2Opsi, (hitung2.get(j.langkah2Opsi) ?? 0) + 1);
+  }
+  const isi = kj.isi;
+  return {
+    v: V,
+    t: "data_pembahasan",
+    kejadianId: kj.kode,
+    judul: isi.judul,
+    situasi: isi.situasi,
+    pertanyaan1: isi.langkah1.pertanyaan,
+    opsi1: isi.langkah1.opsi.map((x) => ({ id: x.id, teks: x.teks, benar: x.benar, jumlah: hitung1.get(x.id) ?? 0 })),
+    pertanyaan2: isi.langkah2.pertanyaan,
+    opsi2: isi.langkah2.opsi.map((x) => ({ id: x.id, teks: x.teks, tingkat: x.tingkat, terjadi: x.terjadi, jumlah: hitung2.get(x.id) ?? 0 })),
+    kartu: { hak: isi.kartu.hak, kewajiban: isi.kartu.kewajiban, rujukan: kj.rujukan },
+  };
+}
+
+/**
+ * Sambutan layar kelas sesudah `halo` (P-13): `info_kelas`, `status_ruang`, lalu `lobi` (lobi dan hitung mundur)
+ * atau `papan`, `kemajuan`, dan `dunia_kelas` (status lain).
+ */
+export function sambutanKelas(k: KeadaanRuang, tautan: string, sekarang: number): Keluaran {
+  const o = keluaranKosong();
+  k.tautan = tautan;
+  o.kelas.push(pesanInfoKelas(k, sekarang), pesanStatusKelas(k));
+  if (k.status === "lobi" || k.status === "hitung_mundur") o.kelas.push(pesanLobi(k));
+  else {
+    kirimPapanKelas(k, o, true);
+    o.kelas.push(pesanDuniaKelas(k, sekarang));
+  }
+  return o;
 }

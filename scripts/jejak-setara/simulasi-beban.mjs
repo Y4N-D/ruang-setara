@@ -8,8 +8,11 @@
 // setiap pesan naik dan turun (urutan tetap, seperti TCP) untuk mengukur gerak jujur yang ditolak (P-52).
 // JS-08 (P-71): saat menjelajah, bot berjalan ke kejadian yang terlihat dalam 12 ubin, memeriksa pada jarak 20 piksel,
 // menjawab kedua langkah dengan jeda 1–3 detik secara acak, lalu menutup dialog sesudah 1 detik.
-// Lingkungan uji hanya dengan pilihan tertulis: --sasaran uji --alamat <URL> --saya-paham-kuota, serta
-// rahasia JEJAK_KUNCI_COBA; perkiraan permintaan Durable Object dicetak lebih dulu, dan lebih dari 20.000 ditolak.
+// JS-10 (P-32): ruang dibuat lewat jalur guru (lokal: admin awal dengan kunci lokal, masuk, POST /api/ruang) dan
+// dikendalikan lewat layar kelas bertiket, yang juga mencatat jumlah dan ukuran pesan ke layar kelas (AC-24).
+// Lingkungan uji hanya dengan pilihan tertulis: --sasaran uji --alamat <URL> --saya-paham-kuota, serta akun konsol di
+// JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI; perkiraan permintaan Durable Object dicetak lebih dulu, dan lebih dari 20.000
+// ditolak.
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -44,8 +47,8 @@ if (SASARAN === "uji") {
   alamat = ambil("--alamat", "");
   const perkiraan = RUANG * perkiraanPermintaan(BOT * 6.5, BOT) * (DETIK / 900);
   console.log(`Perkiraan permintaan Durable Object untuk percobaan ini: ±${Math.round(perkiraan)} (kuota gratis 100.000 per hari).`);
-  if (!alamat || !arg.includes("--saya-paham-kuota") || !process.env.JEJAK_KUNCI_COBA) {
-    console.error("Lingkungan uji butuh --alamat, --saya-paham-kuota, dan rahasia JEJAK_KUNCI_COBA (Architecture 13.4).");
+  if (!alamat || !arg.includes("--saya-paham-kuota") || !process.env.JEJAK_UJI_EMAIL || !process.env.JEJAK_UJI_SANDI) {
+    console.error("Lingkungan uji butuh --alamat, --saya-paham-kuota, serta JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI (Architecture 13.4).");
     process.exit(2);
   }
   if (perkiraan > BATAS_PERMINTAAN_UJI) {
@@ -66,21 +69,86 @@ if (SASARAN === "uji") {
   }
 }
 
-const tajukKunci = SASARAN === "uji" ? { "X-Jejak-Kunci-Coba": process.env.JEJAK_KUNCI_COBA } : {};
 /** Versi protokol server, dibaca dari /api/sehat, agar skrip tidak perlu diubah saat protokol naik (JS-08: versi 2). */
 const V = (await (await fetch(`${alamat}/api/sehat`)).json()).protokol;
+const KUNCI_ADMIN_LOKAL = "lokal-kunci-admin-bukan-rahasia";
+const PAKET_INTI = "9880c4d5-8294-51c9-971a-e95531a2e039";
+let cookie = "";
+const tajukKonsol = () => ({ "X-Jejak": "1", Origin: alamat, "Content-Type": "application/json", "CF-Connecting-IP": "10.66.0.1", Cookie: cookie });
+const cookieDari = (j) => (j.headers.get("set-cookie") ?? "").split(";")[0];
+
+/** Sesi konsol: lokal lewat admin awal berkunci lokal; uji lewat akun di JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI. */
+async function masukKonsol() {
+  if (SASARAN === "uji") {
+    const j = await fetch(`${alamat}/api/masuk`, { method: "POST", headers: tajukKonsol(), body: JSON.stringify({ email: process.env.JEJAK_UJI_EMAIL, sandi: process.env.JEJAK_UJI_SANDI }) });
+    if (j.status !== 200) throw new Error(`masuk ${j.status}`);
+    cookie = cookieDari(j);
+    return;
+  }
+  const email = `admin-beban-${process.pid}@sekolah.sch.id`;
+  const awal = await fetch(`${alamat}/api/admin-awal`, {
+    method: "POST",
+    headers: { "X-Jejak-Kunci-Admin": KUNCI_ADMIN_LOKAL, "Content-Type": "application/json", "CF-Connecting-IP": "10.66.0.1" },
+    body: JSON.stringify({ email, sandi: "sandi sementara beban", namaTampilan: "Admin beban" }),
+  });
+  if (awal.status !== 200) throw new Error(`admin awal ${awal.status}`);
+  const masuk = await fetch(`${alamat}/api/masuk`, { method: "POST", headers: tajukKonsol(), body: JSON.stringify({ email, sandi: "sandi sementara beban" }) });
+  cookie = cookieDari(masuk);
+  const ganti = await fetch(`${alamat}/api/sandi`, { method: "POST", headers: tajukKonsol(), body: JSON.stringify({ sandiBaru: "kalimat sandi beban lokal" }) });
+  if (ganti.status !== 200) throw new Error(`ganti sandi ${ganti.status}`);
+  cookie = cookieDari(ganti);
+}
+
+/** Layar kelas per ruang: sambungan bertiket dan hitungan pesan per jenis (JS-10, AC-24). */
+const layarKelas = new Map();
+async function bukaLayarKelas(id, kode) {
+  const t = await fetch(`${alamat}/api/ruang/${id}/tiket`, { method: "POST", headers: tajukKonsol(), body: "{}" });
+  if (t.status !== 200) throw new Error(`tiket ${t.status}`);
+  const { tiket } = await t.json();
+  const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/kelas/${id}?tiket=${encodeURIComponent(tiket)}`, { headers: { Origin: alamat } });
+  const l = { ws, info: null, jenis: {}, status: null };
+  ws.onmessage = (e) => {
+    const teks = String(e.data);
+    const m = JSON.parse(teks);
+    const x = (l.jenis[m.t] ??= { n: 0, byte: 0, byteMaks: 0 });
+    x.n++;
+    x.byte += teks.length;
+    x.byteMaks = Math.max(x.byteMaks, teks.length);
+    if (m.t === "info_kelas") l.info = m;
+    if (m.t === "status_ruang") l.status = m.status;
+  };
+  await new Promise((ok, gagal) => {
+    ws.onopen = () => ok();
+    ws.onerror = () => gagal(new Error("layar kelas gagal tersambung"));
+  });
+  ws.send(JSON.stringify({ v: V, t: "halo", peran: "guru" }));
+  for (let i = 0; i < 100 && !l.info; i++) await tidur(50);
+  layarKelas.set(kode, l);
+  return l;
+}
+
 async function buatRuang() {
-  const j = await fetch(`${alamat}/api/ruang-coba`, { method: "POST", headers: tajukKunci, body: JSON.stringify({ batasPemain: Math.max(2, Math.min(100, BOT)) }) });
-  if (j.status !== 201) throw new Error(`ruang coba ${j.status}`);
-  const isi = await j.json();
-  kejadianRuang.push(isi.kejadian ?? 0);
-  return isi.kode;
+  const j = await fetch(`${alamat}/api/ruang`, {
+    method: "POST",
+    headers: tajukKonsol(),
+    body: JSON.stringify({ labelKelas: "Uji beban", paketId: PAKET_INTI, durasiMenit: 20, batasPemain: Math.max(2, Math.min(100, BOT)), batasTerlambatMenit: 10, modeNomorAbsen: false, uji: true }),
+  });
+  if (j.status !== 201) throw new Error(`ruang ${j.status}`);
+  const { ruang } = await j.json();
+  const l = await bukaLayarKelas(ruang.id, ruang.kode);
+  kejadianRuang.push(l.info?.jumlahKejadian ?? 0);
+  return ruang.kode;
 }
 const kodeRuangIndeks = new Map();
-/** Jumlah kejadian setiap ruang coba yang dibuat (JS-08, P-4). */
+/** Jumlah kejadian setiap ruang yang dibuat (JS-08, P-4). */
 const kejadianRuang = [];
-const kelas = (kode, pesan) => fetch(`${alamat}/api/ruang-coba/${kode}/kelas`, { method: "POST", body: JSON.stringify({ v: V, ...pesan }) });
-const statistik = async (kode) => (await fetch(`${alamat}/api/ruang-coba/${kode}/statistik`)).json();
+/** Pesan layar kelas lewat WebSocket bertiket (pengganti kait `kelas` ruang coba). */
+const kelas = async (kode, pesan) => {
+  layarKelas.get(kode)?.ws.send(JSON.stringify({ v: V, ...pesan }));
+  await tidur(200);
+};
+const statistik = async (kode) => (await fetch(`${alamat}/api/uji/ruang/${kode}/statistik`)).json();
+await masukKonsol();
 
 // Peta kampung: grid tabrakan kampung dan grid lobi (sel gerbang padat), sama dengan server (P-46).
 const kampung = JSON.parse(readFileSync(join(akar, "app/jejak-setara/peta/kampung.json"), "utf8"));
@@ -407,8 +475,8 @@ try {
   const lobi = await jalankanFase(bot, "lobi", LOBI_DETIK, hz);
   const koreksiLobi = bot.reduce((s, b) => s + b.koreksi, 0);
   const gerakLobi = bot.reduce((s, b) => s + b.gerak, 0);
-  // 3. Ronde: mulai lewat kait lokal, lalu menjelajah kampung.
-  if (SASARAN === "lokal") for (const kode of kodeRuang) await kelas(kode, { t: "mulai" });
+  // 3. Ronde: mulai lewat layar kelas, lalu menjelajah kampung.
+  for (const kode of kodeRuang) await kelas(kode, { t: "mulai" });
   await jalankanFase(bot, "diam", 3.5, hz);
   for (const b of bot) {
     b.koreksi = 0;
@@ -419,7 +487,9 @@ try {
   // Dihitung sebelum ruang diakhiri dan ditutup, karena penutupan ruang memutus semua bot dengan sengaja.
   const putusTakTerduga = bot.filter((b) => b.putus).length;
   const stat = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
-  if (SASARAN === "lokal") for (const kode of kodeRuang) {
+  // Pesan layar kelas sampai akhir menjelajah, sebelum ruang diakhiri (JS-10, AC-24).
+  const kelasJelajah = kodeRuang.map((kode) => JSON.parse(JSON.stringify(layarKelas.get(kode)?.jenis ?? {})));
+  for (const kode of kodeRuang) {
     await kelas(kode, { t: "akhiri" });
     await kelas(kode, { t: "tutup_ruang" });
   }
@@ -460,6 +530,12 @@ try {
     pesanDitolakServer: stat.reduce((s, x) => s + (x.pelanggaran ?? 0), 0),
     alasanKoreksiServer: stat.map((x) => x.koreksiAlasan ?? {}),
     barisSqliteDitulisPerRuang: stat.map((x) => x.barisDitulis),
+    // JS-10 (AC-24): pesan ke layar kelas selama sambungan (dari layar kelas), dan hitungan server.
+    layarKelas: kelasJelajah.map((jenis) =>
+      Object.fromEntries(Object.entries(jenis).map(([t, x]) => [t, { n: x.n, byteRata: Math.round(x.byte / Math.max(1, x.n)), byteMaks: x.byteMaks }])),
+    ),
+    pesanKeLayarKelasServer: stat.map((x) => x.keluarKelas ?? 0),
+    byteKeLayarKelasServer: stat.map((x) => x.byteKelas ?? 0),
     perkiraanPermintaanDurableObjectPerSesi15MenitPerRuang: perkiraanPermintaan(jelajah.pesanNaikPerPemainPerDetik * BOT, BOT),
   };
   mkdirSync(join(akar, "test-results-jejak"), { recursive: true });
@@ -467,6 +543,7 @@ try {
   writeFileSync(berkas, JSON.stringify(hasil, null, 2));
   console.log(JSON.stringify(hasil, null, 2));
   for (const b of bot) b.ws.close();
+  for (const l of layarKelas.values()) l.ws.close();
 } finally {
   if (server) server.kill("SIGTERM");
   await tidur(800);

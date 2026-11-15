@@ -8,10 +8,13 @@ import { TEKS_KONSOL } from "../teks-konsol";
 import { api, type GalatApi } from "./api";
 import Akun from "./halaman/Akun";
 import Dasbor from "./halaman/Dasbor";
+import DetailRuang from "./halaman/DetailRuang";
 import GantiSandi from "./halaman/GantiSandi";
 import Masuk from "./halaman/Masuk";
+import Ruang from "./halaman/Ruang";
+import LayarKelas from "./kelas/LayarKelas";
 import Kerangka, { type Pemberitahuan } from "./Kerangka";
-import { keHash, tujuan, type Rute } from "./rute";
+import { keHash, tujuan, type Rute, type Tujuan } from "./rute";
 
 type Keadaan = { jenis: "memuat" } | { jenis: "mati" } | { jenis: "keluar"; sesiBerakhir: boolean } | { jenis: "masuk"; akun: Saya };
 
@@ -42,18 +45,21 @@ export default function App() {
   }, []);
 
   const rute: Rute =
-    keadaan.jenis === "masuk" ? tujuan(hash, { masuk: true, peran: keadaan.akun.peran, wajibGantiSandi: keadaan.akun.wajibGantiSandi }) : "masuk";
+    keadaan.jenis === "masuk" ? tujuan(hash, { masuk: true, peran: keadaan.akun.peran, wajibGantiSandi: keadaan.akun.wajibGantiSandi }).rute : "masuk";
+  const sasaran: Tujuan =
+    keadaan.jenis === "masuk" ? tujuan(hash, { masuk: true, peran: keadaan.akun.peran, wajibGantiSandi: keadaan.akun.wajibGantiSandi }) : { rute: "masuk", id: null };
+  const idRuang = sasaran.id;
 
   // Alamat mengikuti rute yang benar-benar tampil (P-37), tanpa menambah riwayat peramban.
   useEffect(() => {
     if (keadaan.jenis === "memuat" || keadaan.jenis === "mati") return;
-    if (window.location.hash !== keHash(rute)) window.history.replaceState(null, "", keHash(rute));
-  }, [keadaan.jenis, rute]);
+    if (window.location.hash !== keHash(rute, idRuang)) window.history.replaceState(null, "", keHash(rute, idRuang));
+  }, [keadaan.jenis, rute, idRuang]);
 
   // Halaman baru selalu mulai dari atas, misalnya dasbor sesudah formulir sandi yang sudah digulir ke bawah.
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [keadaan.jenis, rute]);
+  }, [keadaan.jenis, rute, idRuang]);
 
   /** Pindah rute dari kode (sesudah masuk, keluar, atau ganti sandi wajib), tanpa membuang pemberitahuan baru. */
   const pindah = useCallback((tujuanBaru: Rute) => {
@@ -88,6 +94,13 @@ export default function App() {
   );
 
   const umumkan = useCallback((pesan: string) => setPemberitahuan({ jenis: "berhasil", pesan }), []);
+
+  /** Membuka detail ruang dengan entri riwayat baru (tombol Kembali peramban kembali ke daftar), lalu pemberitahuan. */
+  const bukaRuang = useCallback((id: string, pesan?: string) => {
+    window.history.pushState(null, "", keHash("ruang", id));
+    setHash(keHash("ruang", id));
+    setPemberitahuan(pesan ? { jenis: "berhasil", pesan } : null);
+  }, []);
 
   async function keluar() {
     await api.keluar();
@@ -132,6 +145,8 @@ export default function App() {
 
   const { akun } = keadaan;
   const perbaruiAkun = (baru: Saya) => setKeadaan({ jenis: "masuk", akun: baru });
+  // Layar kelas tampil tanpa kerangka konsol, untuk proyektor (JS-10, P-1 dan P-23).
+  if (rute === "kelas" && idRuang) return <LayarKelas ruangId={idRuang} galatSesi={galatSesi} />;
   return (
     <div className="js-konsol-ruang">
       <Kerangka akun={akun} rute={rute} wajib={akun.wajibGantiSandi} pemberitahuan={pemberitahuan} keluar={() => void keluar()}>
@@ -147,6 +162,12 @@ export default function App() {
               if (wajib) pindah("dasbor");
             }}
           />
+        ) : rute === "ruang" ? (
+          idRuang ? (
+            <DetailRuang key={idRuang} id={idRuang} akun={akun} galatSesi={galatSesi} umumkan={umumkan} />
+          ) : (
+            <Ruang akun={akun} galatSesi={galatSesi} bukaRuang={bukaRuang} />
+          )
         ) : rute === "akun" ? (
           <Akun akun={akun} galatSesi={galatSesi} umumkan={umumkan} perbaruiDiri={perbaruiAkun} />
         ) : (

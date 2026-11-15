@@ -12,7 +12,6 @@ export interface Env {
   RUANG: DurableObjectNamespace;
   BATAS_PUBLIK?: PembatasLaju;
   BATAS_WS?: PembatasLaju;
-  KUNCI_COBA?: string;
   /** JS-04 (P-14): pembatas per alamat untuk masuk, ganti sandi, dan admin awal. */
   BATAS_MASUK?: PembatasLaju;
   /** JS-04 (P-1): kunci tambahan hash sandi; rahasia Worker di `uji`, variabel tiruan di `lokal`. */
@@ -23,4 +22,8 @@ export interface Env {
   KUNCI_ADMIN?: string;
   /** JS-04 (P-2): target iterasi PBKDF2, bilangan bulat 1.000 sampai 100.000. */
   ITERASI_SANDI?: string;
+  /** JS-10 (P-12): kunci HMAC tiket layar kelas; rahasia Worker di `uji`, variabel tiruan di `lokal`. */
+  KUNCI_TIKET?: string;
+  /** JS-10 (P-4): batas jumlah ruang aktif sekaligus di lingkungan ini (bawaan 3). */
+  RUANG_AKTIF_MAKS?: string;
 }

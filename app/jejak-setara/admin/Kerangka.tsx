@@ -25,6 +25,8 @@ interface PropsKerangka {
 
 const JUDUL: Record<Exclude<Rute, "masuk">, string> = {
   dasbor: TEKS_KONSOL.dasbor.judul,
+  ruang: TEKS_KONSOL.ruang.judul,
+  kelas: TEKS_KONSOL.ruang.judul,
   akun: TEKS_KONSOL.akun.judul,
   sandi: TEKS_KONSOL.sandi.judul,
 };

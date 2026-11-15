@@ -1,7 +1,8 @@
 // Inti ruang (spesifikasi JS-03, bagian D sampai H; AC-7 sampai AC-15).
 import { describe, expect, it } from "vitest";
 import { acakBerbenih } from "../../inti/acak";
-import { PROTOKOL_VERSI, skemaServerKelas, skemaServerPemain, type PesanPemain, type PesanServerPemain } from "../../inti/protokol";
+import { PROTOKOL_VERSI, skemaServerPemain, type PesanPemain, type PesanServerPemain } from "../../inti/protokol";
+import { skemaServerKelas } from "../../inti/protokol-kelas";
 import type { PengaturanRuang } from "../../inti/tipe";
 import {
   alarm,

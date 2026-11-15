@@ -1,7 +1,7 @@
 // Uji Worker, Durable Object, dan D1 lewat HTTP dan WebSocket sungguhan (spesifikasi JS-03, AC-1 sampai AC-15).
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import { AKAR, alamat, buatRuang, d1, kelas, klien, matikanServer, nyalakanServer, tidur, upgradeMentah } from "./bantuan";
+import { AKAR, alamat, buatRuang, d1, kelas, klien, konsol, matikanServer, nyalakanServer, tidur, upgradeMentah } from "./bantuan";
 import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/versi";
 
 const B = alamat();
@@ -34,8 +34,8 @@ describe("migrasi D1 (AC-1)", () => {
   });
 });
 
-describe("ruang coba dan pemeriksaan kode (AC-2, AC-4)", () => {
-  it("201 dengan kode, tautan, dan baris D1 sesuai P-4", async () => {
+describe("ruang dari konsol dan pemeriksaan kode (JS-03 AC-2 dan AC-4; JS-10 P-5)", () => {
+  it("201 dengan kode dan baris D1 milik admin yang membuatnya (JS-10, P-5)", async () => {
     const { status, isi } = await buatRuang({ batasPemain: 30 });
     expect(status).toBe(201);
     expect(isi.kode).toMatch(/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{5}$/);
@@ -43,18 +43,19 @@ describe("ruang coba dan pemeriksaan kode (AC-2, AC-4)", () => {
     const [baris] = d1<Record<string, unknown>>(`SELECT label_kelas, pemilik_id, paket_id, status, uji, pengaturan_json FROM ruang WHERE kode = '${isi.kode}'`);
     // Sejak JS-08 server uji menyemai bank awal, jadi ruang coba memuat Paket inti 16 (P-3, P-4).
     expect(isi.kejadian).toBe(16);
-    expect(baris).toMatchObject({ label_kelas: "Ruang coba", pemilik_id: null, paket_id: "9880c4d5-8294-51c9-971a-e95531a2e039", status: "lobi", uji: 1 });
+    expect(baris).toMatchObject({ label_kelas: "Ruang uji", paket_id: "9880c4d5-8294-51c9-971a-e95531a2e039", status: "lobi", uji: 1 });
+    expect(baris.pemilik_id).toEqual(expect.any(String));
     expect(JSON.parse(String(baris.pengaturan_json))).toEqual({ durasiMenit: 15, batasPemain: 30, batasTerlambatMenit: 5, skillAktif: ["lari", "kompas", "petunjuk"], modeNomorAbsen: false, uji: true });
   });
 
-  it("isi tidak sah 400; nomor absen untuk lebih dari 50 pemain 400 dengan pesan khusus; GET 405", async () => {
-    for (const isi of [{ batasPemain: 101 }, { batasPemain: 1 }, { warna: "biru" }, "bukan json"]) {
-      const j = await fetch(`${B}/api/ruang-coba`, { method: "POST", body: typeof isi === "string" ? isi : JSON.stringify(isi) });
-      expect(j.status, JSON.stringify(isi)).toBe(400);
+  it("isi tidak sah 400 ISI_SALAH; nomor absen untuk lebih dari 50 pemain 400; PUT 405 (JS-10, P-2)", async () => {
+    for (const isi of [{ batasPemain: 101 }, { batasPemain: 1 }, { warna: "biru" }]) {
+      expect((await buatRuang(isi)).status, JSON.stringify(isi)).toBe(400);
     }
+    expect((await konsol("POST", "/api/ruang", "bukan json")).status).toBe(400);
     const absen = await buatRuang({ modeNomorAbsen: true, batasPemain: 60 });
-    expect(absen).toEqual({ status: 400, isi: { galat: { kode: "PENGATURAN_SALAH", pesan: "Mode nomor absen hanya untuk ruang sampai 50 pemain." } } });
-    expect((await fetch(`${B}/api/ruang-coba`)).status).toBe(405);
+    expect(absen).toEqual({ status: 400, isi: { galat: { kode: "ISI_SALAH", pesan: "Isian ruang tidak sesuai. Periksa lagi isiannya." }, isian: ["nomorAbsen"] } });
+    expect((await konsol("PUT", "/api/ruang")).status).toBe(405);
   });
 
   it("pemeriksaan kode: 200 tanpa peka huruf, 404 untuk kode tidak ada atau ruang ditutup, 405 untuk POST", async () => {
@@ -98,7 +99,7 @@ describe("sambungan, bergabung, dan sambung ulang (AC-6 sampai AC-9)", () => {
     const { isi } = await buatRuang();
     const kode = String(isi.kode);
     await klien(kode);
-    const statistik = async () => (await (await fetch(`${B}/api/ruang-coba/${kode}/statistik`)).json()) as Record<string, number>;
+    const statistik = async () => (await (await fetch(`${B}/api/uji/ruang/${kode}/statistik`)).json()) as Record<string, number>;
     expect(await statistik()).toMatchObject({ sambungan: 1, menungguHalo: 1 });
     await tidur(11_000);
     expect(await statistik()).toMatchObject({ sambungan: 0, menungguHalo: 0 });

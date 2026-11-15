@@ -209,7 +209,7 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 | Berkas | Nama di tab Actions | Pemicu | Langkah |
 |---|---|---|---|
 | `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara (daftar jalur di berkasnya), atau tombol "Run workflow" | Sejak JS-01: pasang → `content:check:jejak` → `test:jejak` → `build:jejak`. Sejak JS-03 ditambah "Uji server Jejak", lalu pekerjaan "Deploy uji" di cabang `main` (push atau tombol): build dengan `CLOUDFLARE_ENV=uji`, migrasi D1 jarak jauh, `wrangler deploy` di folder `web/jejak-setara`, dan pemeriksaan `/api/sehat`. Deploy dilewati dengan pemberitahuan bila rahasia atau Database ID uji belum diisi. Sejak JS-08 ditambah "Semai bank awal". Sejak JS-04 ditambah "Siapkan kunci Worker": `KUNCI_SANDI` dan `KUNCI_IP` yang belum ada dibuat acak, lalu ikut versi yang sama lewat `wrangler deploy --secrets-file` |
-| `jejak-ruang-coba.yml` | Jejak: ruang coba | Tombol "Run workflow" | Membuat satu ruang coba di lingkungan uji dengan kunci sekali pakai `KUNCI_COBA`, lalu menulis kode dan tautannya di ringkasan alur kerja (JS-03; dipensiunkan di JS-10) |
+| `jejak-ruang-coba.yml`, `jejak-kendali-coba.yml` | Jejak: ruang coba, Jejak: kendali ruang coba | — | Dihapus di JS-10 (P-32). Ruang dibuat dari konsol (`POST /api/ruang`) dan dikendalikan lewat layar kelas bertiket |
 | `jejak-produksi.yml` | Jejak: produksi | Tombol "Run workflow" oleh pemilik proyek | Sama, untuk produksi (build dengan `CLOUDFLARE_ENV=produksi`); berhenti bila ada ruang produksi berstatus `main` atau `jeda` (dicek lewat API) |
 | `jejak-admin-awal.yml` | Jejak: admin awal | Tombol "Run workflow" dengan masukan nama tampilan | Menyimpan kunci sekali pakai `KUNCI_ADMIN`, memanggil `POST /api/admin-awal` untuk membuat akun admin pertama atau memulihkan akun admin dengan email dan sandi sementara dari rahasia GitHub, lalu mengganti kunci itu dengan nilai acak baru agar rute tertutup lagi (JS-04) |
 
@@ -221,11 +221,11 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 |---|---|---|
 | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | Rahasia GitHub | Untuk deploy dan migrasi |
 | `JEJAK_ADMIN_EMAIL`, `JEJAK_ADMIN_SANDI_SEMENTARA` | Rahasia GitHub | Untuk `jejak-admin-awal.yml` |
-| `KUNCI_TIKET` | Rahasia Worker (`wrangler secret`) | Kunci HMAC tiket layar kelas |
+| `KUNCI_TIKET` | Rahasia Worker (`wrangler secret`) | Kunci HMAC tiket layar kelas; dibuat langkah "Siapkan kunci Worker" bila belum ada, dan bernilai tiruan di `lokal` (JS-10) |
 | `KUNCI_SANDI` | Rahasia Worker | Kunci tambahan (*pepper*) hash sandi |
 | `KUNCI_IP` | Rahasia Worker | Kunci HMAC untuk kunci pembatas percobaan masuk (email, dan alamat IP ditambah tanggal) |
 | `KUNCI_ADMIN` | Rahasia Worker | Kunci sekali pakai untuk `POST /api/admin-awal`, dibuat lalu diganti nilai acak baru setiap "Jejak: admin awal" dijalankan (JS-04) |
-| `KUNCI_COBA` | Rahasia Worker lingkungan uji | Kunci sekali pakai untuk `POST /api/ruang-coba`, dibuat ulang setiap "Jejak: ruang coba" dijalankan (JS-03) |
+| `RUANG_AKTIF_MAKS` | Variabel Worker | Batas ruang aktif sekaligus di lingkungan itu: `lokal` 1000 (agar uji dan simulasi beban bisa membuat banyak ruang), `uji` 3, `produksi` 20; nilai tidak sah dianggap 3 (JS-10, P-4). `KUNCI_COBA` (JS-03) tidak dipakai lagi sejak JS-10 |
 | `LINGKUNGAN` | Variabel Worker | `lokal` (pengembangan dan uji di mesin agen), `uji`, atau `produksi` |
 | `ITERASI_SANDI` | Variabel Worker | Jumlah iterasi PBKDF2 untuk hash baru: 4.000 selama paket gratis (diturunkan dari 15.000 di penutupan JS-04, bagian 10.3), 100.000 sesudah paket berbayar aktif (JS-04) |
 
@@ -441,8 +441,9 @@ Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `
 | Kelas → server | `kunci_ruang` · `keluarkan` · `kode_masuk_ulang` | `kunci` (boolean) · `pemainId` · `pemainId` (P1) |
 | Kelas → server | `pembahasan` · `tutup_ruang` | `kejadianId` |
 | Server → kelas | `lobi` | Daftar pemain (nama, avatar, warna tas, terhubung) |
-| Server → kelas | `dunia_kelas` | Semua posisi pemain, 4 kali per detik |
-| Server → kelas | `papan` | Peringkat lengkap, paling sering 1 kali per detik; layar kelas hanya menampilkan 10 besar |
+| Server → kelas | `info_kelas` | Label kelas, kode, tautan, durasi, batas pemain, ruang uji, terkunci, waktu server, dan daftar kejadian (id, judul, zona). Dikirim sesudah `halo` dan saat kunci berubah (JS-10) |
+| Server → kelas | `dunia_kelas` | Posisi semua pemain berkeidentitas, 2 kali per detik selama `main` (JS-10) |
+| Server → kelas | `papan` | 10 besar (dengan jumlah kejadian selesai) dan jumlah pemain, paling sering 1 kali per detik dan hanya bila berubah; peringkat lengkap tidak dikirim ke layar kelas (JS-10, JFR-30) |
 | Server → kelas | `kemajuan` | Jumlah jawaban dan kemungkinan |
 | Server → kelas | `data_pembahasan` | Isi kejadian, sebaran pilihan Langkah 1 dan 2, kartu dampak |
 | Server → kelas | `status_ruang` · `galat` | Seperti di atas |
@@ -453,8 +454,8 @@ Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `
 |---|---|---|
 | `gerak` dari pemain | ≤ 10 per detik saat bergerak, ≤ 6 per detik di ruang lebih dari 50 pemain; saat diam tidak ada kiriman, kecuali satu laporan `jalan: false` saat berhenti (JS-07) | ±60 byte |
 | `dunia` ke pemain | 10 per detik selama `main`, hanya pemain yang berubah dalam radius 1,5 pandangan (480 × 270 piksel logis), paling banyak 24 pemain terdekat. Sekali per detik per pemain berupa kerangka penuh yang juga memuat pemain diam di dalam radius. Di `lobi` dan `hitung_mundur` dikirim mengikuti `gerak` yang masuk, paling sering setiap 100 ms, tanpa putaran (JS-07) | ±200 byte |
-| `dunia_kelas` | 4 per detik, semua pemain | ±1 KB untuk 40 pemain |
-| `papan` | ≤ 1 per detik, hanya bila berubah | ±1,5 KB |
+| `dunia_kelas` | 2 per detik, semua pemain (JS-10) | ±1,4 KB untuk 50 pemain dan ±2,8 KB untuk 100 pemain (`sim:beban` JS-10) |
+| `papan` | ≤ 1 per detik, hanya bila berubah | ±1,1 KB (10 besar) |
 
 Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 MB naik, di bawah anggaran 3 MB (PRD bagian 12). Bila uji beban melampaui anggaran, `dunia` diturunkan ke 5 per detik. Percobaan Plan JS-03 (lokal, dengan batas 24 pemain terdekat): sekitar 1,5 MB untuk ruang 40 pemain dan 2,5 MB untuk ruang 100 pemain, per pemain per 15 menit. JS-08 menambah sekitar 50 KB pesan kejadian dan paling banyak sekitar 0,22 MB `pribadi` per pemain per 15 menit (Plan JS-08).
 
@@ -530,12 +531,12 @@ stateDiagram-v2
 - **Pembuatan:** `POST /api/ruang` memeriksa izin, memilih versi terbit setiap kejadian di paket (semua rujukannya harus terverifikasi, kecuali ruang uji), membuat kode, membuat baris `ruang` di D1, lalu memanggil Durable Object baru dengan salinan isi, pengaturan, dan benih.
 - **Penempatan kejadian:** setiap kejadian diberi satu titik dari titik-titik zonanya dengan pengacakan berbenih, atau dua titik berbeda di ruang dengan batas pemain lebih dari 50 (JS-08; keputusan Gerbang 1 JS-03, usulan 11a). Satu titik tidak dipakai dua kejadian.
 - **Lobi dan jeda:** tanpa pengatur waktu berkala, sehingga Durable Object boleh beristirahat (*hibernate*). Sejak JS-07 (Permintaan C-10), pemain boleh berjalan di halaman lobi selama `lobi` dan `hitung_mundur`, dengan sel gerbang lobi diperlakukan padat; `dunia` dikirim mengikuti `gerak` yang masuk (paling sering setiap 100 ms, dan langsung untuk laporan berhenti), jadi ruang tetap bisa beristirahat saat semua pemain diam. Sambungan memakai WebSocket Hibernation API; identitas sambungan disimpan dengan `serializeAttachment`. Kiriman ke D1 memakai pengatur waktu 30 detik hanya selama antreannya berisi, sehingga ruang tetap bisa beristirahat sesudahnya (JS-03).
-- **Main:** pengatur waktu 100 ms menyusun dan mengirim `dunia`, `pribadi`, dan `papan`. Alarm dipasang pada `berakhirPada`.
+- **Main:** pengatur waktu 100 ms menyusun dan mengirim `dunia` dan `pribadi`; sejak JS-10 juga `dunia_kelas` setiap putaran ke-5, serta `papan` dan `kemajuan` setiap putaran ke-10 bila berubah. Alarm dipasang pada `berakhirPada`.
 - **Jeda:** jam berhenti; `berakhirPada` digeser sebesar lama jeda saat dilanjutkan.
 - **Selesai:** peringkat akhir dihitung, `selesai` dikirim ke setiap pemain, seluruh `kiriman` dikirim ke D1, dan `ringkasan_json` ditulis.
 - **Ditutup otomatis:** 3 jam tanpa sambungan apa pun, atau 6 jam sejak dibuat. Penyimpanan Durable Object dihapus 24 jam sesudah ditutup, setelah kiriman ke D1 dipastikan lengkap.
-- **Sejak JS-03:** siklus ini dijalankan inti ruang. Pesan layar kelas sampai ke ruang lewat rute `/ws/kelas/` di JS-10; di lingkungan lokal juga lewat kait uji `POST /api/ruang-coba/{KODE}/kelas`. Sejak JS-07, kait itu juga hidup di lingkungan uji dengan kunci sekali pakai `KUNCI_COBA`, dipanggil alur kerja "Jejak: kendali ruang coba", dan dipensiunkan di JS-10 bersama ruang coba.
-- **Ruang coba (JS-08):** ruang coba adalah ruang uji. Saat dibuat, ia membaca Paket inti 16 dari D1 lingkungannya dengan versi `kerja` setiap kejadian, mengisi `ruang.paket_id`, lalu menyalin isi dan teks rujukannya ke Durable Object. Bila bank awal belum disemai, ruang dibuat tanpa kejadian. Kait uji lokal `kejadian` dan `pindahkan` (hanya di `lokal`) dipakai uji ujung ke ujung dan dipensiunkan di JS-10.
+- **Sejak JS-03:** siklus ini dijalankan inti ruang. Sejak JS-10, pesan layar kelas sampai ke ruang lewat rute `/ws/kelas/` bertiket, dan konsol mengelola ruang lewat rute internal `kelola`. Ruang di `lobi` juga bisa ditutup, dan pesan `pembahasan` mengubah status `selesai` menjadi `pembahasan` sambil menjawab `data_pembahasan`. Ruang coba, kait `kelas`, dan kedua alur kerjanya dipensiunkan; kait uji lokal pindah ke `/api/uji/ruang/{KODE}/…`.
+- **Ruang uji dari konsol (JS-08, JS-10):** ruang uji membaca paket dari D1 lingkungannya dengan versi `kerja` setiap kejadian (lalu versi terbit bila tidak ada versi kerja), mengisi `ruang.paket_id`, lalu menyalin isi dan teks rujukannya ke Durable Object. Ruang biasa hanya boleh bila setiap kejadian paket terbit dengan semua rujukannya terverifikasi. Sebelum JS-10, ruang coba JS-03 memakai jalur yang sama.
 - **Satu alarm:** inti ruang menghitung tenggat terdekat dari semua jadwal (hitung mundur, akhir ronde, tutup otomatis, hapus penyimpanan, dan kiriman yang gagal), lalu pembungkus memasang alarm itu.
 
 ## 8. Aturan permainan di server
@@ -619,7 +620,7 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 
 ### 10.1 Rute konsol
 
-Satu halaman di `/admin/` dengan rute *hash*: `#/dasbor`, `#/ruang`, `#/ruang/{id}` (hasil), `#/kelas/{id}` (layar kelas, dibuka di tab baru), `#/kejadian`, `#/kejadian/{id}`, `#/paket`, `#/rujukan`, `#/statistik`, `#/akun`, `#/sandi` (ganti sandi; JS-04), `#/pengaturan`, `#/log`, dan `#/masuk`. Router kecil ditulis sendiri, tanpa dependensi baru. Menu hanya memuat halaman yang sudah dibangun, dan rute yang belum ada dialihkan ke `#/dasbor` (JS-04).
+Satu halaman di `/admin/` dengan rute *hash*: `#/dasbor`, `#/ruang`, `#/ruang/{id}` (detail; hasil menyusul di JS-11), `#/kelas/{id}` (layar kelas, dibuka di tab baru), `#/kejadian`, `#/kejadian/{id}`, `#/paket`, `#/rujukan`, `#/statistik`, `#/akun`, `#/sandi` (ganti sandi; JS-04), `#/pengaturan`, `#/log`, dan `#/masuk`. Router kecil ditulis sendiri, tanpa dependensi baru. Menu hanya memuat halaman yang sudah dibangun, dan rute yang belum ada dialihkan ke `#/dasbor` (JS-04).
 
 ### 10.2 API
 
@@ -645,8 +646,8 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `GET /api/log` | Log audit | Admin |
 | `GET /api/bank/ekspor`; `POST /api/bank/impor` | Ekspor dan impor JSON bank | Admin |
 | `GET /api/publik/ruang/{KODE}` | Apakah kode ada dan apakah mode nomor absen aktif; dibaca dari D1 tanpa memanggil ruang (JS-03) | Umum, dibatasi frekuensinya |
-| `POST /api/ruang-coba`; `POST /api/ruang-coba/{KODE}/kelas`; `GET /api/ruang-coba/{KODE}/statistik` | Ruang coba di lingkungan `lokal` dan `uji` (di `uji` dengan kunci `KUNCI_COBA`); kait uji dan statistik ruang hanya di `lokal`. Dipensiunkan di JS-10 (JS-03) | Alur kerja "Jejak: ruang coba"; uji |
-| `GET /api/ruang-coba/{KODE}/kejadian`; `POST /api/ruang-coba/{KODE}/pindahkan` | Kait uji lokal JS-08: titik aktif setiap kejadian, dan memindahkan pemain bernama tertentu. Hanya di `lokal`; dipensiunkan di JS-10 | Uji |
+| `GET /api/ruang/pilihan`; `POST /api/ruang/{id}/kelola` | Paket aktif untuk dialog ruang baru; kunci, buka kunci, keluarkan, dan tutup dari konsol (JS-10) | Admin, guru (miliknya) |
+| `/api/uji/ruang/{KODE}/statistik` · `/putuskan` · `/kejadian` · `/pindahkan` | Kait uji lokal (JS-07, JS-08); hanya di `lokal`, 404 di lingkungan lain. Pengganti kait ruang coba sejak JS-10 | Uji |
 
 ### 10.3 Autentikasi dan sesi
 
@@ -693,8 +694,9 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 
 ### 10.9 Layar kelas
 
-- Dibuka dari halaman hasil ruang dengan tombol "Buka layar kelas". Konsol meminta tiket, lalu membuka `#/kelas/{id}` di tab baru yang langsung tersambung ke Durable Object.
-- Pintasan keyboard: `Spasi` mulai atau jeda/lanjut, `T` tambah 2 menit, `A` akhiri (dengan konfirmasi), `L` kunci ruang, `←` `→` berpindah kejadian di pembahasan, `F` layar penuh, `M` suara.
+- Dibuka dari halaman detail ruang (`#/ruang/{id}`) dengan tautan "Buka layar kelas" di tab baru. Layar kelas meminta tiket sendiri, lalu tersambung ke Durable Object; bila terputus, ia meminta tiket baru dan menyambung lagi dengan jeda 1, 2, 4, 8, lalu 15 detik, dan berhenti saat ruang ditutup (4000), dibuka di tab lain (4001), atau sesudah 10 menit gagal (JS-10).
+- Satu ruang hanya punya satu layar kelas aktif. Mengeluarkan pemain dilakukan di halaman detail ruang, bukan di proyektor.
+- Pintasan keyboard: `Spasi` mulai atau jeda/lanjut, `T` tambah 2 menit, `A` akhiri (dengan konfirmasi), `L` kunci ruang, `←` `→` berpindah kejadian di pembahasan, `F` layar penuh. `M` (suara) menunggu JS-14.
 - Halaman ini tidak menampilkan lokasi kejadian selama ronde (JFR-28).
 
 ## 11. Peta, aset, dan anggaran

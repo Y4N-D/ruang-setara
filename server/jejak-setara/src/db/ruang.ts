@@ -107,3 +107,93 @@ export async function kirimKeD1(db: D1Database, baris: readonly BarisKiriman[]):
   );
   for (let i = 0; i < pernyataan.length; i += 50) await db.batch(pernyataan.slice(i, i + 50));
 }
+
+// ---------------------------------------------------------------------------------------------
+// Ruang dari konsol (spesifikasi JS-10, P-3 sampai P-8)
+
+export interface BarisRuangKonsol {
+  id: string;
+  kode: string;
+  pemilik_id: string | null;
+  label_kelas: string;
+  status: string;
+  uji: number;
+  pengaturan_json: string;
+  dibuat_pada: number;
+  do_id: string;
+  nama_guru: string | null;
+  jumlah_peserta: number;
+}
+
+const PILIH_RUANG_KONSOL =
+  "SELECT r.id, r.kode, r.pemilik_id, r.label_kelas, r.status, r.uji, r.pengaturan_json, r.dibuat_pada, r.do_id, " +
+  "g.nama_tampilan AS nama_guru, (SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = r.id) AS jumlah_peserta " +
+  "FROM ruang r LEFT JOIN pengguna g ON g.id = r.pemilik_id ";
+
+export interface RuangBaruD1 {
+  id: string;
+  kode: string;
+  pemilikId: string;
+  labelKelas: string;
+  paketId: string;
+  pengaturanJson: string;
+  benih: number;
+  uji: boolean;
+  doId: string;
+  dibuatPada: number;
+}
+
+/**
+ * Sisip ruang bersyarat dalam satu pernyataan (P-4): gagal bila ruang aktif di lingkungan ini sudah `batasAktif`, atau
+ * bila `satuPerPemilik` dan pemilik sudah punya ruang aktif. Ruang aktif: belum ditutup dan dibuat sesudah `sejak`.
+ */
+export async function sisipkanRuang(
+  db: D1Database,
+  r: RuangBaruD1,
+  aturan: { sejak: number; batasAktif: number; satuPerPemilik: boolean },
+): Promise<"ok" | "bentrok" | "ditolak"> {
+  try {
+    const hasil = await db
+      .prepare(
+        "INSERT INTO ruang (id, kode, pemilik_id, label_kelas, paket_id, pengaturan_json, benih, status, uji, do_id, dibuat_pada) " +
+          "SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, 'lobi', ?8, ?9, ?10 " +
+          "WHERE (SELECT COUNT(*) FROM ruang WHERE status <> 'ditutup' AND dibuat_pada > ?11) < ?12 " +
+          "AND (?13 = 0 OR NOT EXISTS (SELECT 1 FROM ruang WHERE pemilik_id = ?3 AND status <> 'ditutup' AND dibuat_pada > ?11))",
+      )
+      .bind(r.id, r.kode, r.pemilikId, r.labelKelas, r.paketId, r.pengaturanJson, r.benih, r.uji ? 1 : 0, r.doId, r.dibuatPada, aturan.sejak, aturan.batasAktif, aturan.satuPerPemilik ? 1 : 0)
+      .run();
+    return (hasil.meta?.changes ?? 0) > 0 ? "ok" : "ditolak";
+  } catch (galat) {
+    if (/UNIQUE/i.test(String(galat))) return "bentrok";
+    throw galat;
+  }
+}
+
+/** Ruang aktif milik seorang guru, atau null (P-4). */
+export function ruangAktifPemilik(db: D1Database, pemilikId: string, sejak: number): Promise<{ id: string; kode: string; label_kelas: string } | null> {
+  return db
+    .prepare("SELECT id, kode, label_kelas FROM ruang WHERE pemilik_id = ?1 AND status <> 'ditutup' AND dibuat_pada > ?2 ORDER BY dibuat_pada DESC LIMIT 1")
+    .bind(pemilikId, sejak)
+    .first();
+}
+
+/** Daftar ruang yang belum ditutup dan dibuat sesudah `sejak`; `pemilikId` null berarti semua (P-6). */
+export async function daftarRuang(db: D1Database, pemilikId: string | null, sejak: number, maks: number): Promise<BarisRuangKonsol[]> {
+  const hasil = await db
+    .prepare(PILIH_RUANG_KONSOL + "WHERE r.status <> 'ditutup' AND r.dibuat_pada > ?1 AND (?2 IS NULL OR r.pemilik_id = ?2) ORDER BY r.dibuat_pada DESC LIMIT ?3")
+    .bind(sejak, pemilikId, maks)
+    .all<BarisRuangKonsol>();
+  return hasil.results ?? [];
+}
+
+export async function hitungRuangBerjalan(db: D1Database, pemilikId: string | null, sejak: number): Promise<number> {
+  const baris = await db
+    .prepare("SELECT COUNT(*) AS n FROM ruang WHERE status <> 'ditutup' AND dibuat_pada > ?1 AND (?2 IS NULL OR pemilik_id = ?2)")
+    .bind(sejak, pemilikId)
+    .first<{ n: number }>();
+  return baris?.n ?? 0;
+}
+
+export function cariRuangId(db: D1Database, id: string): Promise<BarisRuangKonsol | null> {
+  return db.prepare(PILIH_RUANG_KONSOL + "WHERE r.id = ?1").bind(id).first<BarisRuangKonsol>();
+}

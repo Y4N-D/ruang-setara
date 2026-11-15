@@ -180,9 +180,11 @@ test("tajuk halaman dan jawaban Worker (AC-3, AC-4, AC-8)", async ({ request }) 
   expect(kirim.headers()["allow"]).toBe("GET");
   expect(await kirim.json()).toEqual({ galat: { kode: "METODE_TIDAK_DIDUKUNG", pesan: "Metode ini tidak didukung." } });
 
-  const ruang = await request.get("/api/ruang");
-  expect(ruang.status()).toBe(404);
-  expect(await ruang.json()).toEqual({ galat: { kode: "BELUM_TERSEDIA", pesan: "Fitur ini belum tersedia." } });
+  const belum = await request.get("/api/bank");
+  expect(belum.status()).toBe(404);
+  expect(await belum.json()).toEqual({ galat: { kode: "BELUM_TERSEDIA", pesan: "Fitur ini belum tersedia." } });
+  // JS-10: /api/ruang kini ada dan butuh sesi konsol.
+  expect((await request.get("/api/ruang")).status()).toBe(401);
 
   expect((await request.get("/tidak-ada")).status()).toBe(404);
 

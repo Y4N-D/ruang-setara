@@ -154,8 +154,10 @@ Memakai satuan `--u: min(1vh, 0.5625vw)` dan skala huruf proyektor Sehari Setara
 - Kode ruang memakai Press Start 2P 10u dengan jarak antarhuruf lebar. Tautan memakai Pixelify Sans 3,6u.
 - Papan 10 besar: peringkat, ikon avatar 16p, nama samaran (3,1u), skor (Press Start 2P 2,8u), dan jumlah kejadian selesai. Baris yang naik peringkat tidak dianimasikan, cukup berganti isi.
 - **Jeda:** lapisan `ink` 70% di atas layar dengan tulisan "Dijeda" (Press Start 2P 4,4u, `cream`).
-- **Podium:** tiga avatar di atas balok berwarna `sun` (1), `mist` (2), dan `wood` (3), masing-masing dengan angka peringkat, nama samaran, dan skor; daftar 4–10 di sampingnya. Latar bernuansa malam (`#4A4F9C`) dengan teks `cream`.
-- **Pembahasan:** satu kartu per kejadian berisi judul, situasi, grafik batang Langkah 1 (empat pilihan dengan persentase; pilihan yang benar diberi tanda ✓ dan tulisan "Jawaban tepat"), grafik batang Langkah 2 (tingkat tepat, kurang tepat, dan berisiko dengan ikon dan tulisan), lalu kartu dampak. Navigasi "Sebelumnya" dan "Berikutnya".
+- **Podium:** tiga avatar di atas balok berwarna `sun` (1), `mist` (2), dan `wood` (3; token `--js-wood` sejak JS-10), masing-masing dengan angka peringkat, nama samaran, dan skor; daftar 4–10 di sampingnya. Latar bernuansa malam (`#4A4F9C`) dengan teks `cream`. Yang tampil hanya pemain yang sudah mendapat skor.
+- **Pembahasan:** satu kartu per kejadian berisi judul, situasi, grafik batang Langkah 1 (empat pilihan dengan persentase; pilihan yang benar diberi tanda ✓ dan tulisan "Jawaban tepat"), grafik batang Langkah 2 (tingkat tepat, kurang tepat, dan berisiko dengan ikon dan tulisan), lalu kartu dampak. Navigasi "Sebelumnya" dan "Berikutnya". Sejak Build JS-10, batang persen menjadi latar kotak opsinya (warna tingkat atau `leaf` untuk jawaban tepat, sebagian tembus), agar setiap opsi hanya satu blok dan kejadian bank awal muat di layar 16:9 tanpa digulir; isi yang lebih panjang digulir di dalam kartu.
+- **Lobi (JS-10):** daftar nama lima kolom (avatar 4,4u, nama 2,8u; nama panjang mengecil sampai 2,5u lalu dipotong), urut bergabung, paling banyak 40 nama lalu "+n lainnya". Kotak kanan berisi tiga langkah bergabung sampai kode QR tersedia (JS-17).
+- **Peta kelas (JS-10):** delapan kotak zona berwarna (sebagian tembus) dengan ikon zona, dan titik 2,5 ubin berwarna tas bergaris `ink`; warna tas rose dan berry memakai nilai palet aksen bagian 8 karena belum punya token. Letak kejadian tidak digambar.
 
 ### 3.7 Konsol admin
 
@@ -196,6 +198,7 @@ Palet **36 warna** Sehari Setara berlaku penuh. Sumber tunggalnya tetap `scripts
   --js-sun: #FFD23F;  --js-mango: #FF9F1C; --js-coral: #FF6B5B;
   --js-leaf: #8AD95B; --js-teal: #2EC4B6;  --js-sky-d: #3A86D9;
   --js-malam: #4A4F9C;
+  --js-wood: #C98B4F; /* Balok podium ke-3 (JS-10) */
 
   /* Peran */
   --js-surface: var(--js-cream);

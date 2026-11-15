@@ -1,11 +1,11 @@
-// Worker Jejak Setara (spesifikasi JS-01, JS-03, dan JS-04). Menjawab /api/sehat, rute ruang, sambungan WebSocket
-// pemain, serta rute akun dan dasbor konsol (JS-04); jalur /api/* dan /ws/* lain belum tersedia. Jalur lain disajikan
+// Worker Jejak Setara (spesifikasi JS-01, JS-03, JS-04, dan JS-10). Menjawab /api/sehat, rute ruang, sambungan WebSocket
+// pemain dan layar kelas, serta rute akun, ruang, dan dasbor konsol; jalur /api/* dan /ws/* lain belum tersedia. Jalur lain disajikan
 // lapisan aset Cloudflare; yang sampai ke sini diteruskan ke ASSETS. Tidak menulis log permintaan (Architecture 12.3).
 import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/protokol";
 import { jalurAkun, tanganiApiAkun } from "./api/akun";
 import { tanganiApiDasbor } from "./api/dasbor";
 import { JALUR_MASUK, tanganiApiMasuk } from "./api/masuk";
-import { tanganiApiRuang, tanganiWsRuang } from "./api/ruang";
+import { jalurRuang, tanganiApiRuang, tanganiWsKelas, tanganiWsRuang } from "./api/ruang";
 import { bersihkanAkun } from "./db/akun";
 import { tandaiRuangLama } from "./db/ruang";
 import type { Env } from "./env";
@@ -25,9 +25,8 @@ export default {
       return jawabJson({ ok: true, protokol: PROTOKOL_VERSI, lingkungan: env.LINGKUNGAN }, 200);
     }
     if (pathname.startsWith("/ws/ruang/")) return tanganiWsRuang(request, env, url);
-    if (pathname.startsWith("/api/publik/ruang/") || pathname === "/api/ruang-coba" || pathname.startsWith("/api/ruang-coba/")) {
-      return tanganiApiRuang(request, env, url);
-    }
+    if (pathname.startsWith("/ws/kelas/")) return tanganiWsKelas(request, env, url);
+    if (jalurRuang(pathname)) return tanganiApiRuang(request, env, url);
     if (JALUR_MASUK.has(pathname)) return tanganiApiMasuk(request, env, url);
     if (jalurAkun(pathname)) return tanganiApiAkun(request, env, url);
     if (pathname === "/api/dasbor") return tanganiApiDasbor(request, env);
