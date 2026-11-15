@@ -524,7 +524,7 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 |---|---|---|
 | KT-01 | Nama produk | "Jejak Setara". Alternatif: "Jelajah Setara", "Peta Setara" |
 | KT-02 | Mode nomor absen untuk statistik per siswa | Disediakan, mati secara bawaan, dinyalakan guru per ruang |
-| KT-03 | Siapa yang boleh menyunting draf kejadian | Admin dan guru; hanya admin yang menerbitkan |
+| KT-03 | Siapa yang boleh menyunting draf kejadian | Dijawab pemilik proyek (15 Nov 2026, Plan JS-12): mengikuti saran, admin dan guru menyunting draf, hanya admin yang menerbitkan; cakupan suntingan guru ditetapkan di Gerbang 1 JS-12 |
 | KT-04 | Tambahan warna khusus peta bila 36 warna tidak cukup | Coba dulu dengan 36 warna; tambahan paling banyak 4 warna lewat persetujuan |
 | KT-05 | Huruf sistem untuk tabel dan formulir konsol admin | Dijawab pemilik proyek (14 Nov 2026, Gerbang 1 JS-04): ya; judul, menu, dan tombol tetap Pixelify Sans |
 | KT-06 | Domain sendiri | Ya, sebelum uji coba kelas |
@@ -558,3 +558,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 14 Nov 2026 | Penutupan JS-04 (sesudah data Cloudflare): lonjakan CPU 10–23 ms di lingkungan uji berasal dari permintaan pertama di isolat Worker yang baru dimulai, bukan dari hash. AC-20 ditutup dengan kriteria yang diperjelas, dan iterasi 4.000 tetap selama paket gratis. Usulan 14a JS-10: fitur baru JS-22 (pengaman biaya) dikerjakan tepat sesudah JS-10, dan batas ruang aktif sekaligus (uji 3, produksi 20) masuk JS-10 |
 | 14 Nov 2026 | Spesifikasi JS-10 disetujui dengan D-1 sampai D-4 = a: label kelas 1–20 karakter, daftar nama lobi urut bergabung sampai 40 nama lalu "+n lainnya", tanpa tombol suara sebelum JS-14, dan tombol Mulai aktif bila sedikitnya satu pemain sudah memilih identitas |
 | 15 Nov 2026 | JS-10 Selesai. Spesifikasi JS-22 (pengaman biaya) disetujui dengan D-1 sampai D-3 = a: anggaran 200 alarm per ruang, HP berhenti menyambung ulang sesudah 10 menit, dan persen pemakaian terhadap kuota harian paket gratis |
+| 15 Nov 2026 | KT-03 dijawab dengan saran PRD (admin dan guru menyunting draf, hanya admin yang menerbitkan). AC-18 JS-22 diterima: kode layar pemain naik 0,59 KB untuk pengaman sambung ulang |

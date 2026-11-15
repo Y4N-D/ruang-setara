@@ -6,7 +6,7 @@
 | Spesifikasi | [JS-22-biaya.md](../specs/JS-22-biaya.md), disetujui 15 November 2026 (D-1 sampai D-3 = a) |
 | Tanggal | 15 November 2026 |
 | Lingkungan | Mesin agen (mode ZIP): Node 22.23.4, pnpm 11.25.0, Wrangler 4.92.0, Chromium untuk Playwright, 2 vCPU |
-| Keputusan | **Lulus dengan catatan AC-18 (ukuran kode)**: perlu keputusan pemilik proyek (bagian "Keputusan") |
+| Keputusan | **Lulus**: AC-18 diterima pemilik proyek (15 Nov 2026); pemeriksaan "Jejak: hentikan" di layar pemain diulang (bagian "Pemeriksaan manual") |
 
 ## Kriteria penerimaan
 
@@ -71,9 +71,10 @@ Perubahan tidak dipertahankan: perbedaannya di dalam rentang derau, jauh di bawa
 ## Pemeriksaan manual
 
 - [x] Tampilan bagian "Pemakaian ronde ini" diperiksa dari tangkapan layar.
-- [ ] Sesudah push: "Jejak: uji" hijau (pemilik proyek).
-- [ ] "Jejak: hentikan" dengan aksi `hentikan`: layar pemain menampilkan pesan layanan berhenti saat memasukkan kode; lalu aksi `pulihkan` (pemilik proyek).
-- [ ] Satu ronde pendek, lalu tutup ruang dan kirim tangkapan layar "Pemakaian ronde ini" (pemilik proyek).
+- [x] Sesudah push (15 Nov 2026): "Jejak: uji" hijau untuk commit "JS-22: matikan cache otomatis setup-node di Jejak: uji", termasuk "Deploy uji" (bagian "Perbaikan alur kerja sesudah push").
+- [ ] "Jejak: hentikan" dengan aksi `hentikan`: pesan layanan berhenti **belum terlihat** di layar pemain (laporan pemilik proyek, 15 Nov 2026). Keempat run "Jejak: hentikan" hijau, dan langkah "Periksa" di setiap run hanya lulus bila `/api/sehat` menjawab `darurat` sesuai aksi, jadi Worker uji memang berhenti. Dugaan penyebab di sisi peramban: tab layar pemain yang dibuka sebelum deploy JS-22 (kode lama menampilkan pesan jaringan untuk jawaban 503), sesi tersimpan yang langsung menyambung ulang (layar "Menyambung ulang…", lalu "Layanan berhenti sementara" sesudah sekitar satu menit), atau kode yang tidak berbentuk 5 karakter yang sah. Diulang dengan jendela penyamaran baru dan kode `ABCDE`.
+- [x] "Jejak: hentikan" dengan aksi `pulihkan`: layar pemain normal kembali (pemilik proyek, 15 Nov 2026).
+- [x] Satu ronde pendek dengan 1 pemain dari konsol (pemilik proyek, 15 Nov 2026). Tangkapan layar "Pemakaian ronde ini" belum ikut terkirim di pesan.
 
 ## Temuan
 
@@ -106,3 +107,5 @@ Semua kriteria lulus kecuali catatan AC-18: kode layar pemain naik 0,59 KB gzip,
 | `build:pages` | 178 berkas, identik byte dengan `main` |
 
 Bukti terakhir adalah "Jejak: uji" hijau sesudah perbaikan ini di-push (pemeriksaan manual di atas).
+
+**Keputusan pemilik proyek (15 Nov 2026):** AC-18 (a), kenaikan 0,59 KB diterima.
