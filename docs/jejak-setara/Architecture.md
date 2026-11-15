@@ -210,6 +210,7 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 |---|---|---|---|
 | `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara (daftar jalur di berkasnya), atau tombol "Run workflow" | Sejak JS-01: pasang → `content:check:jejak` → `test:jejak` → `build:jejak`. Sejak JS-03 ditambah "Uji server Jejak", lalu pekerjaan "Deploy uji" di cabang `main` (push atau tombol): build dengan `CLOUDFLARE_ENV=uji`, migrasi D1 jarak jauh, `wrangler deploy` di folder `web/jejak-setara`, dan pemeriksaan `/api/sehat`. Deploy dilewati dengan pemberitahuan bila rahasia atau Database ID uji belum diisi. Sejak JS-08 ditambah "Semai bank awal". Sejak JS-04 ditambah "Siapkan kunci Worker": `KUNCI_SANDI` dan `KUNCI_IP` yang belum ada dibuat acak, lalu ikut versi yang sama lewat `wrangler deploy --secrets-file` |
 | `jejak-ruang-coba.yml`, `jejak-kendali-coba.yml` | Jejak: ruang coba, Jejak: kendali ruang coba | — | Dihapus di JS-10 (P-32). Ruang dibuat dari konsol (`POST /api/ruang`) dan dikendalikan lewat layar kelas bertiket |
+| `jejak-hentikan.yml` | Jejak: hentikan | Manual: aksi `hentikan` atau `pulihkan`, lingkungan `uji` | Menyimpan atau menghapus rahasia Worker `DARURAT`, lalu memeriksa `/api/sehat` (JS-22, P-11 sampai P-14) |
 | `jejak-produksi.yml` | Jejak: produksi | Tombol "Run workflow" oleh pemilik proyek | Sama, untuk produksi (build dengan `CLOUDFLARE_ENV=produksi`); berhenti bila ada ruang produksi berstatus `main` atau `jeda` (dicek lewat API) |
 | `jejak-admin-awal.yml` | Jejak: admin awal | Tombol "Run workflow" dengan masukan nama tampilan | Menyimpan kunci sekali pakai `KUNCI_ADMIN`, memanggil `POST /api/admin-awal` untuk membuat akun admin pertama atau memulihkan akun admin dengan email dan sandi sementara dari rahasia GitHub, lalu mengganti kunci itu dengan nilai acak baru agar rute tertutup lagi (JS-04) |
 
@@ -226,6 +227,7 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 | `KUNCI_IP` | Rahasia Worker | Kunci HMAC untuk kunci pembatas percobaan masuk (email, dan alamat IP ditambah tanggal) |
 | `KUNCI_ADMIN` | Rahasia Worker | Kunci sekali pakai untuk `POST /api/admin-awal`, dibuat lalu diganti nilai acak baru setiap "Jejak: admin awal" dijalankan (JS-04) |
 | `RUANG_AKTIF_MAKS` | Variabel Worker | Batas ruang aktif sekaligus di lingkungan itu: `lokal` 1000 (agar uji dan simulasi beban bisa membuat banyak ruang), `uji` 3, `produksi` 20; nilai tidak sah dianggap 3 (JS-10, P-4). `KUNCI_COBA` (JS-03) tidak dipakai lagi sejak JS-10 |
+| `DARURAT` | Rahasia Worker | Hanya ada selama "Jejak: hentikan" aktif. Worker menjawab 503 `LAYANAN_BERHENTI` untuk semua `/api/*` (kecuali `/api/sehat`) dan `/ws/*`, dan setiap Durable Object yang bangun menjalankan berhenti paksa (JS-22) |
 | `LINGKUNGAN` | Variabel Worker | `lokal` (pengembangan dan uji di mesin agen), `uji`, atau `produksi` |
 | `ITERASI_SANDI` | Variabel Worker | Jumlah iterasi PBKDF2 untuk hash baru: 4.000 selama paket gratis (diturunkan dari 15.000 di penutupan JS-04, bagian 10.3), 100.000 sesudah paket berbayar aktif (JS-04) |
 
@@ -536,6 +538,7 @@ stateDiagram-v2
 - **Selesai:** peringkat akhir dihitung, `selesai` dikirim ke setiap pemain, seluruh `kiriman` dikirim ke D1, dan `ringkasan_json` ditulis.
 - **Ditutup otomatis:** 3 jam tanpa sambungan apa pun, atau 6 jam sejak dibuat. Penyimpanan Durable Object dihapus 24 jam sesudah ditutup, setelah kiriman ke D1 dipastikan lengkap.
 - **Sejak JS-03:** siklus ini dijalankan inti ruang. Sejak JS-10, pesan layar kelas sampai ke ruang lewat rute `/ws/kelas/` bertiket, dan konsol mengelola ruang lewat rute internal `kelola`. Ruang di `lobi` juga bisa ditutup, dan pesan `pembahasan` mengubah status `selesai` menjadi `pembahasan` sambil menjawab `data_pembahasan`. Ruang coba, kait `kelas`, dan kedua alur kerjanya dipensiunkan; kait uji lokal pindah ke `/api/uji/ruang/{KODE}/…`.
+- **Pengaman biaya (JS-22):** alarm paling cepat 1 detik dari sekarang; tenggat yang sama lewat lima kali berturut-turut digeser 60 detik; anggaran 200 alarm per ruang; kiriman ke D1 dicoba ulang dengan jeda sampai 60 menit dan berhenti sesudah 24 jam; penyimpanan dihapus paling lambat 7 hari sesudah ruang dibuat; `getAlarm()` dibaca sesudah bangun. "Berhenti paksa" (anggaran habis atau `DARURAT`) menutup ruang, mengirim antrean sekali, lalu menghapus alarm dan seluruh penyimpanan. Durable Object menghitung pemakaian ronde dan menulisnya ke `ruang.ringkasan_json` saat ruang ditutup.
 - **Ruang uji dari konsol (JS-08, JS-10):** ruang uji membaca paket dari D1 lingkungannya dengan versi `kerja` setiap kejadian (lalu versi terbit bila tidak ada versi kerja), mengisi `ruang.paket_id`, lalu menyalin isi dan teks rujukannya ke Durable Object. Ruang biasa hanya boleh bila setiap kejadian paket terbit dengan semua rujukannya terverifikasi. Sebelum JS-10, ruang coba JS-03 memakai jalur yang sama.
 - **Satu alarm:** inti ruang menghitung tenggat terdekat dari semua jadwal (hitung mundur, akhir ronde, tutup otomatis, hapus penyimpanan, dan kiriman yang gagal), lalu pembungkus memasang alarm itu.
 
@@ -768,6 +771,8 @@ export const TANDA: Record<string, Gambar>;
 
 ## 12. Keamanan dan privasi
 
+Sejak JS-22, lingkungan uji menetapkan `observability` di `wrangler.jsonc`: Workers Logs menyala dengan `invocation_logs: false` dan traces mati, sehingga hanya log galat buatan aplikasi yang tersimpan (tanpa header, cookie, alamat IP, atau URL). Untuk diagnosis CPU per permintaan, invocation log dinyalakan sementara di dasbor, dan deploy berikutnya mematikannya lagi.
+
 ### 12.1 Ancaman dan penanganan
 
 | Ancaman | Penanganan |
@@ -800,6 +805,8 @@ Rincian di PRD bagian 13. Ketentuan teknisnya:
 - Pemicu harian menghapus ruang, peserta, dan jawaban yang melewati masa simpan (bawaan 12 bulan), juga sesi dan catatan pembatas yang kedaluwarsa.
 
 ## 13. Kinerja, kapasitas, dan biaya
+
+Sejak JS-22, admin melihat pemakaian setiap ronde di halaman detail ruang (permintaan Durable Object, baris D1 dan baris penyimpanan ruang yang ditulis, sambungan, dan alarm, dengan persen kuota harian paket gratis). Sebelum Workers Paid aktif (JS-15), pemilik proyek menjalankan langkah Spend Management: (1) **Billing → Billable Usage → Create budget alert** 3 USD; (2) **Billing → Spend Management**: batas pakai Workers dan Durable Objects masing-masing 5 USD, pastikan **On**; (3) isi email pemberitahuan bila kolomnya tersedia. Batas Workers berlaku untuk semua Worker di akun dan menghentikan pemanggilan baru sampai periode tagihan berikutnya atau sampai batas diubah; biaya langganan tidak dihitung, dan pemblokiran tidak seketika.
 
 ### 13.1 Sasaran
 

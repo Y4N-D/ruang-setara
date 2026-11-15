@@ -679,3 +679,16 @@
     transition: none;
   }
 }
+
+/* JS-22 (P-17): pemakaian ronde di detail ruang (admin). */
+.js-ruang-pemakaian {
+  margin-top: 24px;
+}
+.js-ruang-pemakaian h2 {
+  margin: 0 0 8px;
+  font-family: "Pixelify Sans", sans-serif;
+}
+.js-ruang-pemakaian th {
+  text-align: left;
+  font-weight: 400;
+}

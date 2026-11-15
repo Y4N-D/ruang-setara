@@ -213,7 +213,10 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   const keluar = g.getByRole("dialog", { name: `Keluarkan ${nama[2]}?` });
   await keluar.getByRole("button", { name: "Keluarkan" }).click();
   await expect(g.getByText(`${nama[2]} dikeluarkan.`)).toBeVisible();
-  await g.screenshot({ path: `${FOTO}/konsol-detail-1280x720.png` });
+  // JS-22 (P-17): admin melihat pemakaian ronde di detail ruang.
+  await expect(g.getByRole("heading", { name: "Pemakaian ronde ini" })).toBeVisible();
+  await expect(g.getByRole("row", { name: /Permintaan Durable Object \(perkiraan\)/ })).toContainText("kuota harian paket gratis");
+  await g.screenshot({ path: `${FOTO}/konsol-detail-1280x720.png`, fullPage: true });
 
   // Tutup ruang dari layar kelas: semua sambungan berhenti (P-14).
   await kelas.bringToFront();

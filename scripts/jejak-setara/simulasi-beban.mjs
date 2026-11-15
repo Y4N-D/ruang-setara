@@ -534,6 +534,8 @@ try {
     layarKelas: kelasJelajah.map((jenis) =>
       Object.fromEntries(Object.entries(jenis).map(([t, x]) => [t, { n: x.n, byteRata: Math.round(x.byte / Math.max(1, x.n)), byteMaks: x.byteMaks }])),
     ),
+    // JS-22 (P-15): pemakaian per ruang menurut penghitung Durable Object, untuk dibandingkan dengan perkiraan di atas.
+    pemakaianRuang: stat.map((x) => x.pemakaian ?? null),
     pesanKeLayarKelasServer: stat.map((x) => x.keluarKelas ?? 0),
     byteKeLayarKelasServer: stat.map((x) => x.byteKelas ?? 0),
     perkiraanPermintaanDurableObjectPerSesi15MenitPerRuang: perkiraanPermintaan(jelajah.pesanNaikPerPemainPerDetik * BOT, BOT),

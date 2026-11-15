@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Ditulis 15 November 2026 di tahap Specify, sesudah `Setuju: JS-22` (usulan 1a sampai 10a). Menunggu `Spesifikasi disetujui: JS-22` beserta pilihan DRAF D-1 sampai D-3 |
+| Status | Disetujui 15 November 2026 (`Spesifikasi disetujui: JS-22. D-1 a, D-2 a, D-3 a.`). Dibangun dan diuji 15 November 2026; penyesuaian saat Build ada di bagian "Catatan Build" |
 | Rencana | `PLAN.md`, bagian "JS-22 — Pengaman biaya" |
 | Sesi | Sesi A (mesin) |
 | Bergantung pada | JS-10 (Selesai, 15 November 2026) |
@@ -233,3 +233,13 @@ Batas biaya produk lain, domain sendiri, `limits.cpu_ms` (JS-15), Worker produks
 1. Sesudah push, "Jejak: uji" hijau.
 2. Pemilik proyek menjalankan "Jejak: hentikan" dengan aksi `hentikan`, membuka layar pemain dan memastikan pesan layanan berhenti tampil saat memasukkan kode ruang, lalu menjalankan aksi `pulihkan`.
 3. Pemilik proyek menjalankan satu ronde pendek, menutup ruang, lalu membuka detail ruang dan mengirim tangkapan layar bagian "Pemakaian ronde ini".
+
+## Catatan Build (15 November 2026)
+
+- **P-16, pemicu ringkasan.** `ringkasan_json` ditulis langsung ke D1 (sekali, tanpa antrean) saat inti ruang mengantrekan status `ditutup`, dan sekali lagi sebelum penyimpanan dihapus, bukan lewat antrean kiriman. Antrean kiriman memakai kunci per baris, jadi baris ringkasan terpisah lebih sederhana dan tidak mengubah urutan kiriman.
+- **P-17, kuota.** Konstanta `KUOTA_HARIAN_GRATIS` ada di `app/jejak-setara/inti/ruang.ts` agar konsol tidak mengimpor kode server.
+- **Kait uji lokal baru** `/api/uji/ruang/{KODE}/pengaman` (POST `{ "alarmDipakai": n }`) agar anggaran alarm bisa diuji di server lokal tanpa menunggu 200 alarm. Hanya ada di lingkungan lokal, seperti kait JS-10.
+- **Rencana uji, darurat di Durable Object.** Server lokal tidak bisa dinyalakan dengan rahasia `DARURAT`, jadi uji server kedua dengan `DARURAT=1` tidak dibuat. Gerbang darurat Worker diuji di uji unit, dan jalur berhenti paksa Durable Object (dipakai bersama anggaran alarm) diuji di uji server anggaran. Pemeriksaan darurat ujung ke ujung dilakukan pemilik proyek dengan "Jejak: hentikan" di lingkungan uji.
+- **Rencana uji, HP di ruang yang hilang.** Uji ujung ke ujung tidak bisa memastikan HP lewat jalur pemeriksaan ruang (penutupan ruang juga mengirim `status_ruang` lebih dulu), jadi jalur itu diuji di uji klien murni (`__tests__/biaya/jaringan-berhenti.test.ts`).
+- **P-21, permintaan pertama.** Calon perbaikan (menyimpan kunci HMAC yang sudah diimpor per isolat) diukur dan tidak dipertahankan, karena tidak menurunkan CPU permintaan pertama sedikitnya 15% (rincian di laporan).
+- **AC-18, ukuran kode.** Kode layar pemain naik 0,59 KB gzip, melewati perkiraan 0,3 KB di spesifikasi: logika pemeriksaan ruang dan batas 10 menit di `jaringan.ts`, layar berhenti, dan teks baru. Keputusan pemilik proyek diperlukan (laporan JS-22).

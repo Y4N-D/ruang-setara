@@ -80,3 +80,16 @@ export function LayarGalat({ kode, saatKembali }: { kode: KodeGalat; saatKembali
     </Panel>
   );
 }
+
+/** JS-22 (P-10): layar berhenti karena layanan dihentikan atau putus terlalu lama; tombol memuat ulang halaman. */
+export function LayarBerhenti({ jenis }: { jenis: "layanan" | "putus" }) {
+  const t = TEKS.berhenti;
+  return (
+    <Panel judul={jenis === "layanan" ? t.layananJudul : t.putusJudul}>
+      <p className="js-isi">{jenis === "layanan" ? t.layananIsi : t.putusIsi}</p>
+      <button type="button" className="js-tombol js-tombol-utama" onClick={() => window.location.reload()}>
+        {t.cobaLagi}
+      </button>
+    </Panel>
+  );
+}

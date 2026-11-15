@@ -65,7 +65,8 @@ const UBAH_RUANG =
  * Mengirim antrean kiriman dalam batch berisi paling banyak 50 pernyataan, menurut urutan masukan (ruang, peserta,
  * lalu jawaban, agar kunci asing terpenuhi; JS-08, P-62). Pengiriman ulang aman (idempoten).
  */
-export async function kirimKeD1(db: D1Database, baris: readonly BarisKiriman[]): Promise<void> {
+/** Mengirim baris ke D1; mengembalikan jumlah baris D1 yang ditulis (JS-22, P-15). */
+export async function kirimKeD1(db: D1Database, baris: readonly BarisKiriman[]): Promise<number> {
   const pernyataan = baris.map((b) =>
     b.jenis === "jawaban"
       ? db
@@ -105,7 +106,11 @@ export async function kirimKeD1(db: D1Database, baris: readonly BarisKiriman[]):
           )
       : db.prepare(UBAH_RUANG).bind(b.isi.ruangId, b.isi.status, b.isi.mulaiPada, b.isi.selesaiPada),
   );
-  for (let i = 0; i < pernyataan.length; i += 50) await db.batch(pernyataan.slice(i, i + 50));
+  let ditulis = 0;
+  for (let i = 0; i < pernyataan.length; i += 50) {
+    for (const h of await db.batch(pernyataan.slice(i, i + 50))) ditulis += h.meta?.rows_written ?? 0;
+  }
+  return ditulis;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -122,12 +127,13 @@ export interface BarisRuangKonsol {
   dibuat_pada: number;
   do_id: string;
   nama_guru: string | null;
+  ringkasan_json: string | null;
   jumlah_peserta: number;
 }
 
 const PILIH_RUANG_KONSOL =
   "SELECT r.id, r.kode, r.pemilik_id, r.label_kelas, r.status, r.uji, r.pengaturan_json, r.dibuat_pada, r.do_id, " +
-  "g.nama_tampilan AS nama_guru, (SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = r.id) AS jumlah_peserta " +
+  "g.nama_tampilan AS nama_guru, r.ringkasan_json, (SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = r.id) AS jumlah_peserta " +
   "FROM ruang r LEFT JOIN pengguna g ON g.id = r.pemilik_id ";
 
 export interface RuangBaruD1 {
@@ -196,4 +202,10 @@ export async function hitungRuangBerjalan(db: D1Database, pemilikId: string | nu
 
 export function cariRuangId(db: D1Database, id: string): Promise<BarisRuangKonsol | null> {
   return db.prepare(PILIH_RUANG_KONSOL + "WHERE r.id = ?1").bind(id).first<BarisRuangKonsol>();
+}
+
+/** JS-22 (P-16): ringkasan pemakaian ruang di `ruang.ringkasan_json`; mengembalikan baris D1 yang ditulis. */
+export async function tulisRingkasanRuang(db: D1Database, ruangId: string, ringkasan: unknown): Promise<number> {
+  const h = await db.prepare("UPDATE ruang SET ringkasan_json = ?1 WHERE id = ?2").bind(JSON.stringify(ringkasan), ruangId).run();
+  return h.meta?.rows_written ?? 0;
 }

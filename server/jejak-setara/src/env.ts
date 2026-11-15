@@ -26,4 +26,6 @@ export interface Env {
   KUNCI_TIKET?: string;
   /** JS-10 (P-4): batas jumlah ruang aktif sekaligus di lingkungan ini (bawaan 3). */
   RUANG_AKTIF_MAKS?: string;
+  /** JS-22 (P-11): rahasia Worker bernilai "1" selama "Jejak: hentikan" aktif. */
+  DARURAT?: string;
 }

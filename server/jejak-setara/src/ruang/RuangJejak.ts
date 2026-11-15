@@ -7,6 +7,22 @@
 import { PROTOKOL_VERSI, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
 import { skemaKelas, type PesanKelas } from "../../../../app/jejak-setara/inti/protokol-kelas";
 import { skemaKelola, STATUS_BOLEH_TUTUP } from "../../../../app/jejak-setara/inti/ruang";
+import { tulisRingkasanRuang } from "../db/ruang";
+import {
+  ALARM_GESER_MS,
+  ALARM_JEDA_MIN_MS,
+  ANGGARAN_ALARM,
+  BERULANG_KOSONG,
+  bacaPemakaian,
+  jedaKiriman,
+  kirimanHarusBerhenti,
+  PEMAKAIAN_KOSONG,
+  perkiraanPermintaan,
+  periksaBerulang,
+  tenggatAman,
+  type CatatanBerulang,
+  type Pemakaian,
+} from "./pengaman";
 import type { Arah, KejadianRuang, StatusRuang, Tingkat, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
 import { TEKS } from "../../../../app/jejak-setara/teks";
 import { kirimKeD1 } from "../db/ruang";
@@ -34,6 +50,7 @@ import {
   type Simpanan,
   type WaktuRuang,
   sambutanKelas,
+  tutupPaksa,
 } from "./inti-ruang";
 import { ambilAntrean, antrekan, hapusTerkirim, jumlahAntrean, SQL_TABEL_ANTREAN } from "./antrean";
 import { jumlahTitikRuang, tempatkanRuang, type JawabanRuang, type KejadianMasuk, type StatusJawaban } from "./kejadian-ruang";
@@ -90,7 +107,6 @@ type BarisPemainSql = {
 };
 
 const JEDA_KIRIMAN_MS = 30_000;
-const JEDA_ULANG_KIRIMAN_MS = [30_000, 60_000, 120_000, 240_000, 480_000];
 const acakKripto = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
 
 const WAKTU_AWAL: WaktuRuang = { mulaiPada: null, berakhirPada: null, jedaSejak: null, jedaMs: 0, selesaiPada: null };
@@ -105,6 +121,14 @@ export class RuangJejak {
   private pewaktuKiriman: ReturnType<typeof setTimeout> | null = null;
   private kirimanGagal: { percobaan: number; berikutnya: number } | null = null;
   private alarmTerpasang: number | null | undefined = undefined;
+  // JS-22 (P-1 sampai P-7, P-15): pengaman biaya dan penghitung pemakaian.
+  private mati = false;
+  private alarmTadi: number | null = null;
+  private berulang: CatatanBerulang = BERULANG_KOSONG;
+  private alarmDipakai = 0;
+  private kirimanGagalSejak: number | null = null;
+  private kirimanBerhenti = false;
+  private pemakaian: Pemakaian = { ...PEMAKAIAN_KOSONG };
   private antrean: Promise<unknown> = Promise.resolve();
   private readonly statistik = {
     masuk: 0,
@@ -127,7 +151,10 @@ export class RuangJejak {
     this.env = env;
     void ctx.blockConcurrencyWhile(async () => {
       this.siapkanTabel();
+      this.pulihkanPengaman();
       this.pulihkan();
+      // P-7: alarm yang sudah terpasang dibaca sekali, agar tenggat yang sama tidak ditulis ulang sesudah bangun.
+      this.alarmTerpasang = await ctx.storage.getAlarm();
     });
   }
 
@@ -136,6 +163,12 @@ export class RuangJejak {
 
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
+    if (this.env.DARURAT === "1") {
+      await this.antre(() => this.berhentiPaksa("DARURAT"));
+      return jawabGalat("LAYANAN_BERHENTI", TEKS.api.LAYANAN_BERHENTI, 503);
+    }
+    if (this.mati) return jawabGalat("RUANG_TIDAK_ADA", TEKS.api.RUANG_TIDAK_ADA, 404);
+    if (url.pathname === "/inisialisasi" || url.pathname === "/kelola") this.pemakaian.internal++;
     if (request.headers.get("Upgrade")?.toLowerCase() === "websocket") {
       if (url.pathname === "/ws-kelas") return this.antre(() => this.terimaSambunganKelas(request));
       return this.antre(() => this.terimaSambungan(request));
@@ -147,10 +180,17 @@ export class RuangJejak {
     if (url.pathname === "/putuskan" && request.method === "POST") return this.antre(() => this.putuskanSemua());
     if (url.pathname === "/kejadian") return jawabJson({ kejadian: this.keadaan ? titikKejadianRuang(this.keadaan) : [] }, 200);
     if (url.pathname === "/pindahkan" && request.method === "POST") return this.antre(() => this.pindahkan(request));
+    if (url.pathname === "/pengaman" && request.method === "POST") return this.antre(() => this.aturPengaman(request));
     return jawabGalat("BELUM_TERSEDIA", "Fitur ini belum tersedia.", 404);
   }
 
   async webSocketMessage(ws: WebSocket, pesan: string | ArrayBuffer): Promise<void> {
+    if (this.env.DARURAT === "1" || this.mati) {
+      if (this.env.DARURAT === "1") await this.antre(() => this.berhentiPaksa("DARURAT"));
+      tutupAman(ws, KODE_TUTUP.ditutup, "ruang ditutup");
+      return;
+    }
+    this.pemakaian.pesanMasuk++;
     if (lampiranKelas(ws)) {
       await this.antre(() => this.tanganiPesanKelas(ws, pesan));
       return;
@@ -173,11 +213,30 @@ export class RuangJejak {
 
   async alarm(): Promise<void> {
     await this.antre(async () => {
+      if (this.mati) return;
+      if (this.env.DARURAT === "1") {
+        await this.berhentiPaksa("DARURAT");
+        return;
+      }
+      const tadi = this.alarmTerpasang ?? Date.now();
       this.alarmTerpasang = null;
-      if (this.kirimanGagal && Date.now() >= this.kirimanGagal.berikutnya) await this.kirimKiriman();
-      const k = this.keadaan;
-      if (k) await this.terapkan(alarm(k, Date.now(), this.antreanKosong()));
-      else await this.pasangAlarm();
+      // P-3: anggaran alarm per ruang.
+      this.alarmDipakai++;
+      this.pemakaian.alarm++;
+      this.tulisMeta("alarmDipakai", this.alarmDipakai);
+      if (this.alarmDipakai > ANGGARAN_ALARM) {
+        await this.berhentiPaksa("ANGGARAN_ALARM");
+        return;
+      }
+      this.alarmTadi = tadi;
+      try {
+        if (this.kirimanGagal && Date.now() >= this.kirimanGagal.berikutnya) await this.kirimKiriman();
+        const k = this.keadaan;
+        if (k) await this.terapkan(alarm(k, Date.now(), this.antreanKosong()));
+        else await this.pasangAlarm();
+      } finally {
+        this.alarmTadi = null;
+      }
     });
   }
 
@@ -283,6 +342,7 @@ export class RuangJejak {
 
   private catatTulis(jumlah: number): void {
     this.statistik.barisDitulis += jumlah;
+    this.pemakaian.barisSqlite += jumlah;
   }
 
   private tulisMeta(kunci: string, nilai: unknown): void {
@@ -437,6 +497,8 @@ export class RuangJejak {
       pemain: this.keadaan?.pemain.size ?? 0,
       sambungan: this.ctx.getWebSockets("pemain").length,
       sambunganKelas: this.ctx.getWebSockets("kelas").length,
+      pemakaian: this.ringkasPemakaian(),
+      alarmDipakai: this.alarmDipakai,
       antreanKiriman: this.sql.exec<{ n: number }>("SELECT COUNT(*) AS n FROM kiriman").one().n + jumlahAntrean(this.sql),
       menungguHalo: this.keadaan?.batasHalo.size ?? 0,
       alarm: this.alarmTerpasang ?? null,
@@ -455,6 +517,7 @@ export class RuangJejak {
     const server = pasangan[1];
     const sambunganId = base64url(crypto.getRandomValues(new Uint8Array(9)));
     this.ctx.acceptWebSocket(server, ["pemain"]);
+    this.pemakaian.sambungan++; // JS-22, P-15
     server.serializeAttachment({ sambunganId, pemainId: null, dibukaPada: Date.now() } satisfies Lampiran);
     this.soket.set(sambunganId, server);
     this.batas.set(sambunganId, sambunganBaru(Date.now()));
@@ -585,6 +648,7 @@ export class RuangJejak {
     for (const lama of this.ctx.getWebSockets("kelas")) tutupAman(lama, KODE_TUTUP.diganti, "layar kelas diganti");
     const pasangan = new WebSocketPair();
     this.ctx.acceptWebSocket(pasangan[1], ["kelas"]);
+    this.pemakaian.sambungan++; // JS-22, P-15
     pasangan[1].serializeAttachment({ kelas: true, asal, dibukaPada: sekarang } satisfies LampiranKelas);
     return new Response(null, { status: 101, webSocket: pasangan[0] });
   }
@@ -635,7 +699,16 @@ export class RuangJejak {
       .filter((p) => p.nama !== null && !p.dikeluarkan)
       .sort((a, b) => a.urutan - b.urutan)
       .map((p) => ({ id: p.id, nama: p.nama ?? "", avatar: p.avatar ?? 0, terhubung: p.terhubung }));
-    return { status: k.status, terkunci: k.terkunci, mulaiPada: k.waktu.mulaiPada, berakhirPada: k.waktu.berakhirPada, jedaSejak: k.waktu.jedaSejak, pemain };
+    return {
+      status: k.status,
+      terkunci: k.terkunci,
+      mulaiPada: k.waktu.mulaiPada,
+      berakhirPada: k.waktu.berakhirPada,
+      jedaSejak: k.waktu.jedaSejak,
+      pemain,
+      kirimanBerhenti: this.kirimanBerhenti,
+      pemakaian: this.ringkasPemakaian(),
+    };
   }
 
   /** Aksi kelola dari konsol (P-10), diterjemahkan menjadi pesan kelas yang setara. */
@@ -700,7 +773,10 @@ export class RuangJejak {
     if (o.putaran === "mulai") this.mulaiPutaran();
     else if (o.putaran === "henti") this.hentiPutaran();
     if (o.kirimSekarang) await this.kirimKiriman();
+    // P-16: ringkasan pemakaian saat ruang ditutup (inti ruang mengantrekan status `ditutup` ke D1 pada saat itu).
+    if (o.kiriman.some((b) => b.jenis === "ruang" && b.isi.status === "ditutup")) await this.tulisRingkasan();
     if (o.hapusSemua) {
+      await this.tulisRingkasan();
       this.hentiPutaran();
       await this.ctx.storage.deleteAlarm();
       await this.ctx.storage.deleteAll();
@@ -729,6 +805,7 @@ export class RuangJejak {
   }
 
   private async pasangAlarm(): Promise<void> {
+    if (this.mati) return;
     const k = this.keadaan;
     const calon: number[] = [];
     if (k) {
@@ -736,7 +813,24 @@ export class RuangJejak {
       if (t !== null) calon.push(t);
     }
     if (this.kirimanGagal) calon.push(this.kirimanGagal.berikutnya);
-    const tenggat = calon.length > 0 ? Math.min(...calon) : null;
+    let tenggat = calon.length > 0 ? Math.min(...calon) : null;
+    const sekarang = Date.now();
+    // P-2: tenggat yang sudah lewat dan sama dengan alarm yang baru berjalan, lima kali berturut-turut, digeser 60 detik.
+    if (this.alarmTadi !== null) {
+      const hasil = periksaBerulang(this.berulang, this.alarmTadi, tenggat, sekarang);
+      if (hasil.catatan.tenggat !== this.berulang.tenggat || hasil.catatan.n !== this.berulang.n) this.tulisMeta("alarmBerulang", hasil.catatan);
+      this.berulang = hasil.catatan;
+      if (hasil.geser && tenggat !== null) {
+        catatGalat("ALARM_BERULANG", { ruang: k?.ruang.kode ?? null, tenggat, status: k?.status ?? null });
+        tenggat = sekarang + ALARM_GESER_MS;
+      }
+    }
+    if (tenggat !== null) {
+      // P-1: paling cepat 1 detik dari sekarang. Tenggat yang sudah lewat tidak menggeser alarm dekat yang sudah terpasang,
+      // agar putaran 100 ms tidak menulis ulang alarm terus.
+      if (tenggat <= sekarang && typeof this.alarmTerpasang === "number" && this.alarmTerpasang <= sekarang + ALARM_JEDA_MIN_MS) return;
+      tenggat = tenggatAman(tenggat, sekarang);
+    }
     if (tenggat === this.alarmTerpasang) return;
     if (tenggat === null) await this.ctx.storage.deleteAlarm();
     else await this.ctx.storage.setAlarm(tenggat);
@@ -753,7 +847,7 @@ export class RuangJejak {
   }
 
   private jadwalkanKiriman(): void {
-    if (this.pewaktuKiriman || this.kirimanGagal) return;
+    if (this.pewaktuKiriman || this.kirimanGagal || this.kirimanBerhenti || this.mati) return;
     this.pewaktuKiriman = setTimeout(() => {
       this.pewaktuKiriman = null;
       void this.antre(async () => {
@@ -786,22 +880,131 @@ export class RuangJejak {
     }
     try {
       if (lama.length > 0) {
-        await kirimKeD1(this.env.DB, [...terakhir.values()]);
+        this.pemakaian.barisD1 += await kirimKeD1(this.env.DB, [...terakhir.values()]);
         this.catatTulis(this.sql.exec("DELETE FROM kiriman WHERE id <= ?", lama[lama.length - 1].id).rowsWritten);
       }
       if (antrean.length > 0) {
-        await kirimKeD1(
+        this.pemakaian.barisD1 += await kirimKeD1(
           this.env.DB,
           antrean.map((a) => a.baris),
         );
         this.catatTulis(hapusTerkirim(this.sql, antrean));
       }
       this.kirimanGagal = null;
+      if (this.kirimanGagalSejak !== null) {
+        this.kirimanGagalSejak = null;
+        this.tulisMeta("kirimanGagalSejak", null);
+      }
+      this.tulisMeta("pemakaian", this.pemakaian);
     } catch {
+      // P-4: jeda naik sampai 60 menit; berhenti 24 jam sesudah kegagalan pertama.
+      const sekarang = Date.now();
+      if (this.kirimanGagalSejak === null) {
+        this.kirimanGagalSejak = sekarang;
+        this.tulisMeta("kirimanGagalSejak", sekarang);
+      }
+      if (kirimanHarusBerhenti(this.kirimanGagalSejak, sekarang)) {
+        this.kirimanGagal = null;
+        this.kirimanBerhenti = true;
+        this.tulisMeta("kirimanBerhenti", true);
+        catatGalat("KIRIMAN_BERHENTI", { ruang: this.keadaan?.ruang.kode ?? null, sejak: this.kirimanGagalSejak });
+        return;
+      }
       const percobaan = (this.kirimanGagal?.percobaan ?? 0) + 1;
-      this.kirimanGagal = { percobaan, berikutnya: Date.now() + JEDA_ULANG_KIRIMAN_MS[Math.min(percobaan, JEDA_ULANG_KIRIMAN_MS.length) - 1] };
+      this.kirimanGagal = { percobaan, berikutnya: sekarang + jedaKiriman(percobaan) };
     }
   }
+
+  // -------------------------------------------------------------------------------------------
+  // Pengaman biaya (JS-22)
+
+  /** Membaca catatan pengaman dan pemakaian dari tabel meta sesudah bangun. */
+  private pulihkanPengaman(): void {
+    const baca = (kunci: string): unknown => {
+      const baris = this.sql.exec<{ nilai: string }>("SELECT nilai FROM meta WHERE kunci = ?", kunci).toArray()[0];
+      if (!baris) return null;
+      try {
+        return JSON.parse(baris.nilai) as unknown;
+      } catch {
+        return null;
+      }
+    };
+    const dipakai = baca("alarmDipakai");
+    this.alarmDipakai = typeof dipakai === "number" ? dipakai : 0;
+    const berulang = baca("alarmBerulang") as CatatanBerulang | null;
+    this.berulang = berulang && typeof berulang.n === "number" ? berulang : BERULANG_KOSONG;
+    const sejak = baca("kirimanGagalSejak");
+    this.kirimanGagalSejak = typeof sejak === "number" ? sejak : null;
+    this.kirimanBerhenti = baca("kirimanBerhenti") === true;
+    this.pemakaian = bacaPemakaian(baca("pemakaian"));
+  }
+
+  /** Kait uji lokal (JS-22): mengatur hitungan alarm agar anggaran alarm bisa diuji tanpa menunggu 200 alarm. */
+  private async aturPengaman(request: Request): Promise<Response> {
+    let isi: { alarmDipakai?: unknown } = {};
+    try {
+      isi = (await request.json()) as { alarmDipakai?: unknown };
+    } catch {
+      isi = {};
+    }
+    if (typeof isi.alarmDipakai === "number" && Number.isInteger(isi.alarmDipakai) && isi.alarmDipakai >= 0) {
+      this.alarmDipakai = isi.alarmDipakai;
+      this.tulisMeta("alarmDipakai", this.alarmDipakai);
+    }
+    return jawabJson({ ok: true, alarmDipakai: this.alarmDipakai }, 200);
+  }
+
+  /** Pemakaian ronde untuk konsol dan `ringkasan_json` (P-16, P-17). */
+  private ringkasPemakaian() {
+    return { ...this.pemakaian, perkiraanPermintaan: perkiraanPermintaan(this.pemakaian) };
+  }
+
+  /** Menyimpan pemakaian di meta dan `ruang.ringkasan_json` di D1, sekali, tanpa percobaan ulang. */
+  private async tulisRingkasan(): Promise<void> {
+    const ruangId = this.keadaan?.ruang.ruangId;
+    if (!ruangId) return;
+    try {
+      this.pemakaian.barisD1 += await tulisRingkasanRuang(this.env.DB, ruangId, { pemakaian: this.ringkasPemakaian() });
+    } catch {
+      // Ringkasan bersifat perkiraan; kegagalan tidak menahan penutupan atau penghapusan.
+    }
+    if (!this.mati) this.tulisMeta("pemakaian", this.pemakaian);
+  }
+
+  /**
+   * P-6: berhenti paksa. Ruang ditutup apa pun statusnya, antrean kiriman dicoba sekali, lalu alarm dan seluruh
+   * penyimpanan dihapus; sisa umur objek ini menolak pesan dan alarm.
+   */
+  private async berhentiPaksa(alasan: "ANGGARAN_ALARM" | "DARURAT"): Promise<void> {
+    if (this.mati) return;
+    const k = this.keadaan;
+    catatGalat(alasan, { ruang: k?.ruang.kode ?? null, status: k?.status ?? null, alarm: this.alarmDipakai });
+    if (k && k.status !== "ditutup") {
+      const o = tutupPaksa(k, Date.now());
+      for (const { sambunganId, pesan } of o.kirim) {
+        const ws = this.cariSoket(sambunganId);
+        if (ws) this.kirimSoket(ws, pesan);
+      }
+      if (o.kelas.length > 0) this.kirimKelas(o.kelas);
+      if (o.kiriman.length > 0) this.catatTulis(antrekan(this.sql, o.kiriman, Date.now()));
+    }
+    this.mati = true;
+    this.hentiPutaran();
+    if (this.pewaktuKiriman) clearTimeout(this.pewaktuKiriman);
+    this.pewaktuKiriman = null;
+    try {
+      await this.kirimKiriman();
+    } catch {
+      // Sekali saja.
+    }
+    await this.tulisRingkasan();
+    for (const ws of this.ctx.getWebSockets()) tutupAman(ws, KODE_TUTUP.ditutup, "ruang ditutup");
+    await this.ctx.storage.deleteAlarm();
+    await this.ctx.storage.deleteAll();
+    this.keadaan = null;
+    this.alarmTerpasang = null;
+  }
+
 }
 
 function barisKeJawaban(r: BarisJawabanSql): JawabanRuang {
@@ -854,4 +1057,9 @@ function tutupAman(ws: WebSocket, kode: number, alasan: string): void {
   } catch {
     // Sudah tertutup.
   }
+}
+
+/** Log galat terstruktur tanpa data pribadi (JS-22, P-2 sampai P-6, P-13); tersimpan di Workers Logs. */
+function catatGalat(kode: string, rincian: Record<string, unknown>): void {
+  console.error(JSON.stringify({ galat: kode, ...rincian }));
 }

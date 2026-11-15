@@ -28,10 +28,10 @@ import { perangkatSentuh } from "./dunia/masukan";
 import { MesinDunia } from "./dunia/mesin";
 import { VERSI_PETA } from "./dunia/petaKampung";
 import { LayarAbsen, LayarIdentitas, LayarKode, LayarMenghubungkan } from "./Gabung";
-import { ketergantunganPeramban, KlienRuang, type KeadaanKlien } from "./jaringan";
+import { ketergantunganPeramban, KlienRuang, type KeadaanKlien, KODE_LAYANAN_BERHENTI, KODE_PUTUS_LAMA } from "./jaringan";
 import LayarDunia, { areaDialog } from "./LayarDunia";
 import { LapisanJeda, LapisanMenyambung } from "./LayarMenyambung";
-import { LayarDitutup, LayarGalat, LayarRonde, type SkorAkhir, type WaktuStatus } from "./LayarRonde";
+import { LayarDitutup, LayarGalat, LayarRonde, type SkorAkhir, type WaktuStatus, LayarBerhenti } from "./LayarRonde";
 
 type NamaLayar = "kode" | "absen" | "menghubungkan" | "identitas" | "dunia" | "ronde" | "ditutup" | "galat";
 
@@ -83,6 +83,7 @@ export default function App() {
   const [koneksi, setKoneksi] = useState<KeadaanKlien>("menghubungkan");
   const [terputusSejak, setTerputusSejak] = useState<number | null>(null);
   const [galatKode, setGalatKode] = useState<KodeGalat | null>(null);
+  const [berhentiJenis, setBerhentiJenis] = useState<"layanan" | "putus" | null>(null); // JS-22, P-10
   const [pengaturan, setPengaturan] = useState({ durasiMenit: 15, batasPemain: 40 });
   const [asetSiap, setAsetSiap] = useState(false);
   // Kode sah yang dikirim sebelum aset dunia termuat; diperiksa begitu aset siap (JS-07).
@@ -269,7 +270,10 @@ export default function App() {
       setTerputusSejak(null);
       if (k === "berhenti" && layarRef.current !== "galat" && layarRef.current !== "ditutup") {
         if (kodeTutup === 4000) gantiLayar("ditutup");
-        else if (kodeTutup === 4004 || kodeTutup === 4005) {
+        else if (kodeTutup === KODE_LAYANAN_BERHENTI || kodeTutup === KODE_PUTUS_LAMA) {
+          setBerhentiJenis(kodeTutup === KODE_LAYANAN_BERHENTI ? "layanan" : "putus");
+          gantiLayar("galat");
+        } else if (kodeTutup === 4004 || kodeTutup === 4005) {
           setGalatKode(kodeTutup === 4004 ? "DIKELUARKAN" : "VERSI_BERBEDA");
           gantiLayar("galat");
         }
@@ -324,6 +328,7 @@ export default function App() {
       try {
         const jawaban = await fetch(`/api/publik/ruang/${k}`, { cache: "no-store", headers: { Accept: "application/json" } });
         if (jawaban.status === 404) setGalatForm(TEKS.galat.RUANG_TIDAK_ADA);
+        else if (jawaban.status === 503) setGalatForm(TEKS.api.LAYANAN_BERHENTI); // JS-22, P-12
         else if (jawaban.status === 429) setGalatForm(TEKS.kode.galatTerlaluSering);
         else if (!jawaban.ok) setGalatForm(TEKS.kode.galatJaringan);
         else {
@@ -362,6 +367,7 @@ export default function App() {
     setPemain({});
     setGalatForm(null);
     setGalatKode(null);
+    setBerhentiJenis(null);
     gantiLayar("kode");
   };
 
@@ -560,7 +566,7 @@ export default function App() {
       isi = <LayarDitutup saatKembali={kembali} />;
       break;
     case "galat":
-      isi = <LayarGalat kode={galatKode ?? "VERSI_BERBEDA"} saatKembali={kembali} />;
+      isi = berhentiJenis ? <LayarBerhenti jenis={berhentiJenis} /> : <LayarGalat kode={galatKode ?? "VERSI_BERBEDA"} saatKembali={kembali} />;
       break;
   }
 

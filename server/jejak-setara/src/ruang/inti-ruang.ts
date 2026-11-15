@@ -5,6 +5,7 @@
 // `koreksi` (P-49), dan pemeriksaan gerak dengan anggaran jarak (P-52).
 // JS-08: kejadian (keterlihatan, periksa, dialog dua langkah, kunci, skor, peringkat, `pribadi`, `selesai`), tanda
 // `dialog` di butir `dunia`, dan protokol versi 2 (spesifikasi JS-08, P-10 sampai P-37, P-55, P-56, P-63, P-64).
+import { HAPUS_PAKSA_MS } from "./pengaman";
 import { BATAS, hitungPeringkat } from "../../../../app/jejak-setara/inti/aturan";
 import { koreksi, periksaGerak, posisiSah, STATUS_GERAK } from "../../../../app/jejak-setara/inti/gerak";
 import { UKURAN_UBIN } from "../../../../app/jejak-setara/inti/peta";
@@ -1251,6 +1252,11 @@ export function alarm(k: KeadaanRuang, sekarang: number, antreanKosong: boolean)
   } else if (k.ditutupPada !== null && sekarang >= k.ditutupPada + WAKTU.hapusSesudahTutupMs && antreanKosong) {
     o.hapusSemua = true;
   }
+  // JS-22 (P-5): penyimpanan dihapus paling lambat 7 hari sesudah ruang dibuat, walau antrean kiriman belum kosong.
+  if (sekarang >= k.ruang.dibuatPada + HAPUS_PAKSA_MS) {
+    if (k.status !== "ditutup") tutupRuang(k, o, sekarang);
+    o.hapusSemua = true;
+  }
   return o;
 }
 
@@ -1265,6 +1271,7 @@ export function tenggatBerikut(k: KeadaanRuang, antreanKosong: boolean): number 
   } else if (k.ditutupPada !== null && antreanKosong) {
     t.push(k.ditutupPada + WAKTU.hapusSesudahTutupMs);
   }
+  t.push(k.ruang.dibuatPada + HAPUS_PAKSA_MS); // JS-22, P-5
   return t.length > 0 ? Math.min(...t) : null;
 }
 
@@ -1399,5 +1406,12 @@ export function sambutanKelas(k: KeadaanRuang, tautan: string, sekarang: number)
     kirimPapanKelas(k, o, true);
     o.kelas.push(pesanDuniaKelas(k, sekarang));
   }
+  return o;
+}
+
+/** JS-22 (P-6): menutup ruang apa pun statusnya, untuk berhenti paksa (anggaran alarm dan darurat). */
+export function tutupPaksa(k: KeadaanRuang, sekarang: number): Keluaran {
+  const o = keluaranKosong();
+  if (k.status !== "ditutup") tutupRuang(k, o, sekarang);
   return o;
 }

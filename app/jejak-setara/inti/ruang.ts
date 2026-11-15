@@ -131,9 +131,25 @@ export const skemaLangsung = z.object({
   jedaSejak: z.number().nullable(),
   tautan: z.string(),
   pemain: z.array(skemaPemainLangsung),
+  /** JS-22 (P-18): kiriman ke D1 berhenti sesudah 24 jam gagal. */
+  kirimanBerhenti: z.boolean().optional(),
 });
+
+/** JS-22 (P-15 sampai P-17): pemakaian ronde, hanya untuk admin. */
+export const skemaPemakaian = z.object({
+  sambungan: z.number().int().min(0),
+  pesanMasuk: z.number().int().min(0),
+  alarm: z.number().int().min(0),
+  barisSqlite: z.number().int().min(0),
+  barisD1: z.number().int().min(0),
+  internal: z.number().int().min(0),
+  perkiraanPermintaan: z.number().int().min(0),
+});
+export type PemakaianRuang = z.infer<typeof skemaPemakaian>;
+/** JS-22 (P-17, D-3): kuota harian paket gratis untuk persen pemakaian (permintaan Durable Object dan baris ditulis). */
+export const KUOTA_HARIAN_GRATIS = 100_000;
 export type Langsung = z.infer<typeof skemaLangsung>;
-export const skemaDetailRuang = z.object({ ruang: skemaRingkasanRuang, langsung: skemaLangsung.nullable() });
+export const skemaDetailRuang = z.object({ ruang: skemaRingkasanRuang, langsung: skemaLangsung.nullable(), pemakaian: skemaPemakaian.nullable().optional() });
 export type DetailRuang = z.infer<typeof skemaDetailRuang>;
 
 export const skemaTiket = z.object({ tiket: z.string().min(1), kedaluwarsaPada: z.number() });

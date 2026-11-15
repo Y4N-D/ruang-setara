@@ -26,6 +26,7 @@
     "uji": {
       "name": "jejak-setara-uji",
       "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "4000", "RUANG_AKTIF_MAKS": "3" },
+      "observability": { "enabled": true, "logs": { "enabled": true, "invocation_logs": false }, "traces": { "enabled": false } },
       "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
       "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "8870d944-5d38-4c97-b8bf-819f7676eeb1", "migrations_dir": "migrations" }],
       "ratelimits": [

@@ -12,6 +12,7 @@ import {
   RUANG_DAFTAR_MAKS,
   RUANG_DAFTAR_MS,
   skemaKelola,
+  skemaPemakaian,
   skemaRuangBaru,
   STATUS_RUANG,
   type KodeGalatRuang,
@@ -86,7 +87,7 @@ export function ringkasanRuang(b: BarisRuangKonsol): RingkasanRuang {
 export async function tanganiApiRuang(request: Request, env: Env, url: URL): Promise<Response> {
   const jalur = url.pathname;
   if (jalur.startsWith("/api/publik/ruang/")) return periksaKode(request, env, jalur.slice("/api/publik/ruang/".length));
-  const kait = /^\/api\/uji\/ruang\/([^/]+)\/(statistik|putuskan|kejadian|pindahkan)$/.exec(jalur);
+  const kait = /^\/api\/uji\/ruang\/([^/]+)\/(statistik|putuskan|kejadian|pindahkan|pengaman)$/.exec(jalur);
   if (kait) return env.LINGKUNGAN === "lokal" ? kaitUji(request, env, kait[1], kait[2] as JenisKait) : belumTersedia();
   if (jalur === "/api/ruang/pilihan") return request.method === "GET" ? pilihan(request, env) : metodeSalah("GET");
   if (jalur === "/api/ruang") {
@@ -250,15 +251,29 @@ async function detail(request: Request, env: Env, url: URL, id: string): Promise
   const milik = await ruangMilik(request, env, id);
   if (!milik.ok) return milik.jawaban;
   let langsung: Record<string, unknown> | null = null;
+  let pemakaian: unknown = null;
   if (milik.ruang.status !== "ditutup") {
     try {
       const jawaban = await stubRuang(env, milik.ruang).fetch("https://ruang/kelola");
-      if (jawaban.ok) langsung = { ...((await jawaban.json()) as Record<string, unknown>), tautan: url.origin };
+      if (jawaban.ok) {
+        const { pemakaian: dariRuang, ...isi } = (await jawaban.json()) as Record<string, unknown>;
+        langsung = { ...isi, tautan: url.origin };
+        pemakaian = dariRuang ?? null;
+      }
     } catch {
       langsung = null;
     }
   }
-  return jawabJson({ ruang: ringkasanRuang(milik.ruang), langsung }, 200);
+  if (pemakaian === null && milik.ruang.ringkasan_json) {
+    try {
+      pemakaian = (JSON.parse(milik.ruang.ringkasan_json) as { pemakaian?: unknown }).pemakaian ?? null;
+    } catch {
+      pemakaian = null;
+    }
+  }
+  // JS-22 (P-17): pemakaian ronde hanya untuk admin.
+  const admin = milik.sesi.akun.peran === "admin";
+  return jawabJson({ ruang: ringkasanRuang(milik.ruang), langsung, pemakaian: admin && skemaPemakaian.safeParse(pemakaian).success ? pemakaian : null }, 200);
 }
 
 /** P-10. */
@@ -289,7 +304,7 @@ async function tiket(request: Request, env: Env, url: URL, id: string): Promise<
 // -------------------------------------------------------------------------------------------
 // Kait uji lokal (P-32)
 
-type JenisKait = "statistik" | "putuskan" | "kejadian" | "pindahkan";
+type JenisKait = "statistik" | "putuskan" | "kejadian" | "pindahkan" | "pengaman";
 
 async function kaitUji(request: Request, env: Env, bagian: string, jenis: JenisKait): Promise<Response> {
   const kode = kodeDariJalur(bagian);
@@ -302,6 +317,7 @@ async function kaitUji(request: Request, env: Env, bagian: string, jenis: JenisK
   }
   if (request.method !== "POST") return metodeSalah("POST");
   if (jenis === "putuskan") return stub.fetch("https://ruang/putuskan", { method: "POST" });
+  if (jenis === "pengaman") return stub.fetch("https://ruang/pengaman", { method: "POST", body: await request.text() }); // JS-22
   return stub.fetch("https://ruang/pindahkan", { method: "POST", body: await request.text() });
 }
 

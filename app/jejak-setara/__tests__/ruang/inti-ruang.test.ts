@@ -1,4 +1,5 @@
 // Inti ruang (spesifikasi JS-03, bagian D sampai H; AC-7 sampai AC-15).
+import { HAPUS_PAKSA_MS } from "../../../../server/jejak-setara/src/ruang/pengaman";
 import { describe, expect, it } from "vitest";
 import { acakBerbenih } from "../../inti/acak";
 import { PROTOKOL_VERSI, skemaServerPemain, type PesanPemain, type PesanServerPemain } from "../../inti/protokol";
@@ -270,7 +271,8 @@ describe("siklus ruang dan alarm (P-31 sampai P-40)", () => {
     const tutup = semuaSah(terimaKelas(k, { v: PROTOKOL_VERSI, t: "tutup_ruang" }, akhir + 1000));
     expect(k.status).toBe("ditutup");
     expect(tutup.tutup).toEqual([{ sambunganId: "s1", kode: KODE_TUTUP.ditutup, alasan: "ruang ditutup" }]);
-    expect(tenggatBerikut(k, false)).toBeNull();
+    // JS-22 (P-5): tanpa tenggat lain, alarm tetap terpasang untuk penghapusan paksa 7 hari sesudah dibuat.
+    expect(tenggatBerikut(k, false)).toBe(DIBUAT + HAPUS_PAKSA_MS);
     expect(tenggatBerikut(k, true)).toBe(akhir + 1000 + WAKTU.hapusSesudahTutupMs);
     expect(alarm(k, akhir + 1000 + WAKTU.hapusSesudahTutupMs, false).hapusSemua).toBe(false);
     expect(alarm(k, akhir + 1000 + WAKTU.hapusSesudahTutupMs, true).hapusSemua).toBe(true);

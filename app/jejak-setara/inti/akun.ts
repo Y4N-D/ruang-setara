@@ -36,6 +36,7 @@ export const KODE_GALAT_AKUN = [
   "TIDAK_BOLEH_DIRI",
   "ADMIN_TERAKHIR",
   "KUNCI_ADMIN_SALAH",
+  "LAYANAN_BERHENTI",
   "JARINGAN",
   "UMUM",
 ] as const;

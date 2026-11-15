@@ -1,12 +1,22 @@
 // Klien WebSocket pemain (spesifikasi JS-03, P-18, P-25, P-29 sampai P-31, P-55).
 // Ketergantungan (soket, jam, pengatur waktu, penyimpanan) diberikan dari luar agar bisa diuji di Node.
 // JS-07: versi peta halaman dibandingkan dengan `selamat_datang.versiPeta` (P-50), dan bufferedAmount soket
-// dibaca agar `gerak` tidak diantrekan (P-16).
+// dibaca agar `gerak` tidak diantrekan (P-16). JS-22 (P-8 sampai P-10): sesudah 10 kali gagal berturut-turut klien
+// memeriksa apakah ruang masih ada, lalu mencoba setiap 30 detik; sesudah 10 menit gagal, klien berhenti.
 import { BATAS } from "../inti/aturan";
 import { PROTOKOL_VERSI, skemaServerPemain, type KodeGalat, type PesanPemain, type PesanServerPemain } from "../inti/protokol";
 
 /** Jeda percobaan sambung ulang: 0,5, 1, 2, 4, lalu 8 detik seterusnya (P-29). */
 export const JADWAL_SAMBUNG_ULANG_MS = [500, 1000, 2000, 4000, 8000] as const;
+
+/** JS-22 (P-8, P-9): pemeriksaan ruang setiap 10 kali gagal, jeda 30 detik sesudahnya, dan batas 10 menit (D-2). */
+export const PERIKSA_SETIAP_GAGAL = 10;
+export const JEDA_SESUDAH_PERIKSA_MS = 30_000;
+export const BATAS_PUTUS_MS = 10 * 60_000;
+/** Kode berhenti buatan klien (bukan dari server): layanan dihentikan dan putus terlalu lama (P-10). */
+export const KODE_LAYANAN_BERHENTI = 4900;
+export const KODE_PUTUS_LAMA = 4901;
+export type HasilPeriksaRuang = "ada" | "tidak_ada" | "berhenti" | "tidak_tahu";
 
 export function jedaPercobaan(percobaan: number): number {
   return JADWAL_SAMBUNG_ULANG_MS[Math.min(Math.max(0, percobaan), JADWAL_SAMBUNG_ULANG_MS.length - 1)];
@@ -53,6 +63,8 @@ export interface Ketergantungan {
   pasang(kerja: () => void, ms: number): unknown;
   batal(id: unknown): void;
   penyimpanan: Pick<Storage, "getItem" | "setItem" | "removeItem"> | null;
+  /** JS-22 (P-8): GET /api/publik/ruang/{KODE}; tidak ada di soket tiruan lama, dianggap "tidak_tahu". */
+  periksaRuang?: (kode: string) => Promise<HasilPeriksaRuang>;
 }
 
 /** Galat yang menghentikan sambung ulang (P-29). */
@@ -73,6 +85,7 @@ export class KlienRuang {
   pesanCacat = 0;
   private soket: SoketMirip | null = null;
   private percobaan = 0;
+  private gagalSejak: number | null = null;
   private pewaktuUlang: unknown = null;
   private pewaktuPing: unknown = null;
   private sampel: SampelJam[] = [];
@@ -239,6 +252,7 @@ export class KlienRuang {
     if (p.t === "selamat_datang") {
       this.dep.penyimpanan?.setItem(kunciToken(this.kode), p.token);
       this.percobaan = 0;
+      this.gagalSejak = null;
       this.ubahKeadaan("tersambung");
     } else if (p.t === "pong") {
       const kini = this.dep.jam();
@@ -268,9 +282,35 @@ export class KlienRuang {
       this.berhenti(kode);
       return;
     }
+    const sekarang = this.dep.jam();
+    if (this.gagalSejak === null) this.gagalSejak = sekarang;
+    if (sekarang - this.gagalSejak >= BATAS_PUTUS_MS) {
+      this.berhenti(KODE_PUTUS_LAMA);
+      return;
+    }
     this.ubahKeadaan("menyambung_ulang");
-    const jeda = jedaPercobaan(this.percobaan);
+    const sebelum = this.percobaan;
     this.percobaan++;
+    if (this.percobaan % PERIKSA_SETIAP_GAGAL === 0 && this.dep.periksaRuang) {
+      void this.dep.periksaRuang(this.kode).then(
+        (hasil) => this.sesudahPeriksa(hasil),
+        () => this.sesudahPeriksa("tidak_tahu"),
+      );
+      return;
+    }
+    this.jadwalkanBuka(this.percobaan > PERIKSA_SETIAP_GAGAL ? JEDA_SESUDAH_PERIKSA_MS : jedaPercobaan(sebelum));
+  }
+
+  private sesudahPeriksa(hasil: HasilPeriksaRuang): void {
+    if (this.keadaan === "berhenti") return;
+    if (hasil === "tidak_ada") {
+      this.hapusToken();
+      this.berhenti(4000);
+    } else if (hasil === "berhenti") this.berhenti(KODE_LAYANAN_BERHENTI);
+    else this.jadwalkanBuka(JEDA_SESUDAH_PERIKSA_MS);
+  }
+
+  private jadwalkanBuka(jeda: number): void {
     this.pewaktuUlang = this.dep.pasang(() => {
       this.pewaktuUlang = null;
       if (this.keadaan !== "berhenti") this.buka();
@@ -292,5 +332,16 @@ export function ketergantunganPeramban(): Ketergantungan {
     pasang: (kerja, ms) => window.setTimeout(kerja, ms),
     batal: (id) => window.clearTimeout(id as number),
     penyimpanan,
+    periksaRuang: async (kode) => {
+      try {
+        const j = await fetch(`/api/publik/ruang/${encodeURIComponent(kode)}`, { cache: "no-store", headers: { Accept: "application/json" } });
+        if (j.ok) return "ada";
+        if (j.status === 404) return "tidak_ada";
+        if (j.status === 503) return "berhenti";
+        return "tidak_tahu";
+      } catch {
+        return "tidak_tahu";
+      }
+    },
   };
 }

@@ -153,6 +153,15 @@ export const TEKS = {
     PESAN_SALAH: "Pesan tidak sah.",
     TERLALU_SERING: "Terlalu banyak percobaan. Tunggu sebentar.",
     RUANG_TIDAK_ADA: "Kode ruang tidak ditemukan. Periksa lagi kodenya.",
+    LAYANAN_BERHENTI: "Layanan sedang dihentikan sementara. Coba lagi nanti.",
+  },
+  // JS-22 (P-8 sampai P-10): layar berhenti di HP pemain.
+  berhenti: {
+    layananJudul: "Layanan berhenti sementara",
+    layananIsi: "Guru atau admin sedang menghentikan layanan. Coba lagi nanti.",
+    putusJudul: "Sambungan terputus terlalu lama",
+    putusIsi: "Periksa internet HP, lalu ketuk Coba lagi.",
+    cobaLagi: "Coba lagi",
   },
 } as const;
 

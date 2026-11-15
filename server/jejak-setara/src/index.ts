@@ -1,7 +1,8 @@
-// Worker Jejak Setara (spesifikasi JS-01, JS-03, JS-04, dan JS-10). Menjawab /api/sehat, rute ruang, sambungan WebSocket
+// Worker Jejak Setara (spesifikasi JS-01, JS-03, JS-04, JS-10, dan JS-22). Menjawab /api/sehat, rute ruang, sambungan WebSocket
 // pemain dan layar kelas, serta rute akun, ruang, dan dasbor konsol; jalur /api/* dan /ws/* lain belum tersedia. Jalur lain disajikan
 // lapisan aset Cloudflare; yang sampai ke sini diteruskan ke ASSETS. Tidak menulis log permintaan (Architecture 12.3).
 import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/protokol";
+import { TEKS } from "../../../app/jejak-setara/teks";
 import { jalurAkun, tanganiApiAkun } from "./api/akun";
 import { tanganiApiDasbor } from "./api/dasbor";
 import { JALUR_MASUK, tanganiApiMasuk } from "./api/masuk";
@@ -22,7 +23,12 @@ export default {
       if (request.method !== "GET") {
         return jawabGalat("METODE_TIDAK_DIDUKUNG", "Metode ini tidak didukung.", 405, { Allow: "GET" });
       }
-      return jawabJson({ ok: true, protokol: PROTOKOL_VERSI, lingkungan: env.LINGKUNGAN }, 200);
+      const sehat = { ok: true, protokol: PROTOKOL_VERSI, lingkungan: env.LINGKUNGAN };
+      return jawabJson(env.DARURAT === "1" ? { ...sehat, darurat: true } : sehat, 200);
+    }
+    // JS-22 (P-12): saat "Jejak: hentikan" aktif, semua API dan WebSocket dijawab 503 sebelum menyentuh D1 atau ruang.
+    if (env.DARURAT === "1" && (pathname.startsWith("/api/") || pathname.startsWith("/ws/"))) {
+      return jawabGalat("LAYANAN_BERHENTI", TEKS.api.LAYANAN_BERHENTI, 503);
     }
     if (pathname.startsWith("/ws/ruang/")) return tanganiWsRuang(request, env, url);
     if (pathname.startsWith("/ws/kelas/")) return tanganiWsKelas(request, env, url);

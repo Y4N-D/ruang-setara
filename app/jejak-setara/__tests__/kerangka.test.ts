@@ -149,7 +149,7 @@ describe("Teks dan halaman", () => {
   it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01, JS-03, JS-07, dan JS-08 (tanpa konsolJudul dan konsolIsi sejak JS-04)", () => {
     expect(TEKS).not.toHaveProperty("konsolJudul");
     expect(TEKS).not.toHaveProperty("konsolIsi");
-    expect(TEKS).toEqual({
+    expect(tanpaKunci(TEKS, KUNCI_JS22_PEMAIN)).toEqual({
       judulTabPemain: "Jejak Setara",
       judulTabKonsol: "Konsol admin · Jejak Setara",
       judul: "Jejak Setara",
@@ -293,17 +293,30 @@ describe("Teks dan halaman", () => {
     });
   });
 
+  it("JS-22: TEKS dan TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-22 (AC-17)", () => {
+    const isi = baca("docs/jejak-setara/specs/JS-22-biaya.md");
+    const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"));
+    const pemain = uraiTabelTeks(bagian.slice(0, bagian.indexOf("**Konsol**")) + "\n## ");
+    const konsol = uraiTabelTeks("## Teks yang tampil (final)\n" + bagian.slice(bagian.indexOf("**Konsol**")));
+    expect(Object.keys(pemain).sort()).toEqual([...KUNCI_JS22_PEMAIN].sort());
+    expect(Object.keys(konsol).sort()).toEqual([...KUNCI_JS22_KONSOL].sort());
+    const datarPemain = ratakanTeks(TEKS);
+    const datarKonsol = ratakanTeks(TEKS_KONSOL);
+    for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
+    for (const [k, t] of Object.entries(konsol)) expect(datarKonsol[k], k).toBe(t);
+  });
+
   it("JS-10: TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-10 (AC-25)", () => {
     const harapan = uraiTabelTeks(baca("docs/jejak-setara/specs/JS-10-kelas.md"));
     expect(Object.keys(harapan).length).toBeGreaterThan(150);
     const datar = ratakanTeks(TEKS_KONSOL);
     for (const [kunci, teks] of Object.entries(harapan)) expect(datar[kunci], kunci).toBe(teks);
-    const kunciJs10 = Object.keys(datar).filter((k) => KUNCI_JS10.some((awal) => k === awal || k.startsWith(`${awal}.`)));
+    const kunciJs10 = Object.keys(datar).filter((k) => KUNCI_JS10.some((awal) => k === awal || k.startsWith(`${awal}.`)) && !KUNCI_JS22_KONSOL.includes(k));
     expect(kunciJs10.sort()).toEqual(Object.keys(harapan).sort());
   });
 
   it("JS-04: TEKS_KONSOL sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-04 (P-51), di luar teks JS-10", () => {
-    expect(tanpaKunciJs10(TEKS_KONSOL)).toEqual({
+    expect(tanpaKunci(tanpaKunciJs10(TEKS_KONSOL) as object, KUNCI_JS22_KONSOL)).toEqual({
       merek: "Jejak Setara",
       subjudul: "Konsol guru dan admin",
       memuat: "Memuat konsol…",
@@ -561,6 +574,7 @@ describe("Token dan tajuk", () => {
         "uji": {
           "name": "jejak-setara-uji",
           "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "4000", "RUANG_AKTIF_MAKS": "3" },
+          "observability": { "enabled": true, "logs": { "enabled": true, "invocation_logs": false }, "traces": { "enabled": false } },
           "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
           "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "8870d944-5d38-4c97-b8bf-819f7676eeb1", "migrations_dir": "migrations" }],
           "ratelimits": [
@@ -571,6 +585,42 @@ describe("Token dan tajuk", () => {
         }
       }
     });
+  });
+});
+
+describe("JS-22: alur kerja Jejak (P-11 sampai P-14, P-22)", () => {
+  const hentikan = baca(".github/workflows/jejak-hentikan.yml");
+
+  it("jejak-hentikan.yml: dijalankan manual dengan pilihan aksi dan lingkungan, memakai rahasia yang sudah ada", () => {
+    expect(hentikan).toContain('name: "Jejak: hentikan"');
+    expect(hentikan).toMatch(/workflow_dispatch:\n\s+inputs:\n\s+aksi:/);
+    expect(hentikan).toMatch(/options:\n\s+- hentikan\n\s+- pulihkan/);
+    expect(hentikan).toMatch(/options:\n\s+- uji\n/);
+    expect(hentikan).toContain("CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}");
+    expect(hentikan).toContain("concurrency:\n  group: jejak-cloudflare-uji");
+  });
+
+  it("jejak-hentikan.yml: hentikan menyimpan DARURAT=1, pulihkan menghapusnya; tidak mencetak nilai rahasia", () => {
+    expect(hentikan).toContain(`printf '1' | npx -y wrangler@4.92.0 secret put DARURAT --name "jejak-setara-$LINGKUNGAN" > /dev/null`);
+    expect(hentikan).toContain(`npx -y wrangler@4.92.0 secret delete DARURAT --name "jejak-setara-$LINGKUNGAN" > /dev/null`);
+    expect(hentikan).not.toMatch(/echo "\$CLOUDFLARE_API_TOKEN|set -x/);
+  });
+
+  it("jejak-hentikan.yml: pemeriksaan /api/sehat paling lama 2 menit dan ringkasan sesuai teks spesifikasi", () => {
+    expect(hentikan).toContain("for i in $(seq 1 24); do");
+    expect(hentikan).toContain("sleep 5");
+    expect(hentikan).toContain(`jq -r '.darurat // false'`);
+    for (const teks of Object.values(TEKS_KONSOL.alurHentikan)) expect(hentikan).toContain(teks);
+  });
+
+  it("alur kerja Jejak memakai checkout@v5, setup-node@v5, dan ubuntu-24.04; deploy-pages.yml tidak berubah", () => {
+    for (const berkas of ["jejak-uji.yml", "jejak-admin-awal.yml", "jejak-hentikan.yml"]) {
+      const isi = baca(`.github/workflows/${berkas}`);
+      expect(isi, berkas).not.toMatch(/actions\/(checkout|setup-node)@v4|ubuntu-latest/);
+      expect(isi, berkas).toContain("runs-on: ubuntu-24.04");
+      expect(isi, berkas).toContain("actions/setup-node@v5");
+    }
+    expect(baca(".github/workflows/deploy-pages.yml")).toContain("ubuntu-latest");
   });
 });
 
@@ -788,4 +838,35 @@ function uraiTabelTeks(isi: string): Record<string, string> {
     kunci.forEach((k, i) => (hasil[k] = teks[i]));
   }
   return hasil;
+}
+
+// JS-22 (AC-17): kunci yang ditambahkan JS-22.
+const KUNCI_JS22_PEMAIN = ["api.LAYANAN_BERHENTI", "berhenti.layananJudul", "berhenti.layananIsi", "berhenti.putusJudul", "berhenti.putusIsi", "berhenti.cobaLagi"];
+const KUNCI_JS22_KONSOL = [
+  "galat.LAYANAN_BERHENTI",
+  "detail.pemakaianJudul",
+  "detail.pemakaianPermintaan",
+  "detail.pemakaianD1",
+  "detail.pemakaianSqlite",
+  "detail.pemakaianSambungan",
+  "detail.pemakaianAlarm",
+  "detail.pemakaianNilai",
+  "detail.pemakaianCatatan",
+  "detail.kirimanGagal",
+  "alurHentikan.berhenti",
+  "alurHentikan.pulih",
+  "alurHentikan.galat",
+];
+
+/** Salinan objek teks tanpa kunci bertitik yang disebut, dan tanpa grup yang menjadi kosong. */
+function tanpaKunci(teks: object, kunci: readonly string[]): unknown {
+  const salin = JSON.parse(JSON.stringify(teks)) as Record<string, Record<string, unknown>>;
+  for (const k of kunci) {
+    const [atas, bawah] = k.split(".");
+    if (salin[atas]) {
+      delete salin[atas][bawah];
+      if (Object.keys(salin[atas]).length === 0) delete salin[atas];
+    }
+  }
+  return salin;
 }

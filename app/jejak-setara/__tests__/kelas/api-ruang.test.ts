@@ -23,7 +23,9 @@ function lingkungan(lain: Record<string, unknown> = {}, inisialisasiOk = true): 
           inisialisasi.push(JSON.parse(String(init?.body)));
           return new Response(JSON.stringify({ ok: inisialisasiOk }), { status: inisialisasiOk ? 200 : 500 });
         }
-        return new Response(JSON.stringify({ status: "lobi", terkunci: false, mulaiPada: null, berakhirPada: null, jedaSejak: null, pemain: [] }));
+        return new Response(
+          JSON.stringify({ status: "lobi", terkunci: false, mulaiPada: null, berakhirPada: null, jedaSejak: null, pemain: [], kirimanBerhenti: true, pemakaian: PEMAKAIAN }),
+        );
       },
     }),
   };
@@ -55,6 +57,8 @@ async function admin(env: Env): Promise<string> {
   expect(j.status).toBe(200);
   return cookieDari(j);
 }
+
+const PEMAKAIAN = { sambungan: 3, pesanMasuk: 400, alarm: 2, barisSqlite: 120, barisD1: 30, internal: 4, perkiraanPermintaan: 29 };
 
 const RUANG_BARU = { labelKelas: "  IX B  ", paketId: "p-1", durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, modeNomorAbsen: false, uji: true };
 const buat = (env: Env, cookie: string, isi: Record<string, unknown> = {}) => minta(env, "POST", "/api/ruang", { ...RUANG_BARU, ...isi }, cookie);
@@ -136,5 +140,29 @@ describe.skipIf(!sqlite)("rute ruang di atas D1 tiruan", () => {
     expect(j.status).toBe(200);
     const { tiket } = (await j.json()) as { tiket: string };
     expect((await periksaTiket("kunci-tiket-uji", tiket, r2, Date.now())).ok).toBe(true);
+  });
+
+  it("JS-22 (P-17, P-18): pemakaian hanya untuk admin, dari ruang yang berjalan atau dari ringkasan_json; kirimanBerhenti untuk keduanya", async () => {
+    const { d1, env } = lingkungan();
+    const admin1 = await admin(env);
+    const akun = await minta(env, "POST", "/api/akun", { email: "guru@sekolah.sch.id", namaTampilan: "Bu Sari", peran: "guru", peninjau: false }, admin1);
+    expect(akun.status).toBe(201);
+    const { sandiSementara } = (await akun.json()) as { sandiSementara: string };
+    const sementara = cookieDari(await minta(env, "POST", "/api/masuk", { email: "guru@sekolah.sch.id", sandi: sandiSementara }));
+    const guru = cookieDari(await minta(env, "POST", "/api/sandi", { sandiBaru: "kalimat sandi guru uji" }, sementara));
+    const id = ((await (await buat(env, guru)).json()) as { ruang: { id: string } }).ruang.id;
+    const lihat = async (cookie: string) => (await (await minta(env, "GET", `/api/ruang/${id}`, undefined, cookie)).json()) as Record<string, unknown>;
+    const olehAdmin = await lihat(admin1);
+    expect(olehAdmin.pemakaian).toEqual(PEMAKAIAN);
+    expect((olehAdmin.langsung as Record<string, unknown>).kirimanBerhenti).toBe(true);
+    expect((olehAdmin.langsung as Record<string, unknown>).pemakaian).toBeUndefined();
+    const olehGuru = await lihat(guru);
+    expect(olehGuru.pemakaian).toBeNull();
+    expect((olehGuru.langsung as Record<string, unknown>).kirimanBerhenti).toBe(true);
+    d1.basis.prepare("UPDATE ruang SET status = 'ditutup', ringkasan_json = ? WHERE id = ?").run(JSON.stringify({ pemakaian: { ...PEMAKAIAN, alarm: 5 } }), id);
+    const ditutup = await lihat(admin1);
+    expect(ditutup.langsung).toBeNull();
+    expect(ditutup.pemakaian).toEqual({ ...PEMAKAIAN, alarm: 5 });
+    expect((await lihat(guru)).pemakaian).toBeNull();
   });
 });

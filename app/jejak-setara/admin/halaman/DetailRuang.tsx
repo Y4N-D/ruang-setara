@@ -3,7 +3,7 @@
 // pemain dilakukan di sini, bukan di proyektor (usulan 5a).
 import { useEffect, useState } from "react";
 import type { Saya } from "../../inti/akun";
-import { STATUS_BOLEH_TUTUP, type AksiKelola, type DetailRuang as DataDetail } from "../../inti/ruang";
+import { KUOTA_HARIAN_GRATIS, STATUS_BOLEH_TUTUP, type AksiKelola, type DetailRuang as DataDetail, type PemakaianRuang } from "../../inti/ruang";
 import { isiTeks } from "../../teks";
 import { TEKS_KONSOL } from "../../teks-konsol";
 import { api, type GalatApi } from "../api";
@@ -15,6 +15,8 @@ import { TautanLayar } from "./Ruang";
 
 const t = TEKS_KONSOL.detail;
 const FORMAT_JAM = new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+const FORMAT_ANGKA = new Intl.NumberFormat("id-ID");
+const FORMAT_PERSEN = new Intl.NumberFormat("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 /** Muat ulang daftar pemain selama halaman tampil (P-9). */
 export const MUAT_ULANG_DETAIL_MS = 10_000;
 
@@ -100,6 +102,7 @@ export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
   }
 
   const { ruang, langsung } = muatan.data;
+  const pemakaian = muatan.data.pemakaian ?? null;
   const status = langsung?.status ?? ruang.status;
   const ditutup = status === "ditutup";
   const bolehTutup = STATUS_BOLEH_TUTUP.includes(status);
@@ -130,6 +133,7 @@ export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
           {ruang.uji ? <span className="js-konsol-tanda js-konsol-tanda-belum">{TEKS_KONSOL.ruang.uji}</span> : null}
         </div>
       </section>
+      {langsung?.kirimanBerhenti ? <PesanGalat pesan={t.kirimanGagal} /> : null}
       {ditutup ? (
         <p role="status">{t.ditutup}</p>
       ) : (
@@ -172,6 +176,7 @@ export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
           <p className="js-konsol-petunjuk">{isiTeks(t.diperbarui, { jam: FORMAT_JAM.format(muatan.pada) })}</p>
         </>
       )}
+      {pemakaian ? <BagianPemakaian p={pemakaian} /> : null}
       {konfirmasi ? (
         <Dialog
           judul={konfirmasi.jenis === "tutup" ? isiTeks(t.tutupJudul, { kode: ruang.kode }) : isiTeks(t.keluarkanJudul, { nama: konfirmasi.nama })}
@@ -199,5 +204,34 @@ export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
         </Dialog>
       ) : null}
     </>
+  );
+}
+
+/** JS-22 (P-17): pemakaian ronde untuk admin, dengan persen kuota harian paket gratis (D-3). */
+function BagianPemakaian({ p }: { p: PemakaianRuang }) {
+  const nilai = (n: number, persen: boolean) =>
+    persen ? isiTeks(t.pemakaianNilai, { n: FORMAT_ANGKA.format(n), p: FORMAT_PERSEN.format((n * 100) / KUOTA_HARIAN_GRATIS) }) : FORMAT_ANGKA.format(n);
+  const baris: [string, number, boolean][] = [
+    [t.pemakaianPermintaan, p.perkiraanPermintaan, true],
+    [t.pemakaianD1, p.barisD1, true],
+    [t.pemakaianSqlite, p.barisSqlite, true],
+    [t.pemakaianSambungan, p.sambungan, false],
+    [t.pemakaianAlarm, p.alarm, false],
+  ];
+  return (
+    <section className="js-ruang-pemakaian" aria-labelledby="js-ruang-pemakaian-judul">
+      <h2 id="js-ruang-pemakaian-judul">{t.pemakaianJudul}</h2>
+      <table className="js-konsol-tabel">
+        <tbody>
+          {baris.map(([label, n, persen]) => (
+            <tr key={label}>
+              <th scope="row">{label}</th>
+              <td>{nilai(n, persen)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="js-konsol-petunjuk">{t.pemakaianCatatan}</p>
+    </section>
   );
 }
