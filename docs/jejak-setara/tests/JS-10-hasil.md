@@ -6,7 +6,7 @@
 | Spesifikasi | [JS-10-kelas.md](../specs/JS-10-kelas.md), disetujui 14 November 2026 (D-1 sampai D-4 = a) |
 | Tanggal | 14 November 2026 |
 | Lingkungan | Mesin agen (mode ZIP): Node 22.23.4, pnpm 11.25.0, Wrangler 4.92.0, Chromium untuk Playwright, 2 vCPU |
-| Keputusan | **Lulus** di lingkungan agen. Langkah pemilik proyek di lingkungan uji (bagian "Pemeriksaan manual") dijalankan sesudah push |
+| Keputusan | **Lulus**: di lingkungan agen 14 Nov 2026 dan di lingkungan uji 15 Nov 2026 (bagian "Pemeriksaan manual") |
 
 ## Kriteria penerimaan
 
@@ -90,9 +90,9 @@ Di [tests/JS-10/](JS-10/): `kelas-lobi`, `kelas-bermain`, `kelas-jeda`, `kelas-p
 ## Pemeriksaan manual
 
 - [x] Tampilan diperiksa dari tangkapan layar di ketiga ukuran layar kelas.
-- [ ] Lingkungan uji sesudah push: "Jejak: uji" hijau dan langkah "Siapkan kunci Worker" menulis "Kunci Worker baru: KUNCI_TIKET." (pemilik proyek).
-- [ ] Rahasia `KUNCI_COBA` dihapus dari Worker uji (pemilik proyek).
-- [ ] Satu ronde pendek dari konsol dengan layar kelas di proyektor atau layar lebar dan dua atau tiga HP (pemilik proyek).
+- [x] Lingkungan uji sesudah push (15 Nov 2026): "Jejak: uji" hijau dan langkah "Siapkan kunci Worker" menulis "Kunci Worker baru: KUNCI_TIKET." Push pertama gagal di "Uji Jejak" karena dua alur kerja ruang coba belum terhapus; sesudah dihapus, kedua job hijau.
+- [ ] Rahasia `KUNCI_COBA` dihapus dari Worker uji: belum dikonfirmasi; tidak dipakai kode mana pun.
+- [x] Ruang dari konsol di lingkungan uji (15 Nov 2026, pemilik proyek): lobi layar kelas dengan kode, alamat, dan nama pemain; HP pemain menunggu di lobi; saat bermain dengan sisa waktu, jam cerita, peta kelas, 10 besar, dan kemajuan. Podium, pembahasan, dan tutup ruang diuji di mesin agen (`kelas.uji.ts`).
 
 ## Temuan
 
@@ -100,6 +100,8 @@ Di [tests/JS-10/](JS-10/): `kelas-lobi`, `kelas-bermain`, `kelas-jeda`, `kelas-p
 2. Kartu pembahasan sempat perlu digulir di layar 16:9. Batang persen kini menjadi latar kotak opsi.
 3. Penyesuaian lain terhadap spesifikasi tercatat di bagian "Catatan Build" spesifikasi JS-10: `RUANG_AKTIF_MAKS` lokal 1000, tabel pesan galat API ruang, berkas tambahan, warna tas rose dan berry, podium hanya untuk pemain berskor, dan cakupan uji aturan impor.
 4. `sim:beban` di lingkungan uji kini butuh akun konsol (`JEJAK_UJI_EMAIL`, `JEJAK_UJI_SANDI`), bukan `JEJAK_KUNCI_COBA`.
+5. Di peramban Windows, tanda ✓ di 10 besar tampil seperti √ karena Pixelify Sans tidak punya glif itu (catatan Plan JS-11: ganti dengan ikon `ikon_centang`).
+6. Menyalin isi ZIP tidak menghapus berkas; alur kerja yang dihapus harus dihapus pemilik proyek sendiri, dan uji kerangka menangkapnya bila terlewat.
 
 ## Keputusan: Lulus
 
