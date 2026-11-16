@@ -2038,3 +2038,27 @@ body {
     padding: 16px;
   }
 }
+
+/* JS-12 (P-12): mode pratinjau di bingkai penyunting konsol. */
+.js-pratinjau {
+  position: fixed;
+  inset: 0;
+  background: var(--js-mist);
+}
+.js-pratinjau-pita {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 0;
+  padding: 4px 8px;
+  background: var(--js-ink);
+  color: var(--js-white);
+  font-size: 12px;
+  z-index: 2;
+}

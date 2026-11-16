@@ -3,7 +3,7 @@
 // `tabrakan` yang diurai, lalu `titikMuncul` dan `gerbangLobi` diambil dan grid lobi dibuat. Hanya kunci yang
 // dipakai yang diimpor, agar Worker tidak membawa daftar objek peta. Pemeriksaan penuh `bacaPeta` dijalankan uji.
 // JS-08: titik kejadian per zona untuk penempatan kejadian ruang (P-2, P-9).
-import { gerbangLobi, lebar, tabrakan, tinggi, titikKejadian, titikMuncul } from "../../../../app/jejak-setara/peta/kampung.json";
+import { gerbangLobi, lebar, tabrakan, tinggi, titikKejadian, titikMuncul, zona } from "../../../../app/jejak-setara/peta/kampung.json";
 import { tutupGerbang, uraiRle, versiPeta } from "../../../../app/jejak-setara/inti/peta";
 import type { TitikPeta, ZonaId } from "../../../../app/jejak-setara/inti/tipe";
 import type { PetaRuang } from "./inti-ruang";
@@ -29,3 +29,6 @@ export const TITIK_PER_ZONA: Readonly<Partial<Record<ZonaId, readonly TitikPeta[
   }
   return hasil;
 })();
+
+/** JS-12 (P-24): nama zona untuk pilihan penyunting konsol. */
+export const NAMA_ZONA: readonly { id: string; nama: string }[] = zona.map((z) => ({ id: z.id, nama: z.nama }));

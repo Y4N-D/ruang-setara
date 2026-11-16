@@ -163,6 +163,11 @@ export const TEKS = {
     putusIsi: "Periksa internet HP, lalu ketuk Coba lagi.",
     cobaLagi: "Coba lagi",
   },
+  // JS-12 (P-12): mode pratinjau untuk penyunting konsol.
+  pratinjau: {
+    pita: "Pratinjau. Di ronde, urutan pilihan diacak untuk setiap pemain.",
+    menunggu: "Menunggu isi kejadian…",
+  },
 } as const;
 
 /** Mengisi {nama} di dalam teks, misalnya isiTeks(TEKS.lobi.jumlah, { n: 3 }). */

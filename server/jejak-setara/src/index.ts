@@ -6,6 +6,7 @@ import { TEKS } from "../../../app/jejak-setara/teks";
 import { jalurAkun, tanganiApiAkun } from "./api/akun";
 import { tanganiApiDasbor } from "./api/dasbor";
 import { JALUR_MASUK, tanganiApiMasuk } from "./api/masuk";
+import { jalurBank, tanganiApiBank } from "./api/bank";
 import { jalurRuang, tanganiApiRuang, tanganiWsKelas, tanganiWsRuang } from "./api/ruang";
 import { bersihkanAkun } from "./db/akun";
 import { tandaiRuangLama } from "./db/ruang";
@@ -36,6 +37,7 @@ export default {
     if (JALUR_MASUK.has(pathname)) return tanganiApiMasuk(request, env, url);
     if (jalurAkun(pathname)) return tanganiApiAkun(request, env, url);
     if (pathname === "/api/dasbor") return tanganiApiDasbor(request, env);
+    if (jalurBank(pathname)) return tanganiApiBank(request, env, url);
     if (pathname.startsWith("/api/") || pathname.startsWith("/ws/")) {
       return jawabGalat("BELUM_TERSEDIA", "Fitur ini belum tersedia.", 404);
     }

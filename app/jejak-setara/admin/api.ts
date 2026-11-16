@@ -27,6 +27,19 @@ import {
   type IsiRuangBaru,
   type KodeGalatRuang,
 } from "../inti/ruang";
+import {
+  skemaDaftarKejadian,
+  skemaDaftarPaket,
+  skemaDaftarRujukan,
+  skemaDetailKejadian,
+  skemaDetailPaket,
+  skemaHasilAksi,
+  skemaHasilRujukan,
+  skemaHasilSimpan,
+  skemaPilihanBank,
+  skemaVersiKejadian,
+  type AksiKejadian,
+} from "../inti/bank";
 import { TEKS_KONSOL } from "../teks-konsol";
 
 export interface GalatApi {
@@ -47,7 +60,7 @@ export function galatDari(kode: KodeGalatAkun | KodeGalatRuang, status = 0, isi?
   return { ok: false, kode, pesan, status, isi };
 }
 
-async function panggil<T>(metode: "GET" | "POST" | "PATCH", jalur: string, isi: unknown, skema: z.ZodType<T>): Promise<HasilApi<T>> {
+async function panggil<T>(metode: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", jalur: string, isi: unknown, skema: z.ZodType<T>): Promise<HasilApi<T>> {
   const tajuk: Record<string, string> = { Accept: "application/json" };
   if (metode !== "GET") tajuk["X-Jejak"] = "1";
   if (isi !== undefined) tajuk["Content-Type"] = "application/json";
@@ -81,6 +94,27 @@ async function panggil<T>(metode: "GET" | "POST" | "PATCH", jalur: string, isi: 
 
 const skemaKeluar = z.object({ ok: z.literal(true) });
 
+export interface IsiRujukanApi {
+  teks: string;
+  sumber: string;
+  catatan: string;
+  kodeSehari: string | null;
+}
+export interface IsiPaketApi {
+  nama: string;
+  deskripsi: string;
+  aktif: boolean;
+  kejadian: string[];
+}
+const skemaOk = z.object({ ok: z.literal(true) });
+const skemaIdPaket = z.object({ id: z.string() });
+
+/** Temuan validasi dari jawaban galat `TEMUAN` (JS-12, P-8). */
+export function temuanDari(g: GalatApi): { kode: string; tingkat: "galat" | "peringatan"; letak: string; pesan: string }[] {
+  const t = (g.isi as { temuan?: unknown } | undefined)?.temuan;
+  return Array.isArray(t) ? (t as { kode: string; tingkat: "galat" | "peringatan"; letak: string; pesan: string }[]) : [];
+}
+
 export const api = {
   saya: () => panggil("GET", "/api/saya", undefined, skemaJawabanSaya),
   masuk: (email: string, sandi: string) => panggil("POST", "/api/masuk", { email, sandi }, skemaJawabanAkunSaya),
@@ -97,6 +131,23 @@ export const api = {
   detailRuang: (id: string) => panggil("GET", `/api/ruang/${encodeURIComponent(id)}`, undefined, skemaDetailRuang),
   kelolaRuang: (id: string, aksi: AksiKelola, pemainId?: string) => panggil("POST", `/api/ruang/${encodeURIComponent(id)}/kelola`, { aksi, pemainId }, skemaKeluar),
   tiketRuang: (id: string) => panggil("POST", `/api/ruang/${encodeURIComponent(id)}/tiket`, {}, skemaTiket),
+  // JS-12 (P-24): bank kejadian, pustaka rujukan, dan paket.
+  daftarKejadian: () => panggil("GET", "/api/kejadian", undefined, skemaDaftarKejadian),
+  pilihanBank: () => panggil("GET", "/api/kejadian/pilihan", undefined, skemaPilihanBank),
+  detailKejadian: (kode: string) => panggil("GET", `/api/kejadian/${kode}`, undefined, skemaDetailKejadian),
+  versiKejadian: (kode: string, nomor: number) => panggil("GET", `/api/kejadian/${kode}/versi/${nomor}`, undefined, skemaVersiKejadian),
+  buatKejadian: (isi: unknown) => panggil("POST", "/api/kejadian", { isi }, skemaHasilSimpan),
+  simpanKejadian: (kode: string, isi: unknown, diubahPada: number) => panggil("PUT", `/api/kejadian/${kode}/kerja`, { isi, diubahPada }, skemaHasilSimpan),
+  aksiKejadian: (kode: string, aksi: AksiKejadian, catatan?: string) =>
+    panggil("POST", `/api/kejadian/${kode}/aksi`, catatan === undefined ? { aksi } : { aksi, catatan }, skemaHasilAksi),
+  daftarRujukan: () => panggil("GET", "/api/rujukan", undefined, skemaDaftarRujukan),
+  tambahRujukan: (isi: IsiRujukanApi) => panggil("POST", "/api/rujukan", isi, skemaHasilRujukan),
+  ubahRujukan: (id: string, isi: IsiRujukanApi) => panggil("PUT", `/api/rujukan/${id}`, isi, skemaHasilRujukan),
+  verifikasiRujukan: (id: string, terverifikasi: boolean) => panggil("POST", `/api/rujukan/${id}/verifikasi`, { terverifikasi }, skemaHasilRujukan),
+  hapusRujukan: (id: string) => panggil("DELETE", `/api/rujukan/${id}`, undefined, skemaOk),
+  daftarPaket: () => panggil("GET", "/api/paket", undefined, skemaDaftarPaket),
+  detailPaket: (id: string) => panggil("GET", `/api/paket/${id}`, undefined, skemaDetailPaket),
+  simpanPaket: (id: string | null, isi: IsiPaketApi) => (id ? panggil("PUT", `/api/paket/${id}`, isi, skemaIdPaket) : panggil("POST", "/api/paket", isi, skemaIdPaket)),
 };
 
 export type Muatan<T> = { jenis: "memuat" } | { jenis: "gagal" } | { jenis: "ada"; data: T };

@@ -12,6 +12,10 @@ import DetailRuang from "./halaman/DetailRuang";
 import GantiSandi from "./halaman/GantiSandi";
 import Masuk from "./halaman/Masuk";
 import Ruang from "./halaman/Ruang";
+import DaftarKejadian from "./bank/DaftarKejadian";
+import DaftarPaket from "./bank/DaftarPaket";
+import Penyunting from "./bank/Penyunting";
+import Rujukan from "./bank/Rujukan";
 import LayarKelas from "./kelas/LayarKelas";
 import Kerangka, { type Pemberitahuan } from "./Kerangka";
 import { keHash, tujuan, type Rute, type Tujuan } from "./rute";
@@ -95,6 +99,13 @@ export default function App() {
 
   const umumkan = useCallback((pesan: string) => setPemberitahuan({ jenis: "berhasil", pesan }), []);
 
+  /** JS-12: membuka hash konsol mana pun dengan entri riwayat baru, lalu pemberitahuan (pemberitahuan lama dipertahankan bila tanpa pesan). */
+  const buka = useCallback((h: string, pesan?: string) => {
+    window.history.pushState(null, "", h);
+    setHash(h);
+    if (pesan) setPemberitahuan({ jenis: "berhasil", pesan });
+  }, []);
+
   /** Membuka detail ruang dengan entri riwayat baru (tombol Kembali peramban kembali ke daftar), lalu pemberitahuan. */
   const bukaRuang = useCallback((id: string, pesan?: string) => {
     window.history.pushState(null, "", keHash("ruang", id));
@@ -167,6 +178,20 @@ export default function App() {
             <DetailRuang key={idRuang} id={idRuang} akun={akun} galatSesi={galatSesi} umumkan={umumkan} />
           ) : (
             <Ruang akun={akun} galatSesi={galatSesi} bukaRuang={bukaRuang} />
+          )
+        ) : rute === "kejadian" ? (
+          idRuang ? (
+            <Penyunting key={idRuang} kode={idRuang} akun={akun} galatSesi={galatSesi} umumkan={umumkan} buka={buka} />
+          ) : (
+            <DaftarKejadian galatSesi={galatSesi} />
+          )
+        ) : rute === "rujukan" ? (
+          <Rujukan akun={akun} galatSesi={galatSesi} umumkan={umumkan} />
+        ) : rute === "paket" ? (
+          akun.peran === "admin" ? (
+            <DaftarPaket key={idRuang ?? "daftar"} id={idRuang} galatSesi={galatSesi} umumkan={umumkan} buka={buka} />
+          ) : (
+            <p role="alert">{TEKS_KONSOL.hanyaAdmin}</p>
           )
         ) : rute === "akun" ? (
           <Akun akun={akun} galatSesi={galatSesi} umumkan={umumkan} perbaruiDiri={perbaruiAkun} />

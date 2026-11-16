@@ -149,7 +149,7 @@ describe("Teks dan halaman", () => {
   it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01, JS-03, JS-07, dan JS-08 (tanpa konsolJudul dan konsolIsi sejak JS-04)", () => {
     expect(TEKS).not.toHaveProperty("konsolJudul");
     expect(TEKS).not.toHaveProperty("konsolIsi");
-    expect(tanpaKunci(TEKS, KUNCI_JS22_PEMAIN)).toEqual({
+    expect(tanpaKunci(TEKS, [...KUNCI_JS22_PEMAIN, ...kunciJs12().pemain])).toEqual({
       judulTabPemain: "Jejak Setara",
       judulTabKonsol: "Konsol admin · Jejak Setara",
       judul: "Jejak Setara",
@@ -293,6 +293,19 @@ describe("Teks dan halaman", () => {
     });
   });
 
+  it("JS-12: TEKS_KONSOL dan TEKS memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-12 (AC-16)", () => {
+    const { konsol, pemain, teks } = kunciJs12();
+    expect(konsol.length).toBeGreaterThan(150);
+    const datarKonsol = ratakanTeks(TEKS_KONSOL);
+    const datarPemain = ratakanTeks(TEKS);
+    for (const k of konsol) expect(datarKonsol[k], k).toBe(teks[k]);
+    for (const k of pemain) expect(datarPemain[k], k).toBe(teks[k]);
+    for (const grup of ["bank", "daftar", "sunting", "aksi", "riwayat", "pratinjau", "pustaka", "paket", "temuan"]) {
+      const ada = Object.keys(datarKonsol).filter((k) => k.startsWith(`${grup}.`));
+      expect(ada.sort(), grup).toEqual(konsol.filter((k) => k.startsWith(`${grup}.`)).sort());
+    }
+  });
+
   it("JS-22: TEKS dan TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-22 (AC-17)", () => {
     const isi = baca("docs/jejak-setara/specs/JS-22-biaya.md");
     const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"));
@@ -316,7 +329,7 @@ describe("Teks dan halaman", () => {
   });
 
   it("JS-04: TEKS_KONSOL sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-04 (P-51), di luar teks JS-10", () => {
-    expect(tanpaKunci(tanpaKunciJs10(TEKS_KONSOL) as object, KUNCI_JS22_KONSOL)).toEqual({
+    expect(tanpaKunci(tanpaKunciJs10(TEKS_KONSOL) as object, [...KUNCI_JS22_KONSOL, ...kunciJs12().konsol])).toEqual({
       merek: "Jejak Setara",
       subjudul: "Konsol guru dan admin",
       memuat: "Memuat konsol…",
@@ -538,7 +551,7 @@ describe("Token dan tajuk", () => {
   it("_headers memberi keempat tajuk untuk /* (AC-8)", () => {
     expect(baca("web/jejak-setara/public/_headers")).toBe(
       "/*\n" +
-        "  Content-Security-Policy: default-src 'self'; connect-src 'self'; img-src 'self' data: blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'\n" +
+        "  Content-Security-Policy: default-src 'self'; connect-src 'self'; img-src 'self' data: blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'\n" +
         "  X-Content-Type-Options: nosniff\n" +
         "  Referrer-Policy: same-origin\n" +
         "  Permissions-Policy: camera=(), microphone=(), geolocation=()\n",
@@ -886,4 +899,25 @@ function tanpaKunci(teks: object, kunci: readonly string[]): unknown {
     }
   }
   return salin;
+}
+
+/** JS-12 (AC-16): kunci dan teks dari tabel spesifikasi JS-12 (konsol, kalimat temuan, dan layar pemain). */
+function kunciJs12(): { konsol: string[]; pemain: string[]; teks: Record<string, string> } {
+  const isi = baca("docs/jejak-setara/specs/JS-12-bank.md");
+  const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"), isi.indexOf("\n## Data, protokol"));
+  const batas = bagian.indexOf("**Layar pemain, mode pratinjau**");
+  const urai = (teks: string): Record<string, string> => {
+    const hasil: Record<string, string> = {};
+    for (const baris of teks.split("\n")) {
+      const m = /^\| (`[^|]+`) \| (.+) \|$/.exec(baris);
+      if (!m) continue;
+      const kunci = [...m[1].matchAll(/`([^`]+)`/g)].map((x) => x[1]);
+      const nilai = kunci.length > 1 ? m[2].split(" / ") : [m[2]];
+      kunci.forEach((k, i) => (hasil[k] = nilai[i]));
+    }
+    return hasil;
+  };
+  const konsol = urai(bagian.slice(0, batas));
+  const pemain = urai(bagian.slice(batas));
+  return { konsol: Object.keys(konsol), pemain: Object.keys(pemain), teks: { ...konsol, ...pemain } };
 }

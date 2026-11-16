@@ -636,11 +636,11 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `GET` · `POST /api/akun`; `PATCH /api/akun/{id}` | Daftar, buat, ubah, nonaktifkan, atur ulang sandi | Admin |
 | `GET /api/dasbor` | Isi dasbor; sejak JS-04 jumlah rujukan yang belum diverifikasi | Admin, guru |
 | `POST /api/admin-awal` | Membuat atau memulihkan akun admin; hanya dengan kunci sekali pakai `KUNCI_ADMIN` (JS-04) | Alur kerja "Jejak: admin awal" |
-| `GET` · `POST /api/kejadian`; `GET` · `PATCH /api/kejadian/{id}` | Daftar, buat draf, baca, simpan versi kerja | Admin, guru |
-| `POST /api/kejadian/{id}/ajukan` · `/terbitkan` · `/arsipkan` | Ubah status | Admin, guru · admin · admin |
-| `GET /api/kejadian/{id}/versi` | Riwayat versi | Admin, guru |
-| `GET` · `POST /api/rujukan`; `PATCH /api/rujukan/{id}`; `POST /api/rujukan/{id}/verifikasi` | Pustaka rujukan; verifikasi | Admin, guru; verifikasi hanya Peninjau |
-| `GET` · `POST /api/paket`; `PATCH /api/paket/{id}` | Paket kejadian | Admin |
+| `GET` · `POST /api/kejadian`; `GET /api/kejadian/pilihan`; `GET /api/kejadian/{K-xx}`; `PUT /api/kejadian/{K-xx}/kerja` | Daftar, buat (kode diberikan saat simpan pertama), pilihan isian, detail, simpan versi kerja dengan penanda versi (JS-12) | Admin; guru untuk kejadian miliknya berstatus Draf atau Siap tinjau |
+| `POST /api/kejadian/{K-xx}/aksi` | Ajukan, kembalikan, terbitkan, arsipkan, pulihkan, hapus (JS-12, P-14) | Menurut aksi: terbitkan, arsipkan, kembalikan, dan pulihkan hanya admin |
+| `GET /api/kejadian/{K-xx}/versi/{nomor}` | Isi satu versi terbit | Admin, guru |
+| `GET` · `POST /api/rujukan`; `PUT` · `DELETE /api/rujukan/{JR-xx}`; `POST /api/rujukan/{JR-xx}/verifikasi` | Pustaka rujukan; tambah (admin, guru), ubah dan hapus (admin), verifikasi (tanda Peninjau) (JS-12) | Lihat kolom isi |
+| `GET` · `POST /api/paket`; `GET` · `PUT /api/paket/{id}` | Paket kejadian (JS-12) | Admin |
 | `POST /api/ruang`; `GET /api/ruang`; `GET /api/ruang/{id}`; `DELETE /api/ruang/{id}` | Buat, daftar, hasil, hapus data | Admin, guru (miliknya) |
 | `POST /api/ruang/{id}/tiket` | Tiket layar kelas | Pemilik ruang, admin |
 | `GET /api/ruang/{id}/ekspor?jenis=peserta\|jawaban` | CSV | Pemilik ruang, admin |
@@ -650,7 +650,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `GET /api/bank/ekspor`; `POST /api/bank/impor` | Ekspor dan impor JSON bank | Admin |
 | `GET /api/publik/ruang/{KODE}` | Apakah kode ada dan apakah mode nomor absen aktif; dibaca dari D1 tanpa memanggil ruang (JS-03) | Umum, dibatasi frekuensinya |
 | `GET /api/ruang/pilihan`; `POST /api/ruang/{id}/kelola` | Paket aktif untuk dialog ruang baru; kunci, buka kunci, keluarkan, dan tutup dari konsol (JS-10) | Admin, guru (miliknya) |
-| `/api/uji/ruang/{KODE}/statistik` · `/putuskan` · `/kejadian` · `/pindahkan` | Kait uji lokal (JS-07, JS-08); hanya di `lokal`, 404 di lingkungan lain. Pengganti kait ruang coba sejak JS-10 | Uji |
+| `/api/uji/ruang/{KODE}/statistik` · `/putuskan` · `/kejadian` · `/pindahkan` · `/pengaman` | Kait uji lokal (JS-07, JS-08); hanya di `lokal`, 404 di lingkungan lain. Pengganti kait ruang coba sejak JS-10 | Uji |
 
 ### 10.3 Autentikasi dan sesi
 
@@ -791,7 +791,7 @@ Sejak JS-22, lingkungan uji menetapkan `observability` di `wrangler.jsonc`: Work
 
 ### 12.2 Tajuk keamanan
 
-Halaman statis mendapat tajuk dari `web/jejak-setara/public/_headers` (aturan `/*`), karena aset disajikan langsung tanpa melewati Worker: `Content-Security-Policy` (`default-src 'self'`; `connect-src 'self'`, yang juga mencakup WebSocket ke alamat sendiri; `img-src 'self' data: blob:`; `frame-ancestors 'none'`; `base-uri 'self'`; `form-action 'self'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, dan `Permissions-Policy` yang menolak kamera, mikrofon, dan lokasi.
+Halaman statis mendapat tajuk dari `web/jejak-setara/public/_headers` (aturan `/*`), karena aset disajikan langsung tanpa melewati Worker: `Content-Security-Policy` (`default-src 'self'`; `connect-src 'self'`, yang juga mencakup WebSocket ke alamat sendiri; `img-src 'self' data: blob:`; `frame-ancestors 'self'`; `base-uri 'self'`; `form-action 'self'`), `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, dan `Permissions-Policy` yang menolak kamera, mikrofon, dan lokasi. Sejak JS-12, `frame-ancestors 'self'` membolehkan bingkai pratinjau penyunting konsol memuat layar pemain dari asal yang sama; situs lain tetap tidak bisa membingkai halaman Jejak Setara.
 
 Tajuk `_headers` tidak berlaku untuk jawaban buatan Worker (dokumentasi Cloudflare). Karena itu setiap jawaban API membawa tajuknya sendiri: `Content-Type: application/json; charset=utf-8`, `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`, dan `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`. Saat `vite` dev, `_headers` tidak dipakai, sehingga muat ulang otomatis tidak terhalang.
 

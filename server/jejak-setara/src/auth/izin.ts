@@ -9,6 +9,14 @@ export const IZIN = {
   // JS-10 (P-33): untuk guru, ruang.kelola juga mensyaratkan kepemilikan ruang (diperiksa di api/ruang.ts).
   "ruang.buat": ["admin", "guru"],
   "ruang.kelola": ["admin", "guru"],
+  // JS-12 (P-2): kepemilikan kejadian dan tanda Peninjau diperiksa di api/bank.ts.
+  "kejadian.lihat": ["admin", "guru"],
+  "kejadian.sunting": ["admin", "guru"],
+  "kejadian.terbitkan": ["admin"],
+  "rujukan.lihat": ["admin", "guru"],
+  "rujukan.tambah": ["admin", "guru"],
+  "rujukan.sunting": ["admin"],
+  "paket.kelola": ["admin"],
 } as const satisfies Record<string, readonly Peran[]>;
 
 export type Aksi = keyof typeof IZIN;

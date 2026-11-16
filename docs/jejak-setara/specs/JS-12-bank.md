@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| Status | Ditulis 15 November 2026 di tahap Specify, sesudah `Setuju: JS-12` (usulan 1a sampai 16a). Menunggu `Spesifikasi disetujui: JS-12` beserta pilihan DRAF D-1 sampai D-4 |
+| Status | Disetujui 15 November 2026 (`Spesifikasi disetujui: JS-12. D-1 a, D-2 a, D-3 a, D-4 a.`). Dibangun dan diuji 16 November 2026; penyesuaian saat Build ada di bagian "Catatan Build" |
 | Rencana | `PLAN.md`, bagian "JS-12 — Bank kejadian di konsol" |
 | Sesi | Sesi A (mesin) |
 | Bergantung pada | JS-04 (akun, peran, Peninjau) dan JS-05 (skema dan aturan konten), keduanya Selesai |
 
-Ralat dari Plan: jumlah kode temuan validasi di `inti/konten/periksa.ts` adalah **28** (8 dari skema, 11 aturan satu kejadian, 9 aturan bank dan paket), bukan 48.
+Ralat dari Plan: jumlah kode temuan validasi di `inti/konten/periksa.ts` adalah **27** (8 dari skema, 11 aturan satu kejadian, 8 aturan bank dan paket), bukan 48. Specify semula menulis 28; tabel kalimat temuan di bawah memang berisi 27 kode (Catatan Build).
 
 ## Ringkasan
 
@@ -382,3 +382,16 @@ Impor dan ekspor JSON (JFR-48), statistik per kejadian dan per versi (JS-13), ha
 2. Pemilik proyek (akun bertanda Peninjau) memeriksa dan menandai 23 rujukan bank awal di `#/rujukan`.
 3. Sebagai admin, menerbitkan 16 kejadian bank awal satu per satu dengan catatan perubahan "Terbit pertama".
 4. Membuat satu ruang dengan kotak "Ruang uji" tidak dicentang, lalu mengirim tangkapan layar dialognya.
+
+## Catatan Build (16 November 2026)
+
+- **Jumlah kode temuan:** 27, bukan 28 seperti yang semula tertulis di spesifikasi ini. Tabel kalimat temuan sudah berisi tepat 27 kode, dan uji `aturan-bank.test.ts` memastikannya sama dengan `KODE_TEMUAN`.
+- **Kolom wajib dari aturan JS-05:** catatan rujukan dan deskripsi paket wajib diisi, karena skema rujukan dan paket bank awal memakai teks polos yang tidak boleh kosong. Formulir konsol menampilkan temuan bila kosong.
+- **Kunci aset tokoh (P-6, P-8):** server memakai daftar tetap `app/jejak-setara/inti/konten/kunci-aset.ts` (102 kunci yang Disetujui) agar tidak mengimpor `assets/manifest.ts`. Uji memastikan daftar itu sama dengan berkas `assets/npc/`, `assets/obj/`, dan `CREDITS.md`; bila Sesi C menambah aset, Sesi A memperbarui daftar ini. Konsol memuat gambar kecilnya lewat `import.meta.glob` (`admin/bank/aset-tokoh.ts`).
+- **Nama zona (P-5, P-6):** nama delapan zona dikirim `GET /api/kejadian/pilihan` dari peta (`NAMA_ZONA` di `ruang/peta-kampung.ts`), sehingga konsol tidak memuat data peta.
+- **Tajuk keamanan halaman (P-11):** `frame-ancestors 'none'` di `web/jejak-setara/public/_headers` menjadi `frame-ancestors 'self'`, karena bingkai pratinjau konsol memuat layar pemain dari asal yang sama. Situs lain tetap tidak bisa membingkai halaman Jejak Setara. Uji kerangka dan Architecture 12 sudah menyesuaikan.
+- **Bentuk dialog di pratinjau (P-11, P-12):** pratinjau selalu memakai bentuk lembar seperti di HP. Di ronde, HP tegak diminta diputar ke mendatar (JS-02), jadi tampilan tegak 360 × 640 di pratinjau dipakai untuk memeriksa panjang teks pada lebar sempit.
+- **Ukuran kode (P-26, AC-8):** mode pratinjau menambah 0,85 KB gzip pada layar pemain (122,72 menjadi 123,57 KB), lebih dari perkiraan 0,4 KB. Memuat pratinjau sebagai potongan terpisah tetap menambah 0,79 KB karena pemuat potongan Vite, jadi kode pratinjau dirampingkan dan dimuat langsung. Konsol naik 17,6 KB (98,78 menjadi 116,34 KB) karena aturan validasi konten dan halaman bank; Worker naik ke 92,07 KB gzip karena validasi konten juga berjalan di server. Keputusan pemilik proyek ada di laporan.
+- **Paket baru (P-21):** "+ Paket baru" membuka penyusun di halaman `#/paket` tanpa rute tersendiri, karena rute paket hanya menerima UUID (P-3).
+- **Riwayat versi (P-16):** bagian Riwayat ada di bawah isian penyunting; "Lihat" menampilkan versi itu di isian hanya baca dan di pratinjau dengan pita "Versi {nomor}".
+- **Kait uji lokal:** uji server alur penuh memakai kejadian dan paket baru yang dibuat di uji, bukan bank awal, agar Paket inti 16 tetap belum siap untuk ruang biasa dan uji lain tidak terpengaruh. Uji ujung ke ujung mengembalikan judul K-01 yang diubahnya.

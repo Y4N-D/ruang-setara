@@ -15,7 +15,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-09 | Belum direncanakan | — | — |
 | JS-10 | Selesai (15 Nov 2026) | [JS-10-kelas.md](specs/JS-10-kelas.md) | [JS-10-hasil.md](tests/JS-10-hasil.md), lulus (AC-19 dengan catatan) |
 | JS-11 | Belum direncanakan | — | — |
-| JS-12 | Spesifikasi ditulis (15 Nov 2026); menunggu `Spesifikasi disetujui: JS-12` | [JS-12-bank.md](specs/JS-12-bank.md) | — |
+| JS-12 | Dibangun dan diuji (16 Nov 2026); menunggu keputusan ukuran kode, push, dan langkah pemilik proyek | [JS-12-bank.md](specs/JS-12-bank.md) | [JS-12-hasil.md](tests/JS-12-hasil.md), lulus dengan catatan AC-8 |
 | JS-13 | Belum direncanakan | — | — |
 | JS-14 | Belum direncanakan | — | — |
 | JS-15 | Belum direncanakan | — | — |
@@ -903,7 +903,7 @@ Dibangun dalam mode ZIP. Rinciannya di [JS-22-hasil.md](tests/JS-22-hasil.md).
 
 ## JS-12 — Bank kejadian di konsol
 
-- Status: **Spesifikasi ditulis (15 Nov 2026)**: [JS-12-bank.md](specs/JS-12-bank.md), menunggu `Spesifikasi disetujui: JS-12` beserta pilihan DRAF D-1 sampai D-4. Plan disetujui 15 Nov 2026 (`Setuju: JS-12`, usulan 1a sampai 16a). Urutan pemilik proyek: JS-12, JS-11, lalu JS-09.
+- Status: **Dibangun dan diuji (16 Nov 2026)**: laporan [JS-12-hasil.md](tests/JS-12-hasil.md) lulus dengan catatan AC-8 (ukuran kode layar pemain); menunggu keputusan pemilik proyek, push, dan langkah di lingkungan uji. Spesifikasi disetujui 15 Nov 2026 (D-1 sampai D-4 = a); Plan disetujui 15 Nov 2026 (usulan 1a sampai 16a). Urutan pemilik proyek: JS-12, JS-11, lalu JS-09.
 - Memenuhi: JFR-41 sampai JFR-46 (PRD 9); PRD 11.1; Architecture 5.4, 10.5, dan 10.6; Permintaan A-7 (kalimat temuan validasi di konsol); catatan Plan JS-12 dari Build JS-10 (`paketSiapRuangBiasa`).
 - Bergantung pada: JS-04 (akun, peran, dan tanda Peninjau) dan JS-05 (skema dan aturan konten), keduanya Selesai.
 - Ukuran: L.
@@ -935,3 +935,20 @@ Dibangun dalam mode ZIP. Rinciannya di [JS-22-hasil.md](tests/JS-22-hasil.md).
 **Risiko:** (1) Penyunting adalah halaman konsol terbesar sejauh ini; isiannya banyak, jadi Specify perlu teks dan susunan yang rinci. (2) Pratinjau `iframe` memuat layar pemain sekali (sekitar 128 KB gzip) saat pertama dibuka; sesudahnya isi dikirim tanpa memuat ulang. (3) Verifikasi 23 rujukan adalah pekerjaan pemilik proyek atau guru bertanda Peninjau di luar kode; ruang biasa baru bisa dipakai sesudahnya.
 
 **Langkah pemilik proyek sesudah Build** (ditetapkan di Specify): masuk sebagai akun bertanda Peninjau, memeriksa dan menandai 23 rujukan bank awal; sebagai admin, menerbitkan 16 kejadian; lalu membuat satu ruang biasa dari dialog ruang baru.
+
+### Hasil Build dan Test JS-12 (16 Nov 2026)
+
+Dibangun dalam mode ZIP. Rinciannya di [JS-12-hasil.md](tests/JS-12-hasil.md).
+
+- **Perintah resmi:** `test:jejak` 950, `test:jejak:server` 55, `content:check:jejak` 254, dan uji ujung ke ujung 43 lulus; `build:pages` 178 berkas identik; `tsc` dan ESLint bersih.
+- **Alur utama di server lokal:** guru bertanda Peninjau membuat dan mengajukan kejadian serta memverifikasi rujukannya, admin menerbitkannya sebagai versi 1 dan menyusun paket, lalu paket itu boleh dipakai untuk ruang biasa.
+- **Penyesuaian:** tajuk `frame-ancestors 'self'` untuk bingkai pratinjau; pratinjau berbentuk lembar; 27 kode temuan; catatan rujukan dan deskripsi paket wajib (Catatan Build spesifikasi).
+- **Catatan AC-8:** kode layar pemain naik 0,85 KB gzip untuk mode pratinjau (perkiraan 0,4 KB); perlu keputusan pemilik proyek.
+
+**Langkah pemilik proyek sesudah ZIP Build JS-12 di-push:**
+
+1. Pastikan "Jejak: uji" hijau.
+2. Masuk konsol sebagai admin, buka **Kejadian**, lalu buka satu kejadian dan lihat pratinjaunya (Tegak dan Mendatar).
+3. Bila akun Anda belum bertanda Peninjau, buka **Akun** dan centang Peninjau untuk akun Anda; lalu di **Rujukan**, periksa teks dan sumber setiap rujukan bank awal dan tandai yang sudah benar sebagai Terverifikasi.
+4. Sesudah semua rujukan sebuah kejadian terverifikasi, terbitkan kejadian itu dengan catatan "Terbit pertama". Bila 16 kejadian Paket inti 16 sudah terbit, dialog **Ruang baru** membolehkan ruang biasa (kotak "Ruang uji" boleh tidak dicentang).
+5. Kirim tangkapan layar penyunting dengan pratinjau dan, bila sudah sampai, dialog ruang baru tanpa ruang uji.

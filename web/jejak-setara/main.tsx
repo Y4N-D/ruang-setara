@@ -6,9 +6,9 @@ import "@fontsource/press-start-2p/latin-400.css";
 import "@fontsource/pixelify-sans/latin-400.css";
 import "../../app/jejak-setara/styles/jejak.css";
 import App from "../../app/jejak-setara/pemain/App";
+import LayarPratinjau from "../../app/jejak-setara/pemain/LayarPratinjau";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+// JS-12 (P-12): `?pratinjau=1` dipakai bingkai penyunting konsol; tanpa sambungan ke ruang.
+const pratinjau = new URLSearchParams(location.search).has("pratinjau");
+
+createRoot(document.getElementById("root")!).render(<StrictMode>{pratinjau ? <LayarPratinjau /> : <App />}</StrictMode>);

@@ -26,7 +26,7 @@ const HALAMAN = [
 
 const TAJUK_HALAMAN: Record<string, string> = {
   "content-security-policy":
-    "default-src 'self'; connect-src 'self'; img-src 'self' data: blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+    "default-src 'self'; connect-src 'self'; img-src 'self' data: blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
   "x-content-type-options": "nosniff",
   "referrer-policy": "same-origin",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
