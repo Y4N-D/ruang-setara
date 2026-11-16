@@ -6,7 +6,7 @@
 | Spesifikasi | [JS-12-bank.md](../specs/JS-12-bank.md), disetujui 15 November 2026 (D-1 sampai D-4 = a) |
 | Tanggal | 16 November 2026 |
 | Lingkungan | Mesin agen (mode ZIP): Node 22.23.4, pnpm 11.25.0, Wrangler 4.92.0, Chromium untuk Playwright, 2 vCPU |
-| Keputusan | **Lulus dengan catatan AC-8 (ukuran kode layar pemain)**: perlu keputusan pemilik proyek (bagian "Keputusan") |
+| Keputusan | **Lulus**: AC-8 diterima pemilik proyek (16 Nov 2026, kenaikan 0,85 KB) |
 
 ## Kriteria penerimaan
 
@@ -59,9 +59,9 @@ Percobaan selama Build: memuat mode pratinjau sebagai potongan terpisah tetap me
 ## Pemeriksaan manual
 
 - [x] Tampilan penyunting dan pratinjau diperiksa dari tangkapan layar (dialog lembar terbaca di 360 dan 731 piksel).
-- [ ] Sesudah push: "Jejak: uji" hijau (pemilik proyek).
-- [ ] Penyunting dan pratinjau di lingkungan uji (pemilik proyek).
-- [ ] Verifikasi rujukan bank awal oleh akun bertanda Peninjau dan penerbitan kejadian (pemilik proyek).
+- [x] Sesudah push (16 Nov 2026): konsol lingkungan uji menampilkan menu dan halaman JS-12.
+- [x] Penyunting dan pratinjau di lingkungan uji (pemilik proyek, 16 Nov 2026): judul yang diketik langsung tampil di pratinjau.
+- [x] Verifikasi rujukan dan penerbitan (pemilik proyek, 16 Nov 2026): 21 dari 23 rujukan diverifikasi akun YAN; 16 kejadian Paket inti 16 terbit; dialog Ruang baru tidak lagi menyatakan paket belum siap.
 
 ## Temuan
 
@@ -73,3 +73,5 @@ Percobaan selama Build: memuat mode pratinjau sebagai potongan terpisah tetap me
 ## Keputusan
 
 Semua kriteria lulus kecuali catatan AC-8: kode layar pemain naik 0,85 KB gzip untuk mode pratinjau. Pilihan: (a, saran) terima, karena pratinjau memakai dialog layar pemain yang sungguhan sehingga tampilannya sama dengan di HP; (b) ganti dengan pratinjau tiruan di konsol, tanpa kenaikan di layar pemain, tetapi tampilannya bisa berbeda dari HP.
+
+**Keputusan pemilik proyek (16 Nov 2026):** AC-8 (a), kenaikan 0,85 KB diterima.

@@ -6,7 +6,7 @@
 | Spesifikasi | [JS-22-biaya.md](../specs/JS-22-biaya.md), disetujui 15 November 2026 (D-1 sampai D-3 = a) |
 | Tanggal | 15 November 2026 |
 | Lingkungan | Mesin agen (mode ZIP): Node 22.23.4, pnpm 11.25.0, Wrangler 4.92.0, Chromium untuk Playwright, 2 vCPU |
-| Keputusan | **Lulus**: AC-18 diterima pemilik proyek (15 Nov 2026); pemeriksaan "Jejak: hentikan" di layar pemain diulang (bagian "Pemeriksaan manual") |
+| Keputusan | **Lulus**: AC-18 diterima pemilik proyek (15 Nov 2026); semua pemeriksaan di lingkungan uji lulus (16 Nov 2026) |
 
 ## Kriteria penerimaan
 
@@ -72,7 +72,7 @@ Perubahan tidak dipertahankan: perbedaannya di dalam rentang derau, jauh di bawa
 
 - [x] Tampilan bagian "Pemakaian ronde ini" diperiksa dari tangkapan layar.
 - [x] Sesudah push (15 Nov 2026): "Jejak: uji" hijau untuk commit "JS-22: matikan cache otomatis setup-node di Jejak: uji", termasuk "Deploy uji" (bagian "Perbaikan alur kerja sesudah push").
-- [ ] "Jejak: hentikan" dengan aksi `hentikan`: pesan layanan berhenti **belum terlihat** di layar pemain (laporan pemilik proyek, 15 Nov 2026). Keempat run "Jejak: hentikan" hijau, dan langkah "Periksa" di setiap run hanya lulus bila `/api/sehat` menjawab `darurat` sesuai aksi, jadi Worker uji memang berhenti. Dugaan penyebab di sisi peramban: tab layar pemain yang dibuka sebelum deploy JS-22 (kode lama menampilkan pesan jaringan untuk jawaban 503), sesi tersimpan yang langsung menyambung ulang (layar "Menyambung ulang…", lalu "Layanan berhenti sementara" sesudah sekitar satu menit), atau kode yang tidak berbentuk 5 karakter yang sah. Diulang dengan jendela penyamaran baru dan kode `ABCDE`.
+- [x] "Jejak: hentikan" dengan aksi `hentikan` (ulangan 16 Nov 2026, jendela penyamaran): `/api/sehat` menjawab `"darurat":true`, dan layar pemain menampilkan "Layanan sedang dihentikan sementara. Coba lagi nanti." untuk kode ABCDE. Pemeriksaan pertama (15 Nov 2026) tidak memperlihatkan pesan itu karena keadaan peramban; keempat run saat itu sudah hijau.
 - [x] "Jejak: hentikan" dengan aksi `pulihkan`: layar pemain normal kembali (pemilik proyek, 15 Nov 2026).
 - [x] Satu ronde pendek dengan 1 pemain dari konsol (pemilik proyek, 15 Nov 2026). Tangkapan layar "Pemakaian ronde ini" belum ikut terkirim di pesan.
 
