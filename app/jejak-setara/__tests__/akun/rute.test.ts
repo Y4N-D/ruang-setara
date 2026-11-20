@@ -1,4 +1,4 @@
-// Rute hash konsol dan pengalihannya (spesifikasi JS-04, P-37 dan P-38, AC-14; JS-10, P-1, AC-1).
+// Rute hash konsol dan pengalihannya (spesifikasi JS-04, P-37 dan P-38, AC-14; JS-10, P-1, AC-1; JS-11, P-16, AC-12).
 import { describe, expect, it } from "vitest";
 import { bacaRute, keHash, menuUntuk, RUTE, tujuan, type KeadaanMasuk } from "../../admin/rute";
 
@@ -23,6 +23,13 @@ describe("pembacaan hash", () => {
     expect(bacaRute(`#/paket/${ID}`)).toEqual({ rute: "paket", id: ID });
     for (const salah of ["#/kejadian/K-7", `#/kejadian/${ID}`, "#/paket/K-07", "#/rujukan/JR-01", "#/ruang/baru", "#/paket/baru"]) expect(bacaRute(salah), salah).toBeNull();
     expect(keHash("kelas", ID)).toBe(`#/kelas/${ID}`);
+  });
+
+  it("JS-11 (P-16): #/ruang/riwayat dikenali; id riwayat hanya berlaku untuk rute ruang", () => {
+    expect(bacaRute("#/ruang/riwayat")).toEqual({ rute: "ruang", id: "riwayat" });
+    expect(keHash("ruang", "riwayat")).toBe("#/ruang/riwayat");
+    expect(tujuan("#/ruang/riwayat", guru)).toEqual({ rute: "ruang", id: "riwayat" });
+    for (const salah of ["#/kelas/riwayat", "#/paket/riwayat", "#/kejadian/riwayat", "#/dasbor/riwayat", "#/ruang/Riwayat", "#/ruang/riwayat/"]) expect(bacaRute(salah), salah).toBeNull();
   });
 
   it.each(["", "#", "#/", "#/bank", "#/Dasbor", "#dasbor", "#/dasbor/", "#/dasbor?x=1", "/dasbor", "#/kelas", `#/akun/${ID}`, "#/ruang/bukan-id", `#/ruang/${ID.toUpperCase()}`])(

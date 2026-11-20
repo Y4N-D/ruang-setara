@@ -40,6 +40,7 @@ import {
   skemaVersiKejadian,
   type AksiKejadian,
 } from "../inti/bank";
+import { skemaHasilRuang, skemaRiwayat, skemaRincianPeserta } from "../inti/hasil";
 import { TEKS_KONSOL } from "../teks-konsol";
 
 export interface GalatApi {
@@ -131,6 +132,12 @@ export const api = {
   detailRuang: (id: string) => panggil("GET", `/api/ruang/${encodeURIComponent(id)}`, undefined, skemaDetailRuang),
   kelolaRuang: (id: string, aksi: AksiKelola, pemainId?: string) => panggil("POST", `/api/ruang/${encodeURIComponent(id)}/kelola`, { aksi, pemainId }, skemaKeluar),
   tiketRuang: (id: string) => panggil("POST", `/api/ruang/${encodeURIComponent(id)}/tiket`, {}, skemaTiket),
+  // JS-11 (P-17, P-21, P-24, P-33): riwayat, hasil, rincian, dan hapus data ruang.
+  riwayatRuang: (q: URLSearchParams) => panggil("GET", `/api/ruang/riwayat${q.toString() ? `?${q.toString()}` : ""}`, undefined, skemaRiwayat),
+  hasilRuang: (id: string) => panggil("GET", `/api/ruang/${encodeURIComponent(id)}/hasil`, undefined, skemaHasilRuang),
+  rincianPeserta: (id: string, pesertaId: string) =>
+    panggil("GET", `/api/ruang/${encodeURIComponent(id)}/hasil/${encodeURIComponent(pesertaId)}`, undefined, skemaRincianPeserta),
+  hapusRuang: (id: string) => panggil("DELETE", `/api/ruang/${encodeURIComponent(id)}`, undefined, skemaOk),
   // JS-12 (P-24): bank kejadian, pustaka rujukan, dan paket.
   daftarKejadian: () => panggil("GET", "/api/kejadian", undefined, skemaDaftarKejadian),
   pilihanBank: () => panggil("GET", "/api/kejadian/pilihan", undefined, skemaPilihanBank),
@@ -149,6 +156,41 @@ export const api = {
   detailPaket: (id: string) => panggil("GET", `/api/paket/${id}`, undefined, skemaDetailPaket),
   simpanPaket: (id: string | null, isi: IsiPaketApi) => (id ? panggil("PUT", `/api/paket/${id}`, isi, skemaIdPaket) : panggil("POST", "/api/paket", isi, skemaIdPaket)),
 };
+
+/**
+ * JS-11 (P-30): unduh CSV hasil ruang lewat fetch dengan cookie sesi, lalu simpan sebagai berkas dengan nama dari tajuk
+ * Content-Disposition. Galat API dikembalikan seperti `panggil`.
+ */
+export async function unduhCsv(id: string, jenis: "peserta" | "jawaban"): Promise<{ ok: true } | GalatApi> {
+  let jawaban: Response;
+  try {
+    jawaban = await fetch(`/api/ruang/${encodeURIComponent(id)}/ekspor?jenis=${jenis}`, { credentials: "same-origin", cache: "no-store" });
+  } catch {
+    return galatDari("JARINGAN");
+  }
+  if (!jawaban.ok) {
+    const json: unknown = await jawaban.json().catch(() => null);
+    const galat = skemaGalat.safeParse(json);
+    const mentah = galat.success ? galat.data.galat.kode : "";
+    return galatDari(kodeDikenal(mentah) || kodeRuang(mentah) ? mentah : "UMUM", jawaban.status, json);
+  }
+  let isi: Blob;
+  try {
+    isi = await jawaban.blob();
+  } catch {
+    return galatDari("JARINGAN");
+  }
+  const nama = /filename="([^"]+)"/.exec(jawaban.headers.get("Content-Disposition") ?? "")?.[1] ?? `jejak-setara_${jenis}.csv`;
+  const alamat = URL.createObjectURL(isi);
+  const a = document.createElement("a");
+  a.href = alamat;
+  a.download = nama;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(alamat), 10_000);
+  return { ok: true };
+}
 
 export type Muatan<T> = { jenis: "memuat" } | { jenis: "gagal" } | { jenis: "ada"; data: T };
 

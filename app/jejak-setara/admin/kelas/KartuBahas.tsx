@@ -3,7 +3,7 @@ import { forwardRef } from "react";
 import type { PesanServerKelas } from "../../inti/protokol-kelas";
 import { isiTeks } from "../../teks";
 import { TEKS_KONSOL } from "../../teks-konsol";
-import { EMOSI, ZONA } from "./ikon-kelas";
+import { EMOSI, IKON_KELAS, ZONA } from "./ikon-kelas";
 import { persenPilihan } from "./tampilan-kelas";
 
 type Bahas = Extract<PesanServerKelas, { t: "data_pembahasan" }>;
@@ -41,7 +41,13 @@ const KartuBahas = forwardRef<HTMLDivElement, { data: Bahas; zona: number }>(fun
               <span className="js-kelas-batang" data-benar={o.benar ? "ya" : "tidak"} style={{ width: `${satu.persen[i]}%` }} />
               <span className="js-kelas-opsi-teks">
                 {o.teks}
-                {o.benar ? <span className="js-kelas-tepat">{t.jawabanTepat}</span> : null}
+                {o.benar ? (
+                  <span className="js-kelas-tepat">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
+                    <img src={IKON_KELAS.centang} alt="" />
+                    {t.jawabanTepat}
+                  </span>
+                ) : null}
               </span>
             </span>
             <span className="js-kelas-angka">{isiTeks(t.persen, { n: satu.persen[i] })}</span>

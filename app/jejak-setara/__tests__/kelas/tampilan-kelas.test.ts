@@ -87,7 +87,13 @@ describe("data layar kelas dari pesan server", () => {
 describe("konsol tidak mengimpor modul layar pemain (P-35; AC-23)", () => {
   it("berkas layar kelas dan halaman ruang tidak mengimpor bersama/, permainan/, pemain/, manifest.ts, atau TEKS dari teks.ts", () => {
     const akar = "app/jejak-setara/admin/kelas";
-    const berkas: string[] = ["app/jejak-setara/admin/halaman/Ruang.tsx", "app/jejak-setara/admin/halaman/DetailRuang.tsx"];
+    // JS-11 (P-35; AC-22): halaman riwayat dan bagian hasil ikut aturan yang sama.
+    const berkas: string[] = [
+      "app/jejak-setara/admin/halaman/Ruang.tsx",
+      "app/jejak-setara/admin/halaman/DetailRuang.tsx",
+      "app/jejak-setara/admin/halaman/RiwayatRuang.tsx",
+      "app/jejak-setara/admin/halaman/HasilRuang.tsx",
+    ];
     const jelajah = (dir: string) => {
       for (const e of readdirSync(dir, { withFileTypes: true })) {
         if (e.isDirectory()) jelajah(join(dir, e.name));

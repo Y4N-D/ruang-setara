@@ -1,6 +1,17 @@
 // Rute ruang (spesifikasi JS-03 bagian A sampai C, JS-08, dan JS-10): pemeriksaan kode untuk pemain, ruang dari konsol
 // (JS-10, P-2 sampai P-12), sambungan WebSocket pemain (JS-03, P-14) dan layar kelas (JS-10, P-13), serta kait uji
-// lokal (JS-10, P-32). Ruang coba JS-03 dan kait `kelas` dipensiunkan di JS-10.
+// lokal (JS-10, P-32). Ruang coba JS-03 dan kait `kelas` dipensiunkan di JS-10. JS-11: riwayat (P-17), hasil dan
+// rincian (P-21, P-24), ekspor CSV (P-26 sampai P-30), dan hapus data ruang (P-33).
+import {
+  bacaSaringanRiwayat,
+  penandaRiwayat,
+  rondeDimainkan,
+  ringkasHasil,
+  skemaRingkasanHasilRuang,
+  urutPeserta,
+  type PesertaHasil,
+  type RuangRiwayat,
+} from "../../../../app/jejak-setara/inti/hasil";
 import { skemaIsiKejadian } from "../../../../app/jejak-setara/inti/konten/skema";
 import { PANJANG_TEKS } from "../../../../app/jejak-setara/inti/protokol";
 import {
@@ -14,6 +25,7 @@ import {
   skemaKelola,
   skemaPemakaian,
   skemaRuangBaru,
+  STATUS_HASIL,
   STATUS_RUANG,
   type KodeGalatRuang,
   type RingkasanRuang,
@@ -23,18 +35,28 @@ import type { PengaturanRuang } from "../../../../app/jejak-setara/inti/tipe";
 import { TEKS } from "../../../../app/jejak-setara/teks";
 import { TEKS_KONSOL } from "../../../../app/jejak-setara/teks-konsol";
 import { buatTiket, periksaTiket } from "../auth/tiket";
+import { pernyataanAudit } from "../db/bank";
 import { bacaPaketUntuk, bacaTeksRujukan, daftarPaketPilihan, paketSiapRuangBiasa } from "../db/konten";
 import {
+  bacaJawabanHasil,
+  bacaPesertaHasil,
+  cariPesertaRuang,
   cariRuangAktif,
   cariRuangId,
+  daftarRiwayat,
   daftarRuang,
+  hapusDataRuang,
+  hitungDataRuang,
   ruangAktifPemilik,
   sisipkanRuang,
   tandaiRuangDitutup,
+  type BarisPesertaHasil,
+  type BarisRiwayat,
   type BarisRuangKonsol,
 } from "../db/ruang";
+import { csvJawaban, csvPeserta, namaBerkasCsv, rincianJawaban, type PesertaEkspor } from "../ekspor/csv";
 import type { Env } from "../env";
-import { asalDiizinkan, bolehLewat, jawabGalat, jawabJson, kodeAcak, lolosCsrf, normalkanKode, POLA_KODE_RUANG } from "../keamanan";
+import { asalDiizinkan, bolehLewat, jawabGalat, jawabJson, kodeAcak, lolosCsrf, normalkanKode, POLA_KODE_RUANG, TAJUK_JSON } from "../keamanan";
 import type { DataRuang } from "../ruang/inti-ruang";
 import { jumlahTitikRuang, saringMenurutTitik, type KejadianMasuk } from "../ruang/kejadian-ruang";
 import { TITIK_PER_ZONA } from "../ruang/peta-kampung";
@@ -95,10 +117,18 @@ export async function tanganiApiRuang(request: Request, env: Env, url: URL): Pro
     if (request.method === "POST") return buat(request, env, url);
     return metodeSalah("GET, POST");
   }
-  const cocok = /^\/api\/ruang\/([^/]+)(?:\/(kelola|tiket))?$/.exec(jalur);
-  if (!cocok) return belumTersedia();
+  // JS-11 (P-17): riwayat dikenali sebelum pola /api/ruang/{id}.
+  if (jalur === "/api/ruang/riwayat") return request.method === "GET" ? riwayat(request, env, url) : metodeSalah("GET");
+  const cocok = /^\/api\/ruang\/([^/]+)(?:\/(kelola|tiket|hasil|ekspor)(?:\/([^/]+))?)?$/.exec(jalur);
+  if (!cocok || (cocok[3] !== undefined && cocok[2] !== "hasil")) return belumTersedia();
   const id = cocok[1];
-  if (!cocok[2]) return request.method === "GET" ? detail(request, env, url, id) : metodeSalah("GET");
+  if (!cocok[2]) {
+    if (request.method === "GET") return detail(request, env, url, id);
+    if (request.method === "DELETE") return hapus(request, env, url, id); // JS-11, P-33
+    return metodeSalah("GET, DELETE");
+  }
+  if (cocok[2] === "hasil") return request.method === "GET" ? (cocok[3] === undefined ? hasil(request, env, id) : rincian(request, env, id, cocok[3])) : metodeSalah("GET");
+  if (cocok[2] === "ekspor") return request.method === "GET" ? ekspor(request, env, url, id) : metodeSalah("GET");
   if (request.method !== "POST") return metodeSalah("POST");
   return cocok[2] === "kelola" ? kelola(request, env, url, id) : tiket(request, env, url, id);
 }
@@ -299,6 +329,185 @@ async function tiket(request: Request, env: Env, url: URL, id: string): Promise<
   if (milik.ruang.status === "ditutup") return galatRuang("RUANG_TIDAK_ADA", 404);
   if (!env.KUNCI_TIKET) return galatAkun("KONSOL_BELUM_SIAP", 503);
   return jawabJson(await buatTiket(env.KUNCI_TIKET, milik.ruang.id, Date.now()), 200);
+}
+
+// -------------------------------------------------------------------------------------------
+// Riwayat, hasil, rincian, ekspor, dan hapus (JS-11)
+
+const POLA_ID_PESERTA = /^[A-Za-z0-9_-]{1,32}$/;
+
+function ruangRiwayat(b: BarisRiwayat): RuangRiwayat {
+  const dimainkan = rondeDimainkan(b.mulai_pada, b.selesai_pada);
+  return {
+    id: b.id,
+    kode: b.kode,
+    labelKelas: b.label_kelas,
+    uji: b.uji === 1,
+    namaGuru: b.nama_guru,
+    dibuatPada: b.dibuat_pada,
+    mulaiPada: b.mulai_pada,
+    selesaiPada: b.selesai_pada,
+    dimainkan,
+    jumlahPemain: b.jumlah_pemain,
+    rataSkor: dimainkan && b.rata_skor !== null ? Math.round(b.rata_skor * 10) / 10 : null,
+  };
+}
+
+/** P-17. */
+async function riwayat(request: Request, env: Env, url: URL): Promise<Response> {
+  const jaga = await jagaRute(request, env, "ruang.kelola", Date.now());
+  if (!jaga.ok) return jaga.jawaban;
+  const admin = jaga.sesi.akun.peran === "admin";
+  const s = bacaSaringanRiwayat(url.searchParams, admin);
+  if (!s) return galatRuang("ISI_SALAH", 400);
+  const baris = await daftarRiwayat(env.DB, { pemilikId: admin ? s.guru : jaga.sesi.akun.id, dari: s.dari, sampai: s.sampai, label: s.label, mulai: s.mulai, batas: s.batas });
+  const ruang = baris.slice(0, s.batas).map(ruangRiwayat);
+  const akhir = ruang[ruang.length - 1];
+  return jawabJson({ ruang, berikutnya: baris.length > s.batas && akhir ? penandaRiwayat(akhir.dibuatPada, akhir.id) : null }, 200);
+}
+
+function pesertaEkspor(b: BarisPesertaHasil): PesertaEkspor {
+  return {
+    id: b.id,
+    nama: b.nama_samaran,
+    nomorAbsen: b.nomor_absen,
+    dikeluarkan: b.dikeluarkan === 1,
+    peringkat: b.dikeluarkan === 1 ? null : b.peringkat_akhir,
+    skor: b.skor,
+    selesai: b.jumlah_kejadian,
+    langkah1Dijawab: b.langkah1_dijawab,
+    langkah1Benar: b.langkah1_benar,
+    tepat: b.tepat,
+    kurang: b.kurang,
+    berisiko: b.berisiko,
+    waktuSkorMs: b.skor > 0 ? b.waktu_skor_ms : null,
+    gabungPada: b.gabung_pada,
+  };
+}
+
+function keHasil(p: PesertaEkspor): PesertaHasil {
+  const { id, nama, nomorAbsen, dikeluarkan, peringkat, skor, selesai, langkah1Dijawab, langkah1Benar, tepat, kurang, berisiko, waktuSkorMs } = p;
+  return { id, nama, nomorAbsen, dikeluarkan, peringkat, skor, selesai, langkah1Dijawab, langkah1Benar, tepat, kurang, berisiko, waktuSkorMs };
+}
+
+function pengaturanHasil(b: BarisRuangKonsol): { durasiMenit: number; modeNomorAbsen: boolean } {
+  try {
+    const p = JSON.parse(b.pengaturan_json) as Partial<PengaturanRuang>;
+    return { durasiMenit: typeof p.durasiMenit === "number" ? p.durasiMenit : 15, modeNomorAbsen: p.modeNomorAbsen === true };
+  } catch {
+    return { durasiMenit: 15, modeNomorAbsen: false };
+  }
+}
+
+function jumlahKejadianRingkasan(b: BarisRuangKonsol): number | null {
+  try {
+    const h = skemaRingkasanHasilRuang.safeParse((JSON.parse(b.ringkasan_json ?? "null") as { hasil?: unknown } | null)?.hasil);
+    return h.success ? h.data.jumlahKejadian : null;
+  } catch {
+    return null;
+  }
+}
+
+const punyaHasil = (b: BarisRuangKonsol) => (STATUS_HASIL as readonly string[]).includes(b.status);
+const dimainkanRuang = (b: BarisRuangKonsol) => rondeDimainkan(b.mulai_pada ?? null, b.selesai_pada ?? null);
+
+/** P-21. */
+async function hasil(request: Request, env: Env, id: string): Promise<Response> {
+  const milik = await ruangMilik(request, env, id);
+  if (!milik.ok) return milik.jawaban;
+  const r = milik.ruang;
+  if (!punyaHasil(r)) return galatRuang("HASIL_BELUM_ADA", 409);
+  const dimainkan = dimainkanRuang(r);
+  const peserta = urutPeserta((await bacaPesertaHasil(env.DB, r.id)).map(pesertaEkspor)).map(keHasil);
+  return jawabJson(
+    {
+      ruang: ringkasanRuang(r),
+      info: { namaPaket: r.nama_paket ?? null, jumlahKejadian: jumlahKejadianRingkasan(r), ...pengaturanHasil(r), mulaiPada: r.mulai_pada ?? null, selesaiPada: r.selesai_pada ?? null },
+      dimainkan,
+      ringkasan: dimainkan ? ringkasHasil(peserta) : null,
+      peserta,
+    },
+    200,
+  );
+}
+
+/** P-24. */
+async function rincian(request: Request, env: Env, id: string, bagian: string): Promise<Response> {
+  const milik = await ruangMilik(request, env, id);
+  if (!milik.ok) return milik.jawaban;
+  if (!punyaHasil(milik.ruang)) return galatRuang("HASIL_BELUM_ADA", 409);
+  let pesertaId = "";
+  try {
+    pesertaId = decodeURIComponent(bagian);
+  } catch {
+    pesertaId = "";
+  }
+  const p = POLA_ID_PESERTA.test(pesertaId) ? await cariPesertaRuang(env.DB, milik.ruang.id, pesertaId) : null;
+  if (!p) return galatRuang("PEMAIN_TIDAK_ADA", 404);
+  const { jawaban, versi } = await bacaJawabanHasil(env.DB, milik.ruang.id, p.id);
+  const daftar = rincianJawaban(jawaban, versi).map((j) => ({
+    kode: j.kode,
+    judul: j.judul,
+    versi: j.versi,
+    huruf1: j.huruf1,
+    pilihan1: j.pilihan1,
+    benar1: j.benar1,
+    jawabanTepat1: j.jawabanTepat1,
+    huruf2: j.huruf2,
+    pilihan2: j.pilihan2,
+    tingkat2: j.tingkat2,
+    pilihanTepat2: j.pilihanTepat2,
+    poin: j.poin,
+    waktuMenjawabMs: j.waktuMenjawabMs,
+  }));
+  return jawabJson({ peserta: { id: p.id, nama: p.nama_samaran }, jawaban: daftar }, 200);
+}
+
+/** P-26: tajuk jawaban CSV (tajuk keamanan API, dengan jenis isi CSV). */
+const TAJUK_CSV: Record<string, string> = { ...TAJUK_JSON, "Content-Type": "text/csv; charset=utf-8" };
+
+/** P-26 sampai P-30. */
+async function ekspor(request: Request, env: Env, url: URL, id: string): Promise<Response> {
+  const milik = await ruangMilik(request, env, id);
+  if (!milik.ok) return milik.jawaban;
+  const jenis = url.searchParams.get("jenis");
+  if (jenis !== "peserta" && jenis !== "jawaban") return galatRuang("ISI_SALAH", 400);
+  const r = milik.ruang;
+  if (!punyaHasil(r)) return galatRuang("HASIL_BELUM_ADA", 409);
+  const dimainkan = dimainkanRuang(r);
+  const peserta = dimainkan ? urutPeserta((await bacaPesertaHasil(env.DB, r.id)).map(pesertaEkspor)) : [];
+  const ruang = { labelKelas: r.label_kelas, dibuatPada: r.dibuat_pada };
+  let isi: string;
+  if (jenis === "peserta") isi = csvPeserta(ruang, peserta);
+  else {
+    const { jawaban, versi } = dimainkan ? await bacaJawabanHasil(env.DB, r.id, null) : { jawaban: [], versi: [] };
+    isi = csvJawaban(ruang, peserta, rincianJawaban(jawaban, versi));
+  }
+  return new Response(isi, { status: 200, headers: { ...TAJUK_CSV, "Content-Disposition": `attachment; filename="${namaBerkasCsv(r.label_kelas, r.dibuat_pada, jenis)}"` } });
+}
+
+/** P-33 (D-3a): hanya admin; ruang harus sudah ditutup. */
+async function hapus(request: Request, env: Env, url: URL, id: string): Promise<Response> {
+  if (!lolosCsrf(request, url, env.LINGKUNGAN)) return galatAkun("ASAL_DITOLAK", 403);
+  const sekarang = Date.now();
+  const jaga = await jagaRute(request, env, "ruang.hapus", sekarang);
+  if (!jaga.ok) return jaga.jawaban;
+  const ruang = idRuangSah(id) ? await cariRuangId(env.DB, id) : null;
+  if (!ruang) return galatRuang("RUANG_TIDAK_ADA", 404);
+  if (ruang.status !== "ditutup") return galatRuang("BELUM_DITUTUP", 409);
+  const jumlah = await hitungDataRuang(env.DB, ruang.id);
+  const audit = pernyataanAudit(
+    env.DB,
+    {
+      penggunaId: jaga.sesi.akun.id,
+      aksi: "ruang.hapus",
+      sasaran: ruang.id,
+      rincian: { kode: ruang.kode, labelKelas: ruang.label_kelas, dibuatPada: ruang.dibuat_pada, peserta: jumlah.peserta, jawaban: jumlah.jawaban },
+      sekarang,
+    },
+    { sql: "EXISTS (SELECT 1 FROM ruang WHERE id = ?7 AND status = 'ditutup')", nilai: [ruang.id] },
+  );
+  return (await hapusDataRuang(env.DB, ruang.id, audit)) ? jawabJson({ ok: true }, 200) : galatRuang("RUANG_TIDAK_ADA", 404);
 }
 
 // -------------------------------------------------------------------------------------------

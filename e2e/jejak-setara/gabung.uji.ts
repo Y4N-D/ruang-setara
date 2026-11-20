@@ -207,8 +207,12 @@ test("mulai, jeda, lanjut, dikeluarkan, selesai, dan ditutup lewat kait uji (AC-
   await expect(a.page.getByRole("heading", { name: "Ronde selesai" })).toBeVisible();
   await expect(a.page.getByText("Tunggu arahan guru.")).toBeVisible();
   await kelas(request, kode, { t: "tutup_ruang" });
-  await expect(a.page.getByRole("heading", { name: "Ruang ditutup" })).toBeVisible();
-  await expect(a.page.getByText("Terima kasih sudah bermain.")).toBeVisible();
+  // JS-11 (P-8, D-2 a): HP yang sudah menampilkan rekap tetap menampilkannya, dengan pita dan tombol Kembali ke layar kode.
+  await expect(a.page.getByText("Ruang sudah ditutup. Rekapmu tetap tampil sampai halaman ini ditutup.")).toBeVisible();
+  await expect(a.page.getByRole("heading", { name: "Ronde selesai" })).toBeVisible();
+  await expect(a.page.getByText("Tunggu arahan guru.")).toBeHidden();
+  await a.page.getByRole("button", { name: "Kembali" }).click();
+  await expect(a.page.getByRole("button", { name: "Masuk" })).toBeVisible();
   expect(catatan).toEqual({ konsol: [], respons: [] });
   await a.ctx.close();
   await b.ctx.close();

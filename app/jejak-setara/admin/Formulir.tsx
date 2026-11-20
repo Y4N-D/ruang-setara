@@ -55,7 +55,7 @@ interface PropsKolom {
   ubah: (nilai: string) => void;
   galat?: string | null;
   petunjuk?: string;
-  jenis?: "text" | "email";
+  jenis?: "text" | "email" | "date";
   autoComplete?: string;
   nonaktif?: boolean;
   ref?: Ref<HTMLInputElement>;

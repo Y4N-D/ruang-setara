@@ -10,13 +10,16 @@
 // menjawab kedua langkah dengan jeda 1–3 detik secara acak, lalu menutup dialog sesudah 1 detik.
 // JS-10 (P-32): ruang dibuat lewat jalur guru (lokal: admin awal dengan kunci lokal, masuk, POST /api/ruang) dan
 // dikendalikan lewat layar kelas bertiket, yang juga mencatat jumlah dan ukuran pesan ke layar kelas (AC-24).
+// JS-11 (AC-23): sesudah ronde diakhiri, setiap bot harus menerima `selesai` dengan rekap yang lolos skema protokol;
+// ukuran pesan itu dan baris peserta akhir di D1 (lewat GET /api/ruang/{id}/hasil) dicatat.
 // Lingkungan uji hanya dengan pilihan tertulis: --sasaran uji --alamat <URL> --saya-paham-kuota, serta akun konsol di
 // JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI; perkiraan permintaan Durable Object dicetak lebih dulu, dan lebih dari 20.000
 // ditolak.
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { register } from "node:module";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const akar = fileURLToPath(new URL("../../", import.meta.url));
 const arg = process.argv.slice(2);
@@ -36,6 +39,23 @@ const SASARAN = ambil("--sasaran", "lokal");
 const PORT = Number(ambil("--port", "4330"));
 const BATAS_PERMINTAAN_UJI = 20_000;
 const tidur = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * JS-11 (AC-23): skema pesan server dari inti/protokol.ts, dimuat lewat pelucutan tipe bawaan Node (22.18 ke atas).
+ * Kait resolve kecil menambahkan ".ts" pada impor relatif tanpa ekstensi. Bila gagal, pemeriksaan skema dilewati (null).
+ */
+let skemaServerPemain = null;
+try {
+  register(
+    "data:text/javascript," +
+      encodeURIComponent(
+        "export async function resolve(s, c, next) { try { return await next(s, c); } catch (e) { if (/^\\.\\.?\\//.test(s) && !/\\.[cm]?[jt]sx?$/.test(s)) return next(s + '.ts', c); throw e; } }",
+      ),
+  );
+  ({ skemaServerPemain } = await import(pathToFileURL(join(akar, "app/jejak-setara/inti/protokol.ts")).href));
+} catch {
+  skemaServerPemain = null;
+}
 const frekuensi = (batas) => (batas > 50 ? 6 : 10); // sama dengan frekuensiGerak() di inti/aturan.ts
 
 /** Perkiraan permintaan Durable Object per ruang untuk satu sesi 15 menit: pesan masuk ÷ 20 + satu per sambungan. */
@@ -127,6 +147,7 @@ async function bukaLayarKelas(id, kode) {
   return l;
 }
 
+const idRuangKode = new Map();
 async function buatRuang() {
   const j = await fetch(`${alamat}/api/ruang`, {
     method: "POST",
@@ -135,6 +156,7 @@ async function buatRuang() {
   });
   if (j.status !== 201) throw new Error(`ruang ${j.status}`);
   const { ruang } = await j.json();
+  idRuangKode.set(ruang.kode, ruang.id);
   const l = await bukaLayarKelas(ruang.id, ruang.kode);
   kejadianRuang.push(l.info?.jumlahKejadian ?? 0);
   return ruang.kode;
@@ -239,7 +261,9 @@ function buatBot(kode, nomor) {
   const b = { kode, nomor, ws: null, id: null, seq: 0, x: null, y: null, arah: "bawah", jalur: [], diamSampai: 0, kirimTerakhir: 0, majuTerakhir: 0,
     jalan: false, naik: 0, turun: 0, byteTurun: 0, dunia: 0, rtt: [], koreksi: 0, gerak: 0, tersinkron: false, antreKirim: 0, antreTerima: 0, putus: false,
     // JS-08: kejadian yang terlihat dan selesai, sasaran, dialog yang terbuka, dan hitungan.
-    lihat: new Map(), selesai: new Set(), sasaran: null, dialog: null, menungguSampai: 0, terlihat: 0, terbuka: 0, jawaban: 0, pribadi: 0, poin: 0 };
+    lihat: new Map(), selesai: new Set(), sasaran: null, dialog: null, menungguSampai: 0, terlihat: 0, terbuka: 0, jawaban: 0, pribadi: 0, poin: 0,
+    // JS-11 (AC-23): pesan `selesai` terakhir dan ukurannya dalam bita.
+    pesanSelesai: null, byteSelesai: 0 };
   return new Promise((ok, gagal) => {
     // Di lokal, setiap ruang dianggap sekolah sendiri (alamat IP berbeda) agar pembatas 300 sambungan per menit
     // per alamat (D-5) tidak menahan simulasi; di Cloudflare tajuk ini diisi jaringan Cloudflare, bukan klien.
@@ -267,6 +291,9 @@ function buatBot(kode, nomor) {
       else if (m.t === "kejadian_terlihat") {
         b.terlihat++;
         if (!b.selesai.has(m.kejadianId)) b.lihat.set(`${m.kejadianId}@${m.x},${m.y}`, { kode: m.kejadianId, x: m.x, y: m.y });
+      } else if (m.t === "selesai") {
+        b.pesanSelesai = m;
+        b.byteSelesai = Buffer.byteLength(teks);
       } else if (m.t === "pribadi") {
         b.pribadi++;
         for (const kode of m.selesai) b.selesai.add(kode);
@@ -489,11 +516,23 @@ try {
   const stat = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
   // Pesan layar kelas sampai akhir menjelajah, sebelum ruang diakhiri (JS-10, AC-24).
   const kelasJelajah = kodeRuang.map((kode) => JSON.parse(JSON.stringify(layarKelas.get(kode)?.jenis ?? {})));
+  for (const kode of kodeRuang) await kelas(kode, { t: "akhiri" });
+  // JS-11 (AC-23): setiap bot menerima `selesai` (paling lama 10 detik), lalu kiriman ke D1 ditunggu kosong (P-15)
+  // dan hasilnya dibaca dari D1 sebelum ruang ditutup.
+  for (let i = 0; i < 100 && bot.some((b) => b.pesanSelesai === null); i++) await tidur(100);
+  const hasilAkhir = [];
   for (const kode of kodeRuang) {
-    await kelas(kode, { t: "akhiri" });
-    await kelas(kode, { t: "tutup_ruang" });
+    const id = idRuangKode.get(kode);
+    for (let i = 0; i < 100; i++) {
+      const d = await (await fetch(`${alamat}/api/ruang/${id}`, { headers: tajukKonsol() })).json();
+      if (d.langsung?.kirimanTertunda === false) break;
+      await tidur(200);
+    }
+    hasilAkhir.push(await (await fetch(`${alamat}/api/ruang/${id}/hasil`, { headers: tajukKonsol() })).json());
   }
+  for (const kode of kodeRuang) await kelas(kode, { t: "tutup_ruang" });
   const jumlah = (f) => bot.reduce((s, b) => s + f(b), 0);
+  const denganSelesai = bot.filter((b) => b.pesanSelesai !== null);
   const hasil = {
     waktu: new Date().toISOString(),
     sasaran: SASARAN,
@@ -525,6 +564,18 @@ try {
       jawabanSelesaiServer: stat.map((x) => x.jawabanSelesai ?? 0),
       pribadiServer: stat.map((x) => x.pribadi ?? 0),
       antreanKirimanSaatAkhir: stat.map((x) => x.antreanKiriman ?? 0),
+    },
+    // JS-11 (AC-23): `selesai` dengan rekap, ukurannya, dan baris peserta akhir di D1.
+    akhirRonde: {
+      botMenerimaSelesai: denganSelesai.length,
+      rekapLolosSkema: skemaServerPemain ? denganSelesai.filter((b) => skemaServerPemain.safeParse(b.pesanSelesai).success).length : null,
+      butirRekapRataPerBot: +(jumlah((b) => b.pesanSelesai?.rekap?.length ?? 0) / Math.max(1, bot.length)).toFixed(2),
+      byteSelesaiRata: Math.round(jumlah((b) => b.byteSelesai) / Math.max(1, denganSelesai.length)),
+      byteSelesaiMaks: Math.max(0, ...bot.map((b) => b.byteSelesai)),
+      pesertaD1: hasilAkhir.map((h) => h.peserta?.length ?? null),
+      pesertaBerperingkatD1: hasilAkhir.map((h) => h.peserta?.filter((p) => p.peringkat !== null).length ?? null),
+      jawabanLangkah1D1: hasilAkhir.map((h) => h.peserta?.reduce((n, p) => n + p.langkah1Dijawab, 0) ?? null),
+      ringkasanHasil: hasilAkhir.map((h) => h.ringkasan ?? null),
     },
     sambunganPutusTakTerduga: putusTakTerduga,
     pesanDitolakServer: stat.reduce((s, x) => s + (x.pelanggaran ?? 0), 0),

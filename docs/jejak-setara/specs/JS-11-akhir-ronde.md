@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Ditulis 20 November 2026; menunggu `Spesifikasi disetujui: JS-11` (DRAF D-1 sampai D-4) |
+| Status | Disetujui 20 November 2026 (`Spesifikasi disetujui: JS-11`, dibaca sebagai D-1 a, D-2 a, D-3 a, D-4 a). Dibangun dan diuji 20 November 2026; laporan [JS-11-hasil.md](../tests/JS-11-hasil.md). Penyesuaian saat Build ada di bagian "Catatan Build" |
 | Rencana | `PLAN.md`, entri JS-11 (Plan 16 November 2026; disetujui 20 November 2026 dengan `Setuju: JS-11 (usulan 1a sampai 12a)`) |
 | Sesi | Sesi A (mesin) |
 | Bergantung pada | JS-10 (Selesai, 15 November 2026); memakai juga JS-12 dan JS-22 (keduanya Selesai, 16 November 2026) |
@@ -686,3 +686,25 @@ Langkah pemilik proyek sesudah ZIP Build di-push:
 7. Kirim tangkapan layar rekap di HP, hasil di konsol, dan CSV di Excel.
 
 Butir daftar periksa AGENTS 9 yang relevan: tidak ada nama asli siswa di layar, berkas ekspor, maupun log; rekap dan refleksi bisa dibaca sampai akhir hanya dengan keyboard di laptop; dan 10 besar di layar kelas terbaca dengan ikon centang.
+
+## Catatan Build
+
+Dicatat saat Build JS-11 (20 November 2026). Perilaku dan teks spesifikasi tidak berubah; catatan ini merinci tempat kode dan beberapa keputusan kecil.
+
+- **Berkas tambahan.**
+  - `app/jejak-setara/pemain/rekapKeadaan.ts` (baru) berisi aturan murni layar rekap: pita dan tombol menurut penyebab sambungan berakhir (P-8), penyebab dari kode tutup klien, dan tampilan skor (P-5). Aturan ini dipisah dari `Rekap.tsx` agar bisa diuji tanpa peramban.
+  - `app/jejak-setara/admin/Formulir.tsx` (ubah): `Kolom` menerima jenis `date` untuk saringan tanggal riwayat (P-18).
+- **Penyusun rincian di `ekspor/csv.ts`.** Fungsi `rincianJawaban` menyusun rincian jawaban (huruf dari urutan acak pemain, teks dari isi versi kejadian yang dipakai ruang). Fungsi ini dipakai API rincian (P-24) dan CSV jawaban (P-29), jadi kedua keluaran selalu sama. Isi setiap versi dan setiap urutan acak diurai sekali per permintaan.
+- **Kueri detail ruang.** `PILIH_RUANG_KONSOL` kini juga mengambil `mulai_pada`, `selesai_pada`, dan nama paket (gabung kiri ke `paket`), untuk baris "Tanggal" dan "Paket" di ringkasan hasil (P-22) dan untuk menentukan ruang yang dimainkan (P-17).
+- **Halaman ruang.**
+  - Ruang yang sudah ditutup tetap menampilkan baris JS-10 "Ruang ini sudah ditutup." di bawah kepala ruang, lalu bagian hasil, pemakaian (admin), dan hapus (admin), sesuai urutan P-20.
+  - Muat ulang 10 detik JS-10 tetap berjalan untuk ruang yang sudah ditutup; bagian hasilnya dimuat sekali (P-25).
+  - Selama kiriman ke D1 masih tertunda, jawaban 409 `HASIL_BELUM_ADA` (status D1 tertinggal sesaat dari server ruang) ditampilkan sebagai "Memuat hasil…", bukan galat, sampai muat ulang berikutnya.
+  - Sesudah "Keluarkan" berhasil, server ruang sudah mengirim baris peserta ke D1 sebelum menjawab, jadi hasil yang dimuat lagi sudah memuat pemain yang dikeluarkan.
+- **Tabel hasil (P-23).** Di layar 1280 px ke atas, kepala tabel tetap di atas saat halaman digulir. Di layar yang lebih sempit, tabel digulir menyamping di dalam wadahnya, dan wadah itu setinggi paling banyak 75% layar agar kepala tabel tetap terlihat di dalamnya.
+- **Riwayat sebagai kartu (P-18).** Di bawah 1024 px, setiap sel kartu diberi label kolomnya (pola tabel kejadian JS-12), karena angka "Pemain" dan "Rata-rata skor" tidak jelas tanpa label.
+- **Cetak (P-31).** Tanggal di kaki cetakan diperbarui saat cetak dibuka, baik lewat tombol Cetak maupun menu peramban. Agar ruang 40 pemain muat di satu halaman A4, baris tabel tidak dibungkus dan jarak barisnya 1,15.
+- **Uji.**
+  - PDF A4 satu halaman untuk 40 pemain diuji dengan jawaban API hasil yang diganti 40 baris di uji ujung ke ujung, karena 40 bot tidak perlu untuk menguji tata letak cetak.
+  - `sim:beban` memuat skema `selesai` dari `inti/protokol.ts` lewat pelucutan tipe bawaan Node 22.18 ke atas; di Node yang lebih lama, pemeriksaan skema dilewati dan tercatat `null`.
+- **Kinerja CSV (AC-22).** Median 20 kali di mesin agen: 100 × 16 memakan 2,1 ms untuk penyusun CSV saja dan 4,3 ms bersama penyusun rincian; 100 × 64 memakan 9,8 ms dan 17,9 ms. Ekspor 64 kejadian untuk 100 pemain bisa melewati batas CPU 10 ms paket gratis; Paket inti 16 tetap di bawahnya. Catatan ini diteruskan ke Plan JS-15.

@@ -1383,6 +1383,166 @@ body {
   font-family: "Press Start 2P", monospace;
 }
 
+/* Layar rekap pribadi dan refleksi (spesifikasi JS-11, P-4 sampai P-9): halaman digulir biasa; tanda selalu berikon
+   dan bertulisan; pita menyambung ulang (mango) dan pita sesudah sambungan berakhir (mist) tetap di atas saat digulir. */
+.js-layar-rekap {
+  align-items: flex-start;
+}
+
+.js-rekap h2 {
+  margin: 8px 0;
+  font-family: "Press Start 2P", monospace;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.js-pita-rekap {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 6px 10px;
+  border: 4px solid var(--js-ink);
+  background: var(--js-mango);
+  color: var(--js-ink);
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.js-pita-rekap[data-jenis="berakhir"] {
+  background: var(--js-mist);
+}
+
+.js-rekap-ke-refleksi {
+  margin: 0;
+  font-size: 17px;
+}
+
+.js-rekap-ke-refleksi a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--js-ink);
+}
+
+.js-rekap a:focus-visible,
+.js-rekap h2:focus-visible {
+  outline: 4px solid var(--js-sun);
+  outline-offset: 2px;
+}
+
+.js-rekap-ke-refleksi a:focus-visible::before {
+  content: "▶ ";
+}
+
+.js-rekap-uji {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--js-text-2);
+}
+
+.js-rekap-daftar,
+.js-refleksi-daftar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding-left: 1.6em;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.js-rekap-kepala {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 0 0 6px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.js-rekap-poin {
+  white-space: nowrap;
+}
+
+.js-rekap-langkah {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.js-rekap-langkah dt {
+  color: var(--js-text-2);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.js-rekap-langkah dd {
+  margin: 0;
+}
+
+.js-rekap-sub {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.js-tanda-rekap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border: 2px solid var(--js-ink);
+  background: var(--js-leaf);
+  color: var(--js-ink);
+  font-size: 16px;
+}
+
+.js-tanda-rekap[data-jenis="belum"],
+.js-tanda-rekap[data-jenis="kurang"] {
+  background: var(--js-mango);
+}
+
+.js-tanda-rekap[data-jenis="berisiko"] {
+  background: var(--js-coral);
+}
+
+.js-tanda-rekap[data-jenis="kabut"] {
+  background: var(--js-mist);
+}
+
+.js-refleksi p {
+  margin: 0 0 8px;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.js-rekap-tombol {
+  align-self: flex-start;
+}
+
+@media (max-height: 500px), (max-width: 600px) {
+  .js-rekap h2,
+  .js-rekap-kepala {
+    font-size: 13px;
+  }
+
+  .js-rekap-daftar,
+  .js-refleksi-daftar,
+  .js-refleksi p {
+    font-size: 17px;
+  }
+
+  .js-rekap-langkah dt,
+  .js-tanda-rekap {
+    font-size: 13px;
+  }
+}
+
 /* ---------------------------------------------------------------------------------------------
    Konsol guru dan admin JS-04 (spesifikasi JS-04, P-38 sampai P-50; Design System 3.7, 5, dan 10).
    Huruf sistem untuk tabel, kolom isian, label, pesan, dan teks isi (KT-05); Pixelify Sans untuk judul halaman, menu,

@@ -80,14 +80,15 @@ ruang-setara/
 │  │  ├─ gerak.ts · peta.ts          # gerak, tabrakan, pemeriksaan kecepatan; pembaca peta
 │  │  ├─ acak.ts                     # pembangkit acak berbenih
 │  │  ├─ akun.ts                     # skema zod API akun, batas panjang, dan aturan sandi (JS-04)
+│  │  ├─ hasil.ts                    # skema zod riwayat, hasil, dan rincian; ringkasan hasil murni (JS-11)
 │  │  └─ konten/skema.ts             # skema zod kejadian, rujukan, paket; periksa.ts: aturan konten dan kode temuan (JS-05)
 │  ├─ pemain/                        # layar pemain
-│  │  ├─ App.tsx · Gabung.tsx · Lobi.tsx · Dunia.tsx · Hud.tsx · Rekap.tsx
+│  │  ├─ App.tsx · Gabung.tsx · Lobi.tsx · Dunia.tsx · Hud.tsx · Rekap.tsx · rekapKeadaan.ts (JS-11)
 │  │  ├─ mesin/                      # loop, kamera, render kanvas, input, interpolasi
 │  │  └─ jaringan.ts                 # klien WebSocket, sambung ulang, sinkron jam
 │  ├─ admin/                         # konsol admin
 │  │  ├─ App.tsx · rute.ts · api.ts · Kerangka.tsx · Dialog.tsx · Formulir.tsx
-│  │  ├─ halaman/                    # Masuk, GantiSandi, Dasbor, Akun (JS-04); Ruang, Riwayat, Kejadian, Penyunting, Paket, Rujukan, Statistik, Pengaturan, Log
+│  │  ├─ halaman/                    # Masuk, GantiSandi, Dasbor, Akun (JS-04); Ruang, DetailRuang (JS-10); RiwayatRuang, HasilRuang (JS-11); Statistik, Pengaturan, Log
 │  │  └─ kelas/                      # layar kelas: Lobi, Langsung, Podium, Pembahasan
 │  ├─ bersama/                       # komponen untuk pemain dan konsol: bingkai, tombol pilihan, dialog kejadian, kartu dampak; PenandaServer (penanda lingkungan JS-01). HalamanKerangka JS-01 dihapus di JS-04
 │  ├─ teks.ts                        # semua teks yang tampil (bagian 17)
@@ -109,10 +110,12 @@ ruang-setara/
 │  │  ├─ ruang/inti-ruang.ts         # logika ruang murni (JA-11)
 │  │  ├─ ruang/kejadian-ruang.ts     # aturan kejadian murni: penempatan, keterlihatan, pilihan, poin (JS-08)
 │  │  ├─ ruang/antrean.ts            # antrean kiriman berkunci dan berversi di SQLite ruang (JS-08)
+│  │  ├─ ruang/rekap-ruang.ts        # penyusun rekap pribadi dan ringkasan hasil, murni (JS-11)
+│  │  ├─ ekspor/csv.ts               # rincian jawaban, CSV peserta dan jawaban, nama berkas, murni (JS-11)
 │  │  ├─ api/                        # masuk, akun, kejadian, rujukan, paket, ruang, statistik, ekspor, pengaturan, log
 │  │  ├─ auth/                       # sandi, sesi, izin, tiket, pembatas percobaan
 │  │  └─ db/                         # kueri D1 (ruang; konten dan jawaban sejak JS-08)
-│  ├─ migrations/0001_awal.sql …     # migrasi D1, hanya maju
+│  ├─ migrations/0001_awal.sql …     # migrasi D1, hanya maju; 0002_peserta_dikeluarkan.sql (JS-11)
 │  └─ seed/bank-awal.json            # bank kejadian awal (hasil fitur konten)
 ├─ scripts/game/art/                 # kit gambar bersama + atas_*.py dan build_jejak.py
 ├─ scripts/jejak-setara/
@@ -312,8 +315,8 @@ Tipe tambahan ditetapkan di JS-02 (spesifikasi JS-02, bagian "Data, protokol, AP
 | `kejadian` | `id`, `kode` (unik), `status` (`draf`/`tinjau`/`terbit`/`arsip`), `versi_terbit_id`, `pemilik_id`, `diubah_pada` | |
 | `kejadian_versi` | `id`, `kejadian_id`, `nomor`, `isi_json`, `jenis` (`kerja`/`terbit`), `dibuat_oleh`, `dibuat_pada`, `catatan_perubahan` | Satu versi `kerja` yang bisa disunting; versi `terbit` tidak pernah berubah |
 | `paket` · `paket_kejadian` | `id`, `nama`, `deskripsi`, `aktif` · `paket_id`, `kejadian_id`, `urutan` | |
-| `ruang` | `id`, `kode`, `pemilik_id`, `label_kelas`, `paket_id`, `pengaturan_json`, `benih`, `status`, `uji`, `do_id`, `dibuat_pada`, `mulai_pada`, `selesai_pada`, `ringkasan_json` | `kode` unik di antara ruang yang belum `ditutup` |
-| `peserta` | `id`, `ruang_id`, `nama_samaran`, `avatar`, `warna_tas`, `nomor_absen`, `skor`, `waktu_skor_ms`, `langkah1_benar`, `jumlah_kejadian`, `gabung_pada`, `peringkat_akhir` | `nomor_absen` kosong bila mode nomor absen mati |
+| `ruang` | `id`, `kode`, `pemilik_id`, `label_kelas`, `paket_id`, `pengaturan_json`, `benih`, `status`, `uji`, `do_id`, `dibuat_pada`, `mulai_pada`, `selesai_pada`, `ringkasan_json` | `kode` unik di antara ruang yang belum `ditutup`. `ringkasan_json` berisi `pemakaian` (JS-22) dan, untuk ruang yang dimainkan, `hasil` (JS-11) |
+| `peserta` | `id`, `ruang_id`, `nama_samaran`, `avatar`, `warna_tas`, `nomor_absen`, `skor`, `waktu_skor_ms`, `langkah1_benar`, `jumlah_kejadian`, `gabung_pada`, `peringkat_akhir`, `dikeluarkan` | `nomor_absen` kosong bila mode nomor absen mati. `dikeluarkan` 0 atau 1 (JS-11); pemain yang dikeluarkan tidak punya `peringkat_akhir` |
 | `jawaban` | `id`, `ruang_id`, `peserta_id`, `kejadian_versi_id`, `urutan_opsi_json`, `langkah1_opsi`, `langkah1_benar`, `petunjuk_dipakai`, `langkah2_opsi`, `tingkat`, `poin`, `dibuka_pada`, `langkah1_pada`, `langkah2_pada` | Satu baris per pemain per kejadian |
 | `pengaturan` | `kunci`, `nilai_json` | Nilai bawaan ruang, daftar nama samaran, masa simpan data, mode pemeliharaan |
 | `log_audit` | `id`, `pengguna_id`, `aksi`, `sasaran`, `rincian_json`, `waktu` | Tanpa sandi dan tanpa token |
@@ -331,7 +334,7 @@ erDiagram
   KEJADIAN_VERSI ||--o{ JAWABAN : dijawab
 ```
 
-Migrasi `0001_awal.sql` (JS-03) membuat ketiga belas tabel ini sekaligus, dengan kolom, kunci, dan indeks seperti spesifikasi JS-03. Waktu disimpan sebagai bilangan bulat milidetik UTC. Migrasi berikutnya hanya ditulis Sesi A; sesi lain yang membutuhkan perubahan skema menulis permintaan di berkas statusnya (Gerbang 1 JS-03, usulan 4a).
+Migrasi `0001_awal.sql` (JS-03) membuat ketiga belas tabel ini sekaligus, dengan kolom, kunci, dan indeks seperti spesifikasi JS-03. Migrasi `0002_peserta_dikeluarkan.sql` (JS-11) menambah kolom `peserta.dikeluarkan` (bawaan 0). Waktu disimpan sebagai bilangan bulat milidetik UTC. Migrasi berikutnya hanya ditulis Sesi A; sesi lain yang membutuhkan perubahan skema menulis permintaan di berkas statusnya (Gerbang 1 JS-03, usulan 4a).
 
 ### 5.3 Status di Durable Object ruang
 
@@ -430,7 +433,7 @@ Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `
 | `hasil_2` | `tingkat`, `poin`, `terjadi`, `opsiTepat`, kartu (`hak`, `kewajiban`, `rujukan` berupa teks) |
 | `koreksi` | `x`, `y`, `seq` — posisi dari server bila laporan gerak ditolak |
 | `pemberitahuan` | `kode` (misalnya `dua_menit`) |
-| `selesai` | `skor`, `peringkat`, `jumlahPemain`, rekap pribadi (kosong sampai JS-11) |
+| `selesai` | `skor`, `peringkat`, `jumlahPemain`, `rekap`: kejadian yang Langkah 1-nya dikunci pemain itu, menurut urutan ruang, paling banyak 64 butir, dengan judul, pilihan dan kebenaran Langkah 1, pilihan dan tingkat Langkah 2 (`null` bila belum dikunci), pilihan yang tepat, poin, dan rujukan berupa teks (JS-11). Dikirim saat ronde berakhir, saat menyambung ulang di `selesai` atau `pembahasan`, dan sesudah peringkat akhir berubah |
 | `galat` | `kode`, `pesan` (bagian 6.7) |
 | `pong` | `tKlien`, `waktuServer` |
 
@@ -535,7 +538,8 @@ stateDiagram-v2
 - **Lobi dan jeda:** tanpa pengatur waktu berkala, sehingga Durable Object boleh beristirahat (*hibernate*). Sejak JS-07 (Permintaan C-10), pemain boleh berjalan di halaman lobi selama `lobi` dan `hitung_mundur`, dengan sel gerbang lobi diperlakukan padat; `dunia` dikirim mengikuti `gerak` yang masuk (paling sering setiap 100 ms, dan langsung untuk laporan berhenti), jadi ruang tetap bisa beristirahat saat semua pemain diam. Sambungan memakai WebSocket Hibernation API; identitas sambungan disimpan dengan `serializeAttachment`. Kiriman ke D1 memakai pengatur waktu 30 detik hanya selama antreannya berisi, sehingga ruang tetap bisa beristirahat sesudahnya (JS-03).
 - **Main:** pengatur waktu 100 ms menyusun dan mengirim `dunia` dan `pribadi`; sejak JS-10 juga `dunia_kelas` setiap putaran ke-5, serta `papan` dan `kemajuan` setiap putaran ke-10 bila berubah. Alarm dipasang pada `berakhirPada`.
 - **Jeda:** jam berhenti; `berakhirPada` digeser sebesar lama jeda saat dilanjutkan.
-- **Selesai:** peringkat akhir dihitung, `selesai` dikirim ke setiap pemain, seluruh `kiriman` dikirim ke D1, dan `ringkasan_json` ditulis.
+- **Selesai:** peringkat akhir dihitung, `selesai` dengan rekap pribadi dikirim ke setiap pemain, baris peserta akhir dan seluruh `kiriman` dikirim ke D1, dan `ringkasan_json` ditulis dengan `pemakaian` dan `hasil` (JS-11). Bila pemain dikeluarkan atau baru memilih nama saat `selesai` atau `pembahasan`, peringkat akhir dihitung ulang, `papan`, `kemajuan`, dan `selesai` dikirim lagi, dan baris peserta diantrekan lagi (JS-11, P-13).
+- **Ditutup di tengah ronde (JS-11, P-12):** tutup otomatis, penghapusan paksa, dan berhenti paksa dari `main` atau `jeda` lebih dulu menutup semua dialog, menghitung peringkat akhir, dan mengantrekan baris peserta, tanpa `selesai`. Ruang yang ditutup dari `lobi` atau `hitung_mundur` tidak dimainkan dan tidak punya hasil.
 - **Ditutup otomatis:** 3 jam tanpa sambungan apa pun, atau 6 jam sejak dibuat. Penyimpanan Durable Object dihapus 24 jam sesudah ditutup, setelah kiriman ke D1 dipastikan lengkap.
 - **Sejak JS-03:** siklus ini dijalankan inti ruang. Sejak JS-10, pesan layar kelas sampai ke ruang lewat rute `/ws/kelas/` bertiket, dan konsol mengelola ruang lewat rute internal `kelola`. Ruang di `lobi` juga bisa ditutup, dan pesan `pembahasan` mengubah status `selesai` menjadi `pembahasan` sambil menjawab `data_pembahasan`. Ruang coba, kait `kelas`, dan kedua alur kerjanya dipensiunkan; kait uji lokal pindah ke `/api/uji/ruang/{KODE}/…`.
 - **Pengaman biaya (JS-22):** alarm paling cepat 1 detik dari sekarang; tenggat yang sama lewat lima kali berturut-turut digeser 60 detik; anggaran 200 alarm per ruang; kiriman ke D1 dicoba ulang dengan jeda sampai 60 menit dan berhenti sesudah 24 jam; penyimpanan dihapus paling lambat 7 hari sesudah ruang dibuat; `getAlarm()` dibaca sesudah bangun. "Berhenti paksa" (anggaran habis atau `DARURAT`) menutup ruang, mengirim antrean sekali, lalu menghapus alarm dan seluruh penyimpanan. Durable Object menghitung pemakaian ronde dan menulisnya ke `ruang.ringkasan_json` saat ruang ditutup.
@@ -603,6 +607,7 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 - Selama antrean berisi, setiap 30 detik (pengatur waktu, bukan alarm), dan saat ronde selesai, `kiriman` dikirim ke D1 dalam satu *batch* dengan `INSERT … ON CONFLICT DO UPDATE` berdasarkan id, sehingga pengiriman ulang aman.
 - Bila D1 gagal, kiriman dicoba lagi lewat alarm dengan jeda yang makin panjang, dan ruang tidak ditutup sebelum kiriman habis.
 - Sejak JS-08, antrean memakai tabel `antrean` berkunci `jenis:id`. Perubahan baris yang sama (misalnya satu jawaban yang dibuka lalu dikunci dua kali) memperbarui satu baris antrean, dan baris dihapus sesudah terkirim hanya bila versinya belum berubah. Urutan kirim: `ruang`, lalu `peserta`, lalu `jawaban`, agar kunci asing D1 terpenuhi. Skor pemain dihitung ulang dari tabel `jawaban` saat ruang dipulihkan, sehingga baris `pemain` tidak ditulis karena skor.
+- Sejak JS-11, baris peserta membawa `dikeluarkan`, dan keadaan langsung untuk konsol (`GET https://ruang/kelola`) memuat `kirimanTertunda`, yang benar selama antrean berisi. Baris `ruang` dari Durable Object hanya memperbarui (`UPDATE`), sehingga kiriman yang tertunda tidak bisa menghidupkan lagi ruang yang datanya sudah dihapus admin; sisipan `peserta` dan `jawaban` untuk ruang itu gagal karena kunci asing.
 
 ## 9. Klien pemain
 
@@ -623,7 +628,7 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 
 ### 10.1 Rute konsol
 
-Satu halaman di `/admin/` dengan rute *hash*: `#/dasbor`, `#/ruang`, `#/ruang/{id}` (detail; hasil menyusul di JS-11), `#/kelas/{id}` (layar kelas, dibuka di tab baru), `#/kejadian`, `#/kejadian/{id}`, `#/paket`, `#/rujukan`, `#/statistik`, `#/akun`, `#/sandi` (ganti sandi; JS-04), `#/pengaturan`, `#/log`, dan `#/masuk`. Router kecil ditulis sendiri, tanpa dependensi baru. Menu hanya memuat halaman yang sudah dibangun, dan rute yang belum ada dialihkan ke `#/dasbor` (JS-04).
+Satu halaman di `/admin/` dengan rute *hash*: `#/dasbor`, `#/ruang` (tab Berjalan), `#/ruang/riwayat` (tab Riwayat, JS-11), `#/ruang/{id}` (detail; bagian hasil untuk ruang `selesai`, `pembahasan`, dan `ditutup` sejak JS-11), `#/kelas/{id}` (layar kelas, dibuka di tab baru), `#/kejadian`, `#/kejadian/{id}`, `#/paket`, `#/rujukan`, `#/statistik`, `#/akun`, `#/sandi` (ganti sandi; JS-04), `#/pengaturan`, `#/log`, dan `#/masuk`. Router kecil ditulis sendiri, tanpa dependensi baru. Menu hanya memuat halaman yang sudah dibangun, dan rute yang belum ada dialihkan ke `#/dasbor` (JS-04).
 
 ### 10.2 API
 
@@ -641,9 +646,12 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `GET /api/kejadian/{K-xx}/versi/{nomor}` | Isi satu versi terbit | Admin, guru |
 | `GET` · `POST /api/rujukan`; `PUT` · `DELETE /api/rujukan/{JR-xx}`; `POST /api/rujukan/{JR-xx}/verifikasi` | Pustaka rujukan; tambah (admin, guru), ubah dan hapus (admin), verifikasi (tanda Peninjau) (JS-12) | Lihat kolom isi |
 | `GET` · `POST /api/paket`; `GET` · `PUT /api/paket/{id}` | Paket kejadian (JS-12) | Admin |
-| `POST /api/ruang`; `GET /api/ruang`; `GET /api/ruang/{id}`; `DELETE /api/ruang/{id}` | Buat, daftar, hasil, hapus data | Admin, guru (miliknya) |
+| `POST /api/ruang`; `GET /api/ruang`; `GET /api/ruang/{id}` | Buat, daftar ruang yang belum ditutup, detail | Admin, guru (miliknya) |
+| `GET /api/ruang/riwayat` | Ruang yang sudah ditutup, dengan saringan `dari`, `sampai`, `label`, `guru` (admin), `batas`, dan `mulai` (JS-11) | Admin, guru (miliknya) |
+| `GET /api/ruang/{id}/hasil`; `GET /api/ruang/{id}/hasil/{pesertaId}` | Hasil ronde dan rincian jawaban satu pemain; 409 `HASIL_BELUM_ADA` sebelum ronde berakhir (JS-11) | Admin, guru (miliknya) |
+| `DELETE /api/ruang/{id}` | Hapus data ruang yang sudah ditutup (409 `BELUM_DITUTUP` bila belum), dalam satu batch bersama log audit `ruang.hapus` (JS-11, D-3) | Admin |
 | `POST /api/ruang/{id}/tiket` | Tiket layar kelas | Pemilik ruang, admin |
-| `GET /api/ruang/{id}/ekspor?jenis=peserta\|jawaban` | CSV | Pemilik ruang, admin |
+| `GET /api/ruang/{id}/ekspor?jenis=peserta\|jawaban` | CSV (bagian 10.8; JS-11) | Pemilik ruang, admin |
 | `GET /api/statistik/kejadian` · `/kelas` · `/siswa` | Statistik | Admin (semua), guru (miliknya) |
 | `GET` · `PUT /api/pengaturan` | Pengaturan umum | Admin |
 | `GET /api/log` | Log audit | Admin |
@@ -663,7 +671,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 
 ### 10.4 Izin
 
-Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.ts` yang dipanggil setiap rute API. Guru hanya bisa mengakses ruang miliknya. Setiap perubahan konten, akun, pengaturan, dan penghapusan data dicatat di `log_audit`. JS-04 mengisi aksi `dasbor.lihat` dan `sandi.sendiri` (admin dan guru) serta `akun.kelola` (admin), dan menulis log audit `admin_awal`, `akun.buat`, `akun.ubah`, `akun.atur_ulang_sandi`, dan `sandi.ganti` tanpa sandi, hash, token, atau alamat IP. Admin tidak bisa menurunkan peran, menonaktifkan, atau mengatur ulang sandi akunnya sendiri, dan sedikitnya satu admin aktif selalu ada.
+Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.ts` yang dipanggil setiap rute API. Guru hanya bisa mengakses ruang miliknya. Setiap perubahan konten, akun, pengaturan, dan penghapusan data dicatat di `log_audit`. JS-04 mengisi aksi `dasbor.lihat` dan `sandi.sendiri` (admin dan guru) serta `akun.kelola` (admin), dan menulis log audit `admin_awal`, `akun.buat`, `akun.ubah`, `akun.atur_ulang_sandi`, dan `sandi.ganti` tanpa sandi, hash, token, atau alamat IP. Admin tidak bisa menurunkan peran, menonaktifkan, atau mengatur ulang sandi akunnya sendiri, dan sedikitnya satu admin aktif selalu ada. JS-11 menambah aksi `ruang.hapus` (admin saja, keputusan D-3 JS-11) dan log audit `ruang.hapus` berisi kode, label kelas, waktu dibuat, serta jumlah baris peserta dan jawaban yang dihapus, tanpa nama samaran.
 
 ### 10.5 Bank kejadian dan versi
 
@@ -691,9 +699,10 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 
 ### 10.8 Ekspor
 
-- CSV memakai **titik koma** sebagai pemisah, koma sebagai tanda desimal, dan diawali BOM UTF-8, agar langsung rapi di Excel berbahasa Indonesia.
-- Nama berkas: `jejak-setara_{label-kelas}_{tanggal}_{jenis}.csv`.
-- Ringkasan ruang dicetak lewat fitur cetak peramban dengan gaya cetak khusus (P1).
+- CSV memakai **titik koma** sebagai pemisah, koma sebagai tanda desimal, akhir baris CRLF, dan diawali BOM UTF-8, agar langsung rapi di Excel berbahasa Indonesia. Sel teks dikutip menurut RFC 4180, dan sel yang diawali `=`, `+`, `-`, `@`, tab, atau CR diberi tanda kutip tunggal agar tidak dibaca sebagai rumus. Waktu ditulis dalam WITA (JS-11).
+- Nama berkas: `jejak-setara_{label-kelas}_{tanggal}_{jenis}.csv`; label dalam huruf kecil dengan karakter selain `a`–`z` dan `0`–`9` menjadi tanda minus, paling panjang 40 karakter, atau `ruang` bila kosong; tanggal ruang dibuat dalam WITA (JS-11).
+- CSV peserta berisi 16 kolom dan CSV jawaban 17 kolom (spesifikasi JS-11, P-28 dan P-29). Pemain yang dikeluarkan ikut dengan keterangan "Dikeluarkan". Ruang yang tidak dimainkan menghasilkan baris judul saja.
+- Ringkasan ruang dicetak lewat fitur cetak peramban dengan gaya `@media print` di `kelas.css`: A4 tegak, ringkasan dan tabel peringkat saja (JS-11).
 
 ### 10.9 Layar kelas
 
@@ -802,6 +811,7 @@ Rincian di PRD bagian 13. Ketentuan teknisnya:
 - Tidak ada analitik, pelacak, CDN pihak ketiga, atau huruf dari luar. Huruf dari `@fontsource` ikut terbit bersama halaman.
 - Alamat IP tidak disimpan. Pembatas percobaan memakai hash IP dengan garam yang berganti setiap hari.
 - Log Workers hanya mencatat galat dan hitungan, tanpa token, sandi, atau isi jawaban.
+- Rekap pribadi (JS-11) hanya dikirim lewat sambungan pemain itu dan hanya disimpan di memori tab; HP tidak menyimpannya di `localStorage`. Kalimat refleksi ditulis siswa di buku, tidak di HP. CSV dibuat saat diminta dan tidak disimpan di server.
 - Pemicu harian menghapus ruang, peserta, dan jawaban yang melewati masa simpan (bawaan 12 bulan), juga sesi dan catatan pembatas yang kedaluwarsa.
 
 ## 13. Kinerja, kapasitas, dan biaya

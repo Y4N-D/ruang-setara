@@ -9,6 +9,8 @@ export const IZIN = {
   // JS-10 (P-33): untuk guru, ruang.kelola juga mensyaratkan kepemilikan ruang (diperiksa di api/ruang.ts).
   "ruang.buat": ["admin", "guru"],
   "ruang.kelola": ["admin", "guru"],
+  // JS-11 (P-33, D-3a): hanya admin yang menghapus data ruang yang sudah ditutup.
+  "ruang.hapus": ["admin"],
   // JS-12 (P-2): kepemilikan kejadian dan tanda Peninjau diperiksa di api/bank.ts.
   "kejadian.lihat": ["admin", "guru"],
   "kejadian.sunting": ["admin", "guru"],

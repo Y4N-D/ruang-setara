@@ -1,4 +1,4 @@
-// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01, JS-03, JS-07, JS-08, dan JS-04).
+// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01, JS-03, JS-07, JS-08, JS-04, dan JS-11).
 // Teks konsol ada di teks-konsol.ts (TEKS_KONSOL, JS-04 P-51), yang tidak diimpor layar pemain.
 // Kedua judul tab ditulis di index.html; nilainya di sini dipakai uji untuk memastikan keduanya sama.
 // Teks dengan {n} atau {kode} diisi lewat isiTeks().
@@ -114,6 +114,21 @@ export const TEKS = {
   skor: {
     label: "Skor {skor}, peringkat {n}",
     labelTanpaPeringkat: "Skor {skor}, belum ada peringkat",
+  },
+  // JS-11 (P-4 sampai P-8): layar rekap pribadi dan refleksi (D-1 a: Pasangan 1 naskah/refleksi.md).
+  rekap: {
+    keRefleksi: "Langsung ke refleksi",
+    judul: "Kejadian yang kamu jawab ({n})",
+    poin: "{poin} poin",
+    langkah: "Langkah {n}",
+    belumDijawab: "Belum dijawab",
+    refleksiJudul: "Refleksi",
+    refleksiPengantar: "Salin dan lengkapi kalimat ini di buku catatanmu.",
+    refleksiHak: "Satu hak yang kupelajari hari ini adalah hak … untuk …",
+    refleksiKewajiban: "Satu kewajiban yang akan kujalankan minggu ini adalah …",
+    pitaMenyambung: "Menyambung ulang… Rekapmu tetap bisa dibaca.",
+    pitaDitutup: "Ruang sudah ditutup. Rekapmu tetap tampil sampai halaman ini ditutup.",
+    pitaBerhenti: "Sambungan ke ruang berhenti. Rekapmu tetap tampil sampai halaman ini ditutup.",
   },
   pengumuman: {
     lobi: "Kamu sudah masuk lobi.",

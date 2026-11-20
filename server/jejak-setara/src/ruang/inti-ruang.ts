@@ -5,7 +5,10 @@
 // `koreksi` (P-49), dan pemeriksaan gerak dengan anggaran jarak (P-52).
 // JS-08: kejadian (keterlihatan, periksa, dialog dua langkah, kunci, skor, peringkat, `pribadi`, `selesai`), tanda
 // `dialog` di butir `dunia`, dan protokol versi 2 (spesifikasi JS-08, P-10 sampai P-37, P-55, P-56, P-63, P-64).
+// JS-11: rekap di `selesai` (P-1 sampai P-3), tanda `dikeluarkan` dan peringkat akhir di baris peserta (P-11 sampai
+// P-13), serta tanda menulis ringkasan hasil ke `ruang.ringkasan_json` (P-14).
 import { HAPUS_PAKSA_MS } from "./pengaman";
+import { rondeDimainkan, type RingkasanHasilRuang } from "../../../../app/jejak-setara/inti/hasil";
 import { BATAS, hitungPeringkat } from "../../../../app/jejak-setara/inti/aturan";
 import { koreksi, periksaGerak, posisiSah, STATUS_GERAK } from "../../../../app/jejak-setara/inti/gerak";
 import { UKURAN_UBIN } from "../../../../app/jejak-setara/inti/peta";
@@ -31,6 +34,7 @@ import {
   type SkorPemain,
 } from "./kejadian-ruang";
 import { NAMA_SAMARAN } from "./nama-samaran";
+import { hitungRingkasanHasil, susunRekap } from "./rekap-ruang";
 
 /** Versi amplop semua pesan keluar (P-64: dibuat dengan PROTOKOL_VERSI, bukan angka tetap). */
 const V = PROTOKOL_VERSI;
@@ -186,6 +190,8 @@ export interface BarisPeserta {
   jumlahKejadian: number;
   gabungPada: number;
   peringkatAkhir: number | null;
+  /** JS-11 (P-10, P-11). Baris antrean dari sebelum JS-11 tidak memuatnya dan dikirim sebagai 0. */
+  dikeluarkan?: boolean;
 }
 export type BarisKiriman =
   | { jenis: "peserta"; isi: BarisPeserta }
@@ -212,6 +218,8 @@ export interface Keluaran {
   /** Statistik kait uji (JS-08): Langkah 2 yang dikunci dan `pribadi` yang dikirim. */
   jawabanSelesai: number;
   pribadi: number;
+  /** JS-11 (P-14): pembungkus menulis `ruang.ringkasan_json` (pemakaian dan hasil) ke D1. */
+  tulisRingkasan: boolean;
 }
 
 export function keluaranKosong(): Keluaran {
@@ -231,6 +239,7 @@ export function keluaranKosong(): Keluaran {
     dialog: [],
     jawabanSelesai: 0,
     pribadi: 0,
+    tulisRingkasan: false,
   };
 }
 
@@ -412,8 +421,19 @@ function barisPeserta(k: KeadaanRuang, p: PemainRuang, peringkat: number | null)
       jumlahKejadian: s.selesai,
       gabungPada: p.gabungPada,
       peringkatAkhir: peringkat,
+      dikeluarkan: p.dikeluarkan,
     },
   };
+}
+
+/** Baris peserta semua pemain berkeidentitas dengan peringkat akhir; pemain yang dikeluarkan tanpa peringkat (P-11). */
+function antrekanPesertaAkhir(k: KeadaanRuang, o: Keluaran): void {
+  k.peringkat = null;
+  const peringkat = peringkatRuang(k);
+  for (const p of urutPemain(k)) {
+    if (p.nama === null) continue;
+    o.kiriman.push(barisPeserta(k, p, p.dikeluarkan ? null : (peringkat.get(p.id) ?? null)));
+  }
 }
 
 function barisRuang(k: KeadaanRuang): BarisKiriman {
@@ -614,7 +634,47 @@ function kirimPribadiSemua(k: KeadaanRuang, o: Keluaran, sekarang: number): void
 
 function pesanSelesai(k: KeadaanRuang, p: PemainRuang): PesanServerPemain {
   const peringkat = peringkatRuang(k);
-  return { v: V, t: "selesai", skor: skorDari(k, p.id).skor, peringkat: peringkat.get(p.id) ?? 1, jumlahPemain: Math.max(1, peringkat.size), rekap: [] };
+  return {
+    v: V,
+    t: "selesai",
+    skor: skorDari(k, p.id).skor,
+    peringkat: peringkat.get(p.id) ?? 1,
+    jumlahPemain: Math.max(1, peringkat.size),
+    rekap: susunRekap(k.kejadian, k.jawaban.get(p.id)), // JS-11, P-1 dan P-2
+  };
+}
+
+/** `selesai` kepada setiap pemain berkeidentitas yang tersambung (JS-08 P-35; JS-11 P-3). */
+function kirimSelesaiSemua(k: KeadaanRuang, o: Keluaran): void {
+  for (const p of urutPemain(k)) {
+    const sid = k.sambunganPemain.get(p.id);
+    if (sid !== undefined && berkeidentitas(p)) kirimKe(o, sid, pesanSelesai(k, p));
+  }
+}
+
+/**
+ * JS-11 (P-13): peringkat berubah sesudah ronde berakhir (pemain dikeluarkan, atau pemain yang sudah tersambung baru
+ * memilih nama). Peringkat dihitung ulang, baris peserta semua pemain diantrekan lagi, layar kelas menerima `papan` dan
+ * `kemajuan` bila berubah, pemain yang tersambung menerima `selesai` baru, dan ringkasan hasil ditulis ulang.
+ */
+function perbaruiPeringkatAkhir(k: KeadaanRuang, o: Keluaran): void {
+  antrekanPesertaAkhir(k, o);
+  kirimPapanKelas(k, o, false);
+  kirimSelesaiSemua(k, o);
+  o.tulisRingkasan = true;
+  o.kirimSekarang = true;
+}
+
+/**
+ * JS-11 (P-14): ringkasan hasil untuk `ruang.ringkasan_json.hasil`, atau null bila ronde tidak dimainkan (ruang ditutup
+ * dari lobi atau saat hitung mundur).
+ */
+export function ringkasanHasil(k: KeadaanRuang): RingkasanHasilRuang | null {
+  if (!rondeDimainkan(k.waktu.mulaiPada, k.waktu.selesaiPada)) return null;
+  const pemain = urutPemain(k)
+    .filter(berkeidentitas)
+    .map((p) => ({ skor: skorDari(k, p.id).skor, jawaban: k.jawaban.get(p.id)?.values() ?? [] }));
+  return hitungRingkasanHasil(k.kejadian.length, pemain);
 }
 
 function catatTerlihat(k: KeadaanRuang, o: Keluaran, p: PemainRuang, sid: string, kj: KejadianRuang, titik: TitikPeta, sekarang: number): void {
@@ -939,7 +999,9 @@ export function terimaPemain(k: KeadaanRuang, sid: string, pesan: PesanPemain, s
       kirimSemua(k, o, pesanPemainBaru(p));
       kirimPosisiAwal(k, o, p, sid, sekarang);
       k.peringkat = null;
-      kirimKeadaanKejadian(k, o, p, sid, sekarang);
+      // JS-11 (P-13): sesudah ronde berakhir, pemain baru ikut peringkat akhir dan semua menerima `selesai` baru.
+      if (k.status === "selesai" || k.status === "pembahasan") perbaruiPeringkatAkhir(k, o);
+      else kirimKeadaanKejadian(k, o, p, sid, sekarang);
       o.kelas.push(pesanLobi(k));
       return o;
     }
@@ -1035,26 +1097,24 @@ function akhiriRonde(k: KeadaanRuang, o: Keluaran, sekarang: number): void {
   k.waktu.jedaSejak = null;
   k.waktu.selesaiPada = sekarang;
   o.putaran = "henti";
-  k.peringkat = null;
-  const peringkat = peringkatRuang(k);
-  for (const p of urutPemain(k)) {
-    if (p.nama === null) continue;
-    o.kiriman.push(barisPeserta(k, p, p.dikeluarkan ? null : (peringkat.get(p.id) ?? null)));
-  }
+  antrekanPesertaAkhir(k, o);
   ubahStatus(k, o);
   kirimPapanKelas(k, o, true); // JS-10, P-18
-  for (const p of urutPemain(k)) {
-    const sid = k.sambunganPemain.get(p.id);
-    if (sid !== undefined && berkeidentitas(p)) kirimKe(o, sid, pesanSelesai(k, p));
-  }
+  kirimSelesaiSemua(k, o);
+  o.tulisRingkasan = true; // JS-11, P-14
   o.kirimSekarang = true;
 }
 
 function tutupRuang(k: KeadaanRuang, o: Keluaran, sekarang: number): void {
+  // JS-11 (P-12): server menutup ruang di tengah ronde (tutup otomatis, penghapusan paksa, atau berhenti paksa). Dialog
+  // ditutup dan peringkat akhir diantrekan lebih dulu, tanpa `selesai`.
+  const diTengahRonde = k.status === "main" || k.status === "jeda";
+  if (diTengahRonde) for (const pid of [...k.dialog.keys()]) tutupDialog(k, o, pid);
   k.status = "ditutup";
   k.ditutupPada = sekarang;
   k.waktu.jedaSejak = null;
   if (k.waktu.selesaiPada === null) k.waktu.selesaiPada = sekarang;
+  if (diTengahRonde) antrekanPesertaAkhir(k, o);
   o.putaran = "henti";
   simpanMeta(o, "ditutupPada", sekarang);
   ubahStatus(k, o);
@@ -1081,7 +1141,12 @@ function keluarkan(k: KeadaanRuang, o: Keluaran, pemainId: string): void {
     k.sambunganPemain.delete(pemainId);
   }
   simpanPemain(o, p);
-  if (p.nama !== null) kirimSemua(k, o, { v: V, t: "pemain_pergi", id: p.id });
+  if (p.nama !== null) {
+    kirimSemua(k, o, { v: V, t: "pemain_pergi", id: p.id });
+    // JS-11 (P-13): tanda `dikeluarkan` ke D1 di status apa pun; sesudah ronde berakhir, peringkat akhir dihitung ulang.
+    if (k.status === "selesai" || k.status === "pembahasan") perbaruiPeringkatAkhir(k, o);
+    else o.kiriman.push(barisPeserta(k, p, null));
+  }
   o.kelas.push(pesanLobi(k));
 }
 

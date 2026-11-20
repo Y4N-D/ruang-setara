@@ -1,7 +1,8 @@
 // Halaman pemain Jejak Setara ("/"): alur gabung (JS-03), lalu dunia untuk lobi, hitung mundur, ronde, dan jeda
 // (JS-07), serta layar selesai dan ditutup. Mesin dunia hidup di sini, agar pesan `dunia` dan `koreksi` diterima
 // walaupun layar dunia belum terpasang. JS-08: keadaan dialog kejadian, skor dan peringkat pribadi, skor akhir, dan
-// pesan periksa, kunci, dan tutup dialog (P-13, P-24, P-28, P-43 sampai P-59).
+// pesan periksa, kunci, dan tutup dialog (P-13, P-24, P-28, P-43 sampai P-59). JS-11: rekap pribadi yang tetap
+// terbaca saat menyambung ulang dan sesudah sambungan berakhir (spesifikasi JS-11, P-3 sampai P-9; D-2 a).
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { AksiDialog } from "../bersama/DialogKejadian";
 import {
@@ -31,7 +32,9 @@ import { LayarAbsen, LayarIdentitas, LayarKode, LayarMenghubungkan } from "./Gab
 import { ketergantunganPeramban, KlienRuang, type KeadaanKlien, KODE_LAYANAN_BERHENTI, KODE_PUTUS_LAMA } from "./jaringan";
 import LayarDunia, { areaDialog } from "./LayarDunia";
 import { LapisanJeda, LapisanMenyambung } from "./LayarMenyambung";
-import { LayarDitutup, LayarGalat, LayarRonde, type SkorAkhir, type WaktuStatus, LayarBerhenti } from "./LayarRonde";
+import { LayarDitutup, LayarGalat, type SkorAkhir, type WaktuStatus, LayarBerhenti } from "./LayarRonde";
+import { LayarRekap } from "./Rekap";
+import { akhirRekap, penyebabDariKode, type AkhirRekap, type ButirRekap, type PenyebabBerakhir } from "./rekapKeadaan";
 
 type NamaLayar = "kode" | "absen" | "menghubungkan" | "identitas" | "dunia" | "ronde" | "ditutup" | "galat";
 
@@ -103,6 +106,10 @@ export default function App() {
   const [pribadi, setPribadi] = useState({ skor: 0, peringkat: 1 });
   const pribadiRef = useRef({ skor: 0, peringkat: 1 });
   const [akhir, setAkhir] = useState<SkorAkhir | null>(null);
+  // JS-11: rekap dari `selesai` (null sebelum tiba) dan rekap yang tetap tampil sesudah sambungan berakhir (P-8).
+  const [rekap, setRekap] = useState<ButirRekap[] | null>(null);
+  const [rekapBerakhir, setRekapBerakhir] = useState<AkhirRekap | null>(null);
+  const rekapBerakhirRef = useRef<AkhirRekap | null>(null);
   const [menungguPeriksa, setMenungguPeriksa] = useState(false);
   const pewaktuPeriksa = useRef<number | null>(null);
   const [ruangUji, setRuangUji] = useState(false);
@@ -126,6 +133,29 @@ export default function App() {
     layarRef.current = l;
     setLayar(l);
   }, []);
+
+  /** Rekap hanya disimpan di memori tab; dikosongkan saat bergabung ke ruang lain atau kembali ke awal. */
+  const hapusRekap = useCallback(() => {
+    setRekap(null);
+    rekapBerakhirRef.current = null;
+    setRekapBerakhir(null);
+  }, []);
+
+  /** P-8: di layar rekap, sambungan yang berakhir tidak mengganti layar; true bila rekap tetap tampil. */
+  const tahanRekap = useCallback(
+    (p: PenyebabBerakhir | null): boolean => {
+      if (layarRef.current !== "ronde" || p === null) return false;
+      const a = akhirRekap(p);
+      if (!a) return false;
+      if (!rekapBerakhirRef.current) {
+        rekapBerakhirRef.current = a;
+        setRekapBerakhir(a);
+        umumkan(a.pita === "ditutup" ? TEKS.rekap.pitaDitutup : TEKS.rekap.pitaBerhenti);
+      }
+      return true;
+    },
+    [umumkan],
+  );
 
   const tanganiPesan = useCallback(
     (p: PesanServerPemain) => {
@@ -162,7 +192,7 @@ export default function App() {
           // Layar juga diganti bila status sudah berubah selama terputus (misalnya ronde selesai saat HP menyambung
           // ulang): selamat_datang sudah membawa status baru, jadi status_ruang sesudahnya tidak tampak berubah (JS-08, P-36).
           if (beridentitas.current && (p.status !== sebelum || layarRef.current !== layarUntuk(p.status))) {
-            gantiLayar(layarUntuk(p.status));
+            if (!(p.status === "ditutup" && tahanRekap("ditutup"))) gantiLayar(layarUntuk(p.status));
           }
           if (beridentitas.current && p.status !== sebelum) {
             if (p.status === "main") umumkan(sebelum === "jeda" ? TEKS.pengumuman.lanjut : TEKS.pengumuman.mulai);
@@ -227,6 +257,7 @@ export default function App() {
           aturDialog(null);
           hentiMenunggu();
           setAkhir({ skor: p.skor, peringkat: p.peringkat, jumlah: p.jumlahPemain });
+          setRekap(p.rekap); // JS-11, P-3
           break;
         case "galat":
           if (p.kode === "NAMA_DIPAKAI") {
@@ -237,7 +268,7 @@ export default function App() {
             gantiLayar("absen");
             umumkan(TEKS.galat.NOMOR_ABSEN_DIPAKAI);
           } else if (p.kode === "RUANG_TIDAK_ADA") {
-            gantiLayar("ditutup");
+            if (!tahanRekap("tidak_ada")) gantiLayar("ditutup");
           } else if (p.kode !== "TERLALU_CEPAT" && p.kode !== "BUKAN_JANGKAUAN") {
             setGalatKode(p.kode);
             gantiLayar("galat");
@@ -248,7 +279,7 @@ export default function App() {
           break;
       }
     },
-    [aturDialog, gantiLayar, hentiMenunggu, mesin, umumkan],
+    [aturDialog, gantiLayar, hentiMenunggu, mesin, tahanRekap, umumkan],
   );
 
   const tanganiKeadaan = useCallback(
@@ -268,6 +299,7 @@ export default function App() {
       if (terputusRef.current !== null && k === "tersambung") umumkan(TEKS.pengumuman.tersambung);
       terputusRef.current = null;
       setTerputusSejak(null);
+      if (k === "berhenti" && tahanRekap(penyebabDariKode(kodeTutup))) return; // JS-11, P-8
       if (k === "berhenti" && layarRef.current !== "galat" && layarRef.current !== "ditutup") {
         if (kodeTutup === 4000) gantiLayar("ditutup");
         else if (kodeTutup === KODE_LAYANAN_BERHENTI || kodeTutup === KODE_PUTUS_LAMA) {
@@ -279,7 +311,7 @@ export default function App() {
         }
       }
     },
-    [aturDialog, gantiLayar, hentiMenunggu, umumkan],
+    [aturDialog, gantiLayar, hentiMenunggu, tahanRekap, umumkan],
   );
 
   const sambungkan = useCallback(
@@ -292,6 +324,7 @@ export default function App() {
       setPemain({});
       setGalatForm(null);
       setAkhir(null);
+      hapusRekap();
       pribadiRef.current = { skor: 0, peringkat: 1 };
       setPribadi(pribadiRef.current);
       const alamat = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/ruang/${k}`;
@@ -313,7 +346,7 @@ export default function App() {
       gantiLayar("menghubungkan");
       c.mulai();
     },
-    [gantiLayar, tanganiKeadaan, tanganiPesan],
+    [gantiLayar, hapusRekap, tanganiKeadaan, tanganiPesan],
   );
 
   const periksaKode = useCallback(
@@ -368,6 +401,7 @@ export default function App() {
     setGalatForm(null);
     setGalatKode(null);
     setBerhentiJenis(null);
+    hapusRekap();
     gantiLayar("kode");
   };
 
@@ -499,7 +533,8 @@ export default function App() {
   const kirimGerak = useCallback((p: Extract<PesanPemain, { t: "gerak" }>) => klien.current?.kirim(p) ?? false, []);
   const bufferedAmount = useCallback(() => klien.current?.bufferedAmount ?? 0, []);
   const diri = diriId ? pemain[diriId] : undefined;
-  const tampilMenyambung = koneksi === "menyambung_ulang" && terputusSejak !== null && LAYAR_BERSAMBUNG.includes(layar);
+  // JS-11 (P-7): di layar rekap, pita menggantikan lapisan menyambung ulang.
+  const tampilMenyambung = koneksi === "menyambung_ulang" && terputusSejak !== null && LAYAR_BERSAMBUNG.includes(layar) && layar !== "ronde";
 
   let isi: ReactNode;
   switch (layar) {
@@ -560,7 +595,16 @@ export default function App() {
       );
       break;
     case "ronde":
-      isi = <LayarRonde akhir={akhir} />;
+      isi = (
+        <LayarRekap
+          akhir={akhir}
+          rekap={rekap}
+          uji={ruangUji}
+          menyambung={koneksi === "menyambung_ulang" && rekapBerakhir === null}
+          berakhir={rekapBerakhir}
+          saatKembali={kembali}
+        />
+      );
       break;
     case "ditutup":
       isi = <LayarDitutup saatKembali={kembali} />;

@@ -216,7 +216,29 @@ describe("kunci, skor, KT-13, dan pribadi (P-31, P-32, P-55, P-56)", () => {
     expect(satu(lagi.o, "s1", "hasil_1")).toEqual(h1);
     const akhir = semuaSah(terimaKelas(k, { v: V, t: "akhiri" }, mulaiPada + 500));
     expect(akhir.dialog).toEqual([{ sambunganId: "s1", kode: null }]);
-    expect(satu(akhir, "s1", "selesai")).toEqual({ v: V, t: "selesai", skor: 40, peringkat: 1, jumlahPemain: 1, rekap: [] });
+    const benar = kj.isi.langkah1.opsi.find((o) => o.benar)!;
+    expect(satu(akhir, "s1", "selesai")).toEqual({
+      v: V,
+      t: "selesai",
+      skor: 40,
+      peringkat: 1,
+      jumlahPemain: 1,
+      // JS-11 (P-1, P-2): Langkah 1 dikunci dan Langkah 2 belum, jadi butir rekapnya berisi pilihan2 dan tingkat2 null.
+      rekap: [
+        {
+          kejadianId: kj.kode,
+          judul: kj.isi.judul,
+          pilihan1: benar.teks,
+          benar1: true,
+          opsiBenar1: benar.teks,
+          pilihan2: null,
+          tingkat2: null,
+          opsiTepat2: kj.isi.langkah2.opsi.filter((o) => o.tingkat === "tepat").map((o) => o.teks),
+          poin: 40,
+          rujukan: kj.rujukan,
+        },
+      ],
+    });
     const peserta = akhir.kiriman.find((x) => x.jenis === "peserta");
     expect(peserta?.isi).toMatchObject({ skor: 40, langkah1Benar: 1, jumlahKejadian: 0, peringkatAkhir: 1 });
   });

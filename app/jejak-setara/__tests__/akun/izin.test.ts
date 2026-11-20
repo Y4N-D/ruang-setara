@@ -13,6 +13,7 @@ describe("tabel izin JS-04 (P-20)", () => {
       "akun.kelola": ["admin"],
       "ruang.buat": ["admin", "guru"],
       "ruang.kelola": ["admin", "guru"],
+      "ruang.hapus": ["admin"], // JS-11 (P-33, D-3a)
       "kejadian.lihat": ["admin", "guru"],
       "kejadian.sunting": ["admin", "guru"],
       "kejadian.terbitkan": ["admin"],

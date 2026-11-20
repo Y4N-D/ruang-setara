@@ -444,9 +444,18 @@
   height: calc(4.4 * var(--u));
 }
 .js-kelas-selesai {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(0.5 * var(--u));
   text-align: right;
   font-size: calc(2.6 * var(--u));
   color: var(--js-dusk);
+}
+/* JS-11 (P-34): ikon_centang setinggi 2,5u menggantikan tanda ✓. */
+.js-kelas-papan li .js-kelas-selesai img {
+  width: calc(2.5 * var(--u));
+  height: calc(2.5 * var(--u));
 }
 .js-kelas-kemajuan {
   display: flex;
@@ -647,12 +656,21 @@
   text-align: right;
 }
 .js-kelas-tepat {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(0.4 * var(--u));
   margin-left: calc(0.8 * var(--u));
   padding: 0 calc(0.6 * var(--u));
   border: calc(0.3 * var(--u)) solid var(--js-ink);
   background: var(--js-leaf);
   font-size: calc(2.4 * var(--u));
   font-weight: 600;
+  vertical-align: middle;
+}
+/* JS-11 (P-34): ikon_centang di depan "Jawaban tepat". */
+.js-kelas-grafik .js-kelas-tepat img {
+  width: calc(2.5 * var(--u));
+  height: calc(2.5 * var(--u));
 }
 .js-kelas-grafik:last-child {
   margin-bottom: 0;
@@ -986,5 +1004,310 @@
   .js-bank-tabel td[data-label]::before {
     content: attr(data-label) ": ";
     color: var(--js-dusk);
+  }
+}
+
+/* ------------------------------------------------------------------------------------------
+   JS-11: tab halaman Ruang, riwayat ruang, hasil ronde, hapus data ruang, dan cetak (hanya konsol). */
+
+/* P-16: tab Berjalan dan Riwayat; tab aktif berlatar sun dengan ▶, seperti butir menu aktif. */
+.js-ruang-tab {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+  border-bottom: 2px solid var(--js-ink);
+}
+.js-ruang-tab a {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 8px 16px 8px 40px;
+  border: 2px solid var(--js-ink);
+  border-bottom: 0;
+  background: var(--js-white);
+  color: var(--js-ink);
+  font-family: "Pixelify Sans", monospace;
+  font-size: 18px;
+  text-decoration: none;
+}
+.js-ruang-tab a[aria-current="page"] {
+  padding-left: 16px;
+  background: var(--js-sun);
+}
+.js-ruang-tab a[aria-current="page"]::before {
+  content: "▶";
+  width: 24px;
+  flex: none;
+}
+
+/* P-18: saringan dalam satu baris yang membungkus. */
+.js-riwayat-ruang-saring {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: flex-start;
+  margin: 0 0 16px;
+}
+.js-riwayat-ruang-saring > .js-konsol-kolom {
+  flex: 1 1 150px;
+  max-width: 220px;
+}
+.js-riwayat-ruang-tombol {
+  padding-top: 30px;
+}
+.js-riwayat-ruang-lagi {
+  margin-top: 16px;
+}
+@media (max-width: 1023px) {
+  .js-riwayat-ruang-saring > .js-konsol-kolom {
+    max-width: none;
+  }
+  .js-riwayat-ruang-tombol {
+    padding-top: 0;
+  }
+  .js-riwayat-ruang-tabel thead {
+    display: none;
+  }
+  .js-riwayat-ruang-tabel tr {
+    display: block;
+    padding: 8px 0;
+    border-top: 2px solid var(--js-mist);
+  }
+  .js-riwayat-ruang-tabel td {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    padding: 2px 10px;
+    border: 0;
+  }
+  .js-riwayat-ruang-tabel td[data-label]::before {
+    content: attr(data-label) ":";
+    color: var(--js-dusk);
+  }
+}
+
+/* P-20 sampai P-24: bagian hasil ronde. */
+.js-hasil,
+.js-hasil-hapus {
+  max-width: none;
+  margin: 16px 0;
+}
+.js-hasil h2,
+.js-hasil-hapus h2 {
+  margin: 0 0 12px;
+  font-family: "Pixelify Sans", sans-serif;
+}
+.js-hasil h3 {
+  margin: 20px 0 8px;
+  font-family: "Pixelify Sans", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+.js-hasil > .js-konsol-pesan {
+  margin-bottom: 12px;
+}
+.js-hasil-cetak-kepala,
+.js-hasil-cetak-kaki {
+  display: none;
+}
+/* P-22: daftar istilah dua kolom. */
+.js-hasil-ringkasan {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 16px;
+  margin: 0 0 12px;
+}
+.js-hasil-ringkasan div {
+  display: contents;
+}
+.js-hasil-ringkasan dt {
+  font-weight: 600;
+}
+.js-hasil-ringkasan dd {
+  margin: 0;
+}
+.js-hasil .js-hasil-uji {
+  margin: 0 0 12px;
+  color: var(--js-dusk);
+}
+.js-hasil-tombol {
+  margin: 12px 0 0;
+}
+.js-hasil-galat:not(:empty) {
+  margin-top: 8px;
+}
+.js-hasil-dikeluarkan p {
+  margin: 0 0 8px;
+}
+/* P-23: kepala tabel tetap di atas saat halaman digulir. Di layar yang lebih sempit dari tabelnya, tabel digulir
+   menyamping di dalam wadahnya, dan wadah itu mendapat tinggi tetap agar kepala tabel tetap terlihat di dalamnya. */
+.js-konsol-gulung.js-hasil-gulung {
+  overflow: visible;
+}
+.js-hasil-tabel > thead > tr > th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+@media (max-width: 1279px) {
+  .js-konsol-gulung.js-hasil-gulung {
+    max-height: 75vh;
+    overflow: auto;
+  }
+}
+.js-hasil-kepala-ikon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.js-hasil-tabel img {
+  flex: none;
+  image-rendering: pixelated;
+}
+/* Baris rincian ikut warna baris pemainnya, jadi baris berselang dihitung per pemain, bukan per baris tabel. */
+.js-konsol-tabel.js-hasil-tabel > tbody > tr:nth-child(n) {
+  background: var(--js-white);
+}
+.js-konsol-tabel.js-hasil-tabel > tbody > tr[data-genap="ya"]:nth-child(n) {
+  background: var(--js-cream);
+}
+.js-hasil-rincian-baris > td {
+  padding: 4px 10px 16px;
+}
+.js-hasil-rincian {
+  font-size: 15px;
+}
+.js-hasil-rincian td {
+  vertical-align: top;
+}
+.js-hasil-rincian p {
+  margin: 0 0 4px;
+}
+.js-hasil-tepat {
+  color: var(--js-dusk);
+  font-size: 14px;
+}
+.js-hasil-tanda {
+  margin-bottom: 4px;
+}
+.js-hasil-tanda[data-jenis="tepat"] {
+  background: var(--js-leaf);
+}
+.js-hasil-tanda[data-jenis="belum"],
+.js-hasil-tanda[data-jenis="kurang"] {
+  background: var(--js-mango);
+}
+.js-hasil-tanda[data-jenis="berisiko"] {
+  background: var(--js-coral);
+}
+.js-hasil-tanda[data-jenis="kosong"] {
+  background: var(--js-mist);
+}
+
+/* P-31: cetak ringkasan. Hanya berlaku bila halaman memuat bagian hasil; halaman konsol lain tidak berubah. */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+  body:has(.js-hasil) {
+    background: none;
+  }
+  .js-konsol:has(.js-hasil) {
+    display: block;
+    min-height: 0;
+    background: none;
+  }
+  .js-konsol:has(.js-hasil) :is(.js-konsol-samping, .js-konsol-kepala, .js-konsol-menu-sempit, .js-konsol-pemberitahuan) {
+    display: none !important;
+  }
+  .js-konsol-isi:has(.js-hasil) {
+    max-width: none;
+    padding: 0;
+  }
+  .js-konsol-isi:has(.js-hasil) > :not(.js-hasil) {
+    display: none !important;
+  }
+  .js-hasil {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: none;
+    font-size: 10pt;
+  }
+  .js-hasil > h2,
+  .js-hasil > .js-konsol-pesan,
+  .js-hasil button,
+  .js-hasil-tombol,
+  .js-hasil-galat,
+  .js-hasil-aksi,
+  .js-hasil-rincian-baris {
+    display: none !important;
+  }
+  .js-hasil-cetak-kepala,
+  .js-hasil-cetak-kaki {
+    display: block;
+  }
+  .js-hasil-cetak-kepala {
+    margin: 0 0 8px;
+  }
+  .js-hasil-cetak-judul {
+    font-family: "Pixelify Sans", sans-serif;
+    font-size: 14pt;
+  }
+  .js-hasil .js-hasil-cetak-kaki {
+    margin-top: 8px;
+    color: var(--js-dusk);
+  }
+  .js-hasil h3 {
+    margin: 10px 0 4px;
+    font-size: 12pt;
+    break-after: avoid;
+  }
+  .js-hasil-ringkasan {
+    grid-template-columns: max-content minmax(0, 1fr) max-content minmax(0, 1fr);
+    gap: 1px 12px;
+    margin-bottom: 6px;
+  }
+  .js-hasil .js-hasil-uji {
+    margin-bottom: 6px;
+  }
+  .js-konsol-gulung.js-hasil-gulung {
+    max-height: none;
+    overflow: visible;
+  }
+  .js-hasil-tabel {
+    border: 1px solid var(--js-ink);
+    font-family: var(--js-huruf-sistem);
+    font-size: 10pt;
+  }
+  .js-hasil-tabel > thead {
+    display: table-header-group;
+  }
+  .js-hasil-tabel > thead > tr > th {
+    position: static;
+  }
+  .js-hasil-tabel > * > tr > :is(th, td) {
+    padding: 1px 4px;
+    border: 1px solid var(--js-ink);
+    background: none !important;
+    line-height: 1.15;
+  }
+  /* Satu baris per pemain, agar ruang 40 pemain muat di satu halaman A4. */
+  .js-hasil-tabel > tbody > tr > td {
+    white-space: nowrap;
+  }
+  .js-konsol-tabel.js-hasil-tabel > tbody > tr:nth-child(n) {
+    border-top: 1px solid var(--js-ink);
+    background: none !important;
+    break-inside: avoid;
+  }
+  .js-hasil-tabel img {
+    width: 10pt;
+    height: 10pt;
   }
 }

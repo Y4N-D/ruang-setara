@@ -174,7 +174,11 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   const hasil1 = await bot.tunggu((m) => m.t === "hasil_1");
   bot.ws.send(JSON.stringify({ v: V, t: "kunci_2", kejadianId: kejadian[0].kejadianId, opsiId: (hasil1.opsi2 as { id: string }[])[0].id }));
   await bot.tunggu((m) => m.t === "hasil_2");
-  await expect(kelas.locator(".js-kelas-papan li").filter({ hasText: bot.nama }).locator(".js-kelas-selesai")).toHaveText("✓1", { timeout: 5000 });
+  // JS-11 (P-34): ikon centang, angka yang terlihat, dan teks pembaca layar tersembunyi.
+  const selesaiBot = kelas.locator(".js-kelas-papan li").filter({ hasText: bot.nama }).locator(".js-kelas-selesai");
+  await expect(selesaiBot.locator('span[aria-hidden="true"]')).toHaveText("1", { timeout: 5000 });
+  await expect(selesaiBot.locator(".js-sr")).toHaveText("1 kejadian selesai");
+  await expect(selesaiBot.locator("img")).toHaveAttribute("alt", "");
   await expect(kelas.locator(".js-kelas-kemajuan .js-kelas-angka")).toHaveText("1%");
   await fotoKelas(kelas, "bermain");
 

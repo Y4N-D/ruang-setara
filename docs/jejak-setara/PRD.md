@@ -388,7 +388,7 @@ Contoh ini menunjukkan bentuk yang diharapkan. Naskah final seluruh kejadian dit
 | Menandai rujukan "Terverifikasi" | Bila bertanda Peninjau | Bila bertanda Peninjau |
 | Mengelola akun | Ya | Tidak (hanya sandinya sendiri) |
 | Pengaturan umum dan log audit | Ya | Tidak |
-| Menghapus data ruang | Semua ruang | Ruang miliknya |
+| Menghapus data ruang | Semua ruang yang sudah ditutup | Tidak (keputusan D-3 JS-11) |
 | Ekspor CSV dan cetak ringkasan | Semua ruang | Ruang miliknya |
 
 ### 11.2 Definisi statistik
@@ -561,3 +561,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 15 Nov 2026 | KT-03 dijawab dengan saran PRD (admin dan guru menyunting draf, hanya admin yang menerbitkan). AC-18 JS-22 diterima: kode layar pemain naik 0,59 KB untuk pengaman sambung ulang |
 | 15 Nov 2026 | Spesifikasi JS-12 (bank kejadian di konsol) disetujui dengan D-1 sampai D-4 = a: guru boleh menambah rujukan tetapi hanya admin yang mengubah dan menghapusnya; pratinjau memakai urutan asli A–D; kode kejadian baru diberikan saat simpan pertama; kejadian bank awal tetap tanpa pemilik |
 | 16 Nov 2026 | JS-12 dan JS-22 Selesai. AC-8 JS-12 diterima: kode layar pemain naik 0,85 KB untuk pratinjau yang memakai dialog layar pemain sungguhan |
+| 20 Nov 2026 | Spesifikasi JS-11 (akhir ronde) disetujui dengan D-1 sampai D-4 = a: refleksi memakai Pasangan 1 dari `naskah/refleksi.md`; rekap tetap tampil di HP sesudah ruang ditutup; hanya admin yang menghapus data ruang, dan baris "Menghapus data ruang" di bagian 11.1 diubah menjadi "Tidak" untuk guru; pemain yang dikeluarkan tampil di tabel terpisah dan di CSV dengan keterangan "Dikeluarkan" |

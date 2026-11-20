@@ -1,13 +1,14 @@
 // Rute hash konsol dan pengalihannya (spesifikasi JS-04, P-37; JS-10, P-1). Murni: tanpa DOM, sehingga diuji di Node.
 // Sejak JS-10: `#/ruang` (daftar), `#/ruang/{id}` (detail), dan `#/kelas/{id}` (layar kelas, tanpa kerangka konsol).
 // Sejak JS-12 (P-3): `#/kejadian`, `#/kejadian/{K-xx}`, `#/kejadian/baru`, `#/rujukan`, `#/paket`, dan `#/paket/{id}`.
+// Sejak JS-11 (P-16): `#/ruang/riwayat` (riwayat ruang yang sudah ditutup).
 import type { Peran } from "../inti/akun";
 import { idRuangSah } from "../inti/ruang";
 
 export const RUTE = ["masuk", "sandi", "dasbor", "ruang", "kejadian", "rujukan", "paket", "akun", "kelas"] as const;
 export type Rute = (typeof RUTE)[number];
 
-/** Rute beserta id: ruang dan paket (UUID), kejadian (`K-xx` atau `baru`); null untuk rute lain. */
+/** Rute beserta id: ruang dan paket (UUID), ruang `riwayat` (JS-11), kejadian (`K-xx` atau `baru`); null untuk rute lain. */
 export interface Tujuan {
   rute: Rute;
   id: string | null;
@@ -18,14 +19,15 @@ export type KeadaanMasuk = { masuk: false } | { masuk: true; peran: Peran; wajib
 
 /** `#/dasbor` → dasbor; `#/ruang/{uuid}` → detail ruang; `#/kelas/{uuid}` → layar kelas. Bentuk lain → null. */
 export function bacaRute(hash: string): Tujuan | null {
-  const cocok = /^#\/([a-z]+)(?:\/([0-9a-f-]{36}|K-\d{2,3}|baru))?$/.exec(hash);
+  const cocok = /^#\/([a-z]+)(?:\/([0-9a-f-]{36}|K-\d{2,3}|baru|riwayat))?$/.exec(hash);
   if (!cocok || !(RUTE as readonly string[]).includes(cocok[1])) return null;
   const rute = cocok[1] as Rute;
   const id = cocok[2] ?? null;
   if (id !== null) {
     const uuid = idRuangSah(id) && (rute === "ruang" || rute === "kelas" || rute === "paket");
     const kejadian = rute === "kejadian" && (id === "baru" || /^K-\d{2,3}$/.test(id));
-    if (!uuid && !kejadian) return null;
+    const riwayat = rute === "ruang" && id === "riwayat"; // JS-11, P-16
+    if (!uuid && !kejadian && !riwayat) return null;
   }
   if (rute === "kelas" && id === null) return null;
   return { rute, id };

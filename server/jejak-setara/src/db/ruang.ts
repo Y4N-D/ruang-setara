@@ -1,5 +1,6 @@
 // Kueri D1 untuk ruang, peserta, dan jawaban (spesifikasi JS-03, P-5, P-12, P-47; JS-08, P-3 dan P-62).
-// Semua kueri berparameter.
+// JS-11: kolom `dikeluarkan` (P-10), riwayat (P-17), hasil dan rincian (P-21, P-24), ekspor (P-28, P-29), dan hapus
+// data ruang (P-33). Semua kueri berparameter.
 import type { BarisKiriman } from "../ruang/inti-ruang";
 
 export interface BarisRuangD1 {
@@ -47,11 +48,11 @@ export async function tandaiRuangLama(db: D1Database, sekarang: number): Promise
 }
 
 const UPSERT_PESERTA =
-  "INSERT INTO peserta (id, ruang_id, nama_samaran, avatar, warna_tas, nomor_absen, skor, waktu_skor_ms, langkah1_benar, jumlah_kejadian, gabung_pada, peringkat_akhir) " +
-  "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12) ON CONFLICT(id) DO UPDATE SET nama_samaran = excluded.nama_samaran, " +
+  "INSERT INTO peserta (id, ruang_id, nama_samaran, avatar, warna_tas, nomor_absen, skor, waktu_skor_ms, langkah1_benar, jumlah_kejadian, gabung_pada, peringkat_akhir, dikeluarkan) " +
+  "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13) ON CONFLICT(id) DO UPDATE SET nama_samaran = excluded.nama_samaran, " +
   "avatar = excluded.avatar, warna_tas = excluded.warna_tas, nomor_absen = excluded.nomor_absen, skor = excluded.skor, " +
   "waktu_skor_ms = excluded.waktu_skor_ms, langkah1_benar = excluded.langkah1_benar, jumlah_kejadian = excluded.jumlah_kejadian, " +
-  "peringkat_akhir = excluded.peringkat_akhir";
+  "peringkat_akhir = excluded.peringkat_akhir, dikeluarkan = excluded.dikeluarkan";
 const UPSERT_JAWABAN =
   "INSERT INTO jawaban (id, ruang_id, peserta_id, kejadian_versi_id, urutan_opsi_json, langkah1_opsi, langkah1_benar, petunjuk_dipakai, " +
   "langkah2_opsi, tingkat, poin, dibuka_pada, langkah1_pada, langkah2_pada) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14) " +
@@ -103,6 +104,7 @@ export async function kirimKeD1(db: D1Database, baris: readonly BarisKiriman[]):
             b.isi.jumlahKejadian,
             b.isi.gabungPada,
             b.isi.peringkatAkhir,
+            b.isi.dikeluarkan ? 1 : 0, // JS-11 (P-10): baris antrean lama tanpa tanda ini dikirim sebagai 0
           )
       : db.prepare(UBAH_RUANG).bind(b.isi.ruangId, b.isi.status, b.isi.mulaiPada, b.isi.selesaiPada),
   );
@@ -129,12 +131,17 @@ export interface BarisRuangKonsol {
   nama_guru: string | null;
   ringkasan_json: string | null;
   jumlah_peserta: number;
+  /** JS-11 (P-21): waktu ronde dan nama paket ruang. */
+  mulai_pada?: number | null;
+  selesai_pada?: number | null;
+  nama_paket?: string | null;
 }
 
 const PILIH_RUANG_KONSOL =
   "SELECT r.id, r.kode, r.pemilik_id, r.label_kelas, r.status, r.uji, r.pengaturan_json, r.dibuat_pada, r.do_id, " +
-  "g.nama_tampilan AS nama_guru, r.ringkasan_json, (SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = r.id) AS jumlah_peserta " +
-  "FROM ruang r LEFT JOIN pengguna g ON g.id = r.pemilik_id ";
+  "g.nama_tampilan AS nama_guru, r.ringkasan_json, (SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = r.id) AS jumlah_peserta, " +
+  "r.mulai_pada, r.selesai_pada, pk.nama AS nama_paket " +
+  "FROM ruang r LEFT JOIN pengguna g ON g.id = r.pemilik_id LEFT JOIN paket pk ON pk.id = r.paket_id ";
 
 export interface RuangBaruD1 {
   id: string;
@@ -208,4 +215,157 @@ export function cariRuangId(db: D1Database, id: string): Promise<BarisRuangKonso
 export async function tulisRingkasanRuang(db: D1Database, ruangId: string, ringkasan: unknown): Promise<number> {
   const h = await db.prepare("UPDATE ruang SET ringkasan_json = ?1 WHERE id = ?2").bind(JSON.stringify(ringkasan), ruangId).run();
   return h.meta?.rows_written ?? 0;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Riwayat, hasil, ekspor, dan hapus data ruang (spesifikasi JS-11)
+
+export interface BarisRiwayat {
+  id: string;
+  kode: string;
+  label_kelas: string;
+  uji: number;
+  dibuat_pada: number;
+  mulai_pada: number | null;
+  selesai_pada: number | null;
+  nama_guru: string | null;
+  jumlah_pemain: number;
+  rata_skor: number | null;
+}
+
+/**
+ * P-17: ruang yang sudah ditutup, terbaru lebih dulu (`dibuat_pada`, lalu `id`, menurun). Label dicocokkan sebagian
+ * tanpa membedakan huruf besar dan kecil (huruf Latin). Mengambil `batas + 1` baris agar pemanggil tahu ada halaman
+ * berikutnya.
+ */
+export async function daftarRiwayat(
+  db: D1Database,
+  s: { pemilikId: string | null; dari: number | null; sampai: number | null; label: string | null; mulai: { dibuatPada: number; id: string } | null; batas: number },
+): Promise<BarisRiwayat[]> {
+  const hasil = await db
+    .prepare(
+      "SELECT r.id, r.kode, r.label_kelas, r.uji, r.dibuat_pada, r.mulai_pada, r.selesai_pada, g.nama_tampilan AS nama_guru, " +
+        "(SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = r.id AND s.dikeluarkan = 0) AS jumlah_pemain, " +
+        "(SELECT AVG(s.skor) FROM peserta s WHERE s.ruang_id = r.id AND s.dikeluarkan = 0) AS rata_skor " +
+        "FROM ruang r LEFT JOIN pengguna g ON g.id = r.pemilik_id " +
+        "WHERE r.status = 'ditutup' AND (?1 IS NULL OR r.pemilik_id = ?1) AND (?2 IS NULL OR r.dibuat_pada >= ?2) " +
+        "AND (?3 IS NULL OR r.dibuat_pada < ?3) AND (?4 IS NULL OR instr(lower(r.label_kelas), lower(?4)) > 0) " +
+        "AND (?5 IS NULL OR r.dibuat_pada < ?5 OR (r.dibuat_pada = ?5 AND r.id < ?6)) " +
+        "ORDER BY r.dibuat_pada DESC, r.id DESC LIMIT ?7",
+    )
+    .bind(s.pemilikId, s.dari, s.sampai, s.label, s.mulai?.dibuatPada ?? null, s.mulai?.id ?? null, s.batas + 1)
+    .all<BarisRiwayat>();
+  return hasil.results ?? [];
+}
+
+export interface BarisPesertaHasil {
+  id: string;
+  nama_samaran: string;
+  nomor_absen: number | null;
+  dikeluarkan: number;
+  peringkat_akhir: number | null;
+  skor: number;
+  jumlah_kejadian: number;
+  waktu_skor_ms: number | null;
+  gabung_pada: number;
+  langkah1_dijawab: number;
+  langkah1_benar: number;
+  tepat: number;
+  kurang: number;
+  berisiko: number;
+}
+
+/** P-21: semua peserta ruang dengan hitungan jawaban per peserta, dalam satu kueri. */
+export async function bacaPesertaHasil(db: D1Database, ruangId: string): Promise<BarisPesertaHasil[]> {
+  const hasil = await db
+    .prepare(
+      "SELECT s.id, s.nama_samaran, s.nomor_absen, s.dikeluarkan, s.peringkat_akhir, s.skor, s.jumlah_kejadian, s.waktu_skor_ms, s.gabung_pada, " +
+        "COALESCE(j.l1, 0) AS langkah1_dijawab, COALESCE(j.b1, 0) AS langkah1_benar, COALESCE(j.tepat, 0) AS tepat, " +
+        "COALESCE(j.kurang, 0) AS kurang, COALESCE(j.berisiko, 0) AS berisiko " +
+        "FROM peserta s LEFT JOIN (SELECT peserta_id, COUNT(*) AS l1, SUM(CASE WHEN langkah1_benar = 1 THEN 1 ELSE 0 END) AS b1, " +
+        "SUM(CASE WHEN tingkat = 'tepat' THEN 1 ELSE 0 END) AS tepat, SUM(CASE WHEN tingkat = 'kurang' THEN 1 ELSE 0 END) AS kurang, " +
+        "SUM(CASE WHEN tingkat = 'berisiko' THEN 1 ELSE 0 END) AS berisiko FROM jawaban WHERE ruang_id = ?1 AND langkah1_opsi IS NOT NULL " +
+        "GROUP BY peserta_id) j ON j.peserta_id = s.id WHERE s.ruang_id = ?1",
+    )
+    .bind(ruangId)
+    .all<BarisPesertaHasil>();
+  return hasil.results ?? [];
+}
+
+export function cariPesertaRuang(db: D1Database, ruangId: string, pesertaId: string): Promise<{ id: string; nama_samaran: string } | null> {
+  return db.prepare("SELECT id, nama_samaran FROM peserta WHERE id = ?1 AND ruang_id = ?2").bind(pesertaId, ruangId).first();
+}
+
+export interface BarisJawabanHasil {
+  peserta_id: string;
+  kejadian_versi_id: string;
+  urutan_opsi_json: string;
+  langkah1_opsi: string;
+  langkah1_benar: number | null;
+  langkah2_opsi: string | null;
+  tingkat: string | null;
+  poin: number;
+  dibuka_pada: number;
+  langkah1_pada: number | null;
+  langkah2_pada: number | null;
+}
+
+export interface BarisVersiHasil {
+  id: string;
+  nomor: number;
+  jenis: string;
+  isi_json: string;
+  kode: string;
+}
+
+/**
+ * P-24 dan P-29: jawaban yang Langkah 1-nya dikunci (satu peserta, atau semua bila `pesertaId` null), beserta setiap versi
+ * kejadian yang dipakainya, sekali per versi.
+ */
+export async function bacaJawabanHasil(
+  db: D1Database,
+  ruangId: string,
+  pesertaId: string | null,
+): Promise<{ jawaban: BarisJawabanHasil[]; versi: BarisVersiHasil[] }> {
+  const [jawaban, versi] = await db.batch([
+    db
+      .prepare(
+        "SELECT peserta_id, kejadian_versi_id, urutan_opsi_json, langkah1_opsi, langkah1_benar, langkah2_opsi, tingkat, poin, dibuka_pada, " +
+          "langkah1_pada, langkah2_pada FROM jawaban WHERE ruang_id = ?1 AND (?2 IS NULL OR peserta_id = ?2) AND langkah1_opsi IS NOT NULL",
+      )
+      .bind(ruangId, pesertaId),
+    db
+      .prepare(
+        "SELECT v.id, v.nomor, v.jenis, v.isi_json, k.kode FROM kejadian_versi v JOIN kejadian k ON k.id = v.kejadian_id WHERE v.id IN " +
+          "(SELECT DISTINCT kejadian_versi_id FROM jawaban WHERE ruang_id = ?1 AND (?2 IS NULL OR peserta_id = ?2) AND langkah1_opsi IS NOT NULL)",
+      )
+      .bind(ruangId, pesertaId),
+  ]);
+  return { jawaban: (jawaban.results ?? []) as BarisJawabanHasil[], versi: (versi.results ?? []) as BarisVersiHasil[] };
+}
+
+/** P-33: jumlah baris yang akan dihapus, untuk rincian log audit. */
+export async function hitungDataRuang(db: D1Database, ruangId: string): Promise<{ peserta: number; jawaban: number }> {
+  const b = await db
+    .prepare("SELECT (SELECT COUNT(*) FROM peserta WHERE ruang_id = ?1) AS peserta, (SELECT COUNT(*) FROM jawaban WHERE ruang_id = ?1) AS jawaban")
+    .bind(ruangId)
+    .first<{ peserta: number; jawaban: number }>();
+  return { peserta: b?.peserta ?? 0, jawaban: b?.jawaban ?? 0 };
+}
+
+/** Syarat setiap pernyataan hapus (P-33): ruang masih ada dan berstatus `ditutup`. */
+export const SYARAT_HAPUS_RUANG = "EXISTS (SELECT 1 FROM ruang WHERE id = ?1 AND status = 'ditutup')";
+
+/**
+ * P-33: satu batch berisi baris audit (bersyarat sama, disiapkan pemanggil), lalu penghapusan jawaban, peserta, dan
+ * ruang. Mengembalikan true bila baris ruang terhapus; dua penghapusan yang hampir bersamaan menghasilkan satu true.
+ */
+export async function hapusDataRuang(db: D1Database, ruangId: string, audit: D1PreparedStatement): Promise<boolean> {
+  const hasil = await db.batch([
+    audit,
+    db.prepare(`DELETE FROM jawaban WHERE ruang_id = ?1 AND ${SYARAT_HAPUS_RUANG}`).bind(ruangId),
+    db.prepare(`DELETE FROM peserta WHERE ruang_id = ?1 AND ${SYARAT_HAPUS_RUANG}`).bind(ruangId),
+    db.prepare("DELETE FROM ruang WHERE id = ?1 AND status = 'ditutup'").bind(ruangId),
+  ]);
+  return (hasil[3]?.meta?.changes ?? 0) > 0;
 }

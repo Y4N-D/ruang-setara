@@ -1,4 +1,5 @@
-// Halaman Ruang (spesifikasi JS-10, P-2, P-6, P-7): daftar ruang yang belum ditutup dan dialog "Ruang baru".
+// Halaman Ruang (spesifikasi JS-10, P-2, P-6, P-7): daftar ruang yang belum ditutup dan dialog "Ruang baru". Sejak JS-11
+// (P-16): tab "Berjalan" (halaman ini) dan "Riwayat" (RiwayatRuang.tsx).
 import { useEffect, useId, useState, type FormEvent } from "react";
 import type { Saya } from "../../inti/akun";
 import {
@@ -25,6 +26,21 @@ const t = TEKS_KONSOL.ruang;
 const tb = TEKS_KONSOL.ruangBaru;
 export const FORMAT_WAKTU_RUANG = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
+/** JS-11 (P-16): dua bagian halaman Ruang; tab aktif bertanda aria-current="page". */
+export function TabRuang({ aktif }: { aktif: "berjalan" | "riwayat" }) {
+  const tr = TEKS_KONSOL.riwayatRuang;
+  return (
+    <nav className="js-ruang-tab" aria-label={tr.bagian}>
+      <a href={keHash("ruang")} aria-current={aktif === "berjalan" ? "page" : undefined}>
+        {tr.tabBerjalan}
+      </a>
+      <a href={keHash("ruang", "riwayat")} aria-current={aktif === "riwayat" ? "page" : undefined}>
+        {tr.tabRiwayat}
+      </a>
+    </nav>
+  );
+}
+
 /** Tautan biasa ke layar kelas di tab baru (bukan window.open, agar tidak diblokir peramban; P-9). */
 export function TautanLayar({ id }: { id: string }) {
   return (
@@ -44,21 +60,32 @@ export default function Ruang({ akun, galatSesi, bukaRuang }: PropsRuang) {
   const { muatan, muatUlang } = useMuat(api.daftarRuang, galatSesi);
   const [dialog, setDialog] = useState(false);
   const [pembuka, setPembuka] = useState<HTMLElement | null>(null);
-  if (muatan.jenis === "memuat") return <p role="status">{t.memuat}</p>;
+  if (muatan.jenis === "memuat") {
+    return (
+      <>
+        <TabRuang aktif="berjalan" />
+        <p role="status">{t.memuat}</p>
+      </>
+    );
+  }
   if (muatan.jenis === "gagal") {
     return (
-      <div className="js-konsol-tumpuk">
-        <p role="alert">{t.gagal}</p>
-        <button type="button" className="js-konsol-tombol" onClick={muatUlang}>
-          {TEKS_KONSOL.dasbor.cobaLagi}
-        </button>
-      </div>
+      <>
+        <TabRuang aktif="berjalan" />
+        <div className="js-konsol-tumpuk">
+          <p role="alert">{t.gagal}</p>
+          <button type="button" className="js-konsol-tombol" onClick={muatUlang}>
+            {TEKS_KONSOL.dasbor.cobaLagi}
+          </button>
+        </div>
+      </>
     );
   }
   const daftar = muatan.data.ruang;
   const admin = akun.peran === "admin";
   return (
     <>
+      <TabRuang aktif="berjalan" />
       <div className="js-konsol-baris-atas">
         <p>{isiTeks(t.ringkasan, { n: daftar.length })}</p>
         <button

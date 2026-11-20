@@ -72,8 +72,12 @@ export default function Langsung({ status, papan, kemajuan, dunia, tas, selisih,
                 <img src={AVATAR[p.avatar] ?? AVATAR[0]} alt="" />
                 <span className="js-kelas-nama">{p.nama}</span>
                 <span className="js-kelas-angka">{p.skor}</span>
-                <span className="js-kelas-selesai" aria-label={isiTeks(t.selesaiLabel, { n: p.selesai })}>
-                  {isiTeks(t.selesaiJumlah, { n: p.selesai })}
+                {/* JS-11 (P-34): ikon centang dan angka; teks pembaca layar tersembunyi, bukan aria-label pada span. */}
+                <span className="js-kelas-selesai">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
+                  <img src={IKON_KELAS.centang} alt="" />
+                  <span aria-hidden="true">{isiTeks(t.selesaiJumlah, { n: p.selesai })}</span>
+                  <span className="js-sr">{isiTeks(t.selesaiLabel, { n: p.selesai })}</span>
                 </span>
               </li>
             ))}

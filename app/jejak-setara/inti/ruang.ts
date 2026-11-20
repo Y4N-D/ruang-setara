@@ -25,6 +25,8 @@ export const AKSI_KELOLA = ["kunci", "buka_kunci", "keluarkan", "tutup"] as cons
 export type AksiKelola = (typeof AKSI_KELOLA)[number];
 /** Status yang membolehkan ruang ditutup (P-10). */
 export const STATUS_BOLEH_TUTUP: readonly StatusRuangKonsol[] = ["lobi", "selesai", "pembahasan"];
+/** JS-11 (P-20, P-21): status yang punya hasil ronde. */
+export const STATUS_HASIL: readonly StatusRuangKonsol[] = ["selesai", "pembahasan", "ditutup"];
 
 export const KODE_GALAT_RUANG = [
   "ISI_SALAH",
@@ -35,6 +37,9 @@ export const KODE_GALAT_RUANG = [
   "RUANG_TIDAK_ADA",
   "PEMAIN_TIDAK_ADA",
   "STATUS_TIDAK_SESUAI",
+  // JS-11 (P-21, P-33): hasil sebelum ronde selesai, dan hapus data ruang yang belum ditutup.
+  "HASIL_BELUM_ADA",
+  "BELUM_DITUTUP",
 ] as const;
 export type KodeGalatRuang = (typeof KODE_GALAT_RUANG)[number];
 
@@ -133,6 +138,8 @@ export const skemaLangsung = z.object({
   pemain: z.array(skemaPemainLangsung),
   /** JS-22 (P-18): kiriman ke D1 berhenti sesudah 24 jam gagal. */
   kirimanBerhenti: z.boolean().optional(),
+  /** JS-11 (P-15): antrean kiriman ke D1 belum kosong. */
+  kirimanTertunda: z.boolean().optional(),
 });
 
 /** JS-22 (P-15 sampai P-17): pemakaian ronde, hanya untuk admin. */

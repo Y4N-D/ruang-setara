@@ -11,6 +11,7 @@ import Dasbor from "./halaman/Dasbor";
 import DetailRuang from "./halaman/DetailRuang";
 import GantiSandi from "./halaman/GantiSandi";
 import Masuk from "./halaman/Masuk";
+import RiwayatRuang from "./halaman/RiwayatRuang";
 import Ruang from "./halaman/Ruang";
 import DaftarKejadian from "./bank/DaftarKejadian";
 import DaftarPaket from "./bank/DaftarPaket";
@@ -174,8 +175,10 @@ export default function App() {
             }}
           />
         ) : rute === "ruang" ? (
-          idRuang ? (
-            <DetailRuang key={idRuang} id={idRuang} akun={akun} galatSesi={galatSesi} umumkan={umumkan} />
+          idRuang === "riwayat" ? (
+            <RiwayatRuang akun={akun} galatSesi={galatSesi} />
+          ) : idRuang ? (
+            <DetailRuang key={idRuang} id={idRuang} akun={akun} galatSesi={galatSesi} umumkan={umumkan} buka={buka} />
           ) : (
             <Ruang akun={akun} galatSesi={galatSesi} bukaRuang={bukaRuang} />
           )

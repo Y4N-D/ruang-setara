@@ -50,6 +50,7 @@ import {
   type Simpanan,
   type WaktuRuang,
   sambutanKelas,
+  ringkasanHasil,
   tutupPaksa,
 } from "./inti-ruang";
 import { ambilAntrean, antrekan, hapusTerkirim, jumlahAntrean, SQL_TABEL_ANTREAN } from "./antrean";
@@ -707,6 +708,7 @@ export class RuangJejak {
       jedaSejak: k.waktu.jedaSejak,
       pemain,
       kirimanBerhenti: this.kirimanBerhenti,
+      kirimanTertunda: !this.antreanKosong(), // JS-11, P-15
       pemakaian: this.ringkasPemakaian(),
     };
   }
@@ -774,7 +776,9 @@ export class RuangJejak {
     else if (o.putaran === "henti") this.hentiPutaran();
     if (o.kirimSekarang) await this.kirimKiriman();
     // P-16: ringkasan pemakaian saat ruang ditutup (inti ruang mengantrekan status `ditutup` ke D1 pada saat itu).
+    // JS-11 (P-14): juga saat ronde berakhir dan saat peringkat akhir berubah, agar `hasil` ikut tertulis.
     if (o.kiriman.some((b) => b.jenis === "ruang" && b.isi.status === "ditutup")) await this.tulisRingkasan();
+    else if (o.tulisRingkasan && !o.hapusSemua) await this.tulisRingkasan();
     if (o.hapusSemua) {
       await this.tulisRingkasan();
       this.hentiPutaran();
@@ -959,12 +963,17 @@ export class RuangJejak {
     return { ...this.pemakaian, perkiraanPermintaan: perkiraanPermintaan(this.pemakaian) };
   }
 
-  /** Menyimpan pemakaian di meta dan `ruang.ringkasan_json` di D1, sekali, tanpa percobaan ulang. */
+  /**
+   * Menyimpan pemakaian di meta dan `ruang.ringkasan_json` di D1, sekali, tanpa percobaan ulang. Sejak JS-11 (P-14),
+   * ringkasan hasil ronde ikut tertulis bila ronde sempat dimainkan.
+   */
   private async tulisRingkasan(): Promise<void> {
-    const ruangId = this.keadaan?.ruang.ruangId;
-    if (!ruangId) return;
+    const k = this.keadaan;
+    const ruangId = k?.ruang.ruangId;
+    if (!k || !ruangId) return;
     try {
-      this.pemakaian.barisD1 += await tulisRingkasanRuang(this.env.DB, ruangId, { pemakaian: this.ringkasPemakaian() });
+      const hasil = ringkasanHasil(k);
+      this.pemakaian.barisD1 += await tulisRingkasanRuang(this.env.DB, ruangId, { pemakaian: this.ringkasPemakaian(), ...(hasil ? { hasil } : {}) });
     } catch {
       // Ringkasan bersifat perkiraan; kegagalan tidak menahan penutupan atau penghapusan.
     }

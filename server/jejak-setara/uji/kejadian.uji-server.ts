@@ -127,7 +127,13 @@ describe("periksa, dua langkah, skor, dan kiriman D1 (AC-4, AC-7, AC-9 sampai AC
     const akhirSkor = total + (h1b.benar ? 40 : 0);
     expect(await kelas(kode, { v: V, t: "akhiri" })).toBe(200);
     const selesai = await a.k.tunggu((m) => m.t === "selesai");
-    expect(selesai).toMatchObject({ skor: akhirSkor, jumlahPemain: 2, rekap: [] });
+    expect(selesai).toMatchObject({ skor: akhirSkor, jumlahPemain: 2 });
+    // JS-11 (P-1): rekap berisi kedua kejadian yang Langkah 1-nya dikunci, menurut urutan ruang; K-02 tanpa Langkah 2.
+    const rekap = selesai.rekap as { kejadianId: string; pilihan2: string | null; tingkat2: string | null; poin: number }[];
+    expect(rekap.map((r) => r.kejadianId)).toEqual([k1.kejadianId, k2.kejadianId]);
+    expect(rekap[0].tingkat2).not.toBeNull();
+    expect(rekap[1]).toMatchObject({ pilihan2: null, tingkat2: null });
+    expect(rekap.reduce((n, r) => n + r.poin, 0)).toBe(akhirSkor);
     const selesaiB = await b.k.tunggu((m) => m.t === "selesai");
     expect(selesaiB).toMatchObject({ skor: 0, jumlahPemain: 2 });
     if (akhirSkor > 0) expect([selesai.peringkat, selesaiB.peringkat]).toEqual([1, 2]);

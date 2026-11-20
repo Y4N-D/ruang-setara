@@ -152,10 +152,10 @@ Memakai satuan `--u: min(1vh, 0.5625vw)` dan skala huruf proyektor Sehari Setara
 ```
 
 - Kode ruang memakai Press Start 2P 10u dengan jarak antarhuruf lebar. Tautan memakai Pixelify Sans 3,6u.
-- Papan 10 besar: peringkat, ikon avatar 16p, nama samaran (3,1u), skor (Press Start 2P 2,8u), dan jumlah kejadian selesai. Baris yang naik peringkat tidak dianimasikan, cukup berganti isi.
+- Papan 10 besar: peringkat, ikon avatar 16p, nama samaran (3,1u), skor (Press Start 2P 2,8u), dan jumlah kejadian selesai. Baris yang naik peringkat tidak dianimasikan, cukup berganti isi. Sejak JS-11, tanda ✓ pada jumlah kejadian selesai berupa ikon `ikon_centang` setinggi 2,5u diikuti angka, dengan teks pembaca layar "{n} kejadian selesai"; sketsa di atas tetap memakai ✓ sebagai lambang.
 - **Jeda:** lapisan `ink` 70% di atas layar dengan tulisan "Dijeda" (Press Start 2P 4,4u, `cream`).
 - **Podium:** tiga avatar di atas balok berwarna `sun` (1), `mist` (2), dan `wood` (3; token `--js-wood` sejak JS-10), masing-masing dengan angka peringkat, nama samaran, dan skor; daftar 4–10 di sampingnya. Latar bernuansa malam (`#4A4F9C`) dengan teks `cream`. Yang tampil hanya pemain yang sudah mendapat skor.
-- **Pembahasan:** satu kartu per kejadian berisi judul, situasi, grafik batang Langkah 1 (empat pilihan dengan persentase; pilihan yang benar diberi tanda ✓ dan tulisan "Jawaban tepat"), grafik batang Langkah 2 (tingkat tepat, kurang tepat, dan berisiko dengan ikon dan tulisan), lalu kartu dampak. Navigasi "Sebelumnya" dan "Berikutnya". Sejak Build JS-10, batang persen menjadi latar kotak opsinya (warna tingkat atau `leaf` untuk jawaban tepat, sebagian tembus), agar setiap opsi hanya satu blok dan kejadian bank awal muat di layar 16:9 tanpa digulir; isi yang lebih panjang digulir di dalam kartu.
+- **Pembahasan:** satu kartu per kejadian berisi judul, situasi, grafik batang Langkah 1 (empat pilihan dengan persentase; pilihan yang benar diberi ikon `ikon_centang` dan tulisan "Jawaban tepat", sejak JS-11), grafik batang Langkah 2 (tingkat tepat, kurang tepat, dan berisiko dengan ikon dan tulisan), lalu kartu dampak. Navigasi "Sebelumnya" dan "Berikutnya". Sejak Build JS-10, batang persen menjadi latar kotak opsinya (warna tingkat atau `leaf` untuk jawaban tepat, sebagian tembus), agar setiap opsi hanya satu blok dan kejadian bank awal muat di layar 16:9 tanpa digulir; isi yang lebih panjang digulir di dalam kartu.
 - **Lobi (JS-10):** daftar nama lima kolom (avatar 4,4u, nama 2,8u; nama panjang mengecil sampai 2,5u lalu dipotong), urut bergabung, paling banyak 40 nama lalu "+n lainnya". Kotak kanan berisi tiga langkah bergabung sampai kode QR tersedia (JS-17).
 - **Peta kelas (JS-10):** delapan kotak zona berwarna (sebagian tembus) dengan ikon zona, dan titik 2,5 ubin berwarna tas bergaris `ink`; warna tas rose dan berry memakai nilai palet aksen bagian 8 karena belum punya token. Letak kejadian tidak digambar.
 
@@ -183,6 +183,7 @@ Memakai satuan `--u: min(1vh, 0.5625vw)` dan skala huruf proyektor Sehari Setara
 - Halaman **layar kelas** dibuka dari konsol di tab atau jendela baru, untuk ditampilkan di proyektor.
 - **Halaman masuk** (JS-04): panel bingkai piksel di tengah layar `ink` berisi merek "Jejak Setara", kolom email dan sandi, dan tombol Masuk; di bawahnya penanda server dan kredit bagian 15.
 - **Kerangka** (JS-04): navigasi samping `ink`, kepala `cream` dengan judul halaman, nama dan peran, serta tombol Keluar, dan area isi `white` dengan panel `cream`. Menu hanya memuat halaman yang sudah dibangun (Gerbang 1 JS-04). Navigasi samping tampil di lebar 1024 px ke atas; di bawahnya diganti tombol "Menu" di kepala (spesifikasi JS-04, D-2).
+- **Ruang, riwayat, dan hasil** (JS-11): halaman Ruang punya dua tab di bawah judul, "Berjalan" dan "Riwayat"; tab aktif memakai pola butir menu aktif (`sun`, ▶, `aria-current="page"`). Riwayat memuat saringan dalam satu baris yang membungkus dan tabel yang menjadi kartu di bawah 1024 px. Bagian "Hasil ronde" di halaman ruang berisi daftar istilah dua kolom, baris tombol unduh CSV dan Cetak, tabel peringkat dengan kepala tetap di atas saat digulir, tabel "Dikeluarkan", dan rincian yang terbuka di bawah baris pemainnya. Cetakan A4 tegak hanya memuat kepala cetak, ringkasan, dan tabel, dengan huruf sistem 10 pt dan garis 1 px `ink`.
 
 ## 4. Warna
 
@@ -424,11 +425,11 @@ Semua panel memakai **bingkai piksel** Sehari Setara: garis `ink` 2 piksel antar
 | **Layar menyambung** | Lapisan `ink` 70% dengan "Menyambung ulang…" dan ikon jam berputar 2 bingkai. Sesudah 30 detik ditambah "Periksa wifi atau data selulermu." |
 | **Layar jeda** | "Dijeda oleh guru" di atas lapisan `ink` 70% |
 | **Lobi pemain** | Kode ruang, nama samaran, avatar, dan "Menunggu guru memulai…"; pemain bisa berjalan di halaman lobi |
-| **Rekap pribadi** | Skor, peringkat, lalu daftar kejadian yang dijawab dengan pilihan pemain, pilihan yang tepat, dan rujukan; dua kalimat refleksi di akhir |
+| **Rekap pribadi** | Skor, peringkat, lalu daftar kejadian yang dijawab dengan pilihan pemain, pilihan yang tepat, dan rujukan; dua kalimat refleksi di akhir. Sejak JS-11: halaman digulir biasa selebar paling banyak 560 px; tanda Langkah 1 dan tingkat Langkah 2 berikon emosi dan bertulisan (`leaf`, `mango`, `coral`; "Belum dijawab" `mist`); pita `mango` saat menyambung ulang dan pita `mist` dengan satu tombol sesudah ruang ditutup atau sambungan berhenti, tanpa lapisan yang menutup isi |
 
 ### Layar kelas
 
-Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 blok seperti pengatur waktu Sehari Setara), tombol kontrol (tampilan tombol lanjut Sehari Setara), podium, dan kartu pembahasan dengan grafik batang (bagian 3.6). Grafik batang selalu menuliskan persentase dan label di samping batangnya.
+Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 blok seperti pengatur waktu Sehari Setara), tombol kontrol (tampilan tombol lanjut Sehari Setara), podium, dan kartu pembahasan dengan grafik batang (bagian 3.6). Grafik batang selalu menuliskan persentase dan label di samping batangnya. Tanda centang di layar kelas memakai ikon `ikon_centang`, bukan huruf ✓, karena huruf itu tampil berbeda di peramban Windows (JS-11).
 
 ### Konsol admin
 
@@ -441,7 +442,8 @@ Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 bl
 | **Pemilih rujukan** | Daftar rujukan dari pustaka dengan status verifikasinya; rujukan baru dibuat di halaman Rujukan |
 | **Pratinjau** | Bingkai HP mendatar berisi dialog kejadian persis seperti di layar pemain |
 | **Grafik** | Batang mendatar dengan label dan angka; warna tingkat `leaf`, `mango`, `coral`, sedangkan pilihan netral `sky-d` |
-| **Konfirmasi berbahaya** | Dialog dengan judul "Hapus data ruang IX B?", penjelasan akibat, dan tombol `coral` bertuliskan aksinya ("Hapus data"), bukan "OK" |
+| **Konfirmasi berbahaya** | Dialog dengan judul "Hapus data ruang IX B?", penjelasan akibat, dan tombol `coral` bertuliskan aksinya ("Hapus data"), bukan "OK". Untuk hapus data ruang (JS-11), tombol baru aktif sesudah label kelas diketik ulang, dan fokus awal ada di isian itu |
+| **Tab halaman** | Tautan bergaya tab di bawah judul halaman (JS-11: "Berjalan" dan "Riwayat" di halaman Ruang). Tab aktif berlatar `sun` dengan ▶ dan `aria-current="page"`; tab lain `white` bergaris `ink` |
 | **Keadaan kosong** | Ikon, satu kalimat, dan satu tombol aksi (misalnya "Belum ada ruang. Buat ruang pertama.") |
 
 ## 11. Gerak dan animasi

@@ -1,7 +1,7 @@
 // D1 tiruan di atas SQLite bawaan Node (node:sqlite) untuk uji rute akun (spesifikasi JS-04, rencana uji
 // api-akun.test.ts). Tabel dari migrasi D1. Parameter bernomor `?1`, `?2`, … diikat menurut urutannya seperti D1, dan
 // batch berjalan dalam satu transaksi: bila satu pernyataan gagal, semuanya dibatalkan.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 
 type ModulSqlite = typeof import("node:sqlite");
 type Basis = InstanceType<ModulSqlite["DatabaseSync"]>;
@@ -64,7 +64,10 @@ export class D1Tiruan {
     if (!sqlite) throw new Error("node:sqlite tidak tersedia");
     this.basis = new sqlite.DatabaseSync(":memory:");
     this.basis.exec("PRAGMA foreign_keys = ON;");
-    this.basis.exec(readFileSync("server/jejak-setara/migrations/0001_awal.sql", "utf8"));
+    // Semua migrasi menurut urutan nomornya (JS-11 menambah 0002).
+    for (const berkas of readdirSync("server/jejak-setara/migrations").filter((b) => /^\d{4}_.+\.sql$/.test(b)).sort()) {
+      this.basis.exec(readFileSync(`server/jejak-setara/migrations/${berkas}`, "utf8"));
+    }
   }
 
   prepare(sql: string): PernyataanTiruan {

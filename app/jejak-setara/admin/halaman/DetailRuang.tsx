@@ -1,9 +1,17 @@
 // Halaman detail ruang (spesifikasi JS-10, P-8 sampai P-10): kode, tautan, status, pemain yang dimuat ulang setiap 10
 // detik selama halaman tampil, kunci, keluarkan (dengan konfirmasi), tutup, dan tautan ke layar kelas. Mengeluarkan
-// pemain dilakukan di sini, bukan di proyektor (usulan 5a).
-import { useEffect, useState } from "react";
+// pemain dilakukan di sini, bukan di proyektor (usulan 5a). Sejak JS-11 (P-19, P-20, P-25, P-32): bagian hasil ronde
+// untuk ruang `selesai`, `pembahasan`, dan `ditutup`, tautan "← Riwayat ruang", dan hapus data ruang (admin).
+import { useCallback, useEffect, useState } from "react";
 import type { Saya } from "../../inti/akun";
-import { KUOTA_HARIAN_GRATIS, STATUS_BOLEH_TUTUP, type AksiKelola, type DetailRuang as DataDetail, type PemakaianRuang } from "../../inti/ruang";
+import {
+  KUOTA_HARIAN_GRATIS,
+  STATUS_BOLEH_TUTUP,
+  STATUS_HASIL,
+  type AksiKelola,
+  type DetailRuang as DataDetail,
+  type PemakaianRuang,
+} from "../../inti/ruang";
 import { isiTeks } from "../../teks";
 import { TEKS_KONSOL } from "../../teks-konsol";
 import { api, type GalatApi } from "../api";
@@ -11,6 +19,7 @@ import Dialog from "../Dialog";
 import { PesanGalat } from "../Formulir";
 import { AVATAR } from "../kelas/ikon-kelas";
 import { keHash } from "../rute";
+import { BagianHapus, BagianHasil } from "./HasilRuang";
 import { TautanLayar } from "./Ruang";
 
 const t = TEKS_KONSOL.detail;
@@ -28,16 +37,20 @@ interface PropsDetail {
   akun: Saya;
   galatSesi: (galat: GalatApi) => boolean;
   umumkan: (pesan: string) => void;
+  /** JS-11 (P-32): pindah halaman sesudah data ruang dihapus. */
+  buka: (hash: string, pesan?: string) => void;
 }
 
-export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
+export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHalaman }: PropsDetail) {
   const [muatan, setMuatan] = useState<Muatan>({ jenis: "memuat" });
   const [konfirmasi, setKonfirmasi] = useState<Konfirmasi>(null);
   const [galatAksi, setGalatAksi] = useState<string | null>(null);
   const [sibuk, setSibuk] = useState(false);
   const [pembuka, setPembuka] = useState<HTMLElement | null>(null);
   const [putaran, setPutaran] = useState(0);
-  const muat = () => setPutaran((p) => p + 1);
+  /** JS-11 (P-25): hasil dimuat lagi sesudah "Keluarkan" berhasil. */
+  const [keluarkanKe, setKeluarkanKe] = useState(0);
+  const muat = useCallback(() => setPutaran((p) => p + 1), []);
 
   useEffect(() => {
     let aktif = true;
@@ -75,6 +88,7 @@ export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
     if (h.ok) {
       setGalatAksi(null);
       umumkan(pesanOk);
+      if (a === "keluarkan") setKeluarkanKe((n) => n + 1);
       muat();
     } else if (!galatSesi(h)) setGalatAksi(h.pesan);
   }
@@ -112,12 +126,16 @@ export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
     setPembuka(e.currentTarget);
     setKonfirmasi(k);
   };
+  // JS-11 (P-15, P-20, P-25): bagian hasil; ruang yang belum ditutup memuat hasil lagi bila status berubah, sesudah
+  // "Keluarkan", dan pada setiap muat ulang 10 detik selama kiriman ke D1 masih tertunda. Ruang ditutup: sekali.
+  const adaHasil = STATUS_HASIL.includes(status);
+  const menyimpan = !ditutup && adaHasil && langsung?.kirimanTertunda === true;
+  const kunciHasil = ditutup ? "ditutup" : `${status}:${keluarkanKe}:${menyimpan ? muatan.pada : ""}`;
+  const hasil = adaHasil ? <BagianHasil id={ruang.id} kunci={kunciHasil} menyimpan={menyimpan} galatSesi={galatSesi} hilang={muat} /> : null;
 
   return (
     <>
-      <p>
-        <a href={keHash("ruang")}>{t.kembali}</a>
-      </p>
+      <p>{ditutup ? <a href={keHash("ruang", "riwayat")}>{TEKS_KONSOL.hasil.kembaliRiwayat}</a> : <a href={keHash("ruang")}>{t.kembali}</a>}</p>
       <section className="js-bingkai js-ruang-kepala" aria-label={ruang.labelKelas}>
         <h2>{ruang.labelKelas}</h2>
         <p className="js-konsol-label">{t.kode}</p>
@@ -135,7 +153,10 @@ export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
       </section>
       {langsung?.kirimanBerhenti ? <PesanGalat pesan={t.kirimanGagal} /> : null}
       {ditutup ? (
-        <p role="status">{t.ditutup}</p>
+        <>
+          <p role="status">{t.ditutup}</p>
+          {hasil}
+        </>
       ) : (
         <>
           <div className="js-konsol-tombol-baris js-ruang-aksi">
@@ -153,6 +174,7 @@ export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
             </p>
           )}
           <PesanGalat pesan={galatAksi} />
+          {hasil}
           <section className="js-ruang-pemain" aria-labelledby="js-ruang-pemain-judul">
             <h2 id="js-ruang-pemain-judul">{isiTeks(t.pemainJudul, { n: pemain.length })}</h2>
             {pemain.length === 0 ? (
@@ -177,6 +199,7 @@ export default function DetailRuang({ id, galatSesi, umumkan }: PropsDetail) {
         </>
       )}
       {pemakaian ? <BagianPemakaian p={pemakaian} /> : null}
+      {ditutup && akun.peran === "admin" ? <BagianHapus ruang={ruang} galatSesi={galatSesi} buka={bukaHalaman} /> : null}
       {konfirmasi ? (
         <Dialog
           judul={konfirmasi.jenis === "tutup" ? isiTeks(t.tutupJudul, { kode: ruang.kode }) : isiTeks(t.keluarkanJudul, { nama: konfirmasi.nama })}
