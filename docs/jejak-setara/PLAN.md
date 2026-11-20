@@ -12,7 +12,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-06 | Selesai (8 Nov 2026), dikerjakan Sesi C; riwayat di `Daftar_Aset.md` | [JS-06-peta.md](specs/JS-06-peta.md) | [JS-06-hasil.md](tests/JS-06-hasil.md), lulus |
 | JS-07 | Selesai (9 Nov 2026) | [JS-07-penjelajah.md](specs/JS-07-penjelajah.md) | [JS-07-hasil.md](tests/JS-07-hasil.md), lulus dengan catatan AC-19 (diterima pemilik proyek; uji HP Android kelas bawah saat uji coba kelas) |
 | JS-08 | Selesai (13 Nov 2026); dibangun dan diuji 11 Nov 2026, "Jejak: uji" hijau, dan percobaan pemilik proyek di lingkungan uji berhasil | [JS-08-kejadian.md](specs/JS-08-kejadian.md) | [JS-08-hasil.md](tests/JS-08-hasil.md), lulus dengan catatan AC-24 (satu uji Sesi B diubah atas keputusan pemilik proyek); uji server yang kadang gagal diperbaiki 13 Nov 2026 |
-| JS-09 | Direncanakan (20 Nov 2026); menunggu `Setuju: JS-09` | — | — |
+| JS-09 | Spesifikasi ditulis (21 Nov 2026); menunggu `Spesifikasi disetujui: JS-09` | [JS-09-skill.md](specs/JS-09-skill.md) | — |
 | JS-10 | Selesai (15 Nov 2026) | [JS-10-kelas.md](specs/JS-10-kelas.md) | [JS-10-hasil.md](tests/JS-10-hasil.md), lulus (AC-19 dengan catatan) |
 | JS-11 | Selesai (20 Nov 2026); "Jejak: uji" hijau untuk commit `e2e2a43` dan langkah pemilik proyek di lingkungan uji berhasil | [JS-11-akhir-ronde.md](specs/JS-11-akhir-ronde.md) | [JS-11-hasil.md](tests/JS-11-hasil.md), lulus (AC-22 diterima: kode layar pemain +1,33 KB) |
 | JS-12 | Selesai (16 Nov 2026) | [JS-12-bank.md](specs/JS-12-bank.md) | [JS-12-hasil.md](tests/JS-12-hasil.md), lulus (AC-8 diterima) |
@@ -191,6 +191,10 @@ Keputusan pemilik proyek, 14 November 2026: sesudah JS-04, Sesi A mengerjakan **
 - Plan berikutnya yang menyentuh dasbor atau uji (dari Build JS-11, 20 Nov 2026): tautan ruang di kartu dasbor "Ruang yang sedang berjalan" (JS-10) setinggi 44 px, di bawah target 48 px yang diperiksa uji JS-04. Uji itu gagal bila semua uji ujung ke ujung dijalankan dalam satu perintah, karena ruang yang ditinggalkan uji lain tampil di dasbor admin. Perbaiki tinggi tautannya, dan tutup ruang uji di akhir setiap uji yang membuatnya. **Diusulkan di rencana JS-09 (usulan 16).**
 - Plan JS-14 (dari Plan JS-09, 20 Nov 2026): efek suara `sfx_kotak` (kotak terambil) dan `sfx_skill` (skill aktif) dari Design System 12 belum ada; JS-09 hanya memakai pita dan pengumuman pembaca layar.
 - Plan JS-18 (dari Plan JS-09, 20 Nov 2026): kotak teropong dan karcis belum ada di `kampung.json` (usulan KT-C14a JS-06). JS-18 meminta Sesi C menambahkannya, lalu membuka `skillAktif` untuk Teropong dan Angkot, yang di JS-09 ditolak `POST /api/ruang`.
+- Plan JS-18 (dari Specify JS-09, 21 Nov 2026): lengkung tombol skill di perangkat sentuh (spesifikasi JS-09 P-34) hanya punya tiga tempat di sekitar tombol Periksa, dan kotak aman panah Kompas (P-26) menyisakan 160 px di kanan. Teropong dan Angkot memerlukan susunan HUD baru yang diukur ulang dengan maket di ketiga ukuran HP, dan daftar skill yang diterima `POST /api/ruang` (`SKILL_P0`) diperluas.
+- Plan JS-13 (dari Specify JS-09, 21 Nov 2026): `jawaban.petunjuk_dipakai` di D1 baru terisi sejak JS-09. Jawaban dari ruang yang dimainkan sebelum JS-09 di-deploy bernilai 0, jadi statistik pemakaian Petunjuk lintas ruang hanya menghitung ruang sesudah tanggal itu, atau menyebut batas itu di tampilannya.
+- Plan JS-14 (dari Specify JS-09, 21 Nov 2026): titik pemicu `sfx_kotak` adalah `pemberitahuan` `kotak_lari`, `kotak_kompas`, dan `kotak_petunjuk`, dan titik pemicu `sfx_skill` adalah `pribadi` yang memulai masa aktif Lari cepat atau Kompas serta `petunjuk` (spesifikasi JS-09 P-16, P-19, P-24, dan P-28).
+- Plan JS-16 (dari Specify JS-09, 21 Nov 2026; Permintaan A-13 Sesi B): bagian [menyusul] panduan guru tentang skill memakai teks final spesifikasi JS-09: nama skill dan keterangan di dialog Ruang baru (P-7 dan bagian "Teks yang tampil (final)"), kotak bantuan dan batas 2 muatan (P-16), serta Petunjuk yang tidak mengurangi skor (P-31).
 
 ## JS-01 — Kerangka
 
@@ -1055,7 +1059,7 @@ Dikerjakan dalam mode ZIP. Pemilik proyek mengirim keputusan AC-22 dan hasil lan
 
 ## JS-09 — Skill dan kotak bantuan
 
-- Status: **Direncanakan (20 Nov 2026)**, menunggu `Setuju: JS-09`. Diperiksa sebelum Plan (AGENTS 4.1 langkah 1): JS-11 Selesai 20 Nov 2026 dengan laporan Lulus (AC-22 diterima), dan JS-08, satu-satunya dependensi JS-09, Selesai 13 Nov 2026. Urutan JS-10, JS-22, JS-12, JS-11, lalu JS-09 ditetapkan pemilik proyek 14 Nov 2026 (bagian "Keputusan urutan fitur"). Dikerjakan dalam mode ZIP dari `main` sesudah commit `e2e2a43`. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare.
+- Status: **Spesifikasi ditulis (21 Nov 2026)** ([JS-09-skill.md](specs/JS-09-skill.md)), menunggu `Spesifikasi disetujui: JS-09` beserta pilihan DRAF D-1 sampai D-3. Plan disetujui 21 Nov 2026 dengan `Setuju: JS-09 (usulan 1a sampai 16a)`. Sebelumnya: **Direncanakan (20 Nov 2026)**. Diperiksa sebelum Plan (AGENTS 4.1 langkah 1): JS-11 Selesai 20 Nov 2026 dengan laporan Lulus (AC-22 diterima), dan JS-08, satu-satunya dependensi JS-09, Selesai 13 Nov 2026. Urutan JS-10, JS-22, JS-12, JS-11, lalu JS-09 ditetapkan pemilik proyek 14 Nov 2026 (bagian "Keputusan urutan fitur"). Dikerjakan dalam mode ZIP dari `main` sesudah commit `e2e2a43`. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare.
 - Memenuhi: JFR-23 (kotak bantuan di setiap zona, milik setiap pemain, muncul lagi 90 detik sesudah diambil), JFR-24 (Lari cepat, Kompas kejadian, dan Petunjuk; paling banyak 2 muatan per skill; +1 muatan Kompas untuk jawaban "tepat" di Langkah 2), dan JFR-26 (guru mematikan skill tertentu untuk satu ruang). Ditambah PRD 8.4 (Petunjuk tidak mengurangi skor) dan 8.5; Architecture 5.3, 6.3 (`pakai_skill`, `pribadi`, `kompas`, `petunjuk`), 8.2 (kecepatan Lari cepat), dan 8.5; Design System 3.3, 3.4, 9, 10, 11, dan 13; serta catatan Plan JS-09 dari JS-08 dan Specify JS-11.
 - Bergantung pada: JS-08 (Selesai, 13 Nov 2026). Memakai juga JS-10 (dialog Ruang baru), JS-11 (CSV dan rincian hasil), dan JS-12 (pratinjau penyunting), semuanya Selesai.
 - File yang dibuat/diubah (rencana; dipastikan di Specify):
@@ -1116,7 +1120,7 @@ Dikerjakan dalam mode ZIP. Pemilik proyek mengirim keputusan AC-22 dan hasil lan
   - Galeri: setiap perubahan dicek dengan `build:pages`, dan ke-178 berkas harus identik.
 - Ukuran: M
 
-**Langkah pemilik proyek sesudah Build** (ditetapkan di Specify): satu ronde pendek dengan dua atau tiga HP. Ambil kotak sepatu lalu pakai Lari cepat; ambil kotak kompas lalu pakai Kompas sampai tiba; jawab "tepat" di Langkah 2 untuk +1 Kompas; ambil kotak buku lalu pakai Petunjuk di Langkah 1. Buat juga satu ruang dengan Petunjuk dimatikan, lalu buka CSV jawaban dan periksa kolom "Petunjuk dipakai".
+**Langkah pemilik proyek sesudah Build** (ditetapkan di Specify): satu ronde pendek dengan dua atau tiga HP. Ambil kotak sepatu lalu pakai Lari cepat; ambil kotak kompas lalu pakai Kompas sampai tiba; jawab "tepat" di Langkah 2 untuk +1 Kompas; ambil kotak buku lalu pakai Petunjuk di Langkah 1. Buat juga satu ruang dengan Petunjuk dimatikan, lalu buka CSV jawaban dan periksa kolom "Petunjuk dipakai". Rinciannya sembilan langkah di spesifikasi JS-09, bagian "Rencana uji", subbagian "Manual (AGENTS 9) dan lingkungan uji".
 
 ### Tanggapan permintaan Sesi B dan C (Plan JS-09, 20 Nov 2026)
 
@@ -1128,3 +1132,36 @@ Dibaca dari `main` sesudah commit `e2e2a43` (20 Nov 2026): `naskah/STATUS.md` (t
 | A-13 (Sesi B) | Draf panduan guru satu halaman | Tetap untuk Plan JS-16. Bagian [menyusul] tentang pilihan skill (bagian 2) dan skill serta kotak bantuan (bagian 4) memakai teks final dari spesifikasi JS-09 | Tidak ada perubahan di berkas Sesi B |
 | "Yang masih ditunggu" no. 4 (Sesi B) | Kode dua rujukan yang belum diverifikasi | Pemeriksaan pemilik proyek di konsol uji, 20 Nov 2026: K-06 dan K-11 Terbit; kode di saringan "Belum" belum diterima (catatan Plan JS-16) | Sesi B bisa mencatat kodenya sesudah pemilik proyek mengirimnya |
 | Sesi C | Tidak ada permintaan baru | JS-09 memakai sembilan aset Disetujui (bagian "Aset yang dibutuhkan"). Kotak teropong dan karcis menunggu JS-18 (catatan Plan JS-18). C-13 sudah diterapkan sejak Build JS-07, tetapi di `Daftar_Aset.md` masih "Diajukan" | Sesi C bisa mengubah status C-13 menjadi Diterapkan |
+
+### Specify JS-09 (21 Nov 2026)
+
+Dikerjakan dalam mode ZIP dari `main` sesudah commit 2c559b1. Spesifikasinya [JS-09-skill.md](specs/JS-09-skill.md), dengan 52 butir perilaku dan 26 kriteria penerimaan.
+
+- **Keputusan penting:**
+  - Waktu skill dan kotak di server disimpan dalam waktu ronde (milidetik ronde tanpa jeda), sehingga jeda menggeser semuanya sesuai usulan 2a tanpa menulis ulang baris. `pribadi` dan `kompas` mengubahnya ke jam server dengan `mulaiPada + jedaMs + t` (P-11 sampai P-13).
+  - Keadaan skill satu pemain, termasuk sasaran Kompas, disimpan sebagai satu baris JSON di tabel `skill`, agar Kompas yang aktif tetap utuh sesudah Durable Object dibangunkan ulang (P-14).
+  - Pemakaian skill yang ditolak tidak dijawab, kecuali Kompas tanpa sasaran, agar pesan berulang tidak memperbesar lalu lintas keluar (P-15).
+  - Kode `pemberitahuan` yang dipakai: `kotak_lari`, `kotak_kompas`, `kotak_petunjuk`, `kompas_tepat`, dan `kompas_tanpa_sasaran` (P-42). Tulisan +1 Kompas tampil di kepala kartu dampak (P-32).
+  - Panah Kompas diletakkan di tepi kotak aman yang tidak tertutup bilah atas, peta mini, tombol skill, tombol Periksa, dan ajakan "E Periksa" (P-26).
+  - Pemain lain tampak berlari bila kecepatannya dalam 500 ms terakhir lebih dari 90 piksel per detik (P-23).
+  - Lebar luar pita skill paling besar lebar HUD dikurangi 256 px dengan `box-sizing: border-box`, karena batas usulan 10a ("dua kali lebar peta mini") masih bertumpuk 4 px dengan peta mini. Pita tampil bergiliran dalam satu antrean bersama "Dua menit lagi" (P-41).
+  - Teks memakai kelompok baru `skill` di `TEKS` dan `TEKS_KONSOL`, ditambah `csv.petunjuk`, agar uji teks fitur lain cukup mengecualikan satu kelompok.
+  - Berkas yang ditambahkan ke daftar rencana: `bersama/KartuDampak.tsx` (+1 Kompas) dan `admin/kelas/ikon-kelas.ts` (ikon skill di konsol). `Dasbor.tsx` tidak berubah, karena tinggi tautan diatur di `kelas.css`.
+- **Pengukuran di luar repositori** (server lokal dan pratinjau penyunting JS-12 di Chromium, dengan huruf yang sudah dimuat, 21 Nov 2026):
+  - Kaki dialog dengan empat tombol, termasuk "Petunjuk dipakai" (168 px), tetap satu baris di dunia 610 × 343, 640 × 360, 960 × 540, dan 1280 × 720.
+  - Kotak petunjuk di tampilan pilihan mode ringkas membuat isi melewati tinggi area paling banyak 25 px di dunia 610 × 343 (15 dari 16 kejadian bank awal), dan 0 px di ukuran lain. Angka ini lebih besar daripada hasil percobaan Plan (10 px), karena seluruh 16 kejadian diukur, dan dunia 610 × 343 juga dipakai HP 731 × 411 dengan rasio 2,625 (ukuran HP uji JS-08). Gaya kotak dengan garis kiri dipilih karena luapannya paling kecil di antara gaya bergaris yang dicoba (bingkai putus-putus 33 px). Isi tetap bisa digulir dan kaki tetap terlihat (AC-11).
+  - Di HUD selebar 610 px, pita "+1 Lari cepat" selebar 205 px. Hanya "Semua kejadian sudah selesai." dan "Petunjuk dipakai di Langkah 1." yang terbungkus menjadi dua baris.
+- **DRAF yang menunggu pemilik proyek:** D-1 memakai lagi skill yang sedang aktif (saran: tidak bisa sampai skill selesai), D-2 pita bantuan muatan (saran: "Cari kotak …" dan "… sudah penuh"), dan D-3 pilihan yang dicoret di pratinjau penyunting (saran: pilihan keliru pertama menurut urutan asli).
+- **Galeri:** `build:pages` tetap menghasilkan 178 berkas yang identik byte dengan `main`.
+
+### Tanggapan permintaan Sesi B dan C (Specify JS-09, 21 Nov 2026)
+
+Dibaca dari ZIP `main` sesudah commit 2c559b1 (20 Nov 2026): `naskah/STATUS.md` (terakhir diubah 20 Nov 2026), `naskah/panduan-guru.md`, dan `Daftar_Aset.md` (8 Nov 2026). Tidak ada permintaan baru sejak Plan JS-09.
+
+| Kode | Permintaan singkat | Tanggapan Sesi A | Perubahan |
+|---|---|---|---|
+| A-12 (Sesi B) | Kalimat refleksi untuk rekap JS-11 | Diterapkan di JS-11 (Selesai 20 Nov 2026); di `naskah/STATUS.md` statusnya masih "Diajukan" | Sesi B bisa mengubah statusnya menjadi Diterapkan |
+| A-13 (Sesi B) | Draf panduan guru satu halaman | Tetap untuk Plan JS-16. Bagian [menyusul] tentang pilihan skill dan tentang skill serta kotak bantuan memakai teks final spesifikasi JS-09 (catatan Plan JS-16 dari Specify JS-09) | Tidak ada perubahan di berkas Sesi B |
+| "Yang masih ditunggu" no. 4 (Sesi B) | Kode dua rujukan yang belum diverifikasi | Tidak berubah sejak Plan JS-09; kodenya masih ditunggu dari pemilik proyek (catatan Plan JS-16) | Tidak ada perubahan |
+| "Yang masih ditunggu" no. 5 (Sesi B) | Pasangan kalimat refleksi | Sudah dijawab di Gerbang 2 JS-11 (D-1a, Pasangan 1) | Sesi B bisa menandainya selesai |
+| Sesi C | Tidak ada permintaan baru | JS-09 memakai sembilan aset Disetujui tanpa aset baru (spesifikasi, bagian "Aset"); kotak teropong dan karcis tetap untuk JS-18. C-13 sudah diterapkan sejak Build JS-07, tetapi di `Daftar_Aset.md` masih "Diajukan" | Sesi C bisa mengubah status C-13 menjadi Diterapkan |
