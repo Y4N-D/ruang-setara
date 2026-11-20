@@ -14,7 +14,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-08 | Selesai (13 Nov 2026); dibangun dan diuji 11 Nov 2026, "Jejak: uji" hijau, dan percobaan pemilik proyek di lingkungan uji berhasil | [JS-08-kejadian.md](specs/JS-08-kejadian.md) | [JS-08-hasil.md](tests/JS-08-hasil.md), lulus dengan catatan AC-24 (satu uji Sesi B diubah atas keputusan pemilik proyek); uji server yang kadang gagal diperbaiki 13 Nov 2026 |
 | JS-09 | Belum direncanakan | — | — |
 | JS-10 | Selesai (15 Nov 2026) | [JS-10-kelas.md](specs/JS-10-kelas.md) | [JS-10-hasil.md](tests/JS-10-hasil.md), lulus (AC-19 dengan catatan) |
-| JS-11 | Direncanakan (16 Nov 2026); menunggu `Setuju: JS-11` | — | — |
+| JS-11 | Spesifikasi ditulis (20 Nov 2026); menunggu `Spesifikasi disetujui: JS-11` | [JS-11-akhir-ronde.md](specs/JS-11-akhir-ronde.md) | — |
 | JS-12 | Selesai (16 Nov 2026) | [JS-12-bank.md](specs/JS-12-bank.md) | [JS-12-hasil.md](tests/JS-12-hasil.md), lulus (AC-8 diterima) |
 | JS-13 | Belum direncanakan | — | — |
 | JS-14 | Belum direncanakan | — | — |
@@ -168,8 +168,8 @@ Keputusan pemilik proyek, 14 November 2026: sesudah JS-04, Sesi A mengerjakan **
 - Plan JS-19 (dari Build JS-04): rincian log audit akun berbentuk JSON: `admin_awal` `{"hasil":…}`, `akun.buat` `{"peran":…,"peninjau":…}`, `akun.ubah` berisi nama kolom D1 yang berubah (`nama_tampilan`, `peran`, `peninjau`, `aktif`) beserta nilai barunya, `akun.atur_ulang_sandi` `{}`, dan `sandi.ganti` `{"wajib":…}`.
 - Semua fitur server (dari penutupan JS-04, diperbaiki sesudah data Cloudflare 14 Nov 2026): di lingkungan uji, permintaan yang sudah hangat memakai 0–6 ms CPU, tetapi permintaan pertama di isolat yang baru dimulai bisa 10–23 ms, sedangkan startup tiap versi (5–7 ms) tidak dihitung ke permintaan. Rancang rute agar tetap jauh di bawah 10 ms saat hangat, dan anggap puncak pada permintaan pertama sebagai hal biasa selama paket gratis (ditanggung kelonggaran CPU Cloudflare; 0 galat di semua pengukuran). CPU per permintaan dibaca dari Workers Logs (Workers & Pages → `jejak-setara-uji` → Observability) atau data GraphQL per menit.
 - Plan JS-22 (dari penutupan JS-04): Workers Logs dan traces di lingkungan uji dinyalakan pemilik proyek di dasbor pada 14 Nov 2026 pukul 09.50.52 UTC, tanpa deploy. Sebelum ada guru atau siswa lain di lingkungan uji, periksa apakah log menyimpan header `cookie` atau `cf-connecting-ip`; bila ya, matikan log, atau atur lewat `wrangler.jsonc` agar hanya data yang perlu tercatat. Deploy lewat Wrangler mungkin mematikan setelan dasbor, jadi periksa sesudah push.
-- Plan JS-11 (dari Build JS-10): halaman `#/ruang/{id}` sudah ada sebagai detail ruang (pemain, kunci, keluarkan, tutup); hasil per ruang, peringkat lengkap, dan ekspor CSV ditambahkan di halaman yang sama. Podium layar kelas hanya menampilkan pemain berskor.
-- Plan JS-11 (dari lingkungan uji JS-10): tanda ✓ (`kelas.selesaiJumlah`) tampil seperti √ di peramban Windows karena Pixelify Sans tidak punya glif itu; ganti dengan ikon `ikon_centang` di 10 besar layar kelas saat papan dan peringkat dikerjakan.
+- Plan JS-11 (dari Build JS-10): halaman `#/ruang/{id}` sudah ada sebagai detail ruang (pemain, kunci, keluarkan, tutup); hasil per ruang, peringkat lengkap, dan ekspor CSV ditambahkan di halaman yang sama. Podium layar kelas hanya menampilkan pemain berskor. **Dipakai di spesifikasi JS-11 (P-20).**
+- Plan JS-11 (dari lingkungan uji JS-10): tanda ✓ (`kelas.selesaiJumlah`) tampil seperti √ di peramban Windows karena Pixelify Sans tidak punya glif itu; ganti dengan ikon `ikon_centang` di 10 besar layar kelas saat papan dan peringkat dikerjakan. **Dipakai di spesifikasi JS-11 (P-34), termasuk label "✓ Jawaban tepat" di pembahasan.**
 - Plan JS-15 (dari Plan JS-22, usulan 10a dan 6a): sesudah Workers Paid aktif, pasang `limits.cpu_ms` 1.000 ms untuk Worker uji dan produksi; sebelum mengaktifkannya, jalankan langkah Spend Management di spesifikasi JS-22 (P-19): peringatan anggaran 3 USD, lalu batas pakai Workers dan Durable Objects masing-masing 5 USD. Tambahkan pilihan `produksi` ke "Jejak: hentikan".
 - Semua sesi (dari Build JS-22): repositori tidak memakai Prettier (tidak ada konfigurasi maupun dependensinya). Jangan menjalankan `prettier --write`; ikuti gaya berkas yang ada, karena memformat ulang mengubah ratusan baris tanpa perubahan isi.
 - Plan JS-12 (dari Build JS-10): kesiapan paket untuk ruang biasa dihitung `paketSiapRuangBiasa` di `db/konten.ts` (semua kejadian terbit dan semua rujukan versi terbitnya terverifikasi). Penerbitan dan verifikasi di bank kejadian langsung membuka ruang biasa di dialog "Ruang baru".
@@ -177,6 +177,15 @@ Keputusan pemilik proyek, 14 November 2026: sesudah JS-04, Sesi A mengerjakan **
 - Semua fitur konsol (dari Build JS-10): gaya khusus konsol ditaruh di `styles/kelas.css` (diimpor `web/jejak-setara/admin/main.tsx`), bukan `jejak.css`, agar CSS layar pemain tidak membesar; uji ujung ke ujung membuat ruang lewat `e2e/jejak-setara/ruang-uji.ts`.
 - Semua sesi (dari penutupan JS-04): dalam mode folder lokal, berkas alur kerja mungkin harus diganti manual oleh pemilik proyek (AGENTS 11.5 butir 8), dan folder `Claude outputs/` diabaikan git.
 - Semua fitur (dari push Build JS-22, 15 Nov 2026): `package.json` memuat `"packageManager": "pnpm@11.25.0"`, sedangkan alur kerja memanggil pnpm lewat `npx`. Setiap langkah `actions/setup-node@v5` di alur kerja yang mengambil repositori memakai `package-manager-cache: false`, termasuk alur kerja produksi di JS-15. `kerangka.test.ts` memeriksa semua berkas `jejak-*.yml`, tetapi uji di mesin agen tidak menjalankan aksi GitHub, jadi perubahan versi aksi baru terbukti di "Jejak: uji" sesudah push.
+- Plan JS-16 atau rilis pertama (dari Specify JS-11, 20 Nov 2026; pertanyaan pemilik proyek): **isi bank di basis data produksi.** Verifikasi rujukan dan penerbitan kejadian tersimpan di D1 lingkungan uji (`jejak-setara-uji`), sedangkan D1 produksi `jejak-setara` mulai kosong. Deploy produksi pertama menjalankan migrasi, lalu menyemai bank awal sekali (Permintaan A-5 butir 3): 23 rujukan berstatus `belum` dan 16 kejadian berstatus Siap tinjau tanpa versi terbit. Jadi verifikasi dan penerbitan memang perlu diulang di produksi. Pilihan untuk Plan JS-16:
+  - (a, saran) Ulangi di konsol produksi: (1) deploy produksi pertama; (2) "Jejak: admin awal" untuk produksi (pilihan lingkungan produksi ditambahkan bersama `jejak-produksi.yml`); (3) centang Peninjau pada akun pemilik proyek; (4) verifikasi rujukan dengan konsol uji terbuka di tab lain sebagai pembanding; (5) terbitkan 16 kejadian dengan catatan "Terbit pertama"; (6) buat satu ruang biasa dan coba dengan satu HP. Perkiraannya 30–45 menit. Cara ini mengikuti AGENTS 7 butir 7, AGENTS 8, dan Architecture 10.6 (hanya akun bertanda Peninjau yang menandai rujukan terverifikasi), tidak membawa ruang uji ke statistik produksi, dan tidak memerlukan kode baru. Sesi A menuliskan langkahnya di catatan rilis JS-16.
+  - (b) Majukan impor dan ekspor bank (JFR-48, JS-19). Rujukan hasil impor tetap berstatus `belum` dan kejadian hasil impor belum terbit, jadi cara ini hanya menghemat pengetikan ulang suntingan isi; verifikasi dan penerbitan tetap diulang.
+  - (c, tidak disarankan) Salin tabel D1 dengan `wrangler d1 export` dan `wrangler d1 execute`. Salinan itu menulis status `terverifikasi` lewat skrip, yang dilarang aturan di atas, dan kolom `diverifikasi_oleh` serta `dibuat_oleh` menunjuk akun lingkungan uji yang tidak ada di produksi.
+
+  Satu hal perlu diperiksa sebelum deploy produksi pertama. Di `bank-awal.json`, ke-23 rujukan dipakai Paket inti 16 (JR-19 hanya oleh K-06 dan JR-22 hanya oleh K-11; keduanya rujukan yang menurut `naskah/STATUS.md` masih perlu dibaca langsung di naskah resmi), sedangkan catatan lingkungan uji JS-12 menulis 21 rujukan terverifikasi, 16 kejadian terbit, dan dua rujukan yang belum diverifikasi tidak dipakai Paket inti 16. Penerbitan mensyaratkan semua rujukan versi kerja terverifikasi, jadi kemungkinan rujukan K-06 dan K-11 sudah disunting di konsol uji, atau hitungannya perlu diperiksa ulang. Pemeriksaannya cukup di konsol uji: halaman Rujukan dengan saringan "Belum", serta kartu dampak K-06 dan K-11. Suntingan di konsol uji tidak ikut ke produksi, sehingga suntingan itu diulang di konsol produksi, atau Sesi B memperbarui `bank-awal.json` **sebelum deploy produksi pertama**, karena semai hanya berjalan sekali per basis data. Basis data uji tetap seperti sekarang.
+- Plan JS-16 (dari Specify JS-11, 20 Nov 2026; Permintaan A-13 Sesi B): **panduan guru satu halaman.** Bahannya `naskah/panduan-guru.md` (draf Sesi B, 20 Nov 2026). Plan JS-16 menetapkan tempat dan bentuknya, mengisi bagian [menyusul] dari JS-11 (rekap dan refleksi, riwayat, hasil, CSV, dan urutan menutup ruang sesuai D-2 spesifikasi JS-11) serta dari JS-09, dan memeriksa ulang tujuh butir yang dicatat Sesi B: domain (KT-06), kuota sesudah Workers Paid, pilihan produksi untuk "Jejak: hentikan", urutan menutup ruang, batas pemain untuk siswa yang berganti HP, data per HP, dan panjang satu halaman.
+- Plan JS-13 (dari Specify JS-11, 20 Nov 2026, bila spesifikasinya disetujui): statistik lintas ruang memakai `peserta.dikeluarkan` (migrasi `0002`) dan tidak memasukkan ruang uji; dasbor bisa membaca salinan ringkas `ruang.ringkasan_json.hasil` (spesifikasi JS-11 P-14) tanpa menghitung ulang baris `jawaban`.
+- Plan JS-09 (dari Specify JS-11, 20 Nov 2026): kolom "Petunjuk dipakai" ditambahkan di ujung kanan CSV jawaban JS-11, agar urutan kolom yang sudah dipakai guru tidak bergeser.
 
 ## JS-01 — Kerangka
 
@@ -957,7 +966,7 @@ Dibangun dalam mode ZIP. Rinciannya di [JS-12-hasil.md](tests/JS-12-hasil.md).
 
 ## JS-11 — Akhir ronde: rekap pribadi, riwayat ruang, hasil per ruang, ekspor CSV
 
-- Status: **Direncanakan (16 Nov 2026)**: menunggu `Setuju: JS-11`. Urutan pemilik proyek: JS-12 (Selesai), JS-11, lalu JS-09.
+- Status: **Spesifikasi ditulis (20 Nov 2026)** ([JS-11-akhir-ronde.md](specs/JS-11-akhir-ronde.md)): menunggu `Spesifikasi disetujui: JS-11` beserta pilihan DRAF D-1 sampai D-4. Plan disetujui 20 Nov 2026 dengan `Setuju: JS-11 (usulan 1a sampai 12a)`. Sebelumnya: **Direncanakan (16 Nov 2026)**. Urutan pemilik proyek: JS-12 (Selesai), JS-11, lalu JS-09. Dikerjakan dalam mode ZIP.
 - Memenuhi: JFR-32 (rekap pribadi), JFR-38 (riwayat ruang), JFR-49 (hasil per ruang), JFR-53 (ekspor CSV); PRD 11.1 (ekspor dan cetak ringkasan; hapus data ruang oleh admin, PRD 13); Architecture 10.2 (`GET /api/ruang/{id}/ekspor`) dan aturan CSV (titik koma, koma desimal, BOM UTF-8, nama berkas); catatan Plan JS-11 dari JS-08 dan JS-10.
 - Bergantung pada: JS-10 (Selesai). JS-13 (statistik) menunggu JS-11 dan JS-12.
 - Ukuran: M.
@@ -981,4 +990,30 @@ Dibangun dalam mode ZIP. Rinciannya di [JS-12-hasil.md](tests/JS-12-hasil.md).
 
 **Risiko:** (1) Rekap bergantung pada isi kejadian yang dipakai ruang; versi yang dipakai ruang disalin ke server ruang saat ruang dibuat, jadi rekap tetap benar walau kejadian diterbitkan ulang sesudahnya. (2) Ruang uji tetap tampil di riwayat dengan tanda "Ruang uji" dan tidak masuk statistik JS-13. (3) CSV dari ruang dengan nama samaran yang diawali tanda minus atau sama dengan harus tetap terbaca benar; uji memastikan perlindungan rumus tidak mengubah isi yang aman.
 
-**Langkah pemilik proyek sesudah Build** (ditetapkan di Specify): satu ronde pendek dengan dua atau tiga HP sampai rekap tampil, lalu membuka riwayat dan hasil ruang di konsol, mengunduh kedua CSV dan membukanya di Excel, dan mencoba cetak.
+**Langkah pemilik proyek sesudah Build** (ditetapkan di Specify): satu ronde pendek dengan dua atau tiga HP sampai rekap tampil, lalu membuka riwayat dan hasil ruang di konsol, mengunduh kedua CSV dan membukanya di Excel, dan mencoba cetak. Rinciannya tujuh langkah di spesifikasi JS-11, bagian "Rencana uji", subbagian "Manual (AGENTS 9) dan lingkungan uji".
+
+### Specify JS-11 (20 Nov 2026)
+
+Dikerjakan dalam mode ZIP dari `main` sesudah commit 5edde25. Spesifikasinya [JS-11-akhir-ronde.md](specs/JS-11-akhir-ronde.md), dengan 35 butir perilaku dan 24 kriteria penerimaan.
+
+- **Keputusan penting:**
+  - Rekap memuat kejadian yang Langkah 1-nya sudah dikunci (menyempurnakan usulan 2a), karena skema `selesai` JS-02 mewajibkan pilihan Langkah 1; `PROTOKOL_VERSI` tetap 2 (P-1 dan P-2).
+  - Migrasi `0002_peserta_dikeluarkan.sql` menambah kolom `peserta.dikeluarkan`, karena D1 belum bisa membedakan pemain yang dikeluarkan (P-10).
+  - Peringkat akhir juga ditulis untuk ruang yang ditutup server di tengah ronde, dan dihitung ulang bila peringkat berubah sesudah ronde berakhir (P-12 dan P-13).
+  - `ruang.ringkasan_json` mendapat kunci `hasil` sebagai salinan ringkas untuk JS-13 (P-14).
+  - Ketepatan Langkah 1 memakai jawaban yang Langkah 1-nya dikunci sebagai penyebut (P-21).
+  - Teks riwayat memakai kelompok `riwayatRuang`, karena kelompok `riwayat` sudah dipakai JS-12.
+  - Label "✓ Jawaban tepat" di pembahasan ikut diganti ikon `ikon_centang`; dua teks JS-10 yang berubah dicatat di spesifikasi untuk uji AC-25 JS-10 (P-34).
+- **Pengukuran di luar repositori:** pesan `selesai` Paket inti 16 berukuran sekitar 9,3–9,5 KB (sekitar 2,8 KB sesudah gzip) dan paling besar sekitar 92 KB untuk 64 kejadian; penyusun CSV jawaban di Node memakan 1,7 ms (40 pemain × 16 kejadian), 3,5 ms (100 × 16), dan 12,3 ms (100 × 64).
+- **DRAF yang menunggu pemilik proyek:** D-1 kalimat refleksi (saran Pasangan 1 Sesi B), D-2 rekap sesudah ruang ditutup (saran: tetap tampil), D-3 hapus data ruang oleh guru (PRD 11.1 berbeda dengan usulan 9a; saran: admin saja), dan D-4 pemain yang dikeluarkan di hasil (saran: tabel terpisah).
+- **Galeri:** `build:pages` tetap menghasilkan 178 berkas yang identik byte dengan `main`.
+
+### Tanggapan permintaan Sesi B dan C (Specify JS-11, 20 Nov 2026)
+
+Dibaca dari ZIP `main` sesudah commit 5edde25 (20 Nov 2026): `naskah/STATUS.md`, `naskah/refleksi.md`, `naskah/panduan-guru.md`, dan `Daftar_Aset.md`.
+
+| Kode | Permintaan singkat | Tanggapan Sesi A | Status |
+|---|---|---|---|
+| A-12 (Sesi B) | Kalimat refleksi untuk rekap JS-11 (tiga pasangan di `refleksi.md`, saran Pasangan 1) dan urutan menutup ruang agar siswa sempat menyalin refleksi | Pasangan 1 dipakai sebagai DRAF D-1, dengan Pasangan 2 dan 3 sebagai alternatif; teks finalnya masuk `teks.ts` saat Build. Urutan menutup ruang dijawab di P-8 dan DRAF D-2: rekap tetap tampil sesudah ruang ditutup | **Diterapkan (Specify JS-11, 20 Nov 2026)**; Sesi B mengubah statusnya di `naskah/STATUS.md` |
+| A-13 (Sesi B) | Draf panduan guru satu halaman untuk Plan JS-16 | Dicatat di "Catatan untuk Plan berikutnya" untuk Plan JS-16, beserta tujuh butir yang perlu diperiksa ulang | Diterima; dikerjakan di Plan JS-16 |
+| Sesi C | Tidak ada permintaan baru | JS-11 tidak membutuhkan aset gambar baru. C-8 dan C-13 sudah diterapkan (tanggapan Plan JS-10) | Tidak ada perubahan di berkas Sesi C |
