@@ -25,7 +25,7 @@ Spesifikasi: [JS-11-akhir-ronde.md](../specs/JS-11-akhir-ronde.md), disetujui 20
 | AC-19 Hapus data ruang | Lulus | `api-hasil.test.ts` (guru 403, 409, satu batch, satu baris audit, dua penghapusan bersamaan); `hasil.uji-server.ts`; `hasil.uji.ts` (tombol aktif hanya bila label cocok, kembali ke Riwayat) |
 | AC-20 Ikon centang | Lulus | `hasil.uji.ts` dan `kelas.uji.ts` (ikon, angka, teks pembaca layar, tanpa huruf ✓); tangkapan layar kelas |
 | AC-21 Teks | Lulus | `kerangka.test.ts` (tabel teks JS-11, termasuk "Teks JS-10 yang berubah" untuk uji AC-25 JS-10) |
-| AC-22 Ukuran dan kinerja | Lulus dengan catatan | Konsol 130,4 KB gzip (batas 350 KB); aturan impor konsol (`tampilan-kelas.test.ts`); CSV 100 × 16: 2,1 ms (batas 5 ms). **Catatan:** kode layar pemain naik 1,33 KB gzip, di atas batas 1 KB (bagian "Anggaran ukuran dan kinerja") |
+| AC-22 Ukuran dan kinerja | Lulus dengan catatan, diterima pemilik proyek (20 Nov 2026, pilihan a) | Konsol 130,4 KB gzip (batas 350 KB); aturan impor konsol (`tampilan-kelas.test.ts`); CSV 100 × 16: 2,1 ms (batas 5 ms). **Catatan:** kode layar pemain naik 1,33 KB gzip, di atas batas 1 KB (bagian "Anggaran ukuran dan kinerja") |
 | AC-23 Beban | Lulus | `sim:beban` 1 × 50: 50 bot menerima `selesai`, 50 rekap lolos skema, 0 putus tak terduga, 0 pesan ditolak (bagian "Simulasi beban") |
 | AC-24 Tanpa regresi | Lulus | Semua perintah di bawah; `build:pages` 178 berkas identik byte |
 
@@ -91,7 +91,22 @@ CSV peserta 100 baris: 0,2 ms (8,8 KB). Ekspor 100 × 64 bisa melewati batas CPU
 - Tidak ada nama asli siswa: layar dan CSV hanya memuat nama samaran, dan log audit `ruang.hapus` hanya memuat kode, label kelas, waktu dibuat, dan jumlah baris yang dihapus.
 - Rekap dan refleksi bisa dibaca sampai akhir dengan papan ketik saja di laptop (halaman digulir biasa; tautan dan tombol bisa difokus dengan fokus terlihat).
 - 10 besar dan pembahasan di layar kelas terbaca dengan ikon centang (tangkapan layar).
-- Pemeriksaan Excel berbahasa Indonesia dan pratinjau cetak di Windows dilakukan pemilik proyek (langkah 4 dan 5 di spesifikasi, bagian "Rencana uji").
+- Pemeriksaan Excel berbahasa Indonesia dan pratinjau cetak di Windows dilakukan pemilik proyek (langkah 4 dan 5 di spesifikasi, bagian "Rencana uji"); hasilnya di bagian "Pemeriksaan di lingkungan uji".
+
+## Pemeriksaan di lingkungan uji (20 November 2026)
+
+Dijalankan pemilik proyek sesudah ZIP Build JS-11 di-push (commit `e2e2a43`):
+
+| Langkah | Hasil |
+|---|---|
+| 1. "Jejak: uji" untuk commit `e2e2a43`, termasuk migrasi D1 `0002` | Hijau |
+| 2. Ronde pendek dengan 5 HP: rekap tampil, satu kalimat refleksi disalin, lalu ruang ditutup dan rekap tetap tampil dengan pita | Berhasil |
+| 3. Tab Riwayat, saringan, hasil ruang, dan satu rincian | Berhasil |
+| 4. CSV peserta dan CSV jawaban di Excel: kolom terpisah, huruf Indonesia, dan desimal koma | Benar |
+| 5. Cetak atau simpan sebagai PDF | Rapi |
+| 6. Hapus data satu ruang uji sebagai admin, lalu ruang itu hilang dari Riwayat | Berhasil |
+
+Pemeriksaan rujukan di konsol uji (catatan Specify JS-11 untuk Plan JS-16): K-06 dan K-11 berstatus Terbit. Kode rujukan yang tampil di saringan "Belum" belum tercatat, karena pesan pemilik proyek masih memuat teks contoh "[kode rujukan, misalnya JR-xx dan JR-yy]"; kodenya diminta lagi dan dicatat di `PLAN.md` untuk Plan JS-16.
 
 ## Temuan
 
@@ -101,3 +116,5 @@ CSV peserta 100 baris: 0,2 ms (8,8 KB). Ekspor 100 × 64 bisa melewati batas CPU
 ## Keputusan
 
 Lulus dengan catatan AC-22 (ukuran kode layar pemain). Menunggu keputusan pemilik proyek untuk temuan 1.
+
+**Keputusan pemilik proyek (20 Nov 2026):** AC-22 (a), kenaikan 1,33 KB diterima dan dicatat di PRD bagian 21. Keenam langkah di lingkungan uji berhasil (bagian "Pemeriksaan di lingkungan uji"). **Lulus; JS-11 Selesai.** Temuan 2 tetap dicatat di `PLAN.md` untuk Plan berikutnya yang menyentuh dasbor atau uji.
