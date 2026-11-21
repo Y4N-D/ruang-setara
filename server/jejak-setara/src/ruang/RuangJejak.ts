@@ -284,6 +284,9 @@ export class RuangJejak {
         "PRIMARY KEY (pemain_id, titik_id))",
     );
     this.sql.exec(SQL_TABEL_ANTREAN);
+    // JS-09 (P-14). IF NOT EXISTS, sehingga ruang yang dibuat sebelum JS-09 tetap jalan.
+    this.sql.exec("CREATE TABLE IF NOT EXISTS skill (pemain_id TEXT PRIMARY KEY, isi_json TEXT NOT NULL)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS petunjuk (pemain_id TEXT NOT NULL, kode TEXT NOT NULL, opsi TEXT NOT NULL, PRIMARY KEY (pemain_id, kode))");
   }
 
   private pulihkan(): void {
@@ -320,6 +323,14 @@ export class RuangJejak {
       .exec<{ pemain_id: string; titik_id: string }>("SELECT pemain_id, titik_id FROM terlihat")
       .toArray()
       .map((r) => ({ pemainId: r.pemain_id, titikId: r.titik_id }));
+    const skill = this.sql
+      .exec<{ pemain_id: string; isi_json: string }>("SELECT pemain_id, isi_json FROM skill")
+      .toArray()
+      .map((r) => ({ pemainId: r.pemain_id, isi: r.isi_json }));
+    const petunjuk = this.sql
+      .exec<{ pemain_id: string; kode: string; opsi: string }>("SELECT pemain_id, kode, opsi FROM petunjuk")
+      .toArray()
+      .map((r) => ({ pemainId: r.pemain_id, kode: r.kode, opsi: r.opsi }));
     this.keadaan = pulihkanKeadaan(
       {
         ruang,
@@ -333,6 +344,8 @@ export class RuangJejak {
         kejadian,
         jawaban,
         terlihat,
+        skill,
+        petunjuk,
       },
       PETA_KAMPUNG,
       sekarang,
@@ -371,6 +384,21 @@ export class RuangJejak {
     }
     if (s.jenis === "hapus_pemain") {
       this.catatTulis(this.sql.exec("DELETE FROM pemain WHERE id = ?", s.id).rowsWritten);
+      return;
+    }
+    // JS-09 (P-14): satu baris per perubahan keadaan skill, dan satu baris per Petunjuk yang dipakai.
+    if (s.jenis === "skill") {
+      const c = this.sql.exec(
+        "INSERT INTO skill (pemain_id, isi_json) VALUES (?, ?) ON CONFLICT(pemain_id) DO UPDATE SET isi_json = excluded.isi_json",
+        s.pemainId,
+        s.isi,
+      );
+      this.catatTulis(c.rowsWritten);
+      return;
+    }
+    if (s.jenis === "petunjuk") {
+      const c = this.sql.exec("INSERT INTO petunjuk (pemain_id, kode, opsi) VALUES (?, ?, ?) ON CONFLICT(pemain_id, kode) DO NOTHING", s.pemainId, s.kode, s.opsi);
+      this.catatTulis(c.rowsWritten);
       return;
     }
     const p = s.pemain;

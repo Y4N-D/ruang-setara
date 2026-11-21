@@ -1,7 +1,9 @@
 // Halaman Ruang (spesifikasi JS-10, P-2, P-6, P-7): daftar ruang yang belum ditutup dan dialog "Ruang baru". Sejak JS-11
-// (P-16): tab "Berjalan" (halaman ini) dan "Riwayat" (RiwayatRuang.tsx).
+// (P-16): tab "Berjalan" (halaman ini) dan "Riwayat" (RiwayatRuang.tsx). JS-09 (P-7, P-9): kelompok "Skill" di dialog
+// Ruang baru, dan teks daftar skill aktif untuk halaman ruang dan hasil.
 import { useEffect, useId, useState, type FormEvent } from "react";
 import type { Saya } from "../../inti/akun";
+import { SKILL_P0, type SkillP0 } from "../../inti/aturan";
 import {
   BATAS_PEMAIN,
   BATAS_TERLAMBAT,
@@ -20,10 +22,17 @@ import { TEKS_KONSOL } from "../../teks-konsol";
 import { api, useMuat, type GalatApi } from "../api";
 import Dialog from "../Dialog";
 import { Kolom, PesanGalat, PesanInfo } from "../Formulir";
+import { IKON_SKILL } from "../kelas/ikon-kelas";
 import { keHash } from "../rute";
 
 const t = TEKS_KONSOL.ruang;
 const tb = TEKS_KONSOL.ruangBaru;
+const ts = TEKS_KONSOL.skill;
+
+/** JS-09 (P-9): nama skill yang aktif dipisah koma menurut urutan P-1, atau "Tidak ada". */
+export function teksSkill(skillAktif: readonly SkillP0[]): string {
+  return skillAktif.length > 0 ? SKILL_P0.filter((s) => skillAktif.includes(s)).map((s) => ts[s]).join(", ") : ts.tidakAda;
+}
 export const FORMAT_WAKTU_RUANG = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
 /** JS-11 (P-16): dua bagian halaman Ruang; tab aktif bertanda aria-current="page". */
@@ -199,6 +208,8 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
   const [terlambat, setTerlambat] = useState(String(BATAS_TERLAMBAT.bawaan));
   const [absen, setAbsen] = useState(false);
   const [uji, setUji] = useState(true);
+  // JS-09 (P-7): ketiga skill tercentang setiap kali dialog dibuka.
+  const [skill, setSkill] = useState<SkillP0[]>([...SKILL_P0]);
   const [galat, setGalat] = useState<GalatIsianRuang[]>([]);
   const [galatUmum, setGalatUmum] = useState<{ pesan: string; lama?: { id: string; kode: string } } | null>(null);
   const [mengirim, setMengirim] = useState(false);
@@ -227,7 +238,7 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
 
   async function kirim(e: FormEvent) {
     e.preventDefault();
-    const isi = { labelKelas: label, paketId, durasiMenit: durasi, batasPemain: batasAngka, batasTerlambatMenit: Number(terlambat), modeNomorAbsen: absenBenar, uji: ujiBenar };
+    const isi = { labelKelas: label, paketId, durasiMenit: durasi, batasPemain: batasAngka, batasTerlambatMenit: Number(terlambat), modeNomorAbsen: absenBenar, uji: ujiBenar, skillAktif: skill };
     const g = periksaRuangBaru(isi);
     setGalat(g);
     setGalatUmum(null);
@@ -291,6 +302,20 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
             <Kolom label={tb.batasPemain} nilai={batas} ubah={setBatas} galat={galatDi("batasPemain")} petunjuk={tb.batasPemainPetunjuk} />
             <Kolom label={tb.terlambat} nilai={terlambat} ubah={setTerlambat} galat={galatDi("terlambat")} petunjuk={tb.terlambatPetunjuk} />
           </div>
+          <fieldset className="js-ruang-skill">
+            <legend className="js-konsol-label">{ts.judul}</legend>
+            <div className="js-ruang-skill-daftar">
+              {SKILL_P0.map((s) => (
+                <label key={s} className="js-konsol-centang">
+                  <input type="checkbox" checked={skill.includes(s)} onChange={(e) => setSkill(SKILL_P0.filter((x) => (x === s ? e.target.checked : skill.includes(x))))} />
+                  {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
+                  <img src={IKON_SKILL[s]} alt="" width={16} height={16} />
+                  <span>{ts[s]}</span>
+                </label>
+              ))}
+            </div>
+            <p className="js-konsol-petunjuk">{ts.keterangan}</p>
+          </fieldset>
           <label className="js-konsol-centang">
             <input type="checkbox" checked={absenBenar} disabled={!absenBoleh} onChange={(e) => setAbsen(e.target.checked)} />
             <span>{tb.nomorAbsen}</span>

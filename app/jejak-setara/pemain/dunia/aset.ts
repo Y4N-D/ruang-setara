@@ -118,8 +118,24 @@ export const IKON_DUNIA = [
   "ikon_emosi_keringat",
   "ikon_emosi_tanya",
   "ikon_emosi_seru",
+  // JS-09: ikon skill untuk tombol HUD, kotak petunjuk, dan kartu dampak.
+  "ikon_lari",
+  "ikon_kompas",
+  "ikon_petunjuk",
 ] as const;
-export const TANDA_DUNIA = ["tanda_diri", "tanda_kejadian", "tanda_dibuka", "tanda_selesai"] as const;
+export const TANDA_DUNIA = [
+  "tanda_diri",
+  "tanda_kejadian",
+  "tanda_dibuka",
+  "tanda_selesai",
+  // JS-09: kotak bantuan, panah Kompas, debu lari, dan kilau kotak yang diambil.
+  "tanda_kotak_sepatu",
+  "tanda_kotak_kompas",
+  "tanda_kotak_buku",
+  "tanda_kompas",
+  "tanda_debu",
+  "tanda_kilau",
+] as const;
 
 /** Jenis objek yang digambar layar dunia: semua jenis di kampung.json, ditambah kedua gambar gerbang. */
 export function jenisObjekDunia(): string[] {

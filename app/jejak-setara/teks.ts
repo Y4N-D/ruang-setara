@@ -1,4 +1,4 @@
-// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01, JS-03, JS-07, JS-08, JS-04, dan JS-11).
+// Semua teks yang tampil di Jejak Setara (Architecture bagian 17; spesifikasi JS-01, JS-03, JS-07, JS-08, JS-04, JS-11, dan JS-09).
 // Teks konsol ada di teks-konsol.ts (TEKS_KONSOL, JS-04 P-51), yang tidak diimpor layar pemain.
 // Kedua judul tab ditulis di index.html; nilainya di sini dipakai uji untuk memastikan keduanya sama.
 // Teks dengan {n} atau {kode} diisi lewat isiTeks().
@@ -177,6 +177,30 @@ export const TEKS = {
     putusJudul: "Sambungan terputus terlalu lama",
     putusIsi: "Periksa internet HP, lalu ketuk Coba lagi.",
     cobaLagi: "Coba lagi",
+  },
+  // JS-09 (spesifikasi JS-09, bagian "Teks yang tampil (final)"): tombol skill, pita, pengumuman, dan Petunjuk di dialog.
+  skill: {
+    lari: "Lari cepat",
+    kompas: "Kompas kejadian",
+    petunjuk: "Petunjuk",
+    kompasPendek: "Kompas",
+    kelompok: "Skill",
+    tombol: "{skill}, {n} muatan",
+    tombolAktif: "{skill}, {n} muatan, sedang aktif",
+    pita: "+1 {skill}",
+    semuaSelesai: "Semua kejadian sudah selesai.",
+    diLangkah1: "Petunjuk dipakai di Langkah 1.",
+    cariLari: "Cari kotak sepatu.",
+    cariKompas: "Cari kotak kompas.",
+    cariPetunjuk: "Cari kotak buku.",
+    penuh: "{skill} sudah penuh.",
+    dapat: "Dapat satu muatan {skill}.",
+    aktif: "{skill} aktif selama {n} detik.",
+    selesai: "{skill} selesai.",
+    tombolDialog: "Petunjuk ({n})",
+    dipakai: "Petunjuk dipakai",
+    dicoret: "dicoret Petunjuk",
+    umumPetunjuk: "Petunjuk: {kalimat} Satu pilihan dicoret.",
   },
   // JS-12 (P-12): mode pratinjau untuk penyunting konsol.
   pratinjau: {

@@ -1,7 +1,8 @@
 // Bantuan uji ujung ke ujung (JS-10, P-32): ruang dibuat lewat jalur guru (admin awal lokal, masuk, POST /api/ruang)
 // dan dikendalikan lewat layar kelas bertiket, menggantikan ruang coba JS-03. Kait uji lokal ada di /api/uji/ruang/….
-// Berkas ini tidak berakhiran .uji.ts, jadi tidak dibaca sebagai uji.
-import { expect, type APIRequestContext } from "@playwright/test";
+// Berkas ini tidak berakhiran .uji.ts, jadi tidak dibaca sebagai uji. JS-09 (P-49): `tutupSemuaRuang` menutup semua ruang
+// yang dibuat proses uji, agar seluruh uji ujung ke ujung bisa dijalankan dalam satu perintah.
+import { expect, type APIRequestContext, type PlaywrightWorkerArgs, type TestInfo } from "@playwright/test";
 import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
 
 const KUNCI_ADMIN = "lokal-kunci-admin-bukan-rahasia";
@@ -14,8 +15,11 @@ const EMAIL = `admin-e2e-${process.pid}@sekolah.sch.id`;
 let asal: string | null = null;
 let cookie: string | null = null;
 const idRuang = new Map<string, string>();
+/** Ruang yang dibuat lewat dialog Ruang baru (JS-09, P-49): id saja. */
+const idTambahan = new Set<string>();
 type Pesan = Record<string, unknown>;
-const kelasRuang = new Map<string, { ws: WebSocket; status: string | null; tutup: number | null; riwayat: Pesan[] }>();
+type LayarKelas = { ws: WebSocket; status: string | null; tutup: number | null; riwayat: Pesan[] };
+const kelasRuang = new Map<string, LayarKelas>();
 
 async function alamatAsal(request: APIRequestContext): Promise<string> {
   if (!asal) asal = new URL((await request.get("/api/sehat")).url()).origin;
@@ -58,12 +62,19 @@ export async function buatRuang(request: APIRequestContext, isi: Pesan = {}): Pr
 export const idDariKode = (kode: string) => idRuang.get(kode) ?? "";
 
 async function layarKelas(request: APIRequestContext, kode: string) {
-  const ada = kelasRuang.get(kode);
-  if (ada && ada.tutup === null) return ada;
   const id = idRuang.get(kode);
   expect(id, `ruang ${kode} dibuat lewat buatRuang`).toBeTruthy();
+  const k = await layarKelasId(request, id ?? "");
+  expect(k, `tiket layar kelas ruang ${kode}`).not.toBeNull();
+  return k as LayarKelas;
+}
+
+/** Layar kelas bertiket untuk ruang dengan id ini; null bila tiket ditolak (misalnya ruang sudah ditutup). */
+async function layarKelasId(request: APIRequestContext, id: string): Promise<LayarKelas | null> {
+  const ada = kelasRuang.get(id);
+  if (ada && ada.tutup === null) return ada;
   const t = await request.post(`/api/ruang/${id}/tiket`, { headers: await tajukKonsol(request), data: {} });
-  expect(t.status()).toBe(200);
+  if (t.status() !== 200) return null;
   const { tiket } = (await t.json()) as { tiket: string };
   const a = await alamatAsal(request);
   const ws = new WebSocket(`${a.replace(/^http/, "ws")}/ws/kelas/${id}?tiket=${encodeURIComponent(tiket)}`, { headers: { Origin: a } } as unknown as string[]);
@@ -79,9 +90,51 @@ async function layarKelas(request: APIRequestContext, kode: string) {
     ws.onerror = () => gagal(new Error("sambungan layar kelas gagal"));
   });
   ws.send(JSON.stringify({ v: PROTOKOL_VERSI, t: "halo", peran: "guru" }));
-  await expect.poll(() => k.status, { timeout: 5000 }).not.toBeNull();
-  kelasRuang.set(kode, k);
+  await expect.poll(() => k.status ?? (k.tutup === null ? null : "ditutup"), { timeout: 5000 }).not.toBeNull();
+  kelasRuang.set(id, k);
   return k;
+}
+
+/** JS-09 (P-49): ruang yang dibuat lewat dialog Ruang baru dicatat agar ditutup `tutupSemuaRuang`. */
+export function catatRuang(id: string): void {
+  if (id) idTambahan.add(id);
+}
+
+/**
+ * JS-09 (P-49): menutup setiap ruang yang dibuat proses uji ini dan belum ditutup. `akhiri` dikirim lewat layar kelas
+ * bertiket bila status `main` atau `jeda` (sesudah menunggu `main` bila masih hitung mundur), lalu
+ * `POST /api/ruang/{id}/kelola` dengan aksi tutup. Jawaban untuk ruang yang sudah ditutup atau dihapus diterima.
+ */
+export async function tutupSemuaRuang(request: APIRequestContext): Promise<void> {
+  const semua = new Set([...idRuang.values(), ...idTambahan]);
+  for (const id of semua) {
+    const k = await layarKelasId(request, id);
+    if (k) {
+      if (k.status === "hitung_mundur") await expect.poll(() => k.status, { timeout: 15_000 }).not.toBe("hitung_mundur");
+      if (k.status === "main" || k.status === "jeda") {
+        k.ws.send(JSON.stringify({ v: PROTOKOL_VERSI, t: "akhiri" }));
+        await expect.poll(() => k.status, { timeout: 10_000 }).toBe("selesai");
+      }
+    }
+    const j = await request.post(`/api/ruang/${id}/kelola`, { headers: await tajukKonsol(request), data: { aksi: "tutup" } });
+    expect([200, 404, 409], `tutup ruang ${id}`).toContain(j.status());
+    k?.ws.close();
+    kelasRuang.delete(id);
+  }
+  idRuang.clear();
+  idTambahan.clear();
+}
+
+/** JS-09 (P-49): isi `test.afterAll` setiap berkas uji yang membuat ruang. Fixture `request` hanya ada per uji, jadi kait
+ * ini membuat konteks permintaan sendiri. */
+export async function tutupRuangBerkas({ playwright }: PlaywrightWorkerArgs, info: TestInfo): Promise<void> {
+  info.setTimeout(180_000);
+  const ctx = await playwright.request.newContext({ baseURL: info.project.use.baseURL });
+  try {
+    await tutupSemuaRuang(ctx);
+  } finally {
+    await ctx.dispose();
+  }
 }
 
 /** Pesan layar kelas lewat WebSocket bertiket (pengganti kait `kelas` ruang coba). Mengembalikan status ruang sesudahnya. */

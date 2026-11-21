@@ -25,6 +25,7 @@ import {
   skemaKelola,
   skemaPemakaian,
   skemaRuangBaru,
+  skillAktifRuang,
   STATUS_HASIL,
   STATUS_RUANG,
   type KodeGalatRuang,
@@ -65,7 +66,6 @@ import { bacaIsi, belumTersedia, galatAkun, jagaRute, metodeSalah, type SesiAkti
 const ruangTidakAda = () => jawabGalat("RUANG_TIDAK_ADA", TEKS.api.RUANG_TIDAK_ADA, 404);
 const terlaluSering = () => jawabGalat("TERLALU_SERING", TEKS.api.TERLALU_SERING, 429);
 /** Ketiga skill P0 tersimpan aktif sampai JS-09 menambah pilihannya (P-5). */
-const SKILL_P0: PengaturanRuang["skillAktif"] = ["lari", "kompas", "petunjuk"];
 
 export function galatRuang(kode: KodeGalatRuang, status: number, tambahan: Record<string, unknown> = {}): Response {
   return jawabJson({ galat: { kode, pesan: TEKS_KONSOL.galatRuang[kode] }, ...tambahan }, status);
@@ -87,8 +87,11 @@ function kodeDariJalur(bagian: string): string | null {
 /** Ringkasan ruang untuk konsol (P-6). */
 export function ringkasanRuang(b: BarisRuangKonsol): RingkasanRuang {
   let batasPemain = 40;
+  let skillAktif: unknown = undefined;
   try {
-    batasPemain = (JSON.parse(b.pengaturan_json) as PengaturanRuang).batasPemain;
+    const p = JSON.parse(b.pengaturan_json) as PengaturanRuang;
+    batasPemain = p.batasPemain;
+    skillAktif = p.skillAktif;
   } catch {
     // Pengaturan rusak: memakai bawaan.
   }
@@ -103,6 +106,7 @@ export function ringkasanRuang(b: BarisRuangKonsol): RingkasanRuang {
     batasPemain,
     namaGuru: b.nama_guru,
     dibuatPada: b.dibuat_pada,
+    skillAktif: skillAktifRuang(skillAktif), // JS-09, P-9
   };
 }
 
@@ -214,7 +218,8 @@ async function buat(request: Request, env: Env, url: URL): Promise<Response> {
     durasiMenit: isi.durasiMenit,
     batasPemain: isi.batasPemain,
     batasTerlambatMenit: isi.batasTerlambatMenit,
-    skillAktif: SKILL_P0,
+    // JS-09 (P-8): skill P0 yang dicentang menurut urutan P-1; tanpa isian berarti ketiganya.
+    skillAktif: skillAktifRuang(isi.skillAktif),
     modeNomorAbsen: isi.modeNomorAbsen,
     uji: isi.uji,
   };
@@ -459,6 +464,7 @@ async function rincian(request: Request, env: Env, id: string, bagian: string): 
     pilihanTepat2: j.pilihanTepat2,
     poin: j.poin,
     waktuMenjawabMs: j.waktuMenjawabMs,
+    petunjukDipakai: j.petunjukDipakai, // JS-09, P-46
   }));
   return jawabJson({ peserta: { id: p.id, nama: p.nama_samaran }, jawaban: daftar }, 200);
 }

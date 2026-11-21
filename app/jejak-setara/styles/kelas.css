@@ -76,6 +76,32 @@
 .js-konsol-daftar-ruang li + li {
   margin-top: 6px;
 }
+/* JS-09 (P-48): setiap tautan kartu dasbor setinggi sedikitnya 48 px. */
+.js-konsol-daftar-ruang a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+}
+/* JS-09 (P-7): kelompok "Skill" di dialog Ruang baru; kotak centang satu baris yang membungkus. */
+.js-ruang-skill {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.js-ruang-skill legend {
+  padding: 0;
+}
+.js-ruang-skill-daftar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+}
+.js-ruang-skill-daftar img {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
 @media (max-width: 1023px) {
   .js-ruang-tabel thead {
     display: none;
@@ -1206,6 +1232,11 @@
 .js-hasil-tanda[data-jenis="kosong"] {
   background: var(--js-mist);
 }
+/* JS-09 (P-46): tanda Petunjuk sesudah tanda Langkah 1, dengan jarak kecil. */
+.js-hasil-tanda[data-jenis="petunjuk"] {
+  margin-left: 6px;
+  background: var(--js-white);
+}
 
 /* P-31: cetak ringkasan. Hanya berlaku bila halaman memuat bagian hasil; halaman konsol lain tidak berubah. */
 @media print {
@@ -1243,6 +1274,7 @@
   .js-hasil > .js-konsol-pesan,
   .js-hasil button,
   .js-hasil-tombol,
+  .js-hasil-ringkasan [data-cetak="tidak"],
   .js-hasil-galat,
   .js-hasil-aksi,
   .js-hasil-rincian-baris {

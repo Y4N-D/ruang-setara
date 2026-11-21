@@ -52,9 +52,13 @@ export interface DiriGambar {
   bingkai: number;
 }
 
-/** Bingkai animasi tokoh dari jam lokal (P-5): diam 2 bingkai 2 fps, jalan 4 bingkai 8 fps; kurangi gerak: bingkai 0. */
-export function bingkaiTokoh(jalan: boolean, jamMs: number, kurangiGerak: boolean): number {
+/**
+ * Bingkai animasi tokoh dari jam lokal (P-5): diam 2 bingkai 2 fps, jalan 4 bingkai 8 fps; kurangi gerak: bingkai 0.
+ * JS-09 (P-22, P-23): tokoh yang berlari dan berjalan memakai langkah 12 fps.
+ */
+export function bingkaiTokoh(jalan: boolean, jamMs: number, kurangiGerak: boolean, lari = false): number {
   if (kurangiGerak) return 0;
+  if (jalan && lari) return Math.floor((jamMs * 12) / 1000) % 4;
   return jalan ? Math.floor(jamMs / 125) % 4 : Math.floor(jamMs / 500) % 2;
 }
 

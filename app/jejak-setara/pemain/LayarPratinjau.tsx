@@ -1,12 +1,27 @@
 // Layar pratinjau untuk bingkai penyunting konsol (spesifikasi JS-12, P-12): dialog kejadian dan kartu dampak yang
 // sungguhan dari isi yang dikirim konsol lewat `postMessage` asal yang sama. Tidak menyambung ke ruang.
+// JS-09 (P-44): tombol Petunjuk dengan muatan tiruan 2; "Ulang" dan isi baru mengembalikan muatan dan dialog ke awal.
 import { useEffect, useState } from "react";
 import DialogKejadian, { type AksiDialog } from "../bersama/DialogKejadian";
-import { bukaDialog, kunci, modeRingkas, pilih, pilihNomor, pindah, terimaHasil1, terimaHasil2, type KeadaanDialog } from "../bersama/dialogKeadaan";
+import {
+  aturPetunjuk,
+  bukaDialog,
+  kunci,
+  modeRingkas,
+  pilih,
+  pilihNomor,
+  pindah,
+  tekanPetunjuk,
+  terimaHasil1,
+  terimaHasil2,
+  terimaPetunjuk,
+  type KeadaanDialog,
+} from "../bersama/dialogKeadaan";
 import { TEKS } from "../teks";
-import { bacaPesanPratinjau, hasilLangkah1, hasilLangkah2, pesanTerbuka, type IsiPratinjau } from "./pratinjau";
+import { bacaPesanPratinjau, hasilLangkah1, hasilLangkah2, MUATAN_PETUNJUK_PRATINJAU, pesanTerbuka, petunjukPratinjau, type IsiPratinjau } from "./pratinjau";
 
-const buka = (p: IsiPratinjau): KeadaanDialog => bukaDialog(pesanTerbuka(p.isi), Number(p.isi.zona.slice(1)) || 1, modeRingkas(innerHeight), Date.now());
+const buka = (p: IsiPratinjau): KeadaanDialog =>
+  bukaDialog(pesanTerbuka(p.isi), Number(p.isi.zona.slice(1)) || 1, modeRingkas(innerHeight), Date.now(), MUATAN_PETUNJUK_PRATINJAU);
 
 export default function LayarPratinjau() {
   const [k, setK] = useState<{ p: IsiPratinjau; d: KeadaanDialog } | null>(null);
@@ -27,6 +42,11 @@ export default function LayarPratinjau() {
     if (a.jenis === "tutup" || a.jenis === "jelajah") baru = buka(p);
     else if (a.jenis === "pilih") baru = pilih(d, a.id, kini);
     else if (a.jenis === "nomor") baru = pilihNomor(d, a.n, kini);
+    else if (a.jenis === "petunjuk") {
+      const h = tekanPetunjuk(d, kini);
+      if (!h) return;
+      baru = aturPetunjuk(terimaPetunjuk(h, petunjukPratinjau(p.isi)), { muatan: MUATAN_PETUNJUK_PRATINJAU - 1 });
+    }
     else if (a.jenis === "kunci") {
       const h = kunci(d, kini);
       if (!h.pesan) return;

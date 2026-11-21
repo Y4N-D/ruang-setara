@@ -1,6 +1,8 @@
 // Keadaan dialog kejadian (spesifikasi JS-08, P-38 sampai P-49): tampilan aktif, pilihan, penguncian, masa tunggu
 // 600 ms, dan mode ringkas. Modul murni tanpa React dan DOM, sehingga diuji di Node dan dipakai ulang pratinjau
 // konsol JS-12. Komponen DialogKejadian hanya membaca keadaan ini dan meneruskan aksi pemain.
+// JS-09: tombol Petunjuk di Langkah 1, pilihan yang dicoret, dan "+1 Kompas" di kartu dampak (spesifikasi JS-09, P-27
+// sampai P-32, P-44).
 import type { PesanServerPemain } from "../inti/protokol";
 
 /** Mode ringkas dipakai bila tinggi area dialog kurang dari 560 px CSS (P-39; Design System 3.5). */
@@ -9,6 +11,8 @@ export const BATAS_DIALOG_RINGKAS_PX = 560;
 export const MASA_TUNGGU_DIALOG_MS = 600;
 /** Tinggi bilah atas yang tetap tampil di atas dialog (Design System 3.3). */
 export const TINGGI_BILAH_PX = 28;
+/** Tombol Petunjuk dan Kunci jawaban menunggu `petunjuk` paling lama 2 detik (JS-09, P-27). */
+export const TUNGGU_PETUNJUK_MS = 2000;
 
 type Pesan<T extends PesanServerPemain["t"]> = Extract<PesanServerPemain, { t: T }>;
 export type Hasil1 = Omit<Pesan<"hasil_1">, "v" | "t">;
@@ -23,7 +27,18 @@ export interface OpsiTampil {
  * dan pilihan1, dan Langkah 2 menjadi pilihan2 dan situasi2 (P-42, P-45).
  */
 export type Tampilan = "langkah1" | "situasi1" | "pilihan1" | "umpan" | "langkah2" | "pilihan2" | "situasi2" | "kartu";
-export type AksiKaki = "tutup" | "kunci" | "lihat" | "situasi" | "lanjut2" | "jelajah";
+export type AksiKaki = "tutup" | "kunci" | "lihat" | "situasi" | "lanjut2" | "jelajah" | "petunjuk";
+
+/** Petunjuk di dialog (JS-09, P-27 sampai P-30); null di keadaan dialog bila Petunjuk dimatikan di ruang. */
+export interface KeadaanPetunjuk {
+  /** Muatan Petunjuk dari `pribadi` terakhir. */
+  muatan: number;
+  /** Jam lokal saat tombol ditekan, sampai `petunjuk` tiba (paling lama 2 detik); 0 bila tidak menunggu. */
+  menunggu: number;
+  /** Sudah dipakai untuk kejadian ini: kalimat petunjuk (boleh kosong di pratinjau) dan id pilihan yang dicoret. */
+  kalimat: string | null;
+  dicoret: string | null;
+}
 
 export interface KeadaanDialog {
   kejadianId: string;
@@ -46,6 +61,10 @@ export interface KeadaanDialog {
   sejak: number;
   /** Dibuka lagi di Langkah 2 (KT-13): ulangan hasil_1 langsung membuka Langkah 2. */
   bukaLangkah2: boolean;
+  /** JS-09 (P-27): Petunjuk, atau null bila dimatikan di ruang. */
+  petunjuk: KeadaanPetunjuk | null;
+  /** JS-09 (P-32): "+1 Kompas" di kepala kartu dampak. */
+  tambahKompas: boolean;
 }
 
 export function modeRingkas(tinggiAreaPx: number): boolean {
@@ -54,8 +73,11 @@ export function modeRingkas(tinggiAreaPx: number): boolean {
 
 const tampilanLangkah2 = (ringkas: boolean): Tampilan => (ringkas ? "pilihan2" : "langkah2");
 
-/** Dialog baru dari `kejadian_terbuka` (P-28, P-41, P-42). */
-export function bukaDialog(p: Pesan<"kejadian_terbuka">, zona: number, ringkas: boolean, sekarang: number): KeadaanDialog {
+/**
+ * Dialog baru dari `kejadian_terbuka` (P-28, P-41, P-42). JS-09: `muatanPetunjuk` bernilai null bila Petunjuk dimatikan
+ * di ruang, sehingga tombolnya tidak tampil (P-10, P-27).
+ */
+export function bukaDialog(p: Pesan<"kejadian_terbuka">, zona: number, ringkas: boolean, sekarang: number, muatanPetunjuk: number | null = null): KeadaanDialog {
   const l2 = p.langkah === 2;
   return {
     kejadianId: p.kejadianId,
@@ -73,6 +95,8 @@ export function bukaDialog(p: Pesan<"kejadian_terbuka">, zona: number, ringkas: 
     mengunci: l2, // Langkah 2 menunggu ulangan hasil_1
     sejak: sekarang,
     bukaLangkah2: l2,
+    petunjuk: muatanPetunjuk === null ? null : { muatan: muatanPetunjuk, menunggu: 0, kalimat: null, dicoret: null },
+    tambahKompas: false,
   };
 }
 
@@ -105,10 +129,16 @@ export function bolehTekan(d: KeadaanDialog, sekarang: number): boolean {
   return !d.mengunci && sekarang - d.sejak >= MASA_TUNGGU_DIALOG_MS;
 }
 
-/** Memilih pilihan dengan id (ketuk, klik); bisa diganti sampai dikunci (P-43). */
+/** Pilihan Langkah 1 yang dicoret Petunjuk (JS-09, P-29). */
+export function dicoret(d: KeadaanDialog, id: string): boolean {
+  return d.petunjuk?.dicoret === id;
+}
+
+/** Memilih pilihan dengan id (ketuk, klik); bisa diganti sampai dikunci (P-43). Pilihan yang dicoret ditolak (JS-09). */
 export function pilih(d: KeadaanDialog, id: string, sekarang: number): KeadaanDialog {
   const l = langkahPilihan(d);
   if (l === null || !bolehTekan(d, sekarang) || !opsiLangkah(d, l).some((o) => o.id === id)) return d;
+  if (l === 1 && dicoret(d, id)) return d;
   return l === 1 ? { ...d, pilihan1: id } : { ...d, pilihan2: id };
 }
 
@@ -131,6 +161,7 @@ export function kunci(d: KeadaanDialog, sekarang: number): { d: KeadaanDialog; p
   const l = langkahPilihan(d);
   const pilihan = l === 1 ? d.pilihan1 : l === 2 ? d.pilihan2 : null;
   if (l === null || pilihan === null || !bolehTekan(d, sekarang)) return { d, pesan: null };
+  if (l === 1 && d.petunjuk?.menunggu) return { d, pesan: null }; // menunggu `petunjuk` (JS-09, P-27)
   return { d: { ...d, mengunci: true }, pesan: { t: l === 1 ? "kunci_1" : "kunci_2", kejadianId: d.kejadianId, opsiId: pilihan } };
 }
 
@@ -151,6 +182,30 @@ export function terimaHasil1(d: KeadaanDialog, h: Hasil1, sekarang: number): Kea
   return { ...d, hasil1: h, pilihan1, tampilan, mengunci: false, sejak: sekarang };
 }
 
+/** Mengubah sebagian keadaan Petunjuk (JS-09): muatan dari `pribadi`, atau menunggu yang berakhir sesudah 2 detik. */
+export function aturPetunjuk(d: KeadaanDialog, ubah: Partial<KeadaanPetunjuk>): KeadaanDialog {
+  return d.petunjuk ? { ...d, petunjuk: { ...d.petunjuk, ...ubah } } : d;
+}
+
+/**
+ * Menekan tombol Petunjuk (JS-09, P-27): hanya di `langkah1` dan `pilihan1`, bermuatan, belum dipakai untuk kejadian
+ * ini, dan tidak sedang menunggu. Mengembalikan keadaan menunggu bila `pakai_skill` perlu dikirim, selain itu null.
+ */
+export function tekanPetunjuk(d: KeadaanDialog, sekarang: number): KeadaanDialog | null {
+  const pt = d.petunjuk;
+  return pt && pt.muatan > 0 && !pt.dicoret && !pt.menunggu && (d.tampilan === "langkah1" || d.tampilan === "pilihan1") && bolehTekan(d, sekarang) ? aturPetunjuk(d, { menunggu: sekarang }) : null;
+}
+
+/**
+ * `petunjuk` (JS-09, P-29, P-30): kalimat dan pilihan yang dicoret untuk dialog kejadian itu selama Langkah 1 belum
+ * dikunci; pilihan yang dicoret dilepas bila sedang terpilih. Untuk kejadian lain atau sesudah Langkah 1: diabaikan.
+ */
+export function terimaPetunjuk(d: KeadaanDialog, p: { kejadianId: string; kalimat: string; opsiDicoret: string }): KeadaanDialog {
+  const pt = d.petunjuk;
+  if (!pt || d.kejadianId !== p.kejadianId || d.hasil1 !== null || d.bukaLangkah2 || !d.opsi1.some((o) => o.id === p.opsiDicoret)) return d;
+  return { ...d, petunjuk: { ...pt, menunggu: 0, kalimat: p.kalimat, dicoret: p.opsiDicoret }, pilihan1: d.pilihan1 === p.opsiDicoret ? null : d.pilihan1 };
+}
+
 /** `hasil_2`: kartu dampak (P-46). */
 export function terimaHasil2(d: KeadaanDialog, h: Hasil2, sekarang: number): KeadaanDialog {
   return { ...d, hasil2: h, tampilan: "kartu", mengunci: false, sejak: sekarang };
@@ -163,18 +218,24 @@ export interface TombolKaki {
   aktif: boolean;
 }
 
-/** Tombol kaki setiap tampilan, dari kiri ke kanan (P-41, P-42, P-44 sampai P-46). */
+/**
+ * Tombol kaki setiap tampilan, dari kiri ke kanan (P-41, P-42, P-44 sampai P-46). JS-09 (P-27): Tutup, Situasi (hanya di
+ * `pilihan1`), Petunjuk, lalu Kunci jawaban di Langkah 1 bila Petunjuk aktif di ruang.
+ */
 export function tombolKaki(d: KeadaanDialog): TombolKaki[] {
   const tutup: TombolKaki = { aksi: "tutup", utama: false, aktif: true };
   const kunciTombol = (ada: boolean): TombolKaki => ({ aksi: "kunci", utama: true, aktif: ada });
+  const pt = d.petunjuk;
+  const petunjuk: TombolKaki[] = pt ? [{ aksi: "petunjuk", utama: false, aktif: pt.muatan > 0 && !pt.dicoret && !pt.menunggu }] : [];
+  const kunci1 = kunciTombol(d.pilihan1 !== null && !pt?.menunggu);
   switch (d.tampilan) {
     case "langkah1":
-      return [tutup, kunciTombol(d.pilihan1 !== null)];
+      return [tutup, ...petunjuk, kunci1];
     case "situasi1":
     case "situasi2":
       return [tutup, { aksi: "lihat", utama: true, aktif: true }];
     case "pilihan1":
-      return [tutup, { aksi: "situasi", utama: false, aktif: true }, kunciTombol(d.pilihan1 !== null)];
+      return [tutup, { aksi: "situasi", utama: false, aktif: true }, ...petunjuk, kunci1];
     case "umpan":
       return [tutup, { aksi: "lanjut2", utama: true, aktif: true }];
     case "langkah2":

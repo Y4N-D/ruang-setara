@@ -1,5 +1,6 @@
 // Isi API ruang konsol (spesifikasi JS-10, P-2 sampai P-12). Satu sumber aturan isian untuk konsol dan server.
 import { z } from "zod";
+import { SKILL_P0, type SkillP0 } from "./aturan";
 
 export const LABEL_KELAS_MAKS = 20;
 export const DURASI_RUANG = [10, 15, 20] as const;
@@ -101,8 +102,20 @@ export const skemaRuangBaru = z
     batasTerlambatMenit: z.number().int(),
     modeNomorAbsen: z.boolean(),
     uji: z.boolean(),
+    // JS-09 (P-8): skill P0 yang aktif di ruang, tanpa duplikat; tanpa isian berarti ketiganya.
+    skillAktif: z
+      .array(z.enum(SKILL_P0))
+      .max(SKILL_P0.length)
+      .refine((d) => new Set(d).size === d.length)
+      .optional(),
   })
   .strict();
+
+/** JS-09 (P-8, P-9): skill P0 menurut urutan tampil; butir yang bukan skill P0 dibuang, dan selain larik menjadi ketiganya. */
+export function skillAktifRuang(nilai: unknown): SkillP0[] {
+  if (!Array.isArray(nilai)) return [...SKILL_P0];
+  return SKILL_P0.filter((s) => nilai.includes(s));
+}
 
 export const skemaKelola = z.object({ aksi: z.enum(AKSI_KELOLA), pemainId: z.string().regex(POLA_ID_PEMAIN).optional() }).strict();
 
@@ -116,6 +129,8 @@ export const skemaRingkasanRuang = z.object({
   batasPemain: z.number().int(),
   namaGuru: z.string().nullable(),
   dibuatPada: z.number(),
+  /** JS-09 (P-9): skill yang aktif di ruang, menurut urutan P-1. */
+  skillAktif: z.array(z.enum(SKILL_P0)),
 });
 export type RingkasanRuang = z.infer<typeof skemaRingkasanRuang>;
 

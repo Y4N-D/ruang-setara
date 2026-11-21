@@ -4,7 +4,10 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { ruangKejadianSendiri } from "./ruang-kejadian";
-import { buatRuang as buatRuangUji, kejadianRuang, kelas, pindahkanPemain, putuskan } from "./ruang-uji";
+import { buatRuang as buatRuangUji, kejadianRuang, kelas, pindahkanPemain, putuskan, tutupRuangBerkas } from "./ruang-uji";
+
+// JS-09 (P-49): ruang yang dibuat berkas ini ditutup sesudah semua ujinya selesai.
+test.afterAll(tutupRuangBerkas);
 
 async function buatRuang(request: APIRequestContext, isiRuang: Record<string, unknown> = {}): Promise<string> {
   const kode = await buatRuangUji(request, isiRuang);

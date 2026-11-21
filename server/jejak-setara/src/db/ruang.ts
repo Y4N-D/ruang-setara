@@ -308,6 +308,8 @@ export interface BarisJawabanHasil {
   dibuka_pada: number;
   langkah1_pada: number | null;
   langkah2_pada: number | null;
+  /** JS-09 (P-45): 1 bila Petunjuk dipakai. Baris sebelum JS-09 bernilai 0. */
+  petunjuk_dipakai: number;
 }
 
 export interface BarisVersiHasil {
@@ -331,7 +333,7 @@ export async function bacaJawabanHasil(
     db
       .prepare(
         "SELECT peserta_id, kejadian_versi_id, urutan_opsi_json, langkah1_opsi, langkah1_benar, langkah2_opsi, tingkat, poin, dibuka_pada, " +
-          "langkah1_pada, langkah2_pada FROM jawaban WHERE ruang_id = ?1 AND (?2 IS NULL OR peserta_id = ?2) AND langkah1_opsi IS NOT NULL",
+          "langkah1_pada, langkah2_pada, petunjuk_dipakai FROM jawaban WHERE ruang_id = ?1 AND (?2 IS NULL OR peserta_id = ?2) AND langkah1_opsi IS NOT NULL",
       )
       .bind(ruangId, pesertaId),
     db

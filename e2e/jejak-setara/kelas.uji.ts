@@ -5,7 +5,10 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
-import { kejadianRuang, pindahkanPemain } from "./ruang-uji";
+import { catatRuang, kejadianRuang, pindahkanPemain, tutupRuangBerkas } from "./ruang-uji";
+
+// JS-09 (P-49): ruang yang dibuat berkas ini ditutup sesudah semua ujinya selesai.
+test.afterAll(tutupRuangBerkas);
 
 const V = PROTOKOL_VERSI;
 const KUNCI_ADMIN = "lokal-kunci-admin-bukan-rahasia";
@@ -86,7 +89,7 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   test.setTimeout(240_000);
   const asal = baseURL as string;
   const email = `guru-kelas-${Date.now()}@sekolah.sch.id`;
-  expect((await request.post("/api/admin-awal", { headers: { "X-Jejak-Kunci-Admin": KUNCI_ADMIN, "CF-Connecting-IP": "10.88.0.1" }, data: { email, sandi: "sandi sementara kelas", namaTampilan: "Bu Sari" } })).status()).toBe(200);
+  expect((await request.post("/api/admin-awal", { headers: { "X-Jejak-Kunci-Admin": KUNCI_ADMIN, "CF-Connecting-IP": "10.88.0.1" }, data: { email, sandi: "sandi sementara kelas", namaTampilan: "Pak Komang" } })).status()).toBe(200);
 
   // Guru masuk dan mengganti sandi sementara.
   const guru = await konteks(browser, asal);
@@ -119,6 +122,9 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   await dialog.getByRole("button", { name: "Buat ruang" }).click();
   await expect(g.getByText(/Ruang [A-Z0-9]{5} dibuat\./)).toBeVisible();
   const kode = ((await g.locator(".js-ruang-kode-besar").textContent()) ?? "").trim();
+  const idBaru = /^#\/ruang\/([^/]+)$/.exec(new URL(g.url()).hash)?.[1] ?? "";
+  expect(idBaru, "detail ruang baru").not.toBe("");
+  catatRuang(idBaru);
   expect(kode).toMatch(/^[A-Z0-9]{5}$/);
 
   // Layar kelas di tab baru (P-9, P-13).

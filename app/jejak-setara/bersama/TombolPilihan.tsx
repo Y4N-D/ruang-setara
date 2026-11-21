@@ -1,6 +1,7 @@
 // Tombol pilihan A–D dialog kejadian (spesifikasi JS-08, P-41, P-43 sampai P-45; Design System 10): biasa cream,
 // terpilih sun dengan ▶ dan cincin dalam, terkunci dengan label "Jawaban tepat" (leaf) atau "Pilihanmu" (mango).
-// Makna selalu ditulis, bukan hanya warna.
+// Makna selalu ditulis, bukan hanya warna. JS-09 (P-29): pilihan yang dicoret Petunjuk bergaris coret, berlatar mist,
+// tanpa ▶, tetap bisa difokus, dan dibacakan "{huruf}. {teks}, dicoret Petunjuk".
 import { forwardRef } from "react";
 import { TEKS } from "../teks";
 
@@ -11,28 +12,32 @@ export interface PropsTombolPilihan {
   nonaktif: boolean;
   saatPilih: () => void;
   saatTombol: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
+  /** JS-09 (P-29): dicoret Petunjuk; tidak bisa dipilih. */
+  dicoret?: boolean;
 }
 
-const TombolPilihan = forwardRef<HTMLButtonElement, PropsTombolPilihan>(function TombolPilihan({ huruf, teks, terpilih, nonaktif, saatPilih, saatTombol }, ref) {
+const TombolPilihan = forwardRef<HTMLButtonElement, PropsTombolPilihan>(function TombolPilihan({ huruf, teks, terpilih, nonaktif, saatPilih, saatTombol, dicoret = false }, ref) {
   return (
     <button
       ref={ref}
       type="button"
       className="js-pilihan-dialog"
       data-pilihan="ya"
-      aria-pressed={terpilih}
-      aria-disabled={nonaktif ? true : undefined}
+      data-dicoret={dicoret ? "ya" : undefined}
+      aria-pressed={terpilih && !dicoret}
+      aria-disabled={nonaktif || dicoret ? true : undefined}
       onClick={() => {
-        if (!nonaktif) saatPilih();
+        if (!nonaktif && !dicoret) saatPilih();
       }}
       onKeyDown={saatTombol}
     >
       <span className="js-huruf" aria-hidden="true">
-        {terpilih ? "▶" : ""}
+        {terpilih && !dicoret ? "▶" : ""}
         {huruf}
       </span>
       <span className="js-sr">{huruf}. </span>
       <span className="js-teks-pilihan">{teks}</span>
+      {dicoret ? <span className="js-sr">, {TEKS.skill.dicoret}</span> : null}
     </button>
   );
 });

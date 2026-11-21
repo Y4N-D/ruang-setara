@@ -183,7 +183,7 @@ describe("ronde penuh sampai hapus data ruang (P-1 sampai P-33)", () => {
     const teksJ = new TextDecoder("utf-8", { ignoreBOM: true }).decode(await csvJ.arrayBuffer());
     const barisJ = teksJ.slice(1).split("\r\n").filter(Boolean);
     expect(barisJ).toHaveLength(3);
-    expect(barisJ[0].split(";")).toHaveLength(17);
+    expect(barisJ[0].split(";")).toHaveLength(18); // JS-09 (P-47): kolom ke-18 "Petunjuk dipakai"
     expect((await konsol("GET", `/api/ruang/${id}/ekspor?jenis=lain`)).status).toBe(400);
 
     // Hapus: guru 403 (D-3a), admin 200; satu baris audit; ruang hilang dari riwayat dan hasil 404 (P-33; AC-19).

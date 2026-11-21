@@ -20,7 +20,7 @@ import { PesanGalat } from "../Formulir";
 import { AVATAR } from "../kelas/ikon-kelas";
 import { keHash } from "../rute";
 import { BagianHapus, BagianHasil } from "./HasilRuang";
-import { TautanLayar } from "./Ruang";
+import { TautanLayar, teksSkill } from "./Ruang";
 
 const t = TEKS_KONSOL.detail;
 const FORMAT_JAM = new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -145,6 +145,10 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
             <span className="js-konsol-label">{t.tautan}</span> {langsung.tautan}
           </p>
         ) : null}
+        {/* JS-09 (P-9): skill yang aktif di ruang ini. */}
+        <p data-baris="skill">
+          <span className="js-konsol-label">{TEKS_KONSOL.skill.judul}</span> {teksSkill(ruang.skillAktif)}
+        </p>
         <div className="js-konsol-sel-label">
           <span className="js-konsol-tanda">{TEKS_KONSOL.status[status]}</span>
           {terkunci ? <span className="js-konsol-tanda js-konsol-tanda-belum">{t.terkunci}</span> : null}

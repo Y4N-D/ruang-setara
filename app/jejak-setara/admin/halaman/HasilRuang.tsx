@@ -18,8 +18,9 @@ import { TEKS_KONSOL } from "../../teks-konsol";
 import { api, unduhCsv, type GalatApi } from "../api";
 import Dialog from "../Dialog";
 import { Kolom, PesanGalat, PesanInfo } from "../Formulir";
-import { EMOSI_HASIL } from "../kelas/ikon-kelas";
+import { EMOSI_HASIL, IKON_SKILL } from "../kelas/ikon-kelas";
 import { keHash } from "../rute";
+import { teksSkill } from "./Ruang";
 
 const t = TEKS_KONSOL.hasil;
 const KOSONG = t.kosongNilai;
@@ -166,11 +167,13 @@ function IsiHasil({ data, ringkasan, dimuatPada, galatSesi, hilang }: PropsIsi) 
   const pemain = ringkasan.dikeluarkan > 0 ? isiTeks(t.pemainIsi, { n: ringkasan.jumlahPemain, m: ringkasan.dikeluarkan }) : String(ringkasan.jumlahPemain);
   const { tepat, kurang, berisiko } = ringkasan.tingkat;
   const sebaran = tepat === null || kurang === null || berisiko === null ? KOSONG : isiTeks(t.sebaranIsi, { a: satu(tepat), b: satu(kurang), c: satu(berisiko) });
-  const ringkas: [string, string][] = [
+  // JS-09 (P-9): baris "Skill" sesudah "Durasi", tidak dicetak (cetakan JS-11 P-31 tetap).
+  const ringkas: [string, string, boolean?][] = [
     [t.tanggal, tanggal],
     [t.guru, ruang.namaGuru ?? KOSONG],
     [t.paket, paket],
     [t.durasi, isiTeks(t.durasiIsi, { n: info.durasiMenit })],
+    [TEKS_KONSOL.skill.judul, teksSkill(ruang.skillAktif), false],
     [t.pemain, pemain],
     [t.rataSkor, satu(ringkasan.rataSkor)],
     [t.ketepatan, persenTeks(ringkasan.ketepatan1)],
@@ -187,8 +190,8 @@ function IsiHasil({ data, ringkasan, dimuatPada, galatSesi, hilang }: PropsIsi) 
         <p>{isiTeks(t.cetakKode, { kode: ruang.kode })}</p>
       </div>
       <dl className="js-hasil-ringkasan">
-        {ringkas.map(([istilah, isi]) => (
-          <div key={istilah}>
+        {ringkas.map(([istilah, isi, cetak]) => (
+          <div key={istilah} data-cetak={cetak === false ? "tidak" : undefined}>
             <dt>{istilah}</dt>
             <dd>{isi}</dd>
           </div>
@@ -374,6 +377,12 @@ function BarisRincian({ j }: { j: JawabanRincian }) {
           <Ikon src={j.benar1 ? EMOSI_HASIL.tepat : EMOSI_HASIL.belum} />
           {j.benar1 ? t.rTepat : t.rBelumTepat}
         </span>
+        {j.petunjukDipakai ? (
+          <span className="js-konsol-tanda js-hasil-tanda" data-jenis="petunjuk">
+            <Ikon src={IKON_SKILL.petunjuk} />
+            {TEKS_KONSOL.skill.petunjuk}
+          </span>
+        ) : null}
         {j.benar1 ? null : <p className="js-hasil-tepat">{isiTeks(t.rJawabanTepat, { teks: j.jawabanTepat1 })}</p>}
       </td>
       <td>

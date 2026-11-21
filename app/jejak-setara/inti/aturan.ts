@@ -2,7 +2,7 @@
 // Semua fungsi murni: waktu, keadaan pemain, dan benih masuk sebagai parameter, dan tidak ada yang
 // disimpan di modul ini. Server memakainya sebagai sumber kebenaran; klien hanya untuk tampilan.
 import { benih, kocok } from "./acak";
-import type { IsiKejadian, KeadaanSkill, Masa, PemainRingkas, Posisi, SkillId, Tingkat, TitikPeta, ZonaId } from "./tipe";
+import type { IsiKejadian, KeadaanSkill, KotakJenis, Masa, PemainRingkas, Posisi, SkillId, Tingkat, TitikPeta, ZonaId } from "./tipe";
 
 /** Galat aturan atau data yang dikenali, dengan kode tetap (misalnya `TITIK_TIDAK_CUKUP`, `PETA_CACAT`). */
 export class GalatInti extends Error {
@@ -128,12 +128,15 @@ export interface PermintaanSkill {
 /**
  * Skill boleh dipakai bila aktif di ruang, muatannya ada, jeda 2 detik sejak pemakaian skill yang sama
  * sudah lewat, dan tidak ada dialog terbuka. Petunjuk sebaliknya hanya dipakai di Langkah 1 dialog.
+ * JS-09 (P-2, D-1a): skill berdurasi yang masih aktif tidak bisa dipakai lagi sampai selesai.
  */
 export function bolehPakaiSkill(p: PermintaanSkill): boolean {
   if (!p.skillAktif.includes(p.skill)) return false;
   if (!(p.keadaan.muatan[p.skill] > 0)) return false;
   const terakhir = p.keadaan.terakhirPakaiMs[p.skill];
   if (terakhir !== undefined && p.now - terakhir < JEDA_SKILL_MS) return false;
+  const aktifSampai = p.keadaan.aktifSampaiMs[p.skill];
+  if (aktifSampai !== undefined && aktifSampai > p.now) return false;
   return p.skill === "petunjuk" ? p.langkahDialog === 1 : p.langkahDialog === null;
 }
 
@@ -159,6 +162,26 @@ export function tambahMuatanKompas(muatan: number): number {
   return Math.min(SKILL.kompas.muatanMaks, muatan + 1);
 }
 
+/** JS-09 (P-1): skill P0, menurut urutan tampil di HUD, dialog Ruang baru, detail ruang, dan hasil. */
+export const SKILL_P0 = ["lari", "kompas", "petunjuk"] as const satisfies readonly SkillId[];
+export type SkillP0 = (typeof SKILL_P0)[number];
+
+/** JS-09 (P-1): isi setiap jenis kotak bantuan. Kotak teropong dan karcis belum ada di peta (JS-18). */
+export const SKILL_KOTAK = {
+  sepatu: "lari",
+  kompas: "kompas",
+  buku: "petunjuk",
+  teropong: "teropong",
+  karcis: "angkot",
+} as const satisfies Record<KotakJenis, SkillId>;
+
+/** JS-09 (P-4): server tetap memakai kecepatan lari untuk laporan gerak sampai 500 ms sesudah Lari cepat berakhir. */
+export const TOLERANSI_LARI_MS = 500;
+
+export function lariBerlaku(aktifSampai: number | undefined, now: number): boolean {
+  return aktifSampai !== undefined && now <= aktifSampai + TOLERANSI_LARI_MS;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Kotak bantuan (PRD 8.5; Architecture 8.5; P-18)
 
@@ -172,6 +195,25 @@ export function kotakSiap(waktuAmbilMs: number, now: number, sudahDiambil: boole
 /** Jarak posisi pemain (titik kaki) ke pusat ubin kotak paling jauh 12 piksel. */
 export function dapatMengambilKotak(jarakPx: number): boolean {
   return jarakPx <= KOTAK.jangkauanPx;
+}
+
+/** Pusat ubin (x, y) dalam piksel logis (ubin 16 piksel). */
+function pusatUbinPx(u: { x: number; y: number }): Posisi {
+  return { x: u.x * 16 + 8, y: u.y * 16 + 8 };
+}
+
+/** JS-09 (P-3): jarak terdekat titik `p` ke ruas lurus `a` ke `b`; ruas sepanjang 0 diperlakukan sebagai titik `a`. */
+export function jarakRuas(a: Posisi, b: Posisi, p: Posisi): number {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const panjang2 = dx * dx + dy * dy;
+  const s = panjang2 > 0 ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / panjang2)) : 0;
+  return Math.hypot(a.x + s * dx - p.x, a.y + s * dy - p.y);
+}
+
+/** JS-09 (P-3): ruas gerak dari `dari` ke `ke` (titik kaki) lewat paling jauh 12 piksel dari pusat ubin kotak. */
+export function kotakDilewati(dari: Posisi, ke: Posisi, kotak: { x: number; y: number }): boolean {
+  return dapatMengambilKotak(jarakRuas(dari, ke, pusatUbinPx(kotak)));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -249,6 +291,32 @@ export function kejadianTerdekat<T extends { kode: string; x: number; y: number;
     }
   }
   return terbaik;
+}
+
+/**
+ * JS-09 (P-5): sasaran Kompas, yaitu titik dengan jarak lurus terkecil dari `pos` ke pusat titik di antara semua titik
+ * kejadian yang belum selesai; seri diputus kode kejadian terkecil, lalu id titik terkecil. Null bila semua selesai.
+ */
+export function sasaranKompas(
+  pos: Posisi,
+  daftar: readonly { kode: string; selesai: boolean; titik: readonly { id: string; x: number; y: number }[] }[],
+): { kode: string; titikId: string; x: number; y: number } | null {
+  const calon: { kode: string; titikId: string; x: number; y: number; ux: number; uy: number; selesai: boolean }[] = [];
+  for (const k of daftar) {
+    if (k.selesai) continue;
+    for (const t of k.titik) {
+      const p = pusatUbinPx(t);
+      calon.push({ kode: k.kode, titikId: t.id, x: p.x, y: p.y, ux: t.x, uy: t.y, selesai: false });
+    }
+  }
+  calon.sort((a, b) => (a.kode < b.kode ? -1 : a.kode > b.kode ? 1 : a.titikId < b.titikId ? -1 : a.titikId > b.titikId ? 1 : 0));
+  const t = kejadianTerdekat(pos, calon);
+  return t ? { kode: t.kode, titikId: t.titikId, x: t.ux, y: t.uy } : null;
+}
+
+/** JS-09 (P-5): pemain tiba di sasaran Kompas bila jaraknya ke pusat titik paling jauh 32 piksel. */
+export function kompasTiba(pos: Posisi, titik: { x: number; y: number }): boolean {
+  return jarak(pos, pusatUbinPx(titik)) <= JANGKAUAN_PERIKSA_PX;
 }
 
 /** Tombol Periksa aktif bila jarak pemain ke titik kejadian paling jauh 32 piksel. */

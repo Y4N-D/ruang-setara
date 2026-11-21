@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Spesifikasi ditulis 21 November 2026; menunggu `Spesifikasi disetujui: JS-09` beserta pilihan DRAF D-1 sampai D-3 |
+| Status | Disetujui 21 November 2026 (`Spesifikasi disetujui: JS-09`, dibaca sebagai D-1 a, D-2 a, D-3 a). Dibangun dan diuji 21 November 2026; laporan [JS-09-hasil.md](../tests/JS-09-hasil.md). Penyesuaian saat Build ada di bagian "Catatan Build" |
 | Rencana | `PLAN.md`, entri JS-09 (Plan 20 November 2026; disetujui dengan `Setuju: JS-09 (usulan 1a sampai 16a)`) |
 | Sesi | Sesi A (mesin) |
 | Bergantung pada | JS-08 (Selesai, 13 November 2026); memakai juga JS-10, JS-11, dan JS-12 (semuanya Selesai) |
@@ -597,3 +597,26 @@ Langkah pemilik proyek sesudah ZIP Build di-push:
 9. Kirim tangkapan layar HUD skill di HP, dialog dengan Petunjuk, dan CSV di Excel.
 
 Butir daftar periksa AGENTS 9 yang relevan: permainan tetap lancar di HP Android kelas bawah saat berlari dan saat panah Kompas tampil; permainan dengan ketiga skill bisa dimainkan hanya dengan papan ketik di laptop; kurangi gerak mematikan debu, pop, kilau, dan denyut panah; HP menyambung kembali sesudah wifi dimatikan 30 detik dengan muatan yang sama; dan tidak ada nama asli siswa di layar, berkas ekspor, maupun log.
+
+## Catatan Build
+
+Dicatat saat Build JS-09 (21 November 2026). Perilaku dan teks spesifikasi tidak berubah; catatan ini merinci tempat kode, beberapa keputusan kecil, dan koreksi atas pengukuran Specify.
+
+- **Server ruang.**
+  - `KOTAK_KAMPUNG` di `peta-kampung.ts` diurutkan menurut id, sehingga dua kotak yang terambil dalam satu ruas selalu diproses dengan urutan yang sama (P-16).
+  - `kotakMenunggu` di `pribadi` dibatasi 24 butir (`KOTAK_MENUNGGU_MAKS`, sama dengan jumlah kotak di peta); skema protokol mengizinkan 64.
+  - Pemilihan pilihan yang dicoret memakai `acakBerbenih(benih(benihRuang, pemainId, kode, "petunjuk"))`, sehingga urutannya terpisah dari pengacakan urutan pilihan JS-08 (P-6).
+- **Layar pemain.**
+  - Daftar kotak layar pemain (`KOTAK_PETA`) dibaca langsung dari `kampung.json` tanpa diurutkan ulang; uji unit memastikan isinya sama dengan `KOTAK_KAMPUNG` server.
+  - Pengumuman "{skill} aktif selama {n} detik." dan "{skill} selesai." dihitung dari perubahan status tombol di setiap bingkai (`periksaWaktu`), sehingga juga berlaku untuk skill yang selesai karena waktu, tiba, atau kehabisan sasaran tanpa pesan server (P-39).
+  - Pita skill masuk antrean `AntreanPita` (`pemain/dunia/skill.ts`) hanya bila tidak ada dialog yang terbuka; pita "Dua menit lagi" masuk antrean yang sama, tetap tampil selama dialog, dan tetap ber-`role="status"` (P-41).
+  - Kelompok tombol skill (`.js-skill`) tidak berukuran sendiri, karena setiap tombol diletakkan mutlak terhadap HUD. Uji memeriksa tampilnya tombol, bukan kelompoknya.
+- **Pengukuran ukuran dunia (koreksi Specify).** HP 731 × 411 dengan rasio 2,625 menampilkan dunia skala 6 (731 × 411 px, terpotong kurang dari 1 px), bukan 610 × 343 seperti tertulis di P-29 butir 2 dan catatan Specify. Dunia 610 × 343 tampil di HP 640 × 360 dengan rasio 2,625 dan di HP dengan bilah peramban 915 × 356. Karena itu, uji ujung ke ujung memakai HP 640 × 360 dengan rasio 3 untuk dunia 640 × 360, dan HP 915 × 356 untuk dunia 610 × 343. Batas luapan AC-11 tetap: paling banyak 32 px di dunia 610 × 343 (terukur 6 px untuk kejadian yang diuji) dan 0 di ukuran lain (terukur 0 px di 731 × 411, 640 × 360, 960 × 540, dan 1280 × 720).
+- **Pembaca layar pilihan yang dicoret.** Nama aksesibel di Chromium menjadi "{huruf}. {teks} , dicoret Petunjuk", karena Chromium menyisipkan spasi di antara dua teks tersembunyi; pembaca layar membacanya sama dengan P-29 butir 3, jadi kodenya tidak diubah.
+- **Uji ujung ke ujung (P-49).**
+  - `tutupRuangBerkas` di `ruang-uji.ts` dipasang di `test.afterAll` setiap berkas uji yang membuat ruang. Kait itu membuat konteks permintaan sendiri, karena fixture `request` Playwright hanya ada per uji.
+  - Agar seluruh uji lulus dalam satu perintah, `konsol.uji.ts` kini menghitung jumlah akun dari keadaan awal halaman Akun (uji lain sudah membuat akun di D1 lokal yang sama), dan nama tampilan admin uji di `hasil.uji.ts`, `kelas.uji.ts`, dan `skill.uji.ts` tidak lagi "Bu Sari", agar baris akun guru Bu Sari di `konsol.uji.ts` tetap satu.
+  - Jarak tempuh Lari cepat (AC-9) diukur dengan menahan panah kanan 3 detik, bukan 2 detik, agar bingkai yang terlambat di mesin uji tidak banyak memengaruhi rasionya. Rasio terukur 1,63–1,65 (teori 1,6; batas 1,4).
+  - Jarak tombol (AC-13) dihitung dengan bentuk sebenarnya: tombol skill dan Periksa sebagai lingkaran, lencana, tanda tombol, peta mini, bilah atas, dan ajakan "E Periksa" sebagai persegi.
+- **Simulasi beban (P-50).** Bot yang memakai Kompas berjalan ke ubin di bawah titik sasaran (atau ke titiknya bila ubin itu tidak tercapai), lalu menemukan kejadiannya lewat `kejadian_terlihat` seperti JS-08. Pemakaian skill dihitung dari muatan `pribadi` yang berkurang, sehingga pemakaian Kompas juga mencakup muatan dari jawaban "tepat" (dicatat terpisah sebagai `kompasTepat`). Ringkasan mendapat baris D1 yang ditulis per ruang (`pemakaian.barisD1`).
+- **Ukuran (AC-23).** Kode layar pemain naik 4,64 KB gzip dari `main` sebelum Build, di atas batas 4 KB. Garis dasarnya 122,46 KB, diukur dari build `main` sesudah commit 2c559b1; P-51 menulis 122,24 KB, angka dari laporan JS-11. Rincian kenaikan dan pilihan untuk pemilik proyek ada di laporan uji, bagian "Temuan".

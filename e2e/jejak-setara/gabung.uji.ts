@@ -2,7 +2,10 @@
 // bermain di ruang coba lokal; siklus ronde dikendalikan lewat kait uji (P-9). Sejak JS-07 lobi dan ronde tampil di
 // atas dunia (panel lobi, bilah atas); uji dunia sendiri ada di dunia.uji.ts.
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
-import { buatRuang, kelas, putuskan } from "./ruang-uji";
+import { buatRuang, kelas, putuskan, tutupRuangBerkas } from "./ruang-uji";
+
+// JS-09 (P-49): ruang yang dibuat berkas ini ditutup sesudah semua ujinya selesai.
+test.afterAll(tutupRuangBerkas);
 
 const LAYAR = "test-results-jejak/layar";
 const UKURAN = [

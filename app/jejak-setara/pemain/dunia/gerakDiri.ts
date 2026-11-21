@@ -1,6 +1,7 @@
 // Gerak pemain sendiri (spesifikasi JS-07, P-14 sampai P-18; Architecture 9): langkah tetap 60 Hz dengan
 // langkahGerak (JS-02), kiriman `gerak` paling sering setiap 100 ms (166 ms di ruang lebih dari 50 pemain), satu
 // laporan saat berhenti, tanpa kiriman saat diam, tanpa antrean saat bufferedAmount > 0, dan `koreksi` dari server.
+// JS-09 (P-20, butir 3): kecepatan lari selama Lari cepat aktif menurut `pribadi` terakhir.
 import { frekuensiGerak } from "../../inti/aturan";
 import { langkahGerak } from "../../inti/gerak";
 import type { PesanPemain } from "../../inti/protokol";
@@ -62,7 +63,7 @@ export class GerakDiri {
    * Maju sejauh `dtMs` dengan langkah tetap 1/60 detik. Bila gerak tidak diizinkan (status, lapisan), atau
    * posisi awal belum tiba, pemain berhenti (P-14). Mengembalikan jumlah langkah yang dijalankan.
    */
-  maju(dtMs: number, arah: { dx: number; dy: number }, boleh: boolean, grid: Grid): number {
+  maju(dtMs: number, arah: { dx: number; dy: number }, boleh: boolean, grid: Grid, lari = false): number {
     if (!this.posisi || this.menungguAwal || !boleh) {
       this.jalan = false;
       this.sisaMs = 0;
@@ -74,7 +75,7 @@ export class GerakDiri {
     while (this.sisaMs >= LANGKAH_MS) {
       this.sisaMs -= LANGKAH_MS;
       langkah++;
-      const h = langkahGerak({ posisi: this.posisi, arah: this.arah, dx: arah.dx, dy: arah.dy, dtMs: LANGKAH_MS, lari: false, peta: grid });
+      const h = langkahGerak({ posisi: this.posisi, arah: this.arah, dx: arah.dx, dy: arah.dy, dtMs: LANGKAH_MS, lari, peta: grid });
       this.posisi = { x: h.x, y: h.y };
       this.arah = h.arah;
       berpindah = berpindah || h.bergerak;

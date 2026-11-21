@@ -3,9 +3,12 @@
 // walaupun layar dunia belum terpasang. JS-08: keadaan dialog kejadian, skor dan peringkat pribadi, skor akhir, dan
 // pesan periksa, kunci, dan tutup dialog (P-13, P-24, P-28, P-43 sampai P-59). JS-11: rekap pribadi yang tetap
 // terbaca saat menyambung ulang dan sesudah sambungan berakhir (spesifikasi JS-11, P-3 sampai P-9; D-2 a).
+// JS-09: pesan skill diteruskan ke mesin dunia, `pakai_skill` dari HUD dan dari tombol Petunjuk di dialog, Petunjuk dan
+// "+1 Kompas" di dialog, serta pengumuman skill (spesifikasi JS-09, P-13, P-24, P-27 sampai P-32, P-37, P-39).
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { AksiDialog } from "../bersama/DialogKejadian";
 import {
+  aturPetunjuk,
   aturRingkas,
   bolehTekan,
   bukaDialog,
@@ -13,10 +16,14 @@ import {
   pilih,
   pilihNomor,
   pindah,
+  tekanPetunjuk,
   terimaHasil1,
   terimaHasil2,
+  terimaPetunjuk,
+  TUNGGU_PETUNJUK_MS,
   type KeadaanDialog,
 } from "../bersama/dialogKeadaan";
+import type { SkillP0 } from "../inti/aturan";
 import { normalkanKode, POLA_KODE_RUANG } from "../inti/aturan";
 import type { KodeGalat, PesanPemain, PesanServerPemain } from "../inti/protokol";
 import { PROTOKOL_VERSI } from "../inti/versi";
@@ -162,6 +169,8 @@ export default function App() {
       // Kejadian yang pertama kali terlihat di layar ini diumumkan (P-13); dicek sebelum mesin mencatatnya.
       const terlihatBaru = p.t === "kejadian_terlihat" && !mesin.kejadian.kodeTerlihat().has(p.kejadianId);
       mesin.terima(p, Date.now(), klien.current?.selisihJamMs ?? 0);
+      // JS-09 (P-39): pengumuman skill dari pesan ini, sesudah pengumuman sebelumnya (misalnya pengumuman kartu).
+      for (const teks of mesin.umum.splice(0)) umumkan(teks);
       switch (p.t) {
         case "selamat_datang":
           pemainId.current = p.pemainId;
@@ -231,7 +240,25 @@ export default function App() {
           const ada = dialogRef.current;
           // Pesan pembukaan yang dikirim ulang untuk dialog yang sama tidak mengulang tampilan (P-26, P-28).
           if (ada && ada.kejadianId === p.kejadianId && (p.langkah === 1 || ada.hasil1)) break;
-          aturDialog(bukaDialog(p, titik ? nomorZona(titik.x, titik.y) : 1, area.ringkas, Date.now()));
+          // JS-09 (P-27): tombol Petunjuk hanya bila Petunjuk aktif di ruang, dengan muatan dari `pribadi` terakhir.
+          const muatanPetunjuk = mesin.skill.ruang.includes("petunjuk") ? mesin.skill.muatan.petunjuk : null;
+          aturDialog(bukaDialog(p, titik ? nomorZona(titik.x, titik.y) : 1, area.ringkas, Date.now(), muatanPetunjuk));
+          break;
+        }
+        case "petunjuk": {
+          // JS-09 (P-29, P-30): kotak petunjuk dan pilihan yang dicoret; pengumuman hanya saat isinya baru.
+          const d = dialogRef.current;
+          if (!d) break;
+          const baru = terimaPetunjuk(d, p);
+          if (baru === d) break;
+          if (d.petunjuk?.dicoret !== p.opsiDicoret) umumkan(isiTeks(TEKS.skill.umumPetunjuk, { kalimat: p.kalimat }));
+          aturDialog(baru);
+          break;
+        }
+        case "pemberitahuan": {
+          // JS-09 (P-32): "+1 Kompas" di kepala kartu dampak; pengumumannya datang dari mesin dunia.
+          const d = dialogRef.current;
+          if (p.kode === "kompas_tepat" && d?.hasil2) aturDialog({ ...d, tambahKompas: true });
           break;
         }
         case "hasil_1": {
@@ -249,10 +276,13 @@ export default function App() {
           aturDialog(terimaHasil2(d, p, Date.now()));
           break;
         }
-        case "pribadi":
+        case "pribadi": {
           pribadiRef.current = { skor: p.skor, peringkat: p.peringkat };
           setPribadi(pribadiRef.current);
+          const d = dialogRef.current;
+          if (d?.petunjuk && d.petunjuk.muatan !== p.muatan.petunjuk) aturDialog(aturPetunjuk(d, { muatan: p.muatan.petunjuk })); // JS-09, P-27
           break;
+        }
         case "selesai":
           aturDialog(null);
           hentiMenunggu();
@@ -501,6 +531,17 @@ export default function App() {
           if (klien.current?.kirim({ v: PROTOKOL_VERSI, ...hasil.pesan })) aturDialog(hasil.d);
           return;
         }
+        case "petunjuk": {
+          // JS-09 (P-27): Petunjuk dan Kunci jawaban menunggu `petunjuk` paling lama 2 detik.
+          const baru = tekanPetunjuk(d, kini);
+          if (!baru || !klien.current?.kirim({ v: PROTOKOL_VERSI, t: "pakai_skill", skill: "petunjuk", kejadianId: d.kejadianId })) return;
+          aturDialog(baru);
+          window.setTimeout(() => {
+            const kini2 = dialogRef.current;
+            if (kini2?.petunjuk?.menunggu === kini) aturDialog(aturPetunjuk(kini2, { menunggu: 0 }));
+          }, TUNGGU_PETUNJUK_MS);
+          return;
+        }
         default:
           aturDialog(pindah(d, a.jenis, kini));
       }
@@ -531,6 +572,7 @@ export default function App() {
 
   const selisihJam = useCallback(() => klien.current?.selisihJamMs ?? 0, []);
   const kirimGerak = useCallback((p: Extract<PesanPemain, { t: "gerak" }>) => klien.current?.kirim(p) ?? false, []);
+  const kirimSkill = useCallback((skill: SkillP0) => klien.current?.kirim({ v: PROTOKOL_VERSI, t: "pakai_skill", skill }) ?? false, []);
   const bufferedAmount = useCallback(() => klien.current?.bufferedAmount ?? 0, []);
   const diri = diriId ? pemain[diriId] : undefined;
   // JS-11 (P-7): di layar rekap, pita menggantikan lapisan menyambung ulang.
@@ -581,6 +623,7 @@ export default function App() {
           menyambung={tampilMenyambung}
           selisihJam={selisihJam}
           kirim={kirimGerak}
+          kirimSkill={kirimSkill}
           bufferedAmount={bufferedAmount}
           umumkan={umumkan}
           skor={pribadi.skor}

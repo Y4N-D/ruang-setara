@@ -659,12 +659,16 @@ body {
   font-size: 16px;
 }
 
-/* Pita pemberitahuan (P-32): di atas tengah selama 3 detik. */
+/* Pita pemberitahuan (P-32): di atas tengah selama 3 detik. JS-09 (P-41): lebar luar paling besar lebar HUD dikurangi
+   256 px, sehingga berjarak sedikitnya 4 px dari peta mini; teks yang tidak muat terbungkus dua baris rata tengah. */
 .js-pita {
   position: absolute;
   top: 36px;
   left: 50%;
   transform: translateX(-50%);
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100% - 256px);
   margin: 0;
   padding: 6px 14px;
   border: 4px solid var(--js-ink);
@@ -672,7 +676,8 @@ body {
   color: var(--js-ink);
   font-family: "Press Start 2P", monospace;
   font-size: 13px;
-  white-space: nowrap;
+  line-height: 1.4;
+  text-align: center;
 }
 
 /* Peta besar (P-37 sampai P-39): menutupi dunia di bawah bilah atas. */
@@ -987,6 +992,137 @@ body {
   text-align: center;
 }
 
+/* JS-09: tombol skill (P-33 sampai P-36). Sentuh: lengkung di sekitar Periksa; laptop: kolom kanan bawah (P-35). */
+.js-skill-butir {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+}
+
+.js-skill[data-letak="lengkung"] .js-skill-butir[data-skill="lari"] {
+  right: 24px;
+  bottom: 100px;
+}
+
+.js-skill[data-letak="lengkung"] .js-skill-butir[data-skill="kompas"] {
+  right: 78px;
+  bottom: 78px;
+}
+
+.js-skill[data-letak="lengkung"] .js-skill-butir[data-skill="petunjuk"] {
+  right: 100px;
+  bottom: 24px;
+}
+
+/* Kolom laptop: tombol 48 px berjarak 10 px dari bawah 16 px; skill yang dimatikan tidak memakan tempat. */
+.js-skill[data-letak="kolom"] .js-skill-butir {
+  right: 16px;
+  bottom: 16px;
+}
+
+.js-skill[data-letak="kolom"] .js-skill-butir:nth-last-child(2) {
+  bottom: 74px;
+}
+
+.js-skill[data-letak="kolom"] .js-skill-butir:nth-last-child(3) {
+  bottom: 132px;
+}
+
+.js-tombol-skill {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 4px solid var(--js-ink);
+  border-radius: 50%;
+  background: var(--js-cream);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.js-tombol-skill[data-muatan="0"] {
+  background: var(--js-mist);
+}
+
+.js-tombol-skill[data-aktif="ya"] {
+  box-shadow: inset 0 0 0 4px var(--js-sun);
+}
+
+.js-tombol-skill[data-ditekan="ya"],
+.js-tombol-skill:active {
+  transform: translate(2px, 2px);
+}
+
+.js-tombol-skill:focus-visible {
+  outline: 4px solid var(--js-sun);
+  outline-offset: 2px;
+}
+
+.js-skill-ikon {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+}
+
+/* Jeda 2 detik: blok ink 70% yang menyusut dari atas ke bawah dalam 8 langkah (P-36). */
+.js-skill-tutup {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.js-skill-jeda {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgb(31 42 68 / 70%);
+}
+
+/* Lencana muatan 22 × 22 di kiri atas tombol (P-36): 12 px di perangkat sentuh, 14 px di laptop. */
+.js-skill-lencana {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--js-ink);
+  background: var(--js-white);
+  color: var(--js-ink);
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.js-skill[data-letak="kolom"] .js-skill-lencana {
+  font-size: 14px;
+}
+
+/* Tanda tombol 1, 2, dan 3 di laptop: 8 px di kiri tombol, di tengah tegak, bergaya ajakan "E Periksa" (P-35). */
+.js-skill-kbd {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 8px);
+  transform: translateY(-50%);
+  min-width: 24px;
+  padding: 2px 4px;
+  border: 2px solid var(--js-ink);
+  background: var(--js-sun);
+  color: var(--js-ink);
+  font-family: "Press Start 2P", monospace;
+  font-size: 12px;
+  text-align: center;
+}
+
 /* Angka fps (P-70), pojok kiri bawah dunia. */
 .js-fps {
   position: absolute;
@@ -1198,6 +1334,52 @@ body {
   cursor: wait;
 }
 
+/* JS-09 (P-29): pilihan yang dicoret Petunjuk: teks bergaris coret, latar mist, tanpa ▶. */
+.js-pilihan-dialog[data-dicoret="ya"] {
+  background: var(--js-mist);
+  color: var(--js-dusk);
+  cursor: not-allowed;
+}
+
+.js-pilihan-dialog[data-dicoret="ya"] .js-teks-pilihan {
+  text-decoration: line-through;
+}
+
+/* JS-09 (P-29): kotak petunjuk, seukuran teks pertanyaan; garis kiri 4 px sky-d. */
+.js-kotak-petunjuk {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 10px;
+  border-left: 4px solid var(--js-sky-d);
+  background: var(--js-white);
+  color: var(--js-ink);
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.js-kotak-petunjuk img {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+}
+
+.js-kotak-petunjuk p {
+  margin: 0;
+}
+
+.js-dialog[data-bentuk="lembar"] .js-kotak-petunjuk {
+  padding: 2px 8px;
+  font-size: 16px;
+}
+
+.js-dialog[data-bentuk="lembar"] .js-kotak-petunjuk img {
+  width: 16px;
+  height: 16px;
+}
+
 /* Pilihan terkunci di umpan balik (P-44): benar leaf, pilihan pemain yang keliru mango, sisanya mist. */
 .js-pilihan-terkunci {
   flex-wrap: wrap;
@@ -1286,6 +1468,16 @@ body {
   margin-left: 0;
 }
 
+/* JS-09 (P-27): Tutup, Situasi, Petunjuk, lalu Kunci jawaban dalam satu baris. */
+.js-tombol-dialog[data-aksi="petunjuk"] {
+  margin-left: auto;
+}
+
+.js-tombol-dialog[data-aksi="situasi"] + [data-aksi="petunjuk"],
+.js-tombol-dialog[data-aksi="petunjuk"] + .js-tombol-utama {
+  margin-left: 0;
+}
+
 .js-dialog[data-mengunci="ya"] .js-tombol-dialog {
   cursor: wait;
 }
@@ -1319,6 +1511,23 @@ body {
 
 .js-kartu-poin {
   margin-left: auto;
+}
+
+/* JS-09 (P-32): "+1 Kompas" di kanan angka poin. */
+.js-kartu-skill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.js-kartu-skill img {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+.js-kartu-poin + .js-kartu-skill {
+  margin-left: 4px;
 }
 
 .js-kartu-isi {

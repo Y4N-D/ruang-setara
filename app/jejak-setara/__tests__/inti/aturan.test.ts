@@ -223,6 +223,7 @@ describe("skill (P-14 sampai P-17 dan P-19)", () => {
   });
 
   it("muatan habis: pemakaian ditolak dan keadaan yang sama dikembalikan", () => {
+    // JS-09 (D-1a): Lari cepat yang masih aktif tidak bisa dipakai lagi, jadi pemakaian berikutnya sesudah 6 detik.
     let k = minta({}).keadaan;
     let now = 100000;
     for (const harapan of [true, true, false]) {
@@ -230,16 +231,27 @@ describe("skill (P-14 sampai P-17 dan P-19)", () => {
       expect(hasil.diterima).toBe(harapan);
       if (!harapan) expect(hasil.keadaan).toBe(k);
       k = hasil.keadaan;
-      now += 2000;
+      now += 6000;
     }
     expect(k.muatan.lari).toBe(0);
   });
 
   it("jeda 2 detik antarpemakaian skill yang sama; skill lain tidak terhalang", () => {
-    const sesudah = pakaiSkill(minta({ now: 100000 })).keadaan;
-    expect(bolehPakaiSkill(minta({ keadaan: sesudah, now: 101999 }))).toBe(false);
-    expect(bolehPakaiSkill(minta({ keadaan: sesudah, now: 102000 }))).toBe(true);
+    // Petunjuk tidak berdurasi, jadi hanya jeda 2 detik yang menahannya (JS-09 D-1a berlaku untuk skill berdurasi).
+    const sesudah = pakaiSkill(minta({ now: 100000, skill: "petunjuk", langkahDialog: 1 })).keadaan;
+    expect(bolehPakaiSkill(minta({ keadaan: sesudah, now: 101999, skill: "petunjuk", langkahDialog: 1 }))).toBe(false);
+    expect(bolehPakaiSkill(minta({ keadaan: sesudah, now: 102000, skill: "petunjuk", langkahDialog: 1 }))).toBe(true);
     expect(bolehPakaiSkill(minta({ keadaan: sesudah, now: 100500, skill: "kompas" }))).toBe(true);
+  });
+
+  it("JS-09 (D-1a): skill berdurasi yang masih aktif tidak bisa dipakai lagi sampai selesai", () => {
+    const lari = pakaiSkill(minta({ now: 100000 })).keadaan;
+    expect(bolehPakaiSkill(minta({ keadaan: lari, now: 102000 }))).toBe(false);
+    expect(bolehPakaiSkill(minta({ keadaan: lari, now: 105999 }))).toBe(false);
+    expect(bolehPakaiSkill(minta({ keadaan: lari, now: 106000 }))).toBe(true);
+    const kompas = pakaiSkill(minta({ now: 100000, skill: "kompas" })).keadaan;
+    expect(bolehPakaiSkill(minta({ keadaan: kompas, now: 119999, skill: "kompas" }))).toBe(false);
+    expect(bolehPakaiSkill(minta({ keadaan: kompas, now: 120000, skill: "kompas" }))).toBe(true);
   });
 
   it("skill tidak bisa dipakai selama dialog terbuka, kecuali Petunjuk di Langkah 1", () => {

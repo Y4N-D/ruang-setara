@@ -343,9 +343,10 @@ Disimpan di SQLite milik Durable Object, sehingga tetap ada bila objek dikeluark
 | Tabel | Isi |
 |---|---|
 | `meta` | Status ruang, pengaturan, benih, `mulaiPada`, `berakhirPada`, `jedaSejak`, salinan isi versi kejadian, dan penempatan kejadian di titik |
-| `pemain` | Token (hash), nama samaran, avatar, posisi terakhir, skor, waktu skor, muatan skill, waktu skill aktif, status sambungan, `dikeluarkan` |
+| `pemain` | Token (hash), nama samaran, avatar, posisi terakhir, skor, waktu skor, status sambungan, `dikeluarkan` |
 | `jawaban` | Seperti tabel D1, ditambah status per pemain per kejadian (`belum`, `langkah1`, `langkah2`, `selesai`) |
-| `kotak` | Waktu terakhir setiap pemain mengambil setiap kotak |
+| `skill` | Satu baris per pemain (JS-09): `isi_json` berisi muatan, akhir masa aktif, waktu pakai terakhir setiap skill, waktu ambil setiap kotak, dan sasaran Kompas, dengan semua waktu dalam waktu ronde |
+| `petunjuk` | Pilihan asli yang dicoret Petunjuk per pemain per kejadian (JS-09) |
 | `kiriman` | Antrean baris yang belum terkirim ke D1 (sampai JS-07) |
 | `kejadian` | Salinan isi, versi, teks rujukan, dan titik aktif setiap kejadian ruang (JS-08) |
 | `terlihat` | Titik kejadian yang sudah terlihat oleh setiap pemain (JS-08) |
@@ -355,6 +356,8 @@ Disimpan di SQLite milik Durable Object, sehingga tetap ada bila objek dikeluark
 Isi kejadian **disalin saat ruang dibuat**, sehingga penyuntingan di konsol tidak mengubah ruang yang sedang berjalan.
 
 JS-03 membuat tabel `meta`, `pemain`, dan `kiriman`; tabel lain ditambahkan fitur yang memakainya. JS-08 menambah `kejadian`, `jawaban`, `terlihat`, dan `antrean`; keadaan dialog yang terbuka disimpan di lampiran sambungan (`serializeAttachment`), bukan di SQLite. Posisi pemain tidak ditulis pada setiap `gerak` (bagian 13.4).
+
+JS-09 menambah `skill` dan `petunjuk` dengan `CREATE TABLE IF NOT EXISTS`. Keduanya menggantikan rencana tabel `kotak` dan kolom muatan serta skill aktif di `pemain`. Satu perubahan muatan, masa aktif, kotak, atau sasaran Kompas menulis satu baris `skill`; skill yang habis karena waktu dan kotak yang muncul lagi tidak menulis. Ruang yang dibuat sebelum JS-09 pulih dengan muatan 0.
 
 Sejak Build JS-08, nilai meta `waktu` juga memuat `riwayatJeda` (awal dan lama setiap jeda yang sudah dilanjutkan), agar waktu ronde tanpa jeda saat skor terakhir bertambah bisa dihitung ulang dari `jawaban` sesudah ruang dibangunkan. Ruang yang dibuat sebelumnya memakai `jedaMs`.
 
@@ -412,7 +415,7 @@ Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `
 | `kunci_2` | `kejadianId`, `opsiId` | Mengunci Langkah 2 |
 | `tutup_dialog` | `kejadianId` | Menutup dialog |
 | `pakai_skill` | `skill`, `kejadianId?` | `kejadianId` hanya untuk Petunjuk |
-| `ambil_kotak` | `kotakId` | Saat avatar melewati kotak |
+| `ambil_kotak` | `kotakId` | Tidak dikirim layar pemain sejak JS-09: server mengambil kotak dari ruas gerak (bagian 8.5) dan mengabaikan pesan ini tanpa mencatat pelanggaran |
 | `ping` | `tKlien` | Setiap 5 detik |
 
 **Dari server ke pemain**
@@ -424,15 +427,15 @@ Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `
 | `status_ruang` | `status`, `mulaiPada`, `berakhirPada`, `jedaSejak` |
 | `dunia` | `w` (waktu server), `p`: larik `[id, x, y, arah, jalan, dialog]` untuk pemain yang berubah di sekitar pemain ini (`dialog` sejak versi 2, JS-08), `n` (jumlah pemain) |
 | `pemain_baru` · `pemain_pergi` | `id`, `nama`, `avatar`, `warnaTas` · `id` |
-| `pribadi` | `skor`, `peringkat`, `selesai` (id kejadian), `terlihat`, muatan skill, skill aktif, kotak yang belum muncul lagi |
+| `pribadi` | `skor`, `peringkat`, `selesai` (id kejadian), `terlihat`, `muatan`, `aktifSampai` (akhir masa aktif dalam jam server), dan `kotakMenunggu` (kotak yang belum muncul lagi, dengan `siapPada` dalam jam server). Sejak JS-09 dikirim juga setiap muatan, masa aktif, atau kotak pemain itu berubah |
 | `kejadian_terlihat` | `kejadianId`, `x`, `y`, `setTokoh` — satu titik aktif yang baru masuk pandangan pemain (atau terungkap Teropong), beserta tokoh dan propertinya (`setTokoh` sejak versi 2, JS-08) |
-| `kompas` | `x`, `y`, `berakhirPada` — sasaran panah Kompas; dikirim ulang bila sasaran selesai sebelum waktunya habis |
+| `kompas` | `x`, `y`, `berakhirPada`: sasaran panah Kompas (ubin titik aktif). Dikirim saat Kompas dipakai, saat menyambung ulang, dan dengan `berakhirPada` yang sama bila kejadian sasaran dijawab di titik lain lalu sasaran baru dipilih (JS-09) |
 | `kejadian_terbuka` | `kejadianId`, `judul`, `situasi`, `setTokoh`, `pertanyaan1`, `opsi1` (id dan teks, sudah diacak), `langkah` (1 atau 2) |
-| `petunjuk` | `kejadianId`, `kalimat`, `opsiDicoret` |
+| `petunjuk` | `kejadianId`, `kalimat`, `opsiDicoret` (id pilihan milik pemain itu). Dikirim lagi tanpa mengurangi muatan saat dialog yang sama dibuka ulang sebelum Langkah 1 dikunci (JS-09) |
 | `hasil_1` | `benar`, `opsiBenar`, umpan balik pilihan pemain dan pilihan benar, `poin`, `pertanyaan2`, `opsi2` (diacak) |
 | `hasil_2` | `tingkat`, `poin`, `terjadi`, `opsiTepat`, kartu (`hak`, `kewajiban`, `rujukan` berupa teks) |
 | `koreksi` | `x`, `y`, `seq` — posisi dari server bila laporan gerak ditolak |
-| `pemberitahuan` | `kode` (misalnya `dua_menit`) |
+| `pemberitahuan` | `kode` (misalnya `dua_menit`). Sejak JS-09: `kotak_lari`, `kotak_kompas`, dan `kotak_petunjuk` (kotak terambil), `kompas_tepat` (+1 Kompas dari jawaban "tepat"), dan `kompas_tanpa_sasaran`. Layar pemain mengabaikan kode yang tidak dikenalnya |
 | `selesai` | `skor`, `peringkat`, `jumlahPemain`, `rekap`: kejadian yang Langkah 1-nya dikunci pemain itu, menurut urutan ruang, paling banyak 64 butir, dengan judul, pilihan dan kebenaran Langkah 1, pilihan dan tingkat Langkah 2 (`null` bila belum dikunci), pilihan yang tepat, poin, dan rujukan berupa teks (JS-11). Dikirim saat ronde berakhir, saat menyambung ulang di `selesai` atau `pembahasan`, dan sesudah peringkat akhir berubah |
 | `galat` | `kode`, `pesan` (bagian 6.7) |
 | `pong` | `tKlien`, `waktuServer` |
@@ -554,7 +557,7 @@ stateDiagram-v2
 
 ### 8.2 Gerak
 
-- Kecepatan dasar 72 piksel logis per detik; ×1,6 saat Lari cepat aktif. Diagonal dinormalisasi.
+- Kecepatan dasar 72 piksel logis per detik; ×1,6 (115,2) saat Lari cepat aktif. Diagonal dinormalisasi. Sejak JS-09, server memeriksa laporan dengan kecepatan lari sampai 500 ms sesudah masa aktif Lari cepat berakhir (`lariBerlaku`, `TOLERANSI_LARI_MS`), agar laporan yang terlambat di jaringan buruk tidak ditolak; layar pemain mulai berlari saat `pribadi` dengan `aktifSampai.lari` tiba.
 - Untuk setiap `gerak`, server menghitung jarak dari posisi terakhir yang diterima. Batasnya: kecepatan saat itu × selang waktu × 1,25 + 4 piksel.
 - Posisi juga ditolak bila berada di sel padat peta, di luar peta, atau tidak bisa dicapai tanpa menembus sel padat (garis lurus, X lalu Y, atau Y lalu X; ditetapkan JS-02), atau saat status bukan `lobi`, `hitung_mundur`, atau `main`, atau saat dialog terbuka. Di `lobi` dan `hitung_mundur`, pemeriksaan memakai grid lobi, yaitu grid peta dengan semua sel `gerbangLobi` padat (`tutupGerbang`, JS-07).
 - Posisi yang ditolak tidak dipakai; server mengirim `koreksi` dengan posisi terakhir yang sah, dan klien langsung berpindah ke sana.
@@ -596,10 +599,13 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 
 ### 8.5 Skill dan kotak
 
-- Muatan, lama, dan jeda pemakaian mengikuti PRD bagian 8.5 dan disimpan sebagai konstanta di `inti/aturan.ts`.
-- Kotak diambil bila jarak avatar ke kotak ≤ 12 piksel dan kotak itu sudah muncul lagi untuk pemain itu. Server mencatat waktu ambil per pemain per kotak.
-- Kompas: server memilih kejadian terdekat yang belum selesai (jarak lurus dari posisi pemain) dan mengirim posisinya lewat `kompas`. Klien menggambar panahnya di tepi pandangan.
-- Petunjuk: server memilih satu opsi keliru secara acak berbenih untuk dicoret dan mengirim kalimat petunjuk.
+- Muatan, lama, dan jeda pemakaian mengikuti PRD bagian 8.5 dan disimpan sebagai konstanta di `inti/aturan.ts`. Sejak JS-09, Lari cepat dan Kompas tidak bisa dipakai lagi selama masih aktif (`bolehPakaiSkill`), dan skill hanya bisa dipakai di status `main`.
+- Aturan skill ruang ada di `server/jejak-setara/src/ruang/skill-ruang.ts` (murni). Semua waktu skill dan kotak disimpan dalam waktu ronde (milidetik tanpa lama jeda), sehingga jeda menggeser semuanya tanpa menulis ulang baris; pesan mengubahnya ke jam server dengan `mulaiPada + jedaMs + t`.
+- Kotak diambil dari laporan `gerak` yang diterima di status `main`: ruas dari posisi sah sebelumnya ke posisi baru lewat paling jauh 12 piksel dari pusat ubin kotak (`kotakDilewati`), kotak sudah muncul lagi untuk pemain itu (90 detik), skillnya aktif di ruang, dan muatannya kurang dari 2. Satu ruas bisa mengambil dua kotak. `ambil_kotak` diabaikan, dan gerak yang ditolak, `koreksi`, serta kait uji `pindahkan` tidak mengambil kotak.
+- Kompas: sasaran adalah titik aktif dengan jarak lurus terkecil dari posisi pemain ke pusat titik, di antara semua titik aktif kejadian yang belum selesai bagi pemain itu, termasuk yang belum terlihat dan kedua titik di ruang lebih dari 50 pemain (`sasaranKompas`); seri diputus kode kejadian, lalu id titik. Kompas berakhir saat waktunya habis (tanpa pesan) atau saat pemain tiba dalam 32 piksel dari sasaran, yang diperiksa di setiap putaran 100 ms (`kompasTiba`). Bila kejadian sasaran dijawab di titik lain, server memilih sasaran baru dengan akhir masa aktif yang sama. Tanpa kejadian yang belum selesai, pemakaian ditolak tanpa mengurangi muatan dan dijawab `pemberitahuan kompas_tanpa_sasaran`. Klien menggambar panahnya di tepi kotak aman pandangan.
+- Petunjuk: hanya di Langkah 1 dialog yang terbuka, sekali per kejadian. Server memilih satu dari tiga pilihan keliru dengan pembangkit berbenih (benih ruang, id pemain, kode kejadian, dan label `petunjuk`), menyimpannya di tabel `petunjuk`, mengirim kalimat petunjuk dan id pilihan milik pemain, lalu mengantrekan ulang baris jawaban dengan `petunjuk_dipakai` 1.
+- +1 Kompas: saat Langkah 2 dikunci dengan tingkat `tepat`, Kompas aktif di ruang, dan muatan Kompas kurang dari 2, muatan bertambah 1. Pemain menerima `hasil_2`, lalu `pemberitahuan kompas_tepat`, lalu `pribadi`.
+- Pemakaian yang ditolak tidak dijawab, kecuali Kompas tanpa sasaran, agar pesan berulang tidak memperbesar lalu lintas keluar.
 
 ### 8.6 Penyimpanan dan kiriman ke D1
 

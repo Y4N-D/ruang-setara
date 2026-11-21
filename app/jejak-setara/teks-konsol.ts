@@ -681,6 +681,16 @@ export const TEKS_KONSOL = {
     tingkatTepat: "Tepat",
     tingkatKurang: "Kurang tepat",
     tingkatBerisiko: "Berisiko",
+    petunjuk: "Petunjuk dipakai", // JS-09, P-47
+  },
+  // JS-09 (P-7, P-9, P-46): pilihan skill di dialog Ruang baru, baris "Skill", dan tanda Petunjuk di rincian.
+  skill: {
+    judul: "Skill",
+    lari: "Lari cepat",
+    kompas: "Kompas kejadian",
+    petunjuk: "Petunjuk",
+    keterangan: "Hapus centang untuk mematikan skill di ruang ini.",
+    tidakAda: "Tidak ada",
   },
   alurHentikan: {
     berhenti: "Layanan uji dihentikan.",

@@ -87,6 +87,7 @@ export function rincianJawaban(jawaban: readonly BarisJawabanHasil[], versi: rea
       pilihanTepat2: x.tepat2,
       poin: j.poin,
       waktuMenjawabMs: dikunci2 ? Math.max(0, (j.langkah2_pada as number) - j.dibuka_pada) : null,
+      petunjukDipakai: j.petunjuk_dipakai === 1, // JS-09, P-46
     });
   }
   return hasil.sort((a, b) => nomorKode(a.kode) - nomorKode(b.kode) || (a.kode < b.kode ? -1 : a.kode > b.kode ? 1 : 0));
@@ -227,6 +228,7 @@ export function csvJawaban(ruang: RuangEkspor, peserta: readonly PesertaEkspor[]
     T.dibuka,
     T.waktuMenjawab,
     T.keterangan,
+    T.petunjuk, // JS-09 (P-47): kolom ke-18 di ujung kanan, agar kolom JS-11 tidak bergeser
   ];
   const kelas = selTeks(ruang.labelKelas);
   const tanggal = selTeks(tanggalWita(ruang.dibuatPada));
@@ -260,6 +262,7 @@ export function csvJawaban(ruang: RuangEkspor, peserta: readonly PesertaEkspor[]
         selTeks(waktuWita(j.dibukaPada)),
         selDesimal(j.waktuMenjawabMs === null ? null : j.waktuMenjawabMs / 1000),
         ket,
+        selTeks(j.petunjukDipakai ? T.ya : T.tidak),
       ]);
     }
   }

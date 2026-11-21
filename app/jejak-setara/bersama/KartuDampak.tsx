@@ -1,6 +1,7 @@
 // Kartu dampak (spesifikasi JS-08, P-46; Design System 3.5 dan 10): kepala berwarna tingkat dengan ikon emosi, tulisan
 // tingkat, dan poin; lalu "Yang terjadi", "Hak yang terdampak", "Kewajiban terkait", "Pilihan yang tepat" (bila tingkat
 // bukan tepat, D-3), dan "Rujukan" (dengan catatan ruang uji, D-4). Mode penuh dua kolom, mode ringkas satu kolom.
+// JS-09 (P-32): "+1 Kompas" dengan ikon Kompas di kanan angka poin bila jawaban tepat menambah muatan Kompas.
 import type { Tingkat } from "../inti/tipe";
 import { isiTeks, TEKS } from "../teks";
 
@@ -15,6 +16,8 @@ export interface PropsKartuDampak {
   ruangUji: boolean;
   ringkas: boolean;
   ikonEmosi: Readonly<Record<Tingkat, string>>;
+  /** JS-09 (P-32): url ikon Kompas bila "+1 Kompas" tampil, selain itu null. */
+  tambahKompas?: string | null;
 }
 
 export default function KartuDampak(p: PropsKartuDampak) {
@@ -25,6 +28,13 @@ export default function KartuDampak(p: PropsKartuDampak) {
         <img className="js-ikon-emosi" src={p.ikonEmosi[p.tingkat]} alt="" width={16} height={16} />
         <span className="js-kartu-tingkat">{TEKS.kartu.tingkat[p.tingkat]}</span>
         {p.poin > 0 ? <span className="js-kartu-poin">{isiTeks(TEKS.dialog.poin, { poin: p.poin })}</span> : null}
+        {p.tambahKompas ? (
+          <span className="js-kartu-skill">
+            {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
+            <img src={p.tambahKompas} alt="" width={16} height={16} />
+            {isiTeks(TEKS.skill.pita, { skill: TEKS.skill.kompasPendek })}
+          </span>
+        ) : null}
       </header>
       <div className="js-kartu-isi">
         <div className="js-kartu-kiri">

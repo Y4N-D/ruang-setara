@@ -7,7 +7,10 @@ import { posisiSah } from "../../app/jejak-setara/inti/gerak";
 import { tutupGerbang, uraiRle } from "../../app/jejak-setara/inti/peta";
 import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
 import { ruangKejadianSendiri } from "./ruang-kejadian";
-import { buatRuang, kelas, pindahkanPemain, putuskan } from "./ruang-uji";
+import { buatRuang, kelas, pindahkanPemain, putuskan, tutupRuangBerkas } from "./ruang-uji";
+
+// JS-09 (P-49): ruang yang dibuat berkas ini ditutup sesudah semua ujinya selesai.
+test.afterAll(tutupRuangBerkas);
 
 const LAYAR = "test-results-jejak/layar";
 /** Ukuran laptop diambil dari satu halaman yang diubah ukurannya; ukuran HP dari konteks HP sungguhan (r 2,625). */

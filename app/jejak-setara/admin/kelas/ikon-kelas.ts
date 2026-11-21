@@ -21,8 +21,11 @@ import emosiHati from "../../assets/ikon/ikon_emosi_hati.png";
 import emosiKeringat from "../../assets/ikon/ikon_emosi_keringat.png";
 import emosiSeru from "../../assets/ikon/ikon_emosi_seru.png";
 import emosiTanya from "../../assets/ikon/ikon_emosi_tanya.png";
+import kompas from "../../assets/ikon/ikon_kompas.png";
+import lari from "../../assets/ikon/ikon_lari.png";
 import layarPenuh from "../../assets/ikon/ikon_layar_penuh.png";
 import matahari from "../../assets/ikon/ikon_matahari.png";
+import petunjuk from "../../assets/ikon/ikon_petunjuk.png";
 
 /** Avatar 0–7 (JS-03). */
 export const AVATAR: readonly string[] = [ava1, ava2, ava3, ava4, ava5, ava6, ava7, ava8];
@@ -36,3 +39,5 @@ export const EMOSI = { tepat: emosiHati, kurang: emosiTanya, berisiko: emosiSeru
 export const EMOSI_HASIL = { tepat: emosiHati, kurang: emosiKeringat, berisiko: emosiSeru, belum: emosiTanya } as const;
 /** `centang`: JS-11 (P-34), 10 besar dan label "Jawaban tepat" di layar kelas. */
 export const IKON_KELAS = { layarPenuh, matahari, centang } as const;
+/** JS-09 (P-7, P-46): ikon skill di dialog Ruang baru dan tanda Petunjuk di rincian hasil. */
+export const IKON_SKILL = { lari, kompas, petunjuk } as const;

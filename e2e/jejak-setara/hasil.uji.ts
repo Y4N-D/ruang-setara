@@ -7,7 +7,10 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
-import { kejadianRuang, pindahkanPemain } from "./ruang-uji";
+import { catatRuang, kejadianRuang, pindahkanPemain, tutupRuangBerkas } from "./ruang-uji";
+
+// JS-09 (P-49): ruang yang dibuat berkas ini ditutup sesudah semua ujinya selesai.
+test.afterAll(tutupRuangBerkas);
 
 const V = PROTOKOL_VERSI;
 const KUNCI_ADMIN = "lokal-kunci-admin-bukan-rahasia";
@@ -112,7 +115,7 @@ test("ronde sampai rekap, ruang ditutup, lalu riwayat, hasil, rincian, CSV, ceta
   const email = `admin-hasil-${Date.now()}@sekolah.sch.id`;
   const awal = await request.post("/api/admin-awal", {
     headers: { "X-Jejak-Kunci-Admin": KUNCI_ADMIN, "CF-Connecting-IP": "10.88.0.3" },
-    data: { email, sandi: "sandi sementara hasil", namaTampilan: "Bu Sari" },
+    data: { email, sandi: "sandi sementara hasil", namaTampilan: "Bu Rina" },
   });
   expect(awal.status()).toBe(200);
   const guru = await konteks(browser, asal);
@@ -134,6 +137,7 @@ test("ronde sampai rekap, ruang ditutup, lalu riwayat, hasil, rincian, CSV, ceta
   }, { labelKelas: "IX B", paketId: PAKET_INTI, durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, modeNomorAbsen: false, uji: true });
   expect(buat.status).toBe(201);
   const { id, kode } = buat.ruang as { id: string; kode: string };
+  catatRuang(id);
 
   // Layar kelas di tab baru, pemain di HP dan laptop, bot, dan satu pemain laptop yang tidak menjawab.
   const kelas = await guru.ctx.newPage();
@@ -394,8 +398,10 @@ test("ronde sampai rekap, ruang ditutup, lalu riwayat, hasil, rincian, CSV, ceta
     const bita = readFileSync((await unduhan.path()) as string);
     expect([...bita.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
     const teks = bita.subarray(3).toString("utf8");
-    expect(teks.split("\r\n")[0].split(";").length).toBe(jenis === "peserta" ? 16 : 17);
+    // JS-09 (P-47): CSV jawaban mendapat kolom ke-18 "Petunjuk dipakai" di ujung kanan.
+    expect(teks.split("\r\n")[0].split(";").length).toBe(jenis === "peserta" ? 16 : 18);
     if (jenis === "peserta") expect(teks).toContain(";Dikeluarkan");
+    else expect(teks.split("\r\n")[0]).toMatch(/;Keterangan;Petunjuk dipakai$/);
   }
 
   // Cetak: hanya bagian P-31; ruang 40 pemain menjadi PDF A4 satu halaman (AC-18).

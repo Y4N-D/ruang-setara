@@ -1,12 +1,14 @@
 // Dialog kejadian dua langkah (spesifikasi JS-08, P-38 sampai P-50; Design System 3.5, 10, 11, dan 13). Komponen ini
 // hanya menampilkan keadaan dari dialogKeadaan.ts dan meneruskan aksi pemain lewat `saatAksi`; aturan pilihan,
 // penguncian, dan masa tunggu ada di modul murni itu. Dipakai layar pemain dan, di JS-12, pratinjau konsol.
+// JS-09 (P-27 sampai P-32): tombol Petunjuk, kotak petunjuk, pilihan yang dicoret, dan "+1 Kompas" di kartu dampak.
 import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
 import { IKON } from "../assets/manifest";
 import type { Tingkat } from "../inti/tipe";
 import { isiTeks, TEKS } from "../teks";
 import BingkaiPiksel from "./BingkaiPiksel";
 import {
+  dicoret,
   fokusAwal,
   langkahChip,
   langkahPilihan,
@@ -30,12 +32,18 @@ const LABEL_KAKI: Readonly<Record<AksiKaki, string>> = {
   situasi: TEKS.dialog.situasi,
   lanjut2: TEKS.dialog.lanjutLangkah2,
   jelajah: TEKS.dialog.lanjutMenjelajah,
+  petunjuk: TEKS.skill.petunjuk,
 };
 const EMOSI_KARTU: Readonly<Record<Tingkat, string>> = {
   tepat: IKON.ikon_emosi_hati.url,
   kurang: IKON.ikon_emosi_keringat.url,
   berisiko: IKON.ikon_emosi_seru.url,
 };
+
+/** Label tombol Petunjuk (JS-09, P-27): "Petunjuk ({n})", atau "Petunjuk dipakai" sesudah dipakai. */
+function labelPetunjuk(d: KeadaanDialog): string {
+  return d.petunjuk?.dicoret ? TEKS.skill.dipakai : isiTeks(TEKS.skill.tombolDialog, { n: d.petunjuk?.muatan ?? 0 });
+}
 
 export interface PropsDialogKejadian {
   d: KeadaanDialog;
@@ -57,9 +65,10 @@ export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi }: PropsD
     const k = kotak.current;
     if (!k) return;
     const sasaran = fokusAwal(d);
+    // JS-09 (P-29): fokus awal melewati pilihan yang dicoret Petunjuk.
     const el =
       sasaran === "pilihan"
-        ? (k.querySelector<HTMLElement>('[data-pilihan="ya"][aria-pressed="true"]') ?? k.querySelector<HTMLElement>('[data-pilihan="ya"]'))
+        ? (k.querySelector<HTMLElement>('[data-pilihan="ya"][aria-pressed="true"]') ?? k.querySelector<HTMLElement>('[data-pilihan="ya"]:not([data-dicoret="ya"])'))
         : k.querySelector<HTMLElement>(`[data-aksi="${sasaran}"]`);
     (el ?? k).focus();
     // Hanya saat tampilan berganti atau Langkah 2 siap, bukan setiap pilihan berubah.
@@ -106,11 +115,12 @@ export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi }: PropsD
     }
   };
 
-  /** Enter pada pilihan: mengunci bila sudah ada pilihan, selain itu memilihnya (P-43, P-49). */
-  const enterPilihan = (id: string) => (e: KeyboardEvent<HTMLButtonElement>) => {
+  /** Enter pada pilihan: mengunci bila sudah ada pilihan, selain itu memilihnya (P-43, P-49). Pilihan yang dicoret: diam. */
+  const enterPilihan = (id: string, coret: boolean) => (e: KeyboardEvent<HTMLButtonElement>) => {
     if (e.key !== "Enter") return;
     e.preventDefault();
     e.stopPropagation();
+    if (coret) return;
     saatAksi(terpilih ? { jenis: "kunci" } : { jenis: "pilih", id });
   };
 
@@ -118,19 +128,32 @@ export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi }: PropsD
   const pertanyaan = (teks: string | undefined) => (teks ? <p className="js-pertanyaan">{teks}</p> : null);
   const pilihan = (l: 1 | 2) => (
     <div className={l === 1 ? "js-kisi-opsi" : "js-susun-opsi"} role="group" aria-label={l === 1 ? d.pertanyaan1 : d.hasil1?.pertanyaan2}>
-      {opsi.map((o, i) => (
-        <TombolPilihan
-          key={o.id}
-          huruf={HURUF[i]}
-          teks={o.teks}
-          terpilih={o.id === terpilih}
-          nonaktif={d.mengunci}
-          saatPilih={() => saatAksi({ jenis: "pilih", id: o.id })}
-          saatTombol={enterPilihan(o.id)}
-        />
-      ))}
+      {opsi.map((o, i) => {
+        const coret = l === 1 && dicoret(d, o.id);
+        return (
+          <TombolPilihan
+            key={o.id}
+            huruf={HURUF[i]}
+            teks={o.teks}
+            terpilih={o.id === terpilih}
+            nonaktif={d.mengunci}
+            dicoret={coret}
+            saatPilih={() => saatAksi({ jenis: "pilih", id: o.id })}
+            saatTombol={enterPilihan(o.id, coret)}
+          />
+        );
+      })}
     </div>
   );
+  // JS-09 (P-29): kotak petunjuk sesudah Petunjuk dipakai; kalimat kosong (pratinjau) tidak menampilkan kotak.
+  const kalimatPetunjuk = d.petunjuk?.kalimat;
+  const kotakPetunjuk = kalimatPetunjuk ? (
+    <div className="js-kotak-petunjuk" role="note" aria-label={TEKS.skill.petunjuk}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
+      <img src={IKON.ikon_petunjuk.url} alt="" width={16} height={16} />
+      <p>{kalimatPetunjuk}</p>
+    </div>
+  ) : null;
   const h1 = d.hasil1;
   const pita = h1 ? (
     <div className="js-pita-umpan" data-benar={h1.benar ? "ya" : "tidak"}>
@@ -155,6 +178,7 @@ export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi }: PropsD
         <>
           {situasi}
           {pertanyaan(d.pertanyaan1)}
+          {kotakPetunjuk}
           {pilihan(1)}
         </>
       );
@@ -170,7 +194,7 @@ export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi }: PropsD
     case "pilihan1":
       isi = (
         <>
-          {pertanyaan(d.pertanyaan1)}
+          {kotakPetunjuk ?? pertanyaan(d.pertanyaan1)}
           {pilihan(1)}
         </>
       );
@@ -226,6 +250,7 @@ export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi }: PropsD
           ruangUji={ruangUji}
           ringkas={d.ringkas}
           ikonEmosi={EMOSI_KARTU}
+          tambahKompas={d.tambahKompas ? IKON.ikon_kompas.url : null}
         />
       ) : null;
       break;
@@ -262,13 +287,14 @@ export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi }: PropsD
               key={b.aksi}
               type="button"
               data-aksi={b.aksi}
+              data-dipakai={b.aksi === "petunjuk" && d.petunjuk?.dicoret ? "ya" : undefined}
               className={`js-tombol js-tombol-dialog${b.utama ? " js-tombol-utama" : ""}`}
               aria-disabled={!b.aktif || d.mengunci ? true : undefined}
               onClick={() => {
                 if (b.aktif && !d.mengunci) saatAksi({ jenis: b.aksi });
               }}
             >
-              {LABEL_KAKI[b.aksi]}
+              {b.aksi === "petunjuk" ? labelPetunjuk(d) : LABEL_KAKI[b.aksi]}
             </button>
           ))}
         </footer>

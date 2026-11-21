@@ -1,6 +1,7 @@
 // Pemain lain (spesifikasi JS-07, P-19 sampai P-24; Architecture 9): penyangga butir `dunia`, tunda tampilan
 // yang menyesuaikan jaringan, interpolasi dan penerusan paling lama 100 ms, serta sembunyi sesudah 2,5 detik di
 // status `main`. Pemain saling tembus, jadi tidak ada tabrakan antarpemain di sini.
+// JS-09 (P-23): pemain lain tampak berlari bila menempuh lebih dari 45 piksel dalam 500 ms tampilan.
 import type { Arah, StatusRuang, WarnaTas } from "../../inti/tipe";
 
 /** Tunda tampilan = 100 + 2J ms, dijepit 120–250 ms; J dan d̄ rata-rata bergerak eksponensial α 0,1 (P-20). */
@@ -100,6 +101,8 @@ export interface PemainTampil extends Tampilan {
   info: InfoPemain;
   /** Pemain ini sedang membuka dialog kejadian: gelembung "…" di atas kepalanya (JS-08, P-17). */
   dialog: boolean;
+  /** Tampak berlari: langkah 12 fps dan debu (JS-09, P-23). */
+  lari: boolean;
 }
 
 /** Semua pemain lain yang dikenal layar ini. */
@@ -171,7 +174,12 @@ export class PemainLain {
       if (!info || id === this.diriId) continue;
       if (status === "main" && jamLokal - c.terlihatLokal > SEMBUNYI_MS) continue;
       const pos = posisiPada(c.butir, t);
-      if (pos) hasil.push({ id, info, x: pos.x, y: pos.y, arah: pos.arah, jalan: pos.jalan, dialog: c.dialog });
+      if (!pos) continue;
+      // JS-09 (P-23): berlari bila butir terakhirnya bertanda jalan dan jarak posisi tampil pada t dan t − 500 ms lebih
+      // dari 45 piksel; penyangga yang butir tertuanya lebih baru dari t − 500 ms dianggap berjalan.
+      const lama = c.butir[0].w <= t - 500 ? posisiPada(c.butir, t - 500) : null;
+      const lari = pos.jalan && c.butir[c.butir.length - 1].jalan && lama !== null && Math.hypot(pos.x - lama.x, pos.y - lama.y) > 45;
+      hasil.push({ id, info, x: pos.x, y: pos.y, arah: pos.arah, jalan: pos.jalan, dialog: c.dialog, lari });
     }
     return hasil;
   }

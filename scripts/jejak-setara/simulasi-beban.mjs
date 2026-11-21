@@ -12,6 +12,10 @@
 // dikendalikan lewat layar kelas bertiket, yang juga mencatat jumlah dan ukuran pesan ke layar kelas (AC-24).
 // JS-11 (AC-23): sesudah ronde diakhiri, setiap bot harus menerima `selesai` dengan rekap yang lolos skema protokol;
 // ukuran pesan itu dan baris peserta akhir di D1 (lewat GET /api/ruang/{id}/hasil) dicatat.
+// JS-09 (P-50): separuh tujuan jelajah acak adalah kotak yang siap dan skillnya belum penuh menurut `pribadi` terakhir;
+// bot bermuatan Lari cepat yang sedang berjalan memakainya lalu bergerak 115,2 piksel per detik sampai `aktifSampai.lari`
+// (jam server diperkirakan dari `pong`); bot tanpa sasaran kejadian yang bermuatan Kompas memakainya lalu berjalan ke
+// ubin dari `kompas`; di Langkah 1, bot bermuatan Petunjuk memakainya lalu memilih pilihan acak yang tidak dicoret.
 // Lingkungan uji hanya dengan pilihan tertulis: --sasaran uji --alamat <URL> --saya-paham-kuota, serta akun konsol di
 // JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI; perkiraan permintaan Durable Object dicetak lebih dulu, dan lebih dari 20.000
 // ditolak.
@@ -57,6 +61,12 @@ try {
   skemaServerPemain = null;
 }
 const frekuensi = (batas) => (batas > 50 ? 6 : 10); // sama dengan frekuensiGerak() di inti/aturan.ts
+// JS-09: sama dengan KECEPATAN, KECEPATAN_LARI (inti/gerak.ts), JEDA_SKILL_MS, dan SKILL_KOTAK (inti/aturan.ts).
+const KECEPATAN = 72;
+const KECEPATAN_LARI = 115.2;
+const JEDA_SKILL_MS = 2000;
+const SKILL_KOTAK = { sepatu: "lari", kompas: "kompas", buku: "petunjuk" };
+const KODE_KOTAK = { kotak_lari: "sepatu", kotak_kompas: "kompas", kotak_petunjuk: "buku" };
 
 /** Perkiraan permintaan Durable Object per ruang untuk satu sesi 15 menit: pesan masuk ÷ 20 + satu per sambungan. */
 const perkiraanPermintaan = (pesanNaikPerDetik, bot) => Math.round((pesanNaikPerDetik * 900) / 20 + bot);
@@ -253,6 +263,8 @@ function jalurUbin(grid, a, b) {
 
 const UBIN_LOBI = ubinTercapai(GRID_LOBI);
 const UBIN_JELAJAH = ubinTercapai(GRID);
+/** JS-09: kotak bantuan di peta kampung yang skillnya P0. */
+const KOTAK_PETA = kampung.kotak.filter((k) => SKILL_KOTAK[k.jenis]);
 const pusatUbin = ([x, y]) => ({ x: x * 16 + 8, y: y * 16 + 12 });
 const acakDari = (larik) => larik[Math.floor(Math.random() * larik.length)];
 const eksponensial = (rata) => (rata > 0 ? -Math.log(1 - Math.random()) * rata : 0);
@@ -263,7 +275,11 @@ function buatBot(kode, nomor) {
     // JS-08: kejadian yang terlihat dan selesai, sasaran, dialog yang terbuka, dan hitungan.
     lihat: new Map(), selesai: new Set(), sasaran: null, dialog: null, menungguSampai: 0, terlihat: 0, terbuka: 0, jawaban: 0, pribadi: 0, poin: 0,
     // JS-11 (AC-23): pesan `selesai` terakhir dan ukurannya dalam bita.
-    pesanSelesai: null, byteSelesai: 0 };
+    pesanSelesai: null, byteSelesai: 0,
+    // JS-09 (P-50): keadaan skill dari `pribadi` terakhir, perkiraan selisih jam server dari `pong`, dan hitungan.
+    muatan: { lari: 0, kompas: 0, petunjuk: 0 }, aktifSampai: {}, kotakMenunggu: new Map(), selisihJam: 0, pakaiTerakhir: {}, menungguSkill: {},
+    tujuanKompas: null, lariSampaiLokal: 0, kotak: { sepatu: 0, kompas: 0, buku: 0 }, dipakai: { lari: 0, kompas: 0, petunjuk: 0 },
+    pesanKompas: 0, pesanPetunjuk: 0, kompasTanpaSasaran: 0, kompasTepat: 0, bytePribadi: 0, jumlahPribadi: 0, koreksiLari: 0 };
   return new Promise((ok, gagal) => {
     // Di lokal, setiap ruang dianggap sekolah sendiri (alamat IP berbeda) agar pembatas 300 sambungan per menit
     // per alamat (D-5) tidak menahan simulasi; di Cloudflare tajuk ini diisi jaringan Cloudflare, bukan klien.
@@ -287,7 +303,11 @@ function buatBot(kode, nomor) {
         kirim({ v: V, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
       } else if (m.t === "saran_nama") kirim({ v: V, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
       else if (m.t === "dunia") b.dunia++;
-      else if (m.t === "pong") b.rtt.push(Date.now() - m.tKlien);
+      else if (m.t === "pong") {
+        const rtt = Date.now() - m.tKlien;
+        b.rtt.push(rtt);
+        b.selisihJam = m.waktuServer - (m.tKlien + rtt / 2);
+      }
       else if (m.t === "kejadian_terlihat") {
         b.terlihat++;
         if (!b.selesai.has(m.kejadianId)) b.lihat.set(`${m.kejadianId}@${m.x},${m.y}`, { kode: m.kejadianId, x: m.x, y: m.y });
@@ -297,12 +317,56 @@ function buatBot(kode, nomor) {
       } else if (m.t === "pribadi") {
         b.pribadi++;
         for (const kode of m.selesai) b.selesai.add(kode);
+        // JS-09 (P-50): muatan yang berkurang berarti skill itu dipakai; jeda 2 detik dihitung dari saat ini.
+        b.jumlahPribadi++;
+        b.bytePribadi += Buffer.byteLength(teks);
+        for (const s of ["lari", "kompas", "petunjuk"]) {
+          if (m.muatan[s] < b.muatan[s]) {
+            b.dipakai[s]++;
+            b.pakaiTerakhir[s] = Date.now();
+          }
+          b.muatan[s] = m.muatan[s];
+          b.menungguSkill[s] = 0;
+        }
+        b.aktifSampai = m.aktifSampai;
+        b.kotakMenunggu = new Map(m.kotakMenunggu.map((k) => [k.id, k.siapPada]));
+        if (m.aktifSampai.lari !== undefined) b.lariSampaiLokal = m.aktifSampai.lari - b.selisihJam;
+        if (m.aktifSampai.kompas === undefined) b.tujuanKompas = null;
+      } else if (m.t === "pemberitahuan") {
+        if (KODE_KOTAK[m.kode]) b.kotak[KODE_KOTAK[m.kode]]++;
+        else if (m.kode === "kompas_tanpa_sasaran") {
+          b.kompasTanpaSasaran++;
+          b.menungguSkill.kompas = 0;
+        } else if (m.kode === "kompas_tepat") b.kompasTepat++;
+      } else if (m.t === "kompas") {
+        // Sasaran Kompas: berjalan ke ubin di bawah titiknya (atau ke titiknya bila ubin itu tidak tercapai).
+        b.pesanKompas++;
+        b.tujuanKompas = { x: m.x, y: m.y };
+        if (!b.sasaran && !b.dialog && b.x !== null) {
+          const asal = [Math.floor(b.x / 16), Math.floor(b.y / 16)];
+          const jalur = jalurUbin(GRID, asal, [m.x, m.y + 1]) ?? jalurUbin(GRID, asal, [m.x, m.y]);
+          if (jalur) {
+            b.jalur = jalur.map(pusatUbin);
+            b.diamSampai = 0;
+          }
+        }
+      } else if (m.t === "petunjuk") {
+        b.pesanPetunjuk++;
+        if (b.dialog && b.dialog.kode === m.kejadianId) b.dialog.coret = m.opsiDicoret;
       } else if (m.t === "kejadian_terbuka") {
         b.terbuka++;
-        b.dialog = { kode: m.kejadianId };
+        b.dialog = { kode: m.kejadianId, coret: null };
         b.menungguSampai = 0;
-        const opsi = m.opsi1[Math.floor(Math.random() * m.opsi1.length)].id;
-        setTimeout(() => b.kirim({ v: V, t: "kunci_1", kejadianId: m.kejadianId, opsiId: opsi }), 1000 + Math.random() * 2000);
+        // JS-09 (P-50): bermuatan Petunjuk (dan di luar jeda 2 detik): pakai lebih dulu, lalu pilih yang tidak dicoret.
+        if (b.muatan.petunjuk > 0 && Date.now() - (b.pakaiTerakhir.petunjuk ?? 0) > JEDA_SKILL_MS + 100) {
+          b.kirim({ v: V, t: "pakai_skill", skill: "petunjuk", kejadianId: m.kejadianId });
+        }
+        const dialog = b.dialog;
+        setTimeout(() => {
+          const boleh = m.opsi1.filter((o) => o.id !== dialog.coret);
+          const opsi = boleh[Math.floor(Math.random() * boleh.length)].id;
+          b.kirim({ v: V, t: "kunci_1", kejadianId: m.kejadianId, opsiId: opsi });
+        }, 1000 + Math.random() * 2000);
       } else if (m.t === "hasil_1") {
         if (b.dialog) {
           const kode = b.dialog.kode;
@@ -326,6 +390,8 @@ function buatBot(kode, nomor) {
       else if (m.t === "koreksi") {
         // Koreksi pertama berisi posisi awal (P-49); sesudah itu koreksi berarti laporan jujur ditolak.
         if (b.tersinkron) b.koreksi++;
+        // JS-09 (P-50): koreksi selama lari atau sampai 1 detik sesudahnya.
+        if (b.tersinkron && Date.now() <= b.lariSampaiLokal + 1000) b.koreksiLari++;
         b.x = m.x;
         b.y = m.y;
         b.seq = Math.max(b.seq, m.seq);
@@ -351,7 +417,17 @@ function buatBot(kode, nomor) {
   });
 }
 
-/** Satu langkah bot: maju 72 px/detik menurut jam dinding di sepanjang jalurnya, lalu mengirim gerak bila perlu. */
+/** JS-09 (P-50): jam server menurut perkiraan bot dari `pong`. */
+const jamServer = (b) => Date.now() + b.selisihJam;
+/** Skill boleh dipakai: bermuatan, tidak sedang aktif, di luar jeda 2 detik, dan tidak sedang menunggu jawaban. */
+const bolehPakai = (b, s, sekarang) =>
+  b.muatan[s] > 0 && !(b.aktifSampai[s] > jamServer(b)) && sekarang - (b.pakaiTerakhir[s] ?? 0) > JEDA_SKILL_MS + 100 && sekarang - (b.menungguSkill[s] ?? 0) > 2000;
+function pakaiSkill(b, s, sekarang) {
+  b.menungguSkill[s] = sekarang;
+  b.kirim({ v: V, t: "pakai_skill", skill: s });
+}
+
+/** Satu langkah bot: maju 72 px/detik (115,2 saat Lari cepat aktif) di sepanjang jalurnya, lalu mengirim gerak bila perlu. */
 function langkahBot(b, sekarang, hz, fase) {
   if (b.ws.readyState !== 1 || !b.tersinkron) return;
   const dt = b.majuTerakhir ? Math.min(250, sekarang - b.majuTerakhir) : 0;
@@ -374,6 +450,8 @@ function langkahBot(b, sekarang, hz, fase) {
     b.sasaran = null;
     return;
   }
+  // JS-09 (P-50): tanpa sasaran kejadian, bot bermuatan Kompas memakainya; jalurnya diatur saat `kompas` tiba.
+  if (fase === "jelajah" && !b.sasaran && !b.tujuanKompas && bolehPakai(b, "kompas", sekarang)) pakaiSkill(b, "kompas", sekarang);
   if (fase === "jelajah" && b.jalur.length === 0) {
     // Kejadian terlihat yang belum selesai, paling jauh 12 ubin (atau sasaran yang jalurnya terputus koreksi):
     // jalur ke ubin titiknya.
@@ -398,11 +476,25 @@ function langkahBot(b, sekarang, hz, fase) {
     b.diamSampai = sekarang + 1000;
   } else if (b.jalur.length === 0 && sekarang >= b.diamSampai) {
     const grid = fase === "lobi" ? GRID_LOBI : GRID;
-    const sasaran = acakDari(fase === "lobi" ? UBIN_LOBI : UBIN_JELAJAH);
-    const jalur = jalurUbin(grid, [Math.floor(b.x / 16), Math.floor(b.y / 16)], sasaran);
+    const asal = [Math.floor(b.x / 16), Math.floor(b.y / 16)];
+    let jalur = null;
+    // JS-09 (P-50): saat menjelajah, separuh tujuan acak adalah kotak yang siap dan skillnya belum penuh.
+    if (fase === "jelajah" && Math.random() < 0.5) {
+      const w = jamServer(b);
+      const siap = KOTAK_PETA.filter((k) => b.muatan[SKILL_KOTAK[k.jenis]] < 2 && !((b.kotakMenunggu.get(k.id) ?? 0) > w));
+      if (siap.length > 0) {
+        const k = acakDari(siap);
+        jalur = jalurUbin(grid, asal, [k.x, k.y]);
+      }
+    }
+    jalur ??= jalurUbin(grid, asal, acakDari(fase === "lobi" ? UBIN_LOBI : UBIN_JELAJAH));
     b.jalur = jalur ? jalur.map(pusatUbin) : [];
   }
-  let sisa = (72 * dt) / 1000;
+  // JS-09 (P-50): bot bermuatan Lari cepat yang sedang berjalan memakainya, lalu berlari sesudah `pribadi` tiba sampai
+  // `aktifSampai.lari` menurut jam server yang diperkirakan.
+  if (fase === "jelajah" && b.jalur.length > 0 && bolehPakai(b, "lari", sekarang)) pakaiSkill(b, "lari", sekarang);
+  const lari = fase === "jelajah" && b.aktifSampai.lari !== undefined && jamServer(b) < b.aktifSampai.lari;
+  let sisa = ((lari ? KECEPATAN_LARI : KECEPATAN) * dt) / 1000;
   let berjalan = false;
   while (sisa > 0 && b.jalur.length > 0) {
     const t = b.jalur[0];
@@ -565,6 +657,22 @@ try {
       pribadiServer: stat.map((x) => x.pribadi ?? 0),
       antreanKirimanSaatAkhir: stat.map((x) => x.antreanKiriman ?? 0),
     },
+    // JS-09 (P-50): kotak dan skill per ruang, ukuran rata-rata `pribadi`, dan gerak yang dikoreksi selama lari atau
+    // sampai 1 detik sesudahnya.
+    skill: kodeRuang.map((kode) => {
+      const bs = bot.filter((b) => b.kode === kode);
+      const j = (f) => bs.reduce((s, b) => s + f(b), 0);
+      return {
+        kotakTerambil: { sepatu: j((b) => b.kotak.sepatu), kompas: j((b) => b.kotak.kompas), buku: j((b) => b.kotak.buku) },
+        dipakai: { lari: j((b) => b.dipakai.lari), kompas: j((b) => b.dipakai.kompas), petunjuk: j((b) => b.dipakai.petunjuk) },
+        pesanKompas: j((b) => b.pesanKompas),
+        pesanPetunjuk: j((b) => b.pesanPetunjuk),
+        kompasTanpaSasaran: j((b) => b.kompasTanpaSasaran),
+        kompasTepat: j((b) => b.kompasTepat),
+        pribadiByteRata: Math.round(j((b) => b.bytePribadi) / Math.max(1, j((b) => b.jumlahPribadi))),
+        gerakDikoreksiSaatLari: j((b) => b.koreksiLari),
+      };
+    }),
     // JS-11 (AC-23): `selesai` dengan rekap, ukurannya, dan baris peserta akhir di D1.
     akhirRonde: {
       botMenerimaSelesai: denganSelesai.length,
@@ -581,6 +689,7 @@ try {
     pesanDitolakServer: stat.reduce((s, x) => s + (x.pelanggaran ?? 0), 0),
     alasanKoreksiServer: stat.map((x) => x.koreksiAlasan ?? {}),
     barisSqliteDitulisPerRuang: stat.map((x) => x.barisDitulis),
+    barisD1DitulisPerRuang: stat.map((x) => x.pemakaian?.barisD1 ?? null), // JS-09 (P-50)
     // JS-10 (AC-24): pesan ke layar kelas selama sambungan (dari layar kelas), dan hitungan server.
     layarKelas: kelasJelajah.map((jenis) =>
       Object.fromEntries(Object.entries(jenis).map(([t, x]) => [t, { n: x.n, byteRata: Math.round(x.byte / Math.max(1, x.n)), byteMaks: x.byteMaks }])),

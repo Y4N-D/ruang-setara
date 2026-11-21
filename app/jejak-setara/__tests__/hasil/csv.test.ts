@@ -1,4 +1,5 @@
 // Ekspor CSV dan rincian jawaban (spesifikasi JS-11, P-24, P-27 sampai P-30; AC-17).
+// JS-09 (P-46, P-47): kolom ke-18 "Petunjuk dipakai" di ujung kanan CSV jawaban dan `petunjukDipakai` di rincian.
 import { describe, expect, it } from "vitest";
 import { TEKS_KONSOL } from "../../teks-konsol";
 import type { BarisJawabanHasil, BarisVersiHasil } from "../../../../server/jejak-setara/src/db/ruang";
@@ -88,7 +89,7 @@ const VERSI: BarisVersiHasil[] = [
   { id: "v-10", nomor: 2, jenis: "terbit", isi_json: isiVersi("K-10", "Antrean"), kode: "K-10" },
   { id: "v-2", nomor: 0, jenis: "kerja", isi_json: isiVersi("K-2", "Zebra cross"), kode: "K-2" },
 ];
-function jawaban(pesertaId: string, versi: string, l1: string, l2: string | null): BarisJawabanHasil {
+function jawaban(pesertaId: string, versi: string, l1: string, l2: string | null, petunjuk = 0): BarisJawabanHasil {
   return {
     peserta_id: pesertaId,
     kejadian_versi_id: versi,
@@ -101,6 +102,7 @@ function jawaban(pesertaId: string, versi: string, l1: string, l2: string | null
     dibuka_pada: Date.UTC(2026, 10, 20, 2, 0, 0),
     langkah1_pada: Date.UTC(2026, 10, 20, 2, 0, 10),
     langkah2_pada: l2 === null ? null : Date.UTC(2026, 10, 20, 2, 0, 41, 600),
+    petunjuk_dipakai: petunjuk,
   };
 }
 
@@ -111,6 +113,12 @@ describe("rincian jawaban (P-24)", () => {
     expect(r[0]).toMatchObject({ judul: "Zebra cross", versi: null, huruf1: "C", pilihan1: "Hak penjual", benar1: false, jawabanTepat1: "Hak ibu", huruf2: null, pilihan2: null, tingkat2: null, waktuMenjawabMs: null, poin: 0 });
     expect(r[0].pilihanTepat2).toEqual(["Menolak dengan sopan"]);
     expect(r[1]).toMatchObject({ versi: 2, huruf1: "D", benar1: true, huruf2: "B", pilihan2: "Diam saja", tingkat2: "kurang", poin: 65, waktuMenjawabMs: 41_600 });
+    expect(r.map((x) => x.petunjukDipakai)).toEqual([false, false]);
+  });
+
+  it("JS-09 (P-46): petunjukDipakai bernilai true hanya bila kolom D1 bernilai 1", () => {
+    const r = rincianJawaban([jawaban("p1", "v-10", "1a", "2b", 1), jawaban("p1", "v-2", "1b", null, 0)], VERSI);
+    expect(r.map((x) => [x.kode, x.petunjukDipakai])).toEqual([["K-2", false], ["K-10", true]]);
   });
 });
 
@@ -143,13 +151,15 @@ describe("CSV peserta dan jawaban (P-28, P-29)", () => {
     expect(baris[3]).toBe("");
   });
 
-  it("CSV jawaban: 17 kolom, urut menurut peserta lalu nomor kode, Kerja untuk versi kerja, Ya dan Tidak, tingkat sebagai teks", () => {
-    const rinci = rincianJawaban([jawaban("p2", "v-10", "1a", "2c"), jawaban("p1", "v-10", "1a", "2b"), jawaban("p1", "v-2", "1b", null)], VERSI);
+  it("CSV jawaban: 18 kolom (JS-09 P-47), urut menurut peserta lalu nomor kode, Kerja untuk versi kerja, Ya dan Tidak, tingkat sebagai teks", () => {
+    const rinci = rincianJawaban([jawaban("p2", "v-10", "1a", "2c"), jawaban("p1", "v-10", "1a", "2b", 1), jawaban("p1", "v-2", "1b", null)], VERSI);
     const baris = csvJawaban(ruang, peserta, rinci).slice(1).split("\r\n");
-    expect(baris[0].split(";")).toHaveLength(17);
-    expect(baris[1].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p1", "7", "K-2", "Zebra cross", T.versiKerja, "C", "Hak penjual", T.tidak, "", "", "", "0", "2026-11-20 10:00:00", "", ""]);
-    expect(baris[2].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p1", "7", "K-10", "Antrean", "2", "D", "Hak ibu", T.ya, "B", "Diam saja", T.tingkatKurang, "65", "2026-11-20 10:00:00", "41,6", ""]);
-    expect(baris[3].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p2", "", "K-10", "Antrean", "2", "D", "Hak ibu", T.ya, "A", "Ikut menyerobot", T.tingkatBerisiko, "40", "2026-11-20 10:00:00", "41,6", T.dikeluarkan]);
+    expect(baris[0].split(";")).toHaveLength(18);
+    expect(baris[0].split(";").slice(15)).toEqual([T.waktuMenjawab, T.keterangan, T.petunjuk]);
+    expect(baris[1].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p1", "7", "K-2", "Zebra cross", T.versiKerja, "C", "Hak penjual", T.tidak, "", "", "", "0", "2026-11-20 10:00:00", "", "", T.tidak]);
+    expect(baris[2].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p1", "7", "K-10", "Antrean", "2", "D", "Hak ibu", T.ya, "B", "Diam saja", T.tingkatKurang, "65", "2026-11-20 10:00:00", "41,6", "", T.ya]);
+    expect(baris[3].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p2", "", "K-10", "Antrean", "2", "D", "Hak ibu", T.ya, "A", "Ikut menyerobot", T.tingkatBerisiko, "40", "2026-11-20 10:00:00", "41,6", T.dikeluarkan, T.tidak]);
+    expect(T.petunjuk).toBe("Petunjuk dipakai");
   });
 
   it("ruang tidak dimainkan: hanya baris judul", () => {

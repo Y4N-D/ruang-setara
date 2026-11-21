@@ -2,6 +2,7 @@
 // kejadian menjadi pesan yang biasanya datang dari server, sehingga dialog kejadian yang sungguhan bisa digambar tanpa
 // menyambung ke ruang. Isi datang dari konsol di asal yang sama, yang sudah memakai skema kejadian; di sini hanya
 // bentuk yang dibutuhkan untuk menggambar yang diperiksa.
+// JS-09 (P-44, D-3a): Petunjuk tiruan bermuatan 2 yang mencoret pilihan keliru pertama menurut urutan asli A sampai D.
 import { POIN } from "../inti/aturan";
 import type { Hasil1, Hasil2 } from "../bersama/dialogKeadaan";
 import type { PesanServerPemain } from "../inti/protokol";
@@ -28,6 +29,15 @@ export function bacaPesanPratinjau(data: unknown): PesanPratinjau | null {
 export function pesanTerbuka(isi: IsiKejadian): Extract<PesanServerPemain, { t: "kejadian_terbuka" }> {
   const { judul, situasi, setTokoh } = isi;
   return { v: PROTOKOL_VERSI, t: "kejadian_terbuka", kejadianId: "pratinjau", judul, situasi, setTokoh, pertanyaan1: isi.langkah1.pertanyaan, opsi1: isi.langkah1.opsi.map(({ id, teks }) => ({ id, teks })), langkah: 1 };
+}
+
+/** Muatan Petunjuk tiruan di pratinjau (P-44). */
+export const MUATAN_PETUNJUK_PRATINJAU = 2;
+
+/** Isi `petunjuk` tiruan (P-44, D-3a): kalimat dari isi yang disunting dan pilihan keliru pertama menurut urutan asli. */
+export function petunjukPratinjau(isi: IsiKejadian): { kejadianId: string; kalimat: string; opsiDicoret: string } {
+  const keliru = isi.langkah1.opsi.find((o) => !o.benar) ?? isi.langkah1.opsi[0];
+  return { kejadianId: "pratinjau", kalimat: typeof isi.langkah1.petunjuk === "string" ? isi.langkah1.petunjuk.trim() : "", opsiDicoret: keliru.id };
 }
 
 export function hasilLangkah1(isi: IsiKejadian, opsiId: string): Hasil1 {

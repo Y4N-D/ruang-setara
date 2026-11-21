@@ -96,6 +96,12 @@ async function targetKecil(page: Page): Promise<string[]> {
 let admin: { ctx: BrowserContext; page: Page; catatan: Catatan };
 let guru: { ctx: BrowserContext; page: Page; catatan: Catatan };
 let sandiGuru = "";
+/**
+ * JS-09 (P-49): jumlah akun dan akun aktif saat halaman Akun pertama dibuka. Bila semua uji ujung ke ujung dijalankan
+ * dalam satu perintah, uji lain sudah membuat akun di D1 lokal yang sama, jadi jumlah akun dihitung dari keadaan awal ini.
+ */
+const akunAwal = { n: 1, aktif: 1 };
+const ringkasAkun = (tambah: number, tambahAktif: number) => `${akunAwal.n + tambah} akun · ${akunAwal.aktif + tambahAktif} aktif`;
 
 test.afterAll(async () => {
   await admin?.ctx.close();
@@ -189,7 +195,9 @@ test("admin: akun baru, dialog sandi sementara sekali tampil, salin sandi, dan t
   const { page } = admin;
   await page.getByRole("link", { name: "Akun" }).click();
   await expect(page).toHaveURL(/#\/akun$/);
-  await expect(page.getByText("1 akun · 1 aktif")).toBeVisible();
+  const ringkasan = page.getByText(/^\d+ akun · \d+ aktif$/);
+  await expect(ringkasan).toBeVisible();
+  [akunAwal.n, akunAwal.aktif] = ((await ringkasan.textContent()) ?? "").match(/\d+/g)!.map(Number);
   await expect(page.getByRole("row", { name: /YAN \(Anda\)/ })).toBeVisible();
 
   const tombolBaru = page.getByRole("button", { name: "+ Akun baru" });
@@ -238,7 +246,7 @@ test("admin: akun baru, dialog sandi sementara sekali tampil, salin sandi, dan t
   await expect(baris).toContainText("Aktif");
   await expect(baris).toContainText("Belum ganti sandi");
   await expect(baris).toContainText("Belum pernah");
-  await expect(page.getByText("2 akun · 2 aktif")).toBeVisible();
+  await expect(page.getByText(ringkasAkun(1, 1))).toBeVisible();
   await expect(page.getByRole("row", { name: /YAN \(Anda\)/ })).toContainText(/\d{1,2} \w{3} \d{4}, \d{2}\.\d{2}/);
   await expect(page.locator(".js-konsol-tabel td").first()).toHaveCSS("font-family", /system-ui/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("font-family", /Pixelify Sans/);
@@ -308,7 +316,7 @@ test("nonaktif dan atur ulang: konfirmasi, sesi guru berakhir, aktif lagi, sandi
   await expect(page.getByText("Perubahan tersimpan.")).toBeVisible();
   await expect(tombolUbah).toBeFocused();
   await expect(page.getByRole("row", { name: /Bu Sari/ })).toContainText("Nonaktif");
-  await expect(page.getByText("2 akun · 1 aktif")).toBeVisible();
+  await expect(page.getByText(ringkasAkun(1, 0))).toBeVisible();
 
   // Permintaan guru berikutnya dijawab 401: konsol kembali ke halaman masuk dengan pemberitahuan (P-48).
   await guru.page.getByRole("link", { name: "Sandi saya" }).click();

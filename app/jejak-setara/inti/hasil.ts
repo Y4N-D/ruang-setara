@@ -215,6 +215,8 @@ export const skemaJawabanRincian = z.object({
   pilihanTepat2: z.array(z.string()),
   poin: bulat(),
   waktuMenjawabMs: z.number().nullable(),
+  /** JS-09 (P-46): Petunjuk dipakai pemain di kejadian ini. */
+  petunjukDipakai: z.boolean(),
 });
 export type JawabanRincian = z.infer<typeof skemaJawabanRincian>;
 export const skemaRincianPeserta = z.object({ peserta: z.object({ id: z.string(), nama: z.string() }), jawaban: z.array(skemaJawabanRincian) });

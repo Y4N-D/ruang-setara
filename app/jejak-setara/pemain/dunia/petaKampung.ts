@@ -1,9 +1,11 @@
 // Data peta kampung untuk layar pemain (spesifikasi JS-07, P-7, P-15, P-28, P-35, P-50). Kedua berkas peta JS-06
 // diimpor saat build, hanya kunci yang dipakai layar pemain. Lapisan RLE diurai sekali saat modul dimuat.
-import { gerbangLobi, halte, lebar, objek, tabrakan, tinggi, titikMuncul, zona } from "../../peta/kampung.json";
+// JS-09 (P-18): kotak bantuan, sama dengan `KOTAK_KAMPUNG` server.
+import { gerbangLobi, halte, kotak, lebar, objek, tabrakan, tinggi, titikMuncul, zona } from "../../peta/kampung.json";
 import { bayangan, daftar, kolom, tanah, tumpang } from "../../peta/kampung_gambar.json";
 import { tutupGerbang, UKURAN_UBIN, uraiRle, versiPeta } from "../../inti/peta";
 import type { ZonaId } from "../../inti/tipe";
+import type { KotakKlien } from "./skill";
 
 const SEL = lebar * tinggi;
 const gridKampung = uraiRle(tabrakan, SEL);
@@ -51,3 +53,6 @@ export interface ZonaPeta {
 export const ZONA: readonly ZonaPeta[] = zona.map((z) => ({ ...z, id: z.id as ZonaId }));
 export const HALTE: readonly { id: string; x: number; y: number }[] = halte.map((h) => ({ id: h.id, x: h.x, y: h.y }));
 export const TITIK_MUNCUL: readonly { x: number; y: number }[] = titikMuncul;
+
+/** JS-09 (P-18): ke-24 kotak bantuan kampung.json (sudah urut menurut id; diperiksa uji). */
+export const KOTAK_PETA = kotak as readonly KotakKlien[];

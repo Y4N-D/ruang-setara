@@ -149,7 +149,7 @@ describe("Teks dan halaman", () => {
   it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01, JS-03, JS-07, dan JS-08 (tanpa konsolJudul dan konsolIsi sejak JS-04)", () => {
     expect(TEKS).not.toHaveProperty("konsolJudul");
     expect(TEKS).not.toHaveProperty("konsolIsi");
-    expect(tanpaKunci(TEKS, [...KUNCI_JS22_PEMAIN, ...kunciJs12().pemain, ...Object.keys(kunciJs11().pemain)])).toEqual({
+    expect(tanpaKunci(TEKS, [...KUNCI_JS22_PEMAIN, ...kunciJs12().pemain, ...Object.keys(kunciJs11().pemain), ...Object.keys(kunciJs09().pemain)])).toEqual({
       judulTabPemain: "Jejak Setara",
       judulTabKonsol: "Konsol admin · Jejak Setara",
       judul: "Jejak Setara",
@@ -332,6 +332,20 @@ describe("Teks dan halaman", () => {
     expect(kunciJs10.sort()).toEqual(Object.keys(harapan).sort());
   });
 
+  it("JS-09: TEKS.skill, TEKS_KONSOL.skill, dan TEKS_KONSOL.csv.petunjuk sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-09 (AC-21)", () => {
+    const { pemain, konsol, csv } = kunciJs09();
+    expect(Object.keys(pemain)).toHaveLength(21);
+    expect(Object.keys(konsol)).toHaveLength(6);
+    expect(Object.keys(csv)).toEqual(["csv.petunjuk"]);
+    const datarPemain = ratakanTeks(TEKS);
+    const datarKonsol = ratakanTeks(TEKS_KONSOL);
+    for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
+    for (const [k, t] of Object.entries({ ...konsol, ...csv })) expect(datarKonsol[k], k).toBe(t);
+    // Kelompok skill tidak memuat kunci di luar spesifikasi.
+    expect(Object.keys(datarPemain).filter((k) => k.startsWith("skill.")).sort()).toEqual(Object.keys(pemain).sort());
+    expect(Object.keys(datarKonsol).filter((k) => k.startsWith("skill.")).sort()).toEqual(Object.keys(konsol).sort());
+  });
+
   it("JS-11: TEKS dan TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-11 (AC-21)", () => {
     const { pemain, konsol, csv, js10 } = kunciJs11();
     expect(Object.keys(pemain)).toHaveLength(12);
@@ -344,15 +358,26 @@ describe("Teks dan halaman", () => {
     for (const [k, t] of Object.entries({ ...konsol, ...csv, ...js10 })) expect(datarKonsol[k], k).toBe(t);
     // Kelompok baru JS-11 tidak memuat kunci di luar spesifikasi.
     expect(Object.keys(datarPemain).filter((k) => k.startsWith("rekap.")).sort()).toEqual(Object.keys(pemain).sort());
+    const js09 = kunciJs09();
     for (const grup of ["riwayatRuang", "hasil", "csv"]) {
-      const ada = Object.keys(datarKonsol).filter((k) => k.startsWith(`${grup}.`));
+      const ada = Object.keys(datarKonsol).filter((k) => k.startsWith(`${grup}.`) && !(k in js09.csv));
       expect(ada.sort(), grup).toEqual(Object.keys({ ...konsol, ...csv }).filter((k) => k.startsWith(`${grup}.`)).sort());
     }
   });
 
   it("JS-04: TEKS_KONSOL sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-04 (P-51), di luar teks JS-10", () => {
     const js11 = kunciJs11();
-    expect(tanpaKunci(tanpaKunciJs10(TEKS_KONSOL) as object, [...KUNCI_JS22_KONSOL, ...kunciJs12().konsol, ...Object.keys(js11.konsol), ...Object.keys(js11.csv)])).toEqual({
+    const js09 = kunciJs09();
+    expect(
+      tanpaKunci(tanpaKunciJs10(TEKS_KONSOL) as object, [
+        ...KUNCI_JS22_KONSOL,
+        ...kunciJs12().konsol,
+        ...Object.keys(js11.konsol),
+        ...Object.keys(js11.csv),
+        ...Object.keys(js09.konsol),
+        ...Object.keys(js09.csv),
+      ]),
+    ).toEqual({
       merek: "Jejak Setara",
       subjudul: "Konsol guru dan admin",
       memuat: "Memuat konsol…",
@@ -940,6 +965,21 @@ function kunciJs11(): { pemain: Record<string, string>; konsol: Record<string, s
     konsol: uraiTabelTeks(potong("**Konsol**", "**Isi berkas CSV**")),
     csv: uraiTabelTeks(potong("**Isi berkas CSV**", "**Teks JS-10 yang berubah**")),
     js10: uraiTabelTeks(potong("**Teks JS-10 yang berubah**", null)),
+  };
+}
+
+/** JS-09 (AC-21): kunci dan teks dari tabel spesifikasi JS-09, menurut subjudul tebalnya: layar pemain, konsol, dan isi berkas CSV. */
+function kunciJs09(): { pemain: Record<string, string>; konsol: Record<string, string>; csv: Record<string, string> } {
+  const isi = baca("docs/jejak-setara/specs/JS-09-skill.md");
+  const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"), isi.indexOf("\n## Data, protokol"));
+  const potong = (dari: string, sampai: string | null) => {
+    const awal = bagian.indexOf(dari);
+    return "## Teks yang tampil (final)\n" + bagian.slice(awal, sampai === null ? undefined : bagian.indexOf(sampai)) + "\n## ";
+  };
+  return {
+    pemain: uraiTabelTeks(potong("**Layar pemain**", "**Konsol**")),
+    konsol: uraiTabelTeks(potong("**Konsol**", "**Isi berkas CSV**")),
+    csv: uraiTabelTeks(potong("**Isi berkas CSV**", null)),
   };
 }
 

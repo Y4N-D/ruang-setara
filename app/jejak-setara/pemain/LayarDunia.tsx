@@ -4,11 +4,13 @@
 // memperbarui mesin dunia, menggambar, dan menulis ringkasan kecil di atribut data kanvas untuk uji.
 // JS-08: tombol Periksa dan ajakan E, dialog kejadian, skor di bilah atas, penanda di peta, kelompok histogram 100 ms,
 // dan angka fps bila alamat diakhiri #fps (P-18 sampai P-25, P-39, P-51 sampai P-54, P-57, P-68, P-70).
+// JS-09: tombol skill dan tombol 1 sampai 3, antrean pita, pengumuman skill, kotak aman panah Kompas, dan atribut data
+// kanvas `data-kotak`, `data-lari`, dan `data-kompas` (spesifikasi JS-09, P-18, P-20, P-26, P-33 sampai P-43).
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as PointerEventReact } from "react";
 import { TANDA, IKON } from "../assets/manifest";
 import DialogKejadian, { type AksiDialog } from "../bersama/DialogKejadian";
 import { modeRingkas, TINGGI_BILAH_PX, type KeadaanDialog } from "../bersama/dialogKeadaan";
-import { PANDANGAN } from "../inti/aturan";
+import { PANDANGAN, SKILL_P0, type SkillP0 } from "../inti/aturan";
 import type { PesanPemain } from "../inti/protokol";
 import type { StatusRuang } from "../inti/tipe";
 import { isiTeks, TEKS } from "../teks";
@@ -19,12 +21,14 @@ import { hitungLangit, type Langit, type WaktuRuangKlien } from "./dunia/langit"
 import { perangkatSentuh, TOMBOL_GULIR, type KeadaanJoystick } from "./dunia/masukan";
 import type { MesinDunia } from "./dunia/mesin";
 import { hitungSkala, type UkuranDunia } from "./dunia/skala";
+import { batasPanah, type StatusTombol } from "./dunia/skill";
 import Joystick from "./Joystick";
 import { LapisanHitungMundur } from "./LayarRonde";
 import PanelLobi from "./PanelLobi";
 import PetaBesar from "./PetaBesar";
 import PetaMini, { gambarPetaMini, type PenandaPeta } from "./PetaMini";
 import { AjakanPeriksa, TombolPeriksa } from "./TombolPeriksa";
+import TombolSkill from "./TombolSkill";
 
 type PesanGerak = Extract<PesanPemain, { t: "gerak" }>;
 
@@ -60,6 +64,10 @@ function ukuranLayar(): UkuranDunia {
   return hitungSkala(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
 }
 
+/** Batas panah Kompas (P-26): px CSS per piksel logis, ditambah bagian kanvas yang terpotong jendela. */
+const batasDari = (u: UkuranDunia, l: { lebar: number; tinggi: number; rasio: number }) =>
+  batasPanah(u.k / l.rasio, [-u.kiriCss, -u.atasCss, u.kiriCss + u.lebarCss - l.lebar, u.atasCss + u.tinggiCss - l.tinggi].map((x) => Math.max(0, x)) as [number, number, number, number]);
+
 function persentil(nilai: number[], q: number): number {
   if (nilai.length === 0) return 0;
   const s = [...nilai].sort((a, b) => a - b);
@@ -77,6 +85,8 @@ export interface PropsLayarDunia {
   menyambung: boolean;
   selisihJam: () => number;
   kirim: (p: PesanGerak) => boolean;
+  /** JS-09 (P-37): `pakai_skill` dari tombol skill; mengembalikan true bila terkirim. */
+  kirimSkill: (s: SkillP0) => boolean;
   bufferedAmount: () => number;
   umumkan: (teks: string) => void;
   // JS-08
@@ -91,7 +101,7 @@ export interface PropsLayarDunia {
 }
 
 export default function LayarDunia(props: PropsLayarDunia) {
-  const { mesin, status, waktu, durasiMenit, kode, diri, jumlahPemain, menyambung, selisihJam, kirim, bufferedAmount, umumkan } = props;
+  const { mesin, status, waktu, durasiMenit, kode, diri, jumlahPemain, menyambung, selisihJam, kirim, kirimSkill, bufferedAmount, umumkan } = props;
   const { skor, peringkat, dialog, ruangUji, menungguPeriksa, saatDialog, saatPeriksa, saatRingkas } = props;
   const [ukuran, setUkuran] = useState<UkuranDunia>(ukuranLayar);
   const [layar, setLayar] = useState(() => ({ lebar: window.innerWidth, tinggi: window.innerHeight, rasio: window.devicePixelRatio || 1 }));
@@ -99,7 +109,9 @@ export default function LayarDunia(props: PropsLayarDunia) {
   const [petaBesar, setPetaBesar] = useState(false);
   const [joystick, setJoystick] = useState<KeadaanJoystick | null>(null);
   const [langit, setLangit] = useState<Langit>(() => hitungLangit(waktu, durasiMenit, Date.now() + selisihJam()));
-  const [pita, setPita] = useState(false);
+  // JS-09 (P-41): pita yang tampil dari antrean mesin dunia, dan status tombol skill (P-36).
+  const [pita, setPita] = useState("");
+  const [tombolSkill, setTombolSkill] = useState<StatusTombol[]>([]);
   const [kurangiGerak, setKurangiGerak] = useState(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false);
   const kanvas = useRef<HTMLCanvasElement | null>(null);
   const label = useRef<HTMLCanvasElement | null>(null);
@@ -114,10 +126,29 @@ export default function LayarDunia(props: PropsLayarDunia) {
   const [fps, setFps] = useState<string | null>(null);
 
   // Nilai terbaru untuk loop bingkai tanpa memasang ulang loop.
-  const terbaru = useRef({ menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, menungguPeriksa });
+  const terbaru = useRef({ menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, menungguPeriksa, umumkan, batas: batasDari(ukuran, layar) });
   useEffect(() => {
-    terbaru.current = { menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, menungguPeriksa };
+    terbaru.current = { menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, menungguPeriksa, umumkan, batas: batasDari(ukuran, layar) };
   });
+
+  // Tombol skill tampil dengan syarat tombol Periksa (P-33).
+  const tampilSkill = status === "main" && !adaDialog && !petaBesar && !menyambung && !tegak;
+  const tampilSkillRef = useRef(tampilSkill);
+  useEffect(() => {
+    tampilSkillRef.current = tampilSkill;
+  });
+
+  // Menekan tombol skill (P-37): pesan bila boleh dipakai, pita bila tanpa muatan atau Petunjuk di luar dialog.
+  const tekanSkill = useCallback(
+    (s: SkillP0) => {
+      if (!tampilSkillRef.current) return;
+      const kini = Date.now();
+      const hasil = mesin.skill.tekan(s, mesin.waktuEfektif(kini, terbaru.current.selisihJam()), kini);
+      if (typeof hasil === "string") mesin.tambahPita(hasil, kini);
+      else if (hasil && kirimSkill(s)) mesin.skill.catatTekan(s, kini);
+    },
+    [mesin, kirimSkill],
+  );
 
   // Periksa (P-23, P-24): pemain berhenti dan laporan berhenti dikirim lebih dulu, lalu `periksa`.
   const periksa = useCallback(() => {
@@ -186,11 +217,10 @@ export default function LayarDunia(props: PropsLayarDunia) {
     const sebelum = duaMenitSebelum.current;
     duaMenitSebelum.current = langit.duaMenit;
     if (!langit.duaMenit || sebelum || status !== "main") return;
-    setPita(true);
+    // JS-09 (P-41): "Dua menit lagi" masuk antrean pita yang sama, tanpa perubahan lain.
+    mesin.pita.tambah(TEKS.dunia.duaMenit, Date.now());
     umumkan(TEKS.dunia.duaMenit);
-    const id = window.setTimeout(() => setPita(false), 3000);
-    return () => window.clearTimeout(id);
-  }, [langit.duaMenit, status, umumkan]);
+  }, [langit.duaMenit, status, umumkan, mesin]);
 
   // Peta besar hanya selama ronde; tertutup sendiri bila ronde berhenti.
   const tutupPetaBesar = useCallback(() => {
@@ -220,6 +250,13 @@ export default function LayarDunia(props: PropsLayarDunia) {
           periksa();
           return;
         }
+      }
+      // Tombol 1 sampai 3 selama tombol skill tampil (P-38); tekanan berulang karena ditahan diabaikan.
+      const angka = /^(?:Digit|Numpad)([1-3])$/.exec(e.code);
+      if (angka && tampilSkillRef.current) {
+        e.preventDefault();
+        if (!e.repeat) tekanSkill(SKILL_P0[Number(angka[1]) - 1]);
+        return;
       }
       if (e.code === "KeyP" && ronde) {
         e.preventDefault();
@@ -253,7 +290,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
       document.removeEventListener("visibilitychange", terlihat);
       m.lepasSemua();
     };
-  }, [mesin, ronde, tutupPetaBesar, periksa]);
+  }, [mesin, ronde, tutupPetaBesar, periksa, tekanSkill]);
 
   // Joystick sentuh (P-13): sentuhan pertama di separuh kiri dunia, bukan di tombol HUD.
   const titikDunia = (e: PointerEventReact<HTMLElement>) => {
@@ -311,6 +348,9 @@ export default function LayarDunia(props: PropsLayarDunia) {
     let ukuranLabel = "";
     let kunciMini = "";
     let kanvasMini: HTMLCanvasElement | null = null;
+    // JS-09: pita dan tombol skill hanya memicu React bila berubah (P-36, P-41).
+    let kunciPita = "";
+    let kunciSkill = "";
     let id = 0;
     const bingkai = (jam: number) => {
       id = requestAnimationFrame(bingkai);
@@ -330,7 +370,9 @@ export default function LayarDunia(props: PropsLayarDunia) {
         kurangiGerak: t.kurangiGerak,
         bufferedAmount: t.bufferedAmount(),
         kirim: t.kirim,
+        batas: t.batas,
       });
+      for (const teks of mesin.umum.splice(0)) t.umumkan(teks);
       ukurBagian(0);
       const kv = kanvas.current;
       const ctx = kv?.getContext("2d");
@@ -409,6 +451,19 @@ export default function LayarDunia(props: PropsLayarDunia) {
       catatan.gambar.push(akhir - mulai);
       const kelompok = KELOMPOK_WAKTU.findIndex((b) => akhir - mulai < b);
       histogram[kelompok]++;
+      // JS-09: pita dari antrean (P-41) dan status tombol skill (P-36).
+      const jamKini = Date.now();
+      // Pita skill tidak tampil selama dialog terbuka (P-41); "Dua menit lagi" tetap seperti JS-07.
+      let pt = mesin.pita.perbarui(jamKini);
+      if (t.adaDialog && pt !== TEKS.dunia.duaMenit) pt = "";
+      if (pt !== kunciPita) setPita((kunciPita = pt));
+      const waktuSkill = mesin.waktuEfektif(jamKini, t.selisihJam());
+      const daftarSkill = mesin.skill.ruang.map((s) => mesin.skill.status(s, waktuSkill, jamKini));
+      const kSkill = daftarSkill.map((b) => Object.values(b).join()).join("|");
+      if (kSkill !== kunciSkill) {
+        kunciSkill = kSkill;
+        setTombolSkill(daftarSkill);
+      }
       // Jangkauan Periksa dan penanda peta hanya memicu React bila berubah (P-19, P-21).
       if (mesin.jangkauan !== jangkauanTampil) {
         jangkauanTampil = mesin.jangkauan;
@@ -461,6 +516,10 @@ export default function LayarDunia(props: PropsLayarDunia) {
         kv.dataset.jangkauan = mesin.jangkauan ?? "";
         kv.dataset.dialogLain = String(mesin.jumlahDialogLain);
         kv.dataset.tokohKejadian = String(mesin.jumlahTokohKejadian);
+        // JS-09 (P-18, P-20, P-26): kotak yang tergambar di pandangan, lari diri, dan arah panah Kompas.
+        kv.dataset.kotak = String(mesin.jumlahKotak);
+        kv.dataset.lari = mesin.lariDiri ? "ya" : "tidak";
+        kv.dataset.kompas = mesin.arahPanah;
         // Rata-rata per bingkai: perbarui, gambar, perbesar, label, peta mini (ms).
         kv.dataset.rincian = catatan.bagian.map((v) => (v / Math.max(1, catatan.gambar.length)).toFixed(2)).join(",");
         catatan.bagian = [0, 0, 0, 0, 0];
@@ -534,6 +593,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
         ) : null}
         {ronde && !petaBesar && !(adaDialog && bentuk === "lembar") ? <PetaMini kanvasRef={mini} rasio={layar.rasio} saatBuka={() => setPetaBesar(true)} /> : null}
         {tampilPeriksa && sentuh ? <TombolPeriksa dekat={jangkauan !== null} ditekan={menungguPeriksa} saatTekan={periksa} /> : null}
+        {tampilSkill && tombolSkill.length > 0 ? <TombolSkill daftar={tombolSkill} sentuh={sentuh} kurangiGerak={kurangiGerak} saatTekan={tekanSkill} /> : null}
         {tampilPeriksa && !sentuh && jangkauan ? <AjakanPeriksa /> : null}
         {fps ? (
           <p className="js-fps" aria-hidden="true">
@@ -551,8 +611,9 @@ export default function LayarDunia(props: PropsLayarDunia) {
           )
         ) : null}
         {pita ? (
-          <p className="js-pita" role="status">
-            {TEKS.dunia.duaMenit}
+          // Pita skill tanpa role="status": teksnya sudah masuk antrean pengumuman (P-39).
+          <p className="js-pita" role={pita === TEKS.dunia.duaMenit ? "status" : undefined}>
+            {pita}
           </p>
         ) : null}
         {petaBesar && ronde ? (

@@ -84,10 +84,11 @@ Contoh skala: HP 412 × 915 CSS px dengan rasio piksel 2,625 dalam posisi mendat
 │                                                │ mini    │ │
 │                                                └─────────┘ │
 │                     DUNIA 320×180                          │
-│                     (skala bulat)                  (⚡2)    │
-│                                                    (➤1)    │
-│   ╭─────╮                                          (?0)    │
-│   │  ◎  │ joystick                         ( PERIKSA )     │
+│                     (skala bulat)                          │
+│                                                    (⚡2)    │
+│                                              (➤1)          │
+│   ╭─────╮                                                   │
+│   │  ◎  │ joystick                       (?0)  ( PERIKSA )  │
 │   ╰─────╯                                                   │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -95,14 +96,14 @@ Contoh skala: HP 412 × 915 CSS px dengan rasio piksel 2,625 dalam posisi mendat
 - **Bilah atas** (tinggi 28 px CSS, menimpa tepi atas dunia): busur hari mini dengan tiga titik masa dan jam cerita di kiri, sisa waktu di tengah, skor dan peringkat di kanan. Selama skor masih 0, peringkat tampil "#–" (keputusan Gerbang 1 JS-08).
 - **Peta mini** di kanan atas, 112 × 75 px CSS. Mengetuknya membuka peta besar yang menutupi dunia; permainan tetap berjalan.
 - **Joystick sentuh** muncul di titik sentuhan pertama pada separuh kiri layar (radius 48 px, kenop 24 px), dan hilang saat jari diangkat.
-- **Tombol Periksa** bulat 64 px di kanan bawah, dengan tiga **tombol skill** bulat 48 px di atasnya.
+- **Tombol Periksa** bulat 64 px di kanan bawah. Tiga **tombol skill** bulat 48 px membentuk lengkung di sekitarnya (JS-09): Lari cepat di atas Periksa (`right: 24px; bottom: 100px`), Kompas kejadian serong kiri atas (`right: 78px; bottom: 78px`), dan Petunjuk di kiri (`right: 100px; bottom: 24px`), diukur dari tepi kanan dan bawah dunia yang tampil. Letak setiap skill tetap walaupun skill lain dimatikan. Jarak antartombol sedikitnya 10 px, ke Periksa 20 px, dan ke peta mini sedikitnya 70 px. Kolom tiga tombol di atas Periksa (rancangan awal) menabrak peta mini di HP 640 × 360 dan HP dengan bilah peramban (maket Plan JS-09). Tombol skill hanya tampil saat ronde berjalan, tidak selama dialog, peta besar, lapisan menyambung ulang, atau ajakan memutar HP.
 - Pada HP yang lebih lebar dari 16:9, sisa ruang kiri-kanan menjadi bingkai `ink` dan kontrol boleh menempati bingkai itu. Pada layar 16:9, kontrol menimpa sudut dunia; pemain sendiri selalu berada di tengah, jauh dari kontrol.
 - HP tegak menampilkan ajakan "Putar HP ke posisi mendatar" dengan ikon, tanpa dunia di belakangnya.
 - Tombol "Layar penuh" di lobi memakai layar penuh peramban dan mengunci orientasi mendatar bila perangkat mendukung.
 
 ### 3.4 Layar pemain di laptop
 
-Tata letaknya sama, tetapi kontrol sentuh disembunyikan bila perangkat tidak memakai layar sentuh. Di dekat tombol skill tampil tanda tombol `1` `2` `3`, dan saat pemain berada dalam jangkauan kejadian, tampil ajakan "`E` Periksa" di bawah tengah dunia.
+Tata letaknya sama, tetapi kontrol sentuh disembunyikan bila perangkat tidak memakai layar sentuh, dan saat pemain berada dalam jangkauan kejadian, tampil ajakan "`E` Periksa" di bawah tengah dunia. Tombol skill membentuk kolom di kanan bawah (JS-09): `right: 16px`, dengan `bottom` 132, 74, dan 16 px untuk Lari cepat, Kompas kejadian, dan Petunjuk bila ketiganya aktif. Skill yang dimatikan tidak memakan tempat, dan tombol yang tersisa turun ke bawah dengan urutan yang sama. Tanda tombol `1` `2` `3` bergaya ajakan "E Periksa" (Press Start 2P 12 px, garis `ink` 2 px, latar `sun`) tampil 8 px di kiri setiap tombol, tetap menurut skillnya walaupun skill lain dimatikan.
 
 ### 3.5 Dialog kejadian
 
@@ -111,7 +112,8 @@ Tata letaknya sama, tetapi kontrol sentuh disembunyikan bila perangkat tidak mem
 - **Isi:** kotak situasi bergaya kotak narasi Sehari Setara, pertanyaan, lalu pilihan:
   - Langkah 1: empat tombol pilihan A–D, berbentuk kisi 2 × 2 di layar mendatar.
   - Langkah 2: tiga tombol pilihan A–C bersusun, karena teksnya lebih panjang; isi bisa digulir.
-- **Kaki:** "Tutup" di kiri, "Petunjuk (n)" di tengah (hanya Langkah 1), dan "Kunci jawaban" di kanan (nonaktif sampai ada pilihan).
+- **Kaki:** "Tutup" di kiri, "Petunjuk (n)" di tengah (hanya Langkah 1), dan "Kunci jawaban" di kanan (nonaktif sampai ada pilihan). Sejak JS-09, urutannya Tutup, Situasi (hanya di tampilan ringkas), Petunjuk, lalu Kunci jawaban, tetap satu baris dengan setiap tombol setinggi 48 px di dunia 610 × 343 sampai 1280 × 720. Tombol Petunjuk hanya tampil di tampilan Langkah 1 yang memuat pilihan, bila Petunjuk aktif di ruang; tanpa muatan tampak nonaktif (`mist`), dan sesudah dipakai bertuliskan "Petunjuk dipakai".
+- **Petunjuk** (JS-09): kotak petunjuk berikon buku (16 px di lembar, 32 px di panel) dengan kalimat seukuran teks pertanyaan, latar `white`, dan garis kiri 4 px `sky-d`. Di tampilan penuh, kotak itu berada di antara pertanyaan dan pilihan; di tampilan ringkas, kotak itu menggantikan pertanyaan di tampilan pilihan. Pilihan yang dicoret bergaris coret, berlatar `mist` dengan teks `dusk`, tanpa ▶, tetap bisa difokus, dan dibacakan "{huruf}. {teks}, dicoret Petunjuk".
 - **Sesudah Langkah 1:** pita umpan balik `leaf` dengan ikon hati ("Tepat") atau `mango` dengan ikon tanda tanya ("Belum tepat"), diikuti kalimat penjelasan, lalu tombol "Lanjut ke Langkah 2".
 - **Sesudah Langkah 2:** kartu dampak dengan susunan Sehari Setara (kepala berwarna tingkat dengan ikon dan tulisan tingkat, lalu "Yang terjadi", "Hak yang terdampak", "Kewajiban terkait", dan "Rujukan"), angka skor melayang, serta tombol "Lanjut menjelajah".
 - **Tampilan ringkas** (keputusan Gerbang 1 JS-08): dipakai bila tinggi area dialog kurang dari 560 px CSS, yaitu HP mendatar dan laptop yang dunianya 960 × 540. Kepala dan kaki dialog tetap. Langkah 1 dibagi dua tampilan: situasi dan pertanyaan dengan tombol "Lihat pilihan", lalu pertanyaan dan pilihan dengan tombol "Situasi". Umpan balik hanya menampilkan pita, pilihanmu, dan jawaban tepat. Langkah 2 menampilkan pertanyaan dan pilihan dengan tombol "Situasi". Kartu dampak boleh digulir, dengan tombol tetap terlihat. Rinciannya di spesifikasi JS-08.
@@ -397,9 +399,9 @@ Semua aturan tokoh Sehari Setara tetap berlaku: tokoh orisinal, warna kulit bera
 | Kejadian belum diperiksa | Gelembung bulat 12 × 12 bertanda "!" | `sun`, garis luar `ink` | Ada kejadian yang bisa diperiksa |
 | Kejadian sedang dibuka pemain sendiri | Gelembung "…" | `mist`, garis luar `ink` | Dialog terbuka |
 | Kejadian selesai | Gelembung kecil bertanda ✓ | `leaf`, garis luar `ink` | Sudah dijawab pemain ini |
-| Kotak bantuan | Peti 12 × 10 dengan ikon skill di tutupnya | `wood`, ikon skill | Ambil dengan melewatinya |
+| Kotak bantuan | Peti 14 × 12 dengan ikon skill di tutupnya; strip tiga bingkai (kecil, besar berkilau, biasa). Tergambar di lapisan tokoh dan diurutkan menurut baris kaki 16y + 14 (JS-09) | `wood`, ikon skill | Ambil dengan melewatinya |
 | Halte | Tiang dengan ikon angkot | `teal` | Halte angkot (P1) |
-| Panah kompas | Panah 7 × 7 di tepi pandangan | `teal`, garis luar `ink` | Arah kejadian terdekat |
+| Panah kompas | Panah 7 × 7 dalam 8 arah, digambar dua kali lebih besar (14 × 14 piksel logis, skala bulat) di tepi kotak aman pandangan, yang tidak tertutup bilah atas, peta mini, tombol skill, Periksa, dan ajakan "E Periksa" (JS-09) | `teal`, garis luar `ink` | Arah titik sasaran Kompas; disembunyikan selama titik itu tampak |
 | Diri di peta mini | Panah | `sun`, garis luar `ink` | Posisi dan arah pemain |
 | Pemain lain di peta kelas | Titik 3 × 3 | Warna tas, garis luar `ink` | Posisi pemain |
 
@@ -417,11 +419,11 @@ Semua panel memakai **bingkai piksel** Sehari Setara: garis `ink` 2 piksel antar
 | **Bilah atas** | Busur hari mini (tiga titik masa; ikon matahari di titik berjalan), jam cerita, sisa waktu (angka berlatar `mango` dengan teks `ink` pada dua menit terakhir), skor dengan ikon bintang, dan peringkat "#n". Latarnya mengikuti masa: pagi `#FFD9A8`, siang `#6EC6F2`, sore `#FFC27A`, teks `ink` |
 | **Joystick** | Lingkaran `cream` 85% bergaris `ink`, kenop `sun`. Tidak tampil di perangkat tanpa layar sentuh |
 | **Tombol Periksa** | Biasa: `mist` dengan teks `dusk` ("Periksa"), nonaktif `aria-disabled`. Dalam jangkauan: `sun` dengan teks `ink`. Ditekan: geser keras 1 piksel antarmuka |
-| **Tombol skill** | Ikon skill dan angka muatan di sudut. Tanpa muatan: `mist`. Sedang aktif: cincin dalam `sun`. Jeda pemakaian: blok `ink` yang menyusut dari atas |
+| **Tombol skill** | Bulat 48 px bergaris `ink` 4 px dengan ikon skill 16 × 16 pada skala 2, dan lencana muatan 22 × 22 (garis `ink` 2 px, latar `white`, angka Press Start 2P 12 px di perangkat sentuh dan 14 px di laptop) di sudut kiri atas. Bermuatan: `cream`. Tanpa muatan: `mist`, lencana "0", `aria-disabled`. Sedang aktif (Lari cepat dan Kompas): cincin dalam `sun` 4 px, nonaktif sampai skill selesai. Jeda 2 detik: blok `ink` 70% yang menyusut dari atas ke bawah dalam 8 langkah. Ditekan: geser 1 piksel antarmuka sampai jawaban tiba, paling lama 2 detik. Fokus: garis luar `sun` 4 px seperti Periksa (JS-09) |
 | **Peta mini** | Bingkai piksel; zona dalam warna dominannya; panah diri; penanda kejadian yang sudah terlihat; halte |
-| **Pemberitahuan** | Pita di atas tengah selama 3 detik, misalnya "Kotak sepatu: +1 Lari cepat" atau "Dua menit lagi". Diumumkan ke pembaca layar |
-| **Tombol pilihan A–D** | Aturan tombol pilihan Sehari Setara: biasa `cream`, fokus atau terpilih `sun` dengan ▶ dan cincin dalam, nonaktif `mist`. Sesudah dikunci: pilihan benar `leaf` berlabel "Jawaban tepat", pilihan pemain yang keliru `mango` berlabel "Pilihanmu". Selalu dengan tulisan, bukan hanya warna |
-| **Kartu dampak** | Susunan kartu dampak Sehari Setara, satu kolom di HP, ditambah angka poin "+60" |
+| **Pemberitahuan** | Pita di atas tengah selama 3 detik, misalnya "+1 Lari cepat" atau "Dua menit lagi". Sejak JS-09, lebar luarnya paling besar lebar dunia yang tampil dikurangi 256 px (berjarak sedikitnya 4 px dari peta mini), teks panjang terbungkus menjadi dua baris rata tengah, dan pita tampil satu per satu dalam antrean paling banyak 3 butir. Pita skill tidak tampil selama dialog. Diumumkan ke pembaca layar; pita skill tidak memakai `role="status"`, karena teksnya masuk antrean pengumuman |
+| **Tombol pilihan A–D** | Aturan tombol pilihan Sehari Setara: biasa `cream`, fokus atau terpilih `sun` dengan ▶ dan cincin dalam, nonaktif `mist`. Sesudah dikunci: pilihan benar `leaf` berlabel "Jawaban tepat", pilihan pemain yang keliru `mango` berlabel "Pilihanmu". Dicoret Petunjuk (JS-09): `mist`, teks `dusk` bergaris coret, tanpa ▶. Selalu dengan tulisan, bukan hanya warna |
+| **Kartu dampak** | Susunan kartu dampak Sehari Setara, satu kolom di HP, ditambah angka poin "+60". Sejak JS-09, jawaban "tepat" yang menambah muatan Kompas menampilkan "+1 Kompas" berikon kompas 16 × 16 di kanan angka poin |
 | **Layar menyambung** | Lapisan `ink` 70% dengan "Menyambung ulang…" dan ikon jam berputar 2 bingkai. Sesudah 30 detik ditambah "Periksa wifi atau data selulermu." |
 | **Layar jeda** | "Dijeda oleh guru" di atas lapisan `ink` 70% |
 | **Lobi pemain** | Kode ruang, nama samaran, avatar, dan "Menunggu guru memulai…"; pemain bisa berjalan di halaman lobi |
@@ -437,8 +439,8 @@ Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 bl
 |---|---|
 | **Navigasi samping** | Butir aktif: latar `sun`, ▶, dan teks `ink` |
 | **Tabel** | Kepala `mist`, baris berselang `cream` dan `white`, baris yang difokus bergaris `ink` |
-| **Label status** | Draf (`mist`), Siap tinjau (`sun`), Terbit (`leaf`), Arsip (`mist` dengan ikon kotak arsip), Rujukan belum diverifikasi (`mango` dengan ikon tanda seru), Terverifikasi (`leaf` dengan ikon centang). Teks selalu `ink` dan selalu disertai tulisan |
-| **Formulir** | Label di atas kolom; penghitung karakter "86/90"; galat validasi `coral` dengan ikon dan kalimat perbaikan di bawah kolom |
+| **Label status** | Draf (`mist`), Siap tinjau (`sun`), Terbit (`leaf`), Arsip (`mist` dengan ikon kotak arsip), Rujukan belum diverifikasi (`mango` dengan ikon tanda seru), Terverifikasi (`leaf` dengan ikon centang). Tanda "Petunjuk" di rincian jawaban (`white` dengan ikon buku, JS-09). Teks selalu `ink` dan selalu disertai tulisan |
+| **Formulir** | Label di atas kolom; penghitung karakter "86/90"; galat validasi `coral` dengan ikon dan kalimat perbaikan di bawah kolom. Kelompok kotak centang berlegenda, misalnya "Skill" di dialog Ruang baru (JS-09): setiap pilihan setinggi 48 px dengan ikon 16 × 16 dan nama, lalu satu kalimat keterangan |
 | **Pemilih rujukan** | Daftar rujukan dari pustaka dengan status verifikasinya; rujukan baru dibuat di halaman Rujukan |
 | **Pratinjau** | Bingkai HP mendatar berisi dialog kejadian persis seperti di layar pemain |
 | **Grafik** | Batang mendatar dengan label dan angka; warna tingkat `leaf`, `mango`, `coral`, sedangkan pilihan netral `sky-d` |
@@ -453,10 +455,10 @@ Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 bl
 | Karakter gerak | Bertahap (`steps()`), bukan halus |
 | Avatar | Jalan 8 fps, lari 12 fps, diam 2 fps |
 | Penanda kejadian | Naik-turun 1 piksel setiap 0,5 detik (2 bingkai) |
-| Ambil kotak | Pop 3 bingkai (kecil, besar berkilau, normal) masing-masing 80 ms |
+| Kotak bantuan | Kotak yang muncul lagi di depan mata pemain: pop 3 bingkai (kecil, besar berkilau, biasa) masing-masing 80 ms. Kotak yang diambil langsung hilang, diganti `tanda_kilau` 2 bingkai masing-masing 80 ms. Kotak yang tampil saat ronde mulai atau saat layar dimuat tidak diberi pop (JS-09) |
 | Skor melayang | "+60" naik 4 piksel dalam dua langkah selama 240 ms di samping skor pada bilah atas, lalu hilang sesudah 1 detik (JS-08) |
-| Lari cepat | Debu 2 bingkai di belakang kaki |
-| Kompas | Panah berdenyut 2 bingkai setiap 0,5 detik |
+| Lari cepat | Langkah 12 fps dan debu 2 bingkai (`tanda_debu`) 7 piksel di belakang kaki saat menghadap kanan atau kiri, atau 2 piksel di bawah kaki saat menghadap atas atau bawah; pemain lain tampak berlari bila dalam 500 ms terakhir bergerak lebih dari 45 piksel (JS-09) |
+| Kompas | Panah berdenyut 2 bingkai (biasa dan terang) setiap 0,5 detik |
 | Ganti masa | Palet peta dan warna bilah atas langsung berganti, tanpa sapuan |
 | Hitung mundur | Angka 3, 2, 1 besar di tengah, masing-masing 1 detik, tanpa membesar halus |
 | Podium | Balok naik dalam 3 langkah selama 300 ms, sekali |
@@ -464,7 +466,7 @@ Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 bl
 | Dialog | Muncul langsung. Tombol maju baru bekerja 600 ms sesudah tampil, agar tekanan ganda tidak melewatkan isi (aturan Sehari Setara) |
 | Durasi antarmuka | 120–400 ms |
 
-**Kurangi gerak** (`prefers-reduced-motion` atau pengaturan): penanda dan panah diam, tanpa pop, tanpa skor melayang (skor langsung berganti), tanpa debu, podium langsung di tempatnya, dan sprite tetap di bingkai pertama walaupun avatar berpindah. Masa tunggu 600 ms tetap berlaku.
+**Kurangi gerak** (`prefers-reduced-motion` atau pengaturan): penanda dan panah diam, tanpa pop, tanpa kilau, tanpa skor melayang (skor langsung berganti), tanpa debu, podium langsung di tempatnya, dan sprite tetap di bingkai pertama walaupun avatar berpindah. Blok jeda tombol skill tampil penuh selama 2 detik lalu hilang, tanpa menyusut bertahap (JS-09). Masa tunggu 600 ms tetap berlaku.
 
 ## 12. Suara
 
@@ -489,8 +491,8 @@ Setiap efek ≤ 1 detik (kecuali jingle akhir) dan ≤ 30 KB, WAV PCM mono 16 bi
 - **Target sentuh** ≥ 48 × 48 px CSS dengan jarak antartombol ≥ 8 px.
 - **Kontras** teks ≥ 4,5 : 1 dan objek grafis penting ≥ 3 : 1 (bagian 4).
 - **Makna tidak hanya lewat warna:** tingkat, status, benar-keliru, dan penanda selalu memakai bentuk, ikon, dan tulisan.
-- **Keyboard penuh di laptop:** `WASD` atau panah untuk bergerak, `E` atau `Enter` untuk Periksa, `1` `2` `3` untuk skill, `1`–`4` dan `Enter` di dialog, `M` untuk suara, `Esc` untuk menu. Fokus selalu terlihat (latar `sun` dan ▶).
-- **Pembaca layar:** dialog kejadian, rekap, layar kelas, dan konsol adalah HTML dengan struktur judul yang benar. Peristiwa penting (kejadian terlihat, skor berubah, waktu tinggal dua menit, jeda) diumumkan lewat wilayah `aria-live="polite"` dengan jarak minimal 2 detik antarpengumuman. Dunia kanvas dilengkapi daftar "Kejadian terdekat" dan bantuan gerak (JFR-13, P1).
+- **Keyboard penuh di laptop:** `WASD` atau panah untuk bergerak, `E` atau `Enter` untuk Periksa, `1` `2` `3` untuk skill di luar dialog (baris angka atau papan angka; tekanan berulang karena tombol ditahan diabaikan), `1`–`4` dan `Enter` di dialog, `M` untuk suara, `Esc` untuk menu. Di dalam dialog tidak ada pintasan Petunjuk; tombol Petunjuk dicapai dengan `Tab` lalu `Enter` atau `Spasi` (JS-09). Fokus selalu terlihat (latar `sun` dan ▶).
+- **Pembaca layar:** dialog kejadian, rekap, layar kelas, dan konsol adalah HTML dengan struktur judul yang benar. Peristiwa penting (kejadian terlihat, skor berubah, waktu tinggal dua menit, jeda) diumumkan lewat wilayah `aria-live="polite"` dengan jarak minimal 2 detik antarpengumuman. Sejak JS-09 juga: kotak terambil ("Dapat satu muatan Lari cepat."), skill mulai aktif ("Lari cepat aktif selama 6 detik.") dan selesai, Petunjuk dengan kalimatnya, +1 Kompas, dan setiap pita skill. Label tombol skill memuat nama lengkap skill dan muatannya ("Kompas kejadian, 1 muatan", ditambah ", sedang aktif"), dan di laptop tombol ber-`aria-keyshortcuts`. Dunia kanvas dilengkapi daftar "Kejadian terdekat" dan bantuan gerak (JFR-13, P1).
 - **Kurangi gerak** (bagian 11) dan **tanpa kedip** (bagian 6).
 - **Ukuran label nama** bisa diperbesar di pengaturan pemain.
 - `<html lang="id">`.

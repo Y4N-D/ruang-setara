@@ -221,6 +221,16 @@ export function pesanTerbuka(k: KejadianRuang, j: JawabanRuang): PesanServer<"ke
   };
 }
 
+/**
+ * JS-09 (P-28, P-30): `petunjuk` berisi kalimat petunjuk isi kejadian ruang dan id pilihan milik pemain untuk pilihan
+ * yang dicoret (`opsiAsli` = id asli 1a–1d); null bila id asli itu tidak ada di isi.
+ */
+export function pesanPetunjuk(k: KejadianRuang, j: JawabanRuang, opsiAsli: string): PesanServer<"petunjuk"> | null {
+  const posisi = j.urutan1.findIndex((i) => k.isi.langkah1.opsi[i]?.id === opsiAsli);
+  if (posisi < 0) return null;
+  return { v: PROTOKOL_VERSI, t: "petunjuk", kejadianId: k.kode, kalimat: k.isi.langkah1.petunjuk, opsiDicoret: j.id1[posisi] };
+}
+
 /** `hasil_1` dari jawaban yang Langkah 1-nya sudah dikunci; juga untuk ulangan saat dibuka lagi (KT-13). */
 export function pesanHasil1(k: KejadianRuang, j: JawabanRuang): PesanServer<"hasil_1"> {
   const opsi = k.isi.langkah1.opsi;
@@ -307,7 +317,8 @@ export interface BarisJawabanD1 {
   langkah2Pada: number | null;
 }
 
-export function barisJawabanD1(ruangId: string, k: KejadianRuang, j: JawabanRuang): BarisJawabanD1 {
+/** JS-09 (P-45): `petunjukDipakai` 1 bila Petunjuk dipakai pemain itu untuk kejadian itu. */
+export function barisJawabanD1(ruangId: string, k: KejadianRuang, j: JawabanRuang, petunjukDipakai = false): BarisJawabanD1 {
   return {
     id: `${j.pemainId}:${j.kode}`,
     ruangId,
@@ -319,7 +330,7 @@ export function barisJawabanD1(ruangId: string, k: KejadianRuang, j: JawabanRuan
     }),
     langkah1Opsi: j.langkah1Opsi,
     langkah1Benar: j.langkah1Benar === null ? null : j.langkah1Benar ? 1 : 0,
-    petunjukDipakai: 0,
+    petunjukDipakai: petunjukDipakai ? 1 : 0,
     langkah2Opsi: j.langkah2Opsi,
     tingkat: j.tingkat,
     poin: j.poin,
