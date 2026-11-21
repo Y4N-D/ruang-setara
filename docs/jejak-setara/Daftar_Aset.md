@@ -4,12 +4,12 @@
 |---|---|
 | Versi | 1.1 |
 | Diperbarui | 21 November 2026 |
-| Tahap saat ini | Plan efek suara (21 November 2026, bagian "Efek suara"): contoh `sfx_tepat` dan berkas banding dikirim di balasan; menunggu `Setuju: suara`. Permintaan C-1 sampai C-13 sudah diterapkan atau selesai; C-14 dan C-15 menunggu `Setuju: suara`. Semua 239 aset gambar dalam rencana Disetujui (6 November 2026); `manifest.ts` (C-6) dan JS-06 selesai 8 November 2026 |
+| Tahap saat ini | Efek suara giliran 1 (21 November 2026, bagian "Efek suara"): kit suara `scripts/game/suara/` dan S-01 sampai S-07 diserahkan, semuanya Ditinjau; menunggu persetujuan per efek. Rencana efek suara disetujui 21 November 2026 (`Setuju: suara`, semua saran a). Permintaan C-1 sampai C-13 sudah diterapkan atau selesai; C-14 dan C-15 diajukan. Semua 239 aset gambar dalam rencana Disetujui (6 November 2026); `manifest.ts` (C-6) dan JS-06 selesai 8 November 2026 |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi". Efek suara dikerjakan Sesi C atas permintaan pemilik proyek, 21 November 2026 |
 | Acuan | ZIP repositori 21 November 2026 (Sesi A sedang mengerjakan JS-09, Sesi B menulis naskah kejadian tambahan) |
-| Cara membuat | Gambar: digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14. Efek suara: dibuat dengan kode, rencananya di bagian "Efek suara" |
-| Cara membangun | `npx pnpm@11.25.0 assets:build:jejak` (menjalankan `python scripts/game/art/build_jejak.py`) |
-| Berkas yang boleh diubah Sesi C | `scripts/game/art/atas_*.py`, `scripts/game/art/build_jejak.py`, `app/jejak-setara/assets/`, `docs/jejak-setara/Daftar_Aset.md`, `docs/jejak-setara/preview/`. Sesudah kabar "JS-02 selesai": juga `scripts/jejak-setara/peta/`, `app/jejak-setara/peta/`, dan uji berawalan `peta-` di `app/jejak-setara/__tests__/konten/` (izin 7 Nov 2026), serta `docs/jejak-setara/specs/JS-06-peta.md` dan `docs/jejak-setara/tests/JS-06-hasil.md` (usulan JS-06 nomor 8a, 8 Nov 2026). Untuk `manifest.ts`: uji berawalan `aset-` di `app/jejak-setara/__tests__/konten/` (izin 8 Nov 2026). Untuk efek suara (izin 21 Nov 2026): juga `scripts/game/suara/` (baru), bersama `build_jejak.py`, `app/jejak-setara/assets/` (termasuk `sfx/`, `manifest.ts`, dan `CREDITS.md`), berkas ini, dan `docs/jejak-setara/preview/` |
+| Cara membuat | Gambar: digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14. Efek suara: dibuat dengan kode di `scripts/game/suara/` (`chip.py` dan `efek.py`), hanya dengan pustaka bawaan Python |
+| Cara membangun | `npx pnpm@11.25.0 assets:build:jejak` (menjalankan `python scripts/game/art/build_jejak.py`), yang membangun gambar dan efek suara sekaligus |
+| Berkas yang boleh diubah Sesi C | `scripts/game/art/atas_*.py`, `scripts/game/art/build_jejak.py`, `app/jejak-setara/assets/`, `docs/jejak-setara/Daftar_Aset.md`, `docs/jejak-setara/preview/`. Sesudah kabar "JS-02 selesai": juga `scripts/jejak-setara/peta/`, `app/jejak-setara/peta/`, dan uji berawalan `peta-` di `app/jejak-setara/__tests__/konten/` (izin 7 Nov 2026), serta `docs/jejak-setara/specs/JS-06-peta.md` dan `docs/jejak-setara/tests/JS-06-hasil.md` (usulan JS-06 nomor 8a, 8 Nov 2026). Untuk `manifest.ts`: uji berawalan `aset-` di `app/jejak-setara/__tests__/konten/` (izin 8 Nov 2026). Untuk efek suara (izin 21 Nov 2026): juga `scripts/game/suara/` (baru), bersama `build_jejak.py`, `app/jejak-setara/assets/` (termasuk `sfx/`, `manifest.ts`, dan `CREDITS.md`), berkas ini, dan `docs/jejak-setara/preview/`; serta `app/jejak-setara/__tests__/konten/aset-manifest.test.ts` untuk kelompok `SUARA` (usulan KT-C24 a, 21 Nov 2026) |
 
 Status: **Disetujui** (pratinjau sudah diterima pemilik proyek) · **Ditinjau** (pratinjau sudah dikirim, menunggu keputusan) · **Belum** · **Ditunda** (menunggu keputusan lain).
 
@@ -53,6 +53,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 8 Nov 2026 | Test JS-06 | 25 uji peta baru lulus, 12 salinan rusak ditolak, `test:jejak` 319 uji lulus, `test:e2e:jejak` 18 uji lulus, galeri 178 berkas identik; JS-06 Selesai ([laporan](tests/JS-06-hasil.md)) |
 | 8 Nov 2026 | Build manifest (C-6) | `build_jejak.py` kini juga menulis `app/jejak-setara/assets/manifest.ts` dengan bentuk Architecture 11.2 (usulan 11a JS-07): 239 aset Disetujui. Uji baru `aset-manifest.test.ts` (16 uji) lulus dengan penjalan pengganti, dan 16 salinan rusak ditolak (bagian "Manifest aset"). Status C-1 sampai C-12 diperbarui sesuai tanggapan Sesi A di `PLAN.md`; C-8 ternyata baru diterapkan sebagian, dan Permintaan C-13 diajukan |
 | 21 Nov 2026 | Plan efek suara | Atas permintaan pemilik proyek, Sesi C merencanakan delapan efek suara Design System 12 untuk JS-14. Percobaan di luar repositori: kit suara dengan pustaka bawaan Python, contoh `sfx_tepat` (lulus pemeriksaan), ukuran berkas, dan keras-pelan dibanding klik dan bunyi teks Sehari Setara. Entri Plan dan usulan KT-C20 sampai KT-C26 ditulis di bagian "Efek suara"; contoh `sfx_tepat.wav` dan berkas banding dikirim di balasan, tidak di repositori. Status C-13 dan C-8 diubah menjadi Diterapkan sesuai tanggapan Sesi A di `PLAN.md`; C-14 dan C-15 disiapkan. Menunggu `Setuju: suara` |
+| 21 Nov 2026 | Plan efek suara | Pemilik proyek membalas `Setuju: suara`: semua saran (a) diterima (usulan 1a sampai 7a, KT-C20 sampai KT-C26). Permintaan C-14 dan C-15 diajukan |
+| 21 Nov 2026 | Efek suara giliran 1 | Kit suara `scripts/game/suara/` (`chip.py` dan `efek.py`) dibuat dan dipanggil `build_jejak.py`. S-01 sampai S-07 diserahkan, menunggu persetujuan per efek: semua lulus pemeriksaan dan berada dalam 1 LU dari sasaran keras terdengar. `CREDITS.md` dan `manifest.ts` belum berubah, karena hanya memuat efek Disetujui |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -645,20 +647,45 @@ Ikon 16 × 16 (termasuk margin 1 piksel) bergaris luar `ink`, sejalan dengan iko
 
 Delapan efek suara Design System bagian 12, dibuat dengan kode (bukan dengan kit gambar) dan disimpan di `app/jejak-setara/assets/sfx/`. Rencana dan usulannya ada di bawah tabel. Untuk efek suara, pratinjaunya adalah berkas WAV yang dilampirkan di balasan. Setiap efek berstatus Ditinjau sampai pemilik proyek mendengarnya dan membalas, lalu menjadi Disetujui.
 
-| ID | Berkas | Peristiwa | Karakter (Design System 12) | Rancangan Plan (bisa berubah sesudah didengar) | Lama | Status |
+| ID | Berkas | Peristiwa | Karakter (Design System 12) | Isi | Lama | Status |
 |---|---|---|---|---|---|---|
-| S-01 | `sfx_kejadian.wav` | Kejadian pertama kali terlihat | Dua nada naik pendek | "Pip-ting": segitiga, G5 lalu C6 dengan jeda kecil | ±0,25 detik | Belum |
-| S-02 | `sfx_kotak.wav` | Ambil kotak | Denting naik | Seperti koin: pulsa 25%, B5 lalu E6 yang berdering | ±0,35 detik | Belum |
-| S-03 | `sfx_skill.wav` | Skill aktif | Desir pendek | "Wus": desis tersaring yang makin tinggi, ditemani luncuran segitiga halus | ±0,35 detik | Belum |
-| S-04 | `sfx_tepat.wav` | Jawaban tepat | Arpeggio ceria | C5, E5, G5, lalu C6, 70 ms per nada: pulsa 25% ditemani segitiga satu oktaf di bawah; nada terakhir berdering dengan getar halus | 0,552 detik | Ditinjau (contoh Plan, 21 Nov) |
-| S-05 | `sfx_lembut.wav` | Kurang tepat atau berisiko | Nada rendah lembut, tidak mengagetkan | Dua nada turun pelan seperti "hmm": segitiga, G4 lalu E4, awal lembut, tanpa dengung atau nada turun bertangga | ±0,45 detik | Belum |
-| S-06 | `sfx_hitung.wav` | Hitung mundur (3, 2, 1) | Tik per angka | Tik bersih yang berbeda dari klik: pulsa 50%, C6 tetap | ±0,08 detik | Belum |
-| S-07 | `sfx_peringatan.wav` | Dua menit terakhir | Dua tik pelan | Dua tik tenang: segitiga, E5 dua kali | ±0,3 detik | Belum |
-| S-08 | `sfx_akhir.wav` | Akhir ronde (layar kelas) | Jingle 3–4 detik | Jingle hangat bernuansa malam: dua suara pulsa, bas segitiga, dan desis halus; C mayor, diakhiri kadens | ±3,2 detik | Belum (format menunggu KT-C22) |
-| — | `sfx_klik.wav`, `sfx_teks.wav` | Tekanan yang diterima; teks muncul per huruf | Dipakai ulang dari Sehari Setara tanpa perubahan | Cara memakainya menunggu KT-C25 | 45 ms, 32 ms | — |
+| S-01 | `sfx_kejadian.wav` | Kejadian pertama kali terlihat | Dua nada naik pendek | "Pip-ting": segitiga, G5 lalu C6 dengan jeda kecil, ditemani sedikit pulsa 25% agar jelas di speaker HP | 0,262 detik | Ditinjau (21 Nov) |
+| S-02 | `sfx_kotak.wav` | Ambil kotak | Denting naik | "Tring": pulsa 25% meluncur cepat dari A5 ke E6 lalu berdering, dengan segitiga satu oktaf di bawah dan kilau pulsa 12,5% di B6 | 0,362 detik | Ditinjau (21 Nov) |
+| S-03 | `sfx_skill.wav` | Skill aktif | Desir pendek | "Wus": desis yang makin terang, ditemani segitiga yang meluncur naik dari E4 ke E5 | 0,352 detik | Ditinjau (21 Nov) |
+| S-04 | `sfx_tepat.wav` | Jawaban tepat | Arpeggio ceria | C5, E5, G5, lalu C6, 70 ms per nada: pulsa 25% ditemani segitiga satu oktaf di bawah; nada terakhir berdering dengan getar halus | 0,552 detik | Ditinjau (21 Nov) |
+| S-05 | `sfx_lembut.wav` | Kurang tepat atau berisiko | Nada rendah lembut, tidak mengagetkan | Dua nada turun pelan seperti "hmm": segitiga G4 lalu E4 dengan awal lembut, ditemani sedikit pulsa 50% yang disaring rendah agar terdengar di speaker HP; tanpa dengung atau nada turun bertangga | 0,462 detik | Ditinjau (21 Nov) |
+| S-06 | `sfx_hitung.wav` | Hitung mundur (3, 2, 1) | Tik per angka | Tik bersih: pulsa 50% di C6 yang tetap, berbeda dari klik yang berpulsa 25% dan nadanya turun | 0,062 detik | Ditinjau (21 Nov) |
+| S-07 | `sfx_peringatan.wav` | Dua menit terakhir | Dua tik pelan | Dua tik tenang: segitiga, E5 dua kali, berjarak 0,22 detik | 0,302 detik | Ditinjau (21 Nov) |
+| S-08 | `sfx_akhir.wav` | Akhir ronde (layar kelas) | Jingle 3–4 detik | Jingle hangat bernuansa malam: dua suara pulsa, bas segitiga, dan desis halus; C mayor, diakhiri kadens; 22.050 Hz, paling besar 160 KB (KT-C22 a) | ±3,2 detik | Belum (giliran 2) |
+| — | `sfx_klik.wav`, `sfx_teks.wav` | Tekanan yang diterima; teks muncul per huruf | Dipakai ulang dari Sehari Setara tanpa perubahan | Disalin identik byte ke `sfx/` oleh `build_jejak.py` (KT-C25 a) | 45 ms, 32 ms | Belum (giliran 2) |
 
 - Semua nada memakai tangga nada C mayor, seperti klik (sekitar E6) dan bunyi teks (sekitar C5), tanpa nada sumbang.
 - Bunyi jawaban kurang tepat sengaja tidak memakai dengung rendah, desis keras, atau nada turun bertangga yang biasa menandai "gagal", agar tidak mempermalukan pemain di kelas.
+
+### Rincian giliran 1 (21 November 2026)
+
+| | |
+|---|---|
+| Kode | `scripts/game/suara/chip.py` (alat: gelombang, selubung, saringan, penulis WAV, pengukur keras, dan pemeriksaan) dan `scripts/game/suara/efek.py` (resep S-01 sampai S-07 dan daftar `EFEK`). `build_jejak.py` memanggil keduanya |
+| Berkas | Tujuh WAV di `app/jejak-setara/assets/sfx/`, jumlah 104.120 byte (101,7 KB) |
+| Pemeriksaan `build_jejak.py` | Lulus: WAV PCM mono 16 bit 22.050 Hz dengan kepala 44 byte, paling lama 0,65 detik, paling besar 30 KB, puncak sesuai daftar, sampel pertama dan terakhir 0, tanpa geser DC, tanpa terpotong, dan keras terdengar dalam 1 LU dari sasaran. Dibangun dua kali dengan hasil sama byte. `CREDITS.md` dan `manifest.ts` hasil bangun sama byte dengan yang ada |
+| Ukuran seluruh aset | 201,9 KB (gambar dan suara), anggaran 2 MB |
+
+| ID | Berkas | Lama | Ukuran | Puncak | Keras terdengar (sasaran) |
+|---|---|---|---|---|---|
+| S-01 | `sfx_kejadian.wav` | 0,262 detik | 11.598 B | −5,5 dBFS | −17,9 LUFS (−18) |
+| S-02 | `sfx_kotak.wav` | 0,362 detik | 16.008 B | −3,0 dBFS | −18,6 LUFS (−18) |
+| S-03 | `sfx_skill.wav` | 0,352 detik | 15.568 B | −6,0 dBFS | −18,2 LUFS (−18) |
+| S-04 | `sfx_tepat.wav` | 0,552 detik | 24.388 B | −7,5 dBFS | −18,0 LUFS (−18) |
+| S-05 | `sfx_lembut.wav` | 0,462 detik | 20.418 B | −11,5 dBFS | −21,0 LUFS (−21) |
+| S-06 | `sfx_hitung.wav` | 0,062 detik | 2.778 B | −4,0 dBFS | −21,2 LUFS (−21) |
+| S-07 | `sfx_peringatan.wav` | 0,302 detik | 13.362 B | −7,5 dBFS | −22,8 LUFS (−23) |
+
+- S-04 memakai resep contoh Plan dengan puncak −7,5 dBFS (KT-C23 a), jadi bunyinya sama dengan versi seimbang di berkas banding Plan. Selisih sampel paling besar 2 dari 32.767 dan tidak terdengar: tabel puncak kini dihitung dengan rumus yang sama untuk semua efek, dan penjumlahan dibuat berurutan agar hasilnya sama di setiap versi Python.
+- S-02 tidak memakai dua nada B5 lalu E6 seperti rancangan Plan, karena urutan itu mirip bunyi koin sebuah game terkenal. Penggantinya luncuran cepat dari A5 ke E6 yang berdering, sejalan dengan aturan "tidak mirip game yang sudah ada" (Design System 14).
+- S-02 sudah memakai puncak tertinggi (−3 dBFS), jadi tetap 0,6 LU di bawah sasaran; masih di dalam batas 1 LU.
+- S-05 ditemani sedikit pulsa 50% yang disaring rendah, karena segitiga G4 dan E4 saja terlalu tipis di speaker HP.
+- `CREDITS.md` dan `manifest.ts` belum berubah, karena keduanya hanya memuat efek Disetujui. Sesudah S-01 sampai S-07 disetujui, giliran 2 menambahkan bagian efek suara di `CREDITS.md`, kelompok `SUARA` di `manifest.ts`, dan penyesuaian `aset-manifest.test.ts`.
 
 ### Rencana (templat AGENTS 12.1)
 
@@ -666,10 +693,10 @@ Ditulis 21 November 2026 di tahap Plan, atas permintaan pemilik proyek: Sesi A s
 
 | | |
 |---|---|
-| Status | **Direncanakan** (21 Nov 2026); menunggu `Setuju: suara` |
+| Status | **Disetujui** (21 Nov 2026, `Setuju: suara`: semua saran a); giliran 1 diserahkan 21 Nov 2026 |
 | Memenuhi | Design System 12 (delapan efek); bahan suara untuk JFR-55 (pengaturan suara pemain, dibangun di JS-14); Design System 15 (asal dan lisensi efek suara dicatat per berkas di `CREDITS.md`) |
 | Bergantung pada | Tidak ada untuk membuat bunyi. JS-14 (Sesi A) memakainya; catatan Plan JS-14 di `PLAN.md` sudah menyebut `sfx_kotak` dan `sfx_skill` |
-| Berkas yang dibuat atau diubah | Sekarang: berkas ini saja. Contoh `sfx_tepat.wav` dikirim di balasan dan tidak masuk repositori; berkas yang sama byte (SHA-256 di percobaan 1) dibangun skrip sesudah disetujui. Sesudah `Setuju: suara` dengan saran (a): `scripts/game/suara/chip.py` dan `scripts/game/suara/efek.py` (baru); `scripts/game/art/build_jejak.py` (diubah: memanggil kit suara, memeriksa hasilnya, dan mencatat kredit); delapan WAV di `app/jejak-setara/assets/sfx/` (baru); `app/jejak-setara/assets/CREDITS.md` (bagian efek suara); `app/jejak-setara/assets/manifest.ts` dan `app/jejak-setara/__tests__/konten/aset-manifest.test.ts` hanya bila KT-C24 (a) disetujui |
+| Berkas yang dibuat atau diubah | Plan: berkas ini saja; contoh `sfx_tepat.wav` dikirim di balasan dan tidak masuk repositori. Giliran 1: `scripts/game/suara/chip.py` dan `scripts/game/suara/efek.py` (baru); `scripts/game/art/build_jejak.py` (diubah: memanggil kit suara dan memeriksa hasilnya); tujuh WAV di `app/jejak-setara/assets/sfx/` (baru). Giliran 2: `sfx_akhir.wav` dan salinan `sfx_klik.wav` serta `sfx_teks.wav` (baru); `build_jejak.py` (kredit dan manifest efek suara); `app/jejak-setara/assets/CREDITS.md`, `app/jejak-setara/assets/manifest.ts`, dan `app/jejak-setara/__tests__/konten/aset-manifest.test.ts` (diubah) |
 | Migrasi D1 | Tidak ada |
 | Pesan protokol baru atau berubah | Tidak ada |
 | Aset yang dibutuhkan | Delapan efek baru (tabel di atas). Klik dan bunyi teks Sehari Setara dipakai ulang tanpa perubahan |
@@ -701,9 +728,9 @@ Dijalankan di luar repositori pada 21 November 2026, dengan kit suara percobaan 
 8. **Berkas berhash.** `vite.jejak.config.ts` mengatur `assetsInlineLimit` sehingga semua berkas di `app/jejak-setara/assets/`, termasuk WAV di `sfx/`, menjadi berkas berhash, bukan data URI (C-13 sudah diterapkan).
 9. **Galeri.** `build:pages` sebelum dan sesudah berkas ini diubah: ke-178 berkas `dist-pages/` identik byte.
 
-### Usulan
+### Usulan (disetujui 21 November 2026: semua saran a)
 
-Setiap usulan berisi saran (a) dan alternatifnya. Kode KT-C20 sampai KT-C26 adalah keputusan terbuka Sesi C untuk efek suara. Balas `Setuju: suara` untuk memakai semua saran (a), atau sebutkan nomor yang memakai alternatif, misalnya `Setuju: suara, 3b, 5b`.
+Setiap usulan berisi saran (a) dan alternatifnya. Kode KT-C20 sampai KT-C26 adalah keputusan Sesi C untuk efek suara. Pemilik proyek membalas `Setuju: suara` pada 21 November 2026, jadi semua saran (a) dipakai. KT-C26 (musik latar) dicatat sebagai arah untuk JS-21; musiknya dibuat bila pemilik proyek memintanya.
 
 1. **Letak dan cara membuat (KT-C20).**
    - (a, saran) Kit suara di folder baru `scripts/game/suara/`: `chip.py` (alat: gelombang pulsa, segitiga, dan desis, selubung, saringan, penulis WAV, dan pemeriksaan) dan `efek.py` (resep delapan efek, satu fungsi per efek). `build_jejak.py` memanggilnya, menulis WAV ke `app/jejak-setara/assets/sfx/`, memeriksanya, dan mencatat kreditnya, sehingga `assets:build:jejak` membangun gambar dan suara sekaligus tanpa mengubah `package.json`. Kit suara hanya memakai `wave` dan `struct`.
@@ -734,13 +761,13 @@ Setiap usulan berisi saran (a) dan alternatifnya. Kode KT-C20 sampai KT-C26 adal
 
 ### Urutan pengerjaan
 
-Sesudah `Setuju: suara`, efek dikirim dalam dua giliran. Setiap giliran melampirkan WAV di balasan dan menyerahkan ZIP kecil. `CREDITS.md` dan manifest hanya memuat efek berstatus Disetujui, sama seperti aset gambar.
+Sesudah `Setuju: suara`, efek dikirim dalam dua giliran. Setiap giliran melampirkan WAV di balasan dan menyerahkan ZIP kecil. `CREDITS.md` dan manifest hanya memuat efek berstatus Disetujui, sama seperti aset gambar. Permintaan C-14 dan C-15 diajukan 21 November 2026, langsung sesudah `Setuju: suara`, karena isinya sudah diputuskan.
 
 | Giliran | Isi | Balasan |
 |---|---|---|
-| 1 | Kit suara, `build_jejak.py`, dan S-01 sampai S-07 (efek pendek), semuanya Ditinjau | `Setuju: S-01 sampai S-07`, atau perbaikan per efek, misalnya "S-05: lebih pelan" |
+| 1 (diserahkan 21 Nov 2026) | Kit suara, `build_jejak.py`, dan S-01 sampai S-07 (efek pendek), semuanya Ditinjau | `Setuju: S-01 sampai S-07`, atau perbaikan per efek, misalnya "S-05: lebih pelan" |
 | 2 | S-08 (format sesuai KT-C22) dan perbaikan dari giliran 1; efek yang sudah Disetujui masuk `CREDITS.md` (dan manifest bila KT-C24 a) | `Setuju: S-08` |
-| Penutup | S-08 masuk `CREDITS.md` (dan manifest); Permintaan C-14 dan C-15 diajukan | — |
+| Penutup | S-08 masuk `CREDITS.md` dan manifest | — |
 
 ### Risiko
 
@@ -759,7 +786,7 @@ Sesudah `Setuju: suara`, efek dikirim dalam dua giliran. Setiap giliran melampir
 - **Siluet pemain:** pemain sendiri di belakang objek atas sebaiknya bergaris ganda (Permintaan C-4).
 - **Manifest:** semua gambar dimuat lewat `app/jejak-setara/assets/manifest.ts` (bagian "Manifest aset"). `lebar` dan `tinggi` di setiap `Gambar` adalah ukuran satu bingkai, jadi bingkai ke-i berada di x = i × `lebar` pada strip mendatar.
 - **Berkas berhash:** sejak Build JS-07 (Permintaan C-13), semua berkas di `app/jejak-setara/assets/`, termasuk WAV di `sfx/` nanti, menjadi berkas berhash, bukan data URI.
-- **Suara (untuk Plan JS-14):** rencana efek suara ada di bagian "Efek suara". Titik pemicu `sfx_kotak` dan `sfx_skill` sudah ditetapkan di Specify JS-09 (catatan Plan JS-14 di `PLAN.md`). Layar kelas mengimpor WAV langsung dari berkasnya, karena tidak boleh mengimpor `manifest.ts` (P-35 JS-10). Semua efek mulai dan berakhir di sampel 0, jadi bisa diputar dan dihentikan tanpa bunyi letup. Tik `sfx_hitung` jauh lebih pendek dari 1 detik, jadi tiga tik hitung mundur tidak bertumpuk. Bila KT-C23 (a) disetujui, keras-pelan sudah seimbang di berkasnya, sehingga satu `GainNode` 60% seperti Sehari Setara sudah cukup.
+- **Suara (untuk Plan JS-14):** rencana efek suara ada di bagian "Efek suara". Titik pemicu `sfx_kotak` dan `sfx_skill` sudah ditetapkan di Specify JS-09 (catatan Plan JS-14 di `PLAN.md`). Layar kelas mengimpor WAV langsung dari berkasnya, karena tidak boleh mengimpor `manifest.ts` (P-35 JS-10). Semua efek mulai dan berakhir di sampel 0, jadi bisa diputar dan dihentikan tanpa bunyi letup. Tik `sfx_hitung` jauh lebih pendek dari 1 detik, jadi tiga tik hitung mundur tidak bertumpuk. KT-C23 (a) dipakai: keras-pelan sudah seimbang di berkasnya, sehingga satu `GainNode` 60% seperti Sehari Setara sudah cukup. S-01 sampai S-07 sudah ada di `app/jejak-setara/assets/sfx/` sejak giliran 1, tetapi baru boleh dipakai sesudah Disetujui dan masuk `manifest.ts`.
 
 ## Permintaan untuk Sesi A
 
@@ -778,8 +805,8 @@ Sesudah `Setuju: suara`, efek dikirim dalam dua giliran. Setiap giliran melampir
 | C-11 | `docs/jejak-setara/Design_System.md` bagian 7 (aturan peta 3) | Ubah menjadi "Dari titik mana pun, sedikitnya satu bangunan atau objek khas zona terlihat di layar", dengan daftar objek khas per zona dari JS-06 | Dengan tabel bangunan penanda saja, hanya 57,4% posisi di prototipe 160 × 100 yang memenuhi (bagian JS-06, percobaan 7) | Diterapkan: Design System 7 aturan 3 (ZIP Gerbang 1 JS-07, 8 Nov 2026); daftar objek penanda di `specs/JS-06-peta.md` P-14 |
 | C-12 | `docs/jejak-setara/PLAN.md`, tabel status fitur | Ubah baris JS-06 menjadi "Selesai (8 Nov 2026)" dengan tautan `specs/JS-06-peta.md` dan `tests/JS-06-hasil.md` | JS-06 selesai di Sesi C, dan statusnya baru tercatat di berkas ini | Diterapkan: tabel status `PLAN.md` (ZIP Gerbang 1 JS-07, 8 Nov 2026) |
 | C-13 | `vite.jejak.config.ts` | Tambahkan `build.assetsInlineLimit` yang mengembalikan `false` untuk berkas di `app/jejak-setara/assets/`, seperti `vite.pages.config.ts` untuk Sehari Setara, sehingga setiap PNG yang diimpor `manifest.ts` menjadi berkas berhash | Architecture 11.2 menulis "Aset selalu menjadi berkas berhash, bukan data URI", tetapi `vite.jejak.config.ts` belum mengatur `assetsInlineLimit`, sehingga Vite memakai batas bawaannya, 4 KB. Begitu layar pemain mengimpor manifest, sampai 236 dari 239 PNG (semua kecuali tiga lembar ubin, bila semua kelompok dipakai) diselipkan ke kode sebagai data URI: sekitar 116 KB teks atau 71 KB gzip, dari anggaran kode layar pemain 200 KB gzip (Architecture 11.3). Diukur Sesi C dengan esbuild, 8 Nov 2026. Ikon avatar di `pemain/avatar.ts` (JS-03) sudah terkena aturan yang sama | Diterapkan: `vite.jejak.config.ts` (Build JS-07, 9 Nov 2026; tanggapan Sesi A di `PLAN.md`, bagian "Tanggapan permintaan (Build JS-07, 9 Nov 2026)"). Diperiksa Sesi C 21 Nov 2026: `assetsInlineLimit` mengembalikan `false` untuk semua berkas di `app/jejak-setara/assets/`, termasuk WAV di `sfx/` |
-| C-14 | `docs/jejak-setara/Design_System.md` bagian 12, 14, dan 15; `Architecture.md` bagian 11.3 | Catat format efek suara (WAV PCM mono 16 bit 22.050 Hz; efek pendek paling lama 0,65 detik dan paling besar 30 KB), aturan volume (KT-C23), pengecualian ukuran jingle akhir (KT-C22), kit suara di `scripts/game/suara/` (KT-C20), dan kalimat kredit layar "Tentang": "Efek suara dibuat dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN." | Bagian "Efek suara" (percobaan 3 dan 4) | Menunggu `Setuju: suara`; isinya mengikuti jawaban usulan |
-| C-15 | `docs/jejak-setara/Architecture.md` bagian 11.2; `AGENTS.md` bagian 6 dan 9 | Bentuk kelompok `SUARA` di `manifest.ts` (bila KT-C24 a); `assets:build:jejak` juga membangun efek suara; format kredit efek suara "Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]" | Bagian "Efek suara" (usulan 1 dan 5) | Menunggu `Setuju: suara` |
+| C-14 | `docs/jejak-setara/Design_System.md` bagian 12, 14, dan 15; `Architecture.md` bagian 11.3 | Catat format efek suara (WAV PCM mono 16 bit 22.050 Hz; efek pendek paling lama 0,65 detik dan paling besar 30 KB), aturan volume (KT-C23 a: puncak paling tinggi −3 dBFS dan keras terdengar diseimbangkan, sekitar −18 LUFS untuk kejadian, kotak, skill, dan tepat; −21 LUFS untuk lembut dan hitung; −23 LUFS untuk peringatan; −16 LUFS untuk jingle akhir), pengecualian ukuran jingle akhir (KT-C22 a: paling besar 160 KB, hanya dimuat layar kelas), kit suara di `scripts/game/suara/` (KT-C20 a), dan kalimat kredit layar "Tentang": "Efek suara dibuat dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN." | Bagian "Efek suara" (percobaan 3 dan 4; usulan disetujui 21 Nov 2026) | Diajukan (21 Nov 2026, sesudah `Setuju: suara`) |
+| C-15 | `docs/jejak-setara/Architecture.md` bagian 11.2; `AGENTS.md` bagian 6 dan 9 | Bentuk kelompok `SUARA` di `manifest.ts` (KT-C24 a): kunci `kejadian`, `kotak`, `skill`, `tepat`, `lembut`, `hitung`, `peringatan`, `akhir`, `klik`, dan `teks` (klik dan teks berupa salinan identik dari Sehari Setara, KT-C25 a), berisi URL berkas, hanya untuk efek Disetujui; layar kelas mengimpor WAV langsung (P-35 JS-10). `assets:build:jejak` juga membangun efek suara. Format kredit efek suara: "Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]" | Bagian "Efek suara" (usulan 1, 5, dan 6) | Diajukan (21 Nov 2026, sesudah `Setuju: suara`) |
 
 ## Manifest aset (Permintaan C-6)
 
@@ -920,8 +947,10 @@ Dijawab 8 November 2026: KT-C11 sampai KT-C19 memakai saran (a), yaitu usulan 1a
 | Permintaan C-8 | Diterapkan 9 Nov 2026 | PRD JFR-01, 8.3, 12, dan 21 diperbarui Sesi A di ZIP Gerbang 1 JS-08 |
 | Permintaan C-13 | Diterapkan 9 Nov 2026 | `assetsInlineLimit` di `vite.jejak.config.ts` (Build JS-07); berlaku juga untuk WAV di `sfx/` |
 | O-42 sanggah | Keputusan KT-10 | Hanya bila versi B K-02 dipilih dan pemilik proyek mengizinkan |
-| Efek suara (Plan 21 Nov 2026) | `Setuju: suara` | Contoh `sfx_tepat` dan berkas banding dikirim di balasan Plan; usulan KT-C20 sampai KT-C26 di bagian "Efek suara" |
-| Permintaan C-14 dan C-15 | `Setuju: suara`, lalu Sesi A | Dokumen Sesi A untuk efek suara |
+| Efek suara giliran 1 (21 Nov 2026) | Persetujuan per efek | S-01 sampai S-07 Ditinjau; balas misalnya `Setuju: S-01 sampai S-07`, atau perbaikan per efek |
+| S-08 jingle akhir, salinan klik dan teks, serta kredit dan manifest efek suara | Giliran 2 | Dikerjakan sesudah S-01 sampai S-07 disetujui |
+| Musik latar (KT-C26 a) | Permintaan pemilik proyek | Arah disetujui untuk JS-21; dibuat bila diminta |
+| Permintaan C-14 dan C-15 | Sesi A | Diajukan 21 Nov 2026: dokumen Sesi A untuk efek suara |
 
 ## Cara membalas
 

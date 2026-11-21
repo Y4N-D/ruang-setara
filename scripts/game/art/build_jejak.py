@@ -6,11 +6,13 @@ Pemakaian (dari folder repositori):
 
 Hasil:
     <out>/ava/ava_{n}_{arah}_{pose}.png, <out>/ikon/ikon_ava_{n}.png, <out>/ubin/ubin_{masa}.png  (ukuran asli 1x)
+    <out>/sfx/sfx_{peristiwa}.wav   (efek suara dari kit suara scripts/game/suara/; Daftar_Aset.md "Efek suara")
     <out>/CREDITS.md                (dibuat otomatis untuk aset berstatus Disetujui)
     <out>/manifest.ts               (dibuat otomatis untuk aset berstatus Disetujui; Architecture Jejak 11.2)
     <preview>/*.png dan *.gif       (pratinjau untuk persetujuan, docs/jejak-setara/preview/)
 Pemeriksaan: warna di luar palet, piksel semi-transparan, ukuran, warna kunci tas hanya di tas,
-anggaran (Architecture Jejak bagian 11.3), dan kelengkapan manifest.
+anggaran (Architecture Jejak bagian 11.3), dan kelengkapan manifest. Efek suara: format WAV, lama, ukuran, puncak,
+tepi tanpa bunyi letup, dan keras terdengar terhadap sasarannya (chip.periksa dan chip.keras_lufs).
 
 Kit Sehari Setara (pixelart.py, palette.json, ikon.py) dipakai tanpa diubah; build_assets.py Sehari Setara
 tidak terpengaruh. Status setiap aset ada di docs/jejak-setara/Daftar_Aset.md. CREDITS.md dan manifest.ts
@@ -41,6 +43,9 @@ from atas_ikon import (SKILL, ARAH_KOMPAS, ARAH_DIRI, tanda_kejadian, tanda_dibu
                        ikon_petunjuk, ikon_teropong, ikon_karcis, ikon_zona, ikon_mini, ikon_menyambung,
                        ikon_putar_hp, ikon_jejak, ikon_konsol)
 import ikon as IKON_SEHARI   # noqa: E402  ikon Sehari Setara yang dipakai ulang, dibangun tanpa perubahan
+sys.path.insert(0, str(HERE.parent / "suara"))      # kit suara Jejak Setara (Daftar_Aset.md, usulan KT-C20 a)
+import chip as CHIP          # noqa: E402  alat bunyi, hanya pustaka bawaan Python
+import efek as EFEK_SUARA    # noqa: E402  resep efek suara dan daftar EFEK
 
 if HERE.parts[-3:] == ("scripts", "game", "art"):      # berada di dalam repositori
     REPO = HERE.parents[2]
@@ -1625,6 +1630,24 @@ def main():
             if bolong:
                 masalah.append(f"{nama}: ubin lapisan 0 berlubang (transparan) di nomor {bolong[:8]}")
         print(f"  {folder}/{nama}.png  {im.size[0]}x{im.size[1]}  {size} B")
+
+    # Efek suara (Design System 12): WAV dari kit suara scripts/game/suara/, lalu diperiksa format, lama, ukuran,
+    # puncak, tepi tanpa bunyi letup, dan keras terdengar terhadap sasaran usulan KT-C23 a (selisih paling besar 1 LU).
+    for nama, ef in EFEK_SUARA.EFEK.items():
+        if args.only and nama not in args.only:
+            continue
+        sampel = ef.bangun()
+        out = args.out / "sfx" / f"{nama}.wav"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        CHIP.tulis_wav(out, sampel)
+        masalah += CHIP.periksa(out, ef.lama_maks, ef.byte_maks, CHIP.PUNCAK_DB[ef.puncak], ef.lama_min)
+        keras = CHIP.keras_lufs(sampel)
+        if abs(keras - ef.sasaran) > 1.0:
+            masalah.append(f"{nama}: keras terdengar {keras:.1f} LUFS, sasaran {ef.sasaran:.0f} LUFS (KT-C23 a)")
+        size = out.stat().st_size
+        total += size
+        print(f"  sfx/{nama}.wav  {len(sampel) / CHIP.LAJU:.3f} detik  {size} B  puncak {ef.puncak} dBFS  "
+              f"{keras:.1f} LUFS")
 
     build_previews(args.preview, args.only)
     if not args.only:
