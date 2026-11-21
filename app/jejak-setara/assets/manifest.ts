@@ -1,10 +1,10 @@
 // Dibuat build_jejak.py. Jangan disunting manual.
-// Satu-satunya pintu masuk aset gambar Jejak Setara (Architecture 11.2; Permintaan C-6; usulan 11a JS-07),
-// hanya untuk aset berstatus Disetujui di docs/jejak-setara/Daftar_Aset.md (sama dengan CREDITS.md).
-// Setiap PNG diimpor sebagai URL berkas lewat Vite, seperti manifest Sehari Setara. Berkas ini tidak
-// mengimpor apa pun dari inti/, karena hanya dipakai klien. Untuk mengubahnya, ubah kode gambar atau daftar
-// aset di scripts/game/art/, lalu jalankan npx pnpm@11.25.0 assets:build:jejak. Isinya diperiksa ulang oleh
-// app/jejak-setara/__tests__/konten/aset-manifest.test.ts.
+// Satu-satunya pintu masuk aset gambar dan efek suara Jejak Setara (Architecture 11.2; Permintaan C-6 dan C-15;
+// usulan 11a JS-07 dan KT-C24 a), hanya untuk aset berstatus Disetujui di docs/jejak-setara/Daftar_Aset.md (sama
+// dengan CREDITS.md). Setiap PNG dan WAV diimpor sebagai URL berkas lewat Vite, seperti manifest Sehari Setara.
+// Berkas ini tidak mengimpor apa pun dari inti/, karena hanya dipakai klien. Untuk mengubahnya, ubah kode gambar
+// di scripts/game/art/ atau kit suara di scripts/game/suara/, lalu jalankan npx pnpm@11.25.0 assets:build:jejak.
+// Isinya diperiksa ulang oleh app/jejak-setara/__tests__/konten/aset-manifest.test.ts.
 
 import ava1AtasDiam from "./ava/ava_1_atas_diam.png";
 import ava1AtasJalan from "./ava/ava_1_atas_jalan.png";
@@ -245,6 +245,16 @@ import objWarungMade from "./obj/obj_warung_made.png";
 import objWarungMadeAtas from "./obj/obj_warung_made_atas.png";
 import objWarungWifi from "./obj/obj_warung_wifi.png";
 import objWarungWifiAtas from "./obj/obj_warung_wifi_atas.png";
+
+import sfxHitung from "./sfx/sfx_hitung.wav";
+import sfxKejadian from "./sfx/sfx_kejadian.wav";
+import sfxKlik from "./sfx/sfx_klik.wav";
+import sfxKotak from "./sfx/sfx_kotak.wav";
+import sfxLembut from "./sfx/sfx_lembut.wav";
+import sfxPeringatan from "./sfx/sfx_peringatan.wav";
+import sfxSkill from "./sfx/sfx_skill.wav";
+import sfxTeks from "./sfx/sfx_teks.wav";
+import sfxTepat from "./sfx/sfx_tepat.wav";
 
 import ubinPagi from "./ubin/ubin_pagi.png";
 import ubinSiang from "./ubin/ubin_siang.png";
@@ -949,3 +959,23 @@ export const TANDA: Readonly<Record<string, Gambar>> = {
   tanda_kotak_teropong: { url: tandaKotakTeropong, lebar: 14, tinggi: 12, bingkai: 3 },
   tanda_selesai: { url: tandaSelesai, lebar: 10, tinggi: 10, bingkai: 1 },
 };
+
+/**
+ * Efek suara berkunci nama peristiwa (nama berkas tanpa awalan sfx_ dan .wav): URL WAV PCM mono 16 bit 22.050 Hz di
+ * sfx/. Hanya efek Disetujui; klik dan teks adalah salinan identik dari Sehari Setara. Layar kelas tidak mengimpor
+ * manifest ini (P-35 JS-10), jadi mengimpor WAV langsung dari berkasnya.
+ */
+export const SUARA = {
+  hitung: sfxHitung,
+  kejadian: sfxKejadian,
+  klik: sfxKlik,
+  kotak: sfxKotak,
+  lembut: sfxLembut,
+  peringatan: sfxPeringatan,
+  skill: sfxSkill,
+  teks: sfxTeks,
+  tepat: sfxTepat,
+} as const;
+
+/** Nama efek suara di SUARA. */
+export type NamaSuara = keyof typeof SUARA;

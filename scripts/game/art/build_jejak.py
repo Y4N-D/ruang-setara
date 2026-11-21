@@ -6,7 +6,8 @@ Pemakaian (dari folder repositori):
 
 Hasil:
     <out>/ava/ava_{n}_{arah}_{pose}.png, <out>/ikon/ikon_ava_{n}.png, <out>/ubin/ubin_{masa}.png  (ukuran asli 1x)
-    <out>/sfx/sfx_{peristiwa}.wav   (efek suara dari kit suara scripts/game/suara/; Daftar_Aset.md "Efek suara")
+    <out>/sfx/sfx_{peristiwa}.wav, <out>/sfx/musik_kelas.wav  (efek suara dan musik latar dari kit suara
+                                    scripts/game/suara/; klik dan bunyi teks disalin identik dari Sehari Setara)
     <out>/CREDITS.md                (dibuat otomatis untuk aset berstatus Disetujui)
     <out>/manifest.ts               (dibuat otomatis untuk aset berstatus Disetujui; Architecture Jejak 11.2)
     <preview>/*.png dan *.gif       (pratinjau untuk persetujuan, docs/jejak-setara/preview/)
@@ -52,10 +53,12 @@ if HERE.parts[-3:] == ("scripts", "game", "art"):      # berada di dalam reposit
     DEFAULT_OUT = REPO / "app" / "jejak-setara" / "assets"
     DEFAULT_PREVIEW = REPO / "docs" / "jejak-setara" / "preview"
     PETA_KAMPUNG = REPO / "app" / "jejak-setara" / "peta" / "kampung.json"   # jenis objek di peta (JS-06)
+    SFX_SEHARI = REPO / "app" / "sehari-setara" / "assets" / "sfx"           # klik dan bunyi teks (KT-C25 a)
 else:                                                 # dijalankan di folder lepas
     DEFAULT_OUT = HERE / "out" / "aset"
     DEFAULT_PREVIEW = HERE / "out" / "pratinjau"
     PETA_KAMPUNG = None
+    SFX_SEHARI = None
 
 # ---------------------------------------------------------------------------
 # Daftar aset: nama berkas -> (folder, fungsi yang mengembalikan Image, ukuran yang diharapkan)
@@ -158,6 +161,13 @@ DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC2)                 # kelompok N2
              or nama in IKON_BARU or nama in IKON_ULANG}                                 # kelompok I
 
+# Efek suara berstatus Disetujui: nama berkas tanpa .wav -> tanggal (Daftar_Aset.md, bagian "Efek suara"). Hanya efek
+# di sini, ditambah salinan klik dan bunyi teks, yang masuk CREDITS.md dan kelompok SUARA di manifest.ts.
+DISETUJUI_SUARA = {nama: "21 November 2026" for nama in ("sfx_kejadian", "sfx_kotak", "sfx_skill", "sfx_tepat",
+                                                          "sfx_lembut", "sfx_hitung", "sfx_peringatan")}
+# Klik dan bunyi teks Sehari Setara yang disalin identik byte ke sfx/ (usulan KT-C25 a): nama -> (ID di Sehari Setara, isi)
+SALINAN_SUARA = {"sfx_klik": ("S-01", "bunyi klik gaya A"), "sfx_teks": ("S-02", "bunyi teks gaya B")}
+
 BATAS_STRIP = 6 * 1024              # satu strip avatar atau tokoh
 BATAS_UBIN = 60 * 1024              # satu lembar ubin per masa
 BATAS_TOTAL = 2 * 1024 * 1024       # seluruh aset layar pemain
@@ -196,7 +206,7 @@ def tulis_kredit(out_dir):
     """CREDITS.md untuk aset berstatus Disetujui (AGENTS Jejak bagian 9). Jangan disunting manual."""
     if not DISETUJUI:
         return 0
-    baris = ["# CREDITS — Aset gambar Jejak Setara", "",
+    baris = ["# CREDITS — Aset Jejak Setara", "",
              "Semua gambar di folder ini digambar dengan kode memakai kit Sehari Setara (`scripts/game/art/`: "
              "`palette.json` dan `pixelart.py`) dan kit tampak atas Jejak Setara (`scripts/game/art/atas_*.py`), "
              "lalu dibangun dengan `python scripts/game/art/build_jejak.py`. Kode adalah sumber utama; PNG tidak "
@@ -213,9 +223,28 @@ def tulis_kredit(out_dir):
             baris.append(f"| `{folder}/{n}.png` | {kode_aset(n)} | Digambar dengan kode (kit Sehari Setara) oleh "
                          f"Claude, disetujui YAN, {DISETUJUI[n]} |")
         baris.append("")
+    suara = sorted(set(DISETUJUI_SUARA) | set(SALINAN_SUARA))
+    if suara:
+        baris += ["## Efek suara (`sfx/`)", "",
+                  "Efek suara dibuat dengan kode memakai kit suara Jejak Setara (`scripts/game/suara/`: `chip.py`, "
+                  "`efek.py`, dan `musik.py`), hanya dengan pustaka bawaan Python, lalu dibangun dengan `python "
+                  "scripts/game/art/build_jejak.py`. Kode adalah sumber utama; WAV tidak disunting manual. Format "
+                  "atribusinya: \"Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]\". Bunyi klik dan bunyi teks "
+                  "adalah salinan identik dari Sehari Setara.", "",
+                  "| File | ID | Atribusi |", "|---|---|---|"]
+        for n in suara:
+            if n in SALINAN_SUARA:
+                kode, isi = SALINAN_SUARA[n]
+                baris.append(f"| `sfx/{n}.wav` | — | Salinan identik `app/sehari-setara/assets/sfx/{n}.wav` ({kode} Sehari "
+                             f"Setara): {isi} dari halaman uji suara Sehari Setara, dipilih dan disetujui YAN, 26 Oktober "
+                             f"2026 |")
+            else:
+                baris.append(f"| `sfx/{n}.wav` | {EFEK_SUARA.EFEK[n].kode} | Dibuat dengan kode oleh Claude, disetujui "
+                             f"YAN, {DISETUJUI_SUARA[n]} |")
+        baris.append("")
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "CREDITS.md").write_text("\n".join(baris), encoding="utf-8")
-    return len(DISETUJUI)
+    return len(DISETUJUI) + len(suara)
 
 
 # ---------------------------------------------------------------------------
@@ -231,12 +260,12 @@ BINGKAI_ASET.update({"tanda_kompas": 2 * len(ARAH_KOMPAS), "tanda_diri": len(ARA
 KAKI_MOTOR = (17, 28)      # titik kaki Dimas di motor, bingkai 34 x 30 (catatan titik kaki di atas_tokoh.py)
 KEPALA_MANIFEST = [
     "// Dibuat build_jejak.py. Jangan disunting manual.",
-    "// Satu-satunya pintu masuk aset gambar Jejak Setara (Architecture 11.2; Permintaan C-6; usulan 11a JS-07),",
-    "// hanya untuk aset berstatus Disetujui di docs/jejak-setara/Daftar_Aset.md (sama dengan CREDITS.md).",
-    "// Setiap PNG diimpor sebagai URL berkas lewat Vite, seperti manifest Sehari Setara. Berkas ini tidak",
-    "// mengimpor apa pun dari inti/, karena hanya dipakai klien. Untuk mengubahnya, ubah kode gambar atau daftar",
-    "// aset di scripts/game/art/, lalu jalankan npx pnpm@11.25.0 assets:build:jejak. Isinya diperiksa ulang oleh",
-    "// app/jejak-setara/__tests__/konten/aset-manifest.test.ts.",
+    "// Satu-satunya pintu masuk aset gambar dan efek suara Jejak Setara (Architecture 11.2; Permintaan C-6 dan C-15;",
+    "// usulan 11a JS-07 dan KT-C24 a), hanya untuk aset berstatus Disetujui di docs/jejak-setara/Daftar_Aset.md (sama",
+    "// dengan CREDITS.md). Setiap PNG dan WAV diimpor sebagai URL berkas lewat Vite, seperti manifest Sehari Setara.",
+    "// Berkas ini tidak mengimpor apa pun dari inti/, karena hanya dipakai klien. Untuk mengubahnya, ubah kode gambar",
+    "// di scripts/game/art/ atau kit suara di scripts/game/suara/, lalu jalankan npx pnpm@11.25.0 assets:build:jejak.",
+    "// Isinya diperiksa ulang oleh app/jejak-setara/__tests__/konten/aset-manifest.test.ts.",
 ]
 DOK_OBJEK = [
     "Objek berkunci jenis di kampung.json, yaitu nama berkas tanpa awalan obj_. Bagian atas digambar di",
@@ -269,10 +298,11 @@ def _dok(teks):
     return ["/**"] + [f" * {b}".rstrip() for b in baris] + [" */"]
 
 
-def tulis_manifest(out_dir, ukuran):
+def tulis_manifest(out_dir, ukuran, suara=frozenset()):
     """manifest.ts untuk aset berstatus Disetujui (Architecture Jejak 11.2). Jangan disunting manual.
 
-    ukuran: nama aset -> (lebar, tinggi) PNG yang baru dibangun. Mengembalikan (jumlah per kelompok, masalah).
+    ukuran: nama aset -> (lebar, tinggi) PNG yang baru dibangun; suara: nama WAV di sfx/ yang baru dibangun atau
+    disalin. Mengembalikan (jumlah per kelompok, masalah).
     Berkas hanya ditulis bila tidak ada masalah, sehingga manifest tidak pernah berbeda dari PNG-nya. Urutan
     kunci tetap (A1-A8, urutan WARNA_TAS, lalu abjad), jadi hasilnya sama setiap kali dibangun."""
     masalah, dirujuk = [], []
@@ -350,6 +380,11 @@ def tulis_manifest(out_dir, ukuran):
     if any(ukuran.get(f"ubin_{m}") != UKURAN_LEMBAR for m in MASA):
         masalah.append(f"manifest: ukuran lembar ubin bukan {UKURAN_LEMBAR}")
 
+    # SUARA: efek suara Disetujui dan salinan klik serta teks, berkunci nama peristiwa (nama berkas tanpa sfx_)
+    nama_suara = sorted(set(DISETUJUI_SUARA) | set(SALINAN_SUARA))
+    masalah += [f"manifest: sfx/{n}.wav tidak dibangun" for n in nama_suara if n not in suara]
+    suara_ts = [f"  {n.removeprefix('sfx_')}: {_pengenal(n)}," for n in nama_suara]
+
     # Kelengkapan: setiap aset Disetujui dirujuk tepat sekali, dan nama impor tidak bertabrakan
     if len(dirujuk) != len(set(dirujuk)):
         masalah.append("manifest: ada aset yang dirujuk lebih dari sekali")
@@ -360,7 +395,10 @@ def tulis_manifest(out_dir, ukuran):
         masalah.append("manifest: nama impor bertabrakan")
 
     impor = []
-    for folder in sorted({ASSETS[n][0] for n in dirujuk}):
+    for folder in sorted({ASSETS[n][0] for n in dirujuk} | ({"sfx"} if nama_suara else set())):
+        if folder == "sfx":
+            impor += [f'import {_pengenal(n)} from "./sfx/{n}.wav";' for n in nama_suara] + [""]
+            continue
         impor += [f'import {_pengenal(n)} from "./{folder}/{n}.png";'
                   for n in sorted({n for n in dirujuk if ASSETS[n][0] == folder})] + [""]
     gerak = "{ " + "; ".join(f"{p}: Gambar" for p in BINGKAI) + " }"
@@ -422,8 +460,19 @@ def tulis_manifest(out_dir, ukuran):
                "- tanda_kotak_*: kecil, besar berkilau, lalu biasa."]),
         "export const TANDA: Readonly<Record<string, Gambar>> = {", *tanda_ts, "};",
     ]
+    if suara_ts:
+        teks += [
+            "",
+            *_dok("Efek suara berkunci nama peristiwa (nama berkas tanpa awalan sfx_ dan .wav): URL WAV PCM mono 16 bit "
+                  "22.050 Hz di sfx/. Hanya efek Disetujui; klik dan teks adalah salinan identik dari Sehari Setara. "
+                  "Layar kelas tidak mengimpor manifest ini (P-35 JS-10), jadi mengimpor WAV langsung dari berkasnya."),
+            "export const SUARA = {", *suara_ts, "} as const;",
+            "",
+            *_dok("Nama efek suara di SUARA."),
+            "export type NamaSuara = keyof typeof SUARA;",
+        ]
     jumlah = {"AVATAR": len(AVATAR), "OBJEK": len(jenis_ada), "NPC": len(npc_ts), "IKON": len(ikon_ts),
-              "TANDA": len(tanda_ts), "UBIN": len(lembar), "berkas": len(set(dirujuk))}
+              "TANDA": len(tanda_ts), "UBIN": len(lembar), "SUARA": len(suara_ts), "berkas": len(set(dirujuk))}
     if not masalah:
         out_dir.mkdir(parents=True, exist_ok=True)
         with open(out_dir / "manifest.ts", "w", encoding="utf-8", newline="\n") as f:
@@ -1599,6 +1648,7 @@ def main():
     args = ap.parse_args()
 
     masalah, total, ukuran_png = [], 0, {}
+    total_kelas, suara_dibangun = 0, set()
     for nama, (folder, fn, ukuran) in ASSETS.items():
         if args.only and nama not in args.only:
             continue
@@ -1631,33 +1681,56 @@ def main():
                 masalah.append(f"{nama}: ubin lapisan 0 berlubang (transparan) di nomor {bolong[:8]}")
         print(f"  {folder}/{nama}.png  {im.size[0]}x{im.size[1]}  {size} B")
 
-    # Efek suara (Design System 12): WAV dari kit suara scripts/game/suara/, lalu diperiksa format, lama, ukuran,
-    # puncak, tepi tanpa bunyi letup, dan keras terdengar terhadap sasaran usulan KT-C23 a (selisih paling besar 1 LU).
+    # Efek suara dan musik latar (Design System 12): WAV dari kit suara scripts/game/suara/, lalu diperiksa format,
+    # lama, ukuran, puncak, tepi tanpa bunyi letup, dan keras terdengar terhadap sasarannya (KT-C23 a; selisih paling
+    # besar 1 LU). Berkas khusus layar kelas (S-08 dan M-01) tidak dihitung dalam anggaran aset layar pemain.
     for nama, ef in EFEK_SUARA.EFEK.items():
         if args.only and nama not in args.only:
             continue
         sampel = ef.bangun()
         out = args.out / "sfx" / f"{nama}.wav"
         out.parent.mkdir(parents=True, exist_ok=True)
-        CHIP.tulis_wav(out, sampel)
-        masalah += CHIP.periksa(out, ef.lama_maks, ef.byte_maks, CHIP.PUNCAK_DB[ef.puncak], ef.lama_min)
-        keras = CHIP.keras_lufs(sampel)
+        CHIP.tulis_wav(out, sampel, ef.laju)
+        masalah += CHIP.periksa(out, ef.lama_maks, ef.byte_maks, CHIP.PUNCAK_DB[ef.puncak], ef.lama_min, ef.laju)
+        keras = CHIP.keras_lufs(sampel, ef.laju)
         if abs(keras - ef.sasaran) > 1.0:
             masalah.append(f"{nama}: keras terdengar {keras:.1f} LUFS, sasaran {ef.sasaran:.0f} LUFS (KT-C23 a)")
         size = out.stat().st_size
-        total += size
-        print(f"  sfx/{nama}.wav  {len(sampel) / CHIP.LAJU:.3f} detik  {size} B  puncak {ef.puncak} dBFS  "
-              f"{keras:.1f} LUFS")
+        if ef.layar == "kelas":
+            total_kelas += size
+        else:
+            total += size
+        suara_dibangun.add(nama)
+        print(f"  sfx/{nama}.wav  {len(sampel) / ef.laju:.3f} detik  {size} B  puncak {ef.puncak} dBFS  "
+              f"{keras:.1f} LUFS" + ("  (layar kelas)" if ef.layar == "kelas" else ""))
+    # Klik dan bunyi teks Sehari Setara dipakai ulang tanpa perubahan: disalin identik byte (usulan KT-C25 a)
+    for nama in SALINAN_SUARA:
+        if args.only and nama not in args.only:
+            continue
+        if SFX_SEHARI is None:
+            print(f"  sfx/{nama}.wav dilewati: folder Sehari Setara tidak ada di luar repositori")
+            continue
+        isi = (SFX_SEHARI / f"{nama}.wav").read_bytes()
+        out = args.out / "sfx" / f"{nama}.wav"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(isi)
+        if out.read_bytes() != isi:
+            masalah.append(f"{nama}: salinan tidak sama dengan berkas Sehari Setara")
+        total += len(isi)
+        suara_dibangun.add(nama)
+        print(f"  sfx/{nama}.wav  salinan identik dari Sehari Setara  {len(isi)} B")
 
     build_previews(args.preview, args.only)
     if not args.only:
         print(f"CREDITS.md: {tulis_kredit(args.out)} aset Disetujui")
-        jumlah, masalah_manifest = tulis_manifest(args.out, ukuran_png)
+        jumlah, masalah_manifest = tulis_manifest(args.out, ukuran_png, suara_dibangun)
         masalah += masalah_manifest
-        print(f"manifest.ts: {jumlah['berkas']} aset Disetujui (AVATAR {jumlah['AVATAR']}, OBJEK {jumlah['OBJEK']}, "
-              f"NPC {jumlah['NPC']}, IKON {jumlah['IKON']}, TANDA {jumlah['TANDA']}, UBIN {jumlah['UBIN']})"
+        print(f"manifest.ts: {jumlah['berkas']} gambar dan {jumlah['SUARA']} suara Disetujui (AVATAR {jumlah['AVATAR']}, "
+              f"OBJEK {jumlah['OBJEK']}, NPC {jumlah['NPC']}, IKON {jumlah['IKON']}, TANDA {jumlah['TANDA']}, "
+              f"UBIN {jumlah['UBIN']}, SUARA {jumlah['SUARA']})"
               + (", tidak ditulis karena ada masalah" if masalah_manifest else ""))
-    print(f"Total aset: {total / 1024:.1f} KB (anggaran aset layar pemain {BATAS_TOTAL / 1024 / 1024:.0f} MB)")
+    print(f"Total aset layar pemain: {total / 1024:.1f} KB (anggaran {BATAS_TOTAL / 1024 / 1024:.0f} MB); "
+          f"khusus layar kelas: {total_kelas / 1024:.1f} KB")
     if total > BATAS_TOTAL:
         masalah.append("Total ukuran aset melebihi anggaran")
     if masalah:

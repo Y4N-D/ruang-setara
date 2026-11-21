@@ -2,9 +2,11 @@
 // manifest.ts dibuat build_jejak.py. Uji ini memeriksa ulang hasilnya tanpa Python: setiap butir menunjuk PNG yang
 // ada, lebar × bingkai dan tinggi sama dengan ukuran PNG, OBJEK lengkap untuk kampung.json dengan jejak kaki aturan
 // JS-06, AVATAR delapan butir, kunci WARNA_TAS sama dengan WarnaTas, dan hanya aset Disetujui yang masuk.
+// SUARA (usulan KT-C24 a, 21 Nov 2026): setiap efek menunjuk WAV PCM mono 16 bit 22.050 Hz di sfx/ dalam batas lama
+// dan ukurannya, klik dan teks identik dengan Sehari Setara, dan hanya efek Disetujui di CREDITS.md yang masuk.
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { AVATAR, IKON, KUNCI_TAS, NPC, OBJEK, TANDA, TOKOH, UBIN, WARNA_TAS, type Gambar } from "../../assets/manifest";
+import { AVATAR, IKON, KUNCI_TAS, NPC, OBJEK, SUARA, TANDA, TOKOH, UBIN, WARNA_TAS, type Gambar } from "../../assets/manifest";
 import type { PetaJejak, WarnaTas } from "../../inti/tipe";
 
 const AKAR = new URL("../../../../", import.meta.url);
@@ -50,6 +52,8 @@ const BUTIR: { label: string; gambar: Gambar }[] = [
 ];
 const LEMBAR_UBIN = (["pagi", "siang", "sore"] as const).map((masa) => ({ label: `UBIN.${masa}`, url: UBIN[masa] }));
 const SEMUA_URL = [...BUTIR.map((b) => ({ label: b.label, url: b.gambar.url })), ...LEMBAR_UBIN];
+/** Efek suara: URL WAV di sfx/, berkunci nama peristiwa (nama berkas tanpa awalan sfx_ dan .wav). */
+const SUARA_URL = Object.entries(SUARA).map(([kunci, url]) => ({ label: `SUARA.${kunci}`, url }));
 
 describe("berkas manifest.ts", () => {
   const sumber = bacaTeks(FOLDER_ASET + "manifest.ts").replace(/\r\n/g, "\n");
@@ -58,14 +62,14 @@ describe("berkas manifest.ts", () => {
     expect(sumber.split("\n")[0]).toBe("// Dibuat build_jejak.py. Jangan disunting manual.");
   });
 
-  it("hanya mengimpor PNG dari folder aset, masing-masing sekali, tanpa impor dari inti/", () => {
+  it("hanya mengimpor PNG dan WAV dari folder aset, masing-masing sekali, tanpa impor dari inti/", () => {
     const impor = sumber.split("\n").filter((b) => /^\s*import\b/.test(b) || /\bfrom\s*["']/.test(b));
-    const pola = /^import [A-Za-z][A-Za-z0-9]* from "\.\/(ava|ikon|npc|obj|ubin)\/[a-z0-9_]+\.png";$/;
+    const pola = /^import [A-Za-z][A-Za-z0-9]* from "\.\/((ava|ikon|npc|obj|ubin)\/[a-z0-9_]+\.png|sfx\/[a-z0-9_]+\.wav)";$/;
     expect(impor.filter((b) => !pola.test(b))).toEqual([]);
     expect(/\bimport\s*\(|\brequire\s*\(/.test(sumber)).toBe(false);
     const jalur = impor.map((b) => b.slice(b.indexOf('"./') + 3, -2)).sort();
     expect(new Set(jalur).size).toBe(jalur.length);
-    expect(jalur).toEqual(SEMUA_URL.map((u) => berkasDari(u.url) ?? u.label).sort());
+    expect(jalur).toEqual([...SEMUA_URL, ...SUARA_URL].map((u) => berkasDari(u.url) ?? u.label).sort());
   });
 });
 
@@ -210,6 +214,59 @@ describe("IKON dan TANDA", () => {
   });
 });
 
+describe("SUARA", () => {
+  /** Isi kepala WAV: sah bila RIFF/WAVE dengan potongan fmt 16 byte lalu data, berkepala tepat 44 byte. */
+  function bacaWav(berkas: string) {
+    const b = readFileSync(new URL(FOLDER_ASET + berkas, AKAR));
+    const sah =
+      b.length > 44 &&
+      b.toString("latin1", 0, 4) === "RIFF" &&
+      b.readUInt32LE(4) === b.length - 8 &&
+      b.toString("latin1", 8, 16) === "WAVEfmt " &&
+      b.readUInt32LE(16) === 16 &&
+      b.toString("latin1", 36, 40) === "data" &&
+      b.readUInt32LE(40) === b.length - 44;
+    return { sah, format: b.readUInt16LE(20), kanal: b.readUInt16LE(22), laju: b.readUInt32LE(24), bit: b.readUInt16LE(34), byte: b.length };
+  }
+
+  it("memuat efek yang dibutuhkan JS-14, dan setiap kunci menunjuk sfx/sfx_{kunci}.wav", () => {
+    const perlu = ["kejadian", "kotak", "skill", "tepat", "lembut", "hitung", "peringatan", "klik", "teks"];
+    expect(perlu.filter((k) => !Object.hasOwn(SUARA, k))).toEqual([]);
+    const salah = SUARA_URL.filter(({ label, url }) => berkasDari(url) !== `sfx/sfx_${label.slice("SUARA.".length)}.wav`);
+    expect(salah.map((u) => u.label)).toEqual([]);
+  });
+
+  it("setiap berkas WAV PCM mono 16 bit 22.050 Hz berkepala 44 byte, dengan lama dan ukuran dalam batas", () => {
+    // Efek pendek paling lama 0,65 detik dan paling besar 30 KB (KT-C21 a); jingle akhir 3–4 detik, paling besar 160 KB (KT-C22 a).
+    const salah: string[] = [];
+    for (const { label, url } of SUARA_URL) {
+      const berkas = berkasDari(url) ?? "";
+      if (!ada(berkas)) {
+        salah.push(`${label}: berkas tidak ada`);
+        continue;
+      }
+      const w = bacaWav(berkas);
+      const [lamaMin, lamaMaks, byteMaks] = label === "SUARA.akhir" ? [3, 4, 160 * 1024] : [0, 0.65, 30 * 1024];
+      const lama = (w.byte - 44) / 2 / w.laju;
+      if (!w.sah || w.format !== 1 || w.kanal !== 1 || w.laju !== 22050 || w.bit !== 16) {
+        salah.push(`${label}: bukan WAV PCM mono 16 bit 22.050 Hz`);
+      } else if (lama < lamaMin || lama > lamaMaks || w.byte > byteMaks) {
+        salah.push(`${label}: ${lama.toFixed(3)} detik, ${w.byte} byte`);
+      }
+    }
+    expect(SUARA_URL.length).toBeGreaterThan(0);
+    expect(salah).toEqual([]);
+  });
+
+  it("klik dan teks identik byte dengan berkas Sehari Setara (usulan KT-C25 a)", () => {
+    for (const nama of ["klik", "teks"]) {
+      const jejak = readFileSync(new URL(`${FOLDER_ASET}sfx/sfx_${nama}.wav`, AKAR));
+      const sehari = readFileSync(new URL(`app/sehari-setara/assets/sfx/sfx_${nama}.wav`, AKAR));
+      expect(jejak.equals(sehari), nama).toBe(true);
+    }
+  });
+});
+
 describe("warna tas", () => {
   it("kunci WARNA_TAS sama dengan tipe WarnaTas di inti/tipe.ts, dengan urutan yang sama", () => {
     const deklarasi = /export type WarnaTas\s*=\s*([^;]+);/.exec(bacaTeks("app/jejak-setara/inti/tipe.ts"))?.[1] ?? "";
@@ -254,6 +311,20 @@ describe("hanya aset Disetujui", () => {
         return m && /disetujui/i.test(b) ? [m[1]] : [];
       });
     const dirujuk = SEMUA_URL.map((u) => berkasDari(u.url) ?? u.label);
+    expect(disetujui.length).toBeGreaterThan(0);
+    expect(new Set(dirujuk).size).toBe(dirujuk.length);
+    expect(dirujuk.filter((b) => !disetujui.includes(b))).toEqual([]);
+    expect(disetujui.filter((b) => !dirujuk.includes(b))).toEqual([]);
+  });
+
+  it("efek suara di SUARA sama dengan efek suara Disetujui di CREDITS.md, masing-masing tepat sekali", () => {
+    const disetujui = bacaTeks(FOLDER_ASET + "CREDITS.md")
+      .split("\n")
+      .flatMap((b) => {
+        const m = /^\| `(sfx\/[a-z0-9_]+\.wav)` \|/.exec(b);
+        return m && /disetujui/i.test(b) ? [m[1]] : [];
+      });
+    const dirujuk = SUARA_URL.map((u) => berkasDari(u.url) ?? u.label);
     expect(disetujui.length).toBeGreaterThan(0);
     expect(new Set(dirujuk).size).toBe(dirujuk.length);
     expect(dirujuk.filter((b) => !disetujui.includes(b))).toEqual([]);

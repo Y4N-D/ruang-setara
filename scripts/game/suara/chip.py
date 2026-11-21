@@ -83,17 +83,17 @@ def _bentuk(gelombang, fase, derau):
     return (1.0 - lebar) if fase < lebar else -lebar      # rata-rata 0, seperti klik gaya A
 
 
-def _isi(buf, n):
+def _isi(buf, n, laju_dalam=LAJU_DALAM):
     """Tambahkan satu not ke penyangga laju dalam."""
-    a = int(n.mulai * LAJU_DALAM + 0.5)
-    b_lama = int((n.mulai + n.lama) * LAJU_DALAM + 0.5)
-    b = int(n.selesai * LAJU_DALAM + 0.5)
-    serang = max(1, int(n.serang * LAJU_DALAM + 0.5))
+    a = int(n.mulai * laju_dalam + 0.5)
+    b_lama = int((n.mulai + n.lama) * laju_dalam + 0.5)
+    b = int(n.selesai * laju_dalam + 0.5)
+    serang = max(1, int(n.serang * laju_dalam + 0.5))
     lepas = max(1, b - b_lama)
     # luruh eksponensial lewat kali berulang: faktor per sampel 1 - 1 / (tetapan x laju)
-    q = 1.0 - 1.0 / (n.luruh * LAJU_DALAM) if n.luruh else 1.0
+    q = 1.0 - 1.0 / (n.luruh * laju_dalam) if n.luruh else 1.0
     hz0, hz1 = n.hz if isinstance(n.hz, tuple) else (n.hz, n.hz)
-    n_luncur = int(n.luncur * LAJU_DALAM + 0.5) if n.luncur else b_lama - a
+    n_luncur = int(n.luncur * laju_dalam + 0.5) if n.luncur else b_lama - a
     langkah_hz = (hz1 - hz0) / max(1, n_luncur)
     getar_laju, getar_dalam = n.getar if n.getar else (0.0, 0.0)
     fase, getar_fase, lfsr, derau = 0.0, 0.0, 0x7FFF, 1.0
@@ -102,11 +102,11 @@ def _isi(buf, n):
         k = i - a
         hz = hz0 + langkah_hz * min(k, n_luncur)
         if getar_dalam:
-            getar_fase += getar_laju / LAJU_DALAM
+            getar_fase += getar_laju / laju_dalam
             if getar_fase >= 1.0:
                 getar_fase -= 1.0
             hz = hz * (1.0 + getar_dalam * (4.0 * (getar_fase if getar_fase < 0.5 else 1.0 - getar_fase) - 1.0))
-        fase += hz / LAJU_DALAM
+        fase += hz / laju_dalam
         if fase >= 1.0:
             fase -= 1.0
             if n.gelombang == "derau":                      # desis berganti nilai sekali per periode
@@ -126,18 +126,20 @@ def _isi(buf, n):
         buf[i] += n.keras * sel * _bentuk(n.gelombang, fase, derau)
 
 
-def rakit(nots, saring_hz=6000.0, kutub=2, ekor=0.012, puncak=PUNCAK_DB[-3.0], masuk=0.002, keluar=0.008):
+def rakit(nots, saring_hz=6000.0, kutub=2, ekor=0.012, puncak=PUNCAK_DB[-3.0], masuk=0.002, keluar=0.008,
+          laju=LAJU):
     """Rakit not menjadi daftar sampel 16 bit: campur, turunkan laju, saring, normalkan, dan pudarkan tepi.
 
     saring_hz: batas saringan lolos-rendah (melembutkan pulsa); kutub: jumlah saringan satu kutub yang dipasang
     berurutan (2 berarti lebih lembut di nada tinggi). ekor: detik sesudah not terakhir selesai, untuk sisa
     saringan. puncak: nilai sampel terbesar (PUNCAK_DB). masuk, keluar: detik pudar lurus di awal dan akhir,
-    sehingga sampel pertama dan terakhir tepat 0 (tanpa bunyi letup)."""
+    sehingga sampel pertama dan terakhir tepat 0 (tanpa bunyi letup). laju: sampel per detik keluaran (bawaan
+    22.050; musik latar 11.025)."""
     akhir = max(n.selesai for n in nots) + ekor
-    panjang = int(akhir * LAJU + 0.5)
+    panjang = int(akhir * laju + 0.5)
     buf = [0.0] * (panjang * LEBIH)
     for n in nots:
-        _isi(buf, n)
+        _isi(buf, n, laju * LEBIH)
     # turunkan laju: rata-rata setiap LEBIH sampel, dijumlah berurutan
     x = []
     for i in range(panjang):
@@ -146,7 +148,7 @@ def rakit(nots, saring_hz=6000.0, kutub=2, ekor=0.012, puncak=PUNCAK_DB[-3.0], m
             t += v
         x.append(t / LEBIH)
     # lolos-rendah satu kutub: a = w / (1 + w), w = 2 pi fc / laju
-    w = 2.0 * PI * saring_hz / LAJU
+    w = 2.0 * PI * saring_hz / laju
     a = w / (1.0 + w)
     keluaran = x
     for _ in range(kutub):
@@ -162,8 +164,8 @@ def rakit(nots, saring_hz=6000.0, kutub=2, ekor=0.012, puncak=PUNCAK_DB[-3.0], m
         sebelum = v
         keluaran[i] = yd
     # pudar tepi
-    n_masuk = max(1, int(masuk * LAJU + 0.5))
-    n_keluar = max(1, int(keluar * LAJU + 0.5))
+    n_masuk = max(1, int(masuk * laju + 0.5))
+    n_keluar = max(1, int(keluar * laju + 0.5))
     for i in range(n_masuk):
         keluaran[i] *= i / n_masuk
     for i in range(n_keluar):
@@ -176,12 +178,12 @@ def rakit(nots, saring_hz=6000.0, kutub=2, ekor=0.012, puncak=PUNCAK_DB[-3.0], m
     return sampel
 
 
-def tulis_wav(jalur, sampel):
+def tulis_wav(jalur, sampel, laju=LAJU):
     """WAV PCM mono 16 bit, kepala 44 byte tanpa potongan tambahan."""
     with wave.open(str(jalur), "wb") as w:
         w.setnchannels(1)
         w.setsampwidth(2)
-        w.setframerate(LAJU)
+        w.setframerate(laju)
         w.writeframes(struct.pack("<%dh" % len(sampel), *sampel))
 
 
@@ -244,18 +246,18 @@ def keras_lufs(sampel, fs=LAJU):
 # Pemeriksaan satu berkas
 # ---------------------------------------------------------------------------
 
-def periksa(jalur, lama_maks, byte_maks, puncak, lama_min=0.0):
+def periksa(jalur, lama_maks, byte_maks, puncak, lama_min=0.0, laju=LAJU):
     """Daftar masalah satu berkas WAV (kosong bila lulus): format, kepala, lama, ukuran, puncak, tepi, DC, potong."""
     masalah = []
     with open(jalur, "rb") as f:
         mentah = f.read()
     p, s = baca_wav(jalur)
     nama = str(jalur).replace("\\", "/").split("/")[-1]
-    if (p.nchannels, p.sampwidth, p.framerate, p.comptype) != (1, 2, LAJU, "NONE"):
-        masalah.append(f"{nama}: bukan WAV PCM mono 16 bit {LAJU} Hz")
+    if (p.nchannels, p.sampwidth, p.framerate, p.comptype) != (1, 2, laju, "NONE"):
+        masalah.append(f"{nama}: bukan WAV PCM mono 16 bit {laju} Hz")
     if len(mentah) != 44 + 2 * len(s) or mentah[:4] != b"RIFF" or mentah[8:16] != b"WAVEfmt ":
         masalah.append(f"{nama}: kepala bukan 44 byte atau ada potongan tambahan")
-    lama = len(s) / LAJU
+    lama = len(s) / laju
     if not lama_min <= lama <= lama_maks:
         masalah.append(f"{nama}: {lama:.3f} detik, di luar {lama_min} sampai {lama_maks} detik")
     if len(mentah) > byte_maks:
@@ -264,7 +266,7 @@ def periksa(jalur, lama_maks, byte_maks, puncak, lama_min=0.0):
         masalah.append(f"{nama}: puncak {max(abs(v) for v in s)}, seharusnya {puncak}")
     if s[0] != 0 or s[-1] != 0:
         masalah.append(f"{nama}: sampel pertama atau terakhir bukan 0 (bunyi letup)")
-    n = LAJU // 1000                                       # 1 ms
+    n = laju // 1000                                       # 1 ms
     if max(abs(v) for v in s[:n]) > puncak // 2 or max(abs(v) for v in s[-n:]) > puncak // 2:
         masalah.append(f"{nama}: tepi awal atau akhir terlalu keras (bunyi letup)")
     if abs(sum(s) / len(s)) > PENUH * 0.002:

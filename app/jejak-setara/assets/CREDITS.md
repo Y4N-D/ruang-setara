@@ -1,4 +1,4 @@
-# CREDITS — Aset gambar Jejak Setara
+# CREDITS — Aset Jejak Setara
 
 Semua gambar di folder ini digambar dengan kode memakai kit Sehari Setara (`scripts/game/art/`: `palette.json` dan `pixelart.py`) dan kit tampak atas Jejak Setara (`scripts/game/art/atas_*.py`), lalu dibangun dengan `python scripts/game/art/build_jejak.py`. Kode adalah sumber utama; PNG tidak disunting manual. Status dan rincian setiap aset ada di `docs/jejak-setara/Daftar_Aset.md`.
 
@@ -267,3 +267,19 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 | `npc/npc_warga2_bawah_diam.png` | N-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `npc/npc_warga3_bawah_diam.png` | N-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `npc/npc_wayan_bawah_diam.png` | N-18 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+
+## Efek suara (`sfx/`)
+
+Efek suara dibuat dengan kode memakai kit suara Jejak Setara (`scripts/game/suara/`: `chip.py`, `efek.py`, dan `musik.py`), hanya dengan pustaka bawaan Python, lalu dibangun dengan `python scripts/game/art/build_jejak.py`. Kode adalah sumber utama; WAV tidak disunting manual. Format atribusinya: "Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]". Bunyi klik dan bunyi teks adalah salinan identik dari Sehari Setara.
+
+| File | ID | Atribusi |
+|---|---|---|
+| `sfx/sfx_hitung.wav` | S-06 | Dibuat dengan kode oleh Claude, disetujui YAN, 21 November 2026 |
+| `sfx/sfx_kejadian.wav` | S-01 | Dibuat dengan kode oleh Claude, disetujui YAN, 21 November 2026 |
+| `sfx/sfx_klik.wav` | — | Salinan identik `app/sehari-setara/assets/sfx/sfx_klik.wav` (S-01 Sehari Setara): bunyi klik gaya A dari halaman uji suara Sehari Setara, dipilih dan disetujui YAN, 26 Oktober 2026 |
+| `sfx/sfx_kotak.wav` | S-02 | Dibuat dengan kode oleh Claude, disetujui YAN, 21 November 2026 |
+| `sfx/sfx_lembut.wav` | S-05 | Dibuat dengan kode oleh Claude, disetujui YAN, 21 November 2026 |
+| `sfx/sfx_peringatan.wav` | S-07 | Dibuat dengan kode oleh Claude, disetujui YAN, 21 November 2026 |
+| `sfx/sfx_skill.wav` | S-03 | Dibuat dengan kode oleh Claude, disetujui YAN, 21 November 2026 |
+| `sfx/sfx_teks.wav` | — | Salinan identik `app/sehari-setara/assets/sfx/sfx_teks.wav` (S-02 Sehari Setara): bunyi teks gaya B dari halaman uji suara Sehari Setara, dipilih dan disetujui YAN, 26 Oktober 2026 |
+| `sfx/sfx_tepat.wav` | S-04 | Dibuat dengan kode oleh Claude, disetujui YAN, 21 November 2026 |

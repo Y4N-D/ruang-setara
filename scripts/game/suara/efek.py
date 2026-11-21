@@ -8,8 +8,12 @@ klik (sekitar E6) dan bunyi teks (sekitar C5) Sehari Setara.
 Setiap fungsi menerima puncak dalam dBFS (kunci chip.PUNCAK_DB). Puncak dipilih agar keras terdengar mendekati
 sasaran usulan KT-C23 a: S-01 sampai S-04 sekitar -18 LUFS, S-05 dan S-06 sekitar -21 LUFS, S-07 sekitar -23 LUFS,
 dan S-08 sekitar -16 LUFS. Puncak paling tinggi -3 dBFS.
+
+Daftar EFEK juga memuat musik latar layar kelas M-01 (musik.py, usulan KT-C26 a), sekitar -24 LUFS agar terdengar di
+bawah efek, dengan 11.025 sampel per detik.
 """
-from chip import NADA, Not, PUNCAK_DB, rakit
+from chip import LAJU, NADA, Not, PUNCAK_DB, rakit
+from musik import LAJU_MUSIK, musik_kelas
 
 LAMA_PENDEK = 0.65            # detik, efek pendek (usulan KT-C21 a)
 BYTE_EFEK = 30 * 1024         # satu efek suara paling besar 30 KB (Architecture 11.3)
@@ -94,19 +98,45 @@ def sfx_peringatan(puncak):
     return rakit(nots, saring_hz=4000.0, kutub=2, puncak=PUNCAK_DB[puncak])
 
 
+def sfx_akhir(puncak):
+    """S-08, akhir ronde (layar kelas): jingle hangat bernuansa malam, 3,26 detik. Melodi pulsa 25% naik G4-C5-E5-G5,
+    turun F5-E5-D5, lalu berhenti di C5 dengan getar halus (kadens IV-V-I). Suara kedua pulsa 12,5% menemani nada
+    panjang, bas segitiga C-F-G-C, desis halus di ketukan, dan dua kerlip tinggi di akhir seperti bintang malam."""
+    nots = []
+    for nama, t, lama in [("G4", 0.00, 0.22), ("C5", 0.25, 0.22), ("E5", 0.50, 0.22), ("G5", 0.75, 0.45),
+                          ("F5", 1.25, 0.22), ("E5", 1.50, 0.22), ("D5", 1.75, 0.45)]:
+        nots.append(Not("pulsa25", t, lama, NADA[nama], serang=0.003, luruh=0.15, tahan=0.5, lepas=0.03, keras=0.6))
+    nots.append(Not("pulsa25", 2.25, 0.85, NADA["C5"], serang=0.003, luruh=0.45, lepas=0.15, keras=0.6,
+                    getar=(5.5, 0.004)))
+    for nama, t, lama, lepas in [("E5", 0.75, 0.45, 0.08), ("B4", 1.75, 0.45, 0.08), ("G4", 2.25, 0.85, 0.15)]:
+        nots.append(Not("pulsa12", t, lama, NADA[nama], serang=0.004, luruh=0.3, tahan=0.4, lepas=lepas, keras=0.3))
+    for nama, t, lama, lepas in [("C3", 0.0, 1.15, 0.1), ("F2", 1.25, 0.45, 0.1), ("G2", 1.75, 0.45, 0.1),
+                                 ("C3", 2.25, 0.85, 0.15)]:
+        nots.append(Not("segitiga", t, lama, NADA[nama], serang=0.006, luruh=0.5, tahan=0.5, lepas=lepas, keras=0.8))
+    for t in (0.0, 0.5, 1.0, 1.5, 2.0):
+        nots.append(Not("derau", t, 0.02, 8000.0, serang=0.001, luruh=0.02, lepas=0.03, keras=0.12))
+    nots.append(Not("derau", 2.25, 0.12, 6000.0, serang=0.01, luruh=0.08, lepas=0.08, keras=0.08))
+    for nama, t in [("G6", 2.6), ("C7", 2.85)]:
+        nots.append(Not("pulsa12", t, 0.05, NADA[nama], serang=0.002, luruh=0.04, lepas=0.05, keras=0.12))
+    return rakit(nots, saring_hz=4500.0, kutub=2, puncak=PUNCAK_DB[puncak])
+
+
 class Efek:
     """Satu efek di daftar: ID di Daftar_Aset.md, fungsi resep, puncak (dBFS), sasaran keras terdengar (LUFS),
-    dan batas lama serta ukuran berkas."""
+    batas lama serta ukuran berkas, laju sampel, dan layar yang memutarnya ("pemain" atau "kelas")."""
 
-    def __init__(self, kode, fungsi, puncak, sasaran, lama_maks=LAMA_PENDEK, byte_maks=BYTE_EFEK, lama_min=0.0):
+    def __init__(self, kode, fungsi, puncak, sasaran, lama_maks=LAMA_PENDEK, byte_maks=BYTE_EFEK, lama_min=0.0,
+                 laju=LAJU, layar="pemain"):
         self.kode, self.fungsi, self.puncak, self.sasaran = kode, fungsi, puncak, sasaran
         self.lama_maks, self.byte_maks, self.lama_min = lama_maks, byte_maks, lama_min
+        self.laju, self.layar = laju, layar
 
     def bangun(self):
         return self.fungsi(self.puncak)
 
 
-# Nama berkas tanpa .wav -> efek. S-08 (sfx_akhir) ditambahkan di giliran 2.
+# Nama berkas tanpa .wav -> efek. S-06 dan S-07 diputar di layar pemain dan layar kelas; S-08 dan M-01 hanya di layar
+# kelas, jadi tidak dihitung dalam anggaran aset layar pemain.
 EFEK = {
     "sfx_kejadian": Efek("S-01", sfx_kejadian, puncak=-5.5, sasaran=-18.0),
     "sfx_kotak": Efek("S-02", sfx_kotak, puncak=-3.0, sasaran=-18.0),
@@ -115,4 +145,8 @@ EFEK = {
     "sfx_lembut": Efek("S-05", sfx_lembut, puncak=-11.5, sasaran=-21.0),
     "sfx_hitung": Efek("S-06", sfx_hitung, puncak=-4.0, sasaran=-21.0),
     "sfx_peringatan": Efek("S-07", sfx_peringatan, puncak=-7.5, sasaran=-23.0),
+    "sfx_akhir": Efek("S-08", sfx_akhir, puncak=-6.5, sasaran=-16.0, lama_maks=4.0, lama_min=3.0, byte_maks=160 * 1024,
+                      layar="kelas"),
+    "musik_kelas": Efek("M-01", musik_kelas, puncak=-14.5, sasaran=-24.0, lama_maks=45.0, lama_min=30.0,
+                        byte_maks=1024 * 1024, laju=LAJU_MUSIK, layar="kelas"),
 }
