@@ -16,7 +16,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-10 | Selesai (15 Nov 2026) | [JS-10-kelas.md](specs/JS-10-kelas.md) | [JS-10-hasil.md](tests/JS-10-hasil.md), lulus (AC-19 dengan catatan) |
 | JS-11 | Selesai (20 Nov 2026); "Jejak: uji" hijau untuk commit `e2e2a43` dan langkah pemilik proyek di lingkungan uji berhasil | [JS-11-akhir-ronde.md](specs/JS-11-akhir-ronde.md) | [JS-11-hasil.md](tests/JS-11-hasil.md), lulus (AC-22 diterima: kode layar pemain +1,33 KB) |
 | JS-12 | Selesai (16 Nov 2026) | [JS-12-bank.md](specs/JS-12-bank.md) | [JS-12-hasil.md](tests/JS-12-hasil.md), lulus (AC-8 diterima) |
-| JS-13 | Direncanakan (21 Nov 2026); menunggu `Setuju: JS-13` | — | — |
+| JS-13 | Spesifikasi ditulis (21 Nov 2026); Plan disetujui 21 Nov 2026; menunggu `Spesifikasi disetujui: JS-13` | [JS-13-statistik.md](specs/JS-13-statistik.md) | — |
 | JS-14 | Belum direncanakan | — | — |
 | JS-15 | Belum direncanakan | — | — |
 | JS-16 | Belum direncanakan | — | — |
@@ -1212,7 +1212,7 @@ Dikerjakan dalam mode ZIP dari `main` sesudah commit `9b0edec` (ZIP Build JS-09)
 
 ## JS-13 — Statistik per kejadian lintas ruang dan isi dasbor
 
-- Status: **Direncanakan (21 Nov 2026)**; menunggu `Setuju: JS-13`. Diperiksa sebelum Plan (AGENTS 4.1 langkah 1): JS-11 Selesai 20 Nov 2026 dengan laporan Lulus (AC-22 diterima) dan JS-12 Selesai 16 Nov 2026 dengan laporan Lulus (AC-8 diterima), keduanya dependensi JS-13. Urutan sisa JS-13, JS-14, JS-15, lalu JS-16 ditetapkan pemilik proyek 21 Nov 2026 (bagian "Keputusan urutan fitur"). Dikerjakan dalam mode ZIP dari `main` commit `676b821`. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare. **Audit independen:** folder `docs/jejak-setara/audit/` tidak ada di ZIP itu, jadi tidak ada temuan audit yang dimasukkan (catatan "Semua Plan" di bagian "Catatan untuk Plan berikutnya").
+- Status: **Spesifikasi ditulis (21 Nov 2026)** ([JS-13-statistik.md](specs/JS-13-statistik.md)); menunggu `Spesifikasi disetujui: JS-13` beserta pilihan DRAF D-1 sampai D-3. Plan disetujui 21 Nov 2026 dengan `Setuju: JS-13`, dibaca sebagai usulan 1a sampai 13a. Sebelumnya: **Direncanakan (21 Nov 2026)**. Diperiksa sebelum Plan (AGENTS 4.1 langkah 1): JS-11 Selesai 20 Nov 2026 dengan laporan Lulus (AC-22 diterima) dan JS-12 Selesai 16 Nov 2026 dengan laporan Lulus (AC-8 diterima), keduanya dependensi JS-13. Urutan sisa JS-13, JS-14, JS-15, lalu JS-16 ditetapkan pemilik proyek 21 Nov 2026 (bagian "Keputusan urutan fitur"). Dikerjakan dalam mode ZIP dari `main` commit `676b821`. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare. **Audit independen:** folder `docs/jejak-setara/audit/` tidak ada di ZIP itu, jadi tidak ada temuan audit yang dimasukkan (catatan "Semua Plan" di bagian "Catatan untuk Plan berikutnya").
 - Memenuhi: JFR-50 (statistik per kejadian lintas ruang dengan saringan: jumlah dijawab, persentase Langkah 1 benar, sebaran pilihan Langkah 2, median waktu menjawab, indeks kesulitan, dan pilihan keliru yang paling sering diambil) dan JFR-37 (dasbor: ruang yang sedang berjalan, sesi terakhir, ringkasan statistik, dan peringatan; kartu ruang sudah ada sejak JS-10). Ditambah PRD 11.1 (admin melihat semua ruang, guru ruang miliknya), PRD 11.2 (definisi statistik; ruang uji tidak masuk statistik; statistik per versi), dan JFR-44 (statistik dicatat per versi); Architecture 10.1 (`#/statistik`), 10.2 (`GET /api/statistik/kejadian`), dan 10.7; Design System 3.7 dan 10 ("Konsol admin": tabel, grafik, dan keadaan kosong); serta catatan Plan JS-13 dari Specify JS-11 dan Specify JS-09.
 - Bergantung pada: JS-11 dan JS-12 (keduanya Selesai). Memakai juga JS-09 (`jawaban.petunjuk_dipakai`).
 - File yang dibuat/diubah (rencana; dipastikan di Specify):
@@ -1316,3 +1316,21 @@ Dibaca dari ZIP `main` commit `676b821`: `naskah/STATUS.md` (terakhir diubah 20 
 | A-13 (Sesi B) | Draf panduan guru satu halaman | Tetap untuk Plan JS-16; halaman Statistik dan kartu dasbor bisa ikut disebut sesudah JS-13 Selesai | Tidak ada perubahan di berkas Sesi B |
 
 Sesi C bisa mengubah status C-14, C-15, dan C-16 menjadi Diterapkan. Berkas Sesi B dan C tidak disentuh.
+
+### Specify JS-13 (21 Nov 2026)
+
+Dikerjakan dalam mode ZIP dari `main` commit `676b821`, ditambah isi ZIP Gerbang 1 JS-13. Spesifikasinya [JS-13-statistik.md](specs/JS-13-statistik.md), dengan 31 butir perilaku dan 16 kriteria penerimaan.
+
+- **Keputusan penting:**
+  - Server tidak menerapkan rentang bawaan. Konsol mengisi "Dari tanggal" dengan tanggal 29 hari lalu, dan mengosongkannya berarti semua waktu (P-11 dan P-17, DRAF D-2).
+  - Kueri statistik punya dua bentuk, tanpa dan dengan guru, agar indeks `ruang_dibuat` atau `ruang_pemilik` terpakai, dengan batas tanggal selalu tertulis. Isi versi diambil dengan satu parameter JSON, karena D1 membatasi jumlah parameter (P-13).
+  - Benar dan tingkat dibaca dari isi versi dengan id pilihan asli yang tersimpan di `jawaban`. Poin penuh berarti Langkah 1 benar dan Langkah 2 tepat (P-5).
+  - Pilihan paket di halaman Statistik tidak bergantung pada saringan, agar pilihan yang sedang dipakai tidak hilang (P-12).
+  - Kategori indeks kesulitan dihitung dari nilai yang sudah dibulatkan, agar label cocok dengan angka (P-9).
+  - Di layar 1024–1279 px tiga kolom disembunyikan dan isinya ada di rincian, dan wadah tabel memakai `position: relative` (P-19, temuan maket Plan).
+  - Kartu dasbor kini menautkan ke Rujukan: JS-12 P-3 menulis tautan itu, tetapi kode dasbor belum memuatnya (P-27).
+  - `skemaDasbor` memberi bawaan untuk isian baru, sehingga konsol tetap membaca jawaban dasbor lama selama Worker belum diperbarui.
+- **Pemeriksaan di luar repositori** (`EXPLAIN QUERY PLAN` di SQLite Node dengan migrasi repositori): kueri statistik admin memakai `SEARCH r USING INDEX ruang_dibuat (dibuat_pada>? AND dibuat_pada<?)` lalu `SEARCH j USING INDEX jawaban_ruang (ruang_id=?)`; kueri guru memakai `SEARCH r USING INDEX ruang_pemilik (pemilik_id=? AND dibuat_pada>? AND dibuat_pada<?)`; dan kueri riwayat baru memilih ruang lewat `ruang_dibuat` lalu menghitung peserta hanya untuk ruang yang terpilih.
+- **DRAF yang menunggu pemilik proyek:** D-1 ruang yang tidak dimainkan di kartu "Sesi terakhir" (saran: dilewati), D-2 rentang bawaan dan cara memilih semua waktu (saran: "Dari tanggal" terisi, dikosongkan untuk semua waktu), dan D-3 nama guru di "Sesi terakhir" untuk admin (saran: ya).
+- **Berkas Sesi B dan C:** tidak ada permintaan baru sejak Plan JS-13 (ZIP yang sama).
+- **Galeri:** `build:pages` tetap menghasilkan 178 berkas yang identik byte dengan `main`.
