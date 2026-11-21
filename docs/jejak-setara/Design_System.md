@@ -471,20 +471,28 @@ Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 bl
 ## 12. Suara
 
 - Bawaan **mati** di layar pemain (kelas berisi puluhan HP); bawaan **nyala** 60% di layar kelas. Tombol `M` dan ikon suara mengubahnya.
-- Bunyi klik (gaya A) dan bunyi teks (gaya B) Sehari Setara dipakai ulang tanpa perubahan.
+- Bunyi klik (gaya A) dan bunyi teks (gaya B) Sehari Setara dipakai ulang tanpa perubahan, sebagai salinan identik byte `sfx_klik.wav` dan `sfx_teks.wav` di `app/jejak-setara/assets/sfx/` (Permintaan C-15).
 
-| Peristiwa | Karakter bunyi | Berkas |
-|---|---|---|
-| Kejadian pertama kali terlihat | Dua nada naik pendek | `sfx_kejadian.wav` |
-| Ambil kotak | Denting naik | `sfx_kotak.wav` |
-| Skill aktif | Desir pendek | `sfx_skill.wav` |
-| Jawaban tepat | Arpeggio ceria | `sfx_tepat.wav` |
-| Kurang tepat atau berisiko | Nada rendah lembut, tidak mengagetkan | `sfx_lembut.wav` |
-| Hitung mundur | Tik per angka | `sfx_hitung.wav` |
-| Dua menit terakhir | Dua tik pelan | `sfx_peringatan.wav` |
-| Akhir ronde | Jingle 3–4 detik (layar kelas) | `sfx_akhir.wav` |
+| Peristiwa | Karakter bunyi | Berkas | Keras terdengar |
+|---|---|---|---|
+| Kejadian pertama kali terlihat | Dua nada naik pendek | `sfx_kejadian.wav` | sekitar −18 LUFS |
+| Ambil kotak | Denting naik | `sfx_kotak.wav` | sekitar −18 LUFS |
+| Skill aktif | Desir pendek | `sfx_skill.wav` | sekitar −18 LUFS |
+| Jawaban tepat | Arpeggio ceria | `sfx_tepat.wav` | sekitar −18 LUFS |
+| Kurang tepat atau berisiko | Nada rendah lembut, tidak mengagetkan | `sfx_lembut.wav` | sekitar −21 LUFS |
+| Hitung mundur | Tik per angka | `sfx_hitung.wav` | sekitar −21 LUFS |
+| Dua menit terakhir | Dua tik pelan | `sfx_peringatan.wav` | sekitar −23 LUFS |
+| Akhir ronde | Jingle 3–4 detik (layar kelas) | `sfx_akhir.wav` | sekitar −16 LUFS |
+| Musik latar (P1, JS-21; layar kelas) | Lagu chiptune tenang 16 birama yang berulang mulus | `musik_kelas.wav` | sekitar −24 LUFS |
 
-Setiap efek ≤ 1 detik (kecuali jingle akhir) dan ≤ 30 KB, WAV PCM mono 16 bit atau MP3. Musik latar chiptune berulang menjadi P1 dan hanya diputar di layar kelas.
+Ketentuan berkas suara (Permintaan C-14 dan C-16; usulan Sesi C KT-C20 sampai KT-C26 pilihan a, disetujui pemilik proyek 21 November 2026):
+
+- **Format:** WAV PCM mono 16 bit 22.050 Hz, sama dengan klik dan bunyi teks. Efek pendek paling lama 0,65 detik dan paling besar 30 KB.
+- **Jingle akhir** `sfx_akhir.wav`: pengecualian ukuran, paling besar 160 KB (sekitar 3,2 detik), karena hanya dimuat layar kelas dan tidak pernah dimuat HP pemain.
+- **Musik latar** `musik_kelas.wav` (M-01): WAV PCM mono 16 bit 11.025 Hz, 38,4 detik yang berulang mulus, paling besar 1 MB, dan hanya dimuat layar kelas. Musik diputar pelan di bawah efek dan berhenti saat jeda, hitung mundur, dan jingle akhir. Layar kelas mengimpor berkasnya langsung (P-35 JS-10). Musik baru terdengar sesudah JS-21 (P1) dibangun.
+- **Volume:** puncak paling tinggi −3 dBFS, dan keras terdengar setiap berkas diseimbangkan dengan sasaran di tabel, sehingga bunyi yang disebut lembut atau pelan memang terdengar pelan. Pemutar cukup memakai satu pengatur volume bersama (60% di layar kelas, seperti Sehari Setara), tanpa volume per efek.
+- Semua bunyi mulai dan berakhir di sampel 0, sehingga bisa diputar dan dihentikan tanpa bunyi letup, dan memakai tangga nada C mayor tanpa nada sumbang. Bunyi kurang tepat sengaja tidak memakai dengung atau nada turun bertangga yang biasa menandai "gagal", agar tidak mempermalukan pemain di kelas.
+- Rincian setiap berkas (ID S-01 sampai S-08 dan M-01, lama, ukuran, dan hasil ukur) ada di `Daftar_Aset.md`, bagian "Efek suara".
 
 ## 13. Aksesibilitas
 
@@ -513,6 +521,8 @@ Kit Jejak Setara berada di `scripts/game/art/` dan memakai ulang `palette.json` 
 | `atas_ikon.py` | Penanda kejadian, ikon skill, ikon zona, ikon peta mini |
 | `build_jejak.py` | Daftar aset Jejak Setara, ekspor PNG ke `app/jejak-setara/assets/`, pratinjau, dan pemeriksaan |
 
+**Kit suara** (Permintaan C-14): efek suara dan musik latar dibuat dengan kode di `scripts/game/suara/`, hanya dengan pustaka bawaan Python (`wave` dan `struct`): `chip.py` (gelombang, selubung, saringan, penulis WAV, pengukur keras terdengar, dan pemeriksaan), `efek.py` (resep setiap efek), dan `musik.py` (musik latar). `build_jejak.py` memanggilnya, menulis WAV ke `app/jejak-setara/assets/sfx/`, memeriksanya, dan mencatat kreditnya, sehingga `assets:build:jejak` membangun gambar dan suara sekaligus. WAV tidak dimampatkan, jadi hasil bangun ulang sama byte di setiap komputer.
+
 ### Penamaan berkas
 
 | Jenis | Pola | Contoh |
@@ -526,6 +536,7 @@ Kit Jejak Setara berada di `scripts/game/art/` dan memakai ulang `palette.json` 
 | Ikon kepala avatar | `ikon_ava_{n}.png` | `ikon_ava_3.png` |
 | Penanda dan efek | `tanda_{nama}.png` | `tanda_kejadian.png`, `tanda_debu.png`, `tanda_kilau.png` |
 | Suara | `sfx_{peristiwa}.wav` | `sfx_kotak.wav` |
+| Musik latar (C-16) | `musik_{nama}.wav` | `musik_kelas.wav` |
 
 - Arah tokoh dan avatar hanya `bawah`, `atas`, dan `kanan`. Arah kiri tidak punya berkas, karena antarmuka mencerminkan arah kanan.
 - Berkas `tanda_*.png` disimpan di folder `ikon/`, tetapi tetap kelompok `tanda` di manifest.
@@ -537,6 +548,7 @@ Disimpan di `docs/jejak-setara/preview/`:
 - Peta penuh ×1 untuk setiap masa, dan potongan setiap zona ×4 dengan garis pindai.
 - Lembar avatar dan tokoh ×6 (semua arah dan pose).
 - Tiruan layar HP 731 × 411 dan laptop 960 × 540 dengan HUD, untuk memeriksa keterbacaan.
+- Efek suara dan musik latar: berkas WAV yang dilampirkan di balasan, karena dinilai dengan telinga; tidak disimpan di `preview/`.
 
 ### Daftar periksa tambahan setiap aset
 
@@ -556,4 +568,4 @@ Cantumkan di layar "Tentang" Jejak Setara dan di halaman masuk konsol:
 
 - Aset visual digambar dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN.
 - Huruf Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.
-- Efek suara: asal dan lisensinya dicatat per berkas di `app/jejak-setara/assets/CREDITS.md`. Bunyi klik dan bunyi teks mengikuti catatan Sehari Setara (butir S-6 spesifikasi F-07).
+- Efek suara dibuat dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN (Permintaan C-14). Asal dan lisensi setiap berkas dicatat di `app/jejak-setara/assets/CREDITS.md` dengan format "Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]". Bunyi klik dan bunyi teks mengikuti catatan Sehari Setara (butir S-6 spesifikasi F-07).

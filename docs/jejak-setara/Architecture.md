@@ -118,6 +118,7 @@ ruang-setara/
 │  ├─ migrations/0001_awal.sql …     # migrasi D1, hanya maju; 0002_peserta_dikeluarkan.sql (JS-11)
 │  └─ seed/bank-awal.json            # bank kejadian awal (hasil fitur konten)
 ├─ scripts/game/art/                 # kit gambar bersama + atas_*.py dan build_jejak.py
+├─ scripts/game/suara/               # kit suara: chip.py, efek.py, musik.py; dipanggil build_jejak.py (C-14)
 ├─ scripts/jejak-setara/
 │  ├─ bila-ada.mjs                   # penjalan skrip yang berkasnya belum ada (bagian 4.3)
 │  ├─ peta/kampung.txt · objek.json · build_peta.py   # sumber peta
@@ -766,11 +767,12 @@ export const OBJEK: Record<string, { bawah: Gambar; atas: Gambar | null; lebar: 
 export const NPC: Record<string, Gambar & { kakiX: number; kakiY: number }>;
 export const IKON: Record<string, Gambar>;
 export const TANDA: Record<string, Gambar>;
+export const SUARA: Record<NamaSuara, string>;     // C-15: URL WAV berhash, hanya bunyi Disetujui
 ```
 
 - `OBJEK` berkunci `jenis` di `kampung.json` (tanpa awalan `obj_`); `lebar` dan `tinggi` adalah jejak kaki dalam ubin.
 - `NPC`, `IKON`, dan `TANDA` berkunci nama berkas tanpa `.png`, misalnya `npc_bayu_bawah_diam`, `ikon_menyambung`, dan `tanda_diri`. Kunci `setTokoh` kejadian (Sesi B) dicocokkan langsung ke `NPC`, dan ke `OBJEK` tanpa awalan `obj_`.
-- Kelompok `suara` ditambahkan di JS-14.
+- Kelompok `SUARA` (Permintaan C-15; ditulis `build_jejak.py` sejak 21 November 2026) berisi URL berkas berhash untuk bunyi Disetujui, dengan tipe `NamaSuara` dan kunci `akhir`, `hitung`, `kejadian`, `klik`, `kotak`, `lembut`, `peringatan`, `skill`, `teks`, dan `tepat`. `klik` dan `teks` adalah salinan identik byte dari Sehari Setara. Layar pemain memakai `SUARA` (JS-14). Layar kelas dan konsol tidak mengimpor `manifest.ts` (P-35 JS-10), jadi layar kelas mengimpor WAV langsung dari `assets/sfx/`, termasuk musik latar `musik_kelas.wav` (M-01), yang sengaja tidak masuk `SUARA` (JS-21).
 
 ### 11.3 Anggaran
 
@@ -782,7 +784,11 @@ export const TANDA: Record<string, Gambar>;
 | Satu lembar ubin per masa | ≤ 60 KB |
 | Satu strip avatar atau tokoh | ≤ 6 KB |
 | Kedua berkas peta JSON bersama, `kampung.json` dan `kampung_gambar.json` (gzip) | ≤ 60 KB |
-| Satu efek suara | ≤ 30 KB |
+| Satu efek suara pendek (WAV PCM mono 16 bit 22.050 Hz, paling lama 0,65 detik) | ≤ 30 KB |
+| Jingle akhir `sfx_akhir.wav`, hanya layar kelas (C-14) | ≤ 160 KB |
+| Musik latar `musik_kelas.wav`, hanya layar kelas (WAV 11.025 Hz, C-16) | ≤ 1 MB |
+
+Jingle akhir dan musik latar tidak dihitung dalam "Seluruh aset layar pemain", karena HP pemain tidak memuatnya. Per 21 November 2026, aset layar pemain 205,3 KB dan aset khusus layar kelas 967,4 KB (`Daftar_Aset.md`, bagian "Efek suara").
 
 ## 12. Keamanan dan privasi
 

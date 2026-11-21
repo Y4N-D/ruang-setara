@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan **Jejak Setara** di repositori `ruang-setara`. Baca seluruh file ini, lalu PRD, Design System, dan Architecture Jejak Setara, sebelum mengubah apa pun.
 
+Versi 0.7 (21 November 2026): kit suara, kredit efek suara, dan `assets:build:jejak` untuk suara di bagian 6 dan 9 (Permintaan C-14 dan C-15, Plan JS-13).
 Versi 0.6 (14 November 2026): JS-22 Pengaman biaya ditambahkan ke backlog bagian 5 (usulan 14a JS-10).
 Versi 0.5 (14 November 2026): berkas alur kerja GitHub dan folder `Claude outputs/` dalam mode folder lokal (bagian 11.5, butir 8; penutupan JS-04).
 Versi 0.4 (13 November 2026): mode folder lokal (aplikasi Claude desktop) di bagian 11.5, berdampingan dengan mode ZIP; penyesuaian kecil di bagian 4, 4.1, 11, 11.3, 13, dan 14 (penutupan JS-08).
@@ -177,7 +178,7 @@ npx pnpm@11.25.0 test:e2e:jejak          # uji Playwright multi-konteks
 npx pnpm@11.25.0 sim:beban               # 50 bot per ruang; lokal saja sampai paket berbayar aktif
 npx pnpm@11.25.0 db:migrasi:lokal        # migrasi D1 lokal
 npx pnpm@11.25.0 peta:build              # python scripts/jejak-setara/peta/build_peta.py: bangun ulang peta + pemeriksaan
-npx pnpm@11.25.0 assets:build:jejak      # python scripts/game/art/build_jejak.py: bangun ulang aset + pemeriksaan
+npx pnpm@11.25.0 assets:build:jejak      # python scripts/game/art/build_jejak.py: bangun ulang aset gambar dan suara + pemeriksaan
 ```
 
 Nama skrip ditetapkan di JS-01 dan terdaftar di `package.json` sejak ZIP akhir JS-01 di-commit. Skrip yang berkas atau fiturnya belum ada mencetak "Belum tersedia: …" dan selesai tanpa galat. Sesi B dan C tidak perlu mengubah `package.json`; cukup membuat berkas di jalurnya: uji konten di `app/jejak-setara/__tests__/konten/`, `scripts/jejak-setara/peta/build_peta.py`, dan `scripts/game/art/build_jejak.py`. Untuk Playwright, ikuti catatan versi peramban yang berlaku di repositori (lihat laporan uji Sehari Setara terbaru). Di lingkungan agen, jalur Chromium diberikan lewat variabel `JEJAK_CHROMIUM`.
@@ -218,7 +219,8 @@ Nama skrip ditetapkan di JS-01 dan terdaftar di `package.json` sejak ZIP akhir J
 
 - Aturan aset `AGENTS.md` akar berlaku: sumber aset adalah kode, PNG tidak disunting manual, dan hanya aset "Disetujui" yang boleh dirilis.
 - Aset Jejak Setara digambar dengan kit di `scripts/game/art/` (berkas `atas_*.py` dan `build_jejak.py`) dan keluar ke `app/jejak-setara/assets/`.
-- Setiap aset dicatat di `app/jejak-setara/assets/CREDITS.md`: "Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui [nama], [tanggal]".
+- Efek suara dan musik latar dibuat dengan kit suara di `scripts/game/suara/`, yang dipanggil `build_jejak.py`, dan keluar ke `app/jejak-setara/assets/sfx/`. Format, volume, dan batas ukurannya ada di Design System 12, dan pratinjaunya berupa berkas WAV yang dilampirkan di balasan (Permintaan C-14 dan C-15).
+- Setiap aset dicatat di `app/jejak-setara/assets/CREDITS.md`: "Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui [nama], [tanggal]" untuk gambar, dan "Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]" untuk efek suara dan musik latar.
 - Mengubah kode gambar bersama tidak boleh mengubah aset Sehari Setara. `build_assets.py` Sehari Setara tetap harus lulus dengan hasil yang sama.
 
 **Daftar periksa manual (dipakai di tahap Test bila relevan)**
