@@ -161,10 +161,12 @@ DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC2)                 # kelompok N2
              or nama in IKON_BARU or nama in IKON_ULANG}                                 # kelompok I
 
-# Efek suara berstatus Disetujui: nama berkas tanpa .wav -> tanggal (Daftar_Aset.md, bagian "Efek suara"). Hanya efek
-# di sini, ditambah salinan klik dan bunyi teks, yang masuk CREDITS.md dan kelompok SUARA di manifest.ts.
+# Efek suara dan musik latar berstatus Disetujui: nama berkas tanpa .wav -> tanggal (Daftar_Aset.md, bagian "Efek
+# suara"). Semuanya, ditambah salinan klik dan bunyi teks, masuk CREDITS.md. Efek (sfx_*) juga masuk kelompok SUARA di
+# manifest.ts; musik latar (musik_*) tidak, karena layar kelas mengimpornya langsung (P-35 JS-10).
 DISETUJUI_SUARA = {nama: "21 November 2026" for nama in ("sfx_kejadian", "sfx_kotak", "sfx_skill", "sfx_tepat",
-                                                          "sfx_lembut", "sfx_hitung", "sfx_peringatan")}
+                                                          "sfx_lembut", "sfx_hitung", "sfx_peringatan", "sfx_akhir",
+                                                          "musik_kelas")}
 # Klik dan bunyi teks Sehari Setara yang disalin identik byte ke sfx/ (usulan KT-C25 a): nama -> (ID di Sehari Setara, isi)
 SALINAN_SUARA = {"sfx_klik": ("S-01", "bunyi klik gaya A"), "sfx_teks": ("S-02", "bunyi teks gaya B")}
 
@@ -225,8 +227,9 @@ def tulis_kredit(out_dir):
         baris.append("")
     suara = sorted(set(DISETUJUI_SUARA) | set(SALINAN_SUARA))
     if suara:
-        baris += ["## Efek suara (`sfx/`)", "",
-                  "Efek suara dibuat dengan kode memakai kit suara Jejak Setara (`scripts/game/suara/`: `chip.py`, "
+        baris += ["## Efek suara dan musik latar (`sfx/`)", "",
+                  "Efek suara dan musik latar dibuat dengan kode memakai kit suara Jejak Setara "
+                  "(`scripts/game/suara/`: `chip.py`, "
                   "`efek.py`, dan `musik.py`), hanya dengan pustaka bawaan Python, lalu dibangun dengan `python "
                   "scripts/game/art/build_jejak.py`. Kode adalah sumber utama; WAV tidak disunting manual. Format "
                   "atribusinya: \"Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]\". Bunyi klik dan bunyi teks "
@@ -380,8 +383,9 @@ def tulis_manifest(out_dir, ukuran, suara=frozenset()):
     if any(ukuran.get(f"ubin_{m}") != UKURAN_LEMBAR for m in MASA):
         masalah.append(f"manifest: ukuran lembar ubin bukan {UKURAN_LEMBAR}")
 
-    # SUARA: efek suara Disetujui dan salinan klik serta teks, berkunci nama peristiwa (nama berkas tanpa sfx_)
-    nama_suara = sorted(set(DISETUJUI_SUARA) | set(SALINAN_SUARA))
+    # SUARA: efek suara Disetujui dan salinan klik serta teks, berkunci nama peristiwa (nama berkas tanpa sfx_). Musik
+    # latar (musik_*.wav) tidak masuk: hanya layar kelas yang memutarnya, dan layar kelas mengimpor WAV langsung (P-35).
+    nama_suara = sorted(n for n in set(DISETUJUI_SUARA) | set(SALINAN_SUARA) if n.startswith("sfx_"))
     masalah += [f"manifest: sfx/{n}.wav tidak dibangun" for n in nama_suara if n not in suara]
     suara_ts = [f"  {n.removeprefix('sfx_')}: {_pengenal(n)}," for n in nama_suara]
 

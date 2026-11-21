@@ -4,6 +4,7 @@
 // JS-06, AVATAR delapan butir, kunci WARNA_TAS sama dengan WarnaTas, dan hanya aset Disetujui yang masuk.
 // SUARA (usulan KT-C24 a, 21 Nov 2026): setiap efek menunjuk WAV PCM mono 16 bit 22.050 Hz di sfx/ dalam batas lama
 // dan ukurannya, klik dan teks identik dengan Sehari Setara, dan hanya efek Disetujui di CREDITS.md yang masuk.
+// Musik latar Disetujui (M-01) berupa WAV 11.025 Hz yang diimpor langsung oleh layar kelas, jadi tidak ada di SUARA.
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { AVATAR, IKON, KUNCI_TAS, NPC, OBJEK, SUARA, TANDA, TOKOH, UBIN, WARNA_TAS, type Gambar } from "../../assets/manifest";
@@ -265,6 +266,31 @@ describe("SUARA", () => {
       expect(jejak.equals(sehari), nama).toBe(true);
     }
   });
+
+  it("musik latar Disetujui berupa WAV PCM mono 16 bit 11.025 Hz, 30–45 detik, paling besar 1 MB, dan tidak ada di SUARA", () => {
+    // Musik latar layar kelas (M-01, usulan KT-C26 a) diimpor langsung oleh layar kelas (P-35 JS-10).
+    const musik = bacaTeks(FOLDER_ASET + "CREDITS.md")
+      .split("\n")
+      .flatMap((b) => {
+        const m = /^\| `(sfx\/musik_[a-z0-9_]+\.wav)` \|/.exec(b);
+        return m && /disetujui/i.test(b) ? [m[1]] : [];
+      });
+    expect(musik.length).toBeGreaterThan(0);
+    const salah: string[] = [];
+    for (const berkas of musik) {
+      if (!ada(berkas)) {
+        salah.push(`${berkas}: berkas tidak ada`);
+        continue;
+      }
+      const w = bacaWav(berkas);
+      const lama = (w.byte - 44) / 2 / w.laju;
+      if (!w.sah || w.format !== 1 || w.kanal !== 1 || w.laju !== 11025 || w.bit !== 16 || lama < 30 || lama > 45 || w.byte > 1024 * 1024) {
+        salah.push(`${berkas}: ${w.laju} Hz, ${lama.toFixed(1)} detik, ${w.byte} byte`);
+      }
+    }
+    expect(salah).toEqual([]);
+    expect(SUARA_URL.filter(({ url }) => (berkasDari(url) ?? "").startsWith("sfx/musik_")).map((u) => u.label)).toEqual([]);
+  });
 });
 
 describe("warna tas", () => {
@@ -321,7 +347,7 @@ describe("hanya aset Disetujui", () => {
     const disetujui = bacaTeks(FOLDER_ASET + "CREDITS.md")
       .split("\n")
       .flatMap((b) => {
-        const m = /^\| `(sfx\/[a-z0-9_]+\.wav)` \|/.exec(b);
+        const m = /^\| `(sfx\/sfx_[a-z0-9_]+\.wav)` \|/.exec(b);
         return m && /disetujui/i.test(b) ? [m[1]] : [];
       });
     const dirujuk = SUARA_URL.map((u) => berkasDari(u.url) ?? u.label);

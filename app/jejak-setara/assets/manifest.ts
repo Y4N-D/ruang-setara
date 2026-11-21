@@ -246,6 +246,7 @@ import objWarungMadeAtas from "./obj/obj_warung_made_atas.png";
 import objWarungWifi from "./obj/obj_warung_wifi.png";
 import objWarungWifiAtas from "./obj/obj_warung_wifi_atas.png";
 
+import sfxAkhir from "./sfx/sfx_akhir.wav";
 import sfxHitung from "./sfx/sfx_hitung.wav";
 import sfxKejadian from "./sfx/sfx_kejadian.wav";
 import sfxKlik from "./sfx/sfx_klik.wav";
@@ -966,6 +967,7 @@ export const TANDA: Readonly<Record<string, Gambar>> = {
  * manifest ini (P-35 JS-10), jadi mengimpor WAV langsung dari berkasnya.
  */
 export const SUARA = {
+  akhir: sfxAkhir,
   hitung: sfxHitung,
   kejadian: sfxKejadian,
   klik: sfxKlik,
