@@ -7,7 +7,7 @@
 | Sesi | A (Mesin), mode ZIP |
 | Tanggal | 21 November 2026 |
 | Dasar kode | ZIP `main` sesudah commit 2c559b1 (20 November 2026) |
-| Hasil | **Lulus dengan catatan AC-23.** Semua perintah uji hijau. Kode layar pemain naik 4,64 KB gzip, di atas batas 4 KB (bagian "Temuan"); keputusan ada di tangan pemilik proyek |
+| Hasil | **Lulus; JS-09 Selesai (21 November 2026).** Semua perintah uji hijau. AC-23 lulus dengan catatan dan diterima pemilik proyek (pilihan a): kode layar pemain naik 4,64 KB gzip, di atas batas 4 KB (bagian "Temuan"). "Jejak: uji" hijau untuk commit `9b0edec`, dan percobaan pemilik proyek di lingkungan uji berhasil (bagian "Pemeriksaan di lingkungan uji" dan "Keputusan") |
 
 ## Ringkasan
 
@@ -109,7 +109,7 @@ Ketiga jenis kotak dan ketiga skill masing-masing lebih dari 10 kali per ruang, 
 | AC-20 Dasbor dan uji ujung ke ujung | Lulus | Tautan dasbor ≥ 48 px saat ruang tampil (`skill.uji.ts`); 48 uji lulus dalam satu perintah; semua ruang uji `ditutup` sesudahnya |
 | AC-21 Teks | Lulus | `kerangka.test.ts` (21 kunci layar pemain, 6 kunci konsol, 1 kunci CSV) |
 | AC-22 Protokol | Lulus | `PROTOKOL_VERSI` tetap 2; semua pesan baru lolos skema (`inti-ruang-skill.test.ts`); layar pemain mengabaikan kode `pemberitahuan` yang tidak dikenal (`klien-skill.test.ts`); ruang lama pulih dengan muatan 0 |
-| AC-23 Ukuran dan kinerja | **Lulus dengan catatan** | CSS +0,41 KB, konsol 132,11 KB, waktu server, dan kinerja HP lulus; JavaScript layar pemain +4,64 KB (batas 4 KB), lihat "Temuan" |
+| AC-23 Ukuran dan kinerja | Lulus dengan catatan, diterima pemilik proyek (21 Nov 2026, pilihan a) | CSS +0,41 KB, konsol 132,11 KB, waktu server, dan kinerja HP lulus; JavaScript layar pemain +4,64 KB (batas 4 KB), lihat "Temuan" |
 | AC-24 Beban | Lulus | Bagian "Simulasi beban" |
 | AC-25 Tangkapan layar | Lulus | Bagian "Tangkapan layar" |
 | AC-26 Tanpa regresi | Lulus | Semua perintah di atas hijau; `build:pages` identik; dokumen utama dan PLAN.md diperbarui |
@@ -129,6 +129,19 @@ Semua di [JS-09/](JS-09/), dibuat oleh `skill.uji.ts`.
 | `konsol-ruang-baru-1280x720.png`, `konsol-hasil-1280x720.png` | Dialog Ruang baru dengan kelompok Skill, dan hasil ruang dengan baris Skill serta tanda Petunjuk di rincian |
 | `konsol-pratinjau-petunjuk.png` | Pratinjau penyunting sesudah "Petunjuk (2)" ditekan |
 | `kelas-1024x768.png`, `kelas-1920x1080.png` | Layar kelas (podium), tanpa perubahan |
+
+## Pemeriksaan di lingkungan uji (21 November 2026)
+
+Dijalankan pemilik proyek sesudah ZIP Build JS-09 di-push (commit `9b0edec`), mengikuti "Langkah pemilik proyek sesudah commit" di entri JS-09 `PLAN.md`:
+
+| Langkah | Hasil |
+|---|---|
+| 1. "Jejak: uji" untuk commit `9b0edec` (alur kerja ini juga memasang versi JS-09 di lingkungan uji) | Hijau |
+| 2. Ronde singkat dengan dua HP | Berhasil |
+| 3. Kotak sepatu, kompas, dan buku terambil; Lari cepat, Kompas, dan Petunjuk berfungsi | Berhasil |
+| 4. Baris Skill dan tanda Petunjuk di hasil ruang di konsol | Tampil |
+
+Pemilik proyek tidak mengirim catatan lain. Langkah 5, 7, 8, dan 9 di spesifikasi, bagian "Manual (AGENTS 9) dan lingkungan uji", tidak termasuk daftar singkat itu: "+1 Kompas" di kartu dampak, kolom "Petunjuk dipakai" di CSV yang dibuka di Excel, ruang dengan Petunjuk dimatikan, dan tangkapan layar dari HP. Tiga perilaku pertama dibuktikan uji otomatis (AC-12, AC-18, dan AC-19), dan tangkapan layar HUD serta dialog Petunjuk dari uji otomatis ada di [JS-09/](JS-09/) (AC-25).
 
 ## Temuan
 
@@ -156,6 +169,8 @@ Pilihan untuk pemilik proyek:
 - **(a) Terima kenaikan 4,64 KB** dan catat di PRD 21 saat penutupan, seperti AC-22 JS-11. Layar pemain menjadi 127,10 KB dari anggaran 200 KB. *Saran.*
 - **(b) Kembali ke Specify** untuk mengurangi fitur yang sudah disetujui sampai kenaikan di bawah 4 KB (sekitar 0,7 KB), misalnya pita bantuan muatan D-2 atau tampilan berlari pemain lain (P-23). Fitur yang dipangkas perlu dipilih dan diukur dulu.
 
+**Keputusan pemilik proyek (21 Nov 2026):** pilihan (a). Kenaikan 4,64 KB diterima dan dicatat di PRD bagian 21.
+
 ### 2. Ukuran dunia di HP 731 × 411 (catatan, bukan kegagalan)
 
 HP 731 × 411 dengan rasio 2,625 menampilkan dunia skala 6 (731 × 411), bukan 610 × 343 seperti tertulis di P-29 butir 2 dan catatan Specify. Dunia 610 × 343 tampil di HP 640 × 360 dengan rasio 2,625 dan di HP dengan bilah peramban 915 × 356. Uji memakai ukuran yang benar untuk setiap ukuran dunia (spesifikasi, "Catatan Build"). Semua batas AC-11, AC-13, dan AC-16 tetap terpenuhi.
@@ -165,3 +180,9 @@ HP 731 × 411 dengan rasio 2,625 menampilkan dunia skala 6 (731 × 411), bukan 6
 - Uji ujung ke ujung yang lama juga membuat tangkapan layar di `tests/JS-10/`, `tests/JS-11/`, dan `tests/JS-12/`. Tangkapan layar itu dikembalikan ke isinya sebelum Build dan tidak ikut ZIP, karena merekam fitur masing-masing.
 - Nama aksesibel pilihan yang dicoret di Chromium memuat spasi sebelum koma ("… , dicoret Petunjuk"); dibacakan sama, jadi kodenya tidak diubah.
 - Simulasi beban dijalankan di server lokal, tidak di lingkungan uji, sesuai AGENTS selama paket gratis.
+
+## Keputusan
+
+Lulus dengan catatan AC-23 (ukuran kode layar pemain) saat Test, 21 November 2026.
+
+**Keputusan pemilik proyek (21 Nov 2026):** AC-23 (a), kenaikan 4,64 KB gzip diterima dan dicatat di PRD bagian 21; layar pemain menjadi 127,10 KB dari anggaran 200 KB. "Jejak: uji" hijau untuk commit `9b0edec`, dan keempat hasil percobaan di lingkungan uji berhasil (bagian "Pemeriksaan di lingkungan uji"). **Lulus; JS-09 Selesai.** Temuan 2 tetap dicatat di `PLAN.md` untuk Plan JS-18 dan Plan lain yang mengukur HUD.
