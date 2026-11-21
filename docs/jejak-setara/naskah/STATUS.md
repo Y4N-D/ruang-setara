@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| Tahap saat ini | **Naskah pendukung JS-11 dan JS-16** (20 November 2026): [`refleksi.md`](refleksi.md) dan [`panduan-guru.md`](panduan-guru.md) menunggu dibaca Sesi A di Specify JS-11 dan Plan JS-16 (Permintaan A-12 dan A-13). Sebelumnya: **JS-05 Selesai** (10 November 2026), dengan Revisi 1 disetujui pemilik proyek (`Spesifikasi disetujui: JS-05`, 8 November 2026) dan pemeriksaan penutup lulus ([`specs/JS-05-konten.md`](../specs/JS-05-konten.md), [`tests/JS-05-hasil.md`](../tests/JS-05-hasil.md)). Baris JS-05 di `PLAN.md` sudah diubah Sesi A (Permintaan A-11, Diterapkan) |
-| Pekerjaan | Naskah final 16 kejadian dan rujukannya (selesai 5 November 2026), lalu JS-05: skema konten, bank awal, semai ke D1, dan `content:check:jejak` (selesai 10 November 2026), lalu naskah pendukung: usulan kalimat refleksi untuk rekap pemain (JS-11) dan draf panduan guru satu halaman (JS-16), 20 November 2026 |
-| Tanggal | 20 November 2026 |
-| Acuan | ZIP repositori `main` sesudah JS-12 dan JS-22 Selesai (berkas bertanggal 16 November 2026): JS-01 sampai JS-08, JS-10, JS-12, dan JS-22 Selesai; Plan JS-11 menunggu `Setuju: JS-11` |
-| Berkas yang boleh diubah sesi ini | Sesi naskah pendukung (20 November 2026): hanya `docs/jejak-setara/naskah/` (pemilik proyek). Batas JS-05 sebelumnya: `docs/jejak-setara/naskah/`, `app/jejak-setara/inti/konten/`, `server/jejak-setara/seed/`, `scripts/jejak-setara/semai.mjs`, dan berkas berawalan `naskah-` atau `bank-` di `app/jejak-setara/__tests__/konten/` (pemilik proyek, 7 November 2026), ditambah `docs/jejak-setara/specs/JS-05-konten.md` dan `docs/jejak-setara/tests/JS-05-hasil.md` (usulan 10a, disetujui 7 November 2026). Perubahan berkas lain ditulis di "Permintaan untuk Sesi A" |
+| Tahap saat ini | **Plan naskah tambahan K-17 sampai K-40** (21 November 2026): usulan di bagian [Plan naskah tambahan (K-17 sampai K-40)](#plan-naskah-tambahan-k-17-sampai-k-40) menunggu "Setuju: naskah tambahan". Sebelumnya: naskah pendukung [`refleksi.md`](refleksi.md) dan [`panduan-guru.md`](panduan-guru.md) (20 November 2026, Permintaan A-12 dan A-13), dan **JS-05 Selesai** (10 November 2026; [`specs/JS-05-konten.md`](../specs/JS-05-konten.md), [`tests/JS-05-hasil.md`](../tests/JS-05-hasil.md)) |
+| Pekerjaan | Naskah final 16 kejadian dan rujukannya (selesai 5 November 2026), lalu JS-05: skema konten, bank awal, semai ke D1, dan `content:check:jejak` (selesai 10 November 2026), lalu naskah pendukung untuk JS-11 dan JS-16 (20 November 2026), lalu Plan 24 naskah tambahan K-17 sampai K-40, tiga per zona (21 November 2026) |
+| Tanggal | 21 November 2026 |
+| Acuan | ZIP repositori `main` dari pemilik proyek (berkas bertanggal 21 November 2026): JS-01 sampai JS-12 dan JS-22 Selesai (JS-09 Selesai 21 Nov 2026); Plan JS-13 menunggu `Setuju: JS-13`; JS-19 (termasuk impor dan ekspor bank) belum direncanakan |
+| Berkas yang boleh diubah sesi ini | Sesi naskah tambahan (21 November 2026): hanya `docs/jejak-setara/naskah/` (pemilik proyek). Di tahap Plan ini hanya `naskah/STATUS.md` yang diubah. Batas JS-05 tercatat di "Catatan untuk JS-05". Perubahan berkas lain ditulis di "Permintaan untuk Sesi A" |
 
 ## Riwayat
 
@@ -44,6 +44,271 @@
 | 8 Nov 2026 | Gerbang 2 JS-05 (Revisi 1) | Pemilik proyek membalas `Spesifikasi disetujui: JS-05` untuk Revisi 1, termasuk D-6 (id tetap UUID versi 5). ZIP perbaikan di-commit dan di-push pukul 02.59. Sesudah itu Database ID uji diisi (commit pukul 14.03), dan deploy ke lingkungan uji berhasil: `/api/sehat` menjawab `{"ok":true,"protokol":1,"lingkungan":"uji"}`. Persetujuan ini dicatat 10 Nov 2026 dari keterangan pemilik proyek, karena chat Sesi B sebelumnya hilang |
 | 10 Nov 2026 | Selesai JS-05 | Pemeriksaan penutup di ZIP `main` 10 Nov 2026 dengan dependensi terpasang (`install --frozen-lockfile`, Node 22.23.4): `content:check:jejak` 10 berkas, 254 uji lulus, 0 dilewati (`bank-peta` kini berjalan karena peta JS-06 ada); `test:jejak` 33 berkas, 705 uji lulus; `test:jejak:server` 2 berkas, 19 uji lulus; `build:jejak` berhasil. Isi repositori cocok dengan Revisi 1: `DASAR_ID` dan id contoh K-01, versi kerja K-01, dan Paket inti 16 sama dengan P-40; `semai.mjs --sql` 73.724 byte tanpa kata "terverifikasi", sama dengan laporan. Satu ketidakcocokan: `server/jejak-setara/seed/kontrak-d1.sql` masih ada di `main` (AC-17), karena menyalin isi ZIP tidak menghapus berkas. Berkas itu tidak dipakai kode mana pun, dan kedua perintah uji konten tetap lulus tanpanya; pemilik proyek menyetujui penghapusannya di commit penutup ini. Pemilik proyek melaporkan "Jejak: uji" terakhir hijau. Syarat di laporan uji ("final bila Revisi 1 disetujui dan 'Jejak: uji' hijau") terpenuhi, jadi keputusan Lulus Revisi 1 kini final. JS-05 Selesai. Permintaan A-11 ditambahkan, dan status A-1 sampai A-10 disesuaikan dengan tanggapan Sesi A di `PLAN.md`. Kode, naskah, spesifikasi, dan laporan uji tidak diubah |
 | 20 Nov 2026 | Naskah pendukung | Atas permintaan pemilik proyek, dari ZIP `main` sesudah JS-12 dan JS-22 Selesai: `refleksi.md` (tiga pasang usulan kalimat refleksi untuk rekap pemain, bahan Specify JS-11 usulan 3; saran Pasangan 1) dan `panduan-guru.md` (draf panduan guru satu halaman, bahan Plan JS-16; bagian yang menunggu JS-11 dan JS-09 bertanda [menyusul]) ditulis. Permintaan A-11 menjadi Diterapkan sesuai tanggapan Sesi A di `PLAN.md` (Plan JS-10), lalu Permintaan A-12 dan A-13 ditambahkan. Pemeriksaan: kalimat refleksi 45–74 karakter; bagian "Halaman untuk guru" muat satu halaman A4 (margin 2 cm, huruf setara Calibri 11 pt); `content:check:jejak` lulus; `build:pages` 178 berkas identik byte dengan `main`. Kode, naskah K-xx, `NASKAH.md`, dan bank awal tidak diubah |
+| 21 Nov 2026 | Plan naskah tambahan | Chat Sesi B sebelumnya berhenti sesudah menulis usulan Plan 24 kejadian baru, dan berkasnya belum tersimpan. Atas permintaan pemilik proyek, usulan itu diperiksa ulang terhadap ZIP `main` 21 Nov 2026 dan ditulis ulang sebagai entri "Plan naskah tambahan (K-17 sampai K-40)": rujukan dibetulkan (koreksi a), judul ditulis ulang (b), 15 tema diganti (c), ukuran giliran menjadi satu zona atau tiga kejadian (d, KT-B2 diubah), cara memasukkan ke basis data dibandingkan (e), kejadian yang perlu peninjauan khusus ditandai (f), dan paket diusulkan ulang (g). Permintaan A-14 diajukan bersyarat (usulan 8). Status Permintaan A-12 menjadi Diterapkan dan A-13 menjadi Diterima, sesuai tanggapan Sesi A di `PLAN.md`. Menunggu "Setuju: naskah tambahan". Kode, naskah K-01 sampai K-16, `NASKAH.md`, dan bank awal tidak diubah |
+
+## Plan naskah tambahan (K-17 sampai K-40)
+
+Entri Plan untuk 24 kejadian baru, tiga per zona (templat AGENTS 12.1). Titik awalnya usulan chat Sesi B sebelumnya (21 November 2026), yang terhenti sebelum berkasnya tersimpan. Usulan itu diperiksa ulang terhadap ZIP `main` terbaru dan dibetulkan menurut koreksi a sampai g dari pemilik proyek. Apa yang diganti dan alasannya ada di bagian "Perubahan dari usulan sebelumnya" di akhir entri ini.
+
+Semua rujukan baru berstatus **perlu verifikasi**. Nomor pasalnya sudah dicari di sumber resmi saat Plan ini disusun, tetapi itu baru pra-pemeriksaan: bunyi lengkapnya dibaca lagi di giliran masing-masing (KT-B7), dan hal yang perlu perhatian ditulis di kolom "Yang perlu dicek". KT-B1 dan KT-B3 sampai KT-B7, serta pegangan gaya usulan 1 (5 November 2026), tetap berlaku. KT-B2 diganti (lihat "Keputusan Gerbang naskah").
+
+| | |
+|---|---|
+| Status | Direncanakan (21 Nov 2026), menunggu "Setuju: naskah tambahan" |
+| Memenuhi | Tambahan isi bank untuk JFR-15, JFR-16, dan JFR-45 (kejadian per zona, dialog dua langkah dan kartu dampak, serta pustaka rujukan), dan paket untuk JFR-46 |
+| Bergantung pada | JS-05 (skema dan bank awal) dan JS-12 (penyunting konsol dan pustaka rujukan), keduanya Selesai. Peta JS-06 memuat 12 titik kejadian per zona. Cara memasukkan ke basis data mengikuti usulan 3 |
+| Berkas yang dibuat atau diubah | Sekarang: `naskah/STATUS.md`. Sesudah disetujui, setiap giliran: tiga berkas `naskah/tambahan/K-xx.md`, `naskah/tambahan/NASKAH-TAMBAHAN.md`, dan `naskah/STATUS.md` (usulan 6). `naskah/NASKAH.md`, `K-01.md` sampai `K-16.md`, dan bank awal tidak diubah |
+| Migrasi D1 | Tidak ada |
+| Pesan protokol baru atau berubah | Tidak ada |
+| Aset yang dibutuhkan | Baru dan wajib: prasasti (K-32), serta kukang dalam kandang dan penjualnya (K-33). Disarankan: pedagang kedua (K-26). Selebihnya memakai tokoh dan objek yang sudah Disetujui (usulan 7) |
+| Hasil percobaan risiko | Bagian "Hasil percobaan dan pemeriksaan" di bawah |
+| Keputusan terbuka | KT-B8 sampai KT-B14 (usulan 1 sampai 7). Usulan 8 berupa Permintaan A-14 |
+| Dependensi baru | Tidak ada |
+| Risiko | Bagian "Risiko" di bawah |
+| Ukuran | L: 24 kejadian, 20 rujukan baru, 8 giliran |
+
+### Hasil percobaan dan pemeriksaan
+
+Diperiksa dengan skrip kecil di luar repositori terhadap `app/jejak-setara/peta/kampung.json`, `NASKAH.md`, pemeriksaan paket di `inti/konten/periksa.ts`, dan penempatan kejadian di server ruang.
+
+1. **Titik kejadian per zona.** Peta memuat 12 titik kejadian di setiap zona (96 seluruhnya). Satu kejadian memakai satu titik, atau dua titik bila batas pemain ruang lebih dari 50. Pemeriksaan paket hanya menolak paket yang kejadiannya di satu zona lebih dari 12, sedangkan server melewatkan tanpa pesan kejadian yang tidak kebagian titik. Jadi satu paket aman untuk semua ukuran ruang bila berisi **paling banyak 6 kejadian per zona** (usulan 4 dan 8).
+2. **Judul.** Ke-24 judul berpanjang 17–30 karakter (batas 32), tidak ada yang kembar, dan tidak ada yang sama dengan judul K-01 sampai K-16.
+3. **Sebaran.** Langkah 1 menanyakan hak (10 kejadian), kewajiban (10), peran lembaga (3), atau keduanya (1). Jenisnya: pengabaian kewajiban 12, pelanggaran hak 11, dan keduanya 1. Bank awal condong ke hak (pelanggaran hak 11, pengabaian kewajiban 3, keduanya 2), jadi ke-40 kejadian bersama menjadi 22, 15, dan 3.
+4. **Rujukan.** 20 rujukan baru (JR-24 sampai JR-43) dan 8 rujukan lama dipakai ulang: JR-01 dan JR-04 masing-masing tiga kali, serta JR-05, JR-07, JR-12, JR-13, JR-14, dan JR-16 masing-masing sekali. Setiap kejadian memakai 1–2 rujukan (batas 1–4). Kejadian yang menanyakan kewajiban memakai sedikitnya satu rujukan berisi kewajiban atau larangan, kecuali K-37 yang masih menunggu ayat larangan merokok (JR-41).
+5. **Kemiripan dengan K-01 sampai K-16.** Topik, latar, dan pertanyaan Langkah 1 setiap tema dibandingkan dengan ke-16 kejadian lama. Sepuluh tema usulan sebelumnya diganti karena terlalu mirip. Tiga tema baru masih bersinggungan dengan kejadian lama, dan bedanya ditulis di kolom catatan: K-18 dengan K-14, K-21 dengan K-09 dan K-10, serta K-33 dengan K-11.
+6. **Latar titik.** Setiap tema terjadi di latar yang ada di semua titik zonanya (tabel latar di `NASKAH.md`, Permintaan A-8). Benda khusus seperti prasasti dan kandang kukang masuk set tokoh kejadian, bukan peta.
+7. **Aturan konten (AGENTS bagian 8).** Tidak ada tokoh berwenang yang menjadi pelanggar; guru, petugas, dan polisi yang muncul digambarkan membantu. Tanpa kekerasan fisik dan tanpa menyalahkan korban. Raka hanya di K-04 (KT-B5), Bayu tidak dipakai, dan tidak ada tema agama atau suku baru (alasannya di "Peninjauan khusus").
+8. **Uji repositori.** Uji `naskah-cocok` membaca berkas `K-xx.md` di folder `naskah/` (tanpa subfolder) dan mewajibkannya sama persis dengan 16 kejadian bank awal. Uji itu juga membaca tabel rujukan serta tabel set tokoh di `NASKAH.md`. Menaruh `K-17.md` di folder itu atau JR-24 di `NASKAH.md` akan membuat "Jejak: uji" merah, jadi naskah tambahan ditaruh di subfolder `naskah/tambahan/` (usulan 6). Tidak ada uji yang membaca `STATUS.md`.
+
+### Daftar tema
+
+Latar setiap zona mengikuti tabel latar di `NASKAH.md`. Tokoh di kolom "Inti kejadian" masih usulan; set tokoh pastinya ditulis di naskah giliran masing-masing.
+
+| Kode | Zona | Judul | Inti kejadian | Langkah 1 / Jenis | Rujukan usulan | Catatan |
+|---|---|---|---|---|---|---|
+| K-17 | Z1 | Bendera yang sudah robek | Menjelang 17 Agustus, tetangga memasang lagi bendera tahun lalu yang sudah robek dan luntur di pagar rumahnya | Kewajiban / Pengabaian kewajiban | JR-24 | Tetangga tidak dipermalukan; pilihan tepat mengingatkan dengan sopan |
+| K-18 | Z1 | Memilih sekolah lanjutan | Teman ingin masuk SMK, tetapi orang tuanya sudah memilihkan SMA tanpa mendengar alasannya | Keduanya / Keduanya | JR-25, JR-16 | Hak didengar pendapatnya dan kewajiban menghormati orang tua; orang tua tidak digambarkan jahat. Beda dengan K-14: bukan berhenti sekolah, tetapi didengar dalam keputusan keluarga |
+| K-19 | Z1 | Pasir menutup jalan gang | Tumpukan pasir dan bata untuk perbaikan rumah menutup hampir seluruh gang selama berhari-hari, sehingga lansia dan anak bersepeda harus memutar jauh | Hak / Pelanggaran hak | JR-26, JR-04 | Pemilik rumah tidak dipermalukan; pilihan tepat meminta dengan sopan agar bahan bangunan dipinggirkan |
+| K-20 | Z2 | Bocoran soal ulangan | Di dekat kantin, teman menawarkan foto "bocoran soal" ulangan besok | Kewajiban / Pengabaian kewajiban | JR-27, JR-04 | Asal bocoran tidak dijelaskan, dan guru tidak digambarkan lalai |
+| K-21 | Z2 | Ketua kelas harus laki-laki? | Beberapa teman menolak calon ketua kelas perempuan dengan alasan "ketua harus laki-laki" | Hak / Pelanggaran hak | JR-12 | Kepekaan gender. Beda dengan K-09 (pendapat ditolak) dan K-10 (logat diejek): yang dipersoalkan kesempatan yang sama untuk dipilih |
+| K-22 | Z2 | Sketsa mural diakui teman | Rancangan mural sekolah buatan seorang siswa diserahkan temannya kepada guru sebagai karyanya sendiri | Hak / Pelanggaran hak | JR-28 | Bu Ratih dapat muncul sebagai guru yang menengahi |
+| K-23 | Z3 | Pengendara jatuh dekat halte | Pengendara motor tergelincir dekat halte dan lecet ringan, sementara orang-orang hanya menonton | Kewajiban / Pengabaian kewajiban | JR-29 | Luka ringan tanpa darah; polisi datang membantu. Beda dengan K-05 (helm) dan K-06 (menyeberang) |
+| K-24 | Z3 | Jalan berlubang dekat halte | Sesudah hujan deras, lubang besar muncul di jalan dekat halte dan membuat pengendara oleng | Peran lembaga / Pengabaian kewajiban | JR-30 | Menanyakan lembaga yang wajib memperbaiki atau memberi tanda, dan cara melapor. Petugas tidak digambarkan lalai: lubangnya baru muncul |
+| K-25 | Z3 | Angkot berhenti sebelum tujuan | Sopir angkot menyuruh penumpang turun di halte sebelum tujuan karena ingin putar balik, tetapi tetap meminta ongkos penuh | Hak / Pelanggaran hak | JR-31 | Sopir tidak dipermalukan; situasi tidak menyebut aturan tarif yang belum dicek |
+| K-26 | Z4 | Berat belanjaan dikurangi | Seorang ibu menimbang ulang belanjaannya di lapak lain, dan beratnya kurang dari yang dibayar | Hak / Pelanggaran hak | JR-31 | Kepekaan stereotip pedagang: memakai pedagang kedua, bukan pedagang K-07 (usulan 7). Sama-sama hak konsumen dengan K-25, tetapi tentang timbangan, bukan angkutan |
+| K-27 | Z4 | Anak kecil jadi kuli pasar | Orang dewasa yang bukan keluarganya menyuruh anak seusia SD mengangkut karung berat setiap pagi sampai terlambat sekolah, dengan upah receh | Hak / Pelanggaran hak | JR-32, JR-01 | **Keselamatan anak.** Anak tidak disalahkan. Yang menyuruh bukan pedagang lapak, agar Z4 tidak selalu menggambarkan pedagang bersalah |
+| K-28 | Z4 | Uang koin ditolak | Teman yang menjaga lapak keluarganya menolak uang koin anak SD yang hendak membeli | Kewajiban / Pengabaian kewajiban | JR-33 | Teman tidak dipermalukan; pilihan tepat menjelaskan dengan ramah |
+| K-29 | Z5 | Amplop untuk suara kakak | Menjelang pemilihan kepala desa, seseorang menitipkan amplop berisi uang untuk kakakmu agar memilih calon tertentu | Peran lembaga / Pelanggaran hak | JR-34 | Tanpa nama calon, partai, atau warna kampanye. Lembaga yang menerima laporan dipastikan saat pra-pemeriksaan giliran Z5 |
+| K-30 | Z5 | Kentongan tanda bahaya | Kentongan pos ronda berbunyi tanda air sungai naik dan warga diminta berkumpul di bale, tetapi seorang teman ingin melihat sungai dari dekat | Kewajiban / Pengabaian kewajiban | JR-35 | **Keselamatan anak.** Tanpa korban dan tanpa gambar banjir; bale menjadi titik kumpul |
+| K-31 | Z5 | Uang kas tanpa laporan | Iuran kas remaja di bale ditarik setiap bulan, tetapi pemakaiannya tidak pernah dilaporkan | Hak / Pelanggaran hak | JR-14 | Hak memperoleh informasi; kecocokan JR-14 untuk kas kelompok warga dinilai lagi di giliran Z5. Tanpa lomba (beda dengan K-09) dan tanpa ejekan |
+| K-32 | Z6 | Nama diukir di prasasti | Remaja mengukir namanya di prasasti tua berstatus cagar budaya di taman tepi sungai | Kewajiban / Pengabaian kewajiban | JR-36 | Prasasti peringatan, bukan benda suci; properti baru (usulan 7). Beda dengan K-11 (sampah) |
+| K-33 | Z6 | Kukang yang dijual | Penjual menawarkan kukang dalam kandang kecil kepada pengunjung taman sebagai hewan peliharaan | Kewajiban / Pengabaian kewajiban | JR-37 | Aset baru (usulan 7); hewan tidak disakiti di layar. Sama-sama tema lingkungan dengan K-11, tetapi tentang satwa dilindungi |
+| K-34 | Z6 | Anak kecil mencari ibunya | Anak kecil menangis mencari ibunya di taman dekat sungai, sementara orang-orang hanya lewat | Peran lembaga / Pengabaian kewajiban | JR-38, JR-01 | **Keselamatan anak.** Ibu tidak disalahkan; petugas atau polisi membantu |
+| K-35 | Z7 | Pengumuman yang tak terdengar | Tetangga yang Tuli menunggu di puskesmas, tetapi nomor antrean hanya dipanggil lewat pengeras suara, sehingga gilirannya terlewat | Hak / Pelanggaran hak | JR-39, JR-07 | **Disabilitas.** Petugas membantu begitu tahu. Tidak memakai tokoh ibu menggendong bayi (K-13) |
+| K-36 | Z7 | Adik belum punya akta lahir | Tetangga baru belum mengurus akta kelahiran adiknya karena mengira sulit, padahal adiknya sebentar lagi masuk sekolah | Hak / Pelanggaran hak | JR-40 | Keluarga tidak disalahkan; kantor desa membantu. Tidak menyebut "gratis" sebelum dicek |
+| K-37 | Z7 | Asap rokok di puskesmas | Pengunjung merokok di halaman puskesmas yang bertanda kawasan tanpa rokok, dekat anak-anak yang menunggu | Kewajiban / Pengabaian kewajiban | JR-41, JR-13 | Perokok tidak dipermalukan; pilihan tepat memberi tahu petugas, bukan menegur sendiri dengan cara berisiko |
+| K-38 | Z8 | Tantangan berbahaya demi video | Teman-teman di warung berwifi mengajak ikut tantangan berbahaya agar videonya banyak ditonton | Kewajiban / Pengabaian kewajiban | JR-01, JR-04 | **Keselamatan anak.** Tanpa rincian cara melakukan tantangan dan tanpa nama aplikasi |
+| K-39 | Z8 | Hadiah kuota minta data | Pesan berhadiah kuota gratis meminta data pribadi dan kode OTP | Hak / Pelanggaran hak | JR-42, JR-05 | Tanpa nama aplikasi atau merek. Beda dengan K-16 (kabar menakutkan): yang dipersoalkan data pribadi |
+| K-40 | Z8 | Umur palsu di media sosial | Teman berumur 12 tahun menaikkan umurnya agar bisa membuat akun media sosial, lalu mengajakmu ikut | Kewajiban / Pengabaian kewajiban | JR-43 | **Keselamatan anak.** Tanpa nama aplikasi. Kewajiban di kartu dampak dan kecocokan rujukannya dinilai lagi di giliran Z8 |
+
+### Peninjauan khusus
+
+Kejadian berikut mendapat catatan peninjauan khusus di naskahnya, seperti K-02, K-04, dan K-10, dan dinilai pemilik proyek sebelum disetujui.
+
+| Kode | Alasan | Yang dijaga |
+|---|---|---|
+| K-35 | Disabilitas | Tetangga digambarkan mandiri dan bermartabat, bukan untuk dikasihani; masalahnya ada pada cara memanggil antrean, bukan pada dirinya. Sebutan "Tuli" (huruf T besar, sebutan yang dipilih banyak komunitas Tuli) atau "tunarungu" diputuskan di giliran Z7 |
+| K-27 | Keselamatan anak | Anak tidak disalahkan dan tidak dikasihani berlebihan; tanpa kekerasan; pilihan tepat melibatkan orang dewasa yang dipercaya atau pos keamanan pasar |
+| K-30 | Keselamatan anak | Tanpa korban dan tanpa gambar bencana; pesan utamanya mengikuti tanda bahaya dan berkumpul di titik kumpul |
+| K-34 | Keselamatan anak | Pilihan tepat menemani anak di tempat ramai sambil memanggil petugas, bukan membawanya pergi sendiri; ibu tidak disalahkan |
+| K-38 | Keselamatan anak | Tanpa rincian cara melakukan tantangan, tanpa nama aplikasi, dan tanpa pujian untuk jumlah penonton |
+| K-40 | Keselamatan anak | Tanpa nama aplikasi; angka batas umur hanya disebut bila sudah dicek di aturan pelaksananya; anak yang ingin punya akun tidak dipermalukan |
+
+**Agama dan suku:** tidak ada tema baru. K-02 (agama) dan K-10 (suku) sudah ada di bank awal, sedangkan tema suku usulan sebelumnya ("Nelayan muda ditolak karena logat" dan "Kata gurau etnis di grup kelas") terlalu mirip K-10 dan K-15. Bila tema agama atau suku tetap diinginkan, tema itu menggantikan salah satu tema di atas dan ditulis dengan peninjauan khusus seperti K-02 dan K-10.
+
+**Kepekaan lain** (dicatat di catatan peninjauan biasa): K-21 (gender), K-26 dan K-27 (pedagang di Z4), K-29 (pemilihan kepala desa yang netral), K-18 dan K-36 (keluarga tidak disalahkan), K-23 (luka ringan), K-37 (orang dewasa yang merokok), dan K-32 (prasasti bukan benda suci).
+
+### Rujukan baru (perlu verifikasi)
+
+Nomor JR-24 sampai JR-43 diberikan menurut kejadian pertama yang memakainya (usulan 5). Teks rujukan mengikuti gaya KT-B4 dan masih usulan; teks finalnya ditulis di naskah giliran masing-masing. Kolom "Yang dibutuhkan kejadian" adalah isi yang harus ada di pasal itu, bukan kutipan bunyi pasal. Rujukan lama yang dipakai ulang tidak perlu dicek ulang bunyinya, cukup kecocokannya dengan kejadian baru. Bila tautan tidak terbuka, cari jenis, nomor, dan tahunnya di https://peraturan.bpk.go.id.
+
+| JR | Teks rujukan (usulan) | Dipakai di | Tautan | Yang dibutuhkan kejadian | Yang perlu dicek |
+|---|---|---|---|---|---|
+| JR-24 | UU No. 24 Tahun 2009, Pasal 24 huruf c | K-17 | https://peraturan.bpk.go.id/Details/38661/uu-no-24-tahun-2009 | Larangan mengibarkan bendera negara yang rusak, robek, luntur, kusut, atau kusam | Pasal 7 (pengibaran bendera pada 17 Agustus) cukup sebagai konteks, bukan rujukan |
+| JR-25 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 10 | K-18 | https://peraturan.bpk.go.id/Details/44473/uu-no-23-tahun-2002 · UU 35/2014: https://peraturan.go.id/files/uu35-2014bt.pdf | Hak anak menyatakan pendapat dan didengar pendapatnya | Apakah Pasal 10 termasuk yang diubah UU 35/2014 (Pasal I UU 35/2014) |
+| JR-26 | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 28 ayat (1) | K-19 | https://peraturan.bpk.go.id/Details/38654/uu-no-22-tahun-2009 | Larangan berbuat sesuatu yang merusak atau mengganggu fungsi jalan | Pastikan tidak diubah UU Cipta Kerja, dan gang kampung termasuk jalan untuk lalu lintas umum menurut Pasal 1 |
+| JR-27 | UU No. 20 Tahun 2003, Pasal 12 ayat (2) huruf a | K-20 | https://peraturan.bpk.go.id/Details/43920/uu-no-20-tahun-2003 | Kewajiban peserta didik menjaga norma pendidikan | RUU perubahan UU Sisdiknas sedang dibahas DPR (per Oktober 2026); bila disahkan, rujukan ditinjau ulang |
+| JR-28 | UU No. 28 Tahun 2014, Pasal 5 ayat (1) huruf a | K-22 | https://peraturan.go.id/files/uu28-2014bt.pdf | Hak moral pencipta agar namanya tetap dicantumkan pada ciptaannya | Rancangan mural siswa termasuk ciptaan yang dilindungi |
+| JR-29 | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 232 | K-23 | Sama dengan JR-26 | Kewajiban orang yang melihat kecelakaan lalu lintas untuk menolong korban dan melapor ke polisi | Pastikan tidak diubah UU Cipta Kerja |
+| JR-30 | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 24 | K-24 | Sama dengan JR-26 | Kewajiban penyelenggara jalan segera memperbaiki jalan rusak, atau memberi tanda bila belum bisa diperbaiki | Pastikan tidak diubah UU Cipta Kerja; siapa penyelenggara jalan di dekat halte kampung |
+| JR-31 | UU No. 8 Tahun 1999, Pasal 4 | K-25, K-26 | https://peraturan.go.id/files/uu8-1999.pdf | Hak konsumen mendapat barang atau jasa sesuai nilai tukar yang dibayar, dan hak atas informasi yang benar dan jujur | Apakah teks rujukan menyebut huruf tertentu atau Pasal 4 saja |
+| JR-32 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 76I | K-27 | Sama dengan JR-25 | Larangan membiarkan atau melakukan eksploitasi ekonomi terhadap anak | Pasal 76I disisipkan UU 35/2014, jadi bunyinya dibaca di UU 35/2014 |
+| JR-33 | UU No. 7 Tahun 2011, Pasal 23 ayat (1) | K-28 | https://jdih.kemenkeu.go.id/fulltext/2011/7TAHUN2011UU.htm | Larangan menolak rupiah sebagai alat pembayaran, kecuali bila keasliannya diragukan | Pastikan perubahan oleh UU 4/2023 (P2SK) tidak menyentuh pasal ini |
+| JR-34 | UU No. 6 Tahun 2014, Pasal 34 ayat (2) | K-29 | https://peraturan.bpk.go.id/Details/38582/uu-no-6-tahun-2014 | Pemilihan kepala desa bersifat langsung, umum, bebas, rahasia, jujur, dan adil | Pastikan tidak diubah UU 3/2024; lembaga yang menerima laporan politik uang di pemilihan kepala desa |
+| JR-35 | UU No. 24 Tahun 2007, Pasal 27 | K-30 | https://jdih.kemenkeu.go.id/fulltext/2007/24tahun2007uu.htm | Kewajiban setiap orang ikut dalam penanggulangan bencana | Bunyi Pasal 27 belum terbaca langsung saat Plan; UU ini masih berlaku karena RUU penggantinya belum disahkan |
+| JR-36 | UU No. 11 Tahun 2010, Pasal 66 ayat (1) | K-32 | https://peraturan.bpk.go.id/Details/38552/uu-no-11-tahun-2010 | Larangan merusak cagar budaya, seluruh maupun bagiannya | Status cagar budaya prasasti cukup disebut di situasi, misalnya lewat papan keterangan |
+| JR-37 | UU No. 5 Tahun 1990 jo. UU No. 32 Tahun 2024, Pasal 21 ayat (2) huruf a | K-33 | https://peraturan.bpk.go.id/Details/46710/uu-no-5-tahun-1990 · UU 32/2024: https://peraturan.bpk.go.id/Details/295135/uu-no-32-tahun-2024 | Larangan menangkap, memelihara, mengangkut, atau memperdagangkan satwa dilindungi dalam keadaan hidup | Bunyi dan huruf sesudah perubahan UU 32/2024; kukang termasuk satwa dilindungi menurut daftar jenis yang berlaku (Permen LHK P.106/2018 atau penggantinya) |
+| JR-38 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 20 | K-34 | Sama dengan JR-25 | Negara, pemerintah, masyarakat, keluarga, dan orang tua sama-sama wajib melindungi anak | Bunyi Pasal 20 sesudah diubah UU 35/2014 |
+| JR-39 | UU No. 8 Tahun 2016, Pasal 12 huruf a | K-35 | https://peraturan.go.id/files/uu8-2016bt.pdf | Hak penyandang disabilitas memperoleh informasi dan komunikasi yang mudah diakses dalam pelayanan kesehatan | Pasal 8 UU ini tentang hak privasi, jadi tidak dipakai (koreksi a) |
+| JR-40 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 27 ayat (1) dan (2) | K-36 | Sama dengan JR-25 | Identitas anak diberikan sejak lahir dan dituangkan dalam akta kelahiran | Apakah Pasal 27 diubah UU 35/2014. Aturan biaya akta (UU Administrasi Kependudukan) tidak dirujuk, jadi situasi tidak menyebut biaya |
+| JR-41 | UU No. 17 Tahun 2023, Pasal 151 ayat (1) | K-37 | https://peraturan.bpk.go.id/Details/258028/uu-no-17-tahun-2023 | Fasilitas pelayanan kesehatan termasuk kawasan tanpa rokok | Ayat yang memuat larangan merokok di kawasan itu, bila ada, ikut dicantumkan |
+| JR-42 | UU No. 27 Tahun 2022, Pasal 65 ayat (1) | K-39 | https://jdih.komdigi.go.id/produk_hukum/view/id/832/t/undangundang%2Bnomor%2B27%2Btahun%2B2022 | Larangan memperoleh atau mengumpulkan data pribadi orang lain secara melawan hukum | Kecocokan dengan pesan berhadiah yang meminta data |
+| JR-43 | UU No. 11 Tahun 2008 sebagaimana telah diubah terakhir dengan UU No. 1 Tahun 2024, Pasal 16A | K-40 | https://jdih.komdigi.go.id/index.php/produk_hukum/view/id/884/t/undangundang+nomor+1+tahun+2024 | Kewajiban penyelenggara sistem elektronik melindungi anak, termasuk soal batas umur pengguna | Ayat yang tepat (pra-pemeriksaan mencatat ayat (1) dan (4)). Aturan pelaksananya (PP 17/2025 dan Permenkomdigi 9/2026) hanya dibaca sebagai konteks, misalnya untuk batas umur |
+
+### Usulan 1. Daftar tema (KT-B8)
+
+- (a, saran) 24 tema di "Daftar tema" di atas.
+- (b) Perubahan sekecil mungkin: hanya K-23 dan K-32 yang diganti (koreksi c), sedangkan tema lain dari usulan sebelumnya tetap, dengan judul dan rujukan yang dibetulkan. Akibatnya tiga tema masih menjadikan tokoh berwenang pelanggar (AGENTS bagian 8), dua tema tidak punya pasal yang cocok, dan delapan tema tetap mirip kejadian lama.
+- (c) Pemilik proyek memilih per kode. Tema yang tidak dipilih diganti tema cadangan berikut, yang belum dipra-periksa:
+  - C-1 "Suara OSIS ditukar jajan" (Z2). Pasal 22E ayat (1) UUD tentang asas pemilu hanya bisa menjadi pembanding, karena pemilihan OSIS bukan pemilu. Tidak dipakai bersama K-29.
+  - C-2 "Coretan di tembok tetangga" (Z1), dengan JR-10 (hak milik). Tidak dipakai bersama K-32, karena sama-sama merusak.
+  - C-3 "Keluhan soal layanan" (Z7). Rujukannya belum dicari.
+
+### Usulan 2. Urutan giliran (KT-B9)
+
+Aturan pemilik proyek (21 November 2026): satu zona, yaitu tiga kejadian, per giliran, sehingga ada delapan giliran (KT-B2 diubah).
+
+- (a, saran) Z1 sampai Z8 berurutan. Nomor kode mengikuti urutan giliran, sehingga bila usulan 3b dipilih, kode yang diberikan konsol saat menyimpan (kode terbesar ditambah satu) juga sama dengan nomor di Plan.
+
+| Giliran | Zona | Kejadian | Peninjauan khusus | Frasa persetujuan |
+|---|---|---|---|---|
+| 1 | Z1 Rumah dan gang | K-17, K-18, K-19 | — | "Setuju: naskah tambahan Z1" |
+| 2 | Z2 Sekolah | K-20, K-21, K-22 | — | "Setuju: naskah tambahan Z2" |
+| 3 | Z3 Jalan dan halte | K-23, K-24, K-25 | — | "Setuju: naskah tambahan Z3" |
+| 4 | Z4 Pasar | K-26, K-27, K-28 | K-27 | "Setuju: naskah tambahan Z4" |
+| 5 | Z5 Balai warga | K-29, K-30, K-31 | K-30 | "Setuju: naskah tambahan Z5" |
+| 6 | Z6 Taman, sungai, dan pantai | K-32, K-33, K-34 | K-34 | "Setuju: naskah tambahan Z6" |
+| 7 | Z7 Puskesmas dan kantor desa | K-35, K-36, K-37 | K-35 | "Setuju: naskah tambahan Z7" |
+| 8 | Z8 Pojok gawai | K-38, K-39, K-40 | K-38, K-40 | "Setuju: naskah tambahan Z8" |
+
+- (b) Mulai dari Z3, karena dua rujukannya berasal dari UU LLAJ yang naskahnya sudah pernah dibuka untuk K-05 dan K-06, sehingga cocok untuk mencoba format tiga kejadian per giliran. Bila usulan 3b dipilih, kejadian tetap harus disimpan di konsol menurut urutan kode, bukan urutan giliran.
+- (c) Zona yang memuat peninjauan khusus lebih dulu (Z6, Z7, Z8, lalu Z4 dan Z5), agar keputusan yang sulit selesai lebih awal. Catatan di (b) juga berlaku.
+
+Setiap giliran: naskah ketiga kejadian tampil di balasan untuk dinilai, ditambah ZIP kecil berisi ketiga berkas `naskah/tambahan/K-xx.md`, `naskah/tambahan/NASKAH-TAMBAHAN.md`, dan `naskah/STATUS.md`. Rujukan baru giliran itu dipra-periksa di sumber resmi (KT-B7). Permintaan revisi cukup ditulis bebas.
+
+### Usulan 3. Cara memasukkan ke basis data (KT-B10)
+
+Yang sudah pasti:
+
+- JS-12 Selesai: kejadian dan rujukan bisa diketik di penyunting konsol sekarang. Kejadian baru mendapat kode saat pertama kali berhasil disimpan (kode terbesar ditambah satu), dan rujukan baru mendapat nomor JR berikutnya dengan status `belum`.
+- JS-19 belum direncanakan. Fitur itu termasuk versi 1.1 dan menggabungkan log audit, pengaturan umum, ruang uji, serta impor dan ekspor bank (JFR-48).
+- D1 uji dan D1 produksi terpisah. D1 produksi mulai kosong dan hanya diisi bank awal pada deploy produksi pertama (`PLAN.md`, catatan untuk Plan JS-16). Jadi, apa pun caranya, kejadian tambahan harus masuk ke kedua basis data.
+- Di semua cara, rujukan diverifikasi dan kejadian diterbitkan oleh akun Peninjau di konsol, di setiap basis data (AGENTS 7 butir 7). Agen dan skrip tidak pernah menandai rujukan terverifikasi. Perkiraan kasar untuk 20 rujukan dan 24 kejadian: 45–60 menit per basis data, dihitung dari perkiraan 30–45 menit untuk 16 kejadian di catatan Plan JS-16.
+- Jangan mencampur dua cara di satu basis data. Kejadian yang sudah diketik di konsol memakai kode K-17 dan seterusnya, sehingga semai atau impor untuk basis data itu harus disesuaikan lebih dulu.
+
+| | (a) Semai tambahan | (b) Diketik di konsol | (c) JS-19 dulu, lalu impor |
+|---|---|---|---|
+| Pekerjaan Anda memasukkan isi | Tidak ada; hanya menyetujui Plan semai, lalu commit dan push seperti biasa | Sekitar 6 jam (salin-tempel) atau 9,5 jam (ketik ulang) per basis data, untuk dua basis data | Mengunggah berkas impor di konsol, sekali per basis data |
+| Pekerjaan agen | Sesi B: Plan kecil, Build, dan Test semai; Sesi A: catatan Architecture | Tidak ada; lembar salin bila diminta | Sesi A: memecah JS-19 lalu satu siklus fitur penuh; Sesi B: data impor |
+| Kapan ada di basis data uji | Sesudah fitur semai di-push | Langsung sesudah setiap giliran diketik | Sesudah JS-19 Selesai |
+| Basis data produksi | Otomatis saat deploy | Diketik ulang | Diimpor ulang |
+| Teks sama dengan naskah | Dipastikan uji | Bergantung ketelitian menyalin | Dipastikan uji Sesi B pada berkas impor |
+| Pengaruh ke rilis 1.0 | Kecil; dikerjakan Sesi B di luar jalur utama Sesi A | Tidak ada | Menunda JS-13 sampai JS-16, atau impor baru ada sesudah rilis |
+
+- (a, saran) **Semai tambahan.** Sesi B menyiapkan berkas data tambahan di `server/jejak-setara/seed/` beserta uji yang mencocokkannya huruf demi huruf dengan naskah di `naskah/tambahan/`. `semai.mjs` menyemainya sekali per basis data dengan penanda sendiri, bukan `semai_bank_awal`. Langkah "Semai bank awal" yang sudah ada di alur kerja uji menjalankannya otomatis sesudah push, begitu juga langkah semai produksi kelak (Permintaan A-5). Anda tidak mengetik dan tidak menjalankan perintah. Rujukan masuk berstatus `belum` dan kejadian berstatus Siap tinjau, sama seperti bank awal; paket usulan 4 bisa ikut disemai. Syaratnya, cara ini perlu Plan kecil sendiri dengan batas berkas di luar `naskah/` (berkas semai, `semai.mjs`, dan uji konten, seperti batas JS-05), serta catatan Architecture bagian 10.6 dari Sesi A. Semai dirancang agar tidak menulis apa pun bila K-17 sampai K-40 atau JR-24 sampai JR-43 sudah terpakai di basis data itu. Waktunya (sekali sesudah giliran 8, atau bertahap dengan penanda masing-masing) ditetapkan di Plan semai.
+- (b) **Diketik di konsol.** Bisa dimulai begitu giliran pertama disetujui, tanpa kode baru. Perkiraan kasar dari panjang K-06 dan K-13 (1.722–1.866 karakter dalam 21 bagian per kejadian): sekitar 12 menit per kejadian bila disalin-tempel dari naskah, atau sekitar 20 menit bila diketik ulang, ditambah sekitar 4 menit per rujukan baru. Untuk 24 kejadian dan 20 rujukan, hasilnya sekitar 6 jam (salin-tempel) atau 9,5 jam (ketik ulang) per basis data, atau sekitar 45 menit per giliran, lalu diulang untuk produksi. Kejadian dan rujukan harus disimpan persis menurut urutan nomor di Plan, karena kode diberikan menurut urutan simpan. Ketepatan teks bergantung pada ketelitian menyalin, karena konsol hanya memeriksa batas panjang dan aturan isian. Bila diminta, Sesi B menambah "lembar salin" per giliran yang menyusun setiap isian menurut urutan di penyunting.
+- (c) **JS-19 lebih dulu, lalu impor.** Memajukan impor berarti memecah JS-19 (keputusan pemilik proyek dan Plan Sesi A), lalu satu siklus fitur penuh dengan empat gerbang. Bila didahulukan, JS-13 sampai JS-16 (rilis 1.0) tertunda; bila tidak, impor baru tersedia sesudah rilis. Bentuk berkas impor baru diketahui sesudah Specify JS-19, jadi Sesi B baru bisa menyiapkan data sesudah itu. Rujukan hasil impor tetap `belum` dan kejadian hasil impor belum terbit (`PLAN.md`, catatan untuk Plan JS-16), sehingga impor hanya menghemat pengetikan.
+
+### Usulan 4. Paket (KT-B11)
+
+Batas aman satu paket adalah 6 kejadian per zona (hasil percobaan 1). Paket disusun admin di konsol, atau ikut disemai bila usulan 3a dipilih. Nama paket paling banyak 40 karakter dan tidak boleh kembar. Lama ronde dipilih terpisah saat membuat ruang (10, 15, atau 20 menit; JFR-01), jadi nama paket tidak memakai angka menit.
+
+- (a, saran) Tiga paket:
+
+| Paket | Isi | Per zona | Titik terpakai di ruang lebih dari 50 pemain | Bisa dipakai ruang biasa |
+|---|---|---|---|---|
+| Paket inti 16 (tetap) | K-01 sampai K-16 | 2 | 4 dari 12 | Sudah, di lingkungan uji |
+| Paket lanjutan 24 | K-17 sampai K-40 | 3 | 6 dari 12 | Sesudah ke-24 kejadiannya terbit |
+| Paket lengkap 40 | K-01 sampai K-40 | 5 | 10 dari 12 | Sesudah ke-40 kejadiannya terbit |
+
+- (b) Semua paket berisi 16 kejadian (2 per zona): Paket inti 16, Paket ragam A (dua kejadian tambahan pertama di setiap zona), dan Paket ragam B (kejadian tambahan ketiga di setiap zona, ditambah satu kejadian bank awal per zona). Kepadatannya sama dengan Paket inti 16, tetapi ada lebih banyak paket untuk dikelola.
+- (c) Hanya Paket inti 16 dan Paket lengkap 40.
+
+### Usulan 5. Nomor rujukan (KT-B12)
+
+- (a, saran) JR-24 sampai JR-43 menjadi nomor tetap sekarang, diurutkan menurut kejadian pertama yang memakainya, seperti KT-B3. Sebelum giliran 1 dimasukkan ke basis data, dipastikan dulu bahwa K-17 dan JR-24 ke atas belum terpakai ("Yang masih ditunggu", butir 8).
+- (b) Nomor sementara, ditetapkan saat dimasukkan ke basis data.
+
+### Usulan 6. Tempat dan format naskah tambahan (KT-B13)
+
+- (a, saran) Subfolder `naskah/tambahan/` berisi `K-17.md` sampai `K-40.md`, dengan format KT-B1 dan pegangan gaya yang sama, ditambah `NASKAH-TAMBAHAN.md` berisi daftar 24 kejadian dan statusnya, pemantauan panjang pilihan, set tokoh dan latar, serta pustaka JR-24 sampai JR-43. Uji `naskah-cocok` tidak membaca subfolder, jadi "Jejak: uji" tetap hijau. Bila usulan 3a dipilih, uji serupa untuk subfolder ini dibuat di Plan semai.
+- (b) Berkas langsung di folder `naskah/` sambil mengubah uji `naskah-cocok`. Cara ini perlu batas berkas di luar `naskah/`, karena uji sekarang menganggap setiap `K-xx.md` di folder itu harus ada di bank awal.
+- (c) Satu berkas besar untuk ke-24 kejadian: sulit dinilai per giliran.
+
+### Usulan 7. Aset baru untuk Sesi C (KT-B14)
+
+Aset dipakai lewat set tokoh, jadi gambarnya harus Disetujui di `CREDITS.md` sebelum kejadiannya bisa disimpan di konsol atau disemai (uji `bank-aset`). Permintaan diteruskan pemilik proyek, seperti bagian "Untuk Sesi C".
+
+- (a, saran) Hanya yang diperlukan. Wajib: prasasti (K-32), serta kukang dalam kandang dan penjualnya (K-33). Disarankan: pedagang kedua (K-26), agar pedagang K-07 tidak tampil lagi sebagai tokoh yang bermasalah. Benda lain (bendera lusuh, tumpukan pasir, motor jatuh, lubang jalan, amplop) cukup disebut di teks situasi.
+- (b) Benda-benda lain di atas juga dibuatkan gambar: lebih hidup, tetapi pekerjaan Sesi C lebih banyak.
+- (c) Tanpa aset baru: K-32 dan K-33 diganti tema Z6 lain yang hanya memakai tokoh dan objek yang ada, ditulis sebelum giliran 6.
+
+### Usulan 8. Peringatan paket di konsol (Permintaan A-14)
+
+- (a, saran) Ajukan Permintaan A-14 ke Sesi A: konsol memberi peringatan, tanpa menolak, bila satu paket memuat lebih dari 6 kejadian di satu zona, karena di ruang berbatas lebih dari 50 pemain kejadian ketujuh dan seterusnya di zona itu tidak tampil tanpa pesan.
+- (b) Cukup dicatat untuk admin di catatan rilis.
+
+### Risiko
+
+1. **Pasal rujukan baru belum diverifikasi.** Pra-pemeriksaan bukan verifikasi. Bila sebuah pasal ternyata tidak cocok, rujukan atau temanya diganti di giliran itu.
+2. **Kode sudah terpakai.** Bila percobaan JS-12 di konsol uji sempat menyimpan kejadian atau rujukan baru, kode K-17 atau JR-24 di basis data uji sudah terpakai. Cukup dilihat di daftar kejadian dan pustaka rujukan konsol uji ("Yang masih ditunggu", butir 8).
+3. **Kepekaan.** Enam kejadian perlu peninjauan khusus, dan beberapa lainnya perlu catatan kepekaan.
+4. **Kepadatan titik.** Paket berisi lebih dari 6 kejadian per zona kehilangan kejadian tanpa pesan di ruang besar (usulan 4 dan 8).
+5. **Perubahan undang-undang.** UU Sisdiknas sedang direvisi, sedangkan UU LLAJ, UU Desa, dan UU Mata Uang pernah diubah sebagian (kolom "Yang perlu dicek").
+6. **Uji repositori.** Naskah tambahan di folder `naskah/` langsung atau rujukan baru di `NASKAH.md` membuat "Jejak: uji" merah (usulan 6).
+
+### Perubahan dari usulan sebelumnya
+
+Dari 24 tema, 9 dipertahankan atau dirumuskan ulang, dan 15 diganti: 10 karena terlalu mirip kejadian lama, 3 karena tokoh berwenang menjadi pelanggar (AGENTS bagian 8), dan 2 karena tidak ada pasal yang cocok dan temanya tidak jelas.
+
+| Kode | Usulan sebelumnya | Sekarang | Alasan |
+|---|---|---|---|
+| K-17 | Iuran RT tertunggak tetangga miskin | Bendera yang sudah robek | Tidak ada pasal yang mewajibkan iuran RT, dan tema itu berisiko mempermalukan keluarga miskin |
+| K-18 | Gaduh waktu belajar malam | Memilih sekolah lanjutan | Mirip K-02 (suara keras di lingkungan rumah) |
+| K-19 | Nenek dipagari jalan ke mushola | Pasir menutup jalan gang | Inti dipertahankan (jalan gang terhalang). Judul diperjelas, pasalnya dari UU LLAJ, dan tempat ibadah tidak disebut agar tidak menjadi tema agama |
+| K-20 | Guru memotong jeda istirahat | Bocoran soal ulangan | Guru menjadi pelanggar (AGENTS bagian 8) |
+| K-21 | OSIS menutup lomba untuk kelas 7 | Ketua kelas harus laki-laki? | Mirip K-09 dan K-10 (lomba dan panitia) |
+| K-22 | Sketsa mural dibrandal | Sketsa mural diakui teman | Judul tidak jelas (koreksi b). Inti diubah menjadi karya yang diakui orang lain, dengan rujukan hak moral pencipta |
+| K-23 | Penyeberang tak memberi jalan lansia | Pengendara jatuh dekat halte | Terlalu mirip K-06 (koreksi c) |
+| K-24 | Parkir liar memakan trotoar | Jalan berlubang dekat halte | Mirip K-06 (hak pejalan kaki) |
+| K-25 | Rute angkot disingkat | Angkot berhenti sebelum tujuan | Inti dipertahankan. Judul diperjelas, dan rujukannya UU 8/1999 (koreksi a) |
+| K-26 | Timbangan dimanipulasi | Berat belanjaan dikurangi | Inti dipertahankan. Judul diperjelas, rujukannya UU 8/1999 (koreksi a), dan memakai pedagang kedua |
+| K-27 | Siswa disuruh mengangkut bawaan pedagang sambil dipatok | Anak kecil jadi kuli pasar | Inti dipertahankan. Judul diperjelas (koreksi b), dan rujukannya UU Perlindungan Anak, bukan Pasal 28I ayat (4) (koreksi a) |
+| K-28 | Pedagang disingkirkan sempoyongan tanpa surat | Uang koin ditolak | Petugas menjadi pelanggar (AGENTS bagian 8), dan judulnya tidak jelas (koreksi b) |
+| K-29 | Kegasakan musyawarah RT | Amplop untuk suara kakak | Mirip K-09 (musyawarah), dan judulnya tidak jelas (koreksi b) |
+| K-30 | Remaja perempuan dilarang panitia bicara | Kentongan tanda bahaya | Mirip K-09 (berpendapat di rapat panitia) |
+| K-31 | Dana kas tanpa laporan | Uang kas tanpa laporan | Inti dipertahankan, tanpa konteks lomba agar beda dengan K-09 |
+| K-32 | Tongkol meroda di rumput taman | Nama diukir di prasasti | Terlalu mirip K-11 (koreksi c), dan judulnya tidak jelas (koreksi b) |
+| K-33 | Nelayan muda ditolak karena logat | Kukang yang dijual | Mirip K-10 (logat diejek) |
+| K-34 | Balita di sungai tanpa pengawasan | Anak kecil mencari ibunya | Inti dipertahankan (anak kecil tanpa pendamping), tanpa bahaya tenggelam dan tanpa menyalahkan ibu |
+| K-35 | Imunisasi sulit bagi disabilitas | Pengumuman yang tak terdengar | Inti dipertahankan. Pasal 8 UU 8/2016 tentang hak privasi, jadi rujukannya Pasal 12 huruf a (koreksi a) |
+| K-36 | Sinyal darurat layanan publik tak dibalas | Adik belum punya akta lahir | Petugas layanan publik menjadi pelanggar (AGENTS bagian 8) |
+| K-37 | Anak disuruh membawa surat keluarga | Asap rokok di puskesmas | Pasal 28A tidak berayat, jadi rujukan "Pasal 28A ayat (3)" tidak ada (koreksi a), dan inti temanya tidak jelas |
+| K-38 | Tantangan viral di jembatan | Tantangan berbahaya demi video | Inti dipertahankan, tanpa tempat dan cara yang bisa ditiru |
+| K-39 | Kliping berita menyesatkan | Hadiah kuota minta data | Mirip K-16 (kabar menakutkan), dan Pasal 28F tidak berayat (koreksi a) |
+| K-40 | Kata gurau etnis di grup kelas | Umur palsu di media sosial | Mirip K-10 (suku) dan K-15 (grup kelas) |
+
+| Bagian | Usulan sebelumnya | Sekarang | Alasan |
+|---|---|---|---|
+| Ukuran giliran | Dua kejadian per giliran (KT-B2) | Satu zona, tiga kejadian, per giliran; delapan giliran | Instruksi pemilik proyek (koreksi d) |
+| Paket | Paket 10, 15, dan 20 | Paket inti 16, lanjutan 24, dan lengkap 40 (usulan 4) | "Paket 10" berisi 12 kejadian, jadi tidak bisa dua per zona; menit ronde dipilih terpisah (JFR-01) (koreksi g) |
+| Cara memasukkan | Data JSON untuk impor JS-19, lalu `npm test` | Tiga cara dibandingkan, tanpa perintah untuk pemilik proyek (usulan 3) | JS-19 belum dibuat, dan pemilik proyek tidak menjalankan perintah (koreksi e) |
+| Jumlah rujukan baru | Sekitar 12 | 20 (JR-24 sampai JR-43) | Setiap pasal yang dipakai dicatat sendiri, tanpa nomor pasal karangan |
+| Tempat naskah | Tidak disebut | `naskah/tambahan/` (usulan 6) | Uji `naskah-cocok` |
+
+**Koreksi rujukan (koreksi a).**
+
+| Di usulan sebelumnya | Yang benar | Di Plan ini |
+|---|---|---|
+| Pasal 28A ayat (3) UUD (K-37 lama) | Pasal 28A tidak berayat | Tidak dipakai; K-37 diganti |
+| Pasal 28F ayat (2) UUD (K-39 lama) | Pasal 28F tidak berayat | JR-14 ("Pasal 28F UUD NRI 1945") di K-31 |
+| Pasal 28D ayat (3) untuk kepastian hukum | Pasal 28D ayat (1) (JR-09) | Tidak ada tema baru tentang kepastian hukum |
+| Pasal 28I ayat (4) untuk pekerja anak | Ayat itu tentang tanggung jawab negara; pekerja anak memakai UU Perlindungan Anak | JR-32 (Pasal 76I) dan JR-01 di K-27 |
+| Pasal 28C untuk kebebasan berpendapat | Pasal 28E ayat (3) (JR-11) | Tidak ada tema baru tentang berpendapat; K-09 sudah ada |
+| Pasal 28G ayat (1) untuk hak konsumen | UU No. 8 Tahun 1999 tentang Perlindungan Konsumen | JR-31 (Pasal 4) di K-25 dan K-26 |
+| Pasal 7 untuk hak bermain anak | Pasal 11 UU 23/2002 jo. UU 35/2014 (JR-17) | Tidak ada tema baru tentang bermain; K-12 sudah ada |
+| UU No. 5 Tahun 1974 | Tidak dipakai | — |
+| Pasal 8 UU 8/2016 (K-35 lama) | Pasal 8 tentang hak privasi; hak kesehatan ada di Pasal 12 | JR-39 (Pasal 12 huruf a) di K-35 |
 
 ## JS-05 — Konten
 
@@ -168,13 +433,14 @@ Percobaan dijalankan dengan skrip kecil di luar repositori.
 | Kode | Keputusan |
 |---|---|
 | KT-B1 | 1a: satu berkas per kejadian (`K-01.md` sampai `K-16.md`) ditambah `NASKAH.md` |
-| KT-B2 | 2a: dua kejadian per giliran, mulai Z7, lalu Z1 sampai Z8 |
+| KT-B2 | 2a: dua kejadian per giliran, mulai Z7, lalu Z1 sampai Z8. Berlaku untuk K-01 sampai K-16; untuk naskah baru diganti (baris "KT-B2, diubah" di bawah) |
 | KT-B3 | 3a: JR-01 sampai JR-23 menjadi nomor tetap |
 | KT-B4 | 4a: teks rujukan yang berpadanan R-xx sama persis dengan Sehari Setara; Permintaan A-2 diajukan |
 | KT-B5 | 5a: penyerobot di K-13 menjadi teman sekelas tanpa nama; Raka hanya di K-04 |
 | KT-B6 | 6a: selisih pilihan paling banyak 20 karakter (Langkah 1) dan 35 karakter (Langkah 2); pilihan benar atau tepat tidak selalu terpanjang |
 | KT-B7 | 7a: rujukan baru dipra-periksa di sumber resmi setiap giliran |
 | KT-10 PRD | Dijawab pemilik proyek, 7 Nov 2026: versi A (umum). Versi B dihapus dari `K-02.md` |
+| KT-B2, diubah (21 Nov 2026) | Instruksi pemilik proyek untuk naskah tambahan K-17 sampai K-40: satu zona, yaitu tiga kejadian, per giliran, sehingga ada delapan giliran. Aturan "dua kejadian per giliran" tidak berlaku lagi untuk naskah baru. Urutan zonanya diputuskan di usulan 2 Plan naskah tambahan (KT-B9) |
 
 ## Usulan Plan tahap naskah (disetujui 5 November 2026)
 
@@ -401,8 +667,9 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 | A-9 | Plan JS-08 dan JS-10 | Rencanakan uji kejadian dan ruang kelas dengan ruang uji atau data uji. Kejadian bank awal baru bisa terbit sesudah Peninjau memverifikasi ke-23 rujukannya di konsol (JS-12) | AGENTS bagian 8 dan JFR-43; risiko di entri JS-05 | Disetujui (Plan JS-08, 9 Nov 2026): ruang coba adalah ruang uji dan memakai versi `kerja` Paket inti 16; aturan yang sama untuk JS-10 sampai rujukan diverifikasi |
 | A-10 | `docs/jejak-setara/PLAN.md` | Catat status JS-05: Diuji 7 Nov 2026 dengan laporan `tests/JS-05-hasil.md` (Lulus dengan pemeriksaan pengganti), lalu Selesai sesudah alur kerja "Jejak: uji" hijau dan perintah resmi lulus. Di Plan JS-03, jalankan juga `content:check:jejak` dengan Vitest sungguhan, seperti catatan "Plan JS-03, langkah pertama" untuk JS-02 | AGENTS bagian 10 (definisi selesai: `PLAN.md` diperbarui); `PLAN.md` hanya diubah Sesi A | Diterapkan sebagian (Plan JS-08, 9 Nov 2026); diteruskan oleh A-11 |
 | A-11 | `docs/jejak-setara/PLAN.md` dan `docs/jejak-setara/Architecture.md` bagian 5.4 atau 10.6 | (1) Ubah baris JS-05 di tabel status menjadi: Status "Selesai (10 Nov 2026), dikerjakan Sesi B; Revisi 1 disetujui 8 Nov 2026; riwayat di `naskah/STATUS.md`", dan Laporan uji "[JS-05-hasil.md](tests/JS-05-hasil.md), lulus Revisi 1 (pemeriksaan pengganti; perintah resmi lulus di pemeriksaan penutup 10 Nov 2026, dan "Jejak: uji" hijau)". (2) Entri JS-08 dan catatan "Build JS-08 (spesifikasi disetujui 9 Nov 2026)": JS-05 sudah Selesai, dan `server/jejak-setara/seed/kontrak-d1.sql` dihapus di commit penutup JS-05, jadi Build JS-08 bisa dimulai dari ZIP `main` sesudah commit itu. (3) Sisa A-7: catat di Architecture bahwa id kejadian, versi kerja, dan paket bank awal berupa UUID versi 5 tetap dari `DASAR_ID` di `semai.mjs`, yang tidak boleh diubah sesudah semai pertama (spesifikasi JS-05 P-40, D-6) | AGENTS bagian 10 (definisi selesai: `PLAN.md` diperbarui); `PLAN.md` dan Architecture hanya diubah Sesi A | Diterapkan (Sesi A, Build JS-08, 11 Nov 2026; dinyatakan di `PLAN.md`, tanggapan Plan JS-10, 14 Nov 2026): butir 1 di tabel status `PLAN.md`, butir 2 di catatan "Build JS-08 (spesifikasi disetujui 9 Nov 2026)", dan butir 3 di Architecture bagian 10.6. Status diubah Sesi B, 20 Nov 2026 |
-| A-12 | Spesifikasi JS-11 dan `app/jejak-setara/teks.ts` (Specify JS-11) | Baca [`refleksi.md`](refleksi.md) saat Specify JS-11 (usulan 3 Plan JS-11). Berkas itu memuat tiga pasang kalimat refleksi untuk rekap pribadi, masing-masing satu kalimat hak dan satu kalimat kewajiban, paling banyak 80 karakter; saran Sesi B: Pasangan 1. Tulis pasangan yang dipilih, atau ketiganya sebagai DRAF, di spesifikasi, lalu teks finalnya masuk `teks.ts`. Juga perlu dijawab di Specify JS-11: saat guru menutup ruang, HP pindah ke layar "Ruang ditutup" (JS-03), jadi siswa perlu sempat menyalin kalimat refleksi lebih dulu (bagian "Catatan untuk Specify JS-11" di `refleksi.md`) | JFR-32 meminta dua kalimat refleksi untuk ditulis di buku; usulan 3a Plan JS-11 menyebut teks final ditetapkan di Specify dan bisa ditinjau Sesi B | Diajukan (20 Nov 2026) |
-| A-13 | Panduan guru JS-16 (tempat dan bentuknya ditetapkan di Plan JS-16) | Pakai [`panduan-guru.md`](panduan-guru.md) sebagai bahan panduan guru satu halaman di Plan JS-16. Draf ini hanya memuat fitur yang Selesai sampai JS-12 dan JS-22; bagian bertanda [menyusul] dilengkapi sesudah JS-11 dan JS-09 Selesai. Bagian "Catatan penyusunan" memuat sumber setiap bagian, isi yang dipangkas agar muat satu halaman, dan tujuh hal yang perlu diperiksa ulang, antara lain domain (KT-06), bagian kuota sesudah Workers Paid aktif, dan batas pemain untuk siswa yang berganti HP | PRD bagian 16: guru menjalankan sesi tanpa bantuan sesudah membaca panduan satu halaman. Saran mode layar diperluas dari risiko entri JS-10 di `PLAN.md` sudah dimasukkan | Diajukan (20 Nov 2026) |
+| A-12 | Spesifikasi JS-11 dan `app/jejak-setara/teks.ts` (Specify JS-11) | Baca [`refleksi.md`](refleksi.md) saat Specify JS-11 (usulan 3 Plan JS-11). Berkas itu memuat tiga pasang kalimat refleksi untuk rekap pribadi, masing-masing satu kalimat hak dan satu kalimat kewajiban, paling banyak 80 karakter; saran Sesi B: Pasangan 1. Tulis pasangan yang dipilih, atau ketiganya sebagai DRAF, di spesifikasi, lalu teks finalnya masuk `teks.ts`. Juga perlu dijawab di Specify JS-11: saat guru menutup ruang, HP pindah ke layar "Ruang ditutup" (JS-03), jadi siswa perlu sempat menyalin kalimat refleksi lebih dulu (bagian "Catatan untuk Specify JS-11" di `refleksi.md`) | JFR-32 meminta dua kalimat refleksi untuk ditulis di buku; usulan 3a Plan JS-11 menyebut teks final ditetapkan di Specify dan bisa ditinjau Sesi B | Diterapkan (Specify dan Build JS-11, Pasangan 1; JS-11 Selesai 20 Nov 2026, menurut tanggapan Sesi A di `PLAN.md`). Status diubah Sesi B, 21 Nov 2026 |
+| A-13 | Panduan guru JS-16 (tempat dan bentuknya ditetapkan di Plan JS-16) | Pakai [`panduan-guru.md`](panduan-guru.md) sebagai bahan panduan guru satu halaman di Plan JS-16. Draf ini hanya memuat fitur yang Selesai sampai JS-12 dan JS-22; bagian bertanda [menyusul] dilengkapi sesudah JS-11 dan JS-09 Selesai. Bagian "Catatan penyusunan" memuat sumber setiap bagian, isi yang dipangkas agar muat satu halaman, dan tujuh hal yang perlu diperiksa ulang, antara lain domain (KT-06), bagian kuota sesudah Workers Paid aktif, dan batas pemain untuk siswa yang berganti HP | PRD bagian 16: guru menjalankan sesi tanpa bantuan sesudah membaca panduan satu halaman. Saran mode layar diperluas dari risiko entri JS-10 di `PLAN.md` sudah dimasukkan | Diterima (Sesi A, Specify JS-11, 20 Nov 2026); dikerjakan di Plan JS-16 |
+| A-14 | Konsol, bagian paket di bank kejadian (JS-12); bila perlu kode temuan baru di `inti/konten/periksa.ts` | Tampilkan peringatan, tanpa menolak, bila satu paket memuat lebih dari 6 kejadian di satu zona, misalnya: "Di ruang berbatas lebih dari 50 pemain, kejadian ketujuh dan seterusnya di zona ini tidak akan tampil." | Peta memuat 12 titik per zona, dan ruang berbatas lebih dari 50 pemain memakai dua titik per kejadian. `periksaPaketPeta` hanya menolak paket di atas 12 kejadian per zona, sedangkan `saringMenurutTitik` di server melewatkan sisanya tanpa pesan (Plan naskah tambahan, hasil percobaan 1) | Menunggu "Setuju: naskah tambahan" (usulan 8); diajukan bila 8a dipilih |
 
 ## Untuk Sesi C (diteruskan pemilik proyek)
 
@@ -439,13 +706,17 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 | 2 | Skrip `db:semai:lokal` dan langkah "Semai bank awal" (Permintaan A-5) | Sesi A, di Build JS-08 | Selesai untuk lokal dan uji: skrip `db:semai:lokal` ada di `package.json`, dan langkah "Semai bank awal" ada di `jejak-uji.yml`. Langkah produksi menyusul saat `jejak-produksi.yml` dibuat (A-5) |
 | 3 | Membaca langsung JR-19 dan JR-22 di naskah resmi | Pemilik proyek | Pra-pemeriksaan keduanya memakai sumber sekunder. Pastikan juga keduanya tidak diubah UU Cipta Kerja; catatan R-06 meminta hal yang sama untuk JR-18 |
 | 4 | Tanda "Terverifikasi" untuk 23 rujukan | Peninjau, di konsol (JS-12) | Bank awal disemai dengan semua rujukan berstatus `belum`. Menurut pemilik proyek, per 16 Nov 2026 di lingkungan uji 21 dari 23 rujukan sudah terverifikasi dan 16 kejadian Paket inti 16 terbit (`PLAN.md`, "Lingkungan uji JS-12"). `NASKAH.md` mencatat setiap rujukan bank awal dipakai sedikitnya satu kejadian Paket inti 16, sedangkan `PLAN.md` mencatat kedua rujukan yang belum diverifikasi tidak dipakai kejadian Paket inti 16; kode kedua rujukan itu belum tercatat di sini |
-| 5 | Memilih pasangan kalimat refleksi (`refleksi.md`) | Pemilik proyek, di Gerbang 2 JS-11 | Saran Sesi B: Pasangan 1 (Permintaan A-12) |
+| 5 | Memilih pasangan kalimat refleksi (`refleksi.md`) | Pemilik proyek, di Gerbang 2 JS-11 | Selesai: Pasangan 1 dipakai di JS-11 (Permintaan A-12, Diterapkan) |
 | 6 | Panduan guru final | Sesi A, di JS-16 | Bahan: `panduan-guru.md` (Permintaan A-13) |
+| 7 | Membalas Plan naskah tambahan | Pemilik proyek | "Setuju: naskah tambahan", atau pilihan lain per usulan (bagian "Cara membalas") |
+| 8 | Melihat di konsol uji apakah sudah ada kejadian berkode K-17 ke atas atau rujukan JR-24 ke atas, misalnya dari percobaan JS-12 | Pemilik proyek | Cukup dilihat di daftar kejadian dan pustaka rujukan konsol, tanpa mengubah apa pun. Bila ada, nomor di Plan disesuaikan sebelum giliran 1 dimasukkan ke basis data (Plan naskah tambahan, risiko 2) |
+| 9 | Aset baru untuk K-32, K-33, dan bila dipilih K-26 (usulan 7) | Pemilik proyek, diteruskan ke Sesi C | Sesudah usulan 7 diputuskan. Gambarnya harus Disetujui sebelum kejadian Z6 (dan K-26) disimpan atau disemai |
 
 Pesan untuk Sesi C (bagian "Untuk Sesi C") sudah terlaksana: JS-06 Selesai 8 Nov 2026, dan uji `bank-peta` kini berjalan dan lulus (pemeriksaan penutup 10 Nov 2026).
 
 ## Cara membalas
 
+- **Plan naskah tambahan:** balas "Setuju: naskah tambahan" untuk menerima semua saran (a) di usulan 1 sampai 8. Untuk memilih alternatif, sebutkan nomornya, misalnya "Setuju: naskah tambahan, kecuali 3b dan 4c". Perubahan tema cukup ditulis bebas. Sesudah disetujui, giliran 1 dimulai, dan setiap giliran disetujui dengan "Setuju: naskah tambahan Z1", "Setuju: naskah tambahan Z2", dan seterusnya.
 - JS-05 sudah Selesai, dan naskah pendukung (20 Nov 2026) tidak membuka gerbang Sesi B. Sesudah commit, pastikan "Jejak: uji" tetap hijau. Bila merah, kirim tangkapan layarnya ke Sesi B.
 - Pasangan kalimat refleksi dipilih di Gerbang 2 JS-11 (Sesi A). Revisi `refleksi.md` atau `panduan-guru.md` sebelum itu cukup ditulis bebas ke Sesi B.
 - Perbaikan naskah sesudah semai pertama dilakukan di konsol (JS-12), bukan di repositori (Catatan untuk JS-05). Permintaan lain cukup ditulis bebas.
