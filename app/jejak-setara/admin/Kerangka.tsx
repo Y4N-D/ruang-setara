@@ -30,6 +30,7 @@ const JUDUL: Record<Exclude<Rute, "masuk">, string> = {
   kejadian: TEKS_KONSOL.daftar.judul,
   rujukan: TEKS_KONSOL.pustaka.judul,
   paket: TEKS_KONSOL.paket.judul,
+  statistik: TEKS_KONSOL.statistik.judul,
   akun: TEKS_KONSOL.akun.judul,
   sandi: TEKS_KONSOL.sandi.judul,
 };

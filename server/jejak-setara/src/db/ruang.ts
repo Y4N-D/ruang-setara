@@ -1,6 +1,7 @@
 // Kueri D1 untuk ruang, peserta, dan jawaban (spesifikasi JS-03, P-5, P-12, P-47; JS-08, P-3 dan P-62).
 // JS-11: kolom `dikeluarkan` (P-10), riwayat (P-17), hasil dan rincian (P-21, P-24), ekspor (P-28, P-29), dan hapus
 // data ruang (P-33). Semua kueri berparameter.
+import { WAKTU_MAKS } from "../../../../app/jejak-setara/inti/hasil";
 import type { BarisKiriman } from "../ruang/inti-ruang";
 
 export interface BarisRuangD1 {
@@ -242,20 +243,80 @@ export async function daftarRiwayat(
   db: D1Database,
   s: { pemilikId: string | null; dari: number | null; sampai: number | null; label: string | null; mulai: { dibuatPada: number; id: string } | null; batas: number },
 ): Promise<BarisRiwayat[]> {
+  // JS-13 (P-29): ruang dipilih dan dipotong lebih dulu, lalu jumlah pemain dan rata-rata skor dihitung hanya untuk
+  // ruang yang tampil. Batas tanggal selalu tertulis agar indeks `ruang_dibuat` terpakai. Isi jawaban tidak berubah.
   const hasil = await db
     .prepare(
-      "SELECT r.id, r.kode, r.label_kelas, r.uji, r.dibuat_pada, r.mulai_pada, r.selesai_pada, g.nama_tampilan AS nama_guru, " +
-        "(SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = r.id AND s.dikeluarkan = 0) AS jumlah_pemain, " +
-        "(SELECT AVG(s.skor) FROM peserta s WHERE s.ruang_id = r.id AND s.dikeluarkan = 0) AS rata_skor " +
-        "FROM ruang r LEFT JOIN pengguna g ON g.id = r.pemilik_id " +
-        "WHERE r.status = 'ditutup' AND (?1 IS NULL OR r.pemilik_id = ?1) AND (?2 IS NULL OR r.dibuat_pada >= ?2) " +
-        "AND (?3 IS NULL OR r.dibuat_pada < ?3) AND (?4 IS NULL OR instr(lower(r.label_kelas), lower(?4)) > 0) " +
-        "AND (?5 IS NULL OR r.dibuat_pada < ?5 OR (r.dibuat_pada = ?5 AND r.id < ?6)) " +
-        "ORDER BY r.dibuat_pada DESC, r.id DESC LIMIT ?7",
+      "WITH t AS (SELECT r.id, r.kode, r.label_kelas, r.uji, r.dibuat_pada, r.mulai_pada, r.selesai_pada, r.pemilik_id FROM ruang r " +
+        "WHERE r.status = 'ditutup' AND (?1 IS NULL OR r.pemilik_id = ?1) AND r.dibuat_pada >= ?2 AND r.dibuat_pada < ?3 " +
+        "AND (?4 IS NULL OR instr(lower(r.label_kelas), lower(?4)) > 0) AND (?5 IS NULL OR r.dibuat_pada < ?5 OR (r.dibuat_pada = ?5 AND r.id < ?6)) " +
+        "ORDER BY r.dibuat_pada DESC, r.id DESC LIMIT ?7) " +
+        "SELECT t.id, t.kode, t.label_kelas, t.uji, t.dibuat_pada, t.mulai_pada, t.selesai_pada, g.nama_tampilan AS nama_guru, " +
+        "(SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = t.id AND s.dikeluarkan = 0) AS jumlah_pemain, " +
+        "(SELECT AVG(s.skor) FROM peserta s WHERE s.ruang_id = t.id AND s.dikeluarkan = 0) AS rata_skor " +
+        "FROM t LEFT JOIN pengguna g ON g.id = t.pemilik_id ORDER BY t.dibuat_pada DESC, t.id DESC",
     )
-    .bind(s.pemilikId, s.dari, s.sampai, s.label, s.mulai?.dibuatPada ?? null, s.mulai?.id ?? null, s.batas + 1)
+    .bind(s.pemilikId, s.dari ?? 0, s.sampai ?? WAKTU_MAKS, s.label, s.mulai?.dibuatPada ?? null, s.mulai?.id ?? null, s.batas + 1)
     .all<BarisRiwayat>();
   return hasil.results ?? [];
+}
+
+// ---------------------------------------------------------------------------------------------
+// Dasbor (spesifikasi JS-13, P-25 dan P-26). Tidak membaca tabel jawaban.
+
+export interface BarisSesiDasbor {
+  id: string;
+  kode: string;
+  label_kelas: string;
+  uji: number;
+  dibuat_pada: number;
+  nama_guru: string | null;
+  jumlah_pemain: number;
+  rata_skor: number | null;
+}
+
+/** P-25: paling banyak `maks` ruang ditutup yang rondenya dimainkan, terbaru lebih dulu (D-1a). */
+export async function sesiTerakhir(db: D1Database, pemilikId: string | null, maks: number): Promise<BarisSesiDasbor[]> {
+  const hasil = await db
+    .prepare(
+      "WITH t AS (SELECT r.id, r.kode, r.label_kelas, r.uji, r.dibuat_pada, r.pemilik_id FROM ruang r WHERE r.status = 'ditutup' AND r.dibuat_pada >= 0 " +
+        "AND r.mulai_pada IS NOT NULL AND r.selesai_pada IS NOT NULL AND r.mulai_pada <= r.selesai_pada AND (?1 IS NULL OR r.pemilik_id = ?1) " +
+        "ORDER BY r.dibuat_pada DESC, r.id DESC LIMIT ?2) " +
+        "SELECT t.id, t.kode, t.label_kelas, t.uji, t.dibuat_pada, g.nama_tampilan AS nama_guru, " +
+        "(SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = t.id AND s.dikeluarkan = 0) AS jumlah_pemain, " +
+        "(SELECT AVG(s.skor) FROM peserta s WHERE s.ruang_id = t.id AND s.dikeluarkan = 0) AS rata_skor " +
+        "FROM t LEFT JOIN pengguna g ON g.id = t.pemilik_id ORDER BY t.dibuat_pada DESC, t.id DESC",
+    )
+    .bind(pemilikId, maks)
+    .all<BarisSesiDasbor>();
+  return hasil.results ?? [];
+}
+
+export interface BarisRingkasanDasbor {
+  sesi: number;
+  pemain: number | null;
+  skor: number | null;
+  l1: number | null;
+  b1: number | null;
+  tepat: number | null;
+  kurang: number | null;
+  berisiko: number | null;
+}
+
+/** P-26: jumlah dari `ringkasan_json.hasil` ruang bukan uji yang rondenya dimainkan dan berakhir sejak `sejak`. */
+export async function ringkasanDasbor(db: D1Database, pemilikId: string | null, sejak: number): Promise<BarisRingkasanDasbor> {
+  const baris = await db
+    .prepare(
+      "WITH h AS (SELECT CASE WHEN json_valid(r.ringkasan_json) THEN json_extract(r.ringkasan_json, '$.hasil') END AS hasil FROM ruang r " +
+        "WHERE r.dibuat_pada >= ?2 AND r.dibuat_pada < ?3 AND (?1 IS NULL OR r.pemilik_id = ?1) AND r.uji = 0 AND r.status IN ('selesai', 'pembahasan', 'ditutup') " +
+        "AND r.mulai_pada IS NOT NULL AND r.selesai_pada IS NOT NULL AND r.mulai_pada <= r.selesai_pada) " +
+        "SELECT COUNT(*) AS sesi, SUM(json_extract(hasil, '$.jumlahPemain')) AS pemain, SUM(json_extract(hasil, '$.jumlahSkor')) AS skor, " +
+        "SUM(json_extract(hasil, '$.langkah1Dijawab')) AS l1, SUM(json_extract(hasil, '$.langkah1Benar')) AS b1, SUM(json_extract(hasil, '$.tepat')) AS tepat, " +
+        "SUM(json_extract(hasil, '$.kurang')) AS kurang, SUM(json_extract(hasil, '$.berisiko')) AS berisiko FROM h WHERE hasil IS NOT NULL AND json_extract(hasil, '$.versi') IS NOT NULL",
+    )
+    .bind(pemilikId, sejak, WAKTU_MAKS)
+    .first<BarisRingkasanDasbor>();
+  return baris ?? { sesi: 0, pemain: 0, skor: 0, l1: 0, b1: 0, tepat: 0, kurang: 0, berisiko: 0 };
 }
 
 export interface BarisPesertaHasil {

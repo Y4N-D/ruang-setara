@@ -8,6 +8,7 @@ import { tanganiApiDasbor } from "./api/dasbor";
 import { JALUR_MASUK, tanganiApiMasuk } from "./api/masuk";
 import { jalurBank, tanganiApiBank } from "./api/bank";
 import { jalurRuang, tanganiApiRuang, tanganiWsKelas, tanganiWsRuang } from "./api/ruang";
+import { JALUR_STATISTIK, tanganiApiStatistik } from "./api/statistik";
 import { bersihkanAkun } from "./db/akun";
 import { tandaiRuangLama } from "./db/ruang";
 import type { Env } from "./env";
@@ -38,6 +39,7 @@ export default {
     if (jalurAkun(pathname)) return tanganiApiAkun(request, env, url);
     if (pathname === "/api/dasbor") return tanganiApiDasbor(request, env);
     if (jalurBank(pathname)) return tanganiApiBank(request, env, url);
+    if (pathname === JALUR_STATISTIK) return tanganiApiStatistik(request, env, url); // JS-13
     if (pathname.startsWith("/api/") || pathname.startsWith("/ws/")) {
       return jawabGalat("BELUM_TERSEDIA", "Fitur ini belum tersedia.", 404);
     }

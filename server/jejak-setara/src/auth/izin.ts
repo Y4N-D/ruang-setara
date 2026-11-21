@@ -19,6 +19,8 @@ export const IZIN = {
   "rujukan.tambah": ["admin", "guru"],
   "rujukan.sunting": ["admin"],
   "paket.kelola": ["admin"],
+  // JS-13 (P-1): statistik per kejadian; guru hanya ruang miliknya (diperiksa di kueri).
+  "statistik.lihat": ["admin", "guru"],
 } as const satisfies Record<string, readonly Peran[]>;
 
 export type Aksi = keyof typeof IZIN;

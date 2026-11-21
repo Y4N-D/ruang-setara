@@ -156,6 +156,34 @@ export const skemaDasbor = z.object({
   // JS-10 (P-11): ruang yang sedang berjalan untuk kartu dasbor.
   ruang: z.array(skemaRingkasanRuang).default([]),
   jumlahRuang: z.number().int().min(0).default(0),
+  // JS-13 (P-24 sampai P-26): kejadian Siap tinjau (admin), sesi terakhir, dan ringkasan 30 hari. Bawaan membuat konsol
+  // tetap membaca jawaban dasbor lama selama Worker belum diperbarui.
+  siapTinjau: z.number().int().min(0).nullable().default(null),
+  sesi: z
+    .array(
+      z.object({
+        id: z.string(),
+        kode: z.string(),
+        labelKelas: z.string(),
+        uji: z.boolean(),
+        namaGuru: z.string().nullable(),
+        dibuatPada: z.number(),
+        jumlahPemain: z.number().int().min(0),
+        rataSkor: z.number().nullable(),
+      }),
+    )
+    .default([]),
+  ringkasan: z
+    .object({
+      hari: z.number().int(),
+      sesi: z.number().int().min(0),
+      pemain: z.number().int().min(0),
+      rataSkor: z.number().nullable(),
+      ketepatan1: z.number().nullable(),
+      tingkat: z.object({ tepat: z.number().nullable(), kurang: z.number().nullable(), berisiko: z.number().nullable() }),
+    })
+    .nullable()
+    .default(null),
 });
 export const skemaHasilAdminAwal = z.object({ hasil: z.enum(["dibuat", "dipulihkan"]) });
 export const skemaGalat = z.object({ galat: z.object({ kode: z.string(), pesan: z.string() }) });

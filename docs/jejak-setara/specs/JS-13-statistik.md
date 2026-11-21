@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Ditulis 21 November 2026; menunggu `Spesifikasi disetujui: JS-13` beserta pilihan DRAF D-1 sampai D-3 |
+| Status | Disetujui 21 November 2026 (D-1, D-2, dan D-3 pilihan a); dibangun dan diuji 21 November 2026 ([laporan](../tests/JS-13-hasil.md)); menunggu uji manual pemilik proyek |
 | Rencana | `PLAN.md`, entri JS-13 (Plan 21 November 2026; disetujui dengan `Setuju: JS-13`, dibaca sebagai usulan 1a sampai 13a) |
 | Sesi | Sesi A (mesin) |
 | Bergantung pada | JS-11 dan JS-12 (keduanya Selesai); memakai juga JS-09 (`jawaban.petunjuk_dipakai`) |
@@ -459,6 +459,8 @@ Tidak ada aset gambar, suara, atau token CSS baru. Yang dipakai, semuanya Disetu
 
 ## DRAF untuk ditinjau pemilik proyek
 
+Keputusan 21 November 2026 (`Spesifikasi disetujui: JS-13`): D-1 (a), D-2 (a), dan D-3 (a).
+
 - **D-1. Ruang yang tidak dimainkan di kartu "Sesi terakhir".**
   - (a, saran) Dilewati. Kartu itu tentang sesi kelas, sedangkan ruang yang ditutup dari lobi atau saat hitung mundur tidak punya hasil. Riwayat ruang (JS-11) tetap menampilkannya dengan "Tidak dimainkan".
   - (b) Ditampilkan dengan teks "{tanggal} · {kelas} · tidak dimainkan", seperti riwayat.
@@ -473,22 +475,22 @@ Tidak ada aset gambar, suara, atau token CSS baru. Yang dipakai, semuanya Disetu
 
 ## Kriteria penerimaan
 
-- [ ] AC-1 **Izin dan rute.** P-1 dan P-2: aksi `statistik.lihat` di `IZIN`; 401 tanpa sesi dan 403 untuk akun wajib ganti sandi; metode lain ditolak; menu admin dan guru sesuai urutan; `#/statistik` dikenali, dan bentuk lain menjadi dasbor.
-- [ ] AC-2 **Ruang dan jawaban yang dihitung.** P-3 dan P-4 dengan data uji yang memuat ruang uji, ruang yang tidak dimainkan, ruang yang masih `main`, ruang `selesai`, `pembahasan`, dan `ditutup`, pemain yang dikeluarkan, jawaban tanpa Langkah 1, dan kejadian yang diarsipkan: hanya yang memenuhi syarat dihitung.
-- [ ] AC-3 **Definisi.** P-5 sampai P-9 dengan data yang diketahui: setiap isian per versi; median untuk jumlah ganjil, genap, dan seri; pilihan keliru seri; Petunjuk hanya dari ruang dengan Petunjuk aktif dan `null` tanpa ruang seperti itu; kategori di 0,29, 0,30, 0,70, dan 0,71.
-- [ ] AC-4 **Per versi.** P-10: kejadian dengan dua versi menghasilkan dua baris dengan teks versinya masing-masing, dalam urutan kode lalu versi turun.
-- [ ] AC-5 **Cocok dengan hasil per ruang.** Untuk satu ruang yang dimainkan di Worker lokal, jumlah dijawab, benar, dan setiap tingkat per versi sama dengan hasil per ruang dan CSV jawaban JS-11.
-- [ ] AC-6 **Kueri hemat.** P-13: paling banyak empat pernyataan dalam dua perjalanan; `EXPLAIN QUERY PLAN` kedua bentuk kueri memakai `ruang_dibuat` atau `ruang_pemilik` dan `jawaban_ruang` tanpa penelusuran penuh `jawaban` (uji unit dengan migrasi repositori); median dihitung dari hitungan per detik.
-- [ ] AC-7 **Saringan dan jawaban API.** P-11 dan P-12: batas tanggal (bawah ikut, atas tidak), label sebagian tanpa membedakan huruf, guru (admin saja), paket, parameter tidak sah 400, `cakupan`, pilihan `paket` yang tidak bergantung saringan, dan jawaban lolos `skemaStatistik`.
-- [ ] AC-8 **Halaman Statistik.** P-16 sampai P-21: susunan halaman, bawaan sesuai D-2, galat tanggal tanpa memanggil API, Atur ulang, saringan dan urutan tersimpan selama sesi, empat urutan dengan aturan seri, tanda "Data sedikit", satu rincian terbuka pada satu waktu dengan isinya, dan keadaan memuat, gagal, serta kosong.
-- [ ] AC-9 **Tampilan.** P-19 dan P-20 di 1280 × 720, 1024 × 768, 1920 × 1080, dan 360 × 640, dengan dan tanpa rincian terbuka: tanpa luapan halaman; tabel tidak digulir menyamping di 1280 × 720 dan 1024 × 768; kolom sesuai lebar; kartu di bawah 1024 px; semua kendali setinggi sedikitnya 48 px.
-- [ ] AC-10 **Aksesibilitas.** P-22: struktur judul, `th scope`, `aria-expanded`, teks pembaca layar batang, tingkat dan kategori bertulisan, dan halaman Statistik serta dasbor bisa dipakai sampai rincian dan tautan hanya dengan papan ketik.
-- [ ] AC-11 **API dasbor.** P-24 sampai P-26: `siapTinjau` (admin angka, guru `null`); `sesi` sesuai D-1 dengan kepemilikan, ruang uji, urutan, dan paling banyak lima; `ringkasan` dari ruang yang tepat dengan angka sesuai data uji; dan tidak ada kueri dasbor yang menyebut tabel `jawaban`.
-- [ ] AC-12 **Kartu dasbor.** P-27 dan P-28: empat kartu dalam urutannya; peringatan bertaut ke Rujukan dan Kejadian; sesi terakhir dengan tanda Uji dan nama guru sesuai D-3; ringkasan dan tautannya; keadaan kosong; dua kolom di 1280 × 720 dan satu kolom di 360 × 640.
-- [ ] AC-13 **Kueri riwayat.** P-29: semua uji riwayat JS-11 tetap lulus dengan jawaban yang sama, dan rencana kueri memilih ruang lewat `ruang_dibuat` atau `ruang_pemilik` sebelum menghitung peserta.
-- [ ] AC-14 **Teks.** Isi `TEKS_KONSOL` sama dengan bagian "Teks yang tampil (final)" spesifikasi ini (uji `kerangka.test.ts`).
-- [ ] AC-15 **Ukuran dan kinerja.** P-30: kode layar pemain tidak naik; konsol naik paling banyak 6 KB gzip; aturan impor konsol; saringan bawaan pada data tiruan 300 ruang paling lama 100 ms waktu D1 lokal dan paling banyak 100 ribu baris dibaca (dicatat di laporan bersama pengukuran semua waktu dan data 1.200 ruang).
-- [ ] AC-16 **Tanpa regresi.** Semua uji JS-01 sampai JS-22 lulus; `build:pages` menghasilkan 178 berkas yang identik byte dengan `main` sebelum Build; `tsc` dan ESLint berkas Jejak bersih.
+- [x] AC-1 **Izin dan rute.** P-1 dan P-2: aksi `statistik.lihat` di `IZIN`; 401 tanpa sesi dan 403 untuk akun wajib ganti sandi; metode lain ditolak; menu admin dan guru sesuai urutan; `#/statistik` dikenali, dan bentuk lain menjadi dasbor.
+- [x] AC-2 **Ruang dan jawaban yang dihitung.** P-3 dan P-4 dengan data uji yang memuat ruang uji, ruang yang tidak dimainkan, ruang yang masih `main`, ruang `selesai`, `pembahasan`, dan `ditutup`, pemain yang dikeluarkan, jawaban tanpa Langkah 1, dan kejadian yang diarsipkan: hanya yang memenuhi syarat dihitung.
+- [x] AC-3 **Definisi.** P-5 sampai P-9 dengan data yang diketahui: setiap isian per versi; median untuk jumlah ganjil, genap, dan seri; pilihan keliru seri; Petunjuk hanya dari ruang dengan Petunjuk aktif dan `null` tanpa ruang seperti itu; kategori di 0,29, 0,30, 0,70, dan 0,71.
+- [x] AC-4 **Per versi.** P-10: kejadian dengan dua versi menghasilkan dua baris dengan teks versinya masing-masing, dalam urutan kode lalu versi turun.
+- [x] AC-5 **Cocok dengan hasil per ruang.** Untuk satu ruang yang dimainkan di Worker lokal, jumlah dijawab, benar, dan setiap tingkat per versi sama dengan hasil per ruang dan CSV jawaban JS-11.
+- [x] AC-6 **Kueri hemat.** P-13: paling banyak empat pernyataan dalam dua perjalanan; `EXPLAIN QUERY PLAN` kedua bentuk kueri memakai `ruang_dibuat` atau `ruang_pemilik` dan `jawaban_ruang` tanpa penelusuran penuh `jawaban` (uji unit dengan migrasi repositori); median dihitung dari hitungan per detik.
+- [x] AC-7 **Saringan dan jawaban API.** P-11 dan P-12: batas tanggal (bawah ikut, atas tidak), label sebagian tanpa membedakan huruf, guru (admin saja), paket, parameter tidak sah 400, `cakupan`, pilihan `paket` yang tidak bergantung saringan, dan jawaban lolos `skemaStatistik`.
+- [x] AC-8 **Halaman Statistik.** P-16 sampai P-21: susunan halaman, bawaan sesuai D-2, galat tanggal tanpa memanggil API, Atur ulang, saringan dan urutan tersimpan selama sesi, empat urutan dengan aturan seri, tanda "Data sedikit", satu rincian terbuka pada satu waktu dengan isinya, dan keadaan memuat, gagal, serta kosong.
+- [x] AC-9 **Tampilan.** P-19 dan P-20 di 1280 × 720, 1024 × 768, 1920 × 1080, dan 360 × 640, dengan dan tanpa rincian terbuka: tanpa luapan halaman; tabel tidak digulir menyamping di 1280 × 720 dan 1024 × 768; kolom sesuai lebar; kartu di bawah 1024 px; semua kendali setinggi sedikitnya 48 px.
+- [x] AC-10 **Aksesibilitas.** P-22: struktur judul, `th scope`, `aria-expanded`, teks pembaca layar batang, tingkat dan kategori bertulisan, dan halaman Statistik serta dasbor bisa dipakai sampai rincian dan tautan hanya dengan papan ketik.
+- [x] AC-11 **API dasbor.** P-24 sampai P-26: `siapTinjau` (admin angka, guru `null`); `sesi` sesuai D-1 dengan kepemilikan, ruang uji, urutan, dan paling banyak lima; `ringkasan` dari ruang yang tepat dengan angka sesuai data uji; dan tidak ada kueri dasbor yang menyebut tabel `jawaban`.
+- [x] AC-12 **Kartu dasbor.** P-27 dan P-28: empat kartu dalam urutannya; peringatan bertaut ke Rujukan dan Kejadian; sesi terakhir dengan tanda Uji dan nama guru sesuai D-3; ringkasan dan tautannya; keadaan kosong; dua kolom di 1280 × 720 dan satu kolom di 360 × 640.
+- [x] AC-13 **Kueri riwayat.** P-29: semua uji riwayat JS-11 tetap lulus dengan jawaban yang sama, dan rencana kueri memilih ruang lewat `ruang_dibuat` atau `ruang_pemilik` sebelum menghitung peserta.
+- [x] AC-14 **Teks.** Isi `TEKS_KONSOL` sama dengan bagian "Teks yang tampil (final)" spesifikasi ini (uji `kerangka.test.ts`).
+- [x] AC-15 **Ukuran dan kinerja.** P-30: kode layar pemain tidak naik; konsol naik paling banyak 6 KB gzip; aturan impor konsol; saringan bawaan pada data tiruan 300 ruang paling lama 100 ms waktu D1 lokal dan paling banyak 100 ribu baris dibaca (dicatat di laporan bersama pengukuran semua waktu dan data 1.200 ruang).
+- [x] AC-16 **Tanpa regresi.** Semua uji JS-01 sampai JS-22 lulus; `build:pages` menghasilkan 178 berkas yang identik byte dengan `main` sebelum Build; `tsc` dan ESLint berkas Jejak bersih.
 
 ## Rencana uji
 
@@ -543,3 +545,12 @@ Langkah pemilik proyek sesudah ZIP Build di-push:
 7. Kirim tangkapan layar Statistik dengan rincian terbuka dan Dasbor.
 
 Butir daftar periksa AGENTS 9 yang relevan: tidak ada nama asli siswa di layar, dan halaman Statistik serta dasbor bisa dipakai hanya dengan papan ketik di laptop.
+
+## Catatan Build (21 November 2026)
+
+- Semua butir P-1 sampai P-31 dibangun seperti tertulis, dengan pilihan D-1, D-2, dan D-3 (a). Hasil uji dan pengukuran ada di [laporan JS-13](../tests/JS-13-hasil.md).
+- P-13 di kode: satu `batch` berisi statistik, cakupan, dan pilihan paket, lalu satu kueri isi versi. Bentuk kueri tanpa guru menulis `?1 IS NULL`, agar jumlah parameter sama dengan bentuk dengan guru.
+- P-28 di kode: selama memuat atau bila gagal, dasbor menampilkan kartu Peringatan dengan "Memuat…" atau "Data dasbor gagal dimuat." dan "Coba lagi", seperti JS-04; tiga kartu lain tampil sesudah data dimuat.
+- Kartu peringatan rujukan kini menautkan ke `#/rujukan` (JS-12 P-3 belum terpasang; temuan Specify).
+- Uji lama yang diperbarui karena perilaku baru: `api-akun.test.ts` (isi dasbor), `konsol.uji.ts` (menu Statistik, dua peringatan admin, satu Tab tambahan, kartu baru), `kerangka.test.ts` (kunci teks JS-13), `rute.test.ts`, dan `izin.test.ts`. Pembantu uji baru: `catatRuangUji` di `server/jejak-setara/uji/bantuan.ts`.
+- Dokumen: Architecture 3, 10.1, 10.2, dan 10.7; Design System 3.7 dan 10; PRD 11.2 dan 21.

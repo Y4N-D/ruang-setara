@@ -404,6 +404,8 @@ Contoh ini menunjukkan bentuk yang diharapkan. Naskah final seluruh kejadian dit
 
 Ruang uji (JFR-47) tidak masuk statistik. Statistik dicatat per versi kejadian, sehingga perbaikan soal tidak mencampur data lama dan baru.
 
+
+Penegasan JS-13 (spesifikasi `specs/JS-13-statistik.md`, P-5 sampai P-9): persentase Langkah 1 benar memakai penyebut jawaban yang Langkah 1-nya dikunci; sebaran Langkah 2 dan indeks kesulitan memakai penyebut jawaban yang Langkah 2-nya dikunci; median waktu ditampilkan dalam detik bulat; pilihan keliru terbanyak memilih yang lebih dulu menurut urutan asli bila seri; dan huruf A–D mengikuti urutan asli di bank kejadian. Indeks kesulitan diberi label Sulit (di bawah 0,30), Sedang (0,30 sampai 0,70), atau Mudah (di atas 0,70). Pemain yang dikeluarkan dan ruang yang sedang berjalan tidak dihitung.
 ## 12. Kebutuhan non-fungsional
 
 | Aspek | Kebutuhan |
@@ -565,3 +567,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 20 Nov 2026 | JS-11 Selesai. AC-22 JS-11 diterima (pilihan a): kode layar pemain naik 1,33 KB gzip untuk layar rekap, teks rekap dan refleksi, serta logika sambungan berakhir, di atas batas 1 KB yang ditetapkan di Plan JS-11; layar pemain kini 122,24 KB dari anggaran 200 KB |
 | 21 Nov 2026 | Spesifikasi JS-09 (skill dan kotak bantuan) disetujui dengan D-1 sampai D-3 = a: Lari cepat dan Kompas tidak bisa dipakai lagi selama masih aktif; layar pemain menampilkan pita bantuan muatan ("Cari kotak …" untuk tombol tanpa muatan dan "… sudah penuh" saat melewati kotak yang muatannya penuh); pratinjau penyunting mencoret pilihan keliru pertama menurut urutan asli A–D. Setiap ronde dimulai dengan muatan 0, sesuai bagian 8.5 |
 | 21 Nov 2026 | JS-09 Selesai. AC-23 JS-09 diterima (pilihan a): kode layar pemain naik 4,64 KB gzip untuk tombol skill, kotak bantuan, panah Kompas, Lari cepat, pita, Petunjuk di dialog, dan teksnya, di atas batas 4 KB yang ditetapkan di Plan JS-09; layar pemain menjadi 127,10 KB dari anggaran 200 KB |
+| 21 Nov 2026 | JS-13: Plan disetujui (`Setuju: JS-13`, usulan 1a sampai 13a) dan spesifikasi disetujui (`Spesifikasi disetujui: JS-13`, D-1 sampai D-3 pilihan a): statistik per versi kejadian dengan kueri hemat tanpa migrasi, kategori indeks kesulitan, rentang bawaan 30 hari, dan dasbor empat kartu | Pemilik proyek |

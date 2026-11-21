@@ -12,6 +12,7 @@ import DetailRuang from "./halaman/DetailRuang";
 import GantiSandi from "./halaman/GantiSandi";
 import Masuk from "./halaman/Masuk";
 import RiwayatRuang from "./halaman/RiwayatRuang";
+import Statistik from "./halaman/Statistik";
 import Ruang from "./halaman/Ruang";
 import DaftarKejadian from "./bank/DaftarKejadian";
 import DaftarPaket from "./bank/DaftarPaket";
@@ -196,6 +197,8 @@ export default function App() {
           ) : (
             <p role="alert">{TEKS_KONSOL.hanyaAdmin}</p>
           )
+        ) : rute === "statistik" ? (
+          <Statistik akun={akun} galatSesi={galatSesi} />
         ) : rute === "akun" ? (
           <Akun akun={akun} galatSesi={galatSesi} umumkan={umumkan} perbaruiDiri={perbaruiAkun} />
         ) : (

@@ -65,6 +65,11 @@ export async function buatRuang(isi: Record<string, unknown> = {}, port = 4320):
   return { status: 201, isi: { ruangId: ruang.id, kode: ruang.kode, tautan: `${alamat(port)}/?kode=${ruang.kode}`, kejadian: kejadian.kejadian.length, ruang } };
 }
 
+/** JS-13: mencatat ruang yang dibuat di luar buatRuang (misalnya ruang biasa milik guru), agar bisa dikendalikan `kelas`. */
+export function catatRuangUji(kode: string, id: string, port = 4320): void {
+  idRuang.set(`${port}:${kode}`, id);
+}
+
 export interface KlienKelas {
   ws: WebSocket;
   riwayat: Pesan[];

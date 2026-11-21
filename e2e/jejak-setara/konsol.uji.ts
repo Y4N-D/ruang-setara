@@ -178,14 +178,16 @@ test("admin 1280 × 720: halaman masuk, sandi salah, sandi sementara, ganti sand
   await gantiSandiWajib(page, ADMIN.sandi);
   await expect(page).toHaveURL(/#\/dasbor$/);
   await expect(page.getByText("Selamat datang, YAN.")).toBeVisible();
-  await expect(page.locator(".js-konsol-peringatan")).toHaveText(
+  await expect(page.locator(".js-konsol-peringatan").filter({ hasText: "rujukan belum diverifikasi" })).toHaveText(
     "23 rujukan belum diverifikasi. Kejadian belum bisa terbit sampai semua rujukannya diverifikasi Peninjau.",
   );
   // JS-10 (P-11): kartu ruang berisi ruang yang sedang berjalan (admin melihat semua ruang uji lain), atau teks kosong.
   await expect(page.getByRole("heading", { name: "Ruang yang sedang berjalan" })).toBeVisible();
-  await expect(page.getByText("Belum ada sesi kelas.")).toBeVisible();
+  // JS-13 (P-27): kartu Sesi terakhir dan Ringkasan 30 hari; isinya bergantung pada ruang yang dibuat uji lain.
+  await expect(page.getByRole("heading", { name: "Sesi terakhir" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ringkasan 30 hari terakhir" })).toBeVisible();
   const menu = page.getByRole("navigation", { name: "Menu konsol" });
-  await expect(menu.getByRole("link")).toHaveText(["Dasbor", "Ruang", "Kejadian", "Rujukan", "Paket", "Akun", "Sandi saya"]);
+  await expect(menu.getByRole("link")).toHaveText(["Dasbor", "Ruang", "Kejadian", "Rujukan", "Paket", "Statistik", "Akun", "Sandi saya"]);
   await expect(menu.getByRole("link", { name: "Dasbor" })).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Dasbor");
   expect(await targetKecil(page)).toEqual([]);
@@ -270,7 +272,7 @@ test("guru HP 731 × 411 lalu 1024 × 768: sandi sementara, ganti sandi, tanpa m
   await gantiSandiWajib(page, GURU.sandi);
   await expect(page.getByText("Selamat datang, Bu Sari.")).toBeVisible();
   await expect(page.getByText("Bu Sari · Guru")).toBeVisible();
-  await expect(page.locator(".js-konsol-peringatan")).toContainText("23 rujukan belum diverifikasi.");
+  await expect(page.locator(".js-konsol-peringatan").filter({ hasText: "rujukan belum diverifikasi" })).toContainText("23 rujukan belum diverifikasi.");
 
   // Di bawah 1024 px navigasi samping tersembunyi; tombol Menu membuka daftar menu (D-2a).
   const tombolMenu = page.getByRole("button", { name: "Menu" });
@@ -279,7 +281,7 @@ test("guru HP 731 × 411 lalu 1024 × 768: sandi sementara, ganti sandi, tanpa m
   await tombolMenu.tap();
   await expect(tombolMenu).toHaveAttribute("aria-expanded", "true");
   const menu = page.getByRole("navigation", { name: "Menu konsol" });
-  await expect(menu.getByRole("link")).toHaveText(["Dasbor", "Ruang", "Kejadian", "Rujukan", "Sandi saya"]);
+  await expect(menu.getByRole("link")).toHaveText(["Dasbor", "Ruang", "Kejadian", "Rujukan", "Statistik", "Sandi saya"]);
   await page.screenshot({ path: `${LAYAR}/konsol-menu-731x411.png` });
   await menu.getByRole("link", { name: "Sandi saya" }).tap();
   await expect(tombolMenu).toHaveAttribute("aria-expanded", "false");
@@ -293,7 +295,7 @@ test("guru HP 731 × 411 lalu 1024 × 768: sandi sementara, ganti sandi, tanpa m
   await page.setViewportSize({ width: 1024, height: 768 });
   await expect(page.locator(".js-konsol-samping")).toBeVisible();
   await expect(tombolMenu).toBeHidden();
-  await expect(page.getByRole("navigation", { name: "Menu konsol" }).getByRole("link")).toHaveText(["Dasbor", "Ruang", "Kejadian", "Rujukan", "Sandi saya"]);
+  await expect(page.getByRole("navigation", { name: "Menu konsol" }).getByRole("link")).toHaveText(["Dasbor", "Ruang", "Kejadian", "Rujukan", "Statistik", "Sandi saya"]);
 });
 
 test("nonaktif dan atur ulang: konfirmasi, sesi guru berakhir, aktif lagi, sandi sementara baru (AC-14, AC-16)", async () => {
@@ -382,7 +384,7 @@ test("akun sendiri: peran, nonaktifkan, dan atur ulang dimatikan dengan catatan;
   await kedua.page.getByRole("button", { name: "Buat akun" }).click();
   await expect(kedua.page.getByRole("alert")).toHaveText("Anda tidak berwenang melakukan ini.");
   await expect(kedua.page.getByText("Halaman ini hanya untuk admin.")).toBeVisible();
-  await expect(kedua.page.getByRole("navigation", { name: "Menu konsol" }).getByRole("link")).toHaveText(["Dasbor", "Ruang", "Kejadian", "Rujukan", "Sandi saya"]);
+  await expect(kedua.page.getByRole("navigation", { name: "Menu konsol" }).getByRole("link")).toHaveText(["Dasbor", "Ruang", "Kejadian", "Rujukan", "Statistik", "Sandi saya"]);
   expect(catatan).toEqual({ konsol: [], respons: [], luar: [] });
   await kedua.ctx.close();
 });
@@ -445,6 +447,7 @@ test("papan ketik saja: masuk, ganti sandi, membuka dialog akun baru, mengisi, d
   await page.keyboard.press("Tab");
   await page.keyboard.press("Tab"); // JS-10: menu Ruang ada di antara Dasbor dan Akun
   for (let i = 0; i < 3; i++) await page.keyboard.press("Tab"); // JS-12: menu Kejadian, Rujukan, dan Paket
+  await page.keyboard.press("Tab"); // JS-13: menu Statistik sesudah Paket
   await expect(page.getByRole("link", { name: "Akun" })).toBeFocused();
   await page.keyboard.press("Enter");
   const tombolBaru = page.getByRole("button", { name: "+ Akun baru" });
@@ -546,7 +549,7 @@ test("memuat, server tidak menjawab, menunggu, dan data gagal dimuat (AC-13, AC-
   await expect(page.getByRole("alert")).toHaveText("Data dasbor gagal dimuat.");
   await page.unroute("**/api/dasbor");
   await page.getByRole("button", { name: "Coba lagi" }).click();
-  await expect(page.locator(".js-konsol-peringatan")).toContainText("23 rujukan belum diverifikasi.");
+  await expect(page.locator(".js-konsol-peringatan").filter({ hasText: "rujukan belum diverifikasi" })).toContainText("23 rujukan belum diverifikasi.");
   await page.route("**/api/akun", (route) => route.fulfill({ status: 500, contentType: "text/plain", body: "galat" }));
   await page.getByRole("link", { name: "Akun" }).click();
   await expect(page.getByRole("alert")).toHaveText("Daftar akun gagal dimuat.");
@@ -589,7 +592,7 @@ for (const ukuran of UKURAN) {
     await expect(page.getByRole("heading", { name: "Buat sandi baru" })).toBeVisible();
     await foto("sandi-wajib");
     await gantiSandiWajib(page, ADMIN.sandi);
-    await expect(page.locator(".js-konsol-peringatan")).toBeVisible();
+    await expect(page.locator(".js-konsol-peringatan").first()).toBeVisible();
     await foto("dasbor");
     expect(await targetKecil(page)).toEqual([]);
 

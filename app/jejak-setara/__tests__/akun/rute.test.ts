@@ -10,7 +10,7 @@ const ID = "0b2f6a9e-1c3d-4e5f-8a7b-9c0d1e2f3a4b";
 
 describe("pembacaan hash", () => {
   it("rute tanpa id, detail ruang, dan layar kelas", () => {
-    expect(RUTE).toEqual(["masuk", "sandi", "dasbor", "ruang", "kejadian", "rujukan", "paket", "akun", "kelas"]);
+    expect(RUTE).toEqual(["masuk", "sandi", "dasbor", "ruang", "kejadian", "rujukan", "paket", "statistik", "akun", "kelas"]);
     for (const r of RUTE.filter((x) => x !== "kelas")) {
       expect(keHash(r)).toBe(`#/${r}`);
       expect(bacaRute(keHash(r))).toEqual({ rute: r, id: null });
@@ -69,7 +69,7 @@ describe("pengalihan (P-37)", () => {
 
 describe("menu per peran (JS-04 P-38; JS-10 P-1)", () => {
   it("admin: Dasbor, Ruang, Akun, Sandi saya; guru tanpa Akun", () => {
-    expect(menuUntuk("admin")).toEqual(["dasbor", "ruang", "kejadian", "rujukan", "paket", "akun", "sandi"]);
-    expect(menuUntuk("guru")).toEqual(["dasbor", "ruang", "kejadian", "rujukan", "sandi"]);
+    expect(menuUntuk("admin")).toEqual(["dasbor", "ruang", "kejadian", "rujukan", "paket", "statistik", "akun", "sandi"]);
+    expect(menuUntuk("guru")).toEqual(["dasbor", "ruang", "kejadian", "rujukan", "statistik", "sandi"]);
   });
 });

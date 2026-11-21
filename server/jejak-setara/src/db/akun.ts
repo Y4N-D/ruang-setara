@@ -230,6 +230,12 @@ export const bilaAda = {
 // ------------------------------------------------------------------ Dasbor dan pembersihan
 
 /** Jumlah rujukan berstatus `belum` (P-36). */
+/** JS-13 (P-24): jumlah kejadian berstatus Siap tinjau, untuk peringatan dasbor admin. */
+export async function hitungSiapTinjau(db: D1Database): Promise<number> {
+  const baris = await db.prepare("SELECT count(*) AS n FROM kejadian WHERE status = 'tinjau'").first<{ n: number }>();
+  return baris?.n ?? 0;
+}
+
 export async function hitungRujukanBelum(db: D1Database): Promise<number> {
   const baris = await db.prepare("SELECT count(*) AS n FROM rujukan WHERE status = 'belum'").first<{ n: number }>();
   return baris?.n ?? 0;

@@ -365,6 +365,15 @@ describe("Teks dan halaman", () => {
     }
   });
 
+  it("JS-13: TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-13 (AC-14)", () => {
+    const js13 = kunciJs13();
+    expect(Object.keys(js13)).toHaveLength(79);
+    const datar = ratakanTeks(TEKS_KONSOL);
+    for (const [kunci, teks] of Object.entries(js13)) expect(datar[kunci], kunci).toBe(teks);
+    // Kelompok baru statistik tidak memuat kunci di luar spesifikasi.
+    expect(Object.keys(datar).filter((x) => x.startsWith("statistik.")).sort()).toEqual(Object.keys(js13).filter((x) => x.startsWith("statistik.")).sort());
+  });
+
   it("JS-04: TEKS_KONSOL sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-04 (P-51), di luar teks JS-10", () => {
     const js11 = kunciJs11();
     const js09 = kunciJs09();
@@ -376,6 +385,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(js11.csv),
         ...Object.keys(js09.konsol),
         ...Object.keys(js09.csv),
+        ...Object.keys(kunciJs13()),
       ]),
     ).toEqual({
       merek: "Jejak Setara",
@@ -1002,4 +1012,9 @@ function kunciJs12(): { konsol: string[]; pemain: string[]; teks: Record<string,
   const konsol = urai(bagian.slice(0, batas));
   const pemain = urai(bagian.slice(batas));
   return { konsol: Object.keys(konsol), pemain: Object.keys(pemain), teks: { ...konsol, ...pemain } };
+}
+
+// JS-13 (AC-14): kunci teks konsol dari tabel spesifikasi JS-13.
+function kunciJs13(): Record<string, string> {
+  return uraiTabelTeks(baca("docs/jejak-setara/specs/JS-13-statistik.md"));
 }

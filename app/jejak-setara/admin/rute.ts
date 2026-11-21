@@ -1,11 +1,11 @@
 // Rute hash konsol dan pengalihannya (spesifikasi JS-04, P-37; JS-10, P-1). Murni: tanpa DOM, sehingga diuji di Node.
 // Sejak JS-10: `#/ruang` (daftar), `#/ruang/{id}` (detail), dan `#/kelas/{id}` (layar kelas, tanpa kerangka konsol).
 // Sejak JS-12 (P-3): `#/kejadian`, `#/kejadian/{K-xx}`, `#/kejadian/baru`, `#/rujukan`, `#/paket`, dan `#/paket/{id}`.
-// Sejak JS-11 (P-16): `#/ruang/riwayat` (riwayat ruang yang sudah ditutup).
+// Sejak JS-11 (P-16): `#/ruang/riwayat` (riwayat ruang yang sudah ditutup). Sejak JS-13 (P-2): `#/statistik`.
 import type { Peran } from "../inti/akun";
 import { idRuangSah } from "../inti/ruang";
 
-export const RUTE = ["masuk", "sandi", "dasbor", "ruang", "kejadian", "rujukan", "paket", "akun", "kelas"] as const;
+export const RUTE = ["masuk", "sandi", "dasbor", "ruang", "kejadian", "rujukan", "paket", "statistik", "akun", "kelas"] as const;
 export type Rute = (typeof RUTE)[number];
 
 /** Rute beserta id: ruang dan paket (UUID), ruang `riwayat` (JS-11), kejadian (`K-xx` atau `baru`); null untuk rute lain. */
@@ -49,7 +49,9 @@ export function tujuan(hash: string, keadaan: KeadaanMasuk): Tujuan {
   return t === null || t.rute === "masuk" ? { rute: "dasbor", id: null } : t;
 }
 
-/** Menu konsol per peran (JS-04 P-38; JS-10 P-1; JS-12 P-3): Paket dan Akun hanya untuk admin. */
+/** Menu konsol per peran (JS-04 P-38; JS-10 P-1; JS-12 P-3; JS-13 P-2): Paket dan Akun hanya untuk admin. */
 export function menuUntuk(peran: Peran): Exclude<Rute, "masuk" | "kelas">[] {
-  return peran === "admin" ? ["dasbor", "ruang", "kejadian", "rujukan", "paket", "akun", "sandi"] : ["dasbor", "ruang", "kejadian", "rujukan", "sandi"];
+  return peran === "admin"
+    ? ["dasbor", "ruang", "kejadian", "rujukan", "paket", "statistik", "akun", "sandi"]
+    : ["dasbor", "ruang", "kejadian", "rujukan", "statistik", "sandi"];
 }

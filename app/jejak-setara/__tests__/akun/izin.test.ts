@@ -21,6 +21,7 @@ describe("tabel izin JS-04 (P-20)", () => {
       "rujukan.tambah": ["admin", "guru"],
       "rujukan.sunting": ["admin"],
       "paket.kelola": ["admin"],
+      "statistik.lihat": ["admin", "guru"],
     });
   });
 

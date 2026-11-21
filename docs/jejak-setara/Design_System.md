@@ -187,6 +187,9 @@ Memakai satuan `--u: min(1vh, 0.5625vw)` dan skala huruf proyektor Sehari Setara
 - **Kerangka** (JS-04): navigasi samping `ink`, kepala `cream` dengan judul halaman, nama dan peran, serta tombol Keluar, dan area isi `white` dengan panel `cream`. Menu hanya memuat halaman yang sudah dibangun (Gerbang 1 JS-04). Navigasi samping tampil di lebar 1024 px ke atas; di bawahnya diganti tombol "Menu" di kepala (spesifikasi JS-04, D-2).
 - **Ruang, riwayat, dan hasil** (JS-11): halaman Ruang punya dua tab di bawah judul, "Berjalan" dan "Riwayat"; tab aktif memakai pola butir menu aktif (`sun`, ▶, `aria-current="page"`). Riwayat memuat saringan dalam satu baris yang membungkus dan tabel yang menjadi kartu di bawah 1024 px. Bagian "Hasil ronde" di halaman ruang berisi daftar istilah dua kolom, baris tombol unduh CSV dan Cetak, tabel peringkat dengan kepala tetap di atas saat digulir, tabel "Dikeluarkan", dan rincian yang terbuka di bawah baris pemainnya. Cetakan A4 tegak hanya memuat kepala cetak, ringkasan, dan tabel, dengan huruf sistem 10 pt dan garis 1 px `ink`.
 
+
+- **Dasbor (JS-13):** salam, lalu empat kartu bingkai piksel dalam kisi dua kolom (satu kolom di bawah 1024 px): Peringatan (tautan setinggi 48 px dengan `ikon_peringatan` dan garis kiri `mango`), Ruang yang sedang berjalan, Sesi terakhir (tautan ke detail ruang, tanda `mist` "Uji"), dan Ringkasan 30 hari terakhir (angka Press Start 2P 16 px, batang tiga tingkat dengan kalimat persennya).
+- **Halaman Statistik (JS-13):** saringan dalam satu baris yang membungkus, tabel 14 px dengan baris berselang `white` dan `cream`, dan rincian per baris. Di 1280 px ke atas tabel memuat sembilan kolom; di 1024–1279 px kolom Langkah 2, Keliru terbanyak, dan Petunjuk disembunyikan (isinya ada di rincian); di bawah 1024 px setiap baris menjadi kartu. Wadah tabel memakai `position: relative`, agar teks pembaca layar tidak meluapkan halaman.
 ## 4. Warna
 
 Palet **36 warna** Sehari Setara berlaku penuh. Sumber tunggalnya tetap `scripts/game/art/palette.json`. Aset gambar hanya boleh memakai warna palet itu, tanpa piksel semi-transparan.
@@ -448,6 +451,9 @@ Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 bl
 | **Tab halaman** | Tautan bergaya tab di bawah judul halaman (JS-11: "Berjalan" dan "Riwayat" di halaman Ruang). Tab aktif berlatar `sun` dengan ▶ dan `aria-current="page"`; tab lain `white` bergaris `ink` |
 | **Keadaan kosong** | Ikon, satu kalimat, dan satu tombol aksi (misalnya "Belum ada ruang. Buat ruang pertama.") |
 
+
+- **Grafik batang statistik (JS-13):** batang 12 px bergaris `ink` 2 px berisi `sky-d`, atau warna tingkat untuk Langkah 2; pilihan yang benar `leaf` dengan tanda `ikon_centang` "Jawaban tepat". Angka "{n} ({p}%)" selalu tertulis, dan batang hanya hiasan bagi pembaca layar. Batang bertumpuk tiga tingkat (`leaf`, `mango`, `coral`) memakai tinggi dan garis yang sama.
+- **Label kategori indeks kesulitan (JS-13):** tanda bergaris `ink` dengan teks `ink` "Sulit" (`coral`, indeks di bawah 0,30), "Sedang" (`sun`, 0,30 sampai 0,70), atau "Mudah" (`leaf`, di atas 0,70). Kategori selalu tertulis di samping angkanya.
 ## 11. Gerak dan animasi
 
 | Hal | Aturan |

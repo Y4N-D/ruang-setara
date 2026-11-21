@@ -41,6 +41,7 @@ import {
   type AksiKejadian,
 } from "../inti/bank";
 import { skemaHasilRuang, skemaRiwayat, skemaRincianPeserta } from "../inti/hasil";
+import { skemaStatistik } from "../inti/statistik";
 import { TEKS_KONSOL } from "../teks-konsol";
 
 export interface GalatApi {
@@ -138,6 +139,8 @@ export const api = {
   rincianPeserta: (id: string, pesertaId: string) =>
     panggil("GET", `/api/ruang/${encodeURIComponent(id)}/hasil/${encodeURIComponent(pesertaId)}`, undefined, skemaRincianPeserta),
   hapusRuang: (id: string) => panggil("DELETE", `/api/ruang/${encodeURIComponent(id)}`, undefined, skemaOk),
+  // JS-13 (P-11, P-12): statistik per kejadian lintas ruang.
+  statistikKejadian: (q: URLSearchParams) => panggil("GET", `/api/statistik/kejadian${q.toString() ? `?${q.toString()}` : ""}`, undefined, skemaStatistik),
   // JS-12 (P-24): bank kejadian, pustaka rujukan, dan paket.
   daftarKejadian: () => panggil("GET", "/api/kejadian", undefined, skemaDaftarKejadian),
   pilihanBank: () => panggil("GET", "/api/kejadian/pilihan", undefined, skemaPilihanBank),

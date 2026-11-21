@@ -112,7 +112,7 @@ ruang-setara/
 │  │  ├─ ruang/antrean.ts            # antrean kiriman berkunci dan berversi di SQLite ruang (JS-08)
 │  │  ├─ ruang/rekap-ruang.ts        # penyusun rekap pribadi dan ringkasan hasil, murni (JS-11)
 │  │  ├─ ekspor/csv.ts               # rincian jawaban, CSV peserta dan jawaban, nama berkas, murni (JS-11)
-│  │  ├─ api/                        # masuk, akun, kejadian, rujukan, paket, ruang, statistik, ekspor, pengaturan, log
+│  │  ├─ api/                        # masuk, akun, kejadian, rujukan, paket, ruang, statistik (JS-13), dasbor, ekspor, pengaturan, log
 │  │  ├─ auth/                       # sandi, sesi, izin, tiket, pembatas percobaan
 │  │  └─ db/                         # kueri D1 (ruang; konten dan jawaban sejak JS-08)
 │  ├─ migrations/0001_awal.sql …     # migrasi D1, hanya maju; 0002_peserta_dikeluarkan.sql (JS-11)
@@ -635,7 +635,7 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 
 ### 10.1 Rute konsol
 
-Satu halaman di `/admin/` dengan rute *hash*: `#/dasbor`, `#/ruang` (tab Berjalan), `#/ruang/riwayat` (tab Riwayat, JS-11), `#/ruang/{id}` (detail; bagian hasil untuk ruang `selesai`, `pembahasan`, dan `ditutup` sejak JS-11), `#/kelas/{id}` (layar kelas, dibuka di tab baru), `#/kejadian`, `#/kejadian/{id}`, `#/paket`, `#/rujukan`, `#/statistik`, `#/akun`, `#/sandi` (ganti sandi; JS-04), `#/pengaturan`, `#/log`, dan `#/masuk`. Router kecil ditulis sendiri, tanpa dependensi baru. Menu hanya memuat halaman yang sudah dibangun, dan rute yang belum ada dialihkan ke `#/dasbor` (JS-04).
+Satu halaman di `/admin/` dengan rute *hash*: `#/dasbor`, `#/ruang` (tab Berjalan), `#/ruang/riwayat` (tab Riwayat, JS-11), `#/statistik` (JS-13), `#/ruang/{id}` (detail; bagian hasil untuk ruang `selesai`, `pembahasan`, dan `ditutup` sejak JS-11), `#/kelas/{id}` (layar kelas, dibuka di tab baru), `#/kejadian`, `#/kejadian/{id}`, `#/paket`, `#/rujukan`, `#/statistik`, `#/akun`, `#/sandi` (ganti sandi; JS-04), `#/pengaturan`, `#/log`, dan `#/masuk`. Router kecil ditulis sendiri, tanpa dependensi baru. Menu hanya memuat halaman yang sudah dibangun, dan rute yang belum ada dialihkan ke `#/dasbor` (JS-04).
 
 ### 10.2 API
 
@@ -646,7 +646,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `POST /api/masuk` · `POST /api/keluar` · `GET /api/saya` | Masuk, keluar, akun saat ini. `GET /api/saya` selalu menjawab 200 dengan `masuk` benar atau salah (JS-04) | Umum · umum · umum |
 | `POST /api/sandi` | Ganti sandi sendiri | Masuk |
 | `GET` · `POST /api/akun`; `PATCH /api/akun/{id}` | Daftar, buat, ubah, nonaktifkan, atur ulang sandi | Admin |
-| `GET /api/dasbor` | Isi dasbor; sejak JS-04 jumlah rujukan yang belum diverifikasi | Admin, guru |
+| `GET /api/dasbor` | Isi dasbor: jumlah rujukan yang belum diverifikasi (JS-04), ruang yang sedang berjalan (JS-10), serta kejadian Siap tinjau untuk admin, lima sesi terakhir, dan ringkasan 30 hari dari `ruang.ringkasan_json` (JS-13, P-24 sampai P-26); tidak membaca tabel `jawaban` | Admin, guru |
 | `POST /api/admin-awal` | Membuat atau memulihkan akun admin; hanya dengan kunci sekali pakai `KUNCI_ADMIN` (JS-04) | Alur kerja "Jejak: admin awal" |
 | `GET` · `POST /api/kejadian`; `GET /api/kejadian/pilihan`; `GET /api/kejadian/{K-xx}`; `PUT /api/kejadian/{K-xx}/kerja` | Daftar, buat (kode diberikan saat simpan pertama), pilihan isian, detail, simpan versi kerja dengan penanda versi (JS-12) | Admin; guru untuk kejadian miliknya berstatus Draf atau Siap tinjau |
 | `POST /api/kejadian/{K-xx}/aksi` | Ajukan, kembalikan, terbitkan, arsipkan, pulihkan, hapus (JS-12, P-14) | Menurut aksi: terbitkan, arsipkan, kembalikan, dan pulihkan hanya admin |
@@ -659,7 +659,8 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `DELETE /api/ruang/{id}` | Hapus data ruang yang sudah ditutup (409 `BELUM_DITUTUP` bila belum), dalam satu batch bersama log audit `ruang.hapus` (JS-11, D-3) | Admin |
 | `POST /api/ruang/{id}/tiket` | Tiket layar kelas | Pemilik ruang, admin |
 | `GET /api/ruang/{id}/ekspor?jenis=peserta\|jawaban` | CSV (bagian 10.8; JS-11) | Pemilik ruang, admin |
-| `GET /api/statistik/kejadian` · `/kelas` · `/siswa` | Statistik | Admin (semua), guru (miliknya) |
+| `GET /api/statistik/kejadian` | Statistik per versi kejadian lintas ruang, dengan saringan `dari`, `sampai`, `label`, `guru` (admin), dan `paket` (JS-13, P-11 sampai P-15) | Admin (semua), guru (miliknya) |
+| `GET /api/statistik/kelas` · `/siswa` | Statistik per kelas dan per siswa (JS-20; belum tersedia) | Admin (semua), guru (miliknya) |
 | `GET` · `PUT /api/pengaturan` | Pengaturan umum | Admin |
 | `GET /api/log` | Log audit | Admin |
 | `GET /api/bank/ekspor`; `POST /api/bank/impor` | Ekspor dan impor JSON bank | Admin |
@@ -699,10 +700,14 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 
 ### 10.7 Statistik
 
-- Dihitung dengan SQL dari `jawaban`, `peserta`, dan `ruang` (ruang uji dikecualikan), dikelompokkan per `kejadian_versi_id`.
-- Rumus mengikuti PRD bagian 11.2. Median waktu dihitung di Worker dari hasil kueri.
-- Saringan: rentang tanggal, guru, label kelas, paket, dan kejadian.
-- Statistik per siswa lintas sesi mengelompokkan `label_kelas` (dinormalkan: huruf besar, tanpa spasi ganda) dan `nomor_absen`, hanya untuk ruang dengan mode nomor absen.
+Statistik per kejadian lintas ruang (JS-13; spesifikasi `specs/JS-13-statistik.md`):
+
+- **Ruang yang dihitung:** bukan ruang uji, status `selesai`, `pembahasan`, atau `ditutup`, dan rondenya sempat dimainkan (`mulai_pada` dan `selesai_pada` terisi). Guru hanya ruang miliknya. **Jawaban yang dihitung:** Langkah 1 dikunci, pemain tidak dikeluarkan, dan versi terbit.
+- **Kueri hemat** (`server/jejak-setara/src/db/statistik.ts`): ruang yang memenuhi saringan dipilih lebih dulu dalam CTE yang dimaterialisasi lewat indeks `ruang_dibuat` (atau `ruang_pemilik` bila ada guru), dengan batas tanggal selalu tertulis. Jawabannya lalu dibaca lewat `jawaban_ruang` dalam satu pernyataan, yang menghasilkan jumlah per versi dan pilihan serta jumlah per versi dan detik waktu menjawab. Satu `batch` memuat statistik, cakupan, dan pilihan paket; isi versi diambil sesudahnya dengan satu parameter JSON. Bentuk lama yang memakai `(?n IS NULL OR …)` membuat SQLite memindai seluruh jawaban (percobaan Plan JS-13: 7,9 juta baris untuk data setahun).
+- **Penyusun murni** `susunStatistik` di `app/jejak-setara/inti/statistik.ts` menghitung angka PRD 11.2 dari hasil kueri dan isi versi. **Median** dihitung dari jumlah per detik (selisih dengan median tepat paling besar setengah detik), tanpa mengirim semua durasi ke Worker.
+- **Saringan:** rentang tanggal pembuatan ruang, label kelas (sebagian), guru (admin), dan paket. Rentang bawaan 30 hari diatur konsol, bukan server. Statistik per label kelas, topik, tren, dan per siswa (`label_kelas` dinormalkan dan `nomor_absen`, hanya ruang dengan mode nomor absen) menyusul di JS-20.
+- **Dasbor** menjumlahkan `ruang.ringkasan_json.hasil` (JS-11, P-14) untuk ringkasan 30 hari, tanpa membaca `jawaban`. Daftar sesi terakhir dan riwayat ruang memilih dan memotong ruang lebih dulu, lalu menghitung peserta hanya untuk ruang yang tampil.
+- **Ukuran pada data tiruan** (pengukuran Test JS-13, D1 lokal): saringan bawaan 30 hari untuk 300 ruang membaca sekitar 65 ribu baris dalam 21 ms; untuk 1.200 ruang (sekitar setahun dengan 100 sesi per bulan) sekitar 0,32 juta baris dalam 0,1 detik; semua waktu untuk 1.200 ruang sekitar 3,9 juta baris dalam 1,4 detik. Bila data bertambah jauh, tabel ringkasan per ruang dan versi bisa ditambah kemudian (usulan 2b Plan JS-13).
 
 ### 10.8 Ekspor
 

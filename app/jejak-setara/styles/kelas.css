@@ -1343,3 +1343,281 @@
     height: 10pt;
   }
 }
+
+/* ---------------------------------------------------------------------------------------------
+   JS-13: dasbor empat kartu (P-27) dan halaman Statistik (P-16 sampai P-22). Hanya konsol. */
+
+.js-dasbor-kisi {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.js-dasbor-peringatan {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.js-dasbor-peringatan a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--js-ink);
+}
+.js-dasbor-sesi .js-konsol-tanda {
+  margin-left: 6px;
+}
+.js-dasbor-ringkasan {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin: 0 0 12px;
+}
+.js-dasbor-ringkasan dt {
+  color: var(--js-dusk);
+  font-size: 14px;
+}
+.js-dasbor-ringkasan dd {
+  margin: 2px 0 0;
+}
+.js-dasbor-tingkat p {
+  font-size: 14px;
+}
+.js-dasbor-tumpuk {
+  width: 100%;
+  margin: 4px 0;
+}
+.js-konsol-isi .js-dasbor-catatan {
+  margin-top: 8px;
+  color: var(--js-dusk);
+  font-size: 14px;
+}
+.js-dasbor-tautan,
+.js-statistik-bank {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+}
+.js-konsol-isi .js-statistik-pengantar {
+  max-width: 70ch;
+  margin-bottom: 16px;
+}
+.js-statistik-atas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 0 0 8px;
+}
+.js-statistik-urut {
+  min-width: 240px;
+}
+.js-konsol-isi .js-statistik-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.js-statistik-legenda img,
+.js-statistik-fakta img,
+.js-statistik-tepat img {
+  image-rendering: pixelated;
+  vertical-align: middle;
+}
+.js-statistik-gulung {
+  position: relative;
+}
+.js-statistik-tabel {
+  font-size: 14px;
+}
+.js-konsol-tabel.js-statistik-tabel th,
+.js-konsol-tabel.js-statistik-tabel td {
+  padding: 6px;
+}
+.js-statistik-tabel .js-angka {
+  text-align: right;
+  white-space: nowrap;
+}
+.js-konsol-tabel.js-statistik-tabel > tbody > tr:nth-child(n) {
+  background: var(--js-white);
+}
+.js-konsol-tabel.js-statistik-tabel > tbody > tr[data-genap="ya"]:nth-child(n) {
+  background: var(--js-cream);
+}
+.js-statistik-kejadian {
+  min-width: 150px;
+}
+.js-statistik-kode {
+  font-family: "Press Start 2P", monospace;
+  font-size: 11px;
+}
+.js-statistik-kejadian .js-konsol-tanda {
+  margin-left: 4px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+.js-statistik-judul {
+  display: block;
+}
+.js-statistik-tingkat {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 96px;
+  font-size: 13px;
+}
+.js-statistik-tumpuk {
+  display: flex;
+  height: 12px;
+  border: 2px solid var(--js-ink);
+  background: var(--js-white);
+}
+.js-statistik-tumpuk > span[data-tingkat="tepat"] {
+  background: var(--js-tier-tepat);
+}
+.js-statistik-tumpuk > span[data-tingkat="kurang"] {
+  background: var(--js-tier-kurang);
+}
+.js-statistik-tumpuk > span[data-tingkat="berisiko"] {
+  background: var(--js-tier-berisiko);
+}
+.js-statistik-indeks {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  white-space: nowrap;
+}
+.js-statistik-indeks[data-kategori="sulit"] .js-konsol-tanda {
+  background: var(--js-coral);
+}
+.js-statistik-indeks[data-kategori="sedang"] .js-konsol-tanda {
+  background: var(--js-sun);
+}
+.js-statistik-indeks[data-kategori="mudah"] .js-konsol-tanda {
+  background: var(--js-leaf);
+}
+.js-statistik-tepat {
+  background: var(--js-leaf);
+}
+.js-statistik-rincian {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  padding: 8px 4px;
+}
+.js-statistik-rincian h3 {
+  margin: 0 0 8px;
+  font-family: "Pixelify Sans", monospace;
+  font-size: 16px;
+  font-weight: 400;
+}
+.js-statistik-grafik ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.js-statistik-grafik li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 96px;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0;
+  border-top: 1px solid var(--js-mist);
+}
+.js-statistik-opsi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.js-statistik-batang {
+  height: 12px;
+  border: 2px solid var(--js-ink);
+  background: var(--js-white);
+}
+.js-statistik-batang > span {
+  display: block;
+  height: 100%;
+  background: var(--js-sky-d);
+}
+.js-statistik-grafik li[data-jenis="tepat"] .js-statistik-batang > span {
+  background: var(--js-tier-tepat);
+}
+.js-statistik-grafik li[data-jenis="kurang"] .js-statistik-batang > span {
+  background: var(--js-tier-kurang);
+}
+.js-statistik-grafik li[data-jenis="berisiko"] .js-statistik-batang > span {
+  background: var(--js-tier-berisiko);
+}
+.js-statistik-nilai {
+  text-align: right;
+  white-space: nowrap;
+}
+.js-statistik-fakta,
+.js-statistik-huruf,
+.js-statistik-rincian > a {
+  grid-column: 1 / -1;
+}
+.js-konsol-isi .js-statistik-huruf {
+  color: var(--js-dusk);
+  font-size: 13px;
+}
+.js-statistik-rincian > a {
+  justify-self: start;
+}
+@media (max-width: 1279px) {
+  .js-statistik-tabel .js-statistik-lebar,
+  .js-konsol-isi .js-statistik-legenda {
+    display: none;
+  }
+  .js-statistik-rincian {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 1023px) {
+  .js-dasbor-kisi {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .js-statistik-tabel thead {
+    display: none;
+  }
+  .js-statistik-tabel tr {
+    display: block;
+    padding: 8px 0;
+  }
+  .js-konsol-tabel.js-statistik-tabel td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 12px;
+    text-align: right;
+  }
+  .js-statistik-tabel td[data-label]::before {
+    content: attr(data-label);
+    font-weight: 600;
+    text-align: left;
+  }
+  .js-konsol-tabel.js-statistik-tabel td.js-statistik-kejadian {
+    display: block;
+    min-width: 0;
+    font-weight: 600;
+    text-align: left;
+  }
+  .js-konsol-tabel.js-statistik-tabel .js-statistik-rincian-baris td {
+    display: block;
+    text-align: left;
+  }
+  .js-statistik-grafik li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .js-statistik-batang {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

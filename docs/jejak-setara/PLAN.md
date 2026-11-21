@@ -16,7 +16,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-10 | Selesai (15 Nov 2026) | [JS-10-kelas.md](specs/JS-10-kelas.md) | [JS-10-hasil.md](tests/JS-10-hasil.md), lulus (AC-19 dengan catatan) |
 | JS-11 | Selesai (20 Nov 2026); "Jejak: uji" hijau untuk commit `e2e2a43` dan langkah pemilik proyek di lingkungan uji berhasil | [JS-11-akhir-ronde.md](specs/JS-11-akhir-ronde.md) | [JS-11-hasil.md](tests/JS-11-hasil.md), lulus (AC-22 diterima: kode layar pemain +1,33 KB) |
 | JS-12 | Selesai (16 Nov 2026) | [JS-12-bank.md](specs/JS-12-bank.md) | [JS-12-hasil.md](tests/JS-12-hasil.md), lulus (AC-8 diterima) |
-| JS-13 | Spesifikasi ditulis (21 Nov 2026); Plan disetujui 21 Nov 2026; menunggu `Spesifikasi disetujui: JS-13` | [JS-13-statistik.md](specs/JS-13-statistik.md) | — |
+| JS-13 | Dibangun dan diuji (21 Nov 2026); menunggu uji manual dan `Diterima: JS-13` | [JS-13-statistik.md](specs/JS-13-statistik.md) | [JS-13-hasil.md](tests/JS-13-hasil.md) |
 | JS-14 | Belum direncanakan | — | — |
 | JS-15 | Belum direncanakan | — | — |
 | JS-16 | Belum direncanakan | — | — |
@@ -1212,7 +1212,7 @@ Dikerjakan dalam mode ZIP dari `main` sesudah commit `9b0edec` (ZIP Build JS-09)
 
 ## JS-13 — Statistik per kejadian lintas ruang dan isi dasbor
 
-- Status: **Spesifikasi ditulis (21 Nov 2026)** ([JS-13-statistik.md](specs/JS-13-statistik.md)); menunggu `Spesifikasi disetujui: JS-13` beserta pilihan DRAF D-1 sampai D-3. Plan disetujui 21 Nov 2026 dengan `Setuju: JS-13`, dibaca sebagai usulan 1a sampai 13a. Sebelumnya: **Direncanakan (21 Nov 2026)**. Diperiksa sebelum Plan (AGENTS 4.1 langkah 1): JS-11 Selesai 20 Nov 2026 dengan laporan Lulus (AC-22 diterima) dan JS-12 Selesai 16 Nov 2026 dengan laporan Lulus (AC-8 diterima), keduanya dependensi JS-13. Urutan sisa JS-13, JS-14, JS-15, lalu JS-16 ditetapkan pemilik proyek 21 Nov 2026 (bagian "Keputusan urutan fitur"). Dikerjakan dalam mode ZIP dari `main` commit `676b821`. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare. **Audit independen:** folder `docs/jejak-setara/audit/` tidak ada di ZIP itu, jadi tidak ada temuan audit yang dimasukkan (catatan "Semua Plan" di bagian "Catatan untuk Plan berikutnya").
+- Status: **Dibangun dan diuji (21 Nov 2026)** ([JS-13-hasil.md](tests/JS-13-hasil.md)); menunggu uji manual pemilik proyek dan `Diterima: JS-13`. Spesifikasi disetujui 21 Nov 2026 dengan D-1, D-2, dan D-3 pilihan a ([JS-13-statistik.md](specs/JS-13-statistik.md)). Plan disetujui 21 Nov 2026 dengan `Setuju: JS-13`, dibaca sebagai usulan 1a sampai 13a. Sebelumnya: **Direncanakan (21 Nov 2026)**. Diperiksa sebelum Plan (AGENTS 4.1 langkah 1): JS-11 Selesai 20 Nov 2026 dengan laporan Lulus (AC-22 diterima) dan JS-12 Selesai 16 Nov 2026 dengan laporan Lulus (AC-8 diterima), keduanya dependensi JS-13. Urutan sisa JS-13, JS-14, JS-15, lalu JS-16 ditetapkan pemilik proyek 21 Nov 2026 (bagian "Keputusan urutan fitur"). Dikerjakan dalam mode ZIP dari `main` commit `676b821`. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare. **Audit independen:** folder `docs/jejak-setara/audit/` tidak ada di ZIP itu, jadi tidak ada temuan audit yang dimasukkan (catatan "Semua Plan" di bagian "Catatan untuk Plan berikutnya").
 - Memenuhi: JFR-50 (statistik per kejadian lintas ruang dengan saringan: jumlah dijawab, persentase Langkah 1 benar, sebaran pilihan Langkah 2, median waktu menjawab, indeks kesulitan, dan pilihan keliru yang paling sering diambil) dan JFR-37 (dasbor: ruang yang sedang berjalan, sesi terakhir, ringkasan statistik, dan peringatan; kartu ruang sudah ada sejak JS-10). Ditambah PRD 11.1 (admin melihat semua ruang, guru ruang miliknya), PRD 11.2 (definisi statistik; ruang uji tidak masuk statistik; statistik per versi), dan JFR-44 (statistik dicatat per versi); Architecture 10.1 (`#/statistik`), 10.2 (`GET /api/statistik/kejadian`), dan 10.7; Design System 3.7 dan 10 ("Konsol admin": tabel, grafik, dan keadaan kosong); serta catatan Plan JS-13 dari Specify JS-11 dan Specify JS-09.
 - Bergantung pada: JS-11 dan JS-12 (keduanya Selesai). Memakai juga JS-09 (`jawaban.petunjuk_dipakai`).
 - File yang dibuat/diubah (rencana; dipastikan di Specify):
@@ -1334,3 +1334,14 @@ Dikerjakan dalam mode ZIP dari `main` commit `676b821`, ditambah isi ZIP Gerbang
 - **DRAF yang menunggu pemilik proyek:** D-1 ruang yang tidak dimainkan di kartu "Sesi terakhir" (saran: dilewati), D-2 rentang bawaan dan cara memilih semua waktu (saran: "Dari tanggal" terisi, dikosongkan untuk semua waktu), dan D-3 nama guru di "Sesi terakhir" untuk admin (saran: ya).
 - **Berkas Sesi B dan C:** tidak ada permintaan baru sejak Plan JS-13 (ZIP yang sama).
 - **Galeri:** `build:pages` tetap menghasilkan 178 berkas yang identik byte dengan `main`.
+
+### Build dan Test JS-13 (21 Nov 2026)
+
+Dikerjakan dalam mode ZIP dari `main` commit `676b821`, ditambah isi ZIP Gerbang 1 dan 2. Laporan lengkap: [tests/JS-13-hasil.md](tests/JS-13-hasil.md).
+
+- **Hasil uji:** `content:check:jejak` 259, `test:jejak` 1.121, `test:jejak:server` 62, dan `test:e2e:jejak` 50 uji lulus. Uji server dan ujung ke ujung dijalankan per kelompok berkas, karena satu perintah di lingkungan agen dibatasi sekitar 300 detik.
+- **Ukuran:** kode layar pemain tidak naik (133,08 KB); konsol naik 4,44 KB gzip menjadi 136,27 KB.
+- **Pengukuran:** saringan bawaan pada data tiruan 300 ruang membaca 64.595 baris dalam 21 ms waktu D1 lokal; pada 1.200 ruang 315 ribu baris dalam 99 ms; semua waktu pada 1.200 ruang 3,9 juta baris dalam 1,4 detik. Dasbor membaca paling banyak 523 baris tanpa tabel jawaban. Riwayat ruang turun dari sekitar 101 ribu menjadi 4.334 baris pada data 1.200 ruang.
+- **Temuan:** kartu peringatan rujukan belum menautkan ke Rujukan walaupun JS-12 P-3 menyebutnya; JS-13 memasangnya.
+- **Galeri:** `build:pages` tetap 178 berkas identik byte.
+- **Catatan untuk Plan berikutnya:** catatan "GET /api/ruang/riwayat perlu diperbaiki" (Plan JS-13, usulan 11) sudah selesai di JS-13. Bila data setahun membuat rentang semua waktu terlalu berat, tabel ringkasan per ruang dan versi (usulan 2b) bisa dipertimbangkan di JS-20 bersama statistik per kelas dan tren.

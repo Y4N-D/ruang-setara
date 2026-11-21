@@ -150,7 +150,15 @@ describe.skipIf(!sqlite)("kunci Worker belum siap (P-34, AC-11)", () => {
 
     expect(await (await minta(rusak, "GET", "/api/saya", { cookie: admin })).json()).toMatchObject({ masuk: true });
     expect((await minta(rusak, "GET", "/api/akun", { cookie: admin })).status).toBe(200);
-    expect(await (await minta(rusak, "GET", "/api/dasbor", { cookie: admin })).json()).toEqual({ rujukanBelum: 0, ruang: [], jumlahRuang: 0 });
+    // JS-13 (P-24): dasbor juga memuat kejadian Siap tinjau, sesi terakhir, dan ringkasan 30 hari.
+    expect(await (await minta(rusak, "GET", "/api/dasbor", { cookie: admin })).json()).toEqual({
+      rujukanBelum: 0,
+      ruang: [],
+      jumlahRuang: 0,
+      siapTinjau: 0,
+      sesi: [],
+      ringkasan: { hari: 30, sesi: 0, pemain: 0, rataSkor: null, ketepatan1: null, tingkat: { tepat: null, kurang: null, berisiko: null } },
+    });
     expect((await minta(rusak, "PATCH", `/api/akun/${guru.id}`, { cookie: admin, isi: { namaTampilan: "Bu Sari W." } })).status).toBe(200);
     expect((await minta(rusak, "POST", "/api/keluar", { cookie: admin })).status).toBe(200);
   });
