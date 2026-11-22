@@ -6,7 +6,7 @@
 | Tanggal | 21 November 2026 |
 | Sesi | Sesi A (mesin), mode ZIP dari `main` commit `676b821` ditambah ZIP Gerbang 1 dan 2 JS-13 |
 | Lingkungan | Node 22.23.5, pnpm 11.25.0, Chromium 1243 (Playwright), Miniflare 4.20260515 |
-| Status | Semua kriteria otomatis lulus; menunggu uji manual pemilik proyek dan `Diterima: JS-13` |
+| Status | Diterima pemilik proyek 22 November 2026 (`Diterima: JS-13`); semua kriteria otomatis lulus |
 
 ## Ringkasan
 
@@ -96,6 +96,8 @@ Di [tests/JS-13/](JS-13/), dari `statistik.uji.ts` (data halaman Statistik admin
 - Di basis data uji, ruang biasa yang dimainkan sebelum JS-09 tercatat tanpa Petunjuk, sehingga kolom Petunjuk bisa lebih rendah untuk ruang lama.
 
 ## Uji manual pemilik proyek
+
+Dilakukan pemilik proyek dan diterima 22 November 2026 (`Diterima: JS-13`). Langkahnya:
 
 1. Pastikan "Jejak: uji" hijau sesudah push.
 2. Jalankan satu ronde pendek di ruang biasa (kotak "Ruang uji" tidak dicentang) dengan dua atau tiga HP sampai ronde berakhir, lalu tutup ruangnya.

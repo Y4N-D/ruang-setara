@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Disetujui 21 November 2026 (D-1, D-2, dan D-3 pilihan a); dibangun dan diuji 21 November 2026 ([laporan](../tests/JS-13-hasil.md)); menunggu uji manual pemilik proyek |
+| Status | Selesai 22 November 2026 (`Diterima: JS-13`); disetujui 21 November 2026 (D-1, D-2, dan D-3 pilihan a); dibangun dan diuji 21 November 2026 ([laporan](../tests/JS-13-hasil.md)) |
 | Rencana | `PLAN.md`, entri JS-13 (Plan 21 November 2026; disetujui dengan `Setuju: JS-13`, dibaca sebagai usulan 1a sampai 13a) |
 | Sesi | Sesi A (mesin) |
 | Bergantung pada | JS-11 dan JS-12 (keduanya Selesai); memakai juga JS-09 (`jawaban.petunjuk_dipakai`) |
