@@ -99,7 +99,7 @@ Sasaran: selisih pilihan terpanjang dan terpendek paling banyak 20 karakter di L
 | K-39 | 14 | Tidak | 20 | Tidak |
 | K-40 | 11 | Tidak | 24 | Tidak |
 
-Sampai giliran 8, pilihan benar menjadi yang terpanjang di 0 dari 24 kejadian (Langkah 1), dan pilihan tepat di 0 dari 24 kejadian (Langkah 2). Kedua puluh empat naskah juga lolos `periksaKejadian` (aturan validasi konsol), dengan dua catatan. Pertama, K-32 dan K-33 baru lolos bila kunci aset usulannya dihitung Disetujui; dengan daftar kunci sekarang, keduanya hanya mendapat galat `SET_TOKOH_TIDAK_ADA` untuk kunci itu (lihat "Set tokoh dan latar titik"). Kedua, K-35 mendapat satu peringatan `KAPITAL_TENGAH` untuk sebutan "Tuli", yang hilang bila Permintaan A-15 dipenuhi (`../STATUS.md`, "Permintaan untuk Sesi A"). Naskah lain tanpa galat dan tanpa peringatan.
+Sampai giliran 8, pilihan benar menjadi yang terpanjang di 0 dari 24 kejadian (Langkah 1), dan pilihan tepat di 0 dari 24 kejadian (Langkah 2). Kedua puluh empat naskah juga lolos `periksaKejadian` (aturan validasi konsol), dengan dua catatan. Pertama, K-32 dan K-33 baru lolos sesudah aset barunya Disetujui (22 November 2026); sejak itu keduanya tanpa galat (lihat "Set tokoh dan latar titik"). Kedua, K-35 mendapat satu peringatan `KAPITAL_TENGAH` untuk sebutan "Tuli", yang hilang bila Permintaan A-15 dipenuhi (`../STATUS.md`, "Permintaan untuk Sesi A"). Naskah lain tanpa galat dan tanpa peringatan.
 
 ## Tokoh dan properti per kejadian
 
@@ -122,8 +122,8 @@ Diambil dari baris "Set tokoh dan properti" setiap naskah. Benda yang hanya dise
 | K-29 | Z5 | Warga dewasa yang menitipkan amplop | amplop berisi uang, hanya disebut di situasi |
 | K-30 | Z5 | Teman (siswa SMP umum) yang memegang HP | kentongan di pos ronda dan bale (objek peta Z5) |
 | K-31 | Z5 | Bendahara kelompok remaja (warga dewasa muda) | uang kas dan catatan, hanya disebut di teks |
-| K-32 | Z6 | Teman (siswa SMP umum) | prasasti tua dari batu dengan papan keterangan cagar budaya (aset baru, menunggu Sesi C) |
-| K-33 | Z6 | Penjual kukang (warga dewasa, aset baru, menunggu Sesi C) | kukang dalam kandang kecil (aset baru, menunggu Sesi C); adik hanya disebut di situasi |
+| K-32 | Z6 | Teman (siswa SMP umum) | prasasti tua dari batu dengan papan keterangan cagar budaya (aset baru `obj_prasasti`, Disetujui 22 Nov 2026) |
+| K-33 | Z6 | Penjual kukang (warga dewasa, aset baru `npc_penjual_bawah_diam`, Disetujui 22 Nov 2026) | kukang dalam kandang kecil (aset baru `obj_kandang_kukang`, Disetujui 22 Nov 2026); adik hanya disebut di situasi |
 | K-34 | Z6 | Anak kecil (anak SD, warga umum) | —; ibu dan polisi hanya disebut di teks |
 | K-35 | Z7 | Tetangga yang Tuli (warga dewasa) | pengeras suara (objek Disetujui `obj_pengeras_suara`); petugas puskesmas hanya disebut di teks |
 | K-36 | Z7 | Tetangga baru (siswa SMP umum) | —; adik, ibu, dan petugas kantor desa hanya disebut di teks |
@@ -136,7 +136,7 @@ Diambil dari baris "Set tokoh dan properti" setiap naskah. Benda yang hanya dise
 
 Kunci `setTokoh` adalah nama berkas aset Disetujui tanpa `.png` (daftar `KUNCI_ASET_DISETUJUI`), 1–4 per kejadian. Dalam Paket lanjutan 24, satu zona tidak memuat tokoh yang sama dua kali. Dalam Paket lengkap 40 hal itu diusahakan juga bila digabung dengan kejadian bank awal di zona yang sama, tetapi di Z2 tidak sepenuhnya bisa: siswa umum berseragam hanya S5 (dua pose) dan S6, dan ketiganya sudah dipakai K-03 dan K-04 (diubah di giliran 2). Latar mengikuti tabel latar di `../NASKAH.md`; untuk Z1: gang berpagar di antara rumah; untuk Z2: halaman sekolah dekat kantin; untuk Z3: dekat halte dan zebra cross; untuk Z4: lorong pasar; untuk Z5: sekitar bale; untuk Z6: lapangan taman di tepi sungai; untuk Z7: halaman bersama puskesmas dan kantor desa; untuk Z8: sekitar warung berwifi.
 
-Kunci bertanda *(usulan)* belum ada di daftar `KUNCI_ASET_DISETUJUI`, karena gambarnya masih dibuat Sesi C (usulan 7a). Namanya mengikuti pola nama berkas aset dan boleh berubah; sebelum semai tambahan, kunci itu diganti nama berkas yang Disetujui (ditambahkan di giliran 6).
+Aset baru K-32 dan K-33 (usulan 7a) Disetujui pada 22 November 2026, dan kuncinya ada di `KUNCI_ASET_DISETUJUI` (Permintaan A-17). Nama finalnya sama dengan nama yang diusulkan di giliran 6, jadi set tokoh kedua kejadian itu tidak berubah.
 
 | Kode | Zona | Kunci `setTokoh` | Latar di naskah | Catatan |
 |---|---|---|---|---|
@@ -155,8 +155,8 @@ Kunci bertanda *(usulan)* belum ada di daftar `KUNCI_ASET_DISETUJUI`, karena gam
 | K-29 | Z5 | `npc_warga3_bawah_diam` | Sekitar bale | Warga 3 juga dipakai K-17 di Z1 dan K-25 di Z3 |
 | K-30 | Z5 | `npc_siswa1_bawah_hp` | Sekitar bale, dekat pos ronda | Pose yang sama dipakai K-16 di Z8 |
 | K-31 | Z5 | `npc_warga1_bawah_diam` | Sekitar bale | Warga 1 berpose menunjuk dipakai K-07 di Z4 dan K-23 di Z3 |
-| K-32 | Z6 | `npc_siswa2_bawah_diam`, `obj_prasasti` *(usulan)* | Prasasti di taman tepi sungai | S2 juga dipakai K-08 di Z4. Prasasti aset baru |
-| K-33 | Z6 | `npc_penjual_bawah_diam` *(usulan)*, `obj_kandang_kukang` *(usulan)* | Pinggir lapangan taman | Penjual dan kukang dalam kandang aset baru |
+| K-32 | Z6 | `npc_siswa2_bawah_diam`, `obj_prasasti` | Prasasti di taman tepi sungai | S2 juga dipakai K-08 di Z4. Prasasti aset baru (O-52), prasasti dan papan keterangan dalam satu gambar |
+| K-33 | Z6 | `npc_penjual_bawah_diam`, `obj_kandang_kukang` | Pinggir lapangan taman | Penjual (N-21) dan kukang dalam kandang (O-53) aset baru |
 | K-34 | Z6 | `npc_anak2_bawah_diam` | Lapangan taman yang ramai | Anak SD 2 juga dipakai K-28 di Z4; anak SD 1 sudah tampil di K-12 (Z6) |
 | K-35 | Z7 | `npc_warga3_bawah_diam`, `obj_pengeras_suara` | Halaman puskesmas | Warga 3 juga dipakai K-17, K-25, dan K-29. Pengeras suara juga dipakai K-02 di Z1 |
 | K-36 | Z7 | `npc_siswa1_bawah_diam` | Halaman kantor desa | S1 juga dipakai K-01 di Z1 |
