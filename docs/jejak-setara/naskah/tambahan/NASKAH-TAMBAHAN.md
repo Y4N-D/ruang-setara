@@ -12,12 +12,12 @@ Judul kejadian yang belum ditulis adalah judul di Plan; perubahan judul diajukan
 
 | Kode | Zona | Judul | Giliran | Status | Berkas |
 |---|---|---|---|---|---|
-| K-17 | Z1 | Bendera yang sudah robek | 1 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z1" | [K-17.md](K-17.md) |
-| K-18 | Z1 | Memilih sekolah lanjutan | 1 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z1" | [K-18.md](K-18.md) |
-| K-19 | Z1 | Pasir menutup jalan gang | 1 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z1" | [K-19.md](K-19.md) |
-| K-20 | Z2 | Bocoran soal ulangan | 2 | Belum ditulis | — |
-| K-21 | Z2 | Ketua kelas harus laki-laki? | 2 | Belum ditulis | — |
-| K-22 | Z2 | Sketsa mural diakui teman | 2 | Belum ditulis | — |
+| K-17 | Z1 | Bendera yang sudah robek | 1 | Disetujui 22 Nov 2026 | [K-17.md](K-17.md) |
+| K-18 | Z1 | Memilih sekolah lanjutan | 1 | Disetujui 22 Nov 2026 | [K-18.md](K-18.md) |
+| K-19 | Z1 | Pasir menutup jalan gang | 1 | Disetujui 22 Nov 2026 | [K-19.md](K-19.md) |
+| K-20 | Z2 | Bocoran soal ulangan | 2 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z2" | [K-20.md](K-20.md) |
+| K-21 | Z2 | Ketua kelas harus laki-laki? | 2 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z2" | [K-21.md](K-21.md) |
+| K-22 | Z2 | Sketsa mural diakui teman | 2 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z2" | [K-22.md](K-22.md) |
 | K-23 | Z3 | Pengendara jatuh dekat halte | 3 | Belum ditulis | — |
 | K-24 | Z3 | Jalan berlubang dekat halte | 3 | Belum ditulis | — |
 | K-25 | Z3 | Angkot berhenti sebelum tujuan | 3 | Belum ditulis | — |
@@ -46,9 +46,9 @@ Agar letak jawaban tidak bisa ditebak dari urutannya, posisi pilihan benar Langk
 | K-17 | 1c | 2b | Sesuai rencana |
 | K-18 | 1a | 2c | Sesuai rencana |
 | K-19 | 1d | 2a | Sesuai rencana |
-| K-20 | 1b | 2c | — |
-| K-21 | 1a | 2a | — |
-| K-22 | 1c | 2b | — |
+| K-20 | 1b | 2c | Sesuai rencana |
+| K-21 | 1a | 2a | Sesuai rencana |
+| K-22 | 1c | 2b | Sesuai rencana |
 | K-23 | 1b | 2a | — |
 | K-24 | 1d | 2b | — |
 | K-25 | 1c | 2c | — |
@@ -77,8 +77,11 @@ Sasaran: selisih pilihan terpanjang dan terpendek paling banyak 20 karakter di L
 | K-17 | 9 | Tidak | 10 | Tidak |
 | K-18 | 5 | Tidak | 9 | Tidak |
 | K-19 | 8 | Tidak | 10 | Tidak |
+| K-20 | 14 | Tidak | 11 | Tidak |
+| K-21 | 7 | Tidak | 21 | Tidak |
+| K-22 | 10 | Tidak | 5 | Tidak |
 
-Sampai giliran 1, pilihan benar menjadi yang terpanjang di 0 dari 3 kejadian (Langkah 1), dan pilihan tepat di 0 dari 3 kejadian (Langkah 2). Ketiga naskah juga lolos `periksaKejadian` (aturan validasi konsol) tanpa galat dan tanpa peringatan.
+Sampai giliran 2, pilihan benar menjadi yang terpanjang di 0 dari 6 kejadian (Langkah 1), dan pilihan tepat di 0 dari 6 kejadian (Langkah 2). Keenam naskah juga lolos `periksaKejadian` (aturan validasi konsol) tanpa galat dan tanpa peringatan.
 
 ## Tokoh dan properti per kejadian
 
@@ -89,28 +92,38 @@ Diambil dari baris "Set tokoh dan properti" setiap naskah. Benda yang hanya dise
 | K-17 | Z1 | Tetangga (warga dewasa) | bendera yang robek dan luntur di pagar, hanya disebut di situasi |
 | K-18 | Z1 | Teman (siswa SMP umum) | — |
 | K-19 | Z1 | Nenek (warga lansia), pemilik rumah (warga dewasa) | tumpukan pasir dan bata, hanya disebut di situasi |
+| K-20 | Z2 | Teman sekelas (siswa SMP umum, berseragam) | foto bocoran soal di HP, hanya disebut di situasi |
+| K-21 | Z2 | Nara | — |
+| K-22 | Z2 | Bu Ratih | pengumuman rancangan mural di papan, hanya disebut di situasi |
 
 ## Set tokoh dan latar titik
 
-Kunci `setTokoh` adalah nama berkas aset Disetujui tanpa `.png` (daftar `KUNCI_ASET_DISETUJUI`), 1–4 per kejadian. Satu zona tidak memuat tokoh yang sama dua kali, termasuk bila digabung dengan kejadian bank awal di zona itu dalam Paket lengkap 40. Latar mengikuti tabel latar di `../NASKAH.md`; untuk Z1: gang berpagar di antara rumah.
+Kunci `setTokoh` adalah nama berkas aset Disetujui tanpa `.png` (daftar `KUNCI_ASET_DISETUJUI`), 1–4 per kejadian. Dalam Paket lanjutan 24, satu zona tidak memuat tokoh yang sama dua kali. Dalam Paket lengkap 40 hal itu diusahakan juga bila digabung dengan kejadian bank awal di zona yang sama, tetapi di Z2 tidak sepenuhnya bisa: siswa umum berseragam hanya S5 (dua pose) dan S6, dan ketiganya sudah dipakai K-03 dan K-04 (diubah di giliran 2). Latar mengikuti tabel latar di `../NASKAH.md`; untuk Z1: gang berpagar di antara rumah; untuk Z2: halaman sekolah dekat kantin.
 
 | Kode | Zona | Kunci `setTokoh` | Latar di naskah | Catatan |
 |---|---|---|---|---|
 | K-17 | Z1 | `npc_warga3_bawah_diam` | Pagar rumah tetangga di ujung gang | Bendera hanya disebut di situasi |
 | K-18 | Z1 | `npc_siswa2_bawah_menunduk` | Depan pagar rumah teman | Pose yang sama dipakai K-10 di Z5 |
 | K-19 | Z1 | `npc_nenek_bawah_diam`, `npc_warga2_bawah_diam` | Gang yang tertutup tumpukan pasir | Nenek juga dipakai K-06 di Z3 |
+| K-20 | Z2 | `npc_siswa5_bawah_hp` | Dekat kantin, menjelang pulang | Kunci yang sama dipakai K-03 di Z2 |
+| K-21 | Z2 | `npc_nara_bawah_diam` | Dekat kantin | Nara juga dipakai K-01 di Z1 dan K-08 di Z4 |
+| K-22 | Z2 | `npc_ratih_bawah_diam` | Papan pengumuman dekat kantin | Bu Ratih belum dipakai set kejadian mana pun |
 
 Tokoh Z1 dalam Paket lengkap 40: Nara, Gita, dan S1 (K-01); Pak Made dan Dimas (K-02); warga 3 (K-17); S2 menunduk (K-18); nenek dan warga 2 (K-19). Tidak ada yang kembar.
 
+Tokoh Z2 dalam Paket lengkap 40: Komang menunduk, S5 memegang HP, dan S6 (K-03); Raka dan S5 (K-04); S5 memegang HP (K-20); Nara (K-21); Bu Ratih (K-22). Kunci `npc_siswa5_bawah_hp` muncul dua kali (K-03 dan K-20), dan S5 tampil di tiga kejadian bila kedua posenya dihitung (bank awal sudah memakainya dua kali). Tokoh berseragam bernama tidak dipakai untuk peran ini: Dimas sudah dua kali berperan sebagai teman yang kurang berpikir panjang (K-02 dan K-05), Komang dan Sinta tidak dijadikan pelaku, dan Raka hanya di K-04 (KT-B5). Dalam Paket lanjutan 24 ketiga kejadian Z2 memakai tokoh yang berbeda. Bila kelak Sesi C menambah siswa umum berseragam, K-20 dapat memakainya; ini tidak wajib dan tidak termasuk usulan 7a.
+
 ## Pustaka rujukan tambahan
 
-Teks mengikuti gaya KT-B4, dan nomor JR tetap (usulan 5a). JR-27 sampai JR-43 ditambahkan pada giliran yang memakainya; usulan teksnya ada di `../STATUS.md`, bagian "Rujukan baru (perlu verifikasi)" Plan naskah tambahan.
+Teks mengikuti gaya KT-B4, dan nomor JR tetap (usulan 5a). JR-29 sampai JR-43 ditambahkan pada giliran yang memakainya; usulan teksnya ada di `../STATUS.md`, bagian "Rujukan baru (perlu verifikasi)" Plan naskah tambahan.
 
 | JR | Teks rujukan | Dokumen sumber | Padanan Sehari | Dipakai di | Pra-pemeriksaan agen | Status |
 |---|---|---|---|---|---|---|
 | JR-24 | UU No. 24 Tahun 2009, Pasal 24 huruf c dan Pasal 65 | UU 24/2009 | Baru | K-17 | 22 Nov 2026, sumber sekunder (K-17.md) | Perlu verifikasi |
 | JR-25 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 10 | UU 23/2002 dan UU 35/2014 | Baru | K-18 | 22 Nov 2026 (K-18.md) | Perlu verifikasi |
 | JR-26 | UU No. 22 Tahun 2009 tentang LLAJ, Pasal 1 angka 12 dan Pasal 28 ayat (1) | UU 22/2009 | Baru | K-19 | 22 Nov 2026 (K-19.md) | Perlu verifikasi |
+| JR-27 | UU No. 20 Tahun 2003, Pasal 12 ayat (2) huruf a | UU 20/2003 | Baru | K-20 | 22 Nov 2026 (K-20.md) | Perlu verifikasi |
+| JR-28 | UU No. 28 Tahun 2014, Pasal 5 ayat (1) huruf a | UU 28/2014 | Baru | K-22 | 22 Nov 2026 (K-22.md) | Perlu verifikasi |
 
 ### Rujukan bank awal yang dipakai ulang
 
@@ -118,8 +131,12 @@ Rujukan ini sudah ada di pustaka konsol. Cukup pastikan isinya cocok dengan keja
 
 | JR | Teks rujukan | Dipakai di kejadian tambahan |
 |---|---|---|
-| JR-04 | Pasal 28J ayat (1) UUD NRI 1945 | K-19 |
+| JR-04 | Pasal 28J ayat (1) UUD NRI 1945 | K-19, K-21, K-22 |
+| JR-06 | Pasal 31 ayat (1) UUD NRI 1945 | K-20 |
+| JR-12 | Pasal 28I ayat (2) UUD NRI 1945 | K-21 |
 | JR-16 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19 | K-18 |
+
+Perubahan dari Plan di giliran 2: K-20 memakai JR-06 sebagai ganti JR-04, karena hak di kartu dampaknya hak atas pendidikan, sedangkan K-21 dan K-22 mendapat tambahan JR-04 untuk kewajiban di kartu dampaknya. Dengan begitu JR-04 dipakai empat kejadian tambahan (K-19, K-21, K-22, dan menurut rencana K-38), dan JR-06 satu kejadian. Alasannya ada di catatan peninjauan setiap naskah.
 
 ### Sumber dan catatan untuk pustaka konsol
 
@@ -130,6 +147,8 @@ Isian pustaka rujukan konsol (spesifikasi JS-12, P-18): sumber berisi 1–3 alam
 | JR-24 | https://peraturan.bpk.go.id/Details/38661/uu-no-24-tahun-2009 | Yang dibutuhkan kejadian: larangan mengibarkan bendera negara yang rusak, robek, luntur, kusut, atau kusam, serta hak dan kewajiban warga negara memelihara, menjaga, dan menggunakan bendera negara (K-17). Rujukan baru: baca pasalnya penuh di naskah resmi. Pra-pemeriksaan agen hanya memakai sumber sekunder, jadi bunyinya perlu dibaca langsung. Pasal 66 sampai 71 (ketentuan pidana) dicabut UU 1/2023 tentang KUHP, jadi naskah tidak menyebut sanksi. |
 | JR-25 | https://peraturan.bpk.go.id/Details/44473/uu-no-23-tahun-2002 · https://peraturan.go.id/files/uu35-2014bt.pdf | Yang dibutuhkan kejadian: hak anak menyatakan pendapat dan didengar pendapatnya (K-18). Rujukan baru: baca pasalnya penuh di naskah resmi. Sumbernya dua: UU 23/2002 dan UU 35/2014 yang mengubahnya; menurut pra-pemeriksaan, Pasal 10 tidak termasuk yang diubah. |
 | JR-26 | https://peraturan.bpk.go.id/Details/38654/uu-no-22-tahun-2009 · https://jdih.kemenkeu.go.id/fullText/2009/22TAHUN2009UU.htm | Yang dibutuhkan kejadian: jalan diperuntukkan bagi lalu lintas umum, dan larangan berbuat sesuatu yang mengganggu fungsi jalan (K-19). Rujukan baru: baca pasalnya penuh di naskah resmi. Pastikan juga Pasal 1 angka 12 dan Pasal 28 tidak diubah UU Cipta Kerja (UU 6/2023). |
+| JR-27 | https://peraturan.bpk.go.id/Details/43920/uu-no-20-tahun-2003 · https://jdih.kemenkeu.go.id/fulltext/2003/20TAHUN2003UU.htm | Yang dibutuhkan kejadian: kewajiban peserta didik menjaga norma-norma pendidikan untuk menjamin keberlangsungan proses dan keberhasilan pendidikan (K-20). Rujukan baru: baca pasalnya penuh di naskah resmi. "Jujur saat ulangan" di kartu dampak adalah contoh norma itu, bukan bunyi pasal. RUU perubahan UU Sisdiknas sedang dibahas DPR; bila disahkan, rujukan ini ditinjau ulang. |
+| JR-28 | https://peraturan.go.id/files/uu28-2014bt.pdf · https://jdih.kemenkeu.go.id/download/0751e9af-b7ce-4d05-87e0-6bd95b373ea7/28TAHUN2014UU.pdf | Yang dibutuhkan kejadian: hak moral pencipta untuk tetap mencantumkan namanya pada ciptaannya yang dipakai untuk umum (K-22). Rujukan baru: baca pasalnya penuh di naskah resmi. Pastikan juga rancangan mural berupa gambar termasuk ciptaan yang dilindungi (Pasal 40 ayat (1) huruf f). |
 
 ### Dokumen sumber
 
@@ -138,3 +157,5 @@ Isian pustaka rujukan konsol (spesifikasi JS-12, P-18): sumber berisi 1–3 alam
 | UU 24/2009 | https://peraturan.bpk.go.id/Details/38661/uu-no-24-tahun-2009 |
 | UU 23/2002 dan UU 35/2014 | https://peraturan.bpk.go.id/Details/44473/uu-no-23-tahun-2002 · https://peraturan.go.id/files/uu35-2014bt.pdf |
 | UU 22/2009 | https://peraturan.bpk.go.id/Details/38654/uu-no-22-tahun-2009 · teks lengkap: https://jdih.kemenkeu.go.id/fullText/2009/22TAHUN2009UU.htm |
+| UU 20/2003 | https://peraturan.bpk.go.id/Details/43920/uu-no-20-tahun-2003 · teks lengkap: https://jdih.kemenkeu.go.id/fulltext/2003/20TAHUN2003UU.htm |
+| UU 28/2014 | https://peraturan.go.id/files/uu28-2014bt.pdf · salinan lain: https://jdih.kemenkeu.go.id/download/0751e9af-b7ce-4d05-87e0-6bd95b373ea7/28TAHUN2014UU.pdf |
