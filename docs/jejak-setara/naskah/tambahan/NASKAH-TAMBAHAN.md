@@ -24,12 +24,12 @@ Judul kejadian yang belum ditulis adalah judul di Plan; perubahan judul diajukan
 | K-26 | Z4 | Berat belanjaan dikurangi | 4 | Disetujui 22 Nov 2026 | [K-26.md](K-26.md) |
 | K-27 | Z4 | Anak kecil jadi kuli pasar | 4 | Disetujui 22 Nov 2026 | [K-27.md](K-27.md) |
 | K-28 | Z4 | Uang koin ditolak | 4 | Disetujui 22 Nov 2026 | [K-28.md](K-28.md) |
-| K-29 | Z5 | Amplop untuk suara kakak | 5 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z5" | [K-29.md](K-29.md) |
-| K-30 | Z5 | Kentongan tanda bahaya | 5 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z5" | [K-30.md](K-30.md) |
-| K-31 | Z5 | Uang kas tanpa laporan | 5 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z5" | [K-31.md](K-31.md) |
-| K-32 | Z6 | Nama diukir di prasasti | 6 | Belum ditulis | — |
-| K-33 | Z6 | Kukang yang dijual | 6 | Belum ditulis | — |
-| K-34 | Z6 | Anak kecil mencari ibunya | 6 | Belum ditulis | — |
+| K-29 | Z5 | Amplop untuk suara kakak | 5 | Disetujui 22 Nov 2026 | [K-29.md](K-29.md) |
+| K-30 | Z5 | Kentongan tanda bahaya | 5 | Disetujui 22 Nov 2026 | [K-30.md](K-30.md) |
+| K-31 | Z5 | Uang kas tanpa laporan | 5 | Disetujui 22 Nov 2026 | [K-31.md](K-31.md) |
+| K-32 | Z6 | Nama diukir di prasasti | 6 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z6" | [K-32.md](K-32.md) |
+| K-33 | Z6 | Kukang yang dijual | 6 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z6" | [K-33.md](K-33.md) |
+| K-34 | Z6 | Anak kecil mencari ibunya | 6 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z6" | [K-34.md](K-34.md) |
 | K-35 | Z7 | Pengumuman yang tak terdengar | 7 | Belum ditulis | — |
 | K-36 | Z7 | Adik belum punya akta lahir | 7 | Belum ditulis | — |
 | K-37 | Z7 | Asap rokok di puskesmas | 7 | Belum ditulis | — |
@@ -58,9 +58,9 @@ Agar letak jawaban tidak bisa ditebak dari urutannya, posisi pilihan benar Langk
 | K-29 | 1b | 2b | Sesuai rencana |
 | K-30 | 1c | 2a | Sesuai rencana |
 | K-31 | 1a | 2c | Sesuai rencana |
-| K-32 | 1d | 2c | — |
-| K-33 | 1a | 2b | — |
-| K-34 | 1b | 2a | — |
+| K-32 | 1d | 2c | Sesuai rencana |
+| K-33 | 1a | 2b | Sesuai rencana |
+| K-34 | 1b | 2a | Sesuai rencana |
 | K-35 | 1c | 2a | — |
 | K-36 | 1d | 2c | — |
 | K-37 | 1b | 2b | — |
@@ -89,12 +89,15 @@ Sasaran: selisih pilihan terpanjang dan terpendek paling banyak 20 karakter di L
 | K-29 | 8 | Tidak | 4 | Tidak |
 | K-30 | 8 | Tidak | 6 | Tidak |
 | K-31 | 9 | Tidak | 4 | Tidak |
+| K-32 | 14 | Tidak | 2 | Tidak |
+| K-33 | 17 | Tidak | 10 | Tidak |
+| K-34 | 10 | Tidak | 18 | Tidak |
 
-Sampai giliran 5, pilihan benar menjadi yang terpanjang di 0 dari 15 kejadian (Langkah 1), dan pilihan tepat di 0 dari 15 kejadian (Langkah 2). Kelima belas naskah juga lolos `periksaKejadian` (aturan validasi konsol) tanpa galat dan tanpa peringatan.
+Sampai giliran 6, pilihan benar menjadi yang terpanjang di 0 dari 18 kejadian (Langkah 1), dan pilihan tepat di 0 dari 18 kejadian (Langkah 2). Kedelapan belas naskah juga lolos `periksaKejadian` (aturan validasi konsol) tanpa galat dan tanpa peringatan. K-32 dan K-33 baru lolos bila kunci aset usulannya dihitung Disetujui; dengan daftar kunci sekarang, keduanya hanya mendapat galat `SET_TOKOH_TIDAK_ADA` untuk kunci itu (lihat "Set tokoh dan latar titik").
 
 ## Tokoh dan properti per kejadian
 
-Diambil dari baris "Set tokoh dan properti" setiap naskah. Benda yang hanya disebut di situasi tidak memerlukan aset baru (usulan 7a).
+Diambil dari baris "Set tokoh dan properti" setiap naskah. Benda yang hanya disebut di situasi tidak memerlukan aset baru (usulan 7a). Aset baru hanya untuk K-32 dan K-33.
 
 | Kode | Zona | Tokoh | Properti |
 |---|---|---|---|
@@ -113,10 +116,15 @@ Diambil dari baris "Set tokoh dan properti" setiap naskah. Benda yang hanya dise
 | K-29 | Z5 | Warga dewasa yang menitipkan amplop | amplop berisi uang, hanya disebut di situasi |
 | K-30 | Z5 | Teman (siswa SMP umum) yang memegang HP | kentongan di pos ronda dan bale (objek peta Z5) |
 | K-31 | Z5 | Bendahara kelompok remaja (warga dewasa muda) | uang kas dan catatan, hanya disebut di teks |
+| K-32 | Z6 | Teman (siswa SMP umum) | prasasti tua dari batu dengan papan keterangan cagar budaya (aset baru, menunggu Sesi C) |
+| K-33 | Z6 | Penjual kukang (warga dewasa, aset baru, menunggu Sesi C) | kukang dalam kandang kecil (aset baru, menunggu Sesi C); adik hanya disebut di situasi |
+| K-34 | Z6 | Anak kecil (anak SD, warga umum) | —; ibu dan polisi hanya disebut di teks |
 
 ## Set tokoh dan latar titik
 
-Kunci `setTokoh` adalah nama berkas aset Disetujui tanpa `.png` (daftar `KUNCI_ASET_DISETUJUI`), 1–4 per kejadian. Dalam Paket lanjutan 24, satu zona tidak memuat tokoh yang sama dua kali. Dalam Paket lengkap 40 hal itu diusahakan juga bila digabung dengan kejadian bank awal di zona yang sama, tetapi di Z2 tidak sepenuhnya bisa: siswa umum berseragam hanya S5 (dua pose) dan S6, dan ketiganya sudah dipakai K-03 dan K-04 (diubah di giliran 2). Latar mengikuti tabel latar di `../NASKAH.md`; untuk Z1: gang berpagar di antara rumah; untuk Z2: halaman sekolah dekat kantin; untuk Z3: dekat halte dan zebra cross; untuk Z4: lorong pasar; untuk Z5: sekitar bale.
+Kunci `setTokoh` adalah nama berkas aset Disetujui tanpa `.png` (daftar `KUNCI_ASET_DISETUJUI`), 1–4 per kejadian. Dalam Paket lanjutan 24, satu zona tidak memuat tokoh yang sama dua kali. Dalam Paket lengkap 40 hal itu diusahakan juga bila digabung dengan kejadian bank awal di zona yang sama, tetapi di Z2 tidak sepenuhnya bisa: siswa umum berseragam hanya S5 (dua pose) dan S6, dan ketiganya sudah dipakai K-03 dan K-04 (diubah di giliran 2). Latar mengikuti tabel latar di `../NASKAH.md`; untuk Z1: gang berpagar di antara rumah; untuk Z2: halaman sekolah dekat kantin; untuk Z3: dekat halte dan zebra cross; untuk Z4: lorong pasar; untuk Z5: sekitar bale; untuk Z6: lapangan taman di tepi sungai.
+
+Kunci bertanda *(usulan)* belum ada di daftar `KUNCI_ASET_DISETUJUI`, karena gambarnya masih dibuat Sesi C (usulan 7a). Namanya mengikuti pola nama berkas aset dan boleh berubah; sebelum semai tambahan, kunci itu diganti nama berkas yang Disetujui (ditambahkan di giliran 6).
 
 | Kode | Zona | Kunci `setTokoh` | Latar di naskah | Catatan |
 |---|---|---|---|---|
@@ -135,6 +143,9 @@ Kunci `setTokoh` adalah nama berkas aset Disetujui tanpa `.png` (daftar `KUNCI_A
 | K-29 | Z5 | `npc_warga3_bawah_diam` | Sekitar bale | Warga 3 juga dipakai K-17 di Z1 dan K-25 di Z3 |
 | K-30 | Z5 | `npc_siswa1_bawah_hp` | Sekitar bale, dekat pos ronda | Pose yang sama dipakai K-16 di Z8 |
 | K-31 | Z5 | `npc_warga1_bawah_diam` | Sekitar bale | Warga 1 berpose menunjuk dipakai K-07 di Z4 dan K-23 di Z3 |
+| K-32 | Z6 | `npc_siswa2_bawah_diam`, `obj_prasasti` *(usulan)* | Prasasti di taman tepi sungai | S2 juga dipakai K-08 di Z4. Prasasti aset baru |
+| K-33 | Z6 | `npc_penjual_bawah_diam` *(usulan)*, `obj_kandang_kukang` *(usulan)* | Pinggir lapangan taman | Penjual dan kukang dalam kandang aset baru |
+| K-34 | Z6 | `npc_anak2_bawah_diam` | Lapangan taman yang ramai | Anak SD 2 juga dipakai K-28 di Z4; anak SD 1 sudah tampil di K-12 (Z6) |
 
 Tokoh Z1 dalam Paket lengkap 40: Nara, Gita, dan S1 (K-01); Pak Made dan Dimas (K-02); warga 3 (K-17); S2 menunduk (K-18); nenek dan warga 2 (K-19). Tidak ada yang kembar.
 
@@ -146,9 +157,11 @@ Tokoh Z4 dalam Paket lengkap 40: Bayu, pedagang, dan warga 1 menunjuk (K-07); Na
 
 Tokoh Z5 dalam Paket lengkap 40: Sinta dan S4 (K-09); S2 menunduk, S3, dan warga 2 (K-10); warga 3 (K-29); S1 memegang HP (K-30); warga 1 (K-31). Tidak ada yang kembar.
 
+Tokoh Z6 dalam Paket lengkap 40: S3 dan S4 (K-11); Gita dan anak SD 1 (K-12); S2 (K-32); penjual kukang, aset baru (K-33); anak SD 2 (K-34). Tidak ada yang kembar. S1 tidak dipakai di K-32, karena sudah tiga kali berperan sebagai teman yang kurang berpikir panjang (K-01, K-16, dan K-30).
+
 ## Pustaka rujukan tambahan
 
-Teks mengikuti gaya KT-B4, dan nomor JR tetap (usulan 5a). JR-36 sampai JR-43 ditambahkan pada giliran yang memakainya; usulan teksnya ada di `../STATUS.md`, bagian "Rujukan baru (perlu verifikasi)" Plan naskah tambahan.
+Teks mengikuti gaya KT-B4, dan nomor JR tetap (usulan 5a). JR-39 sampai JR-43 ditambahkan pada giliran yang memakainya; usulan teksnya ada di `../STATUS.md`, bagian "Rujukan baru (perlu verifikasi)" Plan naskah tambahan.
 
 | JR | Teks rujukan | Dokumen sumber | Padanan Sehari | Dipakai di | Pra-pemeriksaan agen | Status |
 |---|---|---|---|---|---|---|
@@ -164,6 +177,9 @@ Teks mengikuti gaya KT-B4, dan nomor JR tetap (usulan 5a). JR-36 sampai JR-43 di
 | JR-33 | UU No. 7 Tahun 2011, Pasal 23 ayat (1) | UU 7/2011 | Baru | K-28 | 22 Nov 2026 (K-28.md) | Perlu verifikasi |
 | JR-34 | UU No. 6 Tahun 2014, Pasal 32 ayat (2) dan ayat (3) serta Pasal 34 ayat (2) | UU 6/2014 | Baru | K-29 | 22 Nov 2026 (K-29.md) | Perlu verifikasi |
 | JR-35 | UU No. 24 Tahun 2007, Pasal 26 ayat (1) huruf a dan Pasal 27 huruf b | UU 24/2007 | Baru | K-30 | 22 Nov 2026 (K-30.md) | Perlu verifikasi |
+| JR-36 | UU No. 11 Tahun 2010, Pasal 66 ayat (1) dan Pasal 85 ayat (1) | UU 11/2010 | Baru | K-32 | 22 Nov 2026 (K-32.md) | Perlu verifikasi |
+| JR-37 | UU No. 5 Tahun 1990 jo. UU No. 32 Tahun 2024, Pasal 21 ayat (2) huruf a | UU 5/1990 dan UU 32/2024 | Baru | K-33 | 22 Nov 2026, sumber sekunder (K-33.md) | Perlu verifikasi |
+| JR-38 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 20 | UU 23/2002 dan UU 35/2014 | Baru | K-34 | 22 Nov 2026 (K-34.md) | Perlu verifikasi |
 
 ### Rujukan bank awal yang dipakai ulang
 
@@ -171,11 +187,12 @@ Rujukan ini sudah ada di pustaka konsol. Cukup pastikan isinya cocok dengan keja
 
 | JR | Teks rujukan | Dipakai di kejadian tambahan |
 |---|---|---|
-| JR-01 | Pasal 28B ayat (2) UUD NRI 1945 | K-27 |
+| JR-01 | Pasal 28B ayat (2) UUD NRI 1945 | K-27, K-34 |
 | JR-04 | Pasal 28J ayat (1) UUD NRI 1945 | K-19, K-21, K-22, K-29, K-31 |
 | JR-05 | Pasal 28G ayat (1) UUD NRI 1945 | K-24 |
 | JR-06 | Pasal 31 ayat (1) UUD NRI 1945 | K-20 |
 | JR-12 | Pasal 28I ayat (2) UUD NRI 1945 | K-21 |
+| JR-13 | Pasal 28H ayat (1) UUD NRI 1945 | K-33 |
 | JR-14 | Pasal 28F UUD NRI 1945 | K-31 |
 | JR-16 | UU No. 23 Tahun 2002 jo. UU No. 35 Tahun 2014, Pasal 19 | K-18 |
 
@@ -184,6 +201,8 @@ Perubahan dari Plan di giliran 2: K-20 memakai JR-06 sebagai ganti JR-04, karena
 Perubahan dari Plan di giliran 3: K-24 mendapat tambahan JR-05 untuk hak di kartu dampaknya, seperti K-05. Dengan begitu JR-05 dipakai dua kejadian tambahan (K-24 dan menurut rencana K-39).
 
 Perubahan dari Plan di giliran 5: K-29 dan K-31 mendapat tambahan JR-04 untuk kewajiban di kartu dampaknya. Dengan begitu JR-04 dipakai enam kejadian tambahan (K-19, K-21, K-22, K-29, K-31, dan menurut rencana K-38). Kecocokan JR-14 untuk kas kelompok warga sudah dinilai di K-31 (catatan Plan): cocok untuk hak, tidak untuk kewajiban.
+
+Perubahan dari Plan di giliran 6: K-33 mendapat tambahan JR-13 untuk hak di kartu dampaknya, seperti K-11, karena JR-37 hanya memuat larangan. Dengan begitu JR-13 dipakai dua kejadian tambahan (K-33 dan menurut rencana K-37). K-34 memakai JR-01 sesuai rencana, jadi JR-01 kini dipakai K-27 dan K-34 (dan menurut rencana K-38).
 
 ### Sumber dan catatan untuk pustaka konsol
 
@@ -203,6 +222,9 @@ Isian pustaka rujukan konsol (spesifikasi JS-12, P-18): sumber berisi 1–3 alam
 | JR-33 | https://peraturan.bpk.go.id/Details/39182/uu-no-7-tahun-2011 · https://jdih.kemenkeu.go.id/fulltext/2011/7TAHUN2011UU.htm · https://www.bi.go.id/id/tentang-bi/profil/uu-bi/UndangUndang%20BI/Konsolidasi-UU-No.7-Tahun-2011-Mata%20Uang.pdf | Yang dibutuhkan kejadian: larangan menolak rupiah yang diserahkan sebagai pembayaran, kecuali karena keraguan atas keasliannya (K-28). Rujukan baru: baca pasalnya penuh di naskah resmi. Rupiah logam termasuk macam Rupiah (Pasal 2 ayat (2), yang diubah UU P2SK dengan menambah Rupiah digital). Pastikan Pasal 23 tidak diubah UU 4/2026, dan uang logam di kejadian ini masih berlaku. |
 | JR-34 | https://peraturan.bpk.go.id/Details/38582/uu-no-6-tahun-2014 · https://jdih.kemenkeu.go.id/fulltext/2014/6TAHUN2014UU.htm | Yang dibutuhkan kejadian: panitia pemilihan kepala desa dibentuk BPD serta bersifat mandiri dan tidak memihak (Pasal 32 ayat (2) dan (3)), dan pemilihan kepala desa bersifat langsung, umum, bebas, rahasia, jujur, dan adil (Pasal 34 ayat (2)) (K-29). Rujukan baru: baca pasalnya penuh di naskah resmi. Pastikan kedua pasal tidak diubah UU 3/2024; menurut pra-pemeriksaan, UU itu hanya menyisipkan Pasal 34A. |
 | JR-35 | https://jdih.kemenkeu.go.id/fulltext/2007/24tahun2007uu.htm | Yang dibutuhkan kejadian: hak setiap orang mendapatkan pelindungan sosial dan rasa aman (Pasal 26 ayat (1) huruf a), serta kewajiban setiap orang melakukan kegiatan penanggulangan bencana (Pasal 27 huruf b) (K-30). Rujukan baru: baca pasalnya penuh di naskah resmi, termasuk Pasal 1 angka 10 tentang tanggap darurat yang mencakup evakuasi. |
+| JR-36 | https://peraturan.bpk.go.id/Details/38552/uu-no-11-tahun-2010 · https://jdih.surabaya.go.id/uploads/peraturan/3614_uu_11-2010.pdf | Yang dibutuhkan kejadian: larangan merusak cagar budaya, baik seluruh maupun bagian-bagiannya (Pasal 66 ayat (1)), serta hak setiap orang memanfaatkan cagar budaya untuk pendidikan, ilmu pengetahuan, kebudayaan, dan pariwisata (Pasal 85 ayat (1)) (K-32). Rujukan baru: baca pasalnya penuh di naskah resmi. Status prasasti disebut lewat papan keterangan di situasi, karena cagar budaya ditetapkan melalui proses penetapan (Pasal 1 angka 1). Revisi UU ini sedang disiapkan; bila disahkan, rujukan ditinjau ulang. |
+| JR-37 | https://peraturan.bpk.go.id/Details/46710/uu-no-5-tahun-1990 · https://peraturan.bpk.go.id/Details/295135/uu-no-32-tahun-2024 | Yang dibutuhkan kejadian: larangan memburu, menangkap, melukai, membunuh, menyimpan, memiliki, memelihara, mengangkut, dan/atau memperdagangkan satwa yang dilindungi dalam keadaan hidup (K-33). Rujukan baru: baca pasalnya penuh di naskah resmi; bunyi dan huruf mengikuti perubahan UU 32/2024, dan pra-pemeriksaan agen memakai sumber sekunder. Pastikan juga kukang masih termasuk satwa dilindungi menurut daftar jenis yang berlaku (Permen LHK P.20/2018 sebagaimana diubah terakhir dengan P.106/2018, atau penggantinya). |
+| JR-38 | https://peraturan.bpk.go.id/Details/44473/uu-no-23-tahun-2002 · https://peraturan.go.id/files/uu35-2014bt.pdf | Yang dibutuhkan kejadian: negara, pemerintah, pemerintah daerah, masyarakat, keluarga, dan orang tua atau wali berkewajiban dan bertanggung jawab terhadap penyelenggaraan perlindungan anak (K-34). Rujukan baru: baca pasalnya penuh di naskah resmi. Pasal 20 diubah UU 35/2014, jadi bunyinya ada di UU 35/2014; pastikan perubahan kedua (UU 17/2016) tidak menyentuhnya. Pasal 1 angka 13 (arti masyarakat) dan Pasal 72 ayat (1) dapat dibaca sebagai latar. |
 
 ### Dokumen sumber
 
@@ -216,6 +238,8 @@ Isian pustaka rujukan konsol (spesifikasi JS-12, P-18): sumber berisi 1–3 alam
 | UU 8/1999 | https://peraturan.go.id/files/uu8-1999.pdf · teks lengkap: https://jdih.kemenkeu.go.id/fulltext/1999/8TAHUN~1999UU.htm |
 | UU 6/2014 | https://peraturan.bpk.go.id/Details/38582/uu-no-6-tahun-2014 · teks lengkap: https://jdih.kemenkeu.go.id/fulltext/2014/6TAHUN2014UU.htm |
 | UU 24/2007 | teks lengkap: https://jdih.kemenkeu.go.id/fulltext/2007/24tahun2007uu.htm |
+| UU 11/2010 | https://peraturan.bpk.go.id/Details/38552/uu-no-11-tahun-2010 · salinan lengkap: https://jdih.surabaya.go.id/uploads/peraturan/3614_uu_11-2010.pdf |
+| UU 5/1990 dan UU 32/2024 | https://peraturan.bpk.go.id/Details/46710/uu-no-5-tahun-1990 · https://peraturan.bpk.go.id/Details/295135/uu-no-32-tahun-2024 |
 | UU 7/2011 | https://peraturan.bpk.go.id/Details/39182/uu-no-7-tahun-2011 · teks lengkap: https://jdih.kemenkeu.go.id/fulltext/2011/7TAHUN2011UU.htm · konsolidasi Bank Indonesia: https://www.bi.go.id/id/tentang-bi/profil/uu-bi/UndangUndang%20BI/Konsolidasi-UU-No.7-Tahun-2011-Mata%20Uang.pdf |
 
 ### RUU yang sedang dibahas
@@ -229,3 +253,5 @@ Undang-undang berikut sedang diubah di DPR. Bila salah satunya disahkan sebelum 
 | UU 22/2009 (LLAJ) | RUU Perubahan Ketiga menjadi usul DPR (21 Juli 2026); DIM pemerintah diserahkan ke Komisi V (30 September 2026) | JR-26, JR-29, JR-30, serta JR-18 dan JR-19 bank awal |
 | UU 8/1999 (Perlindungan Konsumen) | RUU perubahan masuk Prolegnas Prioritas 2026; Kementerian Perdagangan menargetkan pembahasan tahun ini (Juli 2026) | JR-31 |
 | UU 24/2007 (Penanggulangan Bencana) | RUU penggantinya dihentikan pembahasannya pada Mei 2022; revisinya kembali diwacanakan Komisi VIII DPR untuk 2026 (ditambahkan di giliran 5) | JR-35 |
+| UU 11/2010 (Cagar Budaya) | RUU perubahan masuk Prolegnas 2025–2029; Kementerian Kebudayaan menargetkan drafnya selesai pada 2026 (Februari 2026), dan Panja Komisi X sedang menyusun rekomendasi (Mei 2026) (ditambahkan di giliran 6) | JR-36 |
+| UU 23/2002 jo. UU 35/2014 (Perlindungan Anak) | RUU perubahannya tercantum di daftar Prolegnas Prioritas 2026 (Baleg, September 2025); pada Mei 2026 DPR menyatakan revisinya masih dikaji sebagai inisiatif DPR, untuk memperkuat pencegahan kekerasan terhadap anak (ditambahkan di giliran 6) | JR-25, JR-32, JR-38 (dan JR-40 menurut rencana), serta JR-16 dan JR-17 bank awal |
