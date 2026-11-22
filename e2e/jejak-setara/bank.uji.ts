@@ -99,3 +99,53 @@ test("admin menyunting kejadian dengan validasi langsung dan pratinjau, lalu mem
   await h.screenshot({ path: `${FOTO}/konsol-penyunting-360x640.png` });
   await hp.close();
 });
+
+// Permintaan A-14: penyusun paket memperingatkan, tanpa menolak, zona yang memuat lebih dari 6 kejadian. Lima kejadian
+// tiruan di Z1 hanya ditambahkan ke daftar kejadian di peramban ini (lewat page.route), jadi basis data uji tidak berubah
+// dan paket tidak disimpan. Bahwa server tetap menerima 7–12 kejadian per zona diuji di api-bank.test.ts.
+test("Permintaan A-14: penyusun paket memperingatkan zona yang lebih dari 6 kejadian, tanpa menolak", async ({ browser, baseURL, request }) => {
+  test.setTimeout(120_000);
+  const email = `admin-paket-${Date.now()}@sekolah.sch.id`;
+  expect((await request.post("/api/admin-awal", { headers: { "X-Jejak-Kunci-Admin": KUNCI_ADMIN, "CF-Connecting-IP": "10.88.0.3" }, data: { email, sandi: "sandi sementara paket", namaTampilan: "Pak Eko" } })).status()).toBe(200);
+  const ctx = await browser.newContext({ baseURL: baseURL as string, viewport: { width: 1280, height: 720 }, timezoneId: "Asia/Makassar" });
+  const g = await ctx.newPage();
+  await g.route("**/api/kejadian", async (route) => {
+    if (route.request().method() !== "GET") return route.fallback();
+    const jawaban = await route.fetch();
+    const isi = (await jawaban.json()) as { kejadian: Record<string, unknown>[] };
+    const contoh = isi.kejadian.find((k) => k.zona === "z1");
+    if (contoh) for (let i = 0; i < 5; i++) isi.kejadian.push({ ...contoh, kode: `K-${91 + i}`, judul: `Kejadian tiruan ${i + 1}`, status: "tinjau" });
+    await route.fulfill({ response: jawaban, json: isi });
+  });
+  await g.goto("/admin/");
+  await g.getByLabel("Email", { exact: true }).fill(email);
+  await g.getByLabel("Sandi", { exact: true }).fill("sandi sementara paket");
+  await g.getByRole("button", { name: "Masuk" }).click();
+  await g.getByLabel("Sandi baru", { exact: true }).fill("kalimat sandi admin paket");
+  await g.getByLabel("Ulangi sandi baru", { exact: true }).fill("kalimat sandi admin paket");
+  await g.getByRole("button", { name: "Simpan sandi" }).click();
+  await expect(g.getByRole("heading", { name: "Dasbor" })).toBeVisible();
+
+  await g.getByRole("link", { name: "Paket" }).first().click();
+  await g.getByRole("button", { name: "+ Paket baru" }).click();
+  const pilih = g.getByRole("combobox", { name: "Tambah kejadian" });
+  const tambah = g.getByRole("button", { name: "Tambah kejadian" });
+  const peringatan = "Zona Rumah dan gang: 7 kejadian. Di ruang berbatas lebih dari 50 pemain, kejadian ke-7 dan seterusnya di zona ini, menurut urutan paket, tidak akan tampil.";
+  for (const kode of ["K-01", "K-02", "K-91", "K-92", "K-93", "K-94"]) {
+    await pilih.selectOption(kode);
+    await tambah.click();
+  }
+  // Enam kejadian di Z1 belum memicu peringatan.
+  await expect(g.locator(".js-paket-daftar li")).toHaveCount(6);
+  await expect(g.locator(".js-paket-padat")).toHaveCount(0);
+  await pilih.selectOption("K-95");
+  await tambah.click();
+  await expect(g.getByText(peringatan)).toBeVisible();
+  await expect(g.locator(".js-paket-padat li")).toHaveCount(1);
+  await expect(g.getByRole("button", { name: "Simpan paket" })).toBeEnabled();
+  await g.screenshot({ path: `${FOTO}/konsol-paket-padat-1280x720.png` });
+  // Mengeluarkan satu kejadian Z1 menghilangkan peringatan.
+  await g.locator(".js-paket-daftar li").first().getByRole("button", { name: "Keluarkan" }).click();
+  await expect(g.locator(".js-paket-padat")).toHaveCount(0);
+  await ctx.close();
+});

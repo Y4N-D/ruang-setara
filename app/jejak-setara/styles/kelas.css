@@ -1014,6 +1014,10 @@
 .js-paket-penyusun {
   max-width: 880px;
 }
+/* Permintaan A-14: peringatan zona padat di bawah daftar kejadian paket. */
+.js-paket-padat {
+  margin-top: 8px;
+}
 @media (max-width: 1023px) {
   .js-bank-tabel thead {
     display: none;

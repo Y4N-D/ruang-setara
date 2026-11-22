@@ -1,7 +1,12 @@
 // Penyusun paket `#/paket/{id}` dan paket baru (spesifikasi JS-12, P-22): nama, deskripsi, aktif, dan daftar kejadian
-// berurutan dengan tombol Naik, Turun, dan Keluarkan. Validasi akhir di server (Architecture 5.4).
+// berurutan dengan tombol Naik, Turun, dan Keluarkan. Validasi akhir di server (Architecture 5.4). Permintaan A-14:
+// peringatan langsung, tanpa menolak, bila satu zona memuat lebih banyak kejadian daripada yang tampil di ruang besar.
 import { useEffect, useState } from "react";
-import type { BarisKejadian, TemuanApi } from "../../inti/bank";
+import { BATAS } from "../../inti/aturan";
+import type { BarisKejadian, PilihanBank, TemuanApi } from "../../inti/bank";
+import { zonaPadatRuangBesar } from "../../inti/konten/periksa";
+import type { ZonaId } from "../../inti/tipe";
+import { isiTeks } from "../../teks";
 import { TEKS_KONSOL } from "../../teks-konsol";
 import { api, temuanDari, useMuat, type GalatApi } from "../api";
 import { PesanGalat } from "../Formulir";
@@ -10,6 +15,25 @@ import { LABEL_STATUS } from "./DaftarKejadian";
 
 const t = TEKS_KONSOL.paket;
 const tb = TEKS_KONSOL.bank;
+
+/**
+ * Permintaan A-14: satu kalimat peringatan untuk setiap zona yang kejadiannya, menurut urutan paket, tidak semua tampil
+ * di ruang berbatas lebih dari 50 pemain. Kode yang tidak ada di daftar kejadian dilewati.
+ */
+export function peringatanZonaPadat(
+  kode: readonly string[],
+  kejadian: ReadonlyMap<string, Pick<BarisKejadian, "zona">>,
+  pilihan: Pick<PilihanBank, "zona" | "titikPerZona">,
+): string[] {
+  const zona = kode.flatMap((k) => {
+    const z = kejadian.get(k)?.zona;
+    return z ? [z as ZonaId] : [];
+  });
+  const nama = new Map(pilihan.zona.map((z) => [z.id, z.nama]));
+  return zonaPadatRuangBesar(zona, pilihan.titikPerZona as Partial<Record<ZonaId, number>>).map((p) =>
+    isiTeks(t.zonaPadat, { zona: nama.get(p.zona) ?? p.zona, n: p.jumlah, ke: p.batas + 1, pemain: BATAS.ruangBesarLebihDari }),
+  );
+}
 
 interface PropsPenyusun {
   id: string | null;
@@ -20,6 +44,8 @@ interface PropsPenyusun {
 
 export default function PenyusunPaket({ id, galatSesi, umumkan, selesai }: PropsPenyusun) {
   const bank = useMuat(api.daftarKejadian, galatSesi);
+  // Hanya untuk peringatan A-14; bila gagal dimuat, penyusun tetap bisa dipakai tanpa peringatan itu.
+  const pilihan = useMuat(api.pilihanBank, galatSesi);
   const [nama, setNama] = useState("");
   const [deskripsi, setDeskripsi] = useState("");
   const [aktif, setAktif] = useState(true);
@@ -45,6 +71,7 @@ export default function PenyusunPaket({ id, galatSesi, umumkan, selesai }: Props
   if (muat === "gagal" || bank.muatan.jenis === "gagal") return <p role="alert">{tb.gagal}</p>;
   const peta = new Map<string, BarisKejadian>(bank.muatan.data.kejadian.map((k) => [k.kode, k]));
   const calon = bank.muatan.data.kejadian.filter((k) => (k.status === "tinjau" || k.status === "terbit") && !kode.includes(k.kode));
+  const padat = pilihan.muatan.jenis === "ada" ? peringatanZonaPadat(kode, peta, pilihan.muatan.data) : [];
   const geser = (i: number, arah: -1 | 1) => {
     const baru = [...kode];
     [baru[i], baru[i + arah]] = [baru[i + arah], baru[i]];
@@ -108,6 +135,17 @@ export default function PenyusunPaket({ id, galatSesi, umumkan, selesai }: Props
           })}
         </ol>
       )}
+      <div aria-live="polite">
+        {padat.length > 0 ? (
+          <ul className="js-sunting-temuan js-paket-padat">
+            {padat.map((kalimat) => (
+              <li key={kalimat} data-tingkat="peringatan">
+                {kalimat}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
       <div className="js-bank-saring">
         <select aria-label={t.tambah} value={tambah} onChange={(e) => setTambah(e.target.value)}>
           <option value="">{t.tambah}</option>

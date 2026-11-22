@@ -56,8 +56,9 @@ export interface KonteksKejadian {
 }
 
 /**
- * Nama diri dan sapaan yang boleh berhuruf kapital di tengah kalimat. Singkatan berhuruf besar semua
- * (SD, SMP, HP, PR, VII) dikenali sendiri.
+ * Nama diri, sapaan, dan sebutan identitas yang boleh berhuruf kapital di tengah kalimat. Singkatan berhuruf besar
+ * semua (SD, SMP, HP, PR, VII) dikenali sendiri. "Tuli" berhuruf T besar adalah sebutan yang dipilih banyak komunitas
+ * Tuli sebagai identitas (naskah K-35; Permintaan A-15).
  */
 export const NAMA_DIRI: ReadonlySet<string> = new Set([
   "Bapak",
@@ -74,6 +75,7 @@ export const NAMA_DIRI: ReadonlySet<string> = new Set([
   "Raka",
   "Ratih",
   "Sinta",
+  "Tuli",
   "Wayan",
 ]);
 
@@ -374,6 +376,33 @@ export function periksaPaketPeta(zonaKejadian: readonly ZonaId[], titikPerZona: 
   for (const [zona, n] of [...jumlah].sort(([a], [b]) => a.localeCompare(b))) {
     const titik = titikPerZona[zona] ?? 0;
     if (n > titik) hasil.push(temuan("PAKET_TITIK_KURANG", sambung(letak, [zona]), `Zona ${zona}: ${n} kejadian, tetapi hanya ${titik} titik kejadian di peta.`));
+  }
+  return hasil;
+}
+
+/** Zona paket yang kehilangan kejadian di ruang besar (Permintaan A-14). */
+export interface ZonaPadat {
+  zona: ZonaId;
+  /** Jumlah kejadian paket di zona itu. */
+  jumlah: number;
+  /** Jumlah kejadian pertama zona itu, menurut urutan paket, yang masih tampil di ruang besar: separuh titiknya, dibulatkan ke bawah. */
+  batas: number;
+}
+
+/**
+ * Permintaan A-14: ruang berbatas lebih dari 50 pemain memakai dua titik per kejadian, dan server melewatkan tanpa
+ * pesan kejadian yang zonanya kehabisan titik (spesifikasi JS-08, P-2 dan P-9). Fungsi ini mengembalikan zona yang
+ * kejadiannya lebih dari separuh titik zona itu, berurutan menurut id zona. Hasilnya hanya peringatan di konsol: paket
+ * tetap boleh disimpan, dan batas keras jumlah titik tetap diperiksa `periksaPaketPeta`. Sengaja tidak memakai kode
+ * temuan baru, agar daftar `KODE_TEMUAN` dan uji konten bank tidak berubah.
+ */
+export function zonaPadatRuangBesar(zonaKejadian: readonly ZonaId[], titikPerZona: Readonly<Partial<Record<ZonaId, number>>>): ZonaPadat[] {
+  const jumlah = new Map<ZonaId, number>();
+  for (const z of zonaKejadian) jumlah.set(z, (jumlah.get(z) ?? 0) + 1);
+  const hasil: ZonaPadat[] = [];
+  for (const [zona, n] of [...jumlah].sort(([a], [b]) => a.localeCompare(b))) {
+    const batas = Math.floor((titikPerZona[zona] ?? 0) / 2);
+    if (n > batas) hasil.push({ zona, jumlah: n, batas });
   }
   return hasil;
 }

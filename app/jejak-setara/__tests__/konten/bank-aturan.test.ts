@@ -228,7 +228,7 @@ describe("fungsi teks (P-4, P-13)", () => {
     expect(kataKapitalTengah("Saya dan Tono ke SD. Lalu “Ayo!” kata Pak Made.")).toEqual(["Tono"]);
     expect(kataKapitalTengah("Ia membawa HP-nya dan buku PR ke kelas VII.")).toEqual([]);
     expect(kataKapitalTengah("Kata (Siapa) dan “Kamu” boleh.")).toEqual([]);
-    expect(NAMA_DIRI.size).toBe(15);
+    expect(NAMA_DIRI.size).toBe(16);
   });
 
   it("alasanTidakPolos", () => {

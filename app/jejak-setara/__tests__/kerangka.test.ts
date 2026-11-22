@@ -309,9 +309,14 @@ describe("Teks dan halaman", () => {
     for (const k of konsol) expect(datarKonsol[k], k).toBe(teks[k]);
     for (const k of pemain) expect(datarPemain[k], k).toBe(teks[k]);
     for (const grup of ["bank", "daftar", "sunting", "aksi", "riwayat", "pratinjau", "pustaka", "paket", "temuan"]) {
-      const ada = Object.keys(datarKonsol).filter((k) => k.startsWith(`${grup}.`));
+      const ada = Object.keys(datarKonsol).filter((k) => k.startsWith(`${grup}.`) && !(k in TEKS_A14_KONSOL));
       expect(ada.sort(), grup).toEqual(konsol.filter((k) => k.startsWith(`${grup}.`)).sort());
     }
+  });
+
+  it("Permintaan A-14: TEKS_KONSOL memuat tepat teks peringatan zona padat di penyusun paket", () => {
+    const datarKonsol = ratakanTeks(TEKS_KONSOL);
+    for (const [k, t] of Object.entries(TEKS_A14_KONSOL)) expect(datarKonsol[k], k).toBe(t);
   });
 
   it("JS-22: TEKS dan TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-22 (AC-17)", () => {
@@ -413,6 +418,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(js09.csv),
         ...Object.keys(kunciJs13()),
         ...Object.keys(kunciJs14().konsol),
+        ...Object.keys(TEKS_A14_KONSOL),
       ]),
     ).toEqual({
       merek: "Jejak Setara",
@@ -770,6 +776,16 @@ describe("JS-08: semai bank awal (P-6, P-7; AC-1, AC-2)", () => {
     expect(s).toContain('if (!argumen.includes("--tanpa-semai"))');
   });
 
+  it("server-lokal.mjs menyemai bank awal saja lewat JEJAK_SEMAI_TANPA_TAMBAHAN=1; alur kerja dan db:semai:lokal tidak (Permintaan A-18)", () => {
+    const s = baca("scripts/jejak-setara/server-lokal.mjs");
+    expect(s).toMatch(/\nconst env = \{[^}\n]*JEJAK_SEMAI_TANPA_TAMBAHAN: "1"[^}\n]*\};\n/);
+    // Semai dijalankan lewat jalankan(), yang meneruskan env itu.
+    expect(s).toContain('spawnSync(process.execPath, [bin, ...args], { cwd: akar, stdio: "inherit", env })');
+    const { scripts } = JSON.parse(baca("package.json")) as { scripts: Record<string, string> };
+    expect(scripts["db:semai:lokal"]).not.toContain("JEJAK_SEMAI_TANPA_TAMBAHAN");
+    expect(uji).not.toContain("JEJAK_SEMAI_TANPA_TAMBAHAN");
+  });
+
   it("job Deploy uji: Semai bank awal tepat sesudah Migrasi D1 uji, dengan syarat yang sama", () => {
     const langkah = [...uji.matchAll(/\n      - name: ([^\n]+)\n        if: ([^\n]+)\n/g)].map((m) => [m[1], m[2]]);
     const nama = langkah.map((l) => l[0]);
@@ -972,6 +988,13 @@ const KUNCI_JS22_KONSOL = [
   "alurHentikan.pulih",
   "alurHentikan.galat",
 ];
+
+// Permintaan A-14 (Sesi B, dikerjakan Sesi A 23 Nov 2026): peringatan zona padat di penyusun paket JS-12. Teks finalnya
+// dicatat di PLAN.md, bagian "Permintaan Sesi B A-14 sampai A-18", karena permintaan ini tidak punya spesifikasi sendiri.
+const TEKS_A14_KONSOL: Record<string, string> = {
+  "paket.zonaPadat":
+    "Zona {zona}: {n} kejadian. Di ruang berbatas lebih dari {pemain} pemain, kejadian ke-{ke} dan seterusnya di zona ini, menurut urutan paket, tidak akan tampil.",
+};
 
 /** Salinan objek teks tanpa kunci bertitik yang disebut, dan tanpa grup yang menjadi kosong. */
 function tanpaKunci(teks: object, kunci: readonly string[]): unknown {

@@ -580,6 +580,8 @@ export const TEKS_KONSOL = {
     simpan: "Simpan paket",
     okSimpan: "Paket tersimpan.",
     kosong: "Belum ada kejadian di paket ini.",
+    // Permintaan A-14: peringatan tanpa menolak, satu kalimat per zona; {pemain} = BATAS.ruangBesarLebihDari.
+    zonaPadat: "Zona {zona}: {n} kejadian. Di ruang berbatas lebih dari {pemain} pemain, kejadian ke-{ke} dan seterusnya di zona ini, menurut urutan paket, tidak akan tampil.",
   },
   temuan: {
     BENTUK: "Isian ini tidak sesuai bentuk yang diharapkan.",

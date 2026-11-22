@@ -163,4 +163,24 @@ describe.skipIf(!sqlite)("rute bank di atas D1 tiruan", () => {
     const kode = await Promise.all(hasil.map(async (j) => (await json(j)).kode as string));
     expect(new Set(kode).size).toBe(2);
   });
+
+  it("Permintaan A-14: paket berisi 7–12 kejadian di satu zona tetap tersimpan; lebih dari 12 tetap ditolak", async () => {
+    const { d1, env } = lingkungan();
+    const { admin } = await siapkanAkun(env);
+    const dasar = BANK.kejadian.find((k) => k.zona === "z1") as IsiKejadian;
+    const kode = Array.from({ length: 13 }, (_, i) => `K-${70 + i}`);
+    kode.forEach((k, i) => {
+      d1.basis.prepare("INSERT INTO kejadian (id, kode, status, versi_terbit_id, pemilik_id, diubah_pada) VALUES (?, ?, 'tinjau', NULL, NULL, 1000)").run(`kz-${i}`, k);
+      d1.basis
+        .prepare("INSERT INTO kejadian_versi (id, kejadian_id, nomor, isi_json, jenis, dibuat_oleh, dibuat_pada, catatan_perubahan) VALUES (?, ?, 1, ?, 'kerja', NULL, 1000, NULL)")
+        .run(`vz-${i}`, `kz-${i}`, JSON.stringify({ ...dasar, kode: k }));
+    });
+    const tujuh = await minta(env, "POST", "/api/paket", { nama: "Paket padat", deskripsi: "Tujuh kejadian di satu zona.", aktif: true, kejadian: kode.slice(0, 7) }, admin);
+    expect(tujuh.status).toBe(201);
+    const id = (await json(tujuh)).id as string;
+    expect((await minta(env, "PUT", `/api/paket/${id}`, { nama: "Paket padat", deskripsi: "Dua belas kejadian di satu zona.", aktif: true, kejadian: kode.slice(0, 12) }, admin)).status).toBe(200);
+    expect((await json(minta(env, "GET", `/api/paket/${id}`, undefined, admin))).kejadian).toHaveLength(12);
+    const tolak = await json(minta(env, "POST", "/api/paket", { nama: "Paket terlalu padat", deskripsi: "Tiga belas.", aktif: true, kejadian: kode }, admin));
+    expect(tolak.temuan).toMatchObject([{ kode: "PAKET_TITIK_KURANG", letak: "paket/z1" }]);
+  });
 });

@@ -116,14 +116,14 @@ ruang-setara/
 │  │  ├─ auth/                       # sandi, sesi, izin, tiket, pembatas percobaan
 │  │  └─ db/                         # kueri D1 (ruang; konten dan jawaban sejak JS-08)
 │  ├─ migrations/0001_awal.sql …     # migrasi D1, hanya maju; 0002_peserta_dikeluarkan.sql (JS-11)
-│  └─ seed/bank-awal.json            # bank kejadian awal (hasil fitur konten)
+│  └─ seed/bank-awal.json            # bank kejadian awal (hasil fitur konten); bank-tambahan-1.json: semai tambahan (A-16)
 ├─ scripts/game/art/                 # kit gambar bersama + atas_*.py dan build_jejak.py
 ├─ scripts/game/suara/               # kit suara: chip.py, efek.py, musik.py; dipanggil build_jejak.py (C-14)
 ├─ scripts/jejak-setara/
 │  ├─ bila-ada.mjs                   # penjalan skrip yang berkasnya belum ada (bagian 4.3)
 │  ├─ peta/kampung.txt · objek.json · build_peta.py   # sumber peta
 │  ├─ simulasi-beban.mjs             # 50 bot WebSocket
-│  └─ semai.mjs                      # menyemai bank awal ke D1, sekali per basis data (JS-05)
+│  └─ semai.mjs                      # menyemai bank awal, lalu bank tambahan, ke D1, masing-masing sekali per basis data (JS-05; bagian 10.6)
 ├─ e2e/jejak-setara/                 # uji Playwright multi-konteks
 ├─ vite.jejak.config.ts            # Vite dan plugin Cloudflare (JA-15)
 ├─ vitest.jejak.config.ts · playwright.jejak.config.ts   # uji unit dan uji ujung ke ujung Jejak Setara
@@ -385,7 +385,7 @@ Diperiksa skema `zod` yang sama untuk bank awal (`content:check:jejak`) dan untu
 | Pustaka rujukan | Teks ≤ 160 karakter; sumber 1–3 alamat `https://` dipisah " · ", ≤ 400 karakter; catatan ≤ 600 karakter teks polos; bank awal tanpa kolom status |
 | Teks | Teks polos: tanpa HTML, tanpa Markdown, tanpa tautan; huruf kapital hanya di awal kalimat diperiksa sebagai peringatan, bukan galat, kecuali singkatan dan nama diri di `NAMA_DIRI` |
 | Set tokoh | 1–4 kunci tanpa kembar, berupa nama berkas aset Disetujui tanpa `.png`: `npc_…` dicocokkan ke `NPC` dan `obj_…` ke `OBJEK` tanpa awalan di manifest |
-| Paket | 1–64 kejadian tanpa kembar (batas rekap pesan `selesai`); nama ≤ 40 dan deskripsi ≤ 160 karakter; jumlah kejadian per zona tidak melebihi jumlah titik zona itu |
+| Paket | 1–64 kejadian tanpa kembar (batas rekap pesan `selesai`); nama ≤ 40 dan deskripsi ≤ 160 karakter; jumlah kejadian per zona tidak melebihi jumlah titik zona itu. Bila lebih dari separuh titik zona (lebih dari 6 dari 12), penyusun paket di konsol menampilkan peringatan tanpa menolak, karena ruang lebih dari 50 pemain memakai dua titik per kejadian dan kejadian sesudahnya tidak tampil (`zonaPadatRuangBesar`, Permintaan A-14) |
 
 Skema dan aturan ini ada di `inti/konten/skema.ts` dan `inti/konten/periksa.ts` (JS-05). Setiap temuan punya kode tetap; kalimat yang tampil di konsol ditetapkan di JS-12 (Permintaan A-7).
 
@@ -707,6 +707,7 @@ Matriks izin di PRD bagian 11.1 dijalankan di satu fungsi penjaga di `auth/izin.
 - Hanya akun bertanda Peninjau yang dapat menandai `terverifikasi`; nama dan tanggal dicatat otomatis.
 - Bank awal disemai sekali per basis data: `semai.mjs` menulis penanda `semai_bank_awal` di tabel `pengaturan`, dan setiap pernyataan hanya berlaku selama penanda belum ada, sehingga semai ulang tidak menimpa suntingan konsol, tanda Terverifikasi, atau kejadian yang dihapus (JS-05).
 - Id kejadian, versi `kerja`, dan paket bank awal berupa UUID versi 5 tetap, dihitung dari `DASAR_ID` di `semai.mjs` bersama kode kejadian atau nama paket (spesifikasi JS-05 P-40, D-6). `DASAR_ID` tidak boleh diubah sesudah semai pertama, karena data yang sudah disemai, ruang coba (Paket inti 16, JS-08), dan baris `jawaban` merujuk id itu.
+- **Semai tambahan** (lanjutan JS-05, dikerjakan Sesi B; spesifikasi `JS-05-semai-tambahan.md`; Permintaan A-16, 22 November 2026): `server/jejak-setara/seed/bank-tambahan-1.json` (K-17 sampai K-40, JR-24 sampai JR-43, Paket lanjutan 24, dan Paket lengkap 40) disemai lewat langkah semai yang sama, sekali per basis data, dengan penanda `semai_tambahan_1`. Semai ini hanya berjalan sesudah bank awal disemai (penanda `semai_bank_awal` ada), dan tidak menulis apa pun bila salah satu kode K-17 sampai K-40, nomor JR-24 sampai JR-43, atau nama paket tambahannya sudah ada di basis data itu; penanda tidak dipasang, jadi deploy berikutnya mencoba lagi. Id memakai `DASAR_ID` yang sama, dengan nama `kejadian/K-xx`, `kejadian_versi/K-xx/1`, dan `paket/<nama>`. Rujukannya juga disemai berstatus `belum`. Server uji lokal (`server-lokal.mjs`) memasang `JEJAK_SEMAI_TANPA_TAMBAHAN=1`, sehingga D1 untuk uji server, uji ujung ke ujung, dan `sim:beban` hanya berisi bank awal; langkah semai di alur kerja dan `db:semai:lokal` tidak memasangnya (Permintaan A-18).
 
 ### 10.7 Statistik
 

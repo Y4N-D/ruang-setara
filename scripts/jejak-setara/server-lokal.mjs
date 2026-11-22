@@ -1,6 +1,8 @@
 // Server lokal Jejak Setara untuk uji (spesifikasi JS-03, bagian "Skrip"): build, migrasi D1 ke folder
 // keadaan baru, semai bank awal ke D1 lokal itu (JS-08, P-7; Permintaan A-5), lalu vite preview dengan JEJAK_KEADAAN
 // menunjuk folder itu. Dipakai uji ujung ke ujung (port 4310), uji server (4320), dan sim:beban (4330).
+// JEJAK_SEMAI_TANPA_TAMBAHAN=1 membuat semai hanya menulis bank awal, karena ketiga uji itu ditulis untuk bank awal
+// (spesifikasi JS-05 semai tambahan, Revisi 1, P-17a; Permintaan A-18).
 //   node scripts/jejak-setara/server-lokal.mjs --port 4320 [--tanpa-build] [--keadaan <folder>] [--pakai-ulang] [--tanpa-semai]
 // --tanpa-semai: D1 lokal tanpa bank awal, untuk menguji ruang coba tanpa kejadian (JS-08, P-5).
 import { spawn, spawnSync } from "node:child_process";
@@ -19,7 +21,7 @@ const port = Number(ambil("--port", "4310"));
 const keadaan = resolve(akar, ambil("--keadaan", join("test-results-jejak", `keadaan-${port}`)));
 const vite = join(akar, "node_modules", "vite", "bin", "vite.js");
 const wrangler = join(akar, "node_modules", "wrangler", "bin", "wrangler.js");
-const env = { ...process.env, WRANGLER_SEND_METRICS: "false", CLOUDFLARE_CF_FETCH_ENABLED: "false", CI: "1" };
+const env = { ...process.env, WRANGLER_SEND_METRICS: "false", CLOUDFLARE_CF_FETCH_ENABLED: "false", CI: "1", JEJAK_SEMAI_TANPA_TAMBAHAN: "1" };
 
 function jalankan(bin, args) {
   const hasil = spawnSync(process.execPath, [bin, ...args], { cwd: akar, stdio: "inherit", env });
