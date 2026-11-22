@@ -45,7 +45,7 @@ describe("ruang dari konsol dan pemeriksaan kode (JS-03 AC-2 dan AC-4; JS-10 P-5
     expect(isi.kejadian).toBe(16);
     expect(baris).toMatchObject({ label_kelas: "Ruang uji", paket_id: "9880c4d5-8294-51c9-971a-e95531a2e039", status: "lobi", uji: 1 });
     expect(baris.pemilik_id).toEqual(expect.any(String));
-    expect(JSON.parse(String(baris.pengaturan_json))).toEqual({ durasiMenit: 15, batasPemain: 30, batasTerlambatMenit: 5, skillAktif: ["lari", "kompas", "petunjuk"], modeNomorAbsen: false, uji: true });
+    expect(JSON.parse(String(baris.pengaturan_json))).toEqual({ durasiMenit: 15, batasPemain: 30, batasTerlambatMenit: 5, skillAktif: ["lari", "kompas", "petunjuk"], modeNomorAbsen: false, uji: true, modeNama: "daftar" });
   });
 
   it("isi tidak sah 400 ISI_SALAH; nomor absen untuk lebih dari 50 pemain 400; PUT 405 (JS-10, P-2)", async () => {
@@ -62,7 +62,7 @@ describe("ruang dari konsol dan pemeriksaan kode (JS-03 AC-2 dan AC-4; JS-10 P-5
     const { isi } = await buatRuang({ modeNomorAbsen: true });
     const kode = String(isi.kode);
     const j = await fetch(`${B}/api/publik/ruang/${kode.toLowerCase()}`);
-    expect([j.status, await j.json()]).toEqual([200, { ada: true, modeNomorAbsen: true }]);
+    expect([j.status, await j.json()]).toEqual([200, { ada: true, modeNomorAbsen: true, modeNama: "daftar" }]);
     expect((await fetch(`${B}/api/publik/ruang/ZZZZZ`)).status).toBe(404);
     expect((await fetch(`${B}/api/publik/ruang/${kode}`, { method: "POST" })).status).toBe(405);
   });

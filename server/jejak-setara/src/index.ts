@@ -10,7 +10,7 @@ import { jalurBank, tanganiApiBank } from "./api/bank";
 import { jalurRuang, tanganiApiRuang, tanganiWsKelas, tanganiWsRuang } from "./api/ruang";
 import { JALUR_STATISTIK, tanganiApiStatistik } from "./api/statistik";
 import { bersihkanAkun } from "./db/akun";
-import { tandaiRuangLama } from "./db/ruang";
+import { hapusRuangKedaluwarsa, tandaiRuangLama } from "./db/ruang";
 import type { Env } from "./env";
 import { jawabGalat, jawabJson } from "./keamanan";
 
@@ -52,5 +52,11 @@ export default {
     const sekarang = Date.now();
     await tandaiRuangLama(env.DB, sekarang);
     await bersihkanAkun(env.DB, sekarang);
+    // JS-14 (P-62, P-63): data ruang yang melewati masa simpan; satu baris log berisi jumlahnya, tanpa nama.
+    try {
+      console.log(JSON.stringify({ tugas: "hapus_kedaluwarsa", ruang: await hapusRuangKedaluwarsa(env.DB, sekarang) }));
+    } catch (e) {
+      console.log(JSON.stringify({ tugas: "hapus_kedaluwarsa", galat: String(e).slice(0, 120) }));
+    }
   },
 } satisfies ExportedHandler<Env>;

@@ -66,6 +66,8 @@ export default function Masuk({ sesiBerakhir, berhasil }: { sesiBerakhir: boolea
       <p className="js-konsol-kredit">
         {TEKS_KONSOL.masuk.kreditAset}
         <br />
+        {TEKS_KONSOL.masuk.kreditSuara}
+        <br />
         {TEKS_KONSOL.masuk.kreditHuruf}
       </p>
     </main>

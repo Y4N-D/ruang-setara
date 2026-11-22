@@ -1621,3 +1621,122 @@
     grid-row: 2;
   }
 }
+
+/* JS-14: suara layar kelas (P-29, P-30), nama sebagai tombol kelola dan menunya (P-53, P-54), dan panel Pemain (P-55). */
+.js-kelas-kepala {
+  padding-right: calc(12 * var(--u));
+}
+.js-kelas-suara {
+  position: absolute;
+  top: calc(0.4 * var(--u));
+  right: calc(6 * var(--u));
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(1 * var(--u));
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 calc(0.6 * var(--u));
+  border: 0;
+  background: transparent;
+  color: var(--js-cream);
+  cursor: pointer;
+}
+.js-kelas-suara img {
+  width: calc(4 * var(--u));
+  height: calc(4 * var(--u));
+  image-rendering: pixelated;
+}
+.js-kelas-suara-tertahan {
+  padding: calc(0.4 * var(--u)) calc(0.8 * var(--u));
+  background: var(--js-sun);
+  color: var(--js-ink);
+  font: calc(2 * var(--u)) "Pixelify Sans", monospace;
+}
+.js-kelas-suara:focus-visible,
+.js-kelas-nama-tombol:focus-visible {
+  outline: 3px solid var(--js-ink);
+  outline-offset: 2px;
+}
+.js-kelas-daftar li,
+.js-kelas-panel-pemain li {
+  position: relative;
+}
+.js-kelas-nama-tombol {
+  display: flex;
+  align-items: center;
+  gap: inherit;
+  width: 100%;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.js-kelas-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  display: grid;
+  gap: 4px;
+  min-width: calc(22 * var(--u));
+  padding: 6px;
+  background: var(--js-cream);
+  border: 3px solid var(--js-ink);
+  box-shadow: 4px 4px 0 var(--js-ink);
+}
+.js-kelas-menu button {
+  min-height: 48px;
+  padding: 0 calc(1.6 * var(--u));
+  background: var(--js-white);
+  border: 2px solid var(--js-ink);
+  color: var(--js-ink);
+  font: calc(2.8 * var(--u)) "Pixelify Sans", monospace;
+  text-align: left;
+  cursor: pointer;
+}
+.js-kelas-menu button:focus-visible {
+  background: var(--js-sun);
+}
+.js-kelas-menu .js-kelas-bahaya {
+  background: var(--js-coral);
+}
+.js-kelas-panel-pemain {
+  max-height: 60vh;
+  overflow: auto;
+}
+.js-kelas-panel-pemain ul {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.js-kelas-panel-pemain li[data-terhubung="tidak"] {
+  opacity: 0.5;
+}
+.js-kelas-panel-pemain img {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+}
+.js-kelas-pita-kelola {
+  top: calc(8 * var(--u));
+}
+/* JS-14: panel Pemain memakai lebar layar kelas, dan pilihan Nama pemain di dialog Ruang baru tersusun dua baris. */
+.js-konsol-dialog:has(.js-kelas-panel-pemain) {
+  width: min(92vw, 1200px);
+  max-width: none;
+}
+.js-kelas-panel-pemain ul {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+}
+.js-ruang-nama-pilihan > span {
+  display: grid;
+  gap: 2px;
+}

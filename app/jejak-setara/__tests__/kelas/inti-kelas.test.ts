@@ -24,7 +24,7 @@ import { PETA_KAMPUNG, TITIK_PER_ZONA } from "../../../../server/jejak-setara/sr
 import { MASUK } from "../ruang/bankUji";
 
 const V = PROTOKOL_VERSI;
-const PENGATURAN: PengaturanRuang = { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: [], modeNomorAbsen: false, uji: true };
+const PENGATURAN: PengaturanRuang = { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: [], modeNomorAbsen: false, modeNama: "daftar", uji: true };
 const DIBUAT = 1_000_000;
 const TAUTAN = "https://jejak-setara-uji.ruangsetara.workers.dev";
 const acak = acakBerbenih(11);

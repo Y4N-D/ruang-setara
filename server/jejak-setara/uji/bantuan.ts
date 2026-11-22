@@ -1,5 +1,6 @@
 // Bantuan uji server: membuat ruang, klien WebSocket dengan Origin dan riwayat pesan, upgrade mentah, kueri D1
 // lokal, dan penantian sampai suatu keadaan tercapai (tanpa jeda tetap).
+import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/versi";
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import http from "node:http";
 import { fileURLToPath } from "node:url";
@@ -99,7 +100,7 @@ export async function klienKelas(kode: string, port = 4320): Promise<KlienKelas 
     ws.onopen = () => ok();
     ws.onerror = () => gagal(new Error("sambungan layar kelas gagal"));
   });
-  ws.send(JSON.stringify({ v: 2, t: "halo", peran: "guru" }));
+  ws.send(JSON.stringify({ v: PROTOKOL_VERSI, t: "halo", peran: "guru" })); // JS-14: tidak menulis angka versi tetap
   await tungguSampai(() => k.status, (s) => s !== null, 5000, 50);
   kelasPort.set(kunci, k);
   return k;

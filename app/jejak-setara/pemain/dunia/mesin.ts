@@ -20,6 +20,7 @@ import { PemainLain, type InfoPemain } from "./pemainLain";
 import { GERBANG, GRID_KAMPUNG, GRID_LOBI, KOTAK_PETA, LAPISAN_GAMBAR, OBJEK_PETA, TITIK_MUNCUL, UKURAN_PETA } from "./petaKampung";
 import { PengelolaPotongan, type ObjekGambar } from "./potongan";
 import { AntreanPita, ARAH_PANAH, batasPanah, SkillKlien } from "./skill";
+import { isiTeks, TEKS } from "../../teks";
 
 /** Sprite yang sebagian tampak di pandangan kamera (atribut uji JS-08 P-20 dan JS-09 P-18). */
 const dalamPandangan = (s: SpriteGambar, k: { x: number; y: number }) =>
@@ -204,6 +205,16 @@ export class MesinDunia {
       case "pemain_pergi":
         this.lain.lupakan(p.id);
         break;
+      case "nama_baru": {
+        // JS-14 (P-47): label dan peta memakai nama baru; pemain itu sendiri menerima pita dan pengumuman.
+        this.lain.gantiNama(p.id, p.nama);
+        if (p.id === this.diriId) {
+          const teks = isiTeks(TEKS.namaDiganti, { nama: p.nama });
+          if (this.dialogKode === null) this.tambahPita(teks, jamLokal);
+          else this.umum.push(teks);
+        }
+        break;
+      }
       case "dunia":
         this.lain.terimaDunia(p.w, p.p, jamLokal, selisihJam);
         break;

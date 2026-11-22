@@ -68,9 +68,11 @@ export interface PropsRekap {
   /** P-8: sambungan sudah berakhir; rekap tetap tampil dengan pita dan satu tombol. */
   berakhir: AkhirRekap | null;
   saatKembali: () => void;
+  /** JS-14 (P-5): tombol Menu dan suara di kanan judul. */
+  kepala?: ReactNode;
 }
 
-export function LayarRekap({ akhir, rekap, uji, menyambung, berakhir, saatKembali }: PropsRekap) {
+export function LayarRekap({ akhir, rekap, uji, menyambung, berakhir, saatKembali, kepala }: PropsRekap) {
   const judulRefleksi = useRef<HTMLHeadingElement>(null);
   const skor = tampilanSkor(akhir, rekap);
   const pita = berakhir ? (berakhir.pita === "ditutup" ? R.pitaDitutup : R.pitaBerhenti) : menyambung ? R.pitaMenyambung : null;
@@ -140,6 +142,9 @@ export function LayarRekap({ akhir, rekap, uji, menyambung, berakhir, saatKembal
             {TOMBOL[berakhir.tombol]}
           </button>
         ) : null}
+        {/* JS-14 (P-5): Menu dan suara tampil di kanan judul, tetapi berada di akhir urutan Tab agar tautan ke refleksi
+            tetap menjadi tujuan Tab pertama (JS-11 P-9). Esc dan M tetap bekerja di rekap. */}
+        {kepala}
       </div>
     </main>
   );

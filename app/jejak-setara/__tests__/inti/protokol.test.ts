@@ -17,6 +17,7 @@ const PENGATURAN = {
   skillAktif: ["lari", "kompas", "petunjuk"],
   modeNomorAbsen: false,
   uji: false,
+  modeNama: "daftar",
 };
 const KARTU = {
   hak: "Hak memperoleh pelayanan kesehatan.",
@@ -72,6 +73,9 @@ const KELAS_KE_SERVER: Record<string, [Pesan, Pesan]> = {
   kode_masuk_ulang: [pesan("kode_masuk_ulang", { pemainId: "p-7f3a" }), pesan("kode_masuk_ulang", { pemainId: 7 })],
   pembahasan: [pesan("pembahasan", { kejadianId: "K-01" }), pesan("pembahasan", { kejadianId: "" })],
   tutup_ruang: [pesan("tutup_ruang"), pesan("tutup_ruang", { alasan: "selesai" })],
+  // JS-14 (P-58)
+  ganti_nama: [pesan("ganti_nama", { pemainId: "p-7f3a" }), pesan("ganti_nama", { pemainId: "p 7f3a" })],
+  ganti_semua_nama: [pesan("ganti_semua_nama"), pesan("ganti_semua_nama", { pemainId: "p-7f3a" })],
 };
 
 const SERVER_KE_PEMAIN: Record<string, [Pesan, Pesan]> = {
@@ -224,6 +228,9 @@ const SERVER_KE_PEMAIN: Record<string, [Pesan, Pesan]> = {
     pesan("saran_nama", { saranNama: ["Kancil Jingga", "Jalak Biru", "Anoa Hijau"] }),
     pesan("saran_nama", { saranNama: ["a", "b", "c", "d"] }),
   ],
+  // JS-14 (P-58)
+  nama_baru: [pesan("nama_baru", { id: "p-03", nama: "Kancil Jingga" }), pesan("nama_baru", { id: "p-03", nama: "" })],
+  mode_nama: [pesan("mode_nama", { modeNama: "daftar" }), pesan("mode_nama", { modeNama: "rakitan" })],
 };
 
 const SERVER_KE_KELAS: Record<string, [Pesan, Pesan]> = {
@@ -242,6 +249,7 @@ const SERVER_KE_KELAS: Record<string, [Pesan, Pesan]> = {
       batasPemain: 40,
       uji: true,
       terkunci: false,
+      modeNama: "bebas",
       waktuServer: 1_700_000_000_000,
       jumlahKejadian: 1,
       kejadian: [{ id: "K-13", judul: "Antrean puskesmas", zona: 7 }],
@@ -254,6 +262,7 @@ const SERVER_KE_KELAS: Record<string, [Pesan, Pesan]> = {
       batasPemain: 40,
       uji: true,
       terkunci: false,
+      modeNama: "bebas",
       waktuServer: 1_700_000_000_000,
       jumlahKejadian: 1,
       kejadian: [{ id: "K-13", judul: "Antrean puskesmas", zona: 7 }],
@@ -294,8 +303,8 @@ const KELOMPOK = [
 ] as const;
 
 describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
-  it("PROTOKOL_VERSI 2 sejak JS-08 (P-64)", () => {
-    expect(PROTOKOL_VERSI).toBe(2);
+  it("PROTOKOL_VERSI 3 sejak JS-14 (P-58)", () => {
+    expect(PROTOKOL_VERSI).toBe(3);
   });
 
   it("JS-08 (P-64): kejadian_terlihat dengan setTokoh 1–4 id; butir dunia enam unsur dengan dialog boolean", () => {
@@ -319,7 +328,7 @@ describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
       ["halo", "pilih_identitas", "minta_nama", "gerak", "periksa", "kunci_1", "kunci_2", "tutup_dialog", "pakai_skill", "ambil_kotak", "ping"].sort(),
     );
     expect(tipe(skemaKelas)).toEqual(
-      ["halo", "mulai", "jeda", "lanjut", "tambah_waktu", "akhiri", "kunci_ruang", "keluarkan", "kode_masuk_ulang", "pembahasan", "tutup_ruang"].sort(),
+      ["halo", "mulai", "jeda", "lanjut", "tambah_waktu", "akhiri", "kunci_ruang", "keluarkan", "kode_masuk_ulang", "pembahasan", "tutup_ruang", "ganti_nama", "ganti_semua_nama"].sort(),
     );
     expect(tipe(skemaServerPemain)).toEqual(
       [
@@ -341,6 +350,8 @@ describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
         "galat",
         "pong",
         "saran_nama",
+        "nama_baru",
+        "mode_nama",
       ].sort(),
     );
     expect(tipe(skemaServerKelas)).toEqual(["info_kelas", "lobi", "dunia_kelas", "papan", "kemajuan", "data_pembahasan", "status_ruang", "galat"].sort());
@@ -359,6 +370,7 @@ describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
       "DIKELUARKAN",
       "BUKAN_JANGKAUAN",
       "NOMOR_ABSEN_DIPAKAI",
+      "NAMA_DITOLAK",
     ]);
   });
 

@@ -1,7 +1,9 @@
 // Simulasi beban Jejak Setara (spesifikasi JS-03, bagian "Skrip"; JS-07, rencana uji "Uji beban"; AC-20, AC-21;
 // Architecture 13.4 dan 14). Bawaan: menyalakan Worker lokal (server-lokal.mjs, port 4330), tanpa kuota Cloudflare.
 //   node scripts/jejak-setara/simulasi-beban.mjs --ruang 1 --bot 50 --detik 120 [--lobi-detik 30] [--diam-detik 5]
-//        [--latensi-ms 80 --jitter-eksp-ms 40] [--jitter-ms 50] [--tanpa-build]
+//        [--latensi-ms 80 --jitter-eksp-ms 40] [--jitter-ms 50] [--tanpa-build] [--mode-nama bebas]
+// JS-14: --mode-nama bebas membuat ruang nama buatan siswa; bot bergabung dengan nama "Bot 001" dan seterusnya, dan
+// layar kelas mengganti 5 nama di lobi dan 5 nama saat menjelajah (spesifikasi JS-14, AC-25).
 // JS-07: bot jujur berjalan 72 piksel per detik di sepanjang jalur ubin peta kampung (pencarian jalur di grid
 // tabrakan). Urutan: semua bot diam di lobi (memeriksa tidak ada kiriman dan pengatur waktu), berjalan di halaman
 // lobi, lalu `mulai` lewat kait lokal dan menjelajah kampung. Pilihan --latensi-ms dan --jitter-eksp-ms menunda
@@ -41,6 +43,7 @@ const LOBI_DETIK = Number(ambil("--lobi-detik", "30"));
 const DIAM_DETIK = Number(ambil("--diam-detik", "5"));
 const SASARAN = ambil("--sasaran", "lokal");
 const PORT = Number(ambil("--port", "4330"));
+const MODE_NAMA = ambil("--mode-nama", "daftar") === "bebas" ? "bebas" : "daftar"; // JS-14
 const BATAS_PERMINTAAN_UJI = 20_000;
 const tidur = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -162,7 +165,7 @@ async function buatRuang() {
   const j = await fetch(`${alamat}/api/ruang`, {
     method: "POST",
     headers: tajukKonsol(),
-    body: JSON.stringify({ labelKelas: "Uji beban", paketId: PAKET_INTI, durasiMenit: 20, batasPemain: Math.max(2, Math.min(100, BOT)), batasTerlambatMenit: 10, modeNomorAbsen: false, uji: true }),
+    body: JSON.stringify({ labelKelas: "Uji beban", paketId: PAKET_INTI, durasiMenit: 20, batasPemain: Math.max(2, Math.min(100, BOT)), batasTerlambatMenit: 10, modeNomorAbsen: false, uji: true , modeNama: MODE_NAMA }),
   });
   if (j.status !== 201) throw new Error(`ruang ${j.status}`);
   const { ruang } = await j.json();
@@ -300,8 +303,12 @@ function buatBot(kode, nomor) {
       const m = JSON.parse(teks);
       if (m.t === "selamat_datang") {
         b.id = m.pemainId;
-        kirim({ v: V, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
+        // JS-14: di ruang nama buatan siswa, bot mengetik namanya sendiri; penolakan dijawab dengan saran.
+        const nama = MODE_NAMA === "bebas" ? `Bot ${String(nomor + 1).padStart(3, "0")}` : m.saranNama[0];
+        kirim({ v: V, t: "pilih_identitas", nama, avatar: nomor % 8 });
       } else if (m.t === "saran_nama") kirim({ v: V, t: "pilih_identitas", nama: m.saranNama[0], avatar: nomor % 8 });
+      else if (m.t === "nama_baru") (b.namaBaru ??= new Set()).add(m.id);
+      else if (m.t === "galat" && (m.kode === "NAMA_DITOLAK" || m.kode === "NAMA_DIPAKAI")) b.galatNama = (b.galatNama ?? 0) + 1;
       else if (m.t === "dunia") b.dunia++;
       else if (m.t === "pong") {
         const rtt = Date.now() - m.tKlien;
@@ -592,6 +599,18 @@ try {
   };
   // 2. Berjalan di halaman lobi (P-45, P-47).
   const lobi = await jalankanFase(bot, "lobi", LOBI_DETIK, hz);
+  // JS-14 (AC-25): layar kelas mengganti 5 nama per ruang di lobi, dan 5 nama lain saat menjelajah.
+  const diganti = [];
+  const gantiLima = async (awal) => {
+    for (const [r, kode] of kodeRuang.entries()) {
+      for (const b of bot.slice(r * BOT + awal, r * BOT + awal + 5)) {
+        if (!b.id) continue;
+        diganti.push(b.id);
+        await kelas(kode, { t: "ganti_nama", pemainId: b.id });
+      }
+    }
+  };
+  await gantiLima(0);
   const koreksiLobi = bot.reduce((s, b) => s + b.koreksi, 0);
   const gerakLobi = bot.reduce((s, b) => s + b.gerak, 0);
   // 3. Ronde: mulai lewat layar kelas, lalu menjelajah kampung.
@@ -602,7 +621,15 @@ try {
     b.gerak = 0;
     b.rtt = [];
   }
+  const waktuGanti = setTimeout(() => void gantiLima(5), (DETIK * 1000) / 2);
   const jelajah = await jalankanFase(bot, "jelajah", DETIK, hz);
+  clearTimeout(waktuGanti);
+  const namaPemain = {
+    mode: MODE_NAMA,
+    diganti: diganti.length,
+    botMenerimaSemuaNamaBaru: bot.filter((b) => diganti.every((id) => b.namaBaru?.has(id))).length,
+    galatNama: bot.reduce((s, b) => s + (b.galatNama ?? 0), 0),
+  };
   // Dihitung sebelum ruang diakhiri dan ditutup, karena penutupan ruang memutus semua bot dengan sengaja.
   const putusTakTerduga = bot.filter((b) => b.putus).length;
   const stat = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
@@ -635,6 +662,7 @@ try {
     jitterSeragamMs: JITTER,
     gerakPerDetikSaatBergerak: hz,
     lamaSemuaBergabungMs: lamaGabung,
+    namaPemain,
     lobiDiam,
     lobi: { ...lobi, gerakDikoreksiPersen: +((100 * koreksiLobi) / Math.max(1, gerakLobi)).toFixed(3) },
     jelajah: {

@@ -210,6 +210,7 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
   const [uji, setUji] = useState(true);
   // JS-09 (P-7): ketiga skill tercentang setiap kali dialog dibuka.
   const [skill, setSkill] = useState<SkillP0[]>([...SKILL_P0]);
+  const [modeNama, setModeNama] = useState<"daftar" | "bebas">("daftar"); // JS-14 (P-32)
   const [galat, setGalat] = useState<GalatIsianRuang[]>([]);
   const [galatUmum, setGalatUmum] = useState<{ pesan: string; lama?: { id: string; kode: string } } | null>(null);
   const [mengirim, setMengirim] = useState(false);
@@ -238,7 +239,7 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
 
   async function kirim(e: FormEvent) {
     e.preventDefault();
-    const isi = { labelKelas: label, paketId, durasiMenit: durasi, batasPemain: batasAngka, batasTerlambatMenit: Number(terlambat), modeNomorAbsen: absenBenar, uji: ujiBenar, skillAktif: skill };
+    const isi = { labelKelas: label, paketId, durasiMenit: durasi, batasPemain: batasAngka, batasTerlambatMenit: Number(terlambat), modeNomorAbsen: absenBenar, uji: ujiBenar, skillAktif: skill, modeNama };
     const g = periksaRuangBaru(isi);
     setGalat(g);
     setGalatUmum(null);
@@ -315,6 +316,19 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
               ))}
             </div>
             <p className="js-konsol-petunjuk">{ts.keterangan}</p>
+          </fieldset>
+          {/* JS-14 (P-32): daftar nama samaran (bawaan) atau nama buatan siswa. */}
+          <fieldset className="js-ruang-nama">
+            <legend className="js-konsol-label">{tb.namaJudul}</legend>
+            {(["daftar", "bebas"] as const).map((m) => (
+              <label key={m} className="js-konsol-centang js-ruang-nama-pilihan">
+                <input type="radio" name="js-mode-nama" value={m} checked={modeNama === m} onChange={() => setModeNama(m)} />
+                <span>
+                  <span className="js-ruang-nama-judul">{m === "daftar" ? tb.namaDaftar : tb.namaBebas}</span>
+                  <span className="js-konsol-petunjuk">{m === "daftar" ? tb.namaDaftarKet : tb.namaBebasKet}</span>
+                </span>
+              </label>
+            ))}
           </fieldset>
           <label className="js-konsol-centang">
             <input type="checkbox" checked={absenBenar} disabled={!absenBoleh} onChange={(e) => setAbsen(e.target.checked)} />

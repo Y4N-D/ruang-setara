@@ -505,7 +505,9 @@ describe("kelola akun (P-20 sampai P-27; AC-7, AC-8)", () => {
       isi: galat("TIDAK_BERWENANG"),
     });
     expect(await minta("PATCH", `/api/akun/${g.id}`, { ip, cookie: cg, isi: { peninjau: true } })).toMatchObject({ status: 403, isi: galat("TIDAK_BERWENANG") });
-    expect(await minta("GET", "/api/dasbor", { ip, cookie: cg })).toMatchObject({ status: 200, isi: { rujukanBelum: 23 } });
+    // JS-14: jumlahnya dibaca dari D1, karena uji bank bisa memverifikasi rujukan lebih dulu.
+    const belum = Number(d1<{ n: number }>("SELECT count(*) AS n FROM rujukan WHERE status = 'belum'")[0].n);
+    expect(await minta("GET", "/api/dasbor", { ip, cookie: cg })).toMatchObject({ status: 200, isi: { rujukanBelum: belum } });
     for (const [metode, jalur] of [
       ["GET", "/api/akun"],
       ["POST", "/api/akun"],
@@ -554,8 +556,10 @@ describe("dasbor, tajuk, metode, dan batas isi (P-36; AC-13; Data, protokol, API
   it("dasbor menjawab 23 rujukan belum diverifikasi di D1 lokal yang disemai", async () => {
     const admin = await adminSiap(ip);
     const j = await minta("GET", "/api/dasbor", { ip, cookie: admin.cookie });
-    expect(j).toMatchObject({ status: 200, isi: { rujukanBelum: 23 } });
-    expect(d1("SELECT count(*) AS n FROM rujukan WHERE status = 'belum'")).toEqual([{ n: 23 }]);
+    // JS-14: semai berisi 23 rujukan belum diverifikasi; uji bank yang berjalan lebih dulu bisa memverifikasi sebagian.
+    const belum = Number(d1<{ n: number }>("SELECT count(*) AS n FROM rujukan WHERE status = 'belum'")[0].n);
+    expect(belum).toBeLessThanOrEqual(23);
+    expect(j).toMatchObject({ status: 200, isi: { rujukanBelum: belum } });
     for (const [nama, nilai] of Object.entries(TAJUK_JSON)) expect(j.tajuk.get(nama), nama).toBe(nilai);
   });
 

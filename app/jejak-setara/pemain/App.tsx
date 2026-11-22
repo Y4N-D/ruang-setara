@@ -5,7 +5,7 @@
 // terbaca saat menyambung ulang dan sesudah sambungan berakhir (spesifikasi JS-11, P-3 sampai P-9; D-2 a).
 // JS-09: pesan skill diteruskan ke mesin dunia, `pakai_skill` dari HUD dan dari tombol Petunjuk di dialog, Petunjuk dan
 // "+1 Kompas" di dialog, serta pengumuman skill (spesifikasi JS-09, P-13, P-24, P-27 sampai P-32, P-37, P-39).
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AksiDialog } from "../bersama/DialogKejadian";
 import {
   aturPetunjuk,
@@ -35,7 +35,10 @@ import { nomorZona } from "./dunia/kejadian";
 import { perangkatSentuh } from "./dunia/masukan";
 import { MesinDunia } from "./dunia/mesin";
 import { VERSI_PETA } from "./dunia/petaKampung";
-import { LayarAbsen, LayarIdentitas, LayarKode, LayarMenghubungkan } from "./Gabung";
+import { LayarAbsen, LayarIdentitas, LayarIdentitasBebas, LayarKode, LayarMenghubungkan } from "./Gabung";
+import { KelompokMenuSuara, PanelPengaturan, PanelPrivasi, PanelTentang, type JenisLembar } from "./PanelPengaturan";
+import { LABEL_HURUF, useKurangiGerak, usePengaturan } from "./pengaturan";
+import { buatPemutarSuara, bunyiTeksJatuh, LAJU_TEKS, type NamaSuara } from "./suara";
 import { ketergantunganPeramban, KlienRuang, type KeadaanKlien, KODE_LAYANAN_BERHENTI, KODE_PUTUS_LAMA } from "./jaringan";
 import LayarDunia, { areaDialog } from "./LayarDunia";
 import { LapisanJeda, LapisanMenyambung } from "./LayarMenyambung";
@@ -95,6 +98,24 @@ export default function App() {
   const [galatKode, setGalatKode] = useState<KodeGalat | null>(null);
   const [berhentiJenis, setBerhentiJenis] = useState<"layanan" | "putus" | null>(null); // JS-22, P-10
   const [pengaturan, setPengaturan] = useState({ durasiMenit: 15, batasPemain: 40 });
+  // JS-14: pengaturan pemain (P-1 sampai P-3), suara (P-20 sampai P-23), panel Menu (P-8 sampai P-11), dan mode nama.
+  const [atur, ubahAtur] = usePengaturan();
+  const aturRef = useRef(atur);
+  useEffect(() => {
+    aturRef.current = atur;
+  }, [atur]);
+  const gerak = useKurangiGerak(atur);
+  const [pemutar] = useState(() => buatPemutarSuara());
+  const [lembar, setLembar] = useState<JenisLembar | null>(null);
+  const lembarRef = useRef<JenisLembar | null>(null);
+  useEffect(() => {
+    lembarRef.current = lembar;
+  }, [lembar]);
+  const lembarDariMenu = useRef(false);
+  const pembukaLembar = useRef<HTMLElement | null>(null);
+  const [modeNama, setModeNama] = useState<"daftar" | "bebas">("daftar");
+  const laptop = useMemo(() => !perangkatSentuh(window), []);
+  const aktifSkill = useRef({ lari: 0, kompas: 0 });
   const [asetSiap, setAsetSiap] = useState(false);
   // Kode sah yang dikirim sebelum aset dunia termuat; diperiksa begitu aset siap (JS-07).
   const [kodeTertunda, setKodeTertunda] = useState<string | null>(null);
@@ -164,6 +185,77 @@ export default function App() {
     [umumkan],
   );
 
+  // JS-14 (P-14, P-20, P-21): bunyi hanya bila suara nyala; konteks dibuat pada ketukan yang menyalakannya.
+  const putar = useCallback(
+    (nama: NamaSuara, laju?: number) => {
+      if (aturRef.current.suara) pemutar.putar(nama, laju);
+    },
+    [pemutar],
+  );
+  const aturSuara = useCallback(
+    (nyala: boolean) => {
+      if (nyala) pemutar.nyalakan();
+      else pemutar.matikan();
+      ubahAtur({ suara: nyala });
+      umumkan(nyala ? TEKS.suara.umumNyala : TEKS.suara.umumMati);
+    },
+    [pemutar, ubahAtur, umumkan],
+  );
+  const balikSuara = useCallback(() => aturSuara(!aturRef.current.suara), [aturSuara]);
+  const hurufKetik = useCallback(
+    (teks: string, dari: number, ke: number) => {
+      if (bunyiTeksJatuh(teks, dari, ke)) putar("teks", LAJU_TEKS);
+    },
+    [putar],
+  );
+  // P-8 sampai P-11: panel Menu; fokus kembali ke pembukanya sesudah panel terakhir ditutup (P-10).
+  const bukaLembar = useCallback((j: JenisLembar) => {
+    if (lembarRef.current === null) pembukaLembar.current = document.activeElement as HTMLElement | null;
+    lembarDariMenu.current = false;
+    setLembar(j);
+  }, []);
+  const tutupLembar = useCallback(() => {
+    if (lembarRef.current !== "pengaturan" && lembarDariMenu.current) {
+      lembarDariMenu.current = false;
+      setLembar("pengaturan");
+      return;
+    }
+    setLembar(null);
+    const p = pembukaLembar.current;
+    pembukaLembar.current = null;
+    if (p && document.contains(p)) window.setTimeout(() => p.focus(), 0);
+  }, []);
+  // P-20: suara yang sudah nyala dari tab ini dihidupkan pada ketukan atau tombol pertama sesudah halaman dimuat.
+  useEffect(() => {
+    if (!atur.suara || pemutar.nyala()) return;
+    const hidupkan = () => pemutar.nyalakan();
+    window.addEventListener("pointerdown", hidupkan, { once: true, capture: true });
+    window.addEventListener("keydown", hidupkan, { once: true, capture: true });
+    return () => {
+      window.removeEventListener("pointerdown", hidupkan, true);
+      window.removeEventListener("keydown", hidupkan, true);
+    };
+  }, [atur.suara, pemutar]);
+  // P-14: M di mana saja kecuali saat mengetik; P-8: Esc membuka Menu di layar identitas dan rekap.
+  useEffect(() => {
+    const tekan = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      const t = e.target as HTMLElement | null;
+      const mengetik = !!t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT");
+      if (e.code === "KeyM" && !e.repeat && !mengetik) {
+        e.preventDefault();
+        balikSuara();
+        return;
+      }
+      if (e.key === "Escape" && !e.repeat && !e.defaultPrevented && !mengetik && lembarRef.current === null && (layarRef.current === "identitas" || layarRef.current === "ronde")) {
+        e.preventDefault();
+        bukaLembar("pengaturan");
+      }
+    };
+    window.addEventListener("keydown", tekan);
+    return () => window.removeEventListener("keydown", tekan);
+  }, [balikSuara, bukaLembar]);
+
   const tanganiPesan = useCallback(
     (p: PesanServerPemain) => {
       // Kejadian yang pertama kali terlihat di layar ini diumumkan (P-13); dicek sebelum mesin mencatatnya.
@@ -181,6 +273,7 @@ export default function App() {
           aturDialog(null);
           hentiMenunggu();
           setPengaturan({ durasiMenit: p.pengaturan.durasiMenit, batasPemain: p.pengaturan.batasPemain });
+          setModeNama(p.pengaturan.modeNama); // JS-14 (P-34)
           setWaktu((w) => ({ ...w, status: p.status }));
           if (p.saranNama.length > 0) {
             beridentitas.current = false;
@@ -230,8 +323,20 @@ export default function App() {
           setSaran(p.saranNama);
           setPilihNama(null);
           break;
+        case "nama_baru":
+          // JS-14 (P-47): nama baru dari guru; pita dan pengumuman untuk diri sendiri datang dari mesin dunia.
+          setPemain((prev) => (prev[p.id] ? { ...prev, [p.id]: { ...prev[p.id], nama: p.nama } } : prev));
+          break;
+        case "mode_nama":
+          // JS-14 (P-45): layar identitas berganti ke tiga saran nama samaran tanpa pita galat tambahan.
+          setModeNama(p.modeNama);
+          setGalatForm(null);
+          break;
         case "kejadian_terlihat":
-          if (terlihatBaru && beridentitas.current) umumkan(TEKS.pengumuman.terlihat);
+          if (terlihatBaru && beridentitas.current) {
+            umumkan(TEKS.pengumuman.terlihat);
+            putar("kejadian"); // JS-14 (P-22)
+          }
           break;
         case "kejadian_terbuka": {
           hentiMenunggu();
@@ -251,7 +356,10 @@ export default function App() {
           if (!d) break;
           const baru = terimaPetunjuk(d, p);
           if (baru === d) break;
-          if (d.petunjuk?.dicoret !== p.opsiDicoret) umumkan(isiTeks(TEKS.skill.umumPetunjuk, { kalimat: p.kalimat }));
+          if (d.petunjuk?.dicoret !== p.opsiDicoret) {
+            umumkan(isiTeks(TEKS.skill.umumPetunjuk, { kalimat: p.kalimat }));
+            putar("skill"); // JS-14 (P-22)
+          }
           aturDialog(baru);
           break;
         }
@@ -259,12 +367,18 @@ export default function App() {
           // JS-09 (P-32): "+1 Kompas" di kepala kartu dampak; pengumumannya datang dari mesin dunia.
           const d = dialogRef.current;
           if (p.kode === "kompas_tepat" && d?.hasil2) aturDialog({ ...d, tambahKompas: true });
+          // JS-14 (P-22): kotak skill dan dua menit terakhir.
+          if (p.kode === "kotak_lari" || p.kode === "kotak_kompas" || p.kode === "kotak_petunjuk") putar("kotak");
+          else if (p.kode === "dua_menit") putar("peringatan");
           break;
         }
         case "hasil_1": {
           const d = dialogRef.current;
           if (!d) break;
-          if (!d.bukaLangkah2) umumkan(p.benar ? TEKS.pengumuman.langkah1Tepat : TEKS.pengumuman.langkah1Belum);
+          if (!d.bukaLangkah2) {
+            umumkan(p.benar ? TEKS.pengumuman.langkah1Tepat : TEKS.pengumuman.langkah1Belum);
+            putar(p.benar ? "tepat" : "lembut"); // JS-14 (P-22); kiriman ulang Langkah 2 tidak berbunyi
+          }
           aturDialog(terimaHasil1(d, p, Date.now()));
           break;
         }
@@ -273,12 +387,18 @@ export default function App() {
           if (!d) break;
           const tingkat = TEKS.kartu.tingkat[p.tingkat];
           umumkan(isiTeks(TEKS.pengumuman.kartu, { tingkat }) + (p.poin > 0 ? ` ${isiTeks(TEKS.pengumuman.tambahPoin, { poin: p.poin })}` : ""));
+          putar(p.tingkat === "tepat" ? "tepat" : "lembut"); // JS-14 (P-22)
           aturDialog(terimaHasil2(d, p, Date.now()));
           break;
         }
         case "pribadi": {
           pribadiRef.current = { skor: p.skor, peringkat: p.peringkat };
           setPribadi(pribadiRef.current);
+          // JS-14 (P-22): masa aktif Lari cepat atau Kompas yang baru.
+          const lari = p.aktifSampai.lari ?? 0;
+          const kompas = p.aktifSampai.kompas ?? 0;
+          if (lari > aktifSkill.current.lari || kompas > aktifSkill.current.kompas) putar("skill");
+          aktifSkill.current = { lari, kompas };
           const d = dialogRef.current;
           if (d?.petunjuk && d.petunjuk.muatan !== p.muatan.petunjuk) aturDialog(aturPetunjuk(d, { muatan: p.muatan.petunjuk })); // JS-09, P-27
           break;
@@ -290,9 +410,10 @@ export default function App() {
           setRekap(p.rekap); // JS-11, P-3
           break;
         case "galat":
-          if (p.kode === "NAMA_DIPAKAI") {
-            setGalatForm(TEKS.galat.NAMA_DIPAKAI);
-            umumkan(TEKS.galat.NAMA_DIPAKAI);
+          if (p.kode === "NAMA_DIPAKAI" || p.kode === "NAMA_DITOLAK") {
+            // JS-14 (P-39): galat nama tampil di layar identitas dan diumumkan.
+            setGalatForm(TEKS.galat[p.kode]);
+            umumkan(TEKS.galat[p.kode]);
           } else if (p.kode === "NOMOR_ABSEN_DIPAKAI") {
             setGalatForm(TEKS.galat.NOMOR_ABSEN_DIPAKAI);
             gantiLayar("absen");
@@ -309,7 +430,7 @@ export default function App() {
           break;
       }
     },
-    [aturDialog, gantiLayar, hentiMenunggu, mesin, tahanRekap, umumkan],
+    [aturDialog, gantiLayar, hentiMenunggu, mesin, tahanRekap, umumkan, putar],
   );
 
   const tanganiKeadaan = useCallback(
@@ -528,7 +649,10 @@ export default function App() {
         case "kunci": {
           const hasil = kunci(d, kini);
           if (!hasil.pesan) return;
-          if (klien.current?.kirim({ v: PROTOKOL_VERSI, ...hasil.pesan })) aturDialog(hasil.d);
+          if (klien.current?.kirim({ v: PROTOKOL_VERSI, ...hasil.pesan })) {
+            aturDialog(hasil.d);
+            putar("klik"); // JS-14 (P-22)
+          }
           return;
         }
         case "petunjuk": {
@@ -546,7 +670,7 @@ export default function App() {
           aturDialog(pindah(d, a.jenis, kini));
       }
     },
-    [aturDialog],
+    [aturDialog, putar],
   );
   const periksa = useCallback(
     (kejadianId: string) => {
@@ -578,10 +702,14 @@ export default function App() {
   // JS-11 (P-7): di layar rekap, pita menggantikan lapisan menyambung ulang.
   const tampilMenyambung = koneksi === "menyambung_ulang" && terputusSejak !== null && LAYAR_BERSAMBUNG.includes(layar) && layar !== "ronde";
 
+  const menuSuara = (kelas: string) => (
+    <KelompokMenuSuara kelas={kelas} laptop={laptop} suara={atur.suara} saatMenu={() => bukaLembar("pengaturan")} saatSuara={balikSuara} />
+  );
+
   let isi: ReactNode;
   switch (layar) {
     case "kode":
-      isi = <LayarKode awal={kodeAwal} memeriksa={memeriksa} siap={asetSiap} galat={galatForm} saatKirim={kirimKode} />;
+      isi = <LayarKode awal={kodeAwal} memeriksa={memeriksa} siap={asetSiap} galat={galatForm} saatKirim={kirimKode} saatPrivasi={() => bukaLembar("privasi")} />;
       break;
     case "absen":
       isi = <LayarAbsen galat={galatForm} saatKirim={kirimAbsen} />;
@@ -590,8 +718,24 @@ export default function App() {
       isi = <LayarMenghubungkan />;
       break;
     case "identitas":
-      isi = (
+      isi =
+        modeNama === "bebas" ? (
+          <LayarIdentitasBebas
+            saran={saran}
+            galat={galatForm}
+            kaki={menuSuara("js-kaki-menu")}
+            saatMintaNama={() => {
+              setGalatForm(null);
+              klien.current?.kirim({ v: PROTOKOL_VERSI, t: "minta_nama" });
+            }}
+            saatGabung={(nama, avatar) => {
+              setGalatForm(null);
+              klien.current?.kirim({ v: PROTOKOL_VERSI, t: "pilih_identitas", nama, avatar });
+            }}
+          />
+        ) : (
         <LayarIdentitas
+          kaki={menuSuara("js-kaki-menu")}
           saran={saran}
           pilihNama={pilihNama}
           pilihAvatar={pilihAvatar}
@@ -608,7 +752,7 @@ export default function App() {
             klien.current?.kirim({ v: PROTOKOL_VERSI, t: "pilih_identitas", nama: pilihNama, avatar: pilihAvatar });
           }}
         />
-      );
+        );
       break;
     case "dunia":
       isi = (
@@ -634,6 +778,15 @@ export default function App() {
           saatDialog={aksiDialog}
           saatPeriksa={periksa}
           saatRingkas={ringkasDialog}
+          menuTerbuka={lembar !== null}
+          saatMenu={() => bukaLembar("pengaturan")}
+          suara={atur.suara}
+          saatSuara={balikSuara}
+          labelHuruf={LABEL_HURUF[atur.label]}
+          kurangiGerak={gerak.efektif}
+          putarSuara={putar}
+          ketik={atur.ketik}
+          saatHurufKetik={hurufKetik}
         />
       );
       break;
@@ -646,6 +799,7 @@ export default function App() {
           menyambung={koneksi === "menyambung_ulang" && rekapBerakhir === null}
           berakhir={rekapBerakhir}
           saatKembali={kembali}
+          kepala={menuSuara("js-rekap-menu")}
         />
       );
       break;
@@ -662,6 +816,21 @@ export default function App() {
       {isi}
       {layar === "dunia" && waktu.status === "jeda" ? <LapisanJeda /> : null}
       {tampilMenyambung ? <LapisanMenyambung sejak={terputusSejak} /> : null}
+      {lembar === "pengaturan" ? (
+        <PanelPengaturan
+          p={atur}
+          ubah={ubahAtur}
+          gerakPerangkat={gerak.perangkat}
+          saatSuara={aturSuara}
+          tutup={tutupLembar}
+          buka={(j) => {
+            lembarDariMenu.current = true;
+            setLembar(j);
+          }}
+        />
+      ) : null}
+      {lembar === "privasi" ? <PanelPrivasi tutup={tutupLembar} /> : null}
+      {lembar === "tentang" ? <PanelTentang tutup={tutupLembar} /> : null}
       <div className="js-sr" aria-live="polite">
         {pengumuman}
       </div>

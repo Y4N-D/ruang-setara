@@ -27,7 +27,7 @@ import { PETA_KAMPUNG } from "../../../../server/jejak-setara/src/ruang/peta-kam
 import { posisiSah } from "../../inti/gerak";
 import { DUNIA_LOBI, KERANGKA_PENUH_SETIAP } from "../../../../server/jejak-setara/src/ruang/inti-ruang";
 
-const PENGATURAN: PengaturanRuang = { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: ["lari"], modeNomorAbsen: false, uji: true };
+const PENGATURAN: PengaturanRuang = { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: ["lari"], modeNomorAbsen: false, modeNama: "daftar", uji: true };
 const DIBUAT = 1_000_000;
 
 function ruang(atur: Partial<PengaturanRuang> = {}): KeadaanRuang {

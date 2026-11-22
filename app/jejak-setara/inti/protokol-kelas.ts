@@ -1,5 +1,6 @@
 // Pesan layar kelas Jejak Setara (Architecture 6.4; spesifikasi JS-10, P-16 sampai P-22). Dipisah dari `protokol.ts`
-// agar layar pemain tidak memuat skema yang hanya dipakai server dan konsol (P-35). `PROTOKOL_VERSI` tetap 2.
+// agar layar pemain tidak memuat skema yang hanya dipakai server dan konsol (P-35). Sejak JS-14 `PROTOKOL_VERSI` 3:
+// `ganti_nama`, `ganti_semua_nama`, dan `info_kelas.modeNama` (spesifikasi JS-14, P-58).
 import { z } from "zod";
 import { POLA_KODE_RUANG } from "./aturan";
 import {
@@ -11,6 +12,7 @@ import {
   isiStatusRuang,
   kartu,
   koordinatPx,
+  modeNama,
   nama,
   PANJANG_TEKS,
   peringkat,
@@ -40,6 +42,8 @@ const kKeluarkan = /* @__PURE__ */ pesan("keluarkan", () => ({ pemainId: id() })
 const kKodeMasukUlang = /* @__PURE__ */ pesan("kode_masuk_ulang", () => ({ pemainId: id() }));
 const kPembahasan = /* @__PURE__ */ pesan("pembahasan", () => ({ kejadianId: id() }));
 const kTutupRuang = /* @__PURE__ */ pesan("tutup_ruang", () => ({}));
+const kGantiNama = /* @__PURE__ */ pesan("ganti_nama", () => ({ pemainId: id() })); // JS-14 (P-46)
+const kGantiSemuaNama = /* @__PURE__ */ pesan("ganti_semua_nama", () => ({})); // JS-14 (P-48)
 
 export const skemaKelas = /* @__PURE__ */ z.discriminatedUnion("t", [
   kHalo,
@@ -53,6 +57,8 @@ export const skemaKelas = /* @__PURE__ */ z.discriminatedUnion("t", [
   kKodeMasukUlang,
   kPembahasan,
   kTutupRuang,
+  kGantiNama,
+  kGantiSemuaNama,
 ]);
 
 
@@ -124,6 +130,7 @@ const kelasInfo = /* @__PURE__ */ pesan("info_kelas", () => ({
   batasPemain: angkaBulat(2, BATAS_PESAN.pemainMaks),
   uji: z.boolean(),
   terkunci: z.boolean(),
+  modeNama: modeNama(), // JS-14 (P-57)
   waktuServer: waktu(),
   jumlahKejadian: angkaBulat(0, BATAS_PESAN.kejadianMaks),
   kejadian: z

@@ -76,7 +76,7 @@ export async function daftarTopik(db: D1Database): Promise<string[]> {
 /** Pernyataan log audit (P-25); `syarat` opsional berupa klausa SQL yang harus benar agar baris ditulis. */
 export function pernyataanAudit(
   db: D1Database,
-  a: { penggunaId: string; aksi: string; sasaran: string; rincian: Record<string, unknown>; sekarang: number },
+  a: { penggunaId: string | null; aksi: string; sasaran: string; rincian: Record<string, unknown>; sekarang: number }, // null: tugas otomatis (JS-14)
   syarat?: { sql: string; nilai: unknown[] },
 ): D1PreparedStatement {
   const nilai = [crypto.randomUUID(), a.penggunaId, a.aksi, a.sasaran, JSON.stringify(a.rincian), a.sekarang];

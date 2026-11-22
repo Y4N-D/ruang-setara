@@ -1,4 +1,5 @@
 // Podium sesudah ronde selesai (spesifikasi JS-10, P-28): tiga besar di atas balok sun, mist, dan wood, lalu 4–10.
+import type { ReactNode } from "react";
 import type { PesanServerKelas } from "../../inti/protokol-kelas";
 import { isiTeks } from "../../teks";
 import { TEKS_KONSOL } from "../../teks-konsol";
@@ -8,7 +9,19 @@ import { susunPodium } from "./tampilan-kelas";
 type P<T extends PesanServerKelas["t"]> = Extract<PesanServerKelas, { t: T }>;
 const t = TEKS_KONSOL.kelas;
 
-export default function Podium({ info, papan, bahas, tutup }: { info: P<"info_kelas">; papan: P<"papan"> | null; bahas: () => void; tutup: () => void }) {
+export default function Podium({
+  info,
+  papan,
+  bahas,
+  tutup,
+  tombolPemain,
+}: {
+  info: P<"info_kelas">;
+  papan: P<"papan"> | null;
+  bahas: () => void;
+  tutup: () => void;
+  tombolPemain?: ReactNode;
+}) {
   const pemain = (papan?.pemain ?? []).filter((p) => p.skor > 0);
   const { podium, sisa } = susunPodium(pemain);
   return (
@@ -48,6 +61,7 @@ export default function Podium({ info, papan, bahas, tutup }: { info: P<"info_ke
         </div>
       )}
       <div className="js-kelas-kontrol">
+        {tombolPemain}
         <span />
         <span className="js-kelas-tombol-grup">
           <button type="button" className="js-kelas-tombol" onClick={tutup}>

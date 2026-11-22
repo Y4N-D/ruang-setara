@@ -39,6 +39,7 @@ export const TEKS_KONSOL = {
     memeriksa: "Memeriksa…",
     isiKosong: "Isi email dan sandi.",
     kreditAset: "Aset visual digambar dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN.",
+    kreditSuara: "Efek suara dibuat dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN.", // JS-14 (P-13)
     kreditHuruf: "Huruf Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.",
   },
   sandi: {
@@ -232,6 +233,12 @@ export const TEKS_KONSOL = {
     gagal: "Daftar ruang gagal dimuat.",
   },
   ruangBaru: {
+    // JS-14 (P-32): kelompok "Nama pemain".
+    namaJudul: "Nama pemain",
+    namaDaftar: "Daftar nama samaran",
+    namaDaftarKet: "Siswa memilih satu dari tiga saran, misalnya Kancil Jingga.",
+    namaBebas: "Nama buatan siswa",
+    namaBebasKet: "Siswa mengetik nama 3–14 karakter yang diperiksa penyaring kata, dan Anda bisa menggantinya kapan saja. Libatkan sekolah lebih dulu, karena siswa bisa mengetik nama panggilannya.",
     judul: "Ruang baru",
     label: "Label kelas",
     labelPetunjuk: "Misalnya IX B. Tampil di layar kelas.",
@@ -263,6 +270,16 @@ export const TEKS_KONSOL = {
     galatUmum: "Ruang gagal dibuat. Coba lagi.",
   },
   detail: {
+    // JS-14 (P-33, P-52): baris Nama pemain, Ganti nama, dan Ganti semua nama.
+    namaPemain: "Nama pemain",
+    gantiNama: "Ganti nama",
+    gantiNamaLabel: "Ganti nama {nama}",
+    okGantiNama: "Nama pemain diganti menjadi {nama}.",
+    gantiSemua: "Ganti semua nama",
+    gantiSemuaJudul: "Ganti semua nama buatan siswa?",
+    gantiSemuaIsi: "Setiap pemain yang mengetik namanya sendiri mendapat nama dari daftar, dan pemain yang bergabung sesudah ini memilih dari daftar.",
+    gantiSemuaTombol: "Ganti semua nama",
+    okGantiSemua: "{n} nama diganti.",
     kembali: "← Semua ruang",
     kode: "Kode ruang",
     tautan: "Buka di HP",
@@ -301,6 +318,25 @@ export const TEKS_KONSOL = {
     kirimanGagal: "Sebagian data ronde ini gagal disimpan ke basis data.",
   },
   kelas: {
+    // JS-14 (P-29 sampai P-31, P-53 sampai P-57): suara, kelola nama, dan panel Pemain.
+    suaraNyala: "Suara nyala. Tekan untuk mematikan.",
+    suaraMati: "Suara mati. Tekan untuk menyalakan.",
+    suaraTertahan: "Klik untuk menyalakan suara",
+    umumSuaraNyala: "Suara dinyalakan.",
+    umumSuaraMati: "Suara dimatikan.",
+    kelolaNama: "Kelola {nama}",
+    menuGantiNama: "Ganti nama",
+    menuKeluarkan: "Keluarkan",
+    menuBatal: "Batal",
+    keluarkanPemainJudul: "Keluarkan pemain ini?",
+    keluarkanPemainIsi: "Pemain ini tidak bisa bergabung lagi ke ruang ini.",
+    okNama: "Nama pemain diganti.",
+    okKeluar: "Pemain dikeluarkan.",
+    tombolPemain: "Pemain",
+    pemainJudul: "Pemain ({n})",
+    pemainKosong: "Belum ada pemain.",
+    pemainTutup: "Tutup",
+    cara3Bebas: "Tulis nama pemain dan pilih avatar",
     judulTab: "Layar kelas · {kode}",
     menyambung: "Menyambung ke ruang…",
     menyambungUlang: "Menyambung ulang…",
@@ -620,6 +656,7 @@ export const TEKS_KONSOL = {
     STATUS_TIDAK_SESUAI: "Ruang hanya bisa ditutup di lobi, sesudah ronde selesai, atau saat pembahasan.",
     HASIL_BELUM_ADA: "Hasil tersedia sesudah ronde selesai.",
     BELUM_DITUTUP: "Data ruang hanya bisa dihapus sesudah ruang ditutup.",
+    BUKAN_NAMA_BEBAS: "Ruang ini memakai daftar nama samaran.", // JS-14 (P-51)
   } satisfies Record<KodeGalatRuang, string>,
   // JS-11: riwayat ruang (P-16 sampai P-19), hasil ronde (P-20 sampai P-25, P-30 sampai P-32), dan isi berkas CSV
   // (P-28, P-29; dipakai server).
@@ -688,7 +725,7 @@ export const TEKS_KONSOL = {
     cetakKaki: "Dicetak dari konsol Jejak Setara, {tanggal}.",
     peringkatJudul: "Peringkat lengkap",
     kolomPeringkat: "Peringkat",
-    kolomNama: "Nama samaran",
+    kolomNama: "Nama pemain", // JS-14 (P-61)
     kolomAbsen: "No. absen",
     kolomSkor: "Skor",
     kolomSelesai: "Kejadian selesai",
@@ -731,7 +768,7 @@ export const TEKS_KONSOL = {
     kelas: "Kelas",
     tanggal: "Tanggal (WITA)",
     peringkat: "Peringkat",
-    nama: "Nama samaran",
+    nama: "Nama pemain", // JS-14 (P-61)
     absen: "Nomor absen",
     skor: "Skor",
     selesai: "Kejadian selesai",

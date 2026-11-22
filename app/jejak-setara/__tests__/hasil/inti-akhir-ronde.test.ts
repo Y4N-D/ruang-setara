@@ -24,7 +24,7 @@ import { hitungRingkasanHasil, susunRekap } from "../../../../server/jejak-setar
 import { MASUK } from "../ruang/bankUji";
 
 const V = PROTOKOL_VERSI;
-const PENGATURAN: PengaturanRuang = { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: [], modeNomorAbsen: false, uji: true };
+const PENGATURAN: PengaturanRuang = { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: [], modeNomorAbsen: false, modeNama: "daftar", uji: true };
 const DIBUAT = 1_000_000;
 type Pesan<T extends PesanServerPemain["t"]> = Extract<PesanServerPemain, { t: T }>;
 

@@ -41,19 +41,20 @@ import { bacaPaketUntuk, bacaTeksRujukan, daftarPaketPilihan, paketSiapRuangBias
 import {
   bacaJawabanHasil,
   bacaPesertaHasil,
+  type BarisPesertaHasil,
+  type BarisRiwayat,
+  type BarisRuangKonsol,
   cariPesertaRuang,
   cariRuangAktif,
   cariRuangId,
   daftarRiwayat,
   daftarRuang,
   hapusDataRuang,
+  hapusRuangKedaluwarsa,
   hitungDataRuang,
   ruangAktifPemilik,
   sisipkanRuang,
   tandaiRuangDitutup,
-  type BarisPesertaHasil,
-  type BarisRiwayat,
-  type BarisRuangKonsol,
 } from "../db/ruang";
 import { csvJawaban, csvPeserta, namaBerkasCsv, rincianJawaban, type PesertaEkspor } from "../ekspor/csv";
 import type { Env } from "../env";
@@ -72,7 +73,7 @@ export function galatRuang(kode: KodeGalatRuang, status: number, tambahan: Recor
 }
 
 export function jalurRuang(jalur: string): boolean {
-  return jalur.startsWith("/api/publik/ruang/") || jalur === "/api/ruang" || jalur.startsWith("/api/ruang/") || jalur.startsWith("/api/uji/ruang/");
+  return jalur.startsWith("/api/publik/ruang/") || jalur === "/api/ruang" || jalur.startsWith("/api/ruang/") || jalur.startsWith("/api/uji/ruang/") || jalur === "/api/uji/pembersihan";
 }
 
 function kodeDariJalur(bagian: string): string | null {
@@ -88,10 +89,12 @@ function kodeDariJalur(bagian: string): string | null {
 export function ringkasanRuang(b: BarisRuangKonsol): RingkasanRuang {
   let batasPemain = 40;
   let skillAktif: unknown = undefined;
+  let modeNama: "daftar" | "bebas" = "daftar";
   try {
     const p = JSON.parse(b.pengaturan_json) as PengaturanRuang;
     batasPemain = p.batasPemain;
     skillAktif = p.skillAktif;
+    if (p.modeNama === "bebas") modeNama = "bebas"; // JS-14 (P-33)
   } catch {
     // Pengaturan rusak: memakai bawaan.
   }
@@ -107,6 +110,7 @@ export function ringkasanRuang(b: BarisRuangKonsol): RingkasanRuang {
     namaGuru: b.nama_guru,
     dibuatPada: b.dibuat_pada,
     skillAktif: skillAktifRuang(skillAktif), // JS-09, P-9
+    modeNama,
   };
 }
 
@@ -115,6 +119,8 @@ export async function tanganiApiRuang(request: Request, env: Env, url: URL): Pro
   if (jalur.startsWith("/api/publik/ruang/")) return periksaKode(request, env, jalur.slice("/api/publik/ruang/".length));
   const kait = /^\/api\/uji\/ruang\/([^/]+)\/(statistik|putuskan|kejadian|pindahkan|pengaman)$/.exec(jalur);
   if (kait) return env.LINGKUNGAN === "lokal" ? kaitUji(request, env, kait[1], kait[2] as JenisKait) : belumTersedia();
+  // JS-14 (P-65): kait uji lokal penghapusan sesudah masa simpan.
+  if (jalur === "/api/uji/pembersihan") return env.LINGKUNGAN === "lokal" ? kaitPembersihan(request, env) : belumTersedia();
   if (jalur === "/api/ruang/pilihan") return request.method === "GET" ? pilihan(request, env) : metodeSalah("GET");
   if (jalur === "/api/ruang") {
     if (request.method === "GET") return daftar(request, env);
@@ -147,7 +153,8 @@ async function periksaKode(request: Request, env: Env, bagian: string): Promise<
   const ruang = kode ? await cariRuangAktif(env.DB, kode) : null;
   if (!ruang) return ruangTidakAda();
   const pengaturan = JSON.parse(ruang.pengaturan_json) as PengaturanRuang;
-  return jawabJson({ ada: true, modeNomorAbsen: pengaturan.modeNomorAbsen }, 200);
+  // JS-14 (P-34): mode nama awal ruang.
+  return jawabJson({ ada: true, modeNomorAbsen: pengaturan.modeNomorAbsen, modeNama: pengaturan.modeNama === "bebas" ? "bebas" : "daftar" }, 200);
 }
 
 // -------------------------------------------------------------------------------------------
@@ -222,6 +229,7 @@ async function buat(request: Request, env: Env, url: URL): Promise<Response> {
     skillAktif: skillAktifRuang(isi.skillAktif),
     modeNomorAbsen: isi.modeNomorAbsen,
     uji: isi.uji,
+    modeNama: isi.modeNama ?? "daftar", // JS-14 (P-32)
   };
   const labelKelas = normalkanLabel(isi.labelKelas);
   const kejadian = await muatKejadian(env.DB, isi.paketId, isi.uji, isi.batasPemain);
@@ -320,9 +328,11 @@ async function kelola(request: Request, env: Env, url: URL, id: string): Promise
   if (!isi) return galatRuang("ISI_SALAH", 400);
   if (milik.ruang.status === "ditutup") return galatRuang(isi.aksi === "tutup" ? "STATUS_TIDAK_SESUAI" : "RUANG_TIDAK_ADA", isi.aksi === "tutup" ? 409 : 404);
   const jawaban = await stubRuang(env, milik.ruang).fetch("https://ruang/kelola", { method: "POST", body: JSON.stringify(isi) });
-  if (jawaban.ok) return jawabJson({ ok: true }, 200);
+  // JS-14 (P-51): jawaban berhasil membawa `nama` atau `jumlah` dari Durable Object.
+  if (jawaban.ok) return jawabJson({ ...((await jawaban.json().catch(() => ({}))) as Record<string, unknown>), ok: true }, 200);
   const galat = ((await jawaban.json().catch(() => null)) as { galat?: { kode?: string } } | null)?.galat?.kode;
-  const kode: KodeGalatRuang = galat === "PEMAIN_TIDAK_ADA" || galat === "STATUS_TIDAK_SESUAI" || galat === "ISI_SALAH" ? galat : "RUANG_TIDAK_ADA";
+  const kode: KodeGalatRuang =
+    galat === "PEMAIN_TIDAK_ADA" || galat === "STATUS_TIDAK_SESUAI" || galat === "ISI_SALAH" || galat === "BUKAN_NAMA_BEBAS" ? galat : "RUANG_TIDAK_ADA";
   return galatRuang(kode, jawaban.status === 409 || jawaban.status === 400 ? jawaban.status : 404);
 }
 
@@ -520,6 +530,14 @@ async function hapus(request: Request, env: Env, url: URL, id: string): Promise<
 // Kait uji lokal (P-32)
 
 type JenisKait = "statistik" | "putuskan" | "kejadian" | "pindahkan" | "pengaman";
+
+/** JS-14 (P-65): menjalankan penghapusan sesudah masa simpan dengan waktu `sekarang` dari isi permintaan. */
+async function kaitPembersihan(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "POST") return metodeSalah("POST");
+  const isi = (await request.json().catch(() => null)) as { sekarang?: unknown } | null;
+  const sekarang = typeof isi?.sekarang === "number" && Number.isFinite(isi.sekarang) ? isi.sekarang : Date.now();
+  return jawabJson({ dihapus: await hapusRuangKedaluwarsa(env.DB, sekarang) }, 200);
+}
 
 async function kaitUji(request: Request, env: Env, bagian: string, jenis: JenisKait): Promise<Response> {
   const kode = kodeDariJalur(bagian);

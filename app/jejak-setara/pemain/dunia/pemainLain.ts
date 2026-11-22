@@ -123,6 +123,12 @@ export class PemainLain {
   }
 
   /** `pemain_pergi` atau sesi baru. */
+  /** JS-14 (P-47): nama baru dari guru; label digambar ulang dari nama ini. */
+  gantiNama(id: string, nama: string): void {
+    const info = this.infoPemain(id);
+    if (info) this.kenal(id, { ...info, nama });
+  }
+
   lupakan(id: string): void {
     this.info.delete(id);
     this.catatan.delete(id);

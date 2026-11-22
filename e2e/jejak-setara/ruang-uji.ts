@@ -8,9 +8,10 @@ import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
 const KUNCI_ADMIN = "lokal-kunci-admin-bukan-rahasia";
 const PAKET_INTI = "9880c4d5-8294-51c9-971a-e95531a2e039";
 const SANDI_SEMENTARA = "sandi sementara uji e2e";
-const SANDI = "kalimat sandi uji e2e";
+/** JS-14: diekspor agar uji bisa masuk konsol lewat halaman masuk. */
+export const SANDI = "kalimat sandi uji e2e";
 const IP = `10.77.${process.pid % 250}.1`;
-const EMAIL = `admin-e2e-${process.pid}@sekolah.sch.id`;
+export const EMAIL = `admin-e2e-${process.pid}@sekolah.sch.id`;
 
 let asal: string | null = null;
 let cookie: string | null = null;

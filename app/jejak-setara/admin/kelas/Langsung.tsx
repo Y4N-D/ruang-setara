@@ -1,5 +1,6 @@
 // Layar kelas saat bermain dan jeda (spesifikasi JS-10, P-26, P-27): bilah masa dengan jam cerita dan sisa waktu, peta
 // kelas, 10 besar, kemajuan kelas 12 blok, dan tombol kontrol.
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { formatJam, masa, menitCerita } from "../../inti/aturan";
 import type { PesanServerKelas } from "../../inti/protokol-kelas";
@@ -34,9 +35,11 @@ interface PropsLangsung {
   lanjut: () => void;
   tambah: () => void;
   akhiri: () => void;
+  /** JS-14 (P-55). */
+  tombolPemain?: ReactNode;
 }
 
-export default function Langsung({ status, papan, kemajuan, dunia, tas, selisih, jeda, lanjut, tambah, akhiri }: PropsLangsung) {
+export default function Langsung({ status, papan, kemajuan, dunia, tas, selisih, jeda, lanjut, tambah, akhiri, tombolPemain }: PropsLangsung) {
   const jam = useJamServer(selisih);
   const dijeda = status.status === "jeda";
   const sisa = sisaRonde(status.berakhirPada, status.jedaSejak, jam);
@@ -85,6 +88,7 @@ export default function Langsung({ status, papan, kemajuan, dunia, tas, selisih,
         </section>
       </div>
       <div className="js-kelas-kontrol">
+        {tombolPemain}
         <span className="js-kelas-kemajuan">
           <span className="js-kelas-besar">{t.kemajuan}</span>
           <span className="js-kelas-blok" aria-hidden="true">

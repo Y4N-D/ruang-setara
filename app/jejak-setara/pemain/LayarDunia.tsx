@@ -24,6 +24,8 @@ import { hitungSkala, type UkuranDunia } from "./dunia/skala";
 import { batasPanah, type StatusTombol } from "./dunia/skill";
 import Joystick from "./Joystick";
 import { LapisanHitungMundur } from "./LayarRonde";
+import { KelompokMenuSuara } from "./PanelPengaturan";
+import type { NamaSuara } from "./suara";
 import PanelLobi from "./PanelLobi";
 import PetaBesar from "./PetaBesar";
 import PetaMini, { gambarPetaMini, type PenandaPeta } from "./PetaMini";
@@ -98,11 +100,33 @@ export interface PropsLayarDunia {
   saatDialog: (a: AksiDialog) => void;
   saatPeriksa: (kejadianId: string) => void;
   saatRingkas: (ringkas: boolean) => void;
+  // JS-14 (P-4 sampai P-8, P-22, P-24, P-27, P-28)
+  menuTerbuka: boolean;
+  saatMenu: () => void;
+  suara: boolean;
+  saatSuara: () => void;
+  labelHuruf: number;
+  kurangiGerak: boolean;
+  putarSuara: (nama: NamaSuara) => void;
+  ketik: boolean;
+  saatHurufKetik: (teks: string, dari: number, ke: number) => void;
+}
+
+/** JS-14 (P-7): kotak kelompok Menu dan suara, diperluas 8 px CSS dan setengah panah, dalam piksel pandangan. */
+function zonaHud(u: UkuranDunia, l: { rasio: number }, el: HTMLElement | null, wadah: HTMLElement | null): number[] {
+  if (!el || !wadah) return [];
+  const r = el.getBoundingClientRect();
+  const w = wadah.getBoundingClientRect();
+  const px = u.k / l.rasio;
+  const kx = (css: number) => (css - w.left - u.kiriCss) / px;
+  const ky = (css: number) => (css - w.top - u.atasCss) / px;
+  return [kx(r.left - 8) - 7, ky(r.top - 8) - 7, kx(r.right + 8) + 7, ky(r.bottom + 8) + 7];
 }
 
 export default function LayarDunia(props: PropsLayarDunia) {
   const { mesin, status, waktu, durasiMenit, kode, diri, jumlahPemain, menyambung, selisihJam, kirim, kirimSkill, bufferedAmount, umumkan } = props;
   const { skor, peringkat, dialog, ruangUji, menungguPeriksa, saatDialog, saatPeriksa, saatRingkas } = props;
+  const { menuTerbuka, saatMenu, suara, saatSuara, labelHuruf, putarSuara, ketik, saatHurufKetik } = props;
   const [ukuran, setUkuran] = useState<UkuranDunia>(ukuranLayar);
   const [layar, setLayar] = useState(() => ({ lebar: window.innerWidth, tinggi: window.innerHeight, rasio: window.devicePixelRatio || 1 }));
   const sentuh = useMemo(() => perangkatSentuh(window), []);
@@ -112,27 +136,31 @@ export default function LayarDunia(props: PropsLayarDunia) {
   // JS-09 (P-41): pita yang tampil dari antrean mesin dunia, dan status tombol skill (P-36).
   const [pita, setPita] = useState("");
   const [tombolSkill, setTombolSkill] = useState<StatusTombol[]>([]);
-  const [kurangiGerak, setKurangiGerak] = useState(() => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false);
+  // JS-14 (P-28): nilai efektif kurangi gerak dari pengaturan pemain atau perangkat.
+  const kurangiGerak = props.kurangiGerak;
   const kanvas = useRef<HTMLCanvasElement | null>(null);
   const label = useRef<HTMLCanvasElement | null>(null);
   const mini = useRef<HTMLCanvasElement | null>(null);
   const kotak = useRef<HTMLDivElement | null>(null);
+  const hudKiri = useRef<HTMLDivElement | null>(null);
   const tegak = sentuh && layar.tinggi > layar.lebar;
   const ronde = status === "main" || status === "jeda";
   const lobi = status === "lobi" || status === "hitung_mundur";
   const adaDialog = dialog !== null;
+  // JS-14 (P-8): selama panel Menu terbuka, dunia tertahan seperti saat dialog terbuka.
+  const tertahan = adaDialog || menuTerbuka;
   const [jangkauan, setJangkauan] = useState<string | null>(null);
   const [penanda, setPenanda] = useState<{ daftar: PenandaPeta[]; terlihat: number; selesai: number }>({ daftar: [], terlihat: 0, selesai: 0 });
   const [fps, setFps] = useState<string | null>(null);
 
   // Nilai terbaru untuk loop bingkai tanpa memasang ulang loop.
-  const terbaru = useRef({ menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, menungguPeriksa, umumkan, batas: batasDari(ukuran, layar) });
+  const terbaru = useRef({ menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, tertahan, labelHuruf, saatMenu, menungguPeriksa, umumkan, batas: batasDari(ukuran, layar) as readonly number[] });
   useEffect(() => {
-    terbaru.current = { menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, menungguPeriksa, umumkan, batas: batasDari(ukuran, layar) };
+    terbaru.current = { menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, tertahan, labelHuruf, saatMenu, menungguPeriksa, umumkan, batas: [...batasDari(ukuran, layar), ...zonaHud(ukuran, layar, hudKiri.current, kotak.current)] };
   });
 
   // Tombol skill tampil dengan syarat tombol Periksa (P-33).
-  const tampilSkill = status === "main" && !adaDialog && !petaBesar && !menyambung && !tegak;
+  const tampilSkill = status === "main" && !tertahan && !petaBesar && !menyambung && !tegak;
   const tampilSkillRef = useRef(tampilSkill);
   useEffect(() => {
     tampilSkillRef.current = tampilSkill;
@@ -154,7 +182,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
   const periksa = useCallback(() => {
     const kodeKejadian = mesin.jangkauan;
     const t = terbaru.current;
-    if (!kodeKejadian || t.adaDialog || t.menungguPeriksa || t.petaBesar || t.menyambung || t.tegak || status !== "main") return;
+    if (!kodeKejadian || t.tertahan || t.menungguPeriksa || t.petaBesar || t.menyambung || t.tegak || status !== "main") return;
     mesin.hentiUntukPeriksa(Date.now(), t.kirim);
     saatPeriksa(kodeKejadian);
   }, [mesin, saatPeriksa, status]);
@@ -182,13 +210,9 @@ export default function LayarDunia(props: PropsLayarDunia) {
     };
     window.addEventListener("resize", ubah);
     window.addEventListener("orientationchange", ubah);
-    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    const gerak = () => setKurangiGerak(mq?.matches ?? false);
-    mq?.addEventListener?.("change", gerak);
     return () => {
       window.removeEventListener("resize", ubah);
       window.removeEventListener("orientationchange", ubah);
-      mq?.removeEventListener?.("change", gerak);
     };
   }, []);
 
@@ -242,7 +266,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
       // Selama dialog terbuka, papan ketik milik dialog: avatar diam dan P tidak membuka peta besar (P-51).
-      if (terbaru.current.adaDialog) return;
+      if (terbaru.current.tertahan) return;
       // E, atau Enter pada dunia yang terfokus, memeriksa kejadian dalam jangkauan (P-23).
       if ((e.code === "KeyE" && !(t && t.tagName === "BUTTON")) || (e.key === "Enter" && t === kanvas.current)) {
         if (mesin.jangkauan && !e.repeat) {
@@ -272,6 +296,13 @@ export default function LayarDunia(props: PropsLayarDunia) {
         tutupPetaBesar();
         return;
       }
+      // JS-14 (P-8): Esc di luar dialog dan peta besar membuka Menu. Esc yang sudah dipakai dialog untuk menutup dirinya
+      // (preventDefault) tidak ikut membuka Menu, walaupun keadaan dialog sudah diperbarui sebelum pesan sampai di sini.
+      if (e.code === "Escape" && !e.repeat && !e.defaultPrevented) {
+        e.preventDefault();
+        terbaru.current.saatMenu();
+        return;
+      }
       if (m.tekan(e.code) && TOMBOL_GULIR.has(e.code)) e.preventDefault();
     };
     const naik = (e: KeyboardEvent) => m.lepas(e.code);
@@ -298,7 +329,8 @@ export default function LayarDunia(props: PropsLayarDunia) {
     return { x: e.clientX - (r?.left ?? 0), y: e.clientY - (r?.top ?? 0), lebar: r?.width ?? 0 };
   };
   const saatTurun = (e: PointerEventReact<HTMLElement>) => {
-    if (!sentuh || e.pointerType === "mouse" || petaBesar || tegak || adaDialog) return;
+    if (!sentuh || e.pointerType === "mouse" || petaBesar || tegak || tertahan) return;
+    if ((e.target as HTMLElement | null)?.closest?.("button")) return; // JS-14 (P-6)
     if ((e.target as Element).closest("button, a, [role='dialog']")) return;
     const p = titikDunia(e);
     if (mesin.masukan.mulaiJoystick(e.pointerId, p.x, p.y, p.lebar)) {
@@ -366,7 +398,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
         jamLokal: Date.now(),
         jamPerforma: jam,
         selisihJam: t.selisihJam(),
-        bolehGerak: !t.menyambung && !t.petaBesar && !t.tegak && !t.adaDialog && !t.menungguPeriksa,
+        bolehGerak: !t.menyambung && !t.petaBesar && !t.tegak && !t.tertahan && !t.menungguPeriksa,
         kurangiGerak: t.kurangiGerak,
         bufferedAmount: t.bufferedAmount(),
         kirim: t.kirim,
@@ -396,7 +428,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
           kotorLabel = [];
           const r = t.rasio;
           const k = t.ukuran.k;
-          const huruf = Math.round(LABEL.huruf * r);
+          const huruf = Math.round(t.labelHuruf * r); // JS-14 (P-27)
           const jarak = Math.round(LABEL.jarak * r);
           const garis = Math.max(1, Math.round(LABEL.garis * r));
           const hurufSiap = document.fonts?.check(`${huruf}px "Pixelify Sans"`) ?? false;
@@ -552,7 +584,9 @@ export default function LayarDunia(props: PropsLayarDunia) {
   const p = mesin.gerak.posisi;
   const ringkas = modeRingkas(hud.height - TINGGI_BILAH);
   const bentuk: "lembar" | "panel" = sentuh && layar.tinggi <= 500 ? "lembar" : "panel";
-  const tampilPeriksa = status === "main" && !adaDialog && !petaBesar && !menyambung && !tegak;
+  const tampilPeriksa = status === "main" && !tertahan && !petaBesar && !menyambung && !tegak;
+  // JS-14 (P-5): Menu dan suara di dunia, kecuali selama dialog, peta besar, menyambung ulang, ajakan memutar HP, dan panel.
+  const tampilMenu = !adaDialog && !petaBesar && !menyambung && !tegak && !menuTerbuka;
 
   return (
     <main
@@ -587,11 +621,12 @@ export default function LayarDunia(props: PropsLayarDunia) {
       </div>
       <div className="js-hud" style={hud}>
         {lobi ? <PanelLobi kode={kode} nama={diri?.nama ?? ""} avatar={diri?.avatar ?? 0} jumlah={jumlahPemain} umumkan={umumkan} /> : null}
-        {hitungMundur ? <LapisanHitungMundur mulaiPada={waktu.mulaiPada as number} selisihJam={selisihJam} /> : null}
+        {tampilMenu ? <KelompokMenuSuara ref={hudKiri} kelas="js-hud-kiri" laptop={!sentuh} suara={suara} saatMenu={saatMenu} saatSuara={saatSuara} /> : null}
+        {hitungMundur ? <LapisanHitungMundur mulaiPada={waktu.mulaiPada as number} selisihJam={selisihJam} saatAngka={() => putarSuara("hitung")} /> : null}
         {ronde ? (
           <BilahAtas langit={langit} denyut={langit.duaMenit && !kurangiGerak && status === "main"} skor={skor} peringkat={peringkat} kurangiGerak={kurangiGerak} />
         ) : null}
-        {ronde && !petaBesar && !(adaDialog && bentuk === "lembar") ? <PetaMini kanvasRef={mini} rasio={layar.rasio} saatBuka={() => setPetaBesar(true)} /> : null}
+        {ronde && !petaBesar && !menuTerbuka && !(adaDialog && bentuk === "lembar") ? <PetaMini kanvasRef={mini} rasio={layar.rasio} saatBuka={() => setPetaBesar(true)} /> : null}
         {tampilPeriksa && sentuh ? <TombolPeriksa dekat={jangkauan !== null} ditekan={menungguPeriksa} saatTekan={periksa} /> : null}
         {tampilSkill && tombolSkill.length > 0 ? <TombolSkill daftar={tombolSkill} sentuh={sentuh} kurangiGerak={kurangiGerak} saatTekan={tekanSkill} /> : null}
         {tampilPeriksa && !sentuh && jangkauan ? <AjakanPeriksa /> : null}
@@ -606,7 +641,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
             <div className="js-dialog-jeda" style={{ top: TINGGI_BILAH }} aria-hidden="true" />
           ) : (
             <div className="js-dialog-wadah" data-bentuk={bentuk} data-ringkas={ringkas ? "ya" : "tidak"} style={{ top: TINGGI_BILAH }}>
-              <DialogKejadian d={dialog} bentuk={bentuk} ruangUji={ruangUji} saatAksi={saatDialog} />
+              <DialogKejadian d={dialog} bentuk={bentuk} ruangUji={ruangUji} saatAksi={saatDialog} ketik={ketik} saatHurufKetik={saatHurufKetik} />
             </div>
           )
         ) : null}

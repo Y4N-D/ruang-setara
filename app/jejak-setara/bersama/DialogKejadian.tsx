@@ -2,7 +2,8 @@
 // hanya menampilkan keadaan dari dialogKeadaan.ts dan meneruskan aksi pemain lewat `saatAksi`; aturan pilihan,
 // penguncian, dan masa tunggu ada di modul murni itu. Dipakai layar pemain dan, di JS-12, pratinjau konsol.
 // JS-09 (P-27 sampai P-32): tombol Petunjuk, kotak petunjuk, pilihan yang dicoret, dan "+1 Kompas" di kartu dampak.
-import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useKetik } from "../pemain/ketik";
 import { IKON } from "../assets/manifest";
 import type { Tingkat } from "../inti/tipe";
 import { isiTeks, TEKS } from "../teks";
@@ -51,9 +52,57 @@ export interface PropsDialogKejadian {
   bentuk: "lembar" | "panel";
   ruangUji: boolean;
   saatAksi: (a: AksiDialog) => void;
+  /** JS-14 (P-24): teks situasi muncul per huruf; pratinjau konsol tidak mengisinya. */
+  ketik?: boolean;
+  saatHurufKetik?: (teks: string, dari: number, ke: number) => void;
 }
 
-export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi }: PropsDialogKejadian) {
+/** JS-14 (P-25): situasi yang sudah tampil penuh di tab ini tidak berjalan lagi. */
+const SITUASI_PENUH = new Set<string>();
+
+/** JS-14 (P-24 sampai P-26): teks situasi muncul per huruf bila diaktifkan; teks lengkap tersedia untuk pembaca layar. */
+function KotakSituasi({ teks, kunci, aktif, saatHuruf }: { teks: string; kunci: string; aktif: boolean; saatHuruf?: (teks: string, dari: number, ke: number) => void }) {
+  const [jalan] = useState(() => aktif && !SITUASI_PENUH.has(kunci));
+  const { tampil, selesai, lewati } = useKetik(teks, jalan, saatHuruf ? (dari, ke) => saatHuruf(teks, dari, ke) : undefined);
+  useEffect(() => {
+    if (selesai) SITUASI_PENUH.add(kunci);
+  }, [selesai, kunci]);
+  useEffect(
+    () => () => {
+      SITUASI_PENUH.add(kunci);
+    },
+    [kunci],
+  );
+  // Sesudah dilewati, kotak ini tidak lagi bisa difokus, jadi fokus pindah ke pilihan pertama di dialog (P-25, P-67).
+  const lewatiDanFokus = (el: HTMLElement) => {
+    const dialog = el.closest<HTMLElement>('[role="dialog"]');
+    lewati();
+    window.requestAnimationFrame(() => (dialog?.querySelector<HTMLElement>('[data-pilihan="ya"]') ?? dialog)?.focus());
+  };
+  if (!jalan || selesai) return <p className="js-situasi">{teks}</p>;
+  return (
+    <>
+      <p
+        className="js-situasi"
+        role="button"
+        tabIndex={0}
+        aria-label={TEKS.ketik.label}
+        onClick={(e) => lewatiDanFokus(e.currentTarget)}
+        onKeyDown={(e) => {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          e.stopPropagation();
+          lewatiDanFokus(e.currentTarget);
+        }}
+      >
+        <span aria-hidden="true">{tampil}</span>
+      </p>
+      <p className="js-sr">{teks}</p>
+    </>
+  );
+}
+
+export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi, ketik, saatHurufKetik }: PropsDialogKejadian) {
   const kotak = useRef<HTMLElement | null>(null);
   const langkah = langkahPilihan(d);
   const opsi = langkah ? opsiLangkah(d, langkah) : [];
@@ -124,7 +173,7 @@ export default function DialogKejadian({ d, bentuk, ruangUji, saatAksi }: PropsD
     saatAksi(terpilih ? { jenis: "kunci" } : { jenis: "pilih", id });
   };
 
-  const situasi = <p className="js-situasi">{d.situasi}</p>;
+  const situasi = <KotakSituasi key={d.kejadianId} teks={d.situasi} kunci={d.kejadianId} aktif={ketik === true} saatHuruf={saatHurufKetik} />;
   const pertanyaan = (teks: string | undefined) => (teks ? <p className="js-pertanyaan">{teks}</p> : null);
   const pilihan = (l: 1 | 2) => (
     <div className={l === 1 ? "js-kisi-opsi" : "js-susun-opsi"} role="group" aria-label={l === 1 ? d.pertanyaan1 : d.hasil1?.pertanyaan2}>

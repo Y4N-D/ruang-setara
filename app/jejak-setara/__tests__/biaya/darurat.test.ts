@@ -1,5 +1,6 @@
 // Worker saat "Jejak: hentikan" aktif (spesifikasi JS-22, P-12; AC-8): 503 untuk API dan WebSocket tanpa menyentuh D1.
 import { describe, expect, it } from "vitest";
+import { PROTOKOL_VERSI } from "../../inti/versi";
 import worker from "../../../../server/jejak-setara/src/index";
 
 type Env = Parameters<typeof worker.fetch>[1];
@@ -55,7 +56,7 @@ describe("darurat di Worker", () => {
           env(true),
         )
       ).json(),
-    ).toEqual({ ok: true, protokol: 2, lingkungan: "uji", darurat: true });
+    ).toEqual({ ok: true, protokol: PROTOKOL_VERSI, lingkungan: "uji", darurat: true });
     expect(
       await (
         await worker.fetch(
@@ -63,7 +64,7 @@ describe("darurat di Worker", () => {
           env(false),
         )
       ).json(),
-    ).toEqual({ ok: true, protokol: 2, lingkungan: "uji" });
+    ).toEqual({ ok: true, protokol: PROTOKOL_VERSI, lingkungan: "uji" });
   });
 
   it("halaman statis tetap disajikan", async () => {

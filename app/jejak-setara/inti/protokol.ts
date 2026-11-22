@@ -25,6 +25,7 @@ export const KODE_GALAT = [
   "DIKELUARKAN",
   "BUKAN_JANGKAUAN",
   "NOMOR_ABSEN_DIPAKAI", // JS-03
+  "NAMA_DITOLAK", // JS-14 (P-42): nama buatan siswa tidak sah, tertangkap penyaring, atau diblokir
 ] as const;
 export type KodeGalat = (typeof KODE_GALAT)[number];
 
@@ -78,6 +79,8 @@ export const avatar = () => angkaBulat(0, BATAS_PESAN.avatarMaks);
 export const warnaTas = () => z.enum(["sun", "mango", "coral", "rose", "berry", "teal", "leaf", "sky-d"]);
 export const statusRuang = () => z.enum(["lobi", "hitung_mundur", "main", "jeda", "selesai", "pembahasan", "ditutup"]);
 export const nama = () => teks(PANJANG_TEKS.nama);
+/** JS-14 (P-58): mode nama ruang, daftar nama samaran atau nama buatan siswa. */
+export const modeNama = () => z.enum(["daftar", "bebas"]);
 export const skor = () => angkaBulat(0, 1_000_000);
 export const peringkat = () => angkaBulat(1, BATAS_PESAN.pemainMaks);
 const poin = () => angkaBulat(0, 100);
@@ -101,6 +104,7 @@ const pengaturan = () =>
         .refine((daftar) => new Set(daftar).size === daftar.length, "skill ganda"),
       modeNomorAbsen: z.boolean(),
       uji: z.boolean(),
+      modeNama: modeNama(), // JS-14: mode yang berlaku untuk pemain ini (P-34, P-41)
     })
     .strict();
 
@@ -276,6 +280,8 @@ const sSelesai = /* @__PURE__ */ pesan("selesai", () => ({
 const sGalat = /* @__PURE__ */ pesan("galat", isiGalat);
 const sPong = /* @__PURE__ */ pesan("pong", () => ({ tKlien: waktu(), waktuServer: waktu() }));
 const sSaranNama = /* @__PURE__ */ pesan("saran_nama", () => ({ saranNama: z.array(nama()).max(3) })); // JS-03
+const sNamaBaru = /* @__PURE__ */ pesan("nama_baru", () => ({ id: id(), nama: nama() })); // JS-14 (P-46)
+const sModeNama = /* @__PURE__ */ pesan("mode_nama", () => ({ modeNama: modeNama() })); // JS-14 (P-44, P-48)
 
 export const skemaServerPemain = /* @__PURE__ */ z.discriminatedUnion("t", [
   sSelamatDatang,
@@ -296,6 +302,8 @@ export const skemaServerPemain = /* @__PURE__ */ z.discriminatedUnion("t", [
   sGalat,
   sPong,
   sSaranNama,
+  sNamaBaru,
+  sModeNama,
 ]);
 
 export type PesanPemain = z.infer<typeof skemaPemain>;

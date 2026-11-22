@@ -37,6 +37,9 @@ export interface IsiKejadian {
   jenis: "pelanggaran_hak" | "pengabaian_kewajiban" | "keduanya";
 }
 
+/** JS-14: daftar nama samaran (bawaan) atau nama buatan siswa. */
+export type ModeNama = "daftar" | "bebas";
+
 export interface PengaturanRuang {
   durasiMenit: 10 | 15 | 20;
   batasPemain: number; // 2–100, bawaan 40; mode nomor absen hanya sampai 50 (JS-03)
@@ -44,6 +47,7 @@ export interface PengaturanRuang {
   skillAktif: SkillId[];
   modeNomorAbsen: boolean;
   uji: boolean; // ruang uji: tidak masuk statistik
+  modeNama: ModeNama; // JS-14 (P-32)
 }
 
 // Tipe tambahan JS-02.

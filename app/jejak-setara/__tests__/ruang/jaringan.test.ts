@@ -84,7 +84,7 @@ const datang = {
   pemainId: "p1",
   token: TOKEN,
   status: "lobi",
-  pengaturan: { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: [], modeNomorAbsen: false, uji: true },
+  pengaturan: { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: [], modeNomorAbsen: false, uji: true, modeNama: "daftar" },
   waktuServer: 5000,
   versiPeta: 1,
   saranNama: ["Kancil Jingga"],

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DRAF (22 November 2026), menunggu `Spesifikasi disetujui: JS-14` |
+| Status | Disetujui 22 November 2026 dengan `Spesifikasi disetujui: JS-14` (D-1 sampai D-9 pilihan a); dibangun dan diuji 22 November 2026 ([tests/JS-14-hasil.md](../tests/JS-14-hasil.md)) |
 | Rencana | `docs/jejak-setara/PLAN.md`, entri JS-14 |
 | Keputusan Gerbang 1 | `Setuju: JS-14` (22 Nov 2026): semua saran usulan 1a sampai 16a, termasuk 2a (nama buatan siswa sebagai pilihan guru, saran pemilik proyek), 3a (kelola nama dari konsol dan layar kelas, dengan Ganti semua nama), dan 12a (penghapusan otomatis sesudah 12 bulan). KT-14 dijawab: nama buatan siswa menjadi pilihan guru, dan bawaannya tetap daftar nama samaran |
 | Server | Paket gratis Cloudflare (Architecture JA-14 dan bagian 13.4) |

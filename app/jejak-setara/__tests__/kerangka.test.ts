@@ -138,8 +138,8 @@ describe("Worker kerangka", () => {
     }
   });
 
-  it("PROTOKOL_VERSI bernilai 2 (JS-08) dan sama dengan protokol jawaban Worker", async () => {
-    expect(PROTOKOL_VERSI).toBe(2);
+  it("PROTOKOL_VERSI bernilai 3 (JS-14) dan sama dengan protokol jawaban Worker", async () => {
+    expect(PROTOKOL_VERSI).toBe(3);
     const isi = (await (await minta("/api/sehat")).json()) as { protokol: number };
     expect(isi.protokol).toBe(PROTOKOL_VERSI);
   });
@@ -149,7 +149,15 @@ describe("Teks dan halaman", () => {
   it("TEKS sama persis dengan tabel Teks yang tampil (final), spesifikasi JS-01, JS-03, JS-07, dan JS-08 (tanpa konsolJudul dan konsolIsi sejak JS-04)", () => {
     expect(TEKS).not.toHaveProperty("konsolJudul");
     expect(TEKS).not.toHaveProperty("konsolIsi");
-    expect(tanpaKunci(TEKS, [...KUNCI_JS22_PEMAIN, ...kunciJs12().pemain, ...Object.keys(kunciJs11().pemain), ...Object.keys(kunciJs09().pemain)])).toEqual({
+    expect(
+      tanpaKunci(TEKS, [
+        ...KUNCI_JS22_PEMAIN,
+        ...kunciJs12().pemain,
+        ...Object.keys(kunciJs11().pemain),
+        ...Object.keys(kunciJs09().pemain),
+        ...Object.keys(kunciJs14().pemain),
+      ]),
+    ).toEqual({
       judulTabPemain: "Jejak Setara",
       judulTabKonsol: "Konsol admin · Jejak Setara",
       judul: "Jejak Setara",
@@ -327,7 +335,8 @@ describe("Teks dan halaman", () => {
     const datar = ratakanTeks(TEKS_KONSOL);
     for (const [kunci, teks] of Object.entries(harapan)) expect(datar[kunci], kunci).toBe(teks);
     const kunciJs10 = Object.keys(datar).filter(
-      (k) => KUNCI_JS10.some((awal) => k === awal || k.startsWith(`${awal}.`)) && !KUNCI_JS22_KONSOL.includes(k) && !(k in js11.konsol),
+      (k) =>
+        KUNCI_JS10.some((awal) => k === awal || k.startsWith(`${awal}.`)) && !KUNCI_JS22_KONSOL.includes(k) && !(k in js11.konsol) && !(k in kunciJs14().konsol),
     );
     expect(kunciJs10.sort()).toEqual(Object.keys(harapan).sort());
   });
@@ -355,7 +364,8 @@ describe("Teks dan halaman", () => {
     const datarPemain = ratakanTeks(TEKS);
     const datarKonsol = ratakanTeks(TEKS_KONSOL);
     for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
-    for (const [k, t] of Object.entries({ ...konsol, ...csv, ...js10 })) expect(datarKonsol[k], k).toBe(t);
+    // JS-14 (P-61): judul kolom nama diganti "Nama pemain".
+    for (const [k, t] of Object.entries({ ...konsol, ...csv, ...js10, ...kunciJs14().ubah })) expect(datarKonsol[k], k).toBe(t);
     // Kelompok baru JS-11 tidak memuat kunci di luar spesifikasi.
     expect(Object.keys(datarPemain).filter((k) => k.startsWith("rekap.")).sort()).toEqual(Object.keys(pemain).sort());
     const js09 = kunciJs09();
@@ -374,6 +384,22 @@ describe("Teks dan halaman", () => {
     expect(Object.keys(datar).filter((x) => x.startsWith("statistik.")).sort()).toEqual(Object.keys(js13).filter((x) => x.startsWith("statistik.")).sort());
   });
 
+  it("JS-14: TEKS dan TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-14 (D-9)", () => {
+    const { pemain, konsol, ubah } = kunciJs14();
+    expect(Object.keys(pemain).length).toBeGreaterThan(40);
+    expect(Object.keys(konsol).length).toBeGreaterThan(30);
+    expect(Object.keys(ubah).sort()).toEqual([...UBAH_JS14].sort());
+    const datarPemain = ratakanTeks(TEKS);
+    const datarKonsol = ratakanTeks(TEKS_KONSOL);
+    for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
+    for (const [k, t] of Object.entries({ ...konsol, ...ubah })) expect(datarKonsol[k], k).toBe(t);
+    // Kelompok baru JS-14 di layar pemain tidak memuat kunci di luar spesifikasi.
+    for (const grup of ["menu", "suara", "pengaturan", "privasi", "tentang", "namaBebas", "ketik"]) {
+      const ada = Object.keys(datarPemain).filter((k) => k.startsWith(`${grup}.`));
+      expect(ada.sort(), grup).toEqual(Object.keys(pemain).filter((k) => k.startsWith(`${grup}.`)).sort());
+    }
+  });
+
   it("JS-04: TEKS_KONSOL sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-04 (P-51), di luar teks JS-10", () => {
     const js11 = kunciJs11();
     const js09 = kunciJs09();
@@ -386,6 +412,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(js09.konsol),
         ...Object.keys(js09.csv),
         ...Object.keys(kunciJs13()),
+        ...Object.keys(kunciJs14().konsol),
       ]),
     ).toEqual({
       merek: "Jejak Setara",
@@ -951,6 +978,11 @@ function tanpaKunci(teks: object, kunci: readonly string[]): unknown {
   const salin = JSON.parse(JSON.stringify(teks)) as Record<string, Record<string, unknown>>;
   for (const k of kunci) {
     const [atas, bawah] = k.split(".");
+    // JS-14: kunci tingkat atas tanpa titik (misalnya `namaDiganti`) dihapus langsung.
+    if (bawah === undefined) {
+      delete salin[atas];
+      continue;
+    }
     if (salin[atas]) {
       delete salin[atas][bawah];
       if (Object.keys(salin[atas]).length === 0) delete salin[atas];
@@ -1017,4 +1049,51 @@ function kunciJs12(): { konsol: string[]; pemain: string[]; teks: Record<string,
 // JS-13 (AC-14): kunci teks konsol dari tabel spesifikasi JS-13.
 function kunciJs13(): Record<string, string> {
   return uraiTabelTeks(baca("docs/jejak-setara/specs/JS-13-statistik.md"));
+}
+
+// JS-14 (D-9): kunci dan teks tabel spesifikasi JS-14. Nama kunci boleh menyesuaikan susunan teks yang ada (bagian
+// "Teks yang tampil"); petanya di sini. Baris "(tetap dari JS-03)" dilewati karena sudah diuji bersama JS-03.
+const PETA_KUNCI_JS14: Record<string, string> = {
+  "galatApi.BUKAN_NAMA_BEBAS": "galatRuang.BUKAN_NAMA_BEBAS",
+  "kelas.kelola": "kelas.kelolaNama",
+  "kelas.gantiNama": "kelas.menuGantiNama",
+  "kelas.keluarkan": "kelas.menuKeluarkan",
+  "kelas.batal": "kelas.menuBatal",
+  "kelas.keluarkanJudul": "kelas.keluarkanPemainJudul",
+  "kelas.keluarkanIsi": "kelas.keluarkanPemainIsi",
+  "kelas.pemain": "kelas.tombolPemain",
+  "kelas.tutup": "kelas.pemainTutup",
+};
+/** Baris yang kolom teksnya memuat keterangan dalam kurung. */
+const TEKS_KHUSUS_JS14: Record<string, string> = { "detail.namaPemain": "Nama pemain" };
+/** Kunci lama yang teksnya diubah JS-14 (P-61). */
+const UBAH_JS14 = ["hasil.kolomNama", "csv.nama"];
+
+function kunciJs14(): { pemain: Record<string, string>; konsol: Record<string, string>; ubah: Record<string, string> } {
+  const isi = baca("docs/jejak-setara/specs/JS-14-pengaturan.md");
+  const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"), isi.indexOf("\n## Data, protokol"));
+  const urai = (teks: string): Record<string, string> => {
+    const hasil: Record<string, string> = {};
+    for (const baris of teks.split("\n")) {
+      if (!baris.startsWith("| ") || !baris.endsWith(" |")) continue;
+      const kolom = baris.slice(2, -2).split(" | ");
+      if (kolom.length !== 3) continue;
+      const [tempat, kolomKunci, kolomTeks] = kolom;
+      if (tempat === "Tempat" || tempat.startsWith("---") || /tetap/.test(tempat)) continue;
+      const kunci = [...kolomKunci.matchAll(/`([^`]+)`/g)].map((m) => m[1]);
+      if (kunci.length === 0) continue;
+      const grup = kunci[0].includes(".") ? kunci[0].split(".")[0] : "";
+      const penuh = kunci.map((k, i) => (i === 0 || k.includes(".") || !grup ? k : `${grup}.${k}`));
+      const nilai = penuh.length > 1 ? kolomTeks.split(" · ") : [kolomTeks];
+      expect(nilai.length, baris).toBe(penuh.length);
+      penuh.forEach((k, i) => (hasil[PETA_KUNCI_JS14[k] ?? k] = TEKS_KHUSUS_JS14[k] ?? nilai[i]));
+    }
+    return hasil;
+  };
+  const batas = bagian.indexOf("**Konsol dan layar kelas");
+  const pemain = urai(bagian.slice(0, batas));
+  const ubah: Record<string, string> = {};
+  const konsol: Record<string, string> = {};
+  for (const [k, t] of Object.entries(urai(bagian.slice(batas)))) (UBAH_JS14.includes(k) ? ubah : konsol)[k] = t;
+  return { pemain, konsol, ubah };
 }

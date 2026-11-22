@@ -1,10 +1,12 @@
 // Layar gabung pemain: Kode, Nomor absen, Menghubungkan, dan Identitas (spesifikasi JS-03, P-49 sampai P-53).
 // JS-07: tombol "Masuk" baru aktif sesudah aset dunia termuat.
-import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import PenandaServer from "../bersama/PenandaServer";
 import { normalkanKode, POLA_KODE_RUANG } from "../inti/aturan";
+import { bentukNamaSah, NAMA_BEBAS_MAKS, rapikanNama } from "../inti/nama";
 import { isiTeks, TEKS } from "../teks";
 import { IKON_AVATAR } from "./avatar";
+import { PemberitahuanSingkat } from "./PanelPengaturan";
 
 export function Panel({ judul, children }: { judul?: string; children: ReactNode }) {
   return (
@@ -33,6 +35,7 @@ export function LayarKode({
   siap = true,
   galat,
   saatKirim,
+  saatPrivasi,
 }: {
   awal: string;
   memeriksa: boolean;
@@ -40,6 +43,8 @@ export function LayarKode({
   siap?: boolean;
   galat: string | null;
   saatKirim: (kode: string) => void;
+  /** JS-14 (P-15): membuka panel Privasi. */
+  saatPrivasi?: () => void;
 }) {
   const [nilai, setNilai] = useState(awal);
   const sah = POLA_KODE_RUANG.test(normalkanKode(nilai));
@@ -78,6 +83,7 @@ export function LayarKode({
           {TEKS.kode.tombol}
         </button>
       </form>
+      {saatPrivasi ? <PemberitahuanSingkat saatBuka={saatPrivasi} /> : null}
       <PenandaServer />
     </Panel>
   );
@@ -120,6 +126,7 @@ export function LayarAbsen({ galat, saatKirim }: { galat: string | null; saatKir
         <p className="js-petunjuk" id="js-absen-petunjuk">
           {TEKS.absen.petunjuk}
         </p>
+        <p className="js-petunjuk">{TEKS.absen.privasi}</p>
         <PitaGalat id="js-absen-galat" teks={teksGalat} />
         <button type="submit" className="js-tombol js-tombol-utama">
           {TEKS.absen.tombol}
@@ -208,6 +215,7 @@ export function LayarIdentitas({
   saatPilihAvatar,
   saatAcak,
   saatGabung,
+  kaki,
 }: {
   saran: readonly string[];
   pilihNama: string | null;
@@ -217,6 +225,8 @@ export function LayarIdentitas({
   saatPilihAvatar: (avatar: number) => void;
   saatAcak: () => void;
   saatGabung: () => void;
+  /** JS-14 (P-5): tombol Menu dan suara di baris kaki, di kiri Gabung. */
+  kaki?: ReactNode;
 }) {
   const siap = pilihNama !== null && pilihAvatar !== null;
   return (
@@ -250,16 +260,136 @@ export function LayarIdentitas({
         />
       </div>
       <PitaGalat teks={galat} />
-      <button
-        type="button"
-        className="js-tombol js-tombol-utama"
-        aria-disabled={!siap}
-        onClick={() => {
-          if (siap) saatGabung();
+      <div className="js-kaki-identitas">
+        {kaki}
+        <button
+          type="button"
+          className="js-tombol js-tombol-utama"
+          aria-disabled={!siap}
+          onClick={() => {
+            if (siap) saatGabung();
+          }}
+        >
+          {TEKS.identitas.gabung}
+        </button>
+      </div>
+    </Panel>
+  );
+}
+
+/**
+ * JS-14 (P-36 sampai P-39): layar identitas di ruang nama buatan siswa. Bentuk nama diperiksa di sini sebelum dikirim;
+ * daftar kata penyaring hanya ada di server.
+ */
+export function LayarIdentitasBebas({
+  saran,
+  galat,
+  saatMintaNama,
+  saatGabung,
+  kaki,
+}: {
+  saran: readonly string[];
+  galat: string | null;
+  saatMintaNama: () => void;
+  saatGabung: (nama: string, avatar: number) => void;
+  kaki?: ReactNode;
+}) {
+  const [nama, setNama] = useState("");
+  const [avatar, setAvatar] = useState<number | null>(null);
+  const [galatBentuk, setGalatBentuk] = useState(false);
+  const [giliran, setGiliran] = useState(0);
+  const isian = useRef<HTMLInputElement>(null);
+  const teksGalat = galatBentuk ? TEKS.namaBebas.galatBentuk : galat;
+  const siap = bentukNamaSah(nama) && avatar !== null;
+  useEffect(() => {
+    if (galat) isian.current?.focus();
+  }, [galat]);
+  const kirim = () => {
+    if (!bentukNamaSah(nama)) {
+      setGalatBentuk(true);
+      isian.current?.focus();
+      return;
+    }
+    if (avatar === null) return;
+    setGalatBentuk(false);
+    saatGabung(rapikanNama(nama), avatar);
+  };
+  return (
+    <Panel judul={TEKS.identitas.judul}>
+      <form
+        className="js-identitas"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          kirim();
         }}
       >
-        {TEKS.identitas.gabung}
-      </button>
+        <div className="js-kelompok">
+          <div className="js-label-baris">
+            <label className="js-label" htmlFor="js-nama-bebas">
+              {TEKS.namaBebas.label}
+            </label>
+            <span className="js-penghitung" aria-hidden="true">
+              {isiTeks(TEKS.namaBebas.hitung, { n: Array.from(nama).length })}
+            </span>
+          </div>
+          <input
+            ref={isian}
+            id="js-nama-bebas"
+            className="js-isian js-isian-nama"
+            value={nama}
+            maxLength={NAMA_BEBAS_MAKS}
+            autoComplete="off"
+            autoCapitalize="words"
+            autoCorrect="off"
+            spellCheck={false}
+            aria-describedby={teksGalat ? "js-nama-pesan js-nama-galat" : "js-nama-pesan"}
+            aria-invalid={teksGalat ? true : undefined}
+            onChange={(e) => {
+              setNama(e.target.value);
+              setGalatBentuk(false);
+            }}
+          />
+          <p className="js-petunjuk" id="js-nama-pesan">
+            {TEKS.namaBebas.pesan}
+          </p>
+          <button
+            type="button"
+            className="js-tombol"
+            onClick={() => {
+              // P-37: saran bergiliran; sesudah ketiganya terpakai, saran baru diminta dan dipakai pada tekanan berikutnya.
+              if (saran.length === 0) return;
+              setNama(saran[giliran % saran.length]);
+              setGalatBentuk(false);
+              const berikut = giliran + 1;
+              setGiliran(berikut % saran.length === 0 ? 0 : berikut);
+              if (berikut % saran.length === 0) saatMintaNama();
+            }}
+          >
+            {TEKS.namaBebas.samaran}
+          </button>
+        </div>
+        <KelompokPilihan
+          id="js-avatar"
+          label={TEKS.identitas.kelompokAvatar}
+          pilihan={IKON_AVATAR.map((src, i) => ({
+            nilai: i,
+            // eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js
+            isi: <img src={src} alt="" width={48} height={48} />,
+            label: isiTeks(TEKS.identitas.avatar, { n: i + 1 }),
+          }))}
+          terpilih={avatar}
+          saatPilih={setAvatar}
+          kelas="js-kisi-avatar"
+        />
+      </form>
+      <PitaGalat id="js-nama-galat" teks={teksGalat} />
+      <div className="js-kaki-identitas">
+        {kaki}
+        <button type="button" className="js-tombol js-tombol-utama" aria-disabled={!siap} onClick={kirim}>
+          {TEKS.identitas.gabung}
+        </button>
+      </div>
     </Panel>
   );
 }

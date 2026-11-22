@@ -30,7 +30,7 @@ const FORMAT_PERSEN = new Intl.NumberFormat("id-ID", { minimumFractionDigits: 1,
 export const MUAT_ULANG_DETAIL_MS = 10_000;
 
 type Muatan = { jenis: "memuat" } | { jenis: "gagal" } | { jenis: "tidakAda" } | { jenis: "ada"; data: DataDetail; pada: number };
-type Konfirmasi = { jenis: "keluarkan"; pemainId: string; nama: string } | { jenis: "tutup" } | null;
+type Konfirmasi = { jenis: "keluarkan"; pemainId: string; nama: string } | { jenis: "tutup" } | { jenis: "gantiSemua" } | null;
 
 interface PropsDetail {
   id: string;
@@ -93,6 +93,19 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
     } else if (!galatSesi(h)) setGalatAksi(h.pesan);
   }
 
+  // JS-14 (P-51, P-52): ganti nama satu pemain tanpa konfirmasi, dan ganti semua nama buatan siswa sesudah konfirmasi.
+  async function kelolaNama(a: "ganti_nama" | "ganti_semua_nama", pemainId?: string) {
+    setSibuk(true);
+    const h = await api.kelolaNama(id, a, pemainId);
+    setSibuk(false);
+    setKonfirmasi(null);
+    if (h.ok) {
+      setGalatAksi(null);
+      umumkan(a === "ganti_nama" ? isiTeks(t.okGantiNama, { nama: h.data.nama ?? "" }) : isiTeks(t.okGantiSemua, { n: h.data.jumlah ?? 0 }));
+      muat();
+    } else if (!galatSesi(h)) setGalatAksi(h.pesan);
+  }
+
   if (muatan.jenis === "memuat") return <p role="status">{t.memuat}</p>;
   if (muatan.jenis === "tidakAda") {
     return (
@@ -119,6 +132,8 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
   const pemakaian = muatan.data.pemakaian ?? null;
   const status = langsung?.status ?? ruang.status;
   const ditutup = status === "ditutup";
+  // JS-14 (P-33, P-52): mode nama yang berlaku sekarang dari Durable Object, atau mode awal dari pengaturan ruang.
+  const modeBebas = (langsung?.modeNama ?? ruang.modeNama ?? "daftar") === "bebas";
   const bolehTutup = STATUS_BOLEH_TUTUP.includes(status);
   const terkunci = langsung?.terkunci ?? false;
   const pemain = langsung?.pemain ?? [];
@@ -148,6 +163,10 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
         {/* JS-09 (P-9): skill yang aktif di ruang ini. */}
         <p data-baris="skill">
           <span className="js-konsol-label">{TEKS_KONSOL.skill.judul}</span> {teksSkill(ruang.skillAktif)}
+        </p>
+        {/* JS-14 (P-33): mode nama yang berlaku sekarang. */}
+        <p data-baris="nama">
+          <span className="js-konsol-label">{t.namaPemain}</span> {modeBebas ? TEKS_KONSOL.ruangBaru.namaBebas : TEKS_KONSOL.ruangBaru.namaDaftar}
         </p>
         <div className="js-konsol-sel-label">
           <span className="js-konsol-tanda">{TEKS_KONSOL.status[status]}</span>
@@ -181,6 +200,13 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
           {hasil}
           <section className="js-ruang-pemain" aria-labelledby="js-ruang-pemain-judul">
             <h2 id="js-ruang-pemain-judul">{isiTeks(t.pemainJudul, { n: pemain.length })}</h2>
+            {modeBebas && !ditutup ? (
+              <div className="js-konsol-tombol-baris">
+                <button type="button" className="js-konsol-tombol" disabled={sibuk} onClick={buka({ jenis: "gantiSemua" })}>
+                  {t.gantiSemua}
+                </button>
+              </div>
+            ) : null}
             {pemain.length === 0 ? (
               <p>{t.pemainKosong}</p>
             ) : (
@@ -191,6 +217,9 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
                     <img src={AVATAR[p.avatar] ?? AVATAR[0]} alt="" width={32} height={32} />
                     <span className="js-ruang-nama">{p.nama}</span>
                     <span className="js-konsol-tanda">{p.terhubung ? t.terhubung : t.terputus}</span>
+                    <button type="button" className="js-konsol-tombol" aria-label={isiTeks(t.gantiNamaLabel, { nama: p.nama })} disabled={sibuk} onClick={() => void kelolaNama("ganti_nama", p.id)}>
+                      {t.gantiNama}
+                    </button>
                     <button type="button" className="js-konsol-tombol" aria-label={isiTeks(t.keluarkanLabel, { nama: p.nama })} disabled={sibuk} onClick={buka({ jenis: "keluarkan", pemainId: p.id, nama: p.nama })}>
                       {t.keluarkan}
                     </button>
@@ -206,11 +235,13 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
       {ditutup && akun.peran === "admin" ? <BagianHapus ruang={ruang} galatSesi={galatSesi} buka={bukaHalaman} /> : null}
       {konfirmasi ? (
         <Dialog
-          judul={konfirmasi.jenis === "tutup" ? isiTeks(t.tutupJudul, { kode: ruang.kode }) : isiTeks(t.keluarkanJudul, { nama: konfirmasi.nama })}
+          judul={
+            konfirmasi.jenis === "tutup" ? isiTeks(t.tutupJudul, { kode: ruang.kode }) : konfirmasi.jenis === "gantiSemua" ? t.gantiSemuaJudul : isiTeks(t.keluarkanJudul, { nama: konfirmasi.nama })
+          }
           tutup={sibuk ? null : () => setKonfirmasi(null)}
           kembaliKe={pembuka}
         >
-          <p>{konfirmasi.jenis === "tutup" ? t.tutupIsi : isiTeks(t.keluarkanIsi, { nama: konfirmasi.nama })}</p>
+          <p>{konfirmasi.jenis === "tutup" ? t.tutupIsi : konfirmasi.jenis === "gantiSemua" ? t.gantiSemuaIsi : isiTeks(t.keluarkanIsi, { nama: konfirmasi.nama })}</p>
           <div className="js-konsol-tombol-baris">
             <button type="button" className="js-konsol-tombol" data-fokus-awal onClick={() => setKonfirmasi(null)} disabled={sibuk}>
               {TEKS_KONSOL.batal}
@@ -222,10 +253,12 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
               onClick={() =>
                 void (konfirmasi.jenis === "tutup"
                   ? aksi("tutup", isiTeks(t.okTutup, { kode: ruang.kode }))
-                  : aksi("keluarkan", isiTeks(t.okKeluarkan, { nama: konfirmasi.nama }), konfirmasi.pemainId))
+                  : konfirmasi.jenis === "gantiSemua"
+                    ? kelolaNama("ganti_semua_nama")
+                    : aksi("keluarkan", isiTeks(t.okKeluarkan, { nama: konfirmasi.nama }), konfirmasi.pemainId))
               }
             >
-              {konfirmasi.jenis === "tutup" ? t.tutup : t.keluarkan}
+              {konfirmasi.jenis === "tutup" ? t.tutup : konfirmasi.jenis === "gantiSemua" ? t.gantiSemuaTombol : t.keluarkan}
             </button>
           </div>
         </Dialog>

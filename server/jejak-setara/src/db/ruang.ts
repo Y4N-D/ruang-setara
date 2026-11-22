@@ -3,6 +3,7 @@
 // data ruang (P-33). Semua kueri berparameter.
 import { WAKTU_MAKS } from "../../../../app/jejak-setara/inti/hasil";
 import type { BarisKiriman } from "../ruang/inti-ruang";
+import { pernyataanAudit } from "./bank";
 
 export interface BarisRuangD1 {
   id: string;
@@ -431,4 +432,43 @@ export async function hapusDataRuang(db: D1Database, ruangId: string, audit: D1P
     db.prepare("DELETE FROM ruang WHERE id = ?1 AND status = 'ditutup'").bind(ruangId),
   ]);
   return (hasil[3]?.meta?.changes ?? 0) > 0;
+}
+
+// ------------------------------------------------------------------ Penghapusan sesudah masa simpan (JS-14)
+
+/** JS-14 (P-62, D-8): masa simpan 365 hari sejak ruang dibuat. Pengaturan 3–24 bulan menyusul di JS-19 (KT-09). */
+export const MASA_SIMPAN_MS = 365 * 24 * 60 * 60 * 1000;
+/** JS-14 (P-62): paling banyak 50 ruang per jalan; sisanya pada malam berikutnya. */
+export const HAPUS_KEDALUWARSA_MAKS = 50;
+
+/**
+ * P-62 sampai P-64: menghapus ruang `ditutup` yang dibuat lebih dari 365 hari sebelum `sekarang`, dari yang tertua,
+ * beserta peserta dan jawabannya, dengan log audit `ruang.hapus_otomatis` tanpa nama pemain. Mengembalikan jumlahnya.
+ */
+export async function hapusRuangKedaluwarsa(db: D1Database, sekarang: number): Promise<number> {
+  const daftar = await db
+    .prepare("SELECT id, kode, label_kelas, dibuat_pada FROM ruang WHERE status = 'ditutup' AND dibuat_pada < ?1 ORDER BY dibuat_pada LIMIT ?2")
+    .bind(sekarang - MASA_SIMPAN_MS, HAPUS_KEDALUWARSA_MAKS)
+    .all<{ id: string; kode: string; label_kelas: string; dibuat_pada: number }>();
+  let dihapus = 0;
+  for (const r of daftar.results ?? []) {
+    try {
+      const jumlah = await hitungDataRuang(db, r.id);
+      const audit = pernyataanAudit(
+        db,
+        {
+          penggunaId: null,
+          aksi: "ruang.hapus_otomatis",
+          sasaran: r.id,
+          rincian: { kode: r.kode, labelKelas: r.label_kelas, dibuatPada: r.dibuat_pada, peserta: jumlah.peserta, jawaban: jumlah.jawaban },
+          sekarang,
+        },
+        { sql: "EXISTS (SELECT 1 FROM ruang WHERE id = ?7 AND status = 'ditutup')", nilai: [r.id] },
+      );
+      if (await hapusDataRuang(db, r.id, audit)) dihapus++;
+    } catch {
+      // P-64: kegagalan satu ruang tidak menghentikan ruang lain.
+    }
+  }
+  return dihapus;
 }

@@ -22,7 +22,10 @@ export const RUANG_AKTIF_MAKS_BAWAAN = 3;
 
 export const STATUS_RUANG = ["lobi", "hitung_mundur", "main", "jeda", "selesai", "pembahasan", "ditutup"] as const;
 export type StatusRuangKonsol = (typeof STATUS_RUANG)[number];
-export const AKSI_KELOLA = ["kunci", "buka_kunci", "keluarkan", "tutup"] as const;
+// JS-14 (P-51): ganti nama dan ganti semua nama.
+export const AKSI_KELOLA = ["kunci", "buka_kunci", "keluarkan", "tutup", "ganti_nama", "ganti_semua_nama"] as const;
+/** JS-14 (P-32): mode nama ruang. */
+export const MODE_NAMA = ["daftar", "bebas"] as const;
 export type AksiKelola = (typeof AKSI_KELOLA)[number];
 /** Status yang membolehkan ruang ditutup (P-10). */
 export const STATUS_BOLEH_TUTUP: readonly StatusRuangKonsol[] = ["lobi", "selesai", "pembahasan"];
@@ -41,6 +44,7 @@ export const KODE_GALAT_RUANG = [
   // JS-11 (P-21, P-33): hasil sebelum ronde selesai, dan hapus data ruang yang belum ditutup.
   "HASIL_BELUM_ADA",
   "BELUM_DITUTUP",
+  "BUKAN_NAMA_BEBAS", // JS-14 (P-51)
 ] as const;
 export type KodeGalatRuang = (typeof KODE_GALAT_RUANG)[number];
 
@@ -70,6 +74,7 @@ export interface IsiRuangBaru {
   batasTerlambatMenit: number;
   modeNomorAbsen: boolean;
   uji: boolean;
+  modeNama?: (typeof MODE_NAMA)[number]; // JS-14 (P-32)
 }
 export type GalatIsianRuang = "label" | "batasPemain" | "terlambat" | "nomorAbsen";
 
@@ -102,6 +107,7 @@ export const skemaRuangBaru = z
     batasTerlambatMenit: z.number().int(),
     modeNomorAbsen: z.boolean(),
     uji: z.boolean(),
+    modeNama: z.enum(MODE_NAMA).optional(), // JS-14 (P-32): tanpa isian berarti daftar
     // JS-09 (P-8): skill P0 yang aktif di ruang, tanpa duplikat; tanpa isian berarti ketiganya.
     skillAktif: z
       .array(z.enum(SKILL_P0))
@@ -131,6 +137,8 @@ export const skemaRingkasanRuang = z.object({
   dibuatPada: z.number(),
   /** JS-09 (P-9): skill yang aktif di ruang, menurut urutan P-1. */
   skillAktif: z.array(z.enum(SKILL_P0)),
+  /** JS-14 (P-33): mode nama awal ruang dari pengaturannya; ruang lama dibaca sebagai daftar. */
+  modeNama: z.enum(MODE_NAMA).optional(),
 });
 export type RingkasanRuang = z.infer<typeof skemaRingkasanRuang>;
 
@@ -155,6 +163,8 @@ export const skemaLangsung = z.object({
   kirimanBerhenti: z.boolean().optional(),
   /** JS-11 (P-15): antrean kiriman ke D1 belum kosong. */
   kirimanTertunda: z.boolean().optional(),
+  /** JS-14 (P-33): mode nama yang berlaku sekarang. */
+  modeNama: z.enum(MODE_NAMA).optional(),
 });
 
 /** JS-22 (P-15 sampai P-17): pemakaian ronde, hanya untuk admin. */

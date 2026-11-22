@@ -172,11 +172,15 @@ describe("kelola dari konsol (P-8 sampai P-11; AC-7, AC-8)", () => {
     const dasbor = await konsol("GET", "/api/dasbor");
     expect((dasbor.isi.ruang as unknown[]).length).toBeLessThanOrEqual(5);
     expect(Number(dasbor.isi.jumlahRuang)).toBeGreaterThanOrEqual(1);
-    expect(await konsol("GET", "/api/ruang/pilihan")).toEqual({
+    // JS-14: kesiapan paket dibaca dari jawaban, karena uji bank bisa memverifikasi rujukan lebih dulu.
+    const pilihan = await konsol("GET", "/api/ruang/pilihan");
+    expect(pilihan).toEqual({
       status: 200,
-      isi: { paket: [{ id: "9880c4d5-8294-51c9-971a-e95531a2e039", nama: expect.any(String), jumlahKejadian: 16, siapRuangBiasa: false }] },
+      isi: { paket: [{ id: "9880c4d5-8294-51c9-971a-e95531a2e039", nama: expect.any(String), jumlahKejadian: 16, siapRuangBiasa: expect.any(Boolean) }] },
     });
-    expect((await buatRuang({ uji: false })).isi).toEqual({ galat: { kode: "PAKET_BELUM_SIAP", pesan: "Paket ini belum siap untuk ruang biasa. Centang Ruang uji." } });
+    if (!(pilihan.isi.paket as { siapRuangBiasa: boolean }[])[0].siapRuangBiasa) {
+      expect((await buatRuang({ uji: false })).isi).toEqual({ galat: { kode: "PAKET_BELUM_SIAP", pesan: "Paket ini belum siap untuk ruang biasa. Centang Ruang uji." } });
+    }
     expect((await konsol("POST", `/api/ruang/${id}/kelola`, { aksi: "tutup" })).status).toBe(200);
     expect((await fetch(`${B}/api/publik/ruang/${kode}`)).status).toBe(404);
   });

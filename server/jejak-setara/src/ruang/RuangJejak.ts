@@ -23,7 +23,7 @@ import {
   type CatatanBerulang,
   type Pemakaian,
 } from "./pengaman";
-import type { Arah, KejadianRuang, StatusRuang, Tingkat, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
+import type { Arah, KejadianRuang, ModeNama, StatusRuang, Tingkat, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
 import { TEKS } from "../../../../app/jejak-setara/teks";
 import { kirimKeD1 } from "../db/ruang";
 import type { Env } from "../env";
@@ -52,6 +52,9 @@ import {
   sambutanKelas,
   ringkasanHasil,
   tutupPaksa,
+  gantiNama,
+  gantiSemuaNama,
+  keluaranKosong,
 } from "./inti-ruang";
 import { ambilAntrean, antrekan, hapusTerkirim, jumlahAntrean, SQL_TABEL_ANTREAN } from "./antrean";
 import { jumlahTitikRuang, tempatkanRuang, type JawabanRuang, type KejadianMasuk, type StatusJawaban } from "./kejadian-ruang";
@@ -339,6 +342,8 @@ export class RuangJejak {
         terkunci: (meta.get("terkunci") as boolean | undefined) ?? false,
         ditutupPada: (meta.get("ditutupPada") as number | undefined) ?? null,
         sambunganTerakhirPutus: (meta.get("sambunganTerakhirPutus") as number | undefined) ?? null,
+        modeNama: meta.get("modeNama") as ModeNama | undefined, // JS-14 (P-41)
+        namaDiblokir: (meta.get("namaDiblokir") as string[] | undefined) ?? [], // JS-14 (P-50)
         pemain,
         sambungan,
         kejadian,
@@ -414,7 +419,7 @@ export class RuangJejak {
       p.avatar,
       p.warnaTas,
       p.nomorAbsen,
-      JSON.stringify(p.saran),
+      JSON.stringify({ saran: p.saran, tolak: p.tolak ?? 0 }), // JS-14 (P-44)
       p.terhubung ? 1 : 0,
       p.terputusSejak,
       p.posisi ? JSON.stringify(p.posisi) : null,
@@ -700,7 +705,7 @@ export class RuangJejak {
     if (!hasil.success) return;
     this.statistik.masuk++;
     if (hasil.data.t === "halo") await this.terapkan(sambutanKelas(k, l.asal, Date.now()));
-    else await this.terapkan(terimaKelas(k, hasil.data, Date.now()));
+    else await this.terapkan(terimaKelas(k, hasil.data, Date.now(), acakKripto));
   }
 
   private kirimKelas(pesan: readonly unknown[]): void {
@@ -731,6 +736,7 @@ export class RuangJejak {
     return {
       status: k.status,
       terkunci: k.terkunci,
+      modeNama: k.modeNama, // JS-14 (P-33)
       mulaiPada: k.waktu.mulaiPada,
       berakhirPada: k.waktu.berakhirPada,
       jedaSejak: k.waktu.jedaSejak,
@@ -755,6 +761,24 @@ export class RuangJejak {
     if (!hasil.success) return jawabJson({ galat: { kode: "ISI_SALAH" } }, 400);
     const { aksi, pemainId } = hasil.data;
     const V = PROTOKOL_VERSI;
+    // JS-14 (P-51): ganti nama dan ganti semua nama menjawab nama baru atau jumlahnya.
+    if (aksi === "ganti_nama") {
+      const p = pemainId ? k.pemain.get(pemainId) : undefined;
+      if (!p || p.nama === null || p.dikeluarkan || !pemainId) return jawabJson({ galat: { kode: "PEMAIN_TIDAK_ADA" } }, 404);
+      if (k.status === "ditutup") return jawabJson({ galat: { kode: "STATUS_TIDAK_SESUAI" } }, 409);
+      const o = keluaranKosong();
+      const nama = gantiNama(k, o, pemainId, acakKripto);
+      await this.terapkan(o);
+      return jawabJson({ ok: true, nama }, 200);
+    }
+    if (aksi === "ganti_semua_nama") {
+      if (k.status === "ditutup") return jawabJson({ galat: { kode: "STATUS_TIDAK_SESUAI" } }, 409);
+      if (k.modeNama !== "bebas") return jawabJson({ galat: { kode: "BUKAN_NAMA_BEBAS" } }, 409);
+      const o = keluaranKosong();
+      const jumlah = gantiSemuaNama(k, o, Date.now(), acakKripto) ?? 0;
+      await this.terapkan(o);
+      return jawabJson({ ok: true, jumlah }, 200);
+    }
     let pesan: PesanKelas;
     if (aksi === "kunci" || aksi === "buka_kunci") pesan = { v: V, t: "kunci_ruang", kunci: aksi === "kunci" };
     else if (aksi === "keluarkan") {
@@ -765,7 +789,7 @@ export class RuangJejak {
       if (!STATUS_BOLEH_TUTUP.includes(k.status)) return jawabJson({ galat: { kode: "STATUS_TIDAK_SESUAI" } }, 409);
       pesan = { v: V, t: "tutup_ruang" };
     }
-    await this.terapkan(terimaKelas(k, pesan, Date.now()));
+    await this.terapkan(terimaKelas(k, pesan, Date.now(), acakKripto));
     return jawabJson({ ok: true }, 200);
   }
 
@@ -1065,6 +1089,19 @@ function barisKeJawaban(r: BarisJawabanSql): JawabanRuang {
   };
 }
 
+/** JS-14 (P-44): `saran_json` berisi `{ saran, tolak }`; isian lama berupa larik tetap terbaca dengan `tolak` 0. */
+function saranDariJson(teks: string): { saran: string[]; tolak: number } {
+  const teksSaja = (x: unknown): string[] => (Array.isArray(x) ? x.filter((y): y is string => typeof y === "string") : []);
+  try {
+    const d = JSON.parse(teks) as unknown;
+    if (Array.isArray(d)) return { saran: teksSaja(d), tolak: 0 };
+    const o = (d ?? {}) as { saran?: unknown; tolak?: unknown };
+    return { saran: teksSaja(o.saran), tolak: typeof o.tolak === "number" && o.tolak >= 0 ? Math.floor(o.tolak) : 0 };
+  } catch {
+    return { saran: [], tolak: 0 };
+  }
+}
+
 function barisKePemain(r: BarisPemainSql): PemainRuang {
   return {
     id: r.id,
@@ -1074,7 +1111,7 @@ function barisKePemain(r: BarisPemainSql): PemainRuang {
     avatar: r.avatar,
     warnaTas: r.warna_tas as WarnaTas | null,
     nomorAbsen: r.nomor_absen,
-    saran: JSON.parse(r.saran_json) as string[],
+    ...saranDariJson(r.saran_json), // JS-14 (P-44)
     terhubung: r.terhubung === 1,
     terputusSejak: r.terputus_sejak,
     posisi: r.posisi_json ? (JSON.parse(r.posisi_json) as { x: number; y: number; arah: Arah }) : null,

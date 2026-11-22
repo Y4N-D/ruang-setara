@@ -400,6 +400,8 @@ test("kinerja: 40 pemain tiruan di ukuran HP; CPU normal dan CPU 6× lebih lamba
   // Ruang yang titik K-13-nya tidak berdekatan dengan titik kejadian lain, agar hanya tokoh K-13 yang terhitung.
   const { kode, titik: t13 } = await ruangKejadianSendiri(request, "K-13", { batasPemain: 45, durasiMenit: 10 });
   const hp = await konteks(browser, baseURL!, true);
+  // JS-14 (P-72): ambang yang sama dengan Suara nyala dan label nama Besar.
+  await hp.page.addInitScript(() => sessionStorage.setItem("jejak:pengaturan", JSON.stringify({ suara: true, kurangiGerak: null, ketik: false, label: "besar" })));
   const namaHp = await gabung(hp.page, kode, 7);
   const bots: Awaited<ReturnType<typeof bot>>[] = [];
   for (let i = 0; i < 40; i++) bots.push(await bot(baseURL!, kode, i));

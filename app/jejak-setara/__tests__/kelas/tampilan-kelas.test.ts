@@ -1,3 +1,4 @@
+import { PROTOKOL_VERSI } from "../../inti/versi";
 // Perhitungan murni layar kelas dan aturan impor konsol (spesifikasi JS-10, P-15, P-24 sampai P-29, P-35; AC-11,
 // AC-15 sampai AC-17, AC-23).
 import { readdirSync, readFileSync } from "node:fs";
@@ -73,8 +74,8 @@ describe("tampilan", () => {
 
 describe("data layar kelas dari pesan server", () => {
   it("info dan dunia_kelas memperbarui selisih jam; pembahasan disimpan per kejadian", () => {
-    const V = 2 as const;
-    let d = terapkanPesan(DATA_KOSONG, { v: V, t: "info_kelas", labelKelas: "IX B", kode: "K7MPA", tautan: "https://a.b", durasiMenit: 15, batasPemain: 40, uji: true, terkunci: false, waktuServer: 10_500, jumlahKejadian: 0, kejadian: [] }, 10_000);
+    const V = PROTOKOL_VERSI;
+    let d = terapkanPesan(DATA_KOSONG, { v: V, t: "info_kelas", labelKelas: "IX B", kode: "K7MPA", tautan: "https://a.b", modeNama: "daftar", durasiMenit: 15, batasPemain: 40, uji: true, terkunci: false, waktuServer: 10_500, jumlahKejadian: 0, kejadian: [] }, 10_000);
     expect(d.selisih).toBe(500);
     d = terapkanPesan(d, { v: V, t: "dunia_kelas", w: 20_000, p: [] }, 20_300);
     expect(d.selisih).toBe(-300);

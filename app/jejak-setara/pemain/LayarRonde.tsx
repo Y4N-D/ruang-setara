@@ -2,7 +2,7 @@
 // dunia (spesifikasi JS-07, P-29). Sejak JS-07, ronde yang berjalan dan jeda tampil di LayarDunia; layar selesai
 // dan ditutup tetap layar HTML tanpa dunia (P-41). JS-08 (P-59, D-5): skor dan peringkat akhir. Sejak JS-11, layar
 // "Ronde selesai" berisi rekap pribadi dan refleksi di Rekap.tsx (spesifikasi JS-11, P-4 sampai P-9).
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { KodeGalat } from "../inti/protokol";
 import type { StatusRuang } from "../inti/tipe";
 import { TEKS } from "../teks";
@@ -19,13 +19,21 @@ export interface WaktuStatus {
 }
 
 /** "Bersiap" dan angka 3, 2, lalu 1 di tengah dunia, masing-masing satu detik menurut jam server (P-29). */
-export function LapisanHitungMundur({ mulaiPada, selisihJam }: { mulaiPada: number; selisihJam: () => number }) {
+export function LapisanHitungMundur({ mulaiPada, selisihJam, saatAngka }: { mulaiPada: number; selisihJam: () => number; saatAngka?: (n: number) => void }) {
   const [kini, setKini] = useState(() => Date.now());
   useEffect(() => {
     const id = window.setInterval(() => setKini(Date.now()), 100);
     return () => window.clearInterval(id);
   }, []);
   const n = Math.min(3, Math.max(1, Math.ceil((mulaiPada - (kini + selisihJam())) / 1000)));
+  // JS-14 (P-22): bunyi hitung pada setiap angka yang tampil.
+  const angka = useRef(saatAngka);
+  useEffect(() => {
+    angka.current = saatAngka;
+  });
+  useEffect(() => {
+    angka.current?.(n);
+  }, [n]);
   return (
     <div className="js-hitung-mundur" role="status">
       <p className="js-hitung-mundur-judul">{TEKS.ronde.bersiap}</p>

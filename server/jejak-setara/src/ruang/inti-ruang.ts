@@ -16,7 +16,9 @@ import { koreksi, periksaGerak, posisiSah, STATUS_GERAK } from "../../../../app/
 import { UKURAN_UBIN } from "../../../../app/jejak-setara/inti/peta";
 import { PROTOKOL_VERSI, type KodeGalat, type PesanPemain, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
 import type { PesanKelas, PesanServerKelas } from "../../../../app/jejak-setara/inti/protokol-kelas";
-import type { Arah, KejadianRuang, PengaturanRuang, SkillId, StatusRuang, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
+import type { Arah, KejadianRuang, ModeNama, PengaturanRuang, SkillId, StatusRuang, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
+import { bentukNamaSah, kunciNama, rapikanNama, sidikNama } from "../../../../app/jejak-setara/inti/nama";
+import { namaTertolak } from "./penyaring-nama";
 import { TEKS } from "../../../../app/jejak-setara/teks";
 import {
   barisJawabanD1,
@@ -128,6 +130,8 @@ export interface PemainRuang {
   warnaTas: WarnaTas | null;
   nomorAbsen: number | null;
   saran: string[];
+  /** JS-14 (P-44): banyak penolakan `NAMA_DITOLAK`. */
+  tolak?: number;
   terhubung: boolean;
   terputusSejak: number | null;
   posisi: PosisiPemain | null;
@@ -192,9 +196,12 @@ export interface KeadaanRuang {
   // JS-09 (P-11, P-14): keadaan skill per pemain (waktu ronde) dan Petunjuk yang dipakai (pemain → kode → id asli).
   skill: Map<string, SkillPemain>;
   petunjuk: Map<string, Map<string, string>>;
+  // JS-14: mode nama yang berlaku di ruang (P-41) dan sidik nama yang diganti guru (P-50); keduanya di meta.
+  modeNama: ModeNama;
+  namaDiblokir: string[];
 }
 
-export type KunciMeta = "ruang" | "status" | "waktu" | "terkunci" | "ditutupPada" | "sambunganTerakhirPutus";
+export type KunciMeta = "ruang" | "status" | "waktu" | "terkunci" | "ditutupPada" | "sambunganTerakhirPutus" | "modeNama" | "namaDiblokir";
 export type Simpanan =
   | { jenis: "pemain"; pemain: PemainRuang }
   | { jenis: "hapus_pemain"; id: string }
@@ -307,6 +314,8 @@ export function buatKeadaan(ruang: DataRuang, peta: PetaRuang, kejadian: readonl
     peringkat: null,
     skill: new Map(),
     petunjuk: new Map(),
+    modeNama: ruang.pengaturan.modeNama === "bebas" ? "bebas" : "daftar", // ruang sebelum JS-14 tanpa isian
+    namaDiblokir: [],
   };
 }
 
@@ -326,6 +335,9 @@ export interface DataPulih {
   // JS-09 (P-12, P-14): tabel `skill` dan `petunjuk` SQLite ruang; ruang sebelum JS-09 tidak punya barisnya.
   skill?: { pemainId: string; isi: string }[];
   petunjuk?: { pemainId: string; kode: string; opsi: string }[];
+  // JS-14 (P-41, P-50): meta `modeNama` dan `namaDiblokir`.
+  modeNama?: ModeNama;
+  namaDiblokir?: string[];
 }
 
 /**
@@ -340,6 +352,8 @@ export function pulihkanKeadaan(d: DataPulih, peta: PetaRuang, sekarang: number)
   k.terkunci = d.terkunci;
   k.ditutupPada = d.ditutupPada;
   k.sambunganTerakhirPutus = d.sambunganTerakhirPutus;
+  if (d.modeNama === "daftar" || d.modeNama === "bebas") k.modeNama = d.modeNama;
+  k.namaDiblokir = [...(d.namaDiblokir ?? [])];
   for (const p of d.pemain) {
     k.pemain.set(p.id, { ...p, terhubung: false });
     k.urutanBerikut = Math.max(k.urutanBerikut, p.urutan + 1);
@@ -1025,12 +1039,115 @@ function terlambat(k: KeadaanRuang, sekarang: number): boolean {
   return waktuRonde(k, sekarang) > k.ruang.pengaturan.batasTerlambatMenit * 60_000;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Nama pemain (JS-14, P-41 sampai P-50)
+
+/** P-44 (D-4): banyak `NAMA_DITOLAK` sebelum pemain hanya boleh memakai nama samaran. */
+export const BATAS_TOLAK_NAMA = 5;
+/** P-50: banyak sidik nama yang diblokir paling banyak; butir tertua dibuang bila penuh. */
+export const BLOKIR_NAMA_MAKS = 300;
+
+/** P-41: mode nama yang berlaku untuk seorang pemain. */
+export function modeNamaPemain(k: KeadaanRuang, p: PemainRuang): ModeNama {
+  return k.modeNama === "bebas" && (p.tolak ?? 0) < BATAS_TOLAK_NAMA ? "bebas" : "daftar";
+}
+
+/** Kunci nama semua pemain bernama selain `pemainId`, termasuk yang terputus dan yang dikeluarkan. */
+function kunciTerpakai(k: KeadaanRuang, pemainId: string): Set<string> {
+  const hasil = new Set<string>();
+  for (const q of k.pemain.values()) if (q.id !== pemainId && q.nama !== null) hasil.add(kunciNama(q.nama));
+  return hasil;
+}
+
+type HasilNama = { nama: string; galat?: undefined } | { galat: KodeGalat; nama?: undefined };
+
+/** P-42: nama yang diterima, atau kode galatnya. */
+function periksaNamaPilihan(k: KeadaanRuang, p: PemainRuang, masuk: string): HasilNama {
+  const terpakai = kunciTerpakai(k, p.id);
+  const diblokir = (n: string) => k.namaDiblokir.includes(sidikNama(n));
+  if (p.saran.includes(masuk) && !terpakai.has(kunciNama(masuk)) && !diblokir(masuk)) return { nama: masuk };
+  if (modeNamaPemain(k, p) === "daftar") return { galat: "NAMA_DIPAKAI" };
+  const rapi = rapikanNama(masuk);
+  if (!bentukNamaSah(rapi) || diblokir(rapi) || namaTertolak(rapi)) return { galat: "NAMA_DITOLAK" };
+  if (terpakai.has(kunciNama(rapi))) return { galat: "NAMA_DIPAKAI" };
+  return { nama: rapi };
+}
+
+/** P-50: sidik nama lama masuk daftar blokir ruang. */
+function blokirNama(k: KeadaanRuang, o: Keluaran, nama: string): void {
+  const sidik = sidikNama(nama);
+  if (!k.namaDiblokir.includes(sidik)) {
+    k.namaDiblokir.push(sidik);
+    if (k.namaDiblokir.length > BLOKIR_NAMA_MAKS) k.namaDiblokir.splice(0, k.namaDiblokir.length - BLOKIR_NAMA_MAKS);
+  }
+  simpanMeta(o, "namaDiblokir", [...k.namaDiblokir]);
+}
+
+/** P-46 butir 2: nama samaran acak yang belum dipakai dan tidak diblokir; cadangannya "Pemain {urutan}". */
+function namaPengganti(k: KeadaanRuang, p: PemainRuang, acak: () => number): string {
+  const terpakai = kunciTerpakai(k, p.id);
+  const blokir = new Set(k.namaDiblokir);
+  const calon = NAMA_SAMARAN.filter((n) => !terpakai.has(kunciNama(n)) && !blokir.has(sidikNama(n)));
+  if (calon.length > 0) return calon[Math.min(calon.length - 1, Math.floor(acak() * calon.length))];
+  let nama = `Pemain ${p.urutan}`;
+  for (let i = 2; terpakai.has(kunciNama(nama)); i++) nama = `Pemain ${p.urutan} ${i}`;
+  return nama;
+}
+
+/** P-46 butir 1 sampai 4 untuk satu pemain bernama, tanpa pesan ke layar kelas. */
+function gantiNamaPemain(k: KeadaanRuang, o: Keluaran, p: PemainRuang, nama: string, acak: () => number): string {
+  blokirNama(k, o, nama);
+  const baru = namaPengganti(k, p, acak);
+  p.nama = baru;
+  simpanPemain(o, p);
+  kirimSemua(k, o, { v: V, t: "nama_baru", id: p.id, nama: baru });
+  const akhir = k.status === "selesai" || k.status === "pembahasan";
+  o.kiriman.push(barisPeserta(k, p, akhir ? (peringkatRuang(k).get(p.id) ?? null) : null));
+  return baru;
+}
+
+/** P-46: ganti nama satu pemain berkeidentitas yang belum dikeluarkan; nama baru, atau null bila tidak berlaku. */
+export function gantiNama(k: KeadaanRuang, o: Keluaran, pemainId: string, acak: () => number): string | null {
+  const p = k.pemain.get(pemainId);
+  if (!p || p.nama === null || p.dikeluarkan || k.status === "ditutup") return null;
+  const baru = gantiNamaPemain(k, o, p, p.nama, acak);
+  o.kelas.push(pesanLobi(k));
+  kirimPapanKelas(k, o, true);
+  return baru;
+}
+
+/** P-48: ganti semua nama buatan siswa, lalu ruang menjadi mode daftar; jumlahnya, atau null di ruang mode daftar. */
+export function gantiSemuaNama(k: KeadaanRuang, o: Keluaran, sekarang: number, acak: () => number): number | null {
+  if (k.modeNama !== "bebas" || k.status === "ditutup") return null;
+  const daftar = new Set(NAMA_SAMARAN);
+  let jumlah = 0;
+  for (const p of urutPemain(k)) {
+    if (p.nama === null || p.dikeluarkan || daftar.has(p.nama)) continue;
+    gantiNamaPemain(k, o, p, p.nama, acak);
+    jumlah++;
+  }
+  k.modeNama = "daftar";
+  simpanMeta(o, "modeNama", k.modeNama);
+  for (const p of k.pemain.values()) {
+    if (p.nama !== null || p.dikeluarkan) continue;
+    const sid = k.sambunganPemain.get(p.id);
+    if (sid !== undefined) kirimKe(o, sid, { v: V, t: "mode_nama", modeNama: "daftar" });
+  }
+  o.kelas.push(pesanLobi(k));
+  kirimPapanKelas(k, o, true);
+  if (k.tautan !== null) o.kelas.push(pesanInfoKelas(k, sekarang));
+  return jumlah;
+}
+
 /** Tiga saran nama yang belum dipakai dan, bila masih cukup, tidak sama dengan saran sebelumnya (P-22). */
 export function pilihSaran(k: KeadaanRuang, sebelumnya: readonly string[], acak: () => number): string[] {
+  // JS-14: nama dibandingkan tanpa membedakan huruf besar dan kecil, dan nama yang diblokir tidak disarankan.
   const dipakai = new Set<string>();
-  for (const p of k.pemain.values()) if (p.nama !== null) dipakai.add(p.nama);
-  let calon = NAMA_SAMARAN.filter((n) => !dipakai.has(n) && !sebelumnya.includes(n));
-  if (calon.length < 3) calon = NAMA_SAMARAN.filter((n) => !dipakai.has(n));
+  for (const p of k.pemain.values()) if (p.nama !== null) dipakai.add(kunciNama(p.nama));
+  const blokir = new Set(k.namaDiblokir);
+  const bebas = (n: string) => !dipakai.has(kunciNama(n)) && !blokir.has(sidikNama(n));
+  let calon = NAMA_SAMARAN.filter((n) => bebas(n) && !sebelumnya.includes(n));
+  if (calon.length < 3) calon = NAMA_SAMARAN.filter(bebas);
   const hasil: string[] = [];
   while (hasil.length < 3 && calon.length > 0) {
     const i = Math.min(calon.length - 1, Math.floor(acak() * calon.length));
@@ -1082,7 +1199,7 @@ function sambutan(k: KeadaanRuang, o: Keluaran, sid: string, p: PemainRuang, tok
     pemainId: p.id,
     token,
     status: k.status,
-    pengaturan: k.ruang.pengaturan,
+    pengaturan: { ...k.ruang.pengaturan, modeNama: modeNamaPemain(k, p) }, // JS-14 (P-34)
     waktuServer: sekarang,
     versiPeta: k.peta.versi,
     saranNama: p.nama === null ? [...p.saran] : [],
@@ -1193,15 +1310,20 @@ export function terimaPemain(k: KeadaanRuang, sid: string, pesan: PesanPemain, s
     }
     case "pilih_identitas": {
       if (p.nama !== null) return o;
-      const dipakai = [...k.pemain.values()].some((q) => q.id !== p.id && q.nama === pesan.nama);
-      if (!p.saran.includes(pesan.nama) || dipakai) {
-        kirimKe(o, sid, galat("NAMA_DIPAKAI"));
+      // JS-14 (P-42 sampai P-44): nama dari saran, atau nama buatan siswa di mode bebas.
+      const periksa = periksaNamaPilihan(k, p, pesan.nama);
+      if (periksa.galat !== undefined) {
+        kirimKe(o, sid, galat(periksa.galat));
+        if (periksa.galat === "NAMA_DITOLAK") {
+          p.tolak = (p.tolak ?? 0) + 1;
+          if (p.tolak === BATAS_TOLAK_NAMA && k.modeNama === "bebas") kirimKe(o, sid, { v: V, t: "mode_nama", modeNama: "daftar" });
+        }
         p.saran = pilihSaran(k, p.saran, acak);
         simpanPemain(o, p);
         kirimKe(o, sid, { v: V, t: "saran_nama", saranNama: [...p.saran] });
         return o;
       }
-      p.nama = pesan.nama;
+      p.nama = periksa.nama;
       p.avatar = pesan.avatar;
       p.warnaTas = warnaTasBaru(k);
       p.saran = [];
@@ -1371,7 +1493,7 @@ function keluarkan(k: KeadaanRuang, o: Keluaran, pemainId: string): void {
 }
 
 /** Pesan layar kelas (P-32 sampai P-39). Di JS-03 datang dari uji dan kait uji lokal. */
-export function terimaKelas(k: KeadaanRuang, pesan: PesanKelas, sekarang: number): Keluaran {
+export function terimaKelas(k: KeadaanRuang, pesan: PesanKelas, sekarang: number, acak: () => number = () => 0): Keluaran {
   const o = keluaranKosong();
   switch (pesan.t) {
     case "mulai": {
@@ -1423,6 +1545,12 @@ export function terimaKelas(k: KeadaanRuang, pesan: PesanKelas, sekarang: number
       return o;
     case "keluarkan":
       keluarkan(k, o, pesan.pemainId);
+      return o;
+    case "ganti_nama": // JS-14 (P-46)
+      gantiNama(k, o, pesan.pemainId, acak);
+      return o;
+    case "ganti_semua_nama": // JS-14 (P-48)
+      gantiSemuaNama(k, o, sekarang, acak);
       return o;
     case "tutup_ruang":
       // JS-10 (P-10): ruang yang belum dimulai juga bisa ditutup.
@@ -1590,6 +1718,7 @@ export function pesanInfoKelas(k: KeadaanRuang, sekarang: number): PesanServerKe
     batasPemain: k.ruang.pengaturan.batasPemain,
     uji: k.ruang.pengaturan.uji,
     terkunci: k.terkunci,
+    modeNama: k.modeNama, // JS-14 (P-57)
     waktuServer: sekarang,
     jumlahKejadian: k.kejadian.length,
     kejadian: k.kejadian.map((kj) => ({ id: kj.kode, judul: kj.isi.judul, zona: Number(kj.isi.zona.slice(1)) })),

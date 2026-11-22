@@ -1,4 +1,5 @@
 // Pembahasan per kejadian (spesifikasi JS-10, P-29): navigasi ← dan →, data diminta sekali per kejadian lalu disimpan.
+import type { ReactNode } from "react";
 import { forwardRef } from "react";
 import type { PesanServerKelas } from "../../inti/protokol-kelas";
 import { isiTeks } from "../../teks";
@@ -15,9 +16,11 @@ interface PropsBahas {
   bahas: Record<string, P<"data_pembahasan">>;
   pindah: (arah: -1 | 1) => void;
   tutup: () => void;
+  /** JS-14 (P-55). */
+  tombolPemain?: ReactNode;
 }
 
-const Pembahasan = forwardRef<HTMLDivElement, PropsBahas>(function Pembahasan({ info, indeks, bahas, pindah, tutup }, ref) {
+const Pembahasan = forwardRef<HTMLDivElement, PropsBahas>(function Pembahasan({ info, indeks, bahas, pindah, tutup, tombolPemain }, ref) {
   const kejadian = info.kejadian[indeks];
   const data = kejadian ? bahas[kejadian.id] : undefined;
   const menjawab = data ? persenPilihan(data.opsi1.map((o) => o.jumlah)).menjawab : 0;
@@ -29,6 +32,7 @@ const Pembahasan = forwardRef<HTMLDivElement, PropsBahas>(function Pembahasan({ 
       </header>
       {data && kejadian ? <KartuBahas ref={ref} data={data} zona={kejadian.zona} /> : <p className="js-kelas-podium-kosong">{t.bahasMemuat}</p>}
       <div className="js-kelas-kontrol">
+        {tombolPemain}
         <button type="button" className="js-kelas-tombol" onClick={() => pindah(-1)} disabled={indeks === 0}>
           {t.sebelumnya} <kbd>←</kbd>
         </button>

@@ -57,6 +57,19 @@ export function batasPanah(px: number, potong: readonly [number, number, number,
 }
 
 /**
+ * JS-14 (P-7): bila `batas` membawa unsur kelima sampai kedelapan (kotak kelompok Menu dan suara di pandangan), pusat
+ * panah yang jatuh di kotak itu digeser sepanjang tepinya: di tepi atas ke kanan, di tepi kiri ke bawah.
+ */
+export function hindariZona(x: number, y: number, batas: readonly number[]): [number, number] {
+  if (batas.length < 8) return [x, y];
+  const [x0, y0, , , zx0, zy0, zx1, zy1] = batas;
+  if (x < zx0 || x > zx1 || y < zy0 || y > zy1) return [x, y];
+  if (y <= y0) return [Math.round(zx1), y];
+  if (x <= x0) return [x, Math.round(zy1)];
+  return zx1 - x <= zy1 - y ? [Math.round(zx1), y] : [x, Math.round(zy1)];
+}
+
+/**
  * Pusat panah (P-26, butir 4): titik potong garis dari titik kaki (dijepit lebih dulu ke dalam batas) ke arah sasaran
  * dengan tepi batas. Semua koordinat pandangan.
  */
@@ -251,6 +264,7 @@ export class SkillKlien {
     const dx = c.x - kaki.x;
     const dy = c.y - kaki.y;
     if (c.x >= kamera.x && c.x < kamera.x + PANDANGAN.lebar && c.y >= kamera.y && c.y < kamera.y + PANDANGAN.tinggi) return null;
-    return [indeksArah(dx, dy), ...letakPanah(kaki.x - kamera.x, kaki.y - kamera.y, dx, dy, batas)];
+    const [x, y] = letakPanah(kaki.x - kamera.x, kaki.y - kamera.y, dx, dy, batas);
+    return [indeksArah(dx, dy), ...hindariZona(x, y, batas)];
   }
 }
