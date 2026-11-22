@@ -170,5 +170,17 @@ test("konsol: kelompok Nama pemain di dialog Ruang baru dan kredit suara di hala
   await expect(kelompok.getByText("Libatkan sekolah lebih dulu", { exact: false })).toBeVisible();
   await kelompok.getByRole("radio", { name: /Nama buatan siswa/ }).check();
   await p.screenshot({ path: `${FOTO}/konsol-ruang-baru-nama-1280x720.png` });
+  // Ruang yang dibuat lewat dialog dengan "Nama buatan siswa" menampilkan isian nama di HP (P-32 sampai P-36).
+  await dialog.getByLabel("Label kelas").fill("IX Dialog");
+  await dialog.getByRole("button", { name: "Buat ruang" }).click();
+  const dibuat = p.getByText(/^Ruang [A-Z0-9]{5} dibuat\.$/);
+  await expect(dibuat).toBeVisible({ timeout: 10_000 });
+  const kode = ((await dibuat.textContent()) ?? "").slice(6, 11);
+  const hp = await browser.newContext({ baseURL, viewport: { width: 731, height: 411 }, isMobile: true, hasTouch: true });
+  const h = await hp.newPage();
+  await h.goto(`/?kode=${kode}`);
+  await expect(h.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(h.getByLabel("Nama pemain")).toBeVisible();
+  await hp.close();
   await ctx.close();
 });

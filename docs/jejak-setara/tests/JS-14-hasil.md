@@ -6,7 +6,7 @@
 | Tanggal | 22 November 2026 |
 | Sesi | Sesi A (mesin), mode ZIP dari `main` commit `9774512` ditambah ZIP Gerbang 1 dan 2 JS-14 |
 | Lingkungan | Node 22.23.5, pnpm 11.25.0, Chromium 1243 (Playwright, lewat `JEJAK_CHROMIUM`), Miniflare dari dependensi terkunci |
-| Status | Diuji; menunggu uji manual pemilik proyek dan `Diterima: JS-14`. Semua kriteria otomatis lulus, kecuali batas kode konsol di AC-24 (bagian "Penyimpangan") |
+| Status | Diterima pemilik proyek 22 November 2026 (`Diterima: JS-14`); semua kriteria otomatis lulus, dan penyimpangan kode konsol di AC-24 diterima dengan saran (a) |
 
 ## Ringkasan
 
@@ -41,7 +41,7 @@ Uji ujung ke ujung lama menemukan dua kesalahan JS-14 yang sudah diperbaiki: `Es
 | AC-21 Penghapusan otomatis | Lulus | `pembersihan.test.ts`; `nama.uji-server.ts` (366 hari terhapus dengan log audit tanpa pengguna, 364 hari tetap) |
 | AC-22 Papan ketik dan pembaca layar | Lulus | `pengaturan.uji.ts` (satu ronde dari layar identitas sampai rekap dengan papan ketik, `toMatchAriaSnapshot` panel Pengaturan, nama dialog kejadian) |
 | AC-23 Kredit | Lulus | `pengaturan.uji.ts` (Tentang); `nama.uji.ts` (halaman masuk konsol) |
-| AC-24 Ukuran dan kinerja | Sebagian | Layar pemain lulus; kode konsol +4,40 KB melewati batas 3 KB (bagian "Penyimpangan"); kinerja HP lulus |
+| AC-24 Ukuran dan kinerja | Lulus dengan penyimpangan yang diterima | Layar pemain lulus; kode konsol +4,40 KB melewati batas 3 KB dan diterima pemilik proyek dengan saran (a) (bagian "Penyimpangan"); kinerja HP lulus |
 | AC-25 Beban | Lulus | `sim:beban` mode bebas (bagian "Beban") |
 | AC-26 Tangkapan layar | Lulus | Bagian "Tangkapan layar" |
 | AC-27 Tanpa regresi | Lulus | Semua perintah di bawah; `build:pages` 178 berkas identik byte |
@@ -109,6 +109,10 @@ Pilihan untuk pemilik proyek:
 Di [tests/JS-14/](JS-14/): `kode-privasi-731x411`, `privasi-731x411`, `nama-bebas-731x411`, `nama-bebas-galat-731x411`, `hud-menu-731x411`, `hud-menu-1280x720`, `pengaturan-731x411`, `pengaturan-640x360`, `pengaturan-1280x720`, `tentang-731x411`, `kelas-menu-1024x768`, `kelas-menu-1920x1080`, `kelas-panel-pemain-1024x768`, `konsol-ruang-nama-1280x720`, dan `konsol-ruang-baru-nama-1280x720`.
 
 ## Uji manual pemilik proyek
+
+Pemilik proyek menerima JS-14 pada 22 November 2026 sesudah mencoba di lingkungan uji. Isian nama buatan siswa awalnya tidak muncul karena halaman konsol belum dimuat ulang sesudah pembaruan; sesudah dimuat ulang, pilihan "Nama buatan siswa" tersedia. Sesudah itu, `nama.uji.ts` mendapat pemeriksaan pembuatan ruang lewat dialog Ruang baru dengan pilihan itu, dan uji tersebut lulus.
+
+Daftar yang disarankan untuk dicoba:
 
 - [ ] Di HP, suara mati secara bawaan; tombol suara menyalakannya, dan bunyi terdengar saat kotak skill diambil dan saat jawaban dikunci.
 - [ ] Di laptop yang menjadi layar kelas, bunyi hitung mundur, dua menit terakhir, dan jingle akhir terdengar; `M` mematikannya.
