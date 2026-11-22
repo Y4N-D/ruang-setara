@@ -2,11 +2,23 @@
 
 | | |
 |---|---|
-| Status | Spesifikasi (22 November 2026), menunggu "Spesifikasi disetujui: semai tambahan" |
+| Status | Disetujui 22 November 2026 (Gerbang 2); Build dimulai hari itu. **Revisi 1** (22 November 2026) dibangun dan diuji di salinan kerja, menunggu "Spesifikasi disetujui: semai tambahan" untuk Revisi 1 |
 | Sesi | B (Naskah dan rujukan). Rencana dan status ada di `docs/jejak-setara/naskah/STATUS.md`, bagian "Plan semai tambahan (lanjutan JS-05)", bukan di `PLAN.md` (AGENTS bagian 4.1) |
 | Keputusan Gerbang 1 | Balasan "Setuju: semai tambahan" (22 Nov 2026): semua saran (a), yaitu KT-B15 sampai KT-B19 dijawab a, dan Permintaan A-16 serta A-17 diajukan |
+| Keputusan Gerbang 2 | Balasan "Spesifikasi disetujui: semai tambahan" (22 Nov 2026): D-1 sampai D-4 diterima tanpa perubahan |
+| Revisi 1 | 22 November 2026, sesudah `test:jejak:server` gagal di Build (bagian "Revisi 1" di bawah) |
 | Batas berkas | `docs/jejak-setara/naskah/`, `server/jejak-setara/seed/`, `scripts/jejak-setara/semai.mjs`, berkas berawalan `naskah-` atau `bank-` di `app/jejak-setara/__tests__/konten/`, serta spesifikasi ini dan laporan ujinya (Plan semai tambahan, disetujui 22 Nov 2026). Perubahan berkas lain ditulis sebagai Permintaan untuk Sesi A di `STATUS.md` |
-| Syarat sebelum Build diserahkan | (1) Permintaan A-15 diterapkan ("Tuli" di `NAMA_DIRI`). (2) Aset prasasti, kukang dalam kandang, dan penjualnya Disetujui di `CREDITS.md`, dan kuncinya masuk `KUNCI_ASET_DISETUJUI` (A-17). (3) Kunci final itu dicatat di naskah (P-24). Build boleh dimulai sesudah Gerbang 2, tetapi ZIP-nya baru diserahkan sesudah ketiga syarat ini terpenuhi (KT-B15a) |
+| Syarat sebelum Build diserahkan | (1) Permintaan A-15 diterapkan ("Tuli" di `NAMA_DIRI`). (2) Aset prasasti, kukang dalam kandang, dan penjualnya Disetujui di `CREDITS.md`, dan kuncinya masuk `KUNCI_ASET_DISETUJUI` (A-17). (3) Kunci final itu dicatat di naskah (P-24). (4) Permintaan A-18 diterapkan: variabel `JEJAK_SEMAI_TANPA_TAMBAHAN` di `server-lokal.mjs` (Revisi 1). Build boleh dimulai sesudah Gerbang 2, tetapi ZIP-nya baru diserahkan sesudah keempat syarat ini terpenuhi (KT-B15a) |
+
+## Revisi 1 (22 November 2026)
+
+| | |
+|---|---|
+| Penyebab | Di Build, `test:jejak:server` gagal di 3 dari 61 uji. Dua uji di `akun.uji-server.ts` mengharapkan 23 rujukan belum diverifikasi, dan satu uji di `kelas.uji-server.ts` mengharapkan pilihan paket hanya berisi Paket inti 16. D1 lokalnya ternyata berisi 43 rujukan dan 3 paket |
+| Akar masalah | Server uji lokal (`scripts/jejak-setara/server-lokal.mjs`) menyemai D1 lokalnya dengan `semai.mjs --jalankan`. Server ini dipakai uji server (port 4320), uji ujung ke ujung (4310), dan `sim:beban` (4330), yang semuanya ditulis untuk bank awal. Spesifikasi ini tidak memperhitungkannya: P-17 langkah 2 menyemai bank tambahan setiap kali berkasnya ada. Akibatnya AC-10 tidak bisa dipenuhi tanpa mengubah berkas di luar batas |
+| Temuan kedua | Bila A-15 diterapkan ("Tuli" di `NAMA_DIRI`), `bank-aturan.test.ts` gagal, karena uji itu mengharapkan 15 nama diri. Angka itu perlu menjadi 16 di commit A-15 yang sama |
+| Dampak | Belum ada yang di-push, dan tidak ada basis data yang tersentuh. ZIP Build memang ditahan sampai syaratnya terpenuhi (KT-B15a) |
+| Jalan keluar | Kembali ke Specify (AGENTS 4.4). `semai.mjs` mengenal variabel lingkungan `JEJAK_SEMAI_TANPA_TAMBAHAN` (P-17a, baru). Bila nilainya `1`, `--jalankan` menyemai bank awal saja. Permintaan A-18 meminta Sesi A memasang variabel itu di `server-lokal.mjs` (satu baris), sehingga ketiga uji tetap memakai bank awal tanpa diubah. A-15 kini juga memuat perubahan angka di `bank-aturan.test.ts` (15 menjadi 16), atas izin Sesi B. Pilihan lain dicatat di `STATUS.md` (KT-B20). Bagian yang berubah ditandai "(Revisi 1)": kepala, Ringkasan, tabel berkas, P-17a, status antarmuka, teks yang tampil, ekspor `semai.mjs`, D-5, catatan Build, AC-8, AC-10, AC-14, dan rencana uji |
 
 ## Ringkasan
 
@@ -17,7 +29,7 @@ Semai tambahan memasukkan ke-24 kejadian tambahan (K-17 sampai K-40), 20 rujukan
 3. **Uji konten**: dua berkas uji baru, dan satu pembantu uji yang diperluas tanpa mengubah perilaku lamanya.
 4. **Naskah**: kunci aset final K-32 dan K-33, dicatat di naskah sebelum Build diserahkan.
 
-Tidak ada layar baru, perubahan server, perubahan protokol, migrasi, atau perubahan alur kerja. Langkah "Semai bank awal" di "Jejak: uji" sudah menjalankan `semai.mjs --jalankan`, jadi semai tambahan ikut berjalan sesudah push. Bank awal (`bank-awal.json`) dan SQL semai bank awal tidak berubah.
+Tidak ada layar baru, perubahan server, perubahan protokol, migrasi, atau perubahan alur kerja. Langkah "Semai bank awal" di "Jejak: uji" sudah menjalankan `semai.mjs --jalankan`, jadi semai tambahan ikut berjalan sesudah push. Bank awal (`bank-awal.json`) dan SQL semai bank awal tidak berubah. (Revisi 1) Server uji lokal tetap menyemai bank awal saja, lewat variabel `JEJAK_SEMAI_TANPA_TAMBAHAN` yang dipasang Sesi A (Permintaan A-18).
 
 ## Kaitan PRD
 
@@ -40,13 +52,15 @@ Tidak ada layar baru, perubahan server, perubahan protokol, migrasi, atau peruba
 | `docs/jejak-setara/naskah/STATUS.md` | Diubah | Gerbang 1, Gerbang 2, Build, Test | Keputusan, riwayat, Permintaan untuk Sesi A |
 | `docs/jejak-setara/naskah/tambahan/NASKAH-TAMBAHAN.md`, `K-32.md`, `K-33.md` | Diubah | Build | Kunci aset final K-32 dan K-33 (P-24) |
 | `server/jejak-setara/seed/bank-tambahan-1.json` | Baru | Build | Bank tambahan (P-1 sampai P-7) |
-| `scripts/jejak-setara/semai.mjs` | Diubah | Build | Semai tambahan dan status (P-9 sampai P-18); bagian bank awal tidak berubah |
+| `scripts/jejak-setara/semai.mjs` | Diubah | Build | Semai tambahan dan status (P-9 sampai P-18), serta variabel server uji lokal (P-17a, Revisi 1); bagian bank awal tidak berubah |
 | `app/jejak-setara/__tests__/konten/naskah-urai.ts` | Diubah | Build | Pengurai menerima folder naskah tambahan, serta pembaca `NASKAH-TAMBAHAN.md` dan bank tambahan (P-23) |
 | `app/jejak-setara/__tests__/konten/naskah-tambahan-cocok.test.ts` | Baru | Build | Bank tambahan sama dengan naskah (P-20) |
-| `app/jejak-setara/__tests__/konten/bank-tambahan.test.ts` | Baru | Build | Aturan, paket, SQL, skenario SQLite, dan perintah (P-21) |
+| `app/jejak-setara/__tests__/konten/bank-tambahan.test.ts` | Baru | Build | Aturan, paket, SQL, skenario SQLite, dan perintah (P-21), termasuk variabel server uji lokal (P-17a, Revisi 1) |
 | `docs/jejak-setara/tests/JS-05-semai-tambahan-hasil.md` | Baru | Test | Laporan uji |
 
 Tidak disentuh: `bank-awal.json`, uji bank awal yang sudah ada (`bank-*.test.ts` dan `naskah-cocok.test.ts`), `app/jejak-setara/inti/` (termasuk `inti/konten/`), `package.json`, lockfile, alur kerja, `wrangler.jsonc`, migrasi, keempat dokumen utama, `PLAN.md`, aset, serta kode dan dokumen Sehari Setara.
+
+(Revisi 1) Dua berkas di luar batas berubah lewat Sesi A, bukan lewat ZIP Build ini: `scripts/jejak-setara/server-lokal.mjs` (A-18) dan angka nama diri di `app/jejak-setara/__tests__/konten/bank-aturan.test.ts` (bersama A-15).
 
 ## Perilaku
 
@@ -113,6 +127,7 @@ Tidak disentuh: `bank-awal.json`, uji bank awal yang sudah ada (`bank-*.test.ts`
   6. Folder sementara dihapus, berhasil ataupun gagal.
 
   Bila berkas bank tambahan tidak ada, perintah berjalan persis seperti JS-05.
+- **P-17a** **(Revisi 1) Server uji lokal.** Bila variabel lingkungan `JEJAK_SEMAI_TANPA_TAMBAHAN` bernilai tepat `1`, bagian bank tambahan di P-17 dilewati: berkasnya tidak dibaca (juga bila tidak sah), SQL berisi bank awal saja, dan kueri status tidak dijalankan. Sesudah pesan selesai bank awal, bila berkas bank tambahan ada, dicetak pesan "dilewati" (D-5) tanpa awalan `::warning`. Nilai lain, termasuk `0`, `true`, atau kosong, tidak melewati apa pun. Variabel ini hanya dipasang `server-lokal.mjs` (A-18). Langkah semai di alur kerja dan `db:semai:lokal` tidak memasangnya, jadi lingkungan uji dan D1 lokal pengembang tetap mendapat kejadian tambahan.
 - **P-18** **Peringatan di GitHub.** Bila variabel lingkungan `GITHUB_ACTIONS` bernilai `true`, pesan status yang berupa peringatan diawali `::warning title=Semai tambahan::`. Dengan begitu pesan itu tampil di ringkasan alur kerja, tanpa membuat alur kerja merah (KT-B16a).
 - **P-19** Basis data yang dituju hanya ditentukan oleh bendera. Agen tidak pernah menjalankan semai dengan `--remote` (JS-05 P-34).
 
@@ -164,12 +179,13 @@ Tidak ada layar. Status perintah semai yang baru atau berubah (status JS-05 lain
 | Berhasil, tambahan ditunda | `wrangler` berhasil, penanda tambahan belum ada | Pesan selesai bank awal, lalu peringatan "ditunda" | 0 |
 | Berhasil, status tidak terbaca | `wrangler` berhasil, kueri status gagal atau keluarannya tidak terbaca | Pesan selesai bank awal, lalu peringatan "tidak terbaca" | 0 |
 | Tanpa bank tambahan | Berkas bank tambahan tidak ada | Persis JS-05 | Seperti JS-05 |
+| Tambahan dilewati (Revisi 1) | `JEJAK_SEMAI_TANPA_TAMBAHAN` bernilai `1` dan berkas bank tambahan ada | Pesan selesai bank awal, lalu pesan "dilewati" | Seperti JS-05 |
 
 ## Teks yang tampil (final)
 
 1. **Isi 24 kejadian dan 20 rujukan:** persis naskah yang sudah disetujui. Semai tambahan tidak menambah atau mengubah satu kata pun.
 2. **Paket dan catatan versi:** D-1 dan D-2. Teks ini tampil di konsol (daftar paket dan riwayat versi), dan nama paket juga tampil di dialog ruang baru.
-3. **Pesan perintah semai**, untuk pengembang dan log alur kerja (D-4):
+3. **Pesan perintah semai**, untuk pengembang dan log alur kerja (D-4, dan D-5 di Revisi 1):
 
 | Status | Teks |
 |---|---|
@@ -179,6 +195,7 @@ Tidak ada layar. Status perintah semai yang baru atau berubah (status JS-05 lain
 | Ditunda, kode sudah terpakai (stdout, peringatan) | `Semai tambahan ditunda: {daftar} sudah ada di basis data ini. Hapus di konsol bila itu hanya percobaan; deploy berikutnya akan mencoba lagi.` `{daftar}` berisi kode yang bentrok, dipisah koma, berurutan seperti di bank: kejadian, rujukan, lalu paket |
 | Ditunda, bank awal belum disemai (stdout, peringatan) | `Semai tambahan ditunda: bank awal belum disemai di basis data ini.` |
 | Status tidak terbaca (stdout, peringatan) | `Status semai tambahan tidak terbaca. Lihat daftar kejadian di konsol untuk memastikan K-17 sampai K-40 sudah ada.` |
+| Tambahan dilewati (stdout, Revisi 1) | `Semai tambahan dilewati (JEJAK_SEMAI_TANPA_TAMBAHAN=1).` Bukan peringatan, jadi tanpa awalan `::warning` |
 
 Bila `GITHUB_ACTIONS` bernilai `true`, setiap teks peringatan diawali `::warning title=Semai tambahan::` (P-18).
 
@@ -238,6 +255,9 @@ Ekspor JS-05 tetap, dengan isi dan keluaran yang sama. Ekspor baru:
 | `sqlStatusTambahan(bank)` | Kueri status (P-15) |
 | `barisStatus(stdout)` | Baris pertama hasil kueri dari keluaran `--json` wrangler, atau `null` bila tidak bisa dibaca. Keluaran dibaca sebagai JSON; yang diambil adalah objek pertama yang memiliki larik `results` |
 | `pesanStatusTambahan(baris, bank)` | `{ teks, peringatan }` menurut tabel teks. Bila `baris` berisi `null`, hasilnya "tidak terbaca" |
+| `barisCetakStatus(pesan, lingkungan)` (catatan Build) | Baris yang dicetak: teks pesan, diawali `::warning title=Semai tambahan::` bila pesan itu peringatan dan `GITHUB_ACTIONS` bernilai `true` (P-18) |
+| `VARIABEL_TANPA_TAMBAHAN`, `PESAN_TAMBAHAN_DILEWATI` (Revisi 1) | `"JEJAK_SEMAI_TANPA_TAMBAHAN"` dan teks D-5 |
+| `tambahanDilewati(lingkungan)` (Revisi 1) | Benar hanya bila variabel itu bernilai tepat `"1"` (P-17a) |
 
 Skrip tetap hanya memakai modul bawaan Node. Format `--json` wrangler 4.92.0 dipastikan di Build dengan D1 lokal (AC-11); bentuk lain yang tidak terbaca selalu berakhir di pesan "tidak terbaca", tidak pernah galat.
 
@@ -288,6 +308,16 @@ Bank awal menyimpan urutan pilihan yang diacak sekali (JS-05 P-21), karena naska
 
 Teks di tabel "Teks yang tampil", butir 3. Pesan ini terbaca di log dan ringkasan alur kerja "Jejak: uji", bukan oleh siswa atau guru.
 
+### D-5 Pesan semai tambahan dilewati (Revisi 1)
+
+Teks: `Semai tambahan dilewati (JEJAK_SEMAI_TANPA_TAMBAHAN=1).` Pesan ini hanya muncul di log server uji lokal, sebagai tanda bahwa D1 uji itu sengaja berisi bank awal saja. Pesan ini bukan peringatan, jadi tidak tampil di ringkasan alur kerja.
+
+## Catatan Build (22 November 2026)
+
+- `barisCetakStatus` ditambahkan di `semai.mjs` agar awalan P-18 bisa diuji tanpa menjalankan perintah. Perilakunya tidak berubah.
+- Format `--json` wrangler 4.92.0 dipastikan dengan D1 lokal: `[{"results":[{...}],"success":true,"meta":{...}}]` (AC-11).
+- `test:jejak:server` gagal di 3 dari 61 uji sebelum Revisi 1. Dengan `JEJAK_SEMAI_TANPA_TAMBAHAN=1` di lingkungan, yang meniru A-18, ke-61 uji lulus. Lihat bagian Revisi 1.
+
 ## Kriteria penerimaan
 
 - [ ] AC-1 `bank-tambahan-1.json` ada, sah menurut skema, dan berisi 20 rujukan, 24 kejadian, serta 2 paket berurutan, dengan format P-7 (P-1, P-7).
@@ -297,9 +327,9 @@ Teks di tabel "Teks yang tampil", butir 3. Pesan ini terbaca di log dan ringkasa
 - [ ] AC-5 SQL tambahan sesuai P-9 sampai P-14: 137 pernyataan, selalu sama, tiap pernyataan paling besar 100.000 byte, tanpa `BEGIN`, `COMMIT`, atau "terverifikasi".
 - [ ] AC-6 Keenam skenario SQLite P-22 lulus.
 - [ ] AC-7 Di setiap skenario, `sqlStatusTambahan` dan `pesanStatusTambahan` menghasilkan nilai dan teks menurut tabel teks, termasuk awalan `::warning` bila `GITHUB_ACTIONS` bernilai `true` (P-15, P-17, P-18).
-- [ ] AC-8 `--sql`, cara pakai, dan perilaku perintah JS-05 tidak berubah, dan uji bank awal yang sudah ada lulus tanpa diubah. Bank tambahan yang tidak sah menghasilkan pesan dan kode 1 (P-16, P-17).
+- [ ] AC-8 `--sql`, cara pakai, dan perilaku perintah JS-05 tidak berubah, dan uji bank awal yang sudah ada lulus tanpa diubah (Revisi 1: kecuali angka nama diri di `bank-aturan.test.ts`, yang diubah Sesi A bersama A-15). Bank tambahan yang tidak sah menghasilkan pesan dan kode 1 (P-16, P-17).
 - [ ] AC-9 `naskah-urai.ts` tetap mengurai naskah bank awal seperti sebelumnya, dan uji `naskah-cocok` lulus tanpa diubah (P-23).
-- [ ] AC-10 Perintah resmi lulus: `content:check:jejak`, `test:jejak`, `test:jejak:server`, dan `build:jejak`.
+- [ ] AC-10 Perintah resmi lulus: `content:check:jejak`, `test:jejak`, `test:jejak:server`, dan `build:jejak`. (Revisi 1) `test:jejak:server` dinilai sesudah A-18 ada di repositori.
 - [ ] AC-11 Semai lokal sungguhan dengan `wrangler` 4.92.0, `--local`, dan folder sementara:
   - semai pertama menulis semuanya dan mencetak "Semai tambahan selesai";
   - semai kedua tidak mengubah apa pun;
@@ -310,6 +340,7 @@ Teks di tabel "Teks yang tampil", butir 3. Pesan ini terbaca di log dan ringkasa
   - konsol uji menampilkan K-17 sampai K-40 Siap tinjau, JR-24 sampai JR-43 belum diverifikasi, serta kedua paket;
   - ringkasan alur kerja memuat peringatan "Semai tambahan ditunda" yang menyebut kode yang bentrok.
 - [ ] AC-13 Tidak ada berkas di luar batas berkas yang berubah, dan `bank-awal.json` tetap sama.
+- [ ] AC-14 (Revisi 1) Dengan `JEJAK_SEMAI_TANPA_TAMBAHAN=1`, `--jalankan` menyemai bank awal saja dan tidak menjalankan kueri status. Pesan "dilewati" dicetak bila berkas bank tambahan ada, bank tambahan yang tidak sah tidak dibaca, dan nilai selain `1` tidak melewati apa pun (P-17a). Di D1 lokal sungguhan, semai dengan variabel itu menghasilkan 23 rujukan, 16 kejadian, dan 1 paket, lalu semai tanpa variabel di folder yang sama menulis kejadian tambahan.
 
 ## Rencana uji
 
@@ -318,18 +349,18 @@ Teks di tabel "Teks yang tampil", butir 3. Pesan ini terbaca di log dan ringkasa
 | Berkas | Isi |
 |---|---|
 | `naskah-tambahan-cocok.test.ts` | P-20: daftar dan status naskah, isi kejadian per naskah (24 uji), set tokoh, pustaka (teks, sumber, catatan, padanan), dan angka "Pemeriksaan panjang" |
-| `bank-tambahan.test.ts` | P-7, P-8, D-1; bentuk dan aturan SQL (P-9 sampai P-14); skenario SQLite P-22; status dan pesan (P-15, P-17, P-18); perintah pada salinan sementara repositori, untuk bank tambahan tidak sah dan bank tambahan tidak ada |
+| `bank-tambahan.test.ts` | P-7, P-8, D-1; bentuk dan aturan SQL (P-9 sampai P-14); skenario SQLite P-22; status dan pesan (P-15, P-17, P-18); perintah pada salinan sementara repositori, untuk bank tambahan tidak sah dan bank tambahan tidak ada; (Revisi 1) variabel server uji lokal (P-17a) |
 | Uji bank awal yang sudah ada | Dijalankan tanpa perubahan, sebagai bukti AC-8 dan AC-9 |
 
 ### Perintah di tahap Test
 
 1. `content:check:jejak`
 2. `test:jejak`
-3. `test:jejak:server`
+3. `test:jejak:server`. (Revisi 1) Sebelum A-18 ada di repositori, perintah ini dijalankan dengan `JEJAK_SEMAI_TANPA_TAMBAHAN=1` di lingkungan untuk meniru A-18, dan hasil tanpa variabel itu dicatat
 4. `build:jejak`
-5. Semai lokal sungguhan (AC-11): `node scripts/jejak-setara/semai.mjs --jalankan -- --local --persist-to <folder sementara>`, dijalankan dua kali, lalu sekali lagi di folder lain yang sudah diberi K-17. Agen tidak menjalankan `--remote`.
+5. Semai lokal sungguhan (AC-11): `node scripts/jejak-setara/semai.mjs --jalankan -- --local --persist-to <folder sementara>`, dijalankan dua kali, lalu sekali lagi di folder lain yang sudah diberi K-17. (Revisi 1) Lalu di folder baru dengan `JEJAK_SEMAI_TANPA_TAMBAHAN=1`, dan sekali lagi tanpa variabel itu di folder yang sama (AC-14). Agen tidak menjalankan `--remote`.
 
-`test:e2e:jejak` dan `sim:beban` tidak diperlukan, karena tidak ada layar, protokol, atau inti ruang yang berubah (AGENTS 4.4 butir 6).
+`test:e2e:jejak` dan `sim:beban` tidak diperlukan, karena tidak ada layar, protokol, atau inti ruang yang berubah, dan (Revisi 1) server uji lokalnya tetap menyemai bank awal saja (A-18) (AGENTS 4.4 butir 6).
 
 ### Daftar periksa manual (pemilik proyek)
 
