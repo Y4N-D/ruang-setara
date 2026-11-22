@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| Tahap saat ini | **Naskah tambahan, giliran 8 dari 8** (22 November 2026): K-38, K-39, dan K-40 (Z8) di [`tambahan/`](tambahan/NASKAH-TAMBAHAN.md) menunggu "Setuju: naskah tambahan Z8". Giliran 1 sampai 7 (K-17 sampai K-37, Z1 sampai Z7) disetujui 22 November 2026. [Plan naskah tambahan (K-17 sampai K-40)](#plan-naskah-tambahan-k-17-sampai-k-40) disetujui pemilik proyek pada 22 November 2026 ("Setuju: naskah tambahan", semua saran a). Sebelumnya: naskah pendukung [`refleksi.md`](refleksi.md) dan [`panduan-guru.md`](panduan-guru.md) (20 November 2026), dan **JS-05 Selesai** (10 November 2026; [`specs/JS-05-konten.md`](../specs/JS-05-konten.md), [`tests/JS-05-hasil.md`](../tests/JS-05-hasil.md)) |
-| Pekerjaan | Naskah final 16 kejadian dan rujukannya (selesai 5 November 2026), lalu JS-05: skema konten, bank awal, semai ke D1, dan `content:check:jejak` (selesai 10 November 2026), lalu naskah pendukung untuk JS-11 dan JS-16 (20 November 2026), lalu 24 naskah tambahan K-17 sampai K-40, tiga per zona: Plan serta giliran 1 sampai 7 disetujui, dan giliran 8 (terakhir) diserahkan, 22 November 2026 |
+| Tahap saat ini | **Plan semai tambahan** (22 November 2026): [entri Plan](#plan-semai-tambahan-lanjutan-js-05) menunggu "Setuju: semai tambahan". Ke-24 naskah tambahan (K-17 sampai K-40, di [`tambahan/`](tambahan/NASKAH-TAMBAHAN.md)) disetujui pemilik proyek pada 22 November 2026; giliran terakhir dengan "Setuju: naskah tambahan Z8". [Plan naskah tambahan (K-17 sampai K-40)](#plan-naskah-tambahan-k-17-sampai-k-40) disetujui pemilik proyek pada 22 November 2026 ("Setuju: naskah tambahan", semua saran a). Sebelumnya: naskah pendukung [`refleksi.md`](refleksi.md) dan [`panduan-guru.md`](panduan-guru.md) (20 November 2026), dan **JS-05 Selesai** (10 November 2026; [`specs/JS-05-konten.md`](../specs/JS-05-konten.md), [`tests/JS-05-hasil.md`](../tests/JS-05-hasil.md)) |
+| Pekerjaan | Naskah final 16 kejadian dan rujukannya (selesai 5 November 2026), lalu JS-05: skema konten, bank awal, semai ke D1, dan `content:check:jejak` (selesai 10 November 2026), lalu naskah pendukung untuk JS-11 dan JS-16 (20 November 2026), lalu 24 naskah tambahan K-17 sampai K-40, tiga per zona (Plan dan kedelapan giliran disetujui 22 November 2026), lalu Plan semai tambahan (22 November 2026) |
 | Tanggal | 22 November 2026 |
-| Acuan | ZIP repositori `main` dari pemilik proyek (berkas bertanggal 21 November 2026): JS-01 sampai JS-12 dan JS-22 Selesai (JS-09 Selesai 21 Nov 2026); Plan JS-13 menunggu `Setuju: JS-13`; JS-19 (termasuk impor dan ekspor bank) belum direncanakan. Ditambah isi `naskah/` dari `naskah-tambahan-z7.zip` (giliran 7, 22 November 2026) |
-| Berkas yang boleh diubah sesi ini | Sesi naskah tambahan (sejak 21 November 2026): hanya `docs/jejak-setara/naskah/` (pemilik proyek). Giliran 1 menambah folder `naskah/tambahan/` (usulan 6a). Setiap giliran menambah tiga naskah di folder itu serta mengubah `tambahan/NASKAH-TAMBAHAN.md` dan `naskah/STATUS.md`. Batas JS-05 tercatat di "Catatan untuk JS-05". Perubahan berkas lain ditulis di "Permintaan untuk Sesi A" |
+| Acuan | ZIP repositori `main` dari pemilik proyek (berkas bertanggal 21 November 2026): JS-01 sampai JS-12 dan JS-22 Selesai (JS-09 Selesai 21 Nov 2026); Plan JS-13 menunggu `Setuju: JS-13`; JS-19 (termasuk impor dan ekspor bank) belum direncanakan. Ditambah isi `naskah/` dari `naskah-tambahan-z8.zip` (giliran 8, 22 November 2026) |
+| Berkas yang boleh diubah sesi ini | Sesi naskah tambahan (sejak 21 November 2026): hanya `docs/jejak-setara/naskah/` (pemilik proyek). Giliran 1 menambah folder `naskah/tambahan/` (usulan 6a). Setiap giliran menambah tiga naskah di folder itu serta mengubah `tambahan/NASKAH-TAMBAHAN.md` dan `naskah/STATUS.md`. Batas JS-05 tercatat di "Catatan untuk JS-05". Plan semai tambahan juga hanya mengubah `naskah/`; batas berkas untuk Specify, Build, dan Test-nya diusulkan di Plan itu dan baru berlaku bila Plan disetujui. Perubahan berkas lain ditulis di "Permintaan untuk Sesi A" |
 
 ## Riwayat
 
@@ -61,6 +61,96 @@
 | 22 Nov 2026 | Naskah tambahan, giliran 7 (Z7) | K-35 "Pengumuman yang tak terdengar" (peninjauan khusus disabilitas), K-36 "Adik belum punya akta lahir", dan K-37 "Asap rokok di puskesmas" ditulis di `naskah/tambahan/`, dan `NASKAH-TAMBAHAN.md` diperbarui. Rujukan baru JR-39, JR-40, dan JR-41 dipra-periksa (KT-B7). Perubahan dari Plan: JR-39 mendapat Pasal 105 ayat (1). Keputusan yang diserahkan Plan ke giliran ini: K-35 memakai sebutan "Tuli" dengan huruf T besar, dan Permintaan A-15 diusulkan agar kata itu tidak memicu peringatan huruf kapital. Ayat larangan merokok yang ditunggu catatan Plan ternyata tidak ada sebagai ayat tersendiri di UU 17/2023, jadi JR-41 tetap Pasal 151 ayat (1). Semua tokoh memakai aset Disetujui, tanpa tokoh kembar di Z7. K-36 dan K-37 lolos `periksaKejadian` tanpa galat dan tanpa peringatan; K-35 tanpa galat, dengan satu peringatan `KAPITAL_TENGAH` untuk "Tuli". Ketiga naskah terbaca sama oleh parser uji `naskah-cocok`. Menunggu "Setuju: naskah tambahan Z7". Kode, naskah K-01 sampai K-16, `NASKAH.md`, dan bank awal tidak diubah |
 | 22 Nov 2026 | Naskah tambahan, giliran 7 disetujui | Pemilik proyek membalas "Setuju: naskah tambahan Z7": K-35, K-36, dan K-37 disetujui, termasuk sebutan "Tuli" di K-35 dan teks final JR-39 sampai JR-41. Permintaan A-15 menjadi Diajukan |
 | 22 Nov 2026 | Naskah tambahan, giliran 8 (Z8) | K-38 "Tantangan berbahaya demi video" dan K-40 "Umur palsu di media sosial" (keduanya dengan peninjauan khusus keselamatan anak), serta K-39 "Hadiah kuota minta data", ditulis di `naskah/tambahan/`, dan `NASKAH-TAMBAHAN.md` diperbarui. Rujukan baru JR-42 dan JR-43 dipra-periksa (KT-B7). Perubahan dari Plan: JR-43 mendapat ayat (1) dan ayat (4). Penilaian ulang yang diminta Plan untuk K-40: kewajiban di kartu dampak adalah kewajiban penyelenggara layanan digital melindungi anak, bukan kewajiban anak, jadi Langkah 1 menanyakan kewajiban di balik batas umur; angka batas umur tidak disebut. UU 27/2022 masuk daftar "RUU yang sedang dibahas". Semua tokoh memakai aset Disetujui, tanpa tokoh kembar di Z8. Ketiga naskah lolos `periksaKejadian` tanpa galat dan tanpa peringatan, dan terbaca sama oleh parser uji `naskah-cocok`. Dengan giliran ini ke-24 naskah tambahan sudah ditulis, dan posisi pilihan benar serta tepat terbagi rata. Menunggu "Setuju: naskah tambahan Z8". Kode, naskah K-01 sampai K-16, `NASKAH.md`, dan bank awal tidak diubah |
+| 22 Nov 2026 | Naskah tambahan, giliran 8 disetujui | Pemilik proyek membalas "Setuju: naskah tambahan Z8": K-38, K-39, dan K-40 disetujui, termasuk teks final JR-42 dan JR-43 serta UU 27/2022 di daftar "RUU yang sedang dibahas". Ke-24 naskah tambahan selesai |
+| 22 Nov 2026 | Plan semai tambahan | Entri "Plan semai tambahan (lanjutan JS-05)" ditulis sesuai KT-B10. Prototipe bank tambahan dari ke-24 naskah diperiksa dengan aturan konsol dan disemai di SQLite di luar repositori (tujuh hasil percobaan). Usulan KT-B15 sampai KT-B19, serta Permintaan A-16 dan A-17 yang diajukan bila Plan disetujui. `tambahan/NASKAH-TAMBAHAN.md` mencatat ke-24 naskah disetujui. Menunggu "Setuju: semai tambahan". Hanya berkas di `naskah/` yang diubah |
+
+## Plan semai tambahan (lanjutan JS-05)
+
+Entri Plan untuk memasukkan ke-24 kejadian tambahan, ke-20 rujukan barunya, dan dua paket ke basis data lewat semai (templat AGENTS 12.1). Ini Plan kecil yang disyaratkan KT-B10 (usulan 3a Plan naskah tambahan). Plan ini hanya mengubah `naskah/STATUS.md`. Berkas di luar `naskah/` baru diubah sesudah Plan disetujui, menurut batas berkas di bagian "Batas berkas yang diusulkan".
+
+| | |
+|---|---|
+| Status | Direncanakan (22 Nov 2026); menunggu "Setuju: semai tambahan" |
+| Memenuhi | Isi bank untuk JFR-15, JFR-16, dan JFR-45, serta paket untuk JFR-46, seperti Plan naskah tambahan |
+| Bergantung pada | JS-05 (semai bank awal) dan JS-12 (konsol), keduanya Selesai; ke-24 naskah tambahan, disetujui 22 Nov 2026; aset K-32 dan K-33 dari Sesi C beserta kuncinya di daftar aset (Permintaan A-17); Permintaan A-15 |
+| Berkas yang dibuat atau diubah | Sekarang: `naskah/STATUS.md` dan `tambahan/NASKAH-TAMBAHAN.md`. Sesudah disetujui: baru `server/jejak-setara/seed/bank-tambahan-1.json`, `app/jejak-setara/__tests__/konten/bank-tambahan.test.ts`, `naskah-tambahan-cocok.test.ts`, spesifikasi `specs/JS-05-semai-tambahan.md`, dan laporan `tests/JS-05-semai-tambahan-hasil.md`; diubah `scripts/jejak-setara/semai.mjs`, pembantu uji `naskah-urai.ts` bila perlu, dan berkas di `naskah/`. `bank-awal.json` dan keluaran semai bank awal tidak berubah |
+| Migrasi D1 | Tidak ada; tabel `0001_awal.sql` sudah cukup |
+| Pesan protokol baru atau berubah | Tidak ada |
+| Aset yang dibutuhkan | Prasasti (K-32), serta kukang dalam kandang dan penjualnya (K-33): dibuat Sesi C, Disetujui di `CREDITS.md`, lalu kuncinya masuk `KUNCI_ASET_DISETUJUI` (A-17). Sesudah itu Sesi B mengganti kunci usulan dengan nama berkas final di naskah |
+| Hasil percobaan risiko | Bagian "Hasil percobaan" di bawah |
+| Keputusan terbuka | KT-B15 sampai KT-B19 (usulan 1 sampai 5). Usulan 6 berupa Permintaan A-16 dan A-17 |
+| Dependensi baru | Tidak ada |
+| Risiko | Bagian "Risiko" di bawah |
+| Ukuran | M: satu berkas data hasil naskah, fungsi semai tambahan di `semai.mjs`, dua berkas uji, spesifikasi pendek, dan laporan uji |
+
+### Hasil percobaan
+
+Dikerjakan 22 November 2026 di luar repositori; repositori tidak diubah. Skrip kecil menyusun prototipe `bank-tambahan-1.json` dari ke-24 naskah dan `tambahan/NASKAH-TAMBAHAN.md`: 20 rujukan, 24 kejadian, dan 2 paket, sekitar 98 KB. SQL semai tambahannya dijalankan di SQLite bawaan Node dengan tabel dari kedua migrasi D1, sesudah SQL semai bank awal yang asli, dengan cara yang sama seperti uji `bank-semai`.
+
+1. **Aturan konten.** Bank tambahan saja sah menurut skema, tetapi `periksaBank` memberi 34 temuan "tidak ada", karena JR-01 sampai JR-23 dan K-01 sampai K-16 berada di bank awal. Karena itu pemeriksaan memakai gabungan bank awal dan tambahan. Hasilnya: 3 galat `SET_TOKOH_TIDAK_ADA` untuk kunci usulan K-32 dan K-33, serta 1 peringatan `KAPITAL_TENGAH` untuk "Tuli" di K-35. Bila ketiga kunci itu dihitung Disetujui dan "Tuli" masuk `NAMA_DIRI` (simulasi di memori), hasilnya 0 galat dan 0 peringatan.
+2. **Paket di peta.** Setiap zona punya 12 titik kejadian. Paket inti 16 (2 kejadian per zona), Paket lanjutan 24 (3), dan Paket lengkap 40 (5) lolos `periksaPaketPeta`, dan `tempatkanKejadian` menempatkan semua kejadiannya untuk tiga benih ruang.
+3. **Semai pertama.** Sesudah bank awal lalu tambahan, basis data berisi 43 rujukan berstatus `belum`, 40 kejadian Siap tinjau, dan 40 versi kerja yang isinya sama persis dengan berkas. Ada juga 3 paket (berisi 16, 24, dan 40 kejadian) serta dua penanda, `semai_bank_awal` dan `semai_tambahan_1`.
+4. **Semai ulang dan suntingan konsol.** Menjalankan ulang kedua semai tidak mengubah satu baris pun. Suntingan konsol sesudah semai juga tetap utuh sesudah semai diulang: rujukan yang ditandai terverifikasi, isi versi yang diubah, kejadian yang diarsipkan, dan kejadian yang dikeluarkan dari paket.
+5. **Kode sudah terpakai.** Sebelum semai tambahan, konsol diisi K-17, JR-24, dan paket bernama "Paket lanjutan 24".
+   - Dengan pola bank awal (hanya penanda), semai tetap memasang penanda. K-17 buatan konsol ikut masuk Paket lanjutan 24 dan Paket lengkap 40 tanpa versi naskah, JR-24 tetap berteks konsol, dan ada dua paket bernama sama.
+   - Dengan pola "semua atau tidak sama sekali" (usulan 2a), tidak ada baris tambahan yang ditulis dan penanda tidak dipasang. Sesudah ketiga baris itu dihapus, semai berikutnya menulis semuanya.
+6. **Urutan.** Bila tambahan disemai sebelum bank awal, Paket lengkap 40 hanya berisi 24 kejadian dan tidak bertambah lagi. Karena itu semai tambahan mensyaratkan penanda bank awal sudah ada (usulan 2a).
+7. **Ukuran.** SQL semai tambahan terdiri atas 137 pernyataan dan 128.169 bita, dengan pernyataan terbesar 3.360 bita. Sebagai pembanding, bank awal 73 pernyataan dan 73.724 bita. Menurut dokumentasi D1, batasnya 100.000 bita per pernyataan dan 5 GB per berkas `d1 execute`.
+
+### Usulan
+
+1. **Waktu dan isi semai (KT-B15).**
+   - (a, saran) **Sekali untuk semuanya.** Ke-24 kejadian, ke-20 rujukan, serta Paket lanjutan 24 dan Paket lengkap 40 disemai bersama dengan satu penanda, `semai_tambahan_1`. Specify dan sebagian Build bisa dikerjakan lebih dulu. Build baru diserahkan sesudah aset K-32 dan K-33 Disetujui dan kuncinya masuk daftar aset (A-17), serta A-15 diterapkan, karena uji mewajibkan 0 galat dan 0 peringatan.
+   - (b) **Bertahap.** Tahap pertama berisi 22 kejadian, tanpa K-32 dan K-33. Tahap kedua, dengan penanda sendiri, menyusul sesudah asetnya siap. Kedua paket baru lengkap di tahap kedua, dan semai, uji, serta naskah harus menangani dua tahap.
+   - (c) **Sekarang dengan kunci pengganti.** K-32 dan K-33 memakai aset yang sudah ada, lalu kuncinya diganti di konsol sesudah aset baru Disetujui. Naskah dan basis data jadi berbeda, dan kedua kejadian harus disunting di setiap basis data.
+2. **Bila kode atau nomor sudah terpakai (KT-B16).** Usulan 3a sudah menetapkan bahwa semai tidak menulis apa pun bila K-17 sampai K-40 atau JR-24 sampai JR-43 sudah terpakai.
+   - (a, saran) **Semua atau tidak sama sekali, dengan peringatan.** Semai tambahan hanya berjalan bila dua syarat terpenuhi: penanda bank awal sudah ada, dan kode K-17 sampai K-40, nomor JR-24 sampai JR-43, serta nama kedua paket tambahan belum ada di basis data itu. Bila salah satunya sudah ada, tidak ada yang ditulis dan penanda tidak dipasang, sehingga semai dicoba lagi pada deploy berikutnya. `semai.mjs` lalu menulis peringatan berisi kode yang bentrok di ringkasan alur kerja "Jejak: uji". Alur kerja tidak dibuat merah, supaya deploy fitur lain tidak terhalang.
+   - (b) Sama, tetapi alur kerja dibuat merah sampai bentrokan dibereskan.
+   - (c) Pola bank awal, hanya dengan penanda. Tidak disarankan, karena di percobaan 5 kejadian buatan konsol ikut masuk paket.
+3. **Berkas data dan uji (KT-B17).**
+   - (a, saran) **Berkas terpisah.** `server/jejak-setara/seed/bank-tambahan-1.json` berbentuk sama dengan bank awal (versi 1, dengan `rujukan`, `kejadian`, dan `paket`), tetapi hanya berisi tambahan. Id memakai `DASAR_ID` yang sama dengan nama `kejadian/K-17` dan seterusnya, jadi tidak bentrok dengan bank awal. Fungsi dan keluaran semai bank awal tidak berubah, jadi uji bank awal tetap berlaku. Dua uji baru:
+     - `naskah-tambahan-cocok` memastikan berkas itu sama huruf demi huruf dengan `naskah/tambahan/`: naskah, set tokoh, teks rujukan, sumber, dan catatan.
+     - `bank-tambahan` memeriksa gabungan bank awal dan tambahan dengan `periksaBank` (0 galat, 0 peringatan), paket terhadap peta, dan skenario SQL percobaan 3 sampai 6.
+   - (b) **Digabung ke `bank-awal.json`.** Tidak disarankan: berkas bank awal yang sudah disemai berubah, dan uji serta penandanya harus dibedakan lagi.
+4. **Paket (KT-B18).**
+   - (a, saran) Paket lanjutan 24 (K-17 sampai K-40) dan Paket lengkap 40 (K-01 sampai K-40) ikut disemai dalam keadaan aktif, dengan urutan menurut kode, sesuai KT-B11. Keduanya baru bisa dipakai ruang biasa sesudah semua kejadiannya terbit dan semua rujukannya terverifikasi. Sebelum itu, keduanya hanya bisa dipakai ruang uji.
+   - (b) Paket disusun admin di konsol sesudah semai.
+5. **Alur gerbang (KT-B19).**
+   - (a, saran) Seperti AGENTS bagian 4, dengan spesifikasi pendek:
+     - Specify di `specs/JS-05-semai-tambahan.md`, ditutup Gerbang 2 dengan "Spesifikasi disetujui: semai tambahan".
+     - Build dan Test, dengan laporan `tests/JS-05-semai-tambahan-hasil.md`.
+     - Pemilik proyek commit dan push seperti biasa, lalu langkah "Semai bank awal" di "Jejak: uji" menyemainya otomatis. Basis data produksi mendapatkannya dari langkah semai produksi (A-5).
+   - (b) Plan dan spesifikasi digabung supaya lebih cepat. Ini menyimpang dari AGENTS bagian 4.
+6. **Permintaan untuk Sesi A.**
+   - (a, saran) A-16 (catatan Architecture 10.6 dan pembagian kerja di `PLAN.md`) dan A-17 (kunci aset baru K-32 dan K-33) diajukan bila Plan ini disetujui.
+   - (b) Catatan Architecture ditulis Sesi A sesudah Build, bersama hasil ujinya; A-17 tetap diajukan.
+
+### Sesudah semai: pekerjaan di konsol
+
+Di setiap basis data (uji sekarang, produksi kelak), akun Peninjau melakukan dua hal:
+- memverifikasi JR-24 sampai JR-43 di JDIH lalu menandainya di konsol;
+- menilai dan menerbitkan K-17 sampai K-40.
+
+Perkiraannya 45–60 menit per basis data (Plan naskah tambahan, usulan 3). Agen dan skrip tidak pernah menandai rujukan terverifikasi. Paket lanjutan 24 siap untuk ruang biasa sesudah semua kejadiannya terbit dan rujukannya terverifikasi. Paket lengkap 40 juga memerlukan semua kejadian dan rujukan bank awal dalam keadaan terbit dan terverifikasi.
+
+### Batas berkas yang diusulkan
+
+Berlaku untuk Specify, Build, dan Test bila Plan ini disetujui:
+- `docs/jejak-setara/naskah/`;
+- `server/jejak-setara/seed/` (berkas baru `bank-tambahan-1.json`);
+- `scripts/jejak-setara/semai.mjs`;
+- berkas berawalan `naskah-` atau `bank-` di `app/jejak-setara/__tests__/konten/`;
+- `docs/jejak-setara/specs/JS-05-semai-tambahan.md` dan `docs/jejak-setara/tests/JS-05-semai-tambahan-hasil.md`.
+
+Batas ini sama dengan batas JS-05, tanpa `app/jejak-setara/inti/konten/`, karena perubahan di sana kini lewat Sesi A (A-15 dan A-17). Perubahan berkas lain ditulis di "Permintaan untuk Sesi A".
+
+### Risiko
+
+1. **Kode atau nomor sudah terpakai di konsol uji.** Percobaan JS-12 mungkin sudah menyimpan K-17 atau JR-24. Konsol juga memberi kejadian dan rujukan baru kode terbesar ditambah satu, jadi apa pun yang dibuat di konsol sebelum semai tambahan akan memakai K-17 atau JR-24. Karena itu, sampai semai tambahan berjalan, jangan membuat kejadian atau rujukan baru di konsol uji. Bila sudah telanjur, semai tertunda dan peringatan menyebut kodenya (usulan 2a). Kejadian atau rujukan percobaan itu bisa dihapus di konsol bila tidak dipakai.
+2. **Menunggu Sesi C dan Sesi A.** Build tidak bisa diserahkan sebelum aset K-32 dan K-33 Disetujui dan kuncinya masuk daftar aset, serta A-15 diterapkan (usulan 1a). Bila penantian terlalu lama, usulan 1b masih bisa dipilih.
+3. **Naskah berubah sesudah semai.** Sesudah semai di sebuah basis data, perbaikan dilakukan di konsol (catatan JS-05). Mengubah naskah dan berkas tambahan hanya berpengaruh pada basis data yang belum disemai, misalnya produksi.
+4. **Perubahan undang-undang.** Bila salah satu RUU di "RUU yang sedang dibahas" (`tambahan/NASKAH-TAMBAHAN.md`) disahkan sebelum Build, rujukannya ditinjau ulang lebih dulu. Sesudah semai, Peninjau tetap memverifikasi setiap rujukan di konsol.
+5. **Produksi.** Begitu langkah semai produksi ada (A-5), D1 produksi ikut mendapat kejadian tambahan berstatus Siap tinjau. Kejadian itu tidak tampil bagi pemain sebelum terbit, tetapi Peninjau perlu 45–60 menit lagi untuk produksi.
 
 ## Plan naskah tambahan (K-17 sampai K-40)
 
@@ -70,7 +160,7 @@ Semua rujukan baru berstatus **perlu verifikasi**. Nomor pasalnya sudah dicari d
 
 | | |
 |---|---|
-| Status | Disetujui pemilik proyek (22 Nov 2026, semua saran a). Giliran 1 sampai 7 (Z1 sampai Z7) disetujui 22 Nov 2026, dan giliran 8 (Z8), giliran terakhir, diserahkan 22 Nov 2026. Daftar dan status per kejadian ada di `tambahan/NASKAH-TAMBAHAN.md` |
+| Status | Disetujui pemilik proyek (22 Nov 2026, semua saran a). Kedelapan giliran (Z1 sampai Z8) disetujui 22 Nov 2026, jadi ke-24 naskah selesai. Cara memasukkannya ke basis data direncanakan di "Plan semai tambahan (lanjutan JS-05)". Daftar dan status per kejadian ada di `tambahan/NASKAH-TAMBAHAN.md` |
 | Memenuhi | Tambahan isi bank untuk JFR-15, JFR-16, dan JFR-45 (kejadian per zona, dialog dua langkah dan kartu dampak, serta pustaka rujukan), dan paket untuk JFR-46 |
 | Bergantung pada | JS-05 (skema dan bank awal) dan JS-12 (penyunting konsol dan pustaka rujukan), keduanya Selesai. Peta JS-06 memuat 12 titik kejadian per zona. Cara memasukkan ke basis data mengikuti usulan 3 |
 | Berkas yang dibuat atau diubah | Sekarang: `naskah/STATUS.md`. Sesudah disetujui, setiap giliran: tiga berkas `naskah/tambahan/K-xx.md`, `naskah/tambahan/NASKAH-TAMBAHAN.md`, dan `naskah/STATUS.md` (usulan 6). `naskah/NASKAH.md`, `K-01.md` sampai `K-16.md`, dan bank awal tidak diubah |
@@ -702,6 +792,8 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 | A-13 | Panduan guru JS-16 (tempat dan bentuknya ditetapkan di Plan JS-16) | Pakai [`panduan-guru.md`](panduan-guru.md) sebagai bahan panduan guru satu halaman di Plan JS-16. Draf ini hanya memuat fitur yang Selesai sampai JS-12 dan JS-22; bagian bertanda [menyusul] dilengkapi sesudah JS-11 dan JS-09 Selesai. Bagian "Catatan penyusunan" memuat sumber setiap bagian, isi yang dipangkas agar muat satu halaman, dan tujuh hal yang perlu diperiksa ulang, antara lain domain (KT-06), bagian kuota sesudah Workers Paid aktif, dan batas pemain untuk siswa yang berganti HP | PRD bagian 16: guru menjalankan sesi tanpa bantuan sesudah membaca panduan satu halaman. Saran mode layar diperluas dari risiko entri JS-10 di `PLAN.md` sudah dimasukkan | Diterima (Sesi A, Specify JS-11, 20 Nov 2026); dikerjakan di Plan JS-16 |
 | A-14 | Konsol, bagian paket di bank kejadian (JS-12); bila perlu kode temuan baru di `inti/konten/periksa.ts` | Tampilkan peringatan, tanpa menolak, bila satu paket memuat lebih dari 6 kejadian di satu zona, misalnya: "Di ruang berbatas lebih dari 50 pemain, kejadian ketujuh dan seterusnya di zona ini tidak akan tampil." | Peta memuat 12 titik per zona, dan ruang berbatas lebih dari 50 pemain memakai dua titik per kejadian. `periksaPaketPeta` hanya menolak paket di atas 12 kejadian per zona, sedangkan `saringMenurutTitik` di server melewatkan sisanya tanpa pesan (Plan naskah tambahan, hasil percobaan 1) | Diajukan (22 Nov 2026): usulan 8a disetujui pemilik proyek |
 | A-15 | `app/jejak-setara/inti/konten/periksa.ts`, daftar `NAMA_DIRI` | Tambahkan "Tuli" ke daftar `NAMA_DIRI`, yaitu daftar kata yang boleh berhuruf kapital di tengah kalimat, sebelum semai tambahan | K-35 memakai sebutan "Tuli" dengan huruf T besar, yang dipilih banyak komunitas Tuli sebagai identitas (keputusan giliran 7). Tanpa itu, `periksaKejadian` memberi peringatan `KAPITAL_TENGAH`, sedangkan uji bank awal mewajibkan 0 galat dan 0 peringatan (AC-2), dan semai tambahan kemungkinan memakai syarat yang sama. Simulasi Sesi B: dengan "Tuli" di daftar itu, K-35 tanpa temuan | Diajukan (22 Nov 2026): giliran 7 disetujui pemilik proyek, termasuk sebutan "Tuli" |
+| A-16 | `docs/jejak-setara/Architecture.md` bagian 10.6, dan `PLAN.md` bagian "Pembagian kerja tiga sesi" | (1) Catat semai tambahan: `server/jejak-setara/seed/bank-tambahan-1.json` disemai sekali per basis data dengan penanda `semai_tambahan_1`, hanya sesudah bank awal disemai, dan tidak menulis apa pun bila kode K-17 sampai K-40, nomor JR-24 sampai JR-43, atau nama paket tambahannya sudah ada. Id memakai `DASAR_ID` yang sama, dengan nama `kejadian/K-xx`, `kejadian_versi/K-xx/1`, dan `paket/<nama>`. (2) Di pembagian kerja, Sesi B juga mengerjakan naskah tambahan K-17 sampai K-40 dan semai tambahan, sebagai lanjutan JS-05 | KT-B10 Plan naskah tambahan mensyaratkan catatan Architecture 10.6 dari Sesi A, dan `PLAN.md` serta Architecture hanya diubah Sesi A (Plan semai tambahan, usulan 6a) | Diusulkan (22 Nov 2026); diajukan bila Plan semai tambahan disetujui |
+| A-17 | `app/jejak-setara/inti/konten/kunci-aset.ts` dan `app/jejak-setara/assets/manifest.ts` | Sesudah prasasti (K-32), kukang dalam kandang, dan penjualnya (K-33) Disetujui di `CREDITS.md`, tambahkan kuncinya ke `KUNCI_ASET_DISETUJUI` dan manifest, sesuai catatan di `kunci-aset.ts` | Tanpa kunci itu, K-32 dan K-33 mendapat galat `SET_TOKOH_TIDAK_ADA` di konsol dan di uji semai tambahan (Plan semai tambahan, hasil percobaan 1) | Diusulkan (22 Nov 2026); diajukan bila Plan semai tambahan disetujui |
 
 ## Untuk Sesi C (diteruskan pemilik proyek)
 
@@ -749,10 +841,10 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 | 5 | Memilih pasangan kalimat refleksi (`refleksi.md`) | Pemilik proyek, di Gerbang 2 JS-11 | Selesai: Pasangan 1 dipakai di JS-11 (Permintaan A-12, Diterapkan) |
 | 6 | Panduan guru final | Sesi A, di JS-16 | Bahan: `panduan-guru.md` (Permintaan A-13) |
 | 7 | Membalas Plan naskah tambahan | Pemilik proyek | Selesai: disetujui 22 Nov 2026, semua saran (a) |
-| 8 | Melihat di konsol uji apakah sudah ada kejadian berkode K-17 ke atas atau rujukan JR-24 ke atas, misalnya dari percobaan JS-12 | Pemilik proyek | Cukup dilihat di daftar kejadian dan pustaka rujukan konsol, tanpa mengubah apa pun. Bila ada, nomor disesuaikan sebelum semai tambahan dijalankan (Plan naskah tambahan, risiko 2) |
-| 9 | Aset baru untuk K-32 dan K-33 (usulan 7a) | Pemilik proyek, diteruskan ke Sesi C | Permintaannya di bagian "Untuk Sesi C". Naskah keduanya sudah ditulis di giliran 6 dengan nama kunci usulan. Gambarnya harus Disetujui sebelum kedua kejadian itu disemai. Pedagang kedua untuk K-26 dicabut (giliran 4 disetujui 22 Nov 2026) |
+| 8 | Melihat di konsol uji apakah sudah ada kejadian berkode K-17 ke atas atau rujukan JR-24 ke atas, misalnya dari percobaan JS-12 | Pemilik proyek | Cukup dilihat di daftar kejadian dan pustaka rujukan konsol, tanpa mengubah apa pun, lalu kabari Sesi B bila ada. Menurut Plan semai tambahan (usulan 2a), semai tambahan menunggu sampai kejadian atau rujukan percobaan itu dihapus di konsol. Sampai semai tambahan berjalan, jangan membuat kejadian atau rujukan baru di konsol uji (Plan semai tambahan, risiko 1) |
+| 9 | Aset baru untuk K-32 dan K-33 (usulan 7a) | Pemilik proyek, diteruskan ke Sesi C | Permintaannya di bagian "Untuk Sesi C". Naskah keduanya sudah ditulis di giliran 6 dengan nama kunci usulan. Gambarnya harus Disetujui sebelum kedua kejadian itu disemai. Pedagang kedua untuk K-26 dicabut (giliran 4 disetujui 22 Nov 2026). Menurut Plan semai tambahan (usulan 1a), Build semai tambahan baru diserahkan sesudah aset ini Disetujui dan kuncinya masuk daftar aset (A-17) |
 | 10 | Menilai giliran 1 (K-17, K-18, K-19) | Pemilik proyek | Selesai: disetujui 22 Nov 2026 |
-| 11 | Plan semai tambahan (usulan 3a) | Sesi B, dengan catatan Architecture dari Sesi A | Ditulis sesudah giliran 8 disetujui, atau lebih awal bila pemilik proyek ingin mencoba sebagian kejadian di lingkungan uji. Perlu batas berkas baru dari pemilik proyek |
+| 11 | Plan semai tambahan (usulan 3a) | Sesi B, dengan catatan Architecture dari Sesi A | Ditulis 22 Nov 2026 (bagian "Plan semai tambahan (lanjutan JS-05)"). Batas berkas untuk Specify, Build, dan Test-nya ikut disetujui bila Anda membalas "Setuju: semai tambahan" (butir 21) |
 | 12 | Menilai giliran 2 (K-20, K-21, K-22) | Pemilik proyek | Selesai: disetujui 22 Nov 2026 |
 | 13 | Menilai giliran 3 (K-23, K-24, K-25) | Pemilik proyek | Selesai: disetujui 22 Nov 2026 |
 | 14 | Memantau RUU yang menyentuh rujukan naskah tambahan | Pemilik proyek dan Peninjau | Daftarnya di `tambahan/NASKAH-TAMBAHAN.md`, bagian "RUU yang sedang dibahas": Sisdiknas (JR-27), Hak Cipta (JR-28, ditargetkan selesai Desember 2026), LLAJ (JR-26, JR-29, JR-30, serta JR-18 dan JR-19 bank awal), Perlindungan Konsumen (JR-31), Penanggulangan Bencana (JR-35), Cagar Budaya (JR-36), Perlindungan Anak (JR-25, JR-32, JR-38, JR-40, serta JR-16 dan JR-17 bank awal), dan Pelindungan Data Pribadi (JR-42). Bila salah satu disahkan, beri tahu Sesi B agar rujukannya ditinjau ulang sebelum semai tambahan |
@@ -761,13 +853,15 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 | 17 | Menilai giliran 6 (K-32, K-33, K-34) | Pemilik proyek | Selesai: disetujui 22 Nov 2026 |
 | 18 | Menilai giliran 7 (K-35, K-36, K-37) | Pemilik proyek | Selesai: disetujui 22 Nov 2026, termasuk sebutan "Tuli" di K-35 |
 | 19 | Permintaan A-15 (huruf kapital "Tuli") | Sesi A, diteruskan pemilik proyek | Diajukan 22 Nov 2026 (giliran 7 disetujui). Perlu dipenuhi sebelum semai tambahan, atau dijawab di Plan semai tambahan |
-| 20 | Menilai giliran 8 (K-38, K-39, K-40) | Pemilik proyek | "Setuju: naskah tambahan Z8", atau revisi yang ditulis bebas. Ini giliran terakhir; sesudahnya langkah berikutnya adalah Plan semai tambahan (butir 11) |
+| 20 | Menilai giliran 8 (K-38, K-39, K-40) | Pemilik proyek | Selesai: disetujui 22 Nov 2026; ke-24 naskah tambahan selesai |
+| 21 | Membalas Plan semai tambahan | Pemilik proyek | "Setuju: semai tambahan" (semua saran a, termasuk batas berkasnya), atau dengan pilihan lain, misalnya "Setuju: semai tambahan, 1b" |
+| 22 | Permintaan A-16 dan A-17 | Sesi A, diteruskan pemilik proyek | Diajukan bila Plan semai tambahan disetujui. A-17 baru bisa dikerjakan sesudah aset K-32 dan K-33 Disetujui |
 
 Pesan untuk Sesi C (bagian "Untuk Sesi C") sudah terlaksana: JS-06 Selesai 8 Nov 2026, dan uji `bank-peta` kini berjalan dan lulus (pemeriksaan penutup 10 Nov 2026).
 
 ## Cara membalas
 
-- **Naskah tambahan:** balas "Setuju: naskah tambahan Z8" bila ketiga naskah giliran terakhir (K-38, K-39, K-40) disetujui. Permintaan revisi cukup ditulis bebas, misalnya kalimat yang ingin diganti. Dengan persetujuan ini ke-24 naskah tambahan selesai. Langkah berikutnya Plan semai tambahan ("Yang masih ditunggu", butir 11), yang memerlukan batas berkas baru dari Anda, karena berkas semainya ada di luar `naskah/`. (Plan naskah tambahan serta giliran 1 sampai 7 sudah disetujui pada 22 November 2026.)
+- **Semai tambahan:** balas "Setuju: semai tambahan" bila semua saran (a) di Plan semai tambahan disetujui, termasuk batas berkasnya. Pilihan lain cukup ditulis, misalnya "Setuju: semai tambahan, 1b". Pertanyaan atau revisi cukup ditulis bebas. (Ke-24 naskah tambahan sudah disetujui pada 22 November 2026.)
 - JS-05 sudah Selesai, dan naskah pendukung (20 Nov 2026) tidak membuka gerbang Sesi B. Sesudah commit, pastikan "Jejak: uji" tetap hijau. Bila merah, kirim tangkapan layarnya ke Sesi B.
 - Pasangan kalimat refleksi dipilih di Gerbang 2 JS-11 (Sesi A). Revisi `refleksi.md` atau `panduan-guru.md` sebelum itu cukup ditulis bebas ke Sesi B.
 - Perbaikan naskah sesudah semai pertama dilakukan di konsol (JS-12), bukan di repositori (Catatan untuk JS-05). Permintaan lain cukup ditulis bebas.

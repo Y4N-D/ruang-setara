@@ -2,13 +2,13 @@
 
 Daftar 24 kejadian tambahan beserta status naskahnya, rencana posisi pilihan, pemantauan panjang pilihan, tokoh dan properti, set tokoh dan latar, dan pustaka rujukan JR-24 sampai JR-43. Rencananya ada di `../STATUS.md`, bagian "Plan naskah tambahan (K-17 sampai K-40)", yang disetujui pemilik proyek pada 22 November 2026. Format dan pegangan gaya sama dengan bank awal (`../STATUS.md`, usulan 1, 5 November 2026). Setiap giliran menyerahkan satu zona, yaitu tiga kejadian (KT-B2 diubah).
 
-Naskah di folder ini belum ada di basis data dan tidak dibaca uji `naskah-cocok` bank awal. Kejadian tambahan masuk ke basis data lewat semai tambahan (usulan 3a), yang direncanakan di Plan tersendiri; uji pencocok naskah tambahan dibuat di Plan itu (usulan 6a).
+Naskah di folder ini belum ada di basis data dan tidak dibaca uji `naskah-cocok` bank awal. Kejadian tambahan masuk ke basis data lewat semai tambahan (usulan 3a), yang direncanakan di Plan tersendiri (`../STATUS.md`, "Plan semai tambahan (lanjutan JS-05)", 22 November 2026); uji pencocok naskah tambahan dibuat di Plan itu (usulan 6a).
 
 Semua rujukan baru berstatus **perlu verifikasi**. Tanda "Terverifikasi" hanya diberikan akun Peninjau di pustaka rujukan konsol (JFR-45), dan agen serta skrip tidak pernah menandai rujukan terverifikasi.
 
 ## Kejadian
 
-Ke-24 naskah sudah ditulis, semuanya dengan judul di Plan.
+Ke-24 naskah sudah ditulis dan disetujui pemilik proyek (22 November 2026), semuanya dengan judul di Plan.
 
 | Kode | Zona | Judul | Giliran | Status | Berkas |
 |---|---|---|---|---|---|
@@ -33,9 +33,9 @@ Ke-24 naskah sudah ditulis, semuanya dengan judul di Plan.
 | K-35 | Z7 | Pengumuman yang tak terdengar | 7 | Disetujui 22 Nov 2026 | [K-35.md](K-35.md) |
 | K-36 | Z7 | Adik belum punya akta lahir | 7 | Disetujui 22 Nov 2026 | [K-36.md](K-36.md) |
 | K-37 | Z7 | Asap rokok di puskesmas | 7 | Disetujui 22 Nov 2026 | [K-37.md](K-37.md) |
-| K-38 | Z8 | Tantangan berbahaya demi video | 8 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z8" | [K-38.md](K-38.md) |
-| K-39 | Z8 | Hadiah kuota minta data | 8 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z8" | [K-39.md](K-39.md) |
-| K-40 | Z8 | Umur palsu di media sosial | 8 | Diserahkan 22 Nov 2026; menunggu "Setuju: naskah tambahan Z8" | [K-40.md](K-40.md) |
+| K-38 | Z8 | Tantangan berbahaya demi video | 8 | Disetujui 22 Nov 2026 | [K-38.md](K-38.md) |
+| K-39 | Z8 | Hadiah kuota minta data | 8 | Disetujui 22 Nov 2026 | [K-39.md](K-39.md) |
+| K-40 | Z8 | Umur palsu di media sosial | 8 | Disetujui 22 Nov 2026 | [K-40.md](K-40.md) |
 
 ## Rencana posisi pilihan
 
