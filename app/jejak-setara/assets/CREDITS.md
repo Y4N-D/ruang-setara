@@ -147,6 +147,7 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 | `obj/obj_halte_atas.png` | O-08 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_jembatan_datar.png` | O-16 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_jembatan_tegak.png` | O-16 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_kandang_kukang.png` | O-53 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 22 November 2026 |
 | `obj/obj_kantin.png` | O-05 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_kantin_atas.png` | O-05 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_kantor_desa.png` | O-19 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
@@ -192,6 +193,8 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 | `obj/obj_pos_ronda.png` | O-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_pos_ronda_atas.png` | O-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_pot_tanaman.png` | O-50 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `obj/obj_prasasti.png` | O-52 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 22 November 2026 |
+| `obj/obj_prasasti_atas.png` | O-52 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 22 November 2026 |
 | `obj/obj_puskesmas.png` | O-18 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_puskesmas_atas.png` | O-18 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `obj/obj_rambu_halte.png` | O-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
@@ -248,6 +251,7 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 | `npc/npc_nara_bawah_diam.png` | N-01 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `npc/npc_nenek_bawah_diam.png` | N-11 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `npc/npc_pedagang_bawah_diam.png` | N-14 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
+| `npc/npc_penjual_bawah_diam.png` | N-21 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 22 November 2026 |
 | `npc/npc_petugas_bawah_diam.png` | N-15 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `npc/npc_polisi_bawah_diam.png` | N-16 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `npc/npc_raka_bawah_kursiroda.png` | N-17 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |

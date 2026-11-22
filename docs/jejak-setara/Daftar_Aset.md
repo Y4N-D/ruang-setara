@@ -4,7 +4,7 @@
 |---|---|
 | Versi | 1.3 |
 | Diperbarui | 22 November 2026 |
-| Tahap saat ini | Aset tambahan, giliran gambar (22 November 2026, bagian "Aset tambahan untuk naskah tambahan"): prasasti O-52 untuk K-32, serta kandang kukang O-53 dan penjual N-21 untuk K-33 diserahkan dan Ditinjau; menunggu `Setuju: O-52, O-53, N-21`. Plan aset tambahan disetujui 22 November 2026 (`Setuju: aset tambahan`, semua saran a); Permintaan C-17 dan C-18 diajukan. Sebelumnya, efek suara selesai (21 November 2026, bagian "Efek suara"): S-01 sampai S-08 dan musik latar M-01 Disetujui dan tercatat di `CREDITS.md`; S-01 sampai S-08 serta salinan klik dan bunyi teks ada di kelompok `SUARA` di `manifest.ts`. Permintaan C-1 sampai C-13 sudah diterapkan atau selesai; C-14, C-15, dan C-16 diajukan. Semua 239 aset gambar dalam rencana Disetujui (6 November 2026); `manifest.ts` (C-6) dan JS-06 selesai 8 November 2026 |
+| Tahap saat ini | Aset tambahan selesai (22 November 2026, bagian "Aset tambahan untuk naskah tambahan"): prasasti O-52 untuk K-32, serta kandang kukang O-53 dan penjual N-21 untuk K-33 Disetujui dan tercatat di `CREDITS.md` dan `manifest.ts`, sehingga ada 243 aset gambar Disetujui. ZIP penutupnya di-commit bersama ZIP A-17 Sesi A (Permintaan C-17); Permintaan C-18 juga diajukan. Sebelumnya, efek suara selesai (21 November 2026, bagian "Efek suara"): S-01 sampai S-08 dan musik latar M-01 Disetujui dan tercatat di `CREDITS.md`; S-01 sampai S-08 serta salinan klik dan bunyi teks ada di kelompok `SUARA` di `manifest.ts`. Permintaan C-1 sampai C-13 sudah diterapkan atau selesai; C-14, C-15, dan C-16 diajukan. Semua 239 aset gambar dalam rencana Disetujui (6 November 2026); `manifest.ts` (C-6) dan JS-06 selesai 8 November 2026 |
 | Dikerjakan | Sesi C (aset dan peta), lihat `PLAN.md` bagian "Pembagian kerja tiga sesi". Efek suara dikerjakan Sesi C atas permintaan pemilik proyek, 21 November 2026 |
 | Acuan | ZIP repositori 22 November 2026 (naskah tambahan K-17 sampai K-40 disetujui; Plan semai tambahan disetujui dan Permintaan A-17 diajukan Sesi B) |
 | Cara membuat | Gambar: digambar dengan kode di `scripts/game/art/` (berkas `atas_*.py`), mengikuti `Design_System.md` bagian 14. Efek suara: dibuat dengan kode di `scripts/game/suara/` (`chip.py` dan `efek.py`), hanya dengan pustaka bawaan Python |
@@ -62,6 +62,8 @@ Perbarui berkas ini setiap kali sebuah aset selesai atau berubah status. Ukuran 
 | 22 Nov 2026 | Plan aset tambahan | Atas permintaan pemilik proyek, Sesi C merencanakan aset baru untuk naskah tambahan: prasasti (K-32), serta kukang dalam kandang dan penjualnya (K-33), sesuai usulan 7a Plan naskah tambahan (KT-B14), ditambah pedagang kedua (K-26) yang disarankan. Percobaan di luar repositori: kit dibangun ulang (sama piksel), prototipe lima berkas (lulus pemeriksaan), dan simulasi uji kunci, kredit, dan manifest di salinan terpisah. Ditemukan bahwa permintaan pedagang kedua sudah dicabut 22 Nov 2026 di `naskah/STATUS.md` (usulan 4). Entri Plan, usulan KT-C27 sampai KT-C31, dan lembar uji gaya `preview/uji_gaya_tambahan.png` diserahkan; Permintaan C-17 disiapkan. Menunggu `Setuju: aset tambahan` |
 | 22 Nov 2026 | Plan aset tambahan | Pemilik proyek membalas `Setuju: aset tambahan`: semua saran (a) diterima (KT-C27 sampai KT-C31). Pedagang kedua (N-22) tidak dibuat, dan Permintaan C-17 diajukan |
 | 22 Nov 2026 | Aset tambahan, giliran gambar | Kode dipindah dari prototipe ke kit: `atas_tambahan.py` (baru, O-52 dan O-53), `atas_tokoh.py` (N-21), dan `build_jejak.py`. Empat PNG baru (1.834 B) sama byte dengan prototipe lembar uji gaya; pratinjau `tambahan_lembar.png` dan `tambahan_set.png` dibuat, dan `uji_gaya_tambahan.png` kini dibangun `build_jejak.py` dengan hasil sama byte. Perubahan dari rencana: O-52 dan O-53 tidak ditulis di `atas_objek.py`, karena berkas itu termasuk sidik sumber peta. Aset lama, `CREDITS.md`, `manifest.ts`, dan peta tidak berubah. `content:check:jejak` 259 uji, `test:jejak` 1.172 uji, dan `build:jejak` lulus; galeri 178 berkas identik. Permintaan C-18 diajukan. Menunggu `Setuju: O-52, O-53, N-21` |
+| 22 Nov 2026 | Aset tambahan, giliran gambar | Pemilik proyek membalas `Setuju: O-52, O-53, N-21`: ketiga aset Disetujui |
+| 22 Nov 2026 | Penutup aset tambahan | `DISETUJUI_TAMBAHAN` di `build_jejak.py` diisi. `CREDITS.md` mendapat 4 baris (254 aset), dan `manifest.ts` memuat 243 gambar (`OBJEK` 71, `NPC` 34); tabel O5 dan N3 ditambahkan. `content:check:jejak` 259 uji dan `build:jejak` lulus, dan keempat PNG menjadi berkas berhash. `test:jejak` 1.171 dari 1.172 uji lulus: satu-satunya yang gagal, `aturan-bank`, lulus begitu tiga kunci A-17 masuk (dicoba di salinan terpisah: 1.172 uji). Galeri 178 berkas identik. ZIP penutup di-commit bersama ZIP A-17 (C-17) |
 
 ## Keputusan Gerbang aset (6 November 2026)
 
@@ -235,7 +237,7 @@ Setiap kelompok diserahkan dalam satu balasan: pratinjau tampil di balasan, ZIP 
 | 9 | O4 — Varian untuk peta besar | Rumah warga dan pohon tambahan, agar peta 160 × 100 tidak terlihat berulang | sekitar 10 | JS-06 | `Setuju: aset O4` |
 | 10 | I — Ikon | I-01 sampai I-19 | sekitar 35 | JS-07, JS-09, JS-10, JS-12 | `Setuju: aset I` |
 
-Status 6 November 2026: semua kelompok Disetujui.
+Status 6 November 2026: semua kelompok Disetujui. Aset tambahan untuk naskah tambahan (O5 dan N3) Disetujui 22 November 2026.
 
 | Kelompok | Isi | Berkas | Ukuran |
 |---|---|---|---|
@@ -249,7 +251,8 @@ Status 6 November 2026: semua kelompok Disetujui.
 | O3 | Properti kejadian | 15 | 3,2 KB |
 | O4 | Varian untuk peta besar | 15 | 4,7 KB |
 | I | Ikon | 33 | 6,7 KB |
-| **Jumlah** | | **239** | **100,3 KB** |
+| O5 dan N3 (22 Nov 2026) | Aset tambahan untuk naskah tambahan | 4 | 1,8 KB |
+| **Jumlah** | | **243** | **102,1 KB** |
 
 - Bila kabar "JS-02 selesai" datang sebelum kelompok U dan O1 disetujui, JS-06 memakai *placeholder* berupa kotak warna palet dengan label kunci aset (AGENTS bagian 5), lalu diganti sesudah disetujui.
 - Setiap kelompok diperiksa dengan daftar periksa Design System bagian 14 dan bagian 12 Sehari Setara sebelum diserahkan.
@@ -380,7 +383,7 @@ Satu lembar per masa: `ubin_pagi.png`, `ubin_siang.png`, dan `ubin_sore.png`, ma
 
 Bangunan dan pohon terdiri atas `obj_{nama}.png` dan `obj_{nama}_atas.png` (usulan 6). Semua tanpa tulisan, logo, merek, lambang instansi, atau lambang palang merah dan bulan sabit merah.
 
-Properti untuk naskah tambahan, yaitu prasasti (O-52) dan kandang kukang (O-53), ada di bagian "Aset tambahan untuk naskah tambahan" (Ditinjau sejak 22 Nov 2026), dan masuk tabel di bawah sesudah Disetujui. Kodenya di `atas_tambahan.py`, bukan di `atas_objek.py` (alasannya di bagian itu).
+Properti untuk naskah tambahan, yaitu prasasti (O-52) dan kandang kukang (O-53), Disetujui 22 Nov 2026 dan tercatat di O5 di bawah. Kodenya di `atas_tambahan.py`, bukan di `atas_objek.py`; alasannya ada di bagian "Aset tambahan untuk naskah tambahan".
 
 ### O1. Bangunan penanda zona
 
@@ -514,6 +517,15 @@ Ditambahkan sesudah keputusan ukuran peta 160 × 100 ubin, agar kampung yang leb
 - Peta 160 × 100 kini bisa memakai lima bentuk rumah dan enam jenis pohon (termasuk kelapa). Di JS-06, `build_peta.py` memilih varian berbenih agar susunan tidak berulang.
 - Pohon dan pisang hanya padat di ubin batangnya; tajuknya di lapisan atas menutupi pemain yang lewat di belakangnya.
 
+### O5. Properti naskah tambahan
+
+Properti set tokoh untuk naskah tambahan, digambar di `atas_tambahan.py`. Rencana, pemeriksaan, dan penutupnya ada di bagian "Aset tambahan untuk naskah tambahan".
+
+| ID | Berkas | Ukuran (ubin) | Isi | Kejadian | Status |
+|---|---|---|---|---|---|
+| O-52 | `obj_prasasti`, `obj_prasasti_atas` | 2 × 2 | Prasasti tua dari batu alam bertulisan samar tanpa huruf dan berlumut, dengan papan keterangan cagar budaya bergaris tanpa huruf; tanpa tanda keagamaan. Padat di baris ubin bawah; puncak batu dan papan di lapisan atas | K-32 | Disetujui (22 Nov) |
+| O-53 | `obj_kandang_kukang` | 1 × 1 | Kandang kawat kecil beralas papan; kukang duduk tenang memeluk dahan, mata besar terbuka, tanpa luka dan tanpa warna merah | K-33 | Disetujui (22 Nov) |
+
 ## T. Penanda dan efek
 
 Berkas `tanda_*.png` disimpan di folder `ikon/`, karena Architecture bagian 3 tidak mempunyai folder `tanda/`; di manifest tetap kelompok `tanda`.
@@ -557,7 +569,7 @@ Berkas `tanda_*.png` disimpan di folder `ikon/`, karena Architecture bagian 3 ti
 
 Tampak atas, menghadap bawah, diam 2 bingkai (`npc_{tokoh}_bawah_diam.png`), ditambah pose khusus yang diperlukan kejadian. Ukuran bingkai: siswa dan lansia 16 × 24, dewasa 16 × 26, anak SD 14 × 20 (Design System bagian 8). Ciri tokoh Sehari Setara sama dengan `docs/sehari-setara/Daftar_Aset.md` bagian A.
 
-Penjual kukang (N-21) untuk naskah tambahan ada di bagian "Aset tambahan untuk naskah tambahan" (Ditinjau sejak 22 Nov 2026), dan masuk tabel di bawah sesudah Disetujui. Pedagang kedua (N-22) tidak dibuat (KT-C30 a).
+Penjual kukang (N-21) untuk naskah tambahan Disetujui 22 Nov 2026 dan tercatat di N3 di bawah. Pedagang kedua (N-22) tidak dibuat (KT-C30 a).
 
 ### N1. Tokoh Sehari Setara
 
@@ -621,6 +633,17 @@ Ciri Raka, Wayan, dan siswa umum diusulkan Sesi C dan ditetapkan pemilik proyek 
 - Siswa umum tidak bertas punggung, sehingga tidak tertukar dengan pemain (usulan 9a). Kerudung, kulit, dan rambut dibuat beragam.
 - Polisi tanpa lambang instansi, petugas puskesmas memakai tanda hati `leaf`, dan caping pedagang tanpa tulisan.
 - Tokoh kelompok N1 dan kedelapan avatar tidak berubah.
+
+### N3. Tokoh naskah tambahan
+
+Tokoh set kejadian untuk naskah tambahan, digambar di `atas_tokoh.py` (`NPC3`). Rencana, pemeriksaan, dan penutupnya ada di bagian "Aset tambahan untuk naskah tambahan".
+
+| ID | Tokoh | Berkas | Ciri | Kejadian | Status |
+|---|---|---|---|---|---|
+| N-21 | Penjual kukang | `npc_penjual_bawah_diam` (16 × 26) | Warga dewasa yang tampak biasa dan ramah: `skin-2`, topi bundar `sky-d`, kaus `teal`, celana `dusk`, sandal, dan tas selempang cokelat (bukan tas punggung); diam menghadap bawah | K-33 | Disetujui (22 Nov) |
+
+- Titik kaki (8, 23), sama dengan tokoh dewasa lain. Badan, kaki, dan kepalanya memakai bagian kelompok N2; yang baru hanya topi bundar dan tas selempang.
+- Pedagang kedua (N-22) tidak dibuat (KT-C30 a). Cirinya hanya tercatat di `NPC3` untuk membangun ulang lembar uji gaya, tanpa pose dan tanpa PNG.
 
 ## I. Ikon
 
@@ -821,13 +844,13 @@ Sesudah `Setuju: suara`, efek dikirim dalam dua giliran. Setiap giliran melampir
 
 ## Aset tambahan untuk naskah tambahan (K-26, K-32, K-33)
 
-Aset baru untuk set tokoh kejadian tambahan, sesuai usulan 7a Plan naskah tambahan (KT-B14) di `naskah/STATUS.md`. Semuanya dipakai lewat set tokoh kejadian, bukan sebagai objek peta. Rencana, hasil percobaan, dan usulannya ada di bawah tabel, dan lembar uji gayanya `preview/uji_gaya_tambahan.png`. Plan disetujui 22 November 2026 (`Setuju: aset tambahan`, semua saran a). Setiap aset berstatus Ditinjau sesudah gambarnya diserahkan, lalu Disetujui sesudah pemilik proyek membalas.
+Aset baru untuk set tokoh kejadian tambahan, sesuai usulan 7a Plan naskah tambahan (KT-B14) di `naskah/STATUS.md`. Semuanya dipakai lewat set tokoh kejadian, bukan sebagai objek peta. Rencana, hasil percobaan, dan usulannya ada di bawah tabel, dan lembar uji gayanya `preview/uji_gaya_tambahan.png`. Plan disetujui 22 November 2026 (`Setuju: aset tambahan`, semua saran a), dan ketiga aset Disetujui pada hari yang sama (`Setuju: O-52, O-53, N-21`). Keduanya juga tercatat di tabel O5 dan N3.
 
 | ID | Berkas (nama final) | Ukuran | Isi | Kejadian | Status |
 |---|---|---|---|---|---|
-| O-52 | `obj_prasasti.png` dan `obj_prasasti_atas.png` | 2 × 2 ubin: gambar 34 × 34 dipotong di baris 17 menjadi dua berkas 34 × 17 | Prasasti tua dari batu alam: bidang atas terang, muka depan berisi enam deret goresan samar tanpa huruf, retak kecil, dan lumut di kaki batu. Papan keterangan cagar budaya berdiri di kanannya: dua tiang kayu, bingkai kayu, dan panel `cream` bergaris tanpa huruf. Tanpa sesaji, kain, payung, atap, atau tanda keagamaan | K-32 | Ditinjau (22 Nov) |
-| O-53 | `obj_kandang_kukang.png` | 1 × 1 ubin (18 × 18) | Kandang kawat kecil beralas papan. Kukang duduk tenang memeluk dahan berdaun, dengan mata bulat besar yang terbuka, cincin gelap di sekitar mata, dan garis terang di antara mata; tanpa luka dan tanpa warna merah. Jeruji tidak menutupi wajahnya | K-33 | Ditinjau (22 Nov) |
-| N-21 | `npc_penjual_bawah_diam.png` | Strip 2 bingkai dewasa 16 × 26 (32 × 26), titik kaki (8, 23) | Penjual kukang, warga dewasa yang tampak biasa dan ramah: `skin-2`, topi bundar `sky-d`, kaus `teal`, celana `dusk`, sandal, dan tas selempang cokelat (bukan tas punggung). Diam menghadap bawah | K-33 | Ditinjau (22 Nov) |
+| O-52 | `obj_prasasti.png` dan `obj_prasasti_atas.png` | 2 × 2 ubin: gambar 34 × 34 dipotong di baris 17 menjadi dua berkas 34 × 17 | Prasasti tua dari batu alam: bidang atas terang, muka depan berisi enam deret goresan samar tanpa huruf, retak kecil, dan lumut di kaki batu. Papan keterangan cagar budaya berdiri di kanannya: dua tiang kayu, bingkai kayu, dan panel `cream` bergaris tanpa huruf. Tanpa sesaji, kain, payung, atap, atau tanda keagamaan | K-32 | Disetujui (22 Nov) |
+| O-53 | `obj_kandang_kukang.png` | 1 × 1 ubin (18 × 18) | Kandang kawat kecil beralas papan. Kukang duduk tenang memeluk dahan berdaun, dengan mata bulat besar yang terbuka, cincin gelap di sekitar mata, dan garis terang di antara mata; tanpa luka dan tanpa warna merah. Jeruji tidak menutupi wajahnya | K-33 | Disetujui (22 Nov) |
+| N-21 | `npc_penjual_bawah_diam.png` | Strip 2 bingkai dewasa 16 × 26 (32 × 26), titik kaki (8, 23) | Penjual kukang, warga dewasa yang tampak biasa dan ramah: `skin-2`, topi bundar `sky-d`, kaus `teal`, celana `dusk`, sandal, dan tas selempang cokelat (bukan tas punggung). Diam menghadap bawah | K-33 | Disetujui (22 Nov) |
 | N-22 | — (tidak ada berkas) | — | Pedagang kedua: `skin-4`, rambut `hair-1` diikat, baju lengan panjang `sky-d`, celemek `leaf`, rok panjang cokelat, dan sandal; berbeda dari pedagang N-14 dan Ibu | K-26 | Tidak dibuat (KT-C30 a, 22 Nov 2026): permintaannya dicabut; hanya draf di lembar uji gaya |
 
 - Kunci set tokoh sama dengan kunci usulan di naskah K-32 dan K-33: `obj_prasasti`, `obj_kandang_kukang`, dan `npc_penjual_bawah_diam`. Jadi isi set tokoh di naskah tidak perlu diganti; Sesi B cukup mencatatnya sebagai kunci final. Teman di K-32 tetap siswa umum S2 (`npc_siswa2_bawah_diam`), dan Ibu di K-26 tetap `npc_ibu_bawah_diam`.
@@ -848,7 +871,22 @@ Aset baru untuk set tokoh kejadian tambahan, sesuai usulan 7a Plan naskah tambah
 
 - **Perubahan dari rencana:** O-52 dan O-53 ditulis di berkas baru `atas_tambahan.py`, bukan di `atas_objek.py`. `atas_objek.py` termasuk sidik sumber peta (spesifikasi JS-06, P-23). Begitu berkas itu berubah, uji `peta-berkas` ("sidik sumber cocok dengan kelima berkas sumber") gagal sampai `kampung_gambar.json` dibangun ulang, padahal isi peta tidak berubah dan berkas peta di luar batas berkas tugas ini. `build_jejak.py` menggabungkan objek tambahan ke daftarnya untuk aset, pratinjau, dan manifest, sedangkan `build_peta.py` tetap hanya membaca `atas_objek.py`. Permintaan C-18 meminta Sesi A mencatat berkas baru ini di Design System 14.
 - Prasasti dipotong di baris 17: puncak batu dan papan menutupi pemain yang berjalan di belakangnya, dan baris ubin bawahnya padat (panel "Lapisan atas prasasti" di `tambahan_set.png`).
-- `CREDITS.md` dan `manifest.ts` belum berubah. Sesudah `Setuju: O-52, O-53, N-21`, giliran penutup mengisi `DISETUJUI_TAMBAHAN`, lalu `build_jejak.py` menulis keduanya. ZIP penutup itu di-commit bersama ZIP A-17 Sesi A (KT-C31 a, Permintaan C-17).
+- Di giliran ini `CREDITS.md` dan `manifest.ts` belum berubah, karena ketiga aset masih Ditinjau; keduanya ditulis di giliran penutup.
+
+### Penutup (22 November 2026)
+
+| | |
+|---|---|
+| Kode | Hanya `DISETUJUI_TAMBAHAN` di `build_jejak.py` yang diisi (tanggal 22 November 2026), dan judul kedua pratinjau menjadi "disetujui 22 Nov 2026". Gambar tidak berubah |
+| Kredit | `CREDITS.md` mendapat 4 baris: `obj/obj_kandang_kukang.png` (O-53), `obj/obj_prasasti.png` dan `obj/obj_prasasti_atas.png` (O-52), serta `npc/npc_penjual_bawah_diam.png` (N-21), dengan atribusi "Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 22 November 2026". Jumlahnya kini 254 aset (243 gambar dan 11 suara) |
+| Manifest | 243 gambar. `OBJEK` 71 jenis: ditambah `prasasti` (bagian bawah dan atas, jejak kaki 2 × 2 ubin) dan `kandang_kukang` (1 × 1, tanpa bagian atas). `NPC` 34 strip: ditambah `npc_penjual_bawah_diam` (2 bingkai 16 × 26, titik kaki (8, 23)). Bagian lain tidak berubah |
+| Uji | `content:check:jejak` 10 berkas, 259 uji lulus. `test:jejak` 1.171 dari 1.172 uji lulus; satu-satunya yang gagal, `aturan-bank` ("daftar kunci aset server sama dengan berkas aset dan kredit Disetujui"), menunggu tiga kunci A-17. Di salinan terpisah yang sudah memuat ketiga kunci itu, ke-78 berkas uji lulus (1.172 uji) |
+| Build | `build:jejak` lulus: keempat PNG baru menjadi berkas berhash di `dist-jejak/client/assets/`, tanpa data URI |
+| Galeri | `build:pages` 178 berkas identik byte |
+| Commit | ZIP penutup hanya di-commit bersama ZIP A-17 Sesi A (KT-C31 a, Permintaan C-17). Bila di-commit sendiri, "Jejak: uji" merah di uji `aturan-bank` |
+
+- Kunci final set tokoh sama dengan kunci usulan di naskah: `obj_prasasti` (K-32), serta `obj_kandang_kukang` dan `npc_penjual_bawah_diam` (K-33). Sesi B cukup mencatatnya sebagai kunci final sebelum semai tambahan.
+- Sesudah ZIP penutup dan A-17 di-commit, syarat aset untuk Build semai tambahan Sesi B terpenuhi (KT-B15a); syarat lain (A-15 dan A-18) di luar bagian ini.
 
 ### Rencana (templat AGENTS 12.1)
 
@@ -856,7 +894,7 @@ Ditulis 22 November 2026 di tahap Plan, atas permintaan pemilik proyek: naskah K
 
 | | |
 |---|---|
-| Status | Plan disetujui 22 Nov 2026 (`Setuju: aset tambahan`, semua saran a). Giliran gambar diserahkan 22 Nov 2026: O-52, O-53, dan N-21 Ditinjau, menunggu `Setuju: O-52, O-53, N-21` |
+| Status | **Selesai** (22 Nov 2026): Plan disetujui (`Setuju: aset tambahan`, semua saran a); O-52, O-53, dan N-21 Disetujui (`Setuju: O-52, O-53, N-21`); kredit dan manifest lengkap. Kunci di `kunci-aset.ts` masuk lewat A-17 Sesi A di commit yang sama (Permintaan C-17) |
 | Memenuhi | Usulan 7a Plan naskah tambahan (KT-B14): prasasti untuk K-32, serta kukang dalam kandang dan penjualnya untuk K-33; syarat Build semai tambahan (KT-B15a dan Permintaan A-17). Pedagang kedua K-26 hanya bila usulan 4b atau 4c dipilih |
 | Bergantung pada | Tidak ada untuk menggambar. Naskah K-32 dan K-33 (disetujui 22 Nov 2026) sudah memakai kunci yang sama dengan nama berkas di tabel |
 | Berkas yang dibuat atau diubah | Plan: berkas ini dan `preview/uji_gaya_tambahan.png` (baru). Giliran gambar: `scripts/game/art/atas_tambahan.py` (baru: O-52 dan O-53; rencana awal menyebut `atas_objek.py`, lihat "Perubahan dari rencana" di rincian giliran gambar), `atas_tokoh.py` (diubah: bagian baru `NPC3` untuk N-21), dan `build_jejak.py` (diubah: daftar aset, kode ID, titik kaki tokoh baru di manifest, dan pratinjau); PNG baru di `app/jejak-setara/assets/obj/` dan `npc/`; pratinjau baru `preview/tambahan_lembar.png` dan `preview/tambahan_set.png`. Penutup: `app/jejak-setara/assets/CREDITS.md` dan `manifest.ts`, keduanya ditulis `build_jejak.py` |
@@ -913,7 +951,7 @@ Sesudah `Setuju: aset tambahan`, aset diserahkan dalam dua giliran. Setiap gilir
 |---|---|---|
 | Plan (disetujui 22 Nov 2026) | Daftar aset, usulan KT-C27 sampai KT-C31, dan lembar uji gaya | `Setuju: aset tambahan`, atau dengan alternatif, misalnya `Setuju: aset tambahan, 4b` |
 | 1. Gambar (diserahkan 22 Nov 2026) | Kode di `atas_tambahan.py` (baru), `atas_tokoh.py`, dan `build_jejak.py`; PNG O-52, O-53, dan N-21, semuanya Ditinjau; pratinjau `tambahan_lembar.png` dan `tambahan_set.png`. `uji_gaya_tambahan.png` kini dibangun `build_jejak.py`, dengan hasil sama byte dengan lembar Plan | `Setuju: O-52, O-53, N-21`, atau perbaikan per aset, misalnya "O-53: kukang lebih besar" |
-| 2. Penutup | Aset Disetujui masuk `CREDITS.md` dan `manifest.ts`; tabel O dan N diperbarui; nama berkas final dicatat untuk A-17 (Sesi A) dan untuk naskah (Sesi B) | — |
+| 2. Penutup (diserahkan 22 Nov 2026) | Aset Disetujui masuk `CREDITS.md` dan `manifest.ts`; tabel O5 dan N3 ditambahkan; nama berkas final dicatat untuk A-17 (Sesi A) dan untuk naskah (Sesi B). Di-commit bersama ZIP A-17 | — |
 
 ### Risiko
 
@@ -935,7 +973,7 @@ Sesudah `Setuju: aset tambahan`, aset diserahkan dalam dua giliran. Setiap gilir
 - **Manifest:** semua gambar dimuat lewat `app/jejak-setara/assets/manifest.ts` (bagian "Manifest aset"). `lebar` dan `tinggi` di setiap `Gambar` adalah ukuran satu bingkai, jadi bingkai ke-i berada di x = i × `lebar` pada strip mendatar.
 - **Berkas berhash:** sejak Build JS-07 (Permintaan C-13), semua berkas di `app/jejak-setara/assets/`, termasuk WAV di `sfx/` nanti, menjadi berkas berhash, bukan data URI.
 - **Suara (untuk Plan JS-14):** rencana efek suara ada di bagian "Efek suara". Titik pemicu `sfx_kotak` dan `sfx_skill` sudah ditetapkan di Specify JS-09 (catatan Plan JS-14 di `PLAN.md`). Layar kelas mengimpor WAV langsung dari berkasnya, karena tidak boleh mengimpor `manifest.ts` (P-35 JS-10). Semua efek mulai dan berakhir di sampel 0, jadi bisa diputar dan dihentikan tanpa bunyi letup. Tik `sfx_hitung` jauh lebih pendek dari 1 detik, jadi tiga tik hitung mundur tidak bertumpuk. KT-C23 (a) dipakai: keras-pelan sudah seimbang di berkasnya, sehingga satu `GainNode` 60% seperti Sehari Setara sudah cukup. `manifest.ts` memuat kelompok `SUARA` (S-01 sampai S-08, klik, dan teks) dan tipe `NamaSuara`; `musik_kelas.wav` (M-01) diimpor langsung oleh layar kelas di JS-21.
-- **Aset tambahan (K-32, K-33):** prasasti (`obj_prasasti`, dua bagian, jejak kaki 2 × 2 ubin) dan kandang kukang (`obj_kandang_kukang`, 1 × 1) ada di `atas_tambahan.py`, sedangkan penjual (`npc_penjual_bawah_diam`, dewasa, titik kaki (8, 23)) ada di `atas_tokoh.py`. `build_jejak.py` menggabungkan objek tambahan ke daftar objeknya, jadi sesudah Disetujui ketiganya masuk `OBJEK` dan `NPC` di `manifest.ts` dengan bentuk yang sama seperti aset lain; `build_peta.py` dan sidik sumber peta tidak terpengaruh. Kuncinya masuk `kunci-aset.ts` lewat A-17 (Permintaan C-17).
+- **Aset tambahan (K-32, K-33):** prasasti (`obj_prasasti`, dua bagian, jejak kaki 2 × 2 ubin) dan kandang kukang (`obj_kandang_kukang`, 1 × 1) ada di `atas_tambahan.py`, sedangkan penjual (`npc_penjual_bawah_diam`, dewasa, titik kaki (8, 23)) ada di `atas_tokoh.py`. `build_jejak.py` menggabungkan objek tambahan ke daftar objeknya, dan sejak penutup 22 Nov 2026 ketiganya ada di `OBJEK` dan `NPC` di `manifest.ts` dengan bentuk yang sama seperti aset lain; `build_peta.py` dan sidik sumber peta tidak terpengaruh. Kuncinya masuk `kunci-aset.ts` lewat A-17 di commit yang sama (Permintaan C-17).
 
 ## Permintaan untuk Sesi A
 
@@ -957,7 +995,7 @@ Sesudah `Setuju: aset tambahan`, aset diserahkan dalam dua giliran. Setiap gilir
 | C-14 | `docs/jejak-setara/Design_System.md` bagian 12, 14, dan 15; `Architecture.md` bagian 11.3 | Catat format efek suara (WAV PCM mono 16 bit 22.050 Hz; efek pendek paling lama 0,65 detik dan paling besar 30 KB), aturan volume (KT-C23 a: puncak paling tinggi −3 dBFS dan keras terdengar diseimbangkan, sekitar −18 LUFS untuk kejadian, kotak, skill, dan tepat; −21 LUFS untuk lembut dan hitung; −23 LUFS untuk peringatan; −16 LUFS untuk jingle akhir), pengecualian ukuran jingle akhir (KT-C22 a: paling besar 160 KB, hanya dimuat layar kelas), kit suara di `scripts/game/suara/` (KT-C20 a), dan kalimat kredit layar "Tentang": "Efek suara dibuat dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN." | Bagian "Efek suara" (percobaan 3 dan 4; usulan disetujui 21 Nov 2026) | Diajukan (21 Nov 2026, sesudah `Setuju: suara`) |
 | C-15 | `docs/jejak-setara/Architecture.md` bagian 11.2; `AGENTS.md` bagian 6 dan 9 | Bentuk kelompok `SUARA` di `manifest.ts` (KT-C24 a): kunci `kejadian`, `kotak`, `skill`, `tepat`, `lembut`, `hitung`, `peringatan`, `akhir`, `klik`, dan `teks` (klik dan teks berupa salinan identik dari Sehari Setara, KT-C25 a), berisi URL berkas, hanya untuk efek Disetujui; layar kelas mengimpor WAV langsung (P-35 JS-10). `assets:build:jejak` juga membangun efek suara. Format kredit efek suara: "Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]" | Bagian "Efek suara" (usulan 1, 5, dan 6) | Diajukan (21 Nov 2026, sesudah `Setuju: suara`) |
 | C-16 | `docs/jejak-setara/Design_System.md` bagian 12 dan 14; `Architecture.md` bagian 11.3; catatan JS-21 di `PLAN.md` | Catat musik latar layar kelas M-01: berkas `sfx/musik_kelas.wav` (pola nama baru `musik_{nama}.wav`), WAV PCM mono 16 bit 11.025 Hz, 38,4 detik yang berulang mulus, paling besar 1 MB, hanya dimuat layar kelas, sekitar −24 LUFS. Musik berhenti saat jeda, hitung mundur, dan jingle akhir, dan layar kelas mengimpor berkasnya langsung (P-35 JS-10) | Bagian "Efek suara" (KT-C26 a; rincian giliran 2) | Diajukan (21 Nov 2026, sesudah `Setuju: S-08, M-01`) |
-| C-17 | `app/jejak-setara/inti/konten/kunci-aset.ts` (Permintaan A-17 dari Sesi B) | Kerjakan A-17 hanya di `kunci-aset.ts`: tambahkan `npc_penjual_bawah_diam`, `obj_kandang_kukang`, dan `obj_prasasti` ke `KUNCI_ASET_DISETUJUI`, sesudah ketiga aset itu Disetujui. `manifest.ts` tidak disunting manual, karena isinya ditulis `build_jejak.py` di ZIP penutup aset tambahan. Kerjakan dengan ZIP penutup Sesi C terlampir; ZIP A-17 dan ZIP penutup di-commit bersama | Uji "hanya aset Disetujui" (`aset-manifest`) dan "daftar kunci aset server sama dengan berkas aset dan kredit Disetujui" (`aturan-bank`) saling mengunci (bagian "Aset tambahan untuk naskah tambahan", percobaan 6 dan simulasi penutup) | Diajukan (22 Nov 2026, sesudah `Setuju: aset tambahan`, usulan 5a) |
+| C-17 | `app/jejak-setara/inti/konten/kunci-aset.ts` (Permintaan A-17 dari Sesi B) | Kerjakan A-17 hanya di `kunci-aset.ts`: tambahkan `npc_penjual_bawah_diam`, `obj_kandang_kukang`, dan `obj_prasasti` ke `KUNCI_ASET_DISETUJUI`, menurut urutan abjad daftar itu. Ketiga aset Disetujui 22 Nov 2026. `manifest.ts` tidak disunting manual, karena isinya sudah ditulis `build_jejak.py` di ZIP penutup aset tambahan (`aset-tambahan-penutup.zip`). Kerjakan dengan ZIP penutup itu terlampir; ZIP A-17 dan ZIP penutup di-commit bersama | Uji "hanya aset Disetujui" (`aset-manifest`) dan "daftar kunci aset server sama dengan berkas aset dan kredit Disetujui" (`aturan-bank`) saling mengunci (bagian "Aset tambahan untuk naskah tambahan", percobaan 6 dan penutup) | Diajukan (22 Nov 2026, sesudah `Setuju: aset tambahan`, usulan 5a); ZIP penutup siap 22 Nov 2026 |
 | C-18 | `docs/jejak-setara/Design_System.md` bagian 14 (tabel "Kit gambar") | Tambahkan baris `atas_tambahan.py`: properti tambahan untuk set kejadian (O-52 prasasti dan O-53 kandang kukang), terpisah dari `atas_objek.py` karena `atas_objek.py` termasuk sidik sumber peta (JS-06 P-23); `build_jejak.py` menggabungkannya ke daftar objek. Di baris `atas_tokoh.py`, tambahkan "tokoh aset tambahan (penjual kukang N-21)" | Berkas kit baru (bagian "Aset tambahan untuk naskah tambahan", rincian giliran gambar) | Diajukan (22 Nov 2026) |
 
 ## Manifest aset (Permintaan C-6)
@@ -970,8 +1008,8 @@ Selesai 8 November 2026. `build_jejak.py` menulis `app/jejak-setara/assets/manif
 | `TOKOH` | Bingkai avatar 16 × 24 dengan titik kaki (8, 21) | — |
 | `AVATAR` | 8 butir berurutan A1–A8. Setiap butir berisi `bawah`, `atas`, dan `kanan`, masing-masing `diam` (2 bingkai) dan `jalan` (4 bingkai), ditambah `ikon` (ikon kepala) | Indeks 0–7 = nomor avatar di protokol |
 | `KUNCI_TAS`, `WARNA_TAS` | Warna kunci `#FFD23F` dan `#FF9F1C`, serta delapan pasangan `[dasar, bayangan]` dari tabel Design System 8 | Sama dengan `WarnaTas` |
-| `OBJEK` | 69 jenis: `bawah`, `atas` (atau `null` untuk objek satu berkas), dan jejak kaki `lebar` × `tinggi` dalam ubin menurut aturan JS-06 | Jenis di `kampung.json`, yaitu nama berkas tanpa `obj_` |
-| `NPC` | 33 strip 2 bingkai dengan titik kaki: siswa dan lansia (8, 21), dewasa (8, 23), anak (7, 17), Dimas di motor (17, 28) | Nama berkas tanpa `.png` |
+| `OBJEK` | 71 jenis (69 sejak 8 Nov 2026, ditambah `prasasti` dan `kandang_kukang` pada 22 Nov 2026): `bawah`, `atas` (atau `null` untuk objek satu berkas), dan jejak kaki `lebar` × `tinggi` dalam ubin menurut aturan JS-06 | Jenis di `kampung.json`, yaitu nama berkas tanpa `obj_`; properti set yang tidak ada di peta memakai aturan yang sama |
+| `NPC` | 34 strip (ditambah `npc_penjual_bawah_diam` pada 22 Nov 2026), masing-masing 2 bingkai dengan titik kaki: siswa dan lansia (8, 21), dewasa (8, 23), anak (7, 17), Dimas di motor (17, 28) | Nama berkas tanpa `.png` |
 | `IKON` | 33 ikon; `ikon_bintang` 3 bingkai dan `ikon_menyambung` 2 bingkai. Ikon kepala avatar hanya ada di `AVATAR` | Nama berkas tanpa `.png` |
 | `TANDA` | 12 penanda dan efek; berkasnya di folder `ikon/`, dan urutan bingkainya di bagian T | Nama berkas tanpa `.png` |
 
@@ -1104,7 +1142,7 @@ Dijawab 8 November 2026: KT-C11 sampai KT-C19 memakai saran (a), yaitu usulan 1a
 | Musik latar M-01 (KT-C26 a) | JS-21 (P1, Sesi A) | Disetujui 21 Nov 2026; baru diputar sesudah JS-21 dibangun |
 | Permintaan C-14 dan C-15 | Sesi A | Diajukan 21 Nov 2026: dokumen Sesi A untuk efek suara |
 | Permintaan C-16 | Sesi A | Diajukan 21 Nov 2026: dokumen Sesi A untuk musik latar |
-| Aset tambahan O-52, O-53, dan N-21 | `Setuju: O-52, O-53, N-21` | Ditinjau sejak 22 Nov 2026 (bagian "Aset tambahan untuk naskah tambahan"). Sesudah disetujui: giliran penutup (kredit dan manifest) dan A-17, di-commit bersama. Dibutuhkan Build semai tambahan Sesi B untuk K-32 dan K-33 |
+| Aset tambahan O-52, O-53, dan N-21 | Commit bersama A-17 | Disetujui 22 Nov 2026; kredit dan manifest ada di ZIP penutup (bagian "Aset tambahan untuk naskah tambahan"). Sesudah commit, syarat aset Build semai tambahan Sesi B untuk K-32 dan K-33 terpenuhi |
 | Permintaan C-17 | Sesi A | Diajukan 22 Nov 2026: A-17 cukup `kunci-aset.ts`, dikerjakan dengan ZIP penutup aset tambahan terlampir, lalu kedua ZIP di-commit bersama |
 | Permintaan C-18 | Sesi A | Diajukan 22 Nov 2026: catat `atas_tambahan.py` di tabel kit gambar Design System 14 |
 
@@ -1113,4 +1151,4 @@ Dijawab 8 November 2026: KT-C11 sampai KT-C19 memakai saran (a), yaitu usulan 1a
 - **Perbaikan peta sesudah JS-06** cukup ditulis bebas, misalnya "titik z6-03 pindah ke tepi sungai". Saya mengubah `kampung.txt` atau `objek.json`, menjalankan `peta:build` dan uji peta, lalu menyerahkan ZIP kecil.
 - Perbaikan aset tetap bisa diminta kapan saja: tulis ID aset dan perubahannya, misalnya "N-08: rambut Pak Made lebih banyak". Aset yang diubah kembali berstatus Ditinjau sampai disetujui lagi.
 - **Efek suara:** balas `Setuju: suara` untuk semua saran (a) di bagian "Efek suara", atau sebutkan alternatifnya, misalnya `Setuju: suara, 3b, 5b`. Sesudah setiap giliran efek, balas misalnya `Setuju: S-01 sampai S-07`, atau tulis perbaikan per efek, misalnya "S-05: lebih pelan" atau "S-02: lebih pendek". Efek yang diubah kembali berstatus Ditinjau. Untuk giliran 2: `Setuju: S-08, M-01`, atau perbaikan seperti "M-01: lebih pelan".
-- **Aset tambahan:** Plan disetujui 22 November 2026. Untuk giliran gambar, balas `Setuju: O-52, O-53, N-21`, atau tulis perbaikan per aset, misalnya "O-52: lumut lebih banyak" atau "N-21: topi warna lain". Aset yang diubah tetap Ditinjau sampai disetujui.
+- **Aset tambahan:** O-52, O-53, dan N-21 Disetujui 22 November 2026. Perbaikan tetap bisa diminta dengan ID aset, misalnya "O-52: lumut lebih banyak" atau "N-21: topi warna lain". Aset yang diubah kembali Ditinjau sampai disetujui lagi, dan kredit serta manifestnya diperbarui sesudah itu.

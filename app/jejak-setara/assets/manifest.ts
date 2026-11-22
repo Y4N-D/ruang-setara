@@ -123,6 +123,7 @@ import npcMadeBawahDiam from "./npc/npc_made_bawah_diam.png";
 import npcNaraBawahDiam from "./npc/npc_nara_bawah_diam.png";
 import npcNenekBawahDiam from "./npc/npc_nenek_bawah_diam.png";
 import npcPedagangBawahDiam from "./npc/npc_pedagang_bawah_diam.png";
+import npcPenjualBawahDiam from "./npc/npc_penjual_bawah_diam.png";
 import npcPetugasBawahDiam from "./npc/npc_petugas_bawah_diam.png";
 import npcPolisiBawahDiam from "./npc/npc_polisi_bawah_diam.png";
 import npcRakaBawahKursiroda from "./npc/npc_raka_bawah_kursiroda.png";
@@ -163,6 +164,7 @@ import objHalte from "./obj/obj_halte.png";
 import objHalteAtas from "./obj/obj_halte_atas.png";
 import objJembatanDatar from "./obj/obj_jembatan_datar.png";
 import objJembatanTegak from "./obj/obj_jembatan_tegak.png";
+import objKandangKukang from "./obj/obj_kandang_kukang.png";
 import objKantin from "./obj/obj_kantin.png";
 import objKantinAtas from "./obj/obj_kantin_atas.png";
 import objKantorDesa from "./obj/obj_kantor_desa.png";
@@ -208,6 +210,8 @@ import objPosKeamananAtas from "./obj/obj_pos_keamanan_atas.png";
 import objPosRonda from "./obj/obj_pos_ronda.png";
 import objPosRondaAtas from "./obj/obj_pos_ronda_atas.png";
 import objPotTanaman from "./obj/obj_pot_tanaman.png";
+import objPrasasti from "./obj/obj_prasasti.png";
+import objPrasastiAtas from "./obj/obj_prasasti_atas.png";
 import objPuskesmas from "./obj/obj_puskesmas.png";
 import objPuskesmasAtas from "./obj/obj_puskesmas_atas.png";
 import objRambuHalte from "./obj/obj_rambu_halte.png";
@@ -527,6 +531,12 @@ export const OBJEK: Readonly<Record<string, GambarObjek>> = {
     lebar: 2,
     tinggi: 3,
   },
+  kandang_kukang: {
+    bawah: { url: objKandangKukang, lebar: 18, tinggi: 18, bingkai: 1 },
+    atas: null,
+    lebar: 1,
+    tinggi: 1,
+  },
   kantin: {
     bawah: { url: objKantin, lebar: 66, tinggi: 27, bingkai: 1 },
     atas: { url: objKantinAtas, lebar: 66, tinggi: 23, bingkai: 1 },
@@ -731,6 +741,12 @@ export const OBJEK: Readonly<Record<string, GambarObjek>> = {
     lebar: 1,
     tinggi: 1,
   },
+  prasasti: {
+    bawah: { url: objPrasasti, lebar: 34, tinggi: 17, bingkai: 1 },
+    atas: { url: objPrasastiAtas, lebar: 34, tinggi: 17, bingkai: 1 },
+    lebar: 2,
+    tinggi: 2,
+  },
   puskesmas: {
     bawah: { url: objPuskesmas, lebar: 98, tinggi: 35, bingkai: 1 },
     atas: { url: objPuskesmasAtas, lebar: 98, tinggi: 31, bingkai: 1 },
@@ -878,6 +894,7 @@ export const NPC: Readonly<Record<string, GambarNpc>> = {
   npc_nara_bawah_diam: { url: npcNaraBawahDiam, lebar: 16, tinggi: 24, bingkai: 2, kakiX: 8, kakiY: 21 },
   npc_nenek_bawah_diam: { url: npcNenekBawahDiam, lebar: 16, tinggi: 24, bingkai: 2, kakiX: 8, kakiY: 21 },
   npc_pedagang_bawah_diam: { url: npcPedagangBawahDiam, lebar: 16, tinggi: 26, bingkai: 2, kakiX: 8, kakiY: 23 },
+  npc_penjual_bawah_diam: { url: npcPenjualBawahDiam, lebar: 16, tinggi: 26, bingkai: 2, kakiX: 8, kakiY: 23 },
   npc_petugas_bawah_diam: { url: npcPetugasBawahDiam, lebar: 16, tinggi: 26, bingkai: 2, kakiX: 8, kakiY: 23 },
   npc_polisi_bawah_diam: { url: npcPolisiBawahDiam, lebar: 16, tinggi: 26, bingkai: 2, kakiX: 8, kakiY: 23 },
   npc_raka_bawah_kursiroda: { url: npcRakaBawahKursiroda, lebar: 16, tinggi: 24, bingkai: 2, kakiX: 8, kakiY: 21 },

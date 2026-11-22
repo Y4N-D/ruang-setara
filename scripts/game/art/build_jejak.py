@@ -175,10 +175,12 @@ DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC)                  # kelompok N1
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC2)                 # kelompok N2
              or nama in IKON_BARU or nama in IKON_ULANG}                                 # kelompok I
-# Aset tambahan (Daftar_Aset.md, bagian "Aset tambahan untuk naskah tambahan"): nama berkas -> tanggal. Diisi sesudah
-# pemilik proyek menyetujui setiap aset; sampai itu O-52, O-53, dan N-21 berstatus Ditinjau dan tidak masuk CREDITS.md
-# maupun manifest.ts. Kuncinya masuk kunci-aset.ts lewat Permintaan A-17 (Sesi A), di commit yang sama (KT-C31 a).
-DISETUJUI_TAMBAHAN = {}
+# Aset tambahan (Daftar_Aset.md, bagian "Aset tambahan untuk naskah tambahan"): nama berkas -> tanggal persetujuan.
+# O-52, O-53, dan N-21 disetujui pemilik proyek 22 Nov 2026 ("Setuju: O-52, O-53, N-21"). Kuncinya masuk kunci-aset.ts
+# lewat Permintaan A-17 (Sesi A) di commit yang sama, karena uji aturan-bank membandingkan daftar kunci itu dengan
+# CREDITS.md (KT-C31 a, Permintaan C-17).
+DISETUJUI_TAMBAHAN = {nama: "22 November 2026" for nama in ("obj_prasasti", "obj_prasasti_atas", "obj_kandang_kukang",
+                                                             "npc_penjual_bawah_diam")}
 DISETUJUI.update(DISETUJUI_TAMBAHAN)
 
 # Efek suara dan musik latar berstatus Disetujui: nama berkas tanpa .wav -> tanggal (Daftar_Aset.md, bagian "Efek
@@ -1779,7 +1781,7 @@ def pratinjau_uji_gaya_tambahan():
 
 def pratinjau_tambahan_lembar():
     L = Lembar(1440, 800)
-    L.judul("Aset tambahan — Properti dan tokoh naskah tambahan", "Sesi C · 22 Nov 2026 · Ditinjau · O-52, O-53, N-21")
+    L.judul("Aset tambahan — Properti dan tokoh naskah tambahan", "Sesi C · disetujui 22 Nov 2026 · O-52, O-53, N-21")
     L.panel(20, 70, 560, 420, "O-52 prasasti · K-32")
     g = _latar_tambahan(3, 3)
     g.paste(obj_prasasti(), 7, 7)
@@ -1830,7 +1832,7 @@ def pratinjau_tambahan_lembar():
 
 def pratinjau_tambahan_set():
     L = Lembar(1440, 1020)
-    L.judul("Aset tambahan — Set kejadian K-32 dan K-33", "Sesi C · 22 Nov 2026 · Ditinjau · tiga masa dan pandangan pemain")
+    L.judul("Aset tambahan — Set kejadian K-32 dan K-33", "Sesi C · disetujui 22 Nov 2026 · tiga masa dan pandangan pemain")
     for i, masa in enumerate(MASA):
         L.tempel(besar(_set_k32(masa), 2), 20 + i * 236, 76)
         L.label(f"K-32 · {NAMA_MASA[masa].lower()} (×2)", 20 + i * 236 + 112, 244, "tebal")
