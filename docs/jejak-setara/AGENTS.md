@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan **Jejak Setara** di repositori `ruang-setara`. Baca seluruh file ini, lalu PRD, Design System, dan Architecture Jejak Setara, sebelum mengubah apa pun.
 
+Versi 0.8 (22 November 2026): nama buatan siswa sebagai pilihan guru di bagian 7 butir 4 dan daftar periksa bagian 9, serta baris JS-14 di bagian 5 (Gerbang 1 JS-14).
 Versi 0.7 (21 November 2026): kit suara, kredit efek suara, dan `assets:build:jejak` untuk suara di bagian 6 dan 9 (Permintaan C-14 dan C-15, Plan JS-13).
 Versi 0.6 (14 November 2026): JS-22 Pengaman biaya ditambahkan ke backlog bagian 5 (usulan 14a JS-10).
 Versi 0.5 (14 November 2026): berkas alur kerja GitHub dan folder `Claude outputs/` dalam mode folder lokal (bagian 11.5, butir 8; penutupan JS-04).
@@ -155,7 +156,7 @@ flowchart TD
 | JS-11 | Akhir ronde: rekap pribadi, kiriman ke D1, riwayat ruang, hasil per ruang, ekspor CSV | JFR-32, 38, 49, 53 | M | JS-10 |
 | JS-12 | Bank kejadian di konsol: daftar, penyunting dan pratinjau, status dan versi, paket, pustaka rujukan dan verifikasi | JFR-41 sampai JFR-46 | L | JS-04, JS-05 |
 | JS-13 | Statistik per kejadian lintas ruang dan isi dasbor | JFR-37, 50 | M | JS-11, JS-12 |
-| JS-14 | Pengaturan pemain, aksesibilitas, privasi, dan suara | JFR-55, 56, 57 | M | JS-09 |
+| JS-14 | Pengaturan pemain, aksesibilitas, privasi, dan suara, ditambah nama buatan siswa, kelola nama oleh guru, dan penghapusan otomatis sesudah masa simpan (Gerbang 1 JS-14) | JFR-55, 56, 57; JFR-01, 04, 06 (diubah); PRD 13 | L | JS-09 |
 | JS-15 | Uji beban dan ketahanan jaringan, anggaran ukuran, perbaikan kinerja | PRD bagian 12 | M | JS-11 |
 | JS-16 | Tautan dari galeri, panduan guru satu halaman, uji coba kelas, rilis 1.0 | KT-08; PRD bagian 16 | S | JS-13, JS-14, JS-15 |
 | JS-22 | Pengaman biaya: pengaman alarm dan percobaan ulang, alur kerja "Jejak: hentikan", penghitung pemakaian per ruang, serta peringatan anggaran dan batas biaya (ditambahkan 14 Nov 2026, usulan 14a JS-10) | Architecture 12.1 dan 13 | M | JS-10 |
@@ -188,7 +189,7 @@ Nama skrip ditetapkan di JS-01 dan terdaftar di `package.json` sejak ZIP akhir J
 1. **Inti murni.** `app/jejak-setara/inti/` tanpa DOM, React, API Workers, atau jam dan acak langsung.
 2. **Server berwenang** atas waktu, kunci jawaban, skor, peringkat, skill, dan kotak. Jangan pernah mempercayai nilai-nilai itu dari klien.
 3. **Validasi semua masukan:** setiap pesan WebSocket dan permintaan API diperiksa dengan `zod`, dibatasi ukuran dan frekuensinya.
-4. **Tanpa data pribadi siswa:** hanya nama samaran dari daftar dan nomor absen opsional. Tidak ada nama asli, foto, lokasi, atau obrolan. Tidak ada analitik, pelacak, iklan, atau CDN pihak ketiga. Satu-satunya layanan luar adalah akun Cloudflare milik proyek.
+4. **Data pribadi siswa seminimal mungkin:** nama pemain dari daftar nama samaran, atau nama yang diketik siswa di ruang yang gurunya memilih nama buatan siswa (tanpa nama lengkap, diperiksa penyaring di server, dan bisa diganti guru), serta nomor absen opsional. Tidak ada nama lengkap yang diminta, foto, lokasi, atau obrolan. Tidak ada analitik, pelacak, iklan, atau CDN pihak ketiga. Satu-satunya layanan luar adalah akun Cloudflare milik proyek.
 5. **Rahasia** tidak pernah masuk repositori, log, ZIP, tangkapan layar, atau pesan galat.
 6. **Migrasi D1 hanya maju.** Jangan mengubah atau menghapus migrasi yang sudah ada di `main`.
 7. **Rujukan:** agen dan skrip tidak pernah menyemai atau menandai rujukan sebagai terverifikasi.
@@ -231,7 +232,7 @@ Nama skrip ditetapkan di JS-01 dan terdaftar di `package.json` sejak ZIP akhir J
 - [ ] Bisa dimainkan sampai akhir hanya dengan keyboard di laptop.
 - [ ] Kurangi gerak mematikan animasi penanda, pop, dan sprite.
 - [ ] Suara mati secara bawaan di HP; layar kelas berbunyi.
-- [ ] Tidak ada nama asli siswa di layar, berkas ekspor, maupun log.
+- [ ] Tidak ada nama lengkap siswa di layar, berkas ekspor, maupun log. Di ruang nama buatan siswa, penyaring menolak contoh kata kasar, dan guru bisa mengganti nama dari layar kelas.
 - [ ] Menyambung kembali sesudah wifi HP dimatikan 30 detik.
 
 ## 10. Definisi selesai

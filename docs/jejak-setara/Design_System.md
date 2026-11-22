@@ -100,6 +100,7 @@ Contoh skala: HP 412 × 915 CSS px dengan rasio piksel 2,625 dalam posisi mendat
 - Pada HP yang lebih lebar dari 16:9, sisa ruang kiri-kanan menjadi bingkai `ink` dan kontrol boleh menempati bingkai itu. Pada layar 16:9, kontrol menimpa sudut dunia; pemain sendiri selalu berada di tengah, jauh dari kontrol.
 - HP tegak menampilkan ajakan "Putar HP ke posisi mendatar" dengan ikon, tanpa dunia di belakangnya.
 - Tombol "Layar penuh" di lobi memakai layar penuh peramban dan mengunci orientasi mendatar bila perangkat mendukung.
+- **Menu dan suara (JS-14):** kelompok tombol di kiri atas dunia (`left: 8px; top: 36px`): "Menu" (tulisan Pixelify Sans 16 px) lalu tombol suara (`ikon_suara_nyala` atau `ikon_suara_mati` pada skala 2), masing-masing setinggi 48 px, bergaris `ink` 4 px, berlatar `cream`, dan berjarak 8 px. Di laptop, tanda `Esc` dan `M` berada di dalam tombolnya. Keduanya tampil di lobi, hitung mundur, ronde, dan di atas lapisan jeda, dan tersembunyi selama dialog, peta besar, lapisan menyambung ulang, ajakan memutar HP, atau panel terbuka. Di layar identitas keduanya berada di baris kaki di kiri "Gabung", dan di rekap di kanan judul. Panah Kompas tidak menutupi kelompok ini (spesifikasi JS-14, P-4 sampai P-7).
 
 ### 3.4 Layar pemain di laptop
 
@@ -160,6 +161,7 @@ Memakai satuan `--u: min(1vh, 0.5625vw)` dan skala huruf proyektor Sehari Setara
 - **Pembahasan:** satu kartu per kejadian berisi judul, situasi, grafik batang Langkah 1 (empat pilihan dengan persentase; pilihan yang benar diberi ikon `ikon_centang` dan tulisan "Jawaban tepat", sejak JS-11), grafik batang Langkah 2 (tingkat tepat, kurang tepat, dan berisiko dengan ikon dan tulisan), lalu kartu dampak. Navigasi "Sebelumnya" dan "Berikutnya". Sejak Build JS-10, batang persen menjadi latar kotak opsinya (warna tingkat atau `leaf` untuk jawaban tepat, sebagian tembus), agar setiap opsi hanya satu blok dan kejadian bank awal muat di layar 16:9 tanpa digulir; isi yang lebih panjang digulir di dalam kartu.
 - **Lobi (JS-10):** daftar nama lima kolom (avatar 4,4u, nama 2,8u; nama panjang mengecil sampai 2,5u lalu dipotong), urut bergabung, paling banyak 40 nama lalu "+n lainnya". Kotak kanan berisi tiga langkah bergabung sampai kode QR tersedia (JS-17).
 - **Peta kelas (JS-10):** delapan kotak zona berwarna (sebagian tembus) dengan ikon zona, dan titik 2,5 ubin berwarna tas bergaris `ink`; warna tas rose dan berry memakai nilai palet aksen bagian 8 karena belum punya token. Letak kejadian tidak digambar.
+- **Suara dan kelola pemain (JS-14):** tombol suara 48 × 48 di kepala, di kanan jumlah pemain, dengan tulisan "Klik untuk menyalakan suara" di kirinya bila peramban menahan suara. Nama di daftar lobi menjadi tombol yang membuka menu "Ganti nama", "Keluarkan", dan "Batal" (butir 48 px, bergaris `ink` 3 px, "Keluarkan" berlatar `coral`). Tombol "Pemain" dengan tanda `P` di baris kontrol membuka panel lima kolom berisi semua nama, tanpa skor dan peringkat. Konfirmasi dan pita di proyektor tidak pernah memuat nama pemain.
 
 ### 3.7 Konsol admin
 
@@ -190,6 +192,8 @@ Memakai satuan `--u: min(1vh, 0.5625vw)` dan skala huruf proyektor Sehari Setara
 
 - **Dasbor (JS-13):** salam, lalu empat kartu bingkai piksel dalam kisi dua kolom (satu kolom di bawah 1024 px): Peringatan (tautan setinggi 48 px dengan `ikon_peringatan` dan garis kiri `mango`), Ruang yang sedang berjalan, Sesi terakhir (tautan ke detail ruang, tanda `mist` "Uji"), dan Ringkasan 30 hari terakhir (angka Press Start 2P 16 px, batang tiga tingkat dengan kalimat persennya).
 - **Halaman Statistik (JS-13):** saringan dalam satu baris yang membungkus, tabel 14 px dengan baris berselang `white` dan `cream`, dan rincian per baris. Di 1280 px ke atas tabel memuat sembilan kolom; di 1024–1279 px kolom Langkah 2, Keliru terbanyak, dan Petunjuk disembunyikan (isinya ada di rincian); di bawah 1024 px setiap baris menjadi kartu. Wadah tabel memakai `position: relative`, agar teks pembaca layar tidak meluapkan halaman.
+- **Nama pemain (JS-14):** dialog Ruang baru mendapat kelompok "Nama pemain" (dua pilihan 48 px dengan keterangan, pola kelompok Skill). Halaman ruang mendapat baris "Nama pemain" di kepala, tombol "Ganti nama" di kiri "Keluarkan" pada setiap pemain, dan, di ruang nama buatan siswa, tombol "Ganti semua nama" dengan konfirmasi berbahaya.
+
 ## 4. Warna
 
 Palet **36 warna** Sehari Setara berlaku penuh. Sumber tunggalnya tetap `scripts/game/art/palette.json`. Aset gambar hanya boleh memakai warna palet itu, tanpa piksel semi-transparan.
@@ -432,6 +436,8 @@ Semua panel memakai **bingkai piksel** Sehari Setara: garis `ink` 2 piksel antar
 | **Lobi pemain** | Kode ruang, nama samaran, avatar, dan "Menunggu guru memulai…"; pemain bisa berjalan di halaman lobi |
 | **Rekap pribadi** | Skor, peringkat, lalu daftar kejadian yang dijawab dengan pilihan pemain, pilihan yang tepat, dan rujukan; dua kalimat refleksi di akhir. Sejak JS-11: halaman digulir biasa selebar paling banyak 560 px; tanda Langkah 1 dan tingkat Langkah 2 berikon emosi dan bertulisan (`leaf`, `mango`, `coral`; "Belum dijawab" `mist`); pita `mango` saat menyambung ulang dan pita `mist` dengan satu tombol sesudah ruang ditutup atau sambungan berhenti, tanpa lapisan yang menutup isi |
 
+- **Komponen JS-14:** panel Pengaturan, Privasi, dan Tentang memakai bingkai piksel di tengah layar di atas lapisan `ink` 70% (lebar paling besar 640 px), dengan kelompok pilihan dua tombol (pola tombol pilihan, 48 px) dalam dua kolom bila lebar panel ≥ 520 px. Isian nama pemain memakai gaya isian layar gabung dengan penghitung "n/14" di kanan label. Pita "Gurumu mengganti namamu menjadi …" memakai antrean pita JS-09.
+
 ### Layar kelas
 
 Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 blok seperti pengatur waktu Sehari Setara), tombol kontrol (tampilan tombol lanjut Sehari Setara), podium, dan kartu pembahasan dengan grafik batang (bagian 3.6). Grafik batang selalu menuliskan persentase dan label di samping batangnya. Tanda centang di layar kelas memakai ikon `ikon_centang`, bukan huruf ✓, karena huruf itu tampil berbeda di peramban Windows (JS-11).
@@ -472,11 +478,11 @@ Kode ruang besar, kartu pemain lobi, papan 10 besar, bilah kemajuan kelas (12 bl
 | Dialog | Muncul langsung. Tombol maju baru bekerja 600 ms sesudah tampil, agar tekanan ganda tidak melewatkan isi (aturan Sehari Setara) |
 | Durasi antarmuka | 120–400 ms |
 
-**Kurangi gerak** (`prefers-reduced-motion` atau pengaturan): penanda dan panah diam, tanpa pop, tanpa kilau, tanpa skor melayang (skor langsung berganti), tanpa debu, podium langsung di tempatnya, dan sprite tetap di bingkai pertama walaupun avatar berpindah. Blok jeda tombol skill tampil penuh selama 2 detik lalu hilang, tanpa menyusut bertahap (JS-09). Masa tunggu 600 ms tetap berlaku.
+**Kurangi gerak** (`prefers-reduced-motion` atau pengaturan): penanda dan panah diam, tanpa pop, tanpa kilau, tanpa skor melayang (skor langsung berganti), tanpa debu, podium langsung di tempatnya, dan sprite tetap di bingkai pertama walaupun avatar berpindah. Blok jeda tombol skill tampil penuh selama 2 detik lalu hilang, tanpa menyusut bertahap (JS-09). Masa tunggu 600 ms tetap berlaku. Sejak JS-14, pengaturan Kurangi gerak di layar pemain menggantikan pengaturan perangkat untuk tab itu (atribut `data-kurangi-gerak` di `<html>`), sedangkan layar kelas dan konsol tetap mengikuti perangkat. Teks muncul per huruf tidak terpengaruh kurangi gerak.
 
 ## 12. Suara
 
-- Bawaan **mati** di layar pemain (kelas berisi puluhan HP); bawaan **nyala** 60% di layar kelas. Tombol `M` dan ikon suara mengubahnya.
+- Bawaan **mati** di layar pemain (kelas berisi puluhan HP); bawaan **nyala** 60% di layar kelas. Tombol `M` dan ikon suara mengubahnya. Sejak JS-14, HP baru mengunduh berkas suara saat pemain menyalakan suara, dan layar kelas menampilkan "Klik untuk menyalakan suara" bila peramban menahan bunyi. Pemicu setiap bunyi ada di spesifikasi JS-14 (P-22 untuk layar pemain, P-31 untuk layar kelas).
 - Bunyi klik (gaya A) dan bunyi teks (gaya B) Sehari Setara dipakai ulang tanpa perubahan, sebagai salinan identik byte `sfx_klik.wav` dan `sfx_teks.wav` di `app/jejak-setara/assets/sfx/` (Permintaan C-15).
 
 | Peristiwa | Karakter bunyi | Berkas | Keras terdengar |
@@ -508,7 +514,8 @@ Ketentuan berkas suara (Permintaan C-14 dan C-16; usulan Sesi C KT-C20 sampai KT
 - **Keyboard penuh di laptop:** `WASD` atau panah untuk bergerak, `E` atau `Enter` untuk Periksa, `1` `2` `3` untuk skill di luar dialog (baris angka atau papan angka; tekanan berulang karena tombol ditahan diabaikan), `1`–`4` dan `Enter` di dialog, `M` untuk suara, `Esc` untuk menu. Di dalam dialog tidak ada pintasan Petunjuk; tombol Petunjuk dicapai dengan `Tab` lalu `Enter` atau `Spasi` (JS-09). Fokus selalu terlihat (latar `sun` dan ▶).
 - **Pembaca layar:** dialog kejadian, rekap, layar kelas, dan konsol adalah HTML dengan struktur judul yang benar. Peristiwa penting (kejadian terlihat, skor berubah, waktu tinggal dua menit, jeda) diumumkan lewat wilayah `aria-live="polite"` dengan jarak minimal 2 detik antarpengumuman. Sejak JS-09 juga: kotak terambil ("Dapat satu muatan Lari cepat."), skill mulai aktif ("Lari cepat aktif selama 6 detik.") dan selesai, Petunjuk dengan kalimatnya, +1 Kompas, dan setiap pita skill. Label tombol skill memuat nama lengkap skill dan muatannya ("Kompas kejadian, 1 muatan", ditambah ", sedang aktif"), dan di laptop tombol ber-`aria-keyshortcuts`. Dunia kanvas dilengkapi daftar "Kejadian terdekat" dan bantuan gerak (JFR-13, P1).
 - **Kurangi gerak** (bagian 11) dan **tanpa kedip** (bagian 6).
-- **Ukuran label nama** bisa diperbesar di pengaturan pemain.
+- **Ukuran label nama** bisa diperbesar di pengaturan pemain: Biasa 13 px dan Besar 17 px CSS (JS-14).
+- **Panel dan menu (JS-14):** panel Pengaturan, Privasi, dan Tentang di layar pemain, serta panel Pemain, menu nama, dan konfirmasi di layar kelas, memakai pola dialog: judul, jebakan Tab, `Esc`, dan fokus kembali ke pembukanya. `Esc` membuka dan menutup Menu di luar dialog dan peta besar, `M` menyalakan atau mematikan suara di layar pemain dan layar kelas, dan `P` membuka panel Pemain di layar kelas. Pemeriksaan manual memakai Narator Windows.
 - `<html lang="id">`.
 
 ## 14. Pembuatan aset dengan kode

@@ -275,6 +275,7 @@ export interface PengaturanRuang {
   skillAktif: SkillId[];
   modeNomorAbsen: boolean;
   uji: boolean;                              // ruang uji: tidak masuk statistik
+  modeNama: "daftar" | "bebas";              // JS-14: daftar nama samaran (bawaan) atau nama buatan siswa
 }
 
 // Tambahan JS-02
@@ -317,7 +318,7 @@ Tipe tambahan ditetapkan di JS-02 (spesifikasi JS-02, bagian "Data, protokol, AP
 | `kejadian_versi` | `id`, `kejadian_id`, `nomor`, `isi_json`, `jenis` (`kerja`/`terbit`), `dibuat_oleh`, `dibuat_pada`, `catatan_perubahan` | Satu versi `kerja` yang bisa disunting; versi `terbit` tidak pernah berubah |
 | `paket` · `paket_kejadian` | `id`, `nama`, `deskripsi`, `aktif` · `paket_id`, `kejadian_id`, `urutan` | |
 | `ruang` | `id`, `kode`, `pemilik_id`, `label_kelas`, `paket_id`, `pengaturan_json`, `benih`, `status`, `uji`, `do_id`, `dibuat_pada`, `mulai_pada`, `selesai_pada`, `ringkasan_json` | `kode` unik di antara ruang yang belum `ditutup`. `ringkasan_json` berisi `pemakaian` (JS-22) dan, untuk ruang yang dimainkan, `hasil` (JS-11) |
-| `peserta` | `id`, `ruang_id`, `nama_samaran`, `avatar`, `warna_tas`, `nomor_absen`, `skor`, `waktu_skor_ms`, `langkah1_benar`, `jumlah_kejadian`, `gabung_pada`, `peringkat_akhir`, `dikeluarkan` | `nomor_absen` kosong bila mode nomor absen mati. `dikeluarkan` 0 atau 1 (JS-11); pemain yang dikeluarkan tidak punya `peringkat_akhir` |
+| `peserta` | `id`, `ruang_id`, `nama_samaran`, `avatar`, `warna_tas`, `nomor_absen`, `skor`, `waktu_skor_ms`, `langkah1_benar`, `jumlah_kejadian`, `gabung_pada`, `peringkat_akhir`, `dikeluarkan` | `nomor_absen` kosong bila mode nomor absen mati. `dikeluarkan` 0 atau 1 (JS-11); pemain yang dikeluarkan tidak punya `peringkat_akhir`. Sejak JS-14 kolom `nama_samaran` berisi nama pemain, termasuk nama buatan siswa |
 | `jawaban` | `id`, `ruang_id`, `peserta_id`, `kejadian_versi_id`, `urutan_opsi_json`, `langkah1_opsi`, `langkah1_benar`, `petunjuk_dipakai`, `langkah2_opsi`, `tingkat`, `poin`, `dibuka_pada`, `langkah1_pada`, `langkah2_pada` | Satu baris per pemain per kejadian |
 | `pengaturan` | `kunci`, `nilai_json` | Nilai bawaan ruang, daftar nama samaran, masa simpan data, mode pemeliharaan |
 | `log_audit` | `id`, `pengguna_id`, `aksi`, `sasaran`, `rincian_json`, `waktu` | Tanpa sandi dan tanpa token |
@@ -360,6 +361,8 @@ JS-03 membuat tabel `meta`, `pemain`, dan `kiriman`; tabel lain ditambahkan fitu
 
 JS-09 menambah `skill` dan `petunjuk` dengan `CREATE TABLE IF NOT EXISTS`. Keduanya menggantikan rencana tabel `kotak` dan kolom muatan serta skill aktif di `pemain`. Satu perubahan muatan, masa aktif, kotak, atau sasaran Kompas menulis satu baris `skill`; skill yang habis karena waktu dan kotak yang muncul lagi tidak menulis. Ruang yang dibuat sebelum JS-09 pulih dengan muatan 0.
 
+JS-14 menambah meta `modeNama` (mode nama yang berlaku, awalnya dari pengaturan) dan `namaDiblokir` (sidik 64 bit nama yang diganti guru, paling banyak 300, tanpa tulisan namanya), serta menyimpan hitungan penolakan nama di `pemain.saran_json` sebagai `{ saran, tolak }`; isian lama berupa larik tetap terbaca.
+
 Sejak Build JS-08, nilai meta `waktu` juga memuat `riwayatJeda` (awal dan lama setiap jeda yang sudah dilanjutkan), agar waktu ronde tanpa jeda saat skor terakhir bertambah bisa dihitung ulang dari `jawaban` sesudah ruang dibangunkan. Ruang yang dibuat sebelumnya memakai `jedaMs`.
 
 ### 5.4 Aturan validasi konten
@@ -399,7 +402,7 @@ Worker memeriksa tajuk `Origin` (hanya domain Jejak Setara sendiri dan `localhos
 
 ### 6.2 Amplop pesan
 
-Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
+Setiap pesan adalah objek JSON `{ "v": 3, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08, 3 sejak JS-14). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
 
 ### 6.3 Pesan pemain
 
@@ -408,7 +411,7 @@ Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `
 | `t` | Isi | Kapan |
 |---|---|---|
 | `halo` | `peran: "pemain"`, `token?`, `nomorAbsen?` | Pesan pertama; `token` dipakai untuk menyambung ulang |
-| `pilih_identitas` | `nama`, `avatar` | Di layar gabung; `nama` harus salah satu saran server |
+| `pilih_identitas` | `nama`, `avatar` | Di layar gabung; `nama` harus salah satu saran server, kecuali di ruang nama buatan siswa: nama 3–14 karakter yang unik dan lolos penyaring (JS-14) |
 | `minta_nama` | — | Tombol "Acak ulang"; dijawab `saran_nama` (JS-03) |
 | `gerak` | `x`, `y`, `arah`, `jalan` (boolean), `seq` | Paling banyak 10 per detik saat bergerak, 1 per detik saat diam |
 | `periksa` | `kejadianId` | Membuka dialog |
@@ -424,7 +427,9 @@ Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `
 | `t` | Isi |
 |---|---|
 | `selamat_datang` | `pemainId`, `token`, status dan pengaturan ruang, `waktuServer`, versi peta, tiga saran nama samaran, avatar yang tersedia |
-| `saran_nama` | Paling banyak tiga saran nama samaran baru: jawaban `minta_nama`, atau sesudah galat `NAMA_DIPAKAI` (JS-03) |
+| `saran_nama` | Paling banyak tiga saran nama samaran baru: jawaban `minta_nama`, atau sesudah galat `NAMA_DIPAKAI` (JS-03) dan `NAMA_DITOLAK` (JS-14) |
+| `nama_baru` | `id`, `nama`: nama pemain diganti guru; dikirim ke semua pemain, termasuk pemain itu (JS-14) |
+| `mode_nama` | `modeNama`: mode nama yang berlaku untuk pemain itu menjadi `daftar`, sesudah lima penolakan atau Ganti semua nama (JS-14) |
 | `status_ruang` | `status`, `mulaiPada`, `berakhirPada`, `jedaSejak` |
 | `dunia` | `w` (waktu server), `p`: larik `[id, x, y, arah, jalan, dialog]` untuk pemain yang berubah di sekitar pemain ini (`dialog` sejak versi 2, JS-08), `n` (jumlah pemain) |
 | `pemain_baru` · `pemain_pergi` | `id`, `nama`, `avatar`, `warnaTas` · `id` |
@@ -448,9 +453,10 @@ Setiap pesan adalah objek JSON `{ "v": 2, "t": "<tipe>", ...isi }`. `v` adalah `
 | Kelas → server | `halo` | `peran: "guru"` (tiket sudah diperiksa Worker) |
 | Kelas → server | `mulai` · `jeda` · `lanjut` · `tambah_waktu` · `akhiri` | `tambah_waktu` berisi `detik` (120) |
 | Kelas → server | `kunci_ruang` · `keluarkan` · `kode_masuk_ulang` | `kunci` (boolean) · `pemainId` · `pemainId` (P1) |
+| Kelas → server | `ganti_nama` · `ganti_semua_nama` | `pemainId` · — (JS-14; juga dipakai aksi kelola konsol) |
 | Kelas → server | `pembahasan` · `tutup_ruang` | `kejadianId` |
 | Server → kelas | `lobi` | Daftar pemain (nama, avatar, warna tas, terhubung) |
-| Server → kelas | `info_kelas` | Label kelas, kode, tautan, durasi, batas pemain, ruang uji, terkunci, waktu server, dan daftar kejadian (id, judul, zona). Dikirim sesudah `halo` dan saat kunci berubah (JS-10) |
+| Server → kelas | `info_kelas` | Label kelas, kode, tautan, durasi, batas pemain, ruang uji, terkunci, waktu server, dan daftar kejadian (id, judul, zona). Dikirim sesudah `halo` dan saat kunci berubah (JS-10). Sejak JS-14 juga memuat `modeNama` dan dikirim lagi saat mode nama berubah |
 | Server → kelas | `dunia_kelas` | Posisi semua pemain berkeidentitas, 2 kali per detik selama `main` (JS-10) |
 | Server → kelas | `papan` | 10 besar (dengan jumlah kejadian selesai) dan jumlah pemain, paling sering 1 kali per detik dan hanya bila berubah; peringkat lengkap tidak dikirim ke layar kelas (JS-10, JFR-30) |
 | Server → kelas | `kemajuan` | Jumlah jawaban dan kemungkinan |
@@ -472,7 +478,7 @@ Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 M
 
 - Ukuran pesan masuk paling besar 2 KB.
 - Batas per sambungan: 20 pesan per detik rata-rata dengan lonjakan sampai 40. Pesan berlebih dibuang; 3 pelanggaran dalam 10 detik mengirim `galat TERLALU_CEPAT`, dan 10 pelanggaran menutup sambungan.
-- `nama` harus dari saran server; `avatar` dari daftar; `nomorAbsen` bilangan 1–50.
+- `nama` harus dari saran server, atau di ruang nama buatan siswa berbentuk sah, unik, dan lolos penyaring (JS-14); `avatar` dari daftar; `nomorAbsen` bilangan 1–50.
 - Pesan pemain diabaikan bila tidak sesuai status ruang (misalnya `gerak` saat `jeda`).
 
 ### 6.7 Kode galat
@@ -489,6 +495,7 @@ Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 M
 | `DIKELUARKAN` | Dikeluarkan guru | "Kamu dikeluarkan dari ruang oleh guru." |
 | `BUKAN_JANGKAUAN` | Memeriksa kejadian dari tempat yang terlalu jauh | Tidak ditampilkan; posisi dikoreksi |
 | `NOMOR_ABSEN_DIPAKAI` | Nomor absen sudah dipakai pemain lain di ruang itu (JS-03) | "Nomor absen ini sudah dipakai di ruang ini. Periksa lagi nomormu." |
+| `NAMA_DITOLAK` | Nama buatan siswa tidak berbentuk sah, tertangkap penyaring, atau pernah diganti guru di ruang itu (JS-14) | "Nama itu tidak bisa dipakai. Coba nama lain." |
 
 Teks akhir ditetapkan di spesifikasi JS-03 dan disimpan di `teks.ts`.
 
@@ -545,6 +552,7 @@ stateDiagram-v2
 - **Selesai:** peringkat akhir dihitung, `selesai` dengan rekap pribadi dikirim ke setiap pemain, baris peserta akhir dan seluruh `kiriman` dikirim ke D1, dan `ringkasan_json` ditulis dengan `pemakaian` dan `hasil` (JS-11). Bila pemain dikeluarkan atau baru memilih nama saat `selesai` atau `pembahasan`, peringkat akhir dihitung ulang, `papan`, `kemajuan`, dan `selesai` dikirim lagi, dan baris peserta diantrekan lagi (JS-11, P-13).
 - **Ditutup di tengah ronde (JS-11, P-12):** tutup otomatis, penghapusan paksa, dan berhenti paksa dari `main` atau `jeda` lebih dulu menutup semua dialog, menghitung peringkat akhir, dan mengantrekan baris peserta, tanpa `selesai`. Ruang yang ditutup dari `lobi` atau `hitung_mundur` tidak dimainkan dan tidak punya hasil.
 - **Ditutup otomatis:** 3 jam tanpa sambungan apa pun, atau 6 jam sejak dibuat. Penyimpanan Durable Object dihapus 24 jam sesudah ditutup, setelah kiriman ke D1 dipastikan lengkap.
+- **Penghapusan sesudah masa simpan (JS-14):** pemicu harian menghapus paling banyak 50 ruang berstatus `ditutup` yang dibuat lebih dari 365 hari lalu, beserta peserta dan jawabannya, dengan log audit `ruang.hapus_otomatis` tanpa nama pemain.
 - **Sejak JS-03:** siklus ini dijalankan inti ruang. Sejak JS-10, pesan layar kelas sampai ke ruang lewat rute `/ws/kelas/` bertiket, dan konsol mengelola ruang lewat rute internal `kelola`. Ruang di `lobi` juga bisa ditutup, dan pesan `pembahasan` mengubah status `selesai` menjadi `pembahasan` sambil menjawab `data_pembahasan`. Ruang coba, kait `kelas`, dan kedua alur kerjanya dipensiunkan; kait uji lokal pindah ke `/api/uji/ruang/{KODE}/…`.
 - **Pengaman biaya (JS-22):** alarm paling cepat 1 detik dari sekarang; tenggat yang sama lewat lima kali berturut-turut digeser 60 detik; anggaran 200 alarm per ruang; kiriman ke D1 dicoba ulang dengan jeda sampai 60 menit dan berhenti sesudah 24 jam; penyimpanan dihapus paling lambat 7 hari sesudah ruang dibuat; `getAlarm()` dibaca sesudah bangun. "Berhenti paksa" (anggaran habis atau `DARURAT`) menutup ruang, mengirim antrean sekali, lalu menghapus alarm dan seluruh penyimpanan. Durable Object menghitung pemakaian ronde dan menulisnya ke `ruang.ringkasan_json` saat ruang ditutup.
 - **Ruang uji dari konsol (JS-08, JS-10):** ruang uji membaca paket dari D1 lingkungannya dengan versi `kerja` setiap kejadian (lalu versi terbit bila tidak ada versi kerja), mengisi `ruang.paket_id`, lalu menyalin isi dan teks rujukannya ke Durable Object. Ruang biasa hanya boleh bila setiap kejadian paket terbit dengan semua rujukannya terverifikasi. Sebelum JS-10, ruang coba JS-03 memakai jalur yang sama.
@@ -626,9 +634,10 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 - **Warna tas:** saat memuat, setiap strip avatar disalin untuk warna tas yang dipakai, dengan mengganti warna kunci `sun` dan `mango` serentak memakai pasangan Design System bagian 8 (JS-07).
 - **Input:** keyboard (`keydown`/`keyup` dengan peta tombol), joystick sentuh (*pointer events*, satu penunjuk di separuh kiri), dan tombol HTML untuk Periksa serta skill.
 - **HUD dan dialog:** komponen React di atas kanvas. Dialog dibuka dari `kejadian_terbuka` dan memakai komponen `bersama/` yang juga dipakai pratinjau konsol.
-- **Label nama:** kanvas lapisan kedua dengan resolusi perangkat, agar teks tajam; paling banyak 8 label.
+- **Label nama:** kanvas lapisan kedua dengan resolusi perangkat, agar teks tajam; paling banyak 8 label; huruf 13 px atau 17 px CSS menurut pengaturan (JS-14).
 - **Pramuat:** aset pemain dimuat sebelum tombol "Masuk" aktif; lembar ubin masa berikutnya dimuat di latar belakang.
-- **Tanpa penyimpanan lain:** hanya `token` di `sessionStorage` dan pengaturan pemain di memori.
+- **Tanpa penyimpanan lain:** hanya `token` dan, sejak JS-14, pengaturan pemain (`jejak:pengaturan`) di `sessionStorage` tab itu.
+- **Suara (JS-14):** pemutar Web Audio dengan pola Sehari Setara (satu `GainNode` 60%); berkas WAV di `SUARA` baru diunduh saat pemain menyalakan suara, dan konteks dibuat pada ketukan itu.
 - **Kejadian (JS-08):** penanda, tokoh, dan properti digambar di titik yang sudah terlihat. Tokoh dan properti `setTokoh` ditata otomatis di ruang 3 × 3 sekitar titik dan bisa dilewati. Tombol Periksa tampil di perangkat sentuh, dan ajakan `E` di laptop. Dialog memakai komponen `bersama/` dengan mode ringkas bila tinggi area dialog kurang dari 560 px CSS. Angka fps tampil bila alamat diakhiri `#fps`.
 
 ## 10. Konsol admin dan layar kelas
@@ -664,9 +673,10 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `GET` · `PUT /api/pengaturan` | Pengaturan umum | Admin |
 | `GET /api/log` | Log audit | Admin |
 | `GET /api/bank/ekspor`; `POST /api/bank/impor` | Ekspor dan impor JSON bank | Admin |
-| `GET /api/publik/ruang/{KODE}` | Apakah kode ada dan apakah mode nomor absen aktif; dibaca dari D1 tanpa memanggil ruang (JS-03) | Umum, dibatasi frekuensinya |
-| `GET /api/ruang/pilihan`; `POST /api/ruang/{id}/kelola` | Paket aktif untuk dialog ruang baru; kunci, buka kunci, keluarkan, dan tutup dari konsol (JS-10) | Admin, guru (miliknya) |
+| `GET /api/publik/ruang/{KODE}` | Apakah kode ada, apakah mode nomor absen aktif, dan mode nama awal ruang (JS-14); dibaca dari D1 tanpa memanggil ruang (JS-03) | Umum, dibatasi frekuensinya |
+| `GET /api/ruang/pilihan`; `POST /api/ruang/{id}/kelola` | Paket aktif untuk dialog ruang baru; kunci, buka kunci, keluarkan, dan tutup dari konsol (JS-10), serta ganti nama dan ganti semua nama (JS-14) | Admin, guru (miliknya) |
 | `/api/uji/ruang/{KODE}/statistik` · `/putuskan` · `/kejadian` · `/pindahkan` · `/pengaman` | Kait uji lokal (JS-07, JS-08); hanya di `lokal`, 404 di lingkungan lain. Pengganti kait ruang coba sejak JS-10 | Uji |
+| `POST /api/uji/pembersihan` | Kait uji lokal: menjalankan penghapusan sesudah masa simpan dengan waktu yang diberikan (JS-14); hanya di `lokal`, 404 di lingkungan lain | Uji |
 
 ### 10.3 Autentikasi dan sesi
 
@@ -713,14 +723,14 @@ Statistik per kejadian lintas ruang (JS-13; spesifikasi `specs/JS-13-statistik.m
 
 - CSV memakai **titik koma** sebagai pemisah, koma sebagai tanda desimal, akhir baris CRLF, dan diawali BOM UTF-8, agar langsung rapi di Excel berbahasa Indonesia. Sel teks dikutip menurut RFC 4180, dan sel yang diawali `=`, `+`, `-`, `@`, tab, atau CR diberi tanda kutip tunggal agar tidak dibaca sebagai rumus. Waktu ditulis dalam WITA (JS-11).
 - Nama berkas: `jejak-setara_{label-kelas}_{tanggal}_{jenis}.csv`; label dalam huruf kecil dengan karakter selain `a`–`z` dan `0`–`9` menjadi tanda minus, paling panjang 40 karakter, atau `ruang` bila kosong; tanggal ruang dibuat dalam WITA (JS-11).
-- CSV peserta berisi 16 kolom dan CSV jawaban 17 kolom (spesifikasi JS-11, P-28 dan P-29). Pemain yang dikeluarkan ikut dengan keterangan "Dikeluarkan". Ruang yang tidak dimainkan menghasilkan baris judul saja.
+- CSV peserta berisi 16 kolom dan CSV jawaban 17 kolom (spesifikasi JS-11, P-28 dan P-29). Pemain yang dikeluarkan ikut dengan keterangan "Dikeluarkan". Ruang yang tidak dimainkan menghasilkan baris judul saja. Sejak JS-14, judul kolom nama di kedua CSV adalah "Nama pemain".
 - Ringkasan ruang dicetak lewat fitur cetak peramban dengan gaya `@media print` di `kelas.css`: A4 tegak, ringkasan dan tabel peringkat saja (JS-11).
 
 ### 10.9 Layar kelas
 
 - Dibuka dari halaman detail ruang (`#/ruang/{id}`) dengan tautan "Buka layar kelas" di tab baru. Layar kelas meminta tiket sendiri, lalu tersambung ke Durable Object; bila terputus, ia meminta tiket baru dan menyambung lagi dengan jeda 1, 2, 4, 8, lalu 15 detik, dan berhenti saat ruang ditutup (4000), dibuka di tab lain (4001), atau sesudah 10 menit gagal (JS-10).
-- Satu ruang hanya punya satu layar kelas aktif. Mengeluarkan pemain dilakukan di halaman detail ruang, bukan di proyektor.
-- Pintasan keyboard: `Spasi` mulai atau jeda/lanjut, `T` tambah 2 menit, `A` akhiri (dengan konfirmasi), `L` kunci ruang, `←` `→` berpindah kejadian di pembahasan, `F` layar penuh. `M` (suara) menunggu JS-14.
+- Satu ruang hanya punya satu layar kelas aktif. Sejak JS-14, guru bisa mengganti nama atau mengeluarkan pemain dari layar kelas lewat menu nama di lobi dan panel "Pemain", tanpa skor dan tanpa menulis nama lama lagi, selain dari halaman detail ruang.
+- Pintasan keyboard: `Spasi` mulai atau jeda/lanjut, `T` tambah 2 menit, `A` akhiri (dengan konfirmasi), `L` kunci ruang, `←` `→` berpindah kejadian di pembahasan, `F` layar penuh, `M` suara, dan `P` panel Pemain (JS-14).
 - Halaman ini tidak menampilkan lokasi kejadian selama ronde (JFR-28).
 
 ## 11. Peta, aset, dan anggaran
@@ -813,7 +823,8 @@ Sejak JS-22, lingkungan uji menetapkan `observability` di `wrangler.jsonc`: Work
 | XSS lewat isi kejadian | Konten teks polos; React menolak HTML; CSP ketat |
 | CSRF | `SameSite=Lax`, tajuk `X-Jejak`, dan pemeriksaan `Origin` |
 | Menebak sandi | Pembatas percobaan, sandi minimal 12 karakter, hash berkunci tambahan |
-| Kebocoran basis data | Hanya hash sandi dan hash token yang tersimpan; tidak ada nama asli siswa |
+| Kebocoran basis data | Hanya hash sandi dan hash token yang tersimpan; nama lengkap siswa tidak diminta |
+| Nama tidak pantas atau nama asli di ruang nama buatan siswa | Penyaring di server dengan daftar kata yang tidak dikirim ke HP, jawaban galat yang umum, batas lima penolakan, sidik nama yang diganti guru, Ganti nama dan Ganti semua nama dari konsol dan layar kelas, pemberitahuan privasi, dan penghapusan otomatis sesudah 365 hari (JS-14) |
 
 ### 12.2 Tajuk keamanan
 
@@ -829,7 +840,8 @@ Rincian di PRD bagian 13. Ketentuan teknisnya:
 - Alamat IP tidak disimpan. Pembatas percobaan memakai hash IP dengan garam yang berganti setiap hari.
 - Log Workers hanya mencatat galat dan hitungan, tanpa token, sandi, atau isi jawaban.
 - Rekap pribadi (JS-11) hanya dikirim lewat sambungan pemain itu dan hanya disimpan di memori tab; HP tidak menyimpannya di `localStorage`. Kalimat refleksi ditulis siswa di buku, tidak di HP. CSV dibuat saat diminta dan tidak disimpan di server.
-- Pemicu harian menghapus ruang, peserta, dan jawaban yang melewati masa simpan (bawaan 12 bulan), juga sesi dan catatan pembatas yang kedaluwarsa.
+- Pemicu harian menghapus ruang, peserta, dan jawaban yang melewati masa simpan (365 hari, dibangun di JS-14; bisa diatur di JS-19), juga sesi dan catatan pembatas yang kedaluwarsa.
+- Pengaturan pemain di `sessionStorage` (JS-14) tidak memuat data pribadi dan hilang saat tab ditutup.
 
 ## 13. Kinerja, kapasitas, dan biaya
 

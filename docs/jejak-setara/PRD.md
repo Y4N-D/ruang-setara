@@ -43,7 +43,7 @@ Bila Sehari Setara adalah "bermain dan memutuskan bersama", Jejak Setara adalah 
 
 **Non-tujuan (tidak dikerjakan pada versi ini)**
 
-- Login siswa, nama asli siswa, foto, atau obrolan antarpemain.
+- Login siswa, nama lengkap siswa, foto, atau obrolan antarpemain.
 - Saling serang, mencuri skor, atau menghalangi pemain lain.
 - Mode tim (P2), papan skor antarsekolah, pembelian di dalam game, dan iklan.
 - Aplikasi Android atau iOS yang dipasang. Cukup peramban.
@@ -54,7 +54,7 @@ Bila Sehari Setara adalah "bermain dan memutuskan bersama", Jejak Setara adalah 
 
 | Pengguna | Kebutuhan | Peran di sistem |
 |---|---|---|
-| Siswa SMP kelas IX (14–15 tahun), 20–40 per kelas | Masuk cepat, bermain lancar di HP, tahu skor dan peringkatnya sendiri | **Pemain** tanpa akun: kode ruang, nama samaran dari daftar, dan avatar |
+| Siswa SMP kelas IX (14–15 tahun), 20–40 per kelas | Masuk cepat, bermain lancar di HP, tahu skor dan peringkatnya sendiri | **Pemain** tanpa akun: kode ruang, nama samaran dari daftar atau nama buatan sendiri bila guru memilihnya, dan avatar |
 | Guru Pendidikan Pancasila | Membuat dan menjalankan ruang, memandu pembahasan, melihat hasil kelasnya | **Akun guru** |
 | Pemilik proyek (YAN) | Mengelola akun, bank kejadian, rujukan, paket, pengaturan, dan seluruh statistik | **Akun admin** |
 | Peninjau konten | Mencocokkan rujukan dengan naskah resmi di JDIH | Akun guru atau admin bertanda **Peninjau** |
@@ -117,12 +117,12 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
-| JFR-01 | Guru atau admin yang sudah masuk membuat ruang: label kelas (misalnya "IX B"), paket kejadian, durasi 10, 15 (bawaan), atau 20 menit, skill yang aktif, batas pemain (bawaan 40, paling banyak 100), batas bergabung terlambat (bawaan 5 menit sesudah mulai), dan mode nomor absen (mati secara bawaan; hanya untuk ruang sampai 50 pemain) | P0 |
+| JFR-01 | Guru atau admin yang sudah masuk membuat ruang: label kelas (misalnya "IX B"), paket kejadian, durasi 10, 15 (bawaan), atau 20 menit, skill yang aktif, batas pemain (bawaan 40, paling banyak 100), batas bergabung terlambat (bawaan 5 menit sesudah mulai), dan mode nomor absen (mati secara bawaan; hanya untuk ruang sampai 50 pemain), dan nama pemain: daftar nama samaran (bawaan) atau nama buatan siswa | P0 |
 | JFR-02 | Ruang mendapat kode 5 karakter tanpa huruf dan angka yang mirip (misalnya tanpa O dan 0) serta tautan pendek untuk dibuka di HP | P0 |
 | JFR-03 | Kode QR tautan ruang di lobi layar kelas | P1 |
-| JFR-04 | Siswa masuk tanpa akun: buka tautan, ketik kode, isi nomor absen bila mode nomor absen aktif, pilih satu dari tiga saran nama samaran (boleh acak ulang), lalu pilih satu dari 8 avatar | P0 |
+| JFR-04 | Siswa masuk tanpa akun: buka tautan, ketik kode, isi nomor absen bila mode nomor absen aktif, lalu pilih satu dari tiga saran nama samaran (boleh acak ulang) atau, di ruang nama buatan siswa, ketik nama pemain 3–14 karakter yang unik di ruang itu dan lolos penyaring kata, lalu pilih satu dari 8 avatar | P0 |
 | JFR-05 | Lobi: pemain bisa berjalan di halaman lobi tanpa kejadian sambil menunggu; layar kelas menampilkan jumlah dan nama samaran pemain | P0 |
-| JFR-06 | Guru dapat mengunci ruang dan mengeluarkan pemain dengan konfirmasi | P0 |
+| JFR-06 | Guru dapat mengunci ruang, mengganti nama pemain dengan nama dari daftar, dan mengeluarkan pemain dengan konfirmasi, dari konsol dan layar kelas | P0 |
 | JFR-07 | Kode masuk ulang dari guru untuk pemain yang berganti perangkat, dengan skor dan progres tetap | P1 |
 | JFR-08 | Menyambung ulang otomatis bila koneksi putus atau HP terkunci sebentar, dengan skor dan progres utuh | P0 |
 
@@ -285,7 +285,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 
 ### 8.6 Sportivitas
 
-- Tidak ada serangan, tidak ada obrolan, dan nama hanya dari daftar nama samaran.
+- Tidak ada serangan dan tidak ada obrolan. Nama berasal dari daftar nama samaran, atau nama buatan siswa yang lolos penyaring bila guru memilihnya, dan guru bisa mengganti nama yang tidak pantas kapan saja.
 - Proyektor hanya menampilkan 10 besar dan podium 3 besar. Pemain lain hanya melihat peringkatnya sendiri.
 - Pemberitahuan bernada netral dan menyemangati, tanpa menyebut siapa yang tertinggal.
 - Guru dapat mengunci ruang dan mengeluarkan pemain yang mengganggu.
@@ -433,12 +433,13 @@ Pemain adalah anak di bawah umur. Prinsipnya: **kumpulkan sesedikit mungkin, sim
 | Data | Siapa | Disimpan | Dilihat oleh |
 |---|---|---|---|
 | Email, nama tampilan, peran, dan hash sandi | Guru dan admin | Selama akun aktif | Admin |
-| Nama samaran, avatar, skor, dan jawaban | Pemain | Masa simpan data (bawaan 12 bulan) | Guru pemilik ruang dan admin |
+| Nama pemain (nama samaran, atau nama yang diketik siswa di ruang nama buatan siswa), avatar, skor, dan jawaban | Pemain | Masa simpan data (bawaan 12 bulan) | Guru pemilik ruang dan admin |
 | Nomor absen dan label kelas | Pemain, hanya bila mode nomor absen aktif | Masa simpan data | Guru pemilik ruang dan admin |
 | Token sesi pemain | Perangkat pemain (`sessionStorage`) | Sampai tab ditutup | Tidak ada |
+| Pengaturan pemain (suara, kurangi gerak, teks per huruf, dan ukuran label) | Perangkat pemain (`sessionStorage`) | Sampai tab ditutup | Tidak ada |
 | Alamat IP | Semua pengguna | Tidak disimpan; hanya dipakai sesaat untuk membatasi percobaan masuk | Tidak ada |
 
-- Tidak ada nama asli siswa, foto, lokasi perangkat, atau obrolan.
+- Tidak ada nama lengkap siswa yang diminta, foto, lokasi perangkat, atau obrolan. Di ruang nama buatan siswa, siswa bisa mengetik nama panggilannya, jadi pihak sekolah sebaiknya dilibatkan sebelum mode itu dipakai, seperti mode nomor absen.
 - Tidak ada analitik, pelacak, atau iklan.
 - Guru menyampaikan pemberitahuan privasi kepada siswa dan, bila sekolah memintanya, kepada orang tua. Pemakaian data mengikuti UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi dan ketentuan sekolah; pihak sekolah sebaiknya dilibatkan sebelum mode nomor absen dipakai.
 - Admin dapat menghapus data satu ruang kapan saja, dan data yang melewati masa simpan dihapus otomatis.
@@ -537,6 +538,7 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | KT-11 | Kecocokan TP dengan RPM | Dikonfirmasi pemilik proyek |
 | KT-12 | Durasi bawaan 15 menit dan 16 kejadian | Ditinjau ulang sesudah uji coba kelas |
 | KT-13 | Langkah 2 tetap bisa dijawab sesudah dialog ditutup | Dijawab pemilik proyek (9 Nov 2026, Gerbang 1 JS-08): ya, tanpa pengurangan skor |
+| KT-14 | Nama pemain buatan siswa | Dijawab pemilik proyek (22 Nov 2026, Gerbang 1 JS-14): nama buatan siswa menjadi pilihan guru saat membuat ruang, dengan penyaring kata di server, batas 3–14 karakter, nama unik di ruang, dan pesan agar tidak memakai nama lengkap; bawaan tetap daftar nama samaran |
 
 ## 21. Catatan keputusan
 
@@ -569,3 +571,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 21 Nov 2026 | JS-09 Selesai. AC-23 JS-09 diterima (pilihan a): kode layar pemain naik 4,64 KB gzip untuk tombol skill, kotak bantuan, panah Kompas, Lari cepat, pita, Petunjuk di dialog, dan teksnya, di atas batas 4 KB yang ditetapkan di Plan JS-09; layar pemain menjadi 127,10 KB dari anggaran 200 KB |
 | 21 Nov 2026 | JS-13: Plan disetujui (`Setuju: JS-13`, usulan 1a sampai 13a) dan spesifikasi disetujui (`Spesifikasi disetujui: JS-13`, D-1 sampai D-3 pilihan a): statistik per versi kejadian dengan kueri hemat tanpa migrasi, kategori indeks kesulitan, rentang bawaan 30 hari, dan dasbor empat kartu | Pemilik proyek |
 | 22 Nov 2026 | JS-13 Selesai: diterima pemilik proyek (`Diterima: JS-13`) sesudah uji manual halaman Statistik dan dasbor | Pemilik proyek |
+| 22 Nov 2026 | Gerbang 1 JS-14 (`Setuju: JS-14`, usulan 1a sampai 16a): pengaturan pemain disimpan di `sessionStorage` tab; suara HP bawaan mati dan berkasnya baru diunduh saat dinyalakan, sedangkan layar kelas bawaan nyala 60%; nama buatan siswa sebagai pilihan guru (KT-14); guru mengganti nama atau mengeluarkan pemain dari konsol dan layar kelas, dan bisa mengganti semua nama buatan siswa sekaligus; data ruang yang melewati 12 bulan dihapus otomatis sejak JS-14; protokol naik ke versi 3 |

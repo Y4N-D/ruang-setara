@@ -17,7 +17,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-11 | Selesai (20 Nov 2026); "Jejak: uji" hijau untuk commit `e2e2a43` dan langkah pemilik proyek di lingkungan uji berhasil | [JS-11-akhir-ronde.md](specs/JS-11-akhir-ronde.md) | [JS-11-hasil.md](tests/JS-11-hasil.md), lulus (AC-22 diterima: kode layar pemain +1,33 KB) |
 | JS-12 | Selesai (16 Nov 2026) | [JS-12-bank.md](specs/JS-12-bank.md) | [JS-12-hasil.md](tests/JS-12-hasil.md), lulus (AC-8 diterima) |
 | JS-13 | Selesai (22 Nov 2026; `Diterima: JS-13`) | [JS-13-statistik.md](specs/JS-13-statistik.md) | [JS-13-hasil.md](tests/JS-13-hasil.md) |
-| JS-14 | Direncanakan (22 Nov 2026), menunggu `Setuju: JS-14` | — | — |
+| JS-14 | Spesifikasi (22 Nov 2026), menunggu `Spesifikasi disetujui: JS-14`; Plan disetujui 22 Nov 2026 (`Setuju: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | — |
 | JS-15 | Belum direncanakan | — | — |
 | JS-16 | Belum direncanakan | — | — |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
@@ -41,7 +41,7 @@ Salinan backlog AGENTS bagian 5 (versi 0.1, 4 November 2026), ditambah kolom ses
 | JS-11 | Akhir ronde: rekap pribadi, kiriman ke D1, riwayat ruang, hasil per ruang, ekspor CSV | JFR-32, 38, 49, 53 | M | JS-10 | Sesi A (jalur utama) |
 | JS-12 | Bank kejadian di konsol: daftar, penyunting dan pratinjau, status dan versi, paket, pustaka rujukan dan verifikasi | JFR-41 sampai JFR-46 | L | JS-04, JS-05 | Sesi A (jalur utama) |
 | JS-13 | Statistik per kejadian lintas ruang dan isi dasbor | JFR-37, 50 | M | JS-11, JS-12 | Sesi A (jalur utama) |
-| JS-14 | Pengaturan pemain, aksesibilitas, privasi, dan suara | JFR-55, 56, 57 | M | JS-09 | Sesi A (jalur utama) |
+| JS-14 | Pengaturan pemain, aksesibilitas, privasi, dan suara, ditambah nama buatan siswa, kelola nama oleh guru, dan penghapusan otomatis sesudah masa simpan (Gerbang 1 JS-14) | JFR-55, 56, 57; JFR-01, 04, 06 (diubah); PRD 13 | L | JS-09 | Sesi A (jalur utama) |
 | JS-15 | Uji beban dan ketahanan jaringan, anggaran ukuran, perbaikan kinerja | PRD bagian 12 | M | JS-11 | Sesi A (jalur utama) |
 | JS-16 | Tautan dari galeri, panduan guru satu halaman, uji coba kelas, rilis 1.0 | KT-08; PRD bagian 16 | S | JS-13, JS-14, JS-15 | Sesi A (jalur utama) |
 | JS-22 | Pengaman biaya: pengaman alarm dan percobaan ulang, alur kerja "Jejak: hentikan", penghitung pemakaian per ruang, serta peringatan anggaran dan batas biaya (ditambahkan 14 Nov 2026, usulan 14a JS-10) | Architecture 12.1 dan 13 | M | JS-10 | Sesi A (sesudah JS-10) |
@@ -1354,7 +1354,7 @@ Dikerjakan dalam mode ZIP dari `main` commit `676b821`, ditambah isi ZIP Gerbang
 
 ## JS-14 — Pengaturan pemain, aksesibilitas, privasi, dan suara
 
-- Status: **Direncanakan (22 Nov 2026)**, menunggu `Setuju: JS-14`. Diperiksa sebelum Plan (AGENTS 4.1 langkah 1): JS-09, satu-satunya dependensi JS-14, Selesai 21 Nov 2026 dengan laporan Lulus (AC-23 diterima). JS-13 Selesai 22 Nov 2026 (`Diterima: JS-13`). Urutan sisa JS-14, JS-15, lalu JS-16 ditetapkan pemilik proyek 21 Nov 2026. Dikerjakan dalam mode ZIP dari `main` commit `9774512`. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare. **Audit independen:** folder `docs/jejak-setara/audit/` tidak ada di ZIP itu. **Permintaan baru pemilik proyek (22 Nov 2026):** siswa bisa membuat nama pemainnya sendiri. Arah yang disukai pemilik proyek: "nama bebas" sebagai pilihan guru saat membuat ruang (bawaan tetap daftar nama samaran), penyaring kata kasar dan kata yang tidak pantas dalam bahasa Indonesia dan bahasa daerah yang umum, batas panjang, nama unik dalam ruang, pesan "jangan memakai nama lengkap", serta guru bisa mengganti nama atau mengeluarkan pemain dari konsol dan layar kelas (usulan 2 dan 3).
+- Status: **Spesifikasi (22 Nov 2026)**, menunggu `Spesifikasi disetujui: JS-14` ([JS-14-pengaturan.md](specs/JS-14-pengaturan.md)). Plan disetujui 22 Nov 2026 dengan `Setuju: JS-14`, dibaca sebagai usulan 1a sampai 16a: nama buatan siswa sebagai pilihan guru (2a, KT-14), kelola nama dari konsol dan layar kelas dengan Ganti semua nama (3a), protokol versi 3 (4), dan penghapusan otomatis sesudah 12 bulan (12a). Sebelumnya: **Direncanakan (22 Nov 2026)**. Diperiksa sebelum Plan (AGENTS 4.1 langkah 1): JS-09, satu-satunya dependensi JS-14, Selesai 21 Nov 2026 dengan laporan Lulus (AC-23 diterima). JS-13 Selesai 22 Nov 2026 (`Diterima: JS-13`). Urutan sisa JS-14, JS-15, lalu JS-16 ditetapkan pemilik proyek 21 Nov 2026. Dikerjakan dalam mode ZIP dari `main` commit `9774512`. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Server tetap memakai paket gratis Cloudflare. **Audit independen:** folder `docs/jejak-setara/audit/` tidak ada di ZIP itu. **Permintaan baru pemilik proyek (22 Nov 2026):** siswa bisa membuat nama pemainnya sendiri. Arah yang disukai pemilik proyek: "nama bebas" sebagai pilihan guru saat membuat ruang (bawaan tetap daftar nama samaran), penyaring kata kasar dan kata yang tidak pantas dalam bahasa Indonesia dan bahasa daerah yang umum, batas panjang, nama unik dalam ruang, pesan "jangan memakai nama lengkap", serta guru bisa mengganti nama atau mengeluarkan pemain dari konsol dan layar kelas (usulan 2 dan 3).
 - Memenuhi: JFR-55 (pengaturan di layar pemain: suara bawaan mati, kurangi gerak, teks muncul per huruf, dan ukuran label nama), JFR-56 (pemberitahuan privasi sebelum masuk ruang), dan JFR-57 (papan ketik penuh di laptop dan dialog terbaca pembaca layar). Ditambah Design System 12 (efek suara layar pemain dan layar kelas, `M`, dan ikon suara), 13 (`Esc` untuk menu, `M` untuk suara, dan ukuran label nama), dan 15 (kredit di layar "Tentang" dan halaman masuk konsol); Architecture 9 (penyimpanan di klien), 10.9 (`M` di layar kelas), dan 11.2 (`SUARA`); PRD 13 (data yang melewati masa simpan dihapus otomatis, usulan 12); permintaan nama pemain (JFR-01, JFR-04, dan JFR-06 diubah menurut pilihan usulan 2 dan 3); serta catatan Plan JS-14 dari Plan dan Specify JS-09 dan dari Plan JS-13.
 - Bergantung pada: JS-09 (Selesai). Memakai juga JS-10 (layar kelas dan kelola ruang), JS-11 (CSV dan pernyataan hapus data ruang), JS-12 (pratinjau penyunting memakai dialog layar pemain), dan efek suara Sesi C (S-01 sampai S-08, klik, dan bunyi teks, semuanya Disetujui 21 Nov 2026).
 - File yang dibuat/diubah (rencana; dipastikan di Specify):
@@ -1519,3 +1519,21 @@ Dibaca dari ZIP `main` commit `9774512`: `naskah/STATUS.md` (22 Nov 2026) dan `D
 | A-13 (Sesi B) | Panduan guru satu halaman | Tetap untuk Plan JS-16. Sesudah JS-14, panduan juga menyebut Menu, suara, pemberitahuan privasi, dan mode nama yang dipilih | Tidak ada |
 
 Berkas Sesi B dan C tidak disentuh.
+
+### Specify JS-14 (22 Nov 2026)
+
+Dikerjakan dalam mode ZIP dari `main` commit `9774512`, ditambah isi ZIP Gerbang 1 JS-14. Spesifikasinya [JS-14-pengaturan.md](specs/JS-14-pengaturan.md), dengan 72 butir perilaku, 27 kriteria penerimaan, dan Lampiran A (daftar kata penyaring).
+
+- **Keputusan Gerbang 1 yang diterapkan di dokumen utama:** AGENTS versi 0.8 (bagian 5, bagian 7 butir 4, dan daftar periksa bagian 9), PRD (bagian 3, 4, JFR-01, JFR-04, JFR-06, 8.6, 13, KT-14 di bagian 20, dan 21), Design System (3.3, 3.6, 3.7, 10, 11, 12, dan 13), serta Architecture (5.1 sampai 5.3, 6.2 sampai 6.7, 7, 9, 10.2, 10.8, 10.9, 12.1, dan 12.3).
+- **Keputusan penting di spesifikasi:**
+  - Tombol Menu dan suara di layar identitas berada di baris kaki di kiri "Gabung", dan layar identitas mode bebas memakai penghitung "n/14" serta satu kalimat pesan, agar panelnya tidak lebih tinggi dari mode daftar (temuan maket Plan; P-5 dan P-36).
+  - Penyaring memeriksa potongan kata hanya di dalam satu kata, tidak melintasi spasi, kecuali dua kata yang masing-masing paling panjang 3 huruf (P-43). "Cok" tidak masuk daftar, karena juga sapaan nama bangsawan Bali (Cokorda).
+  - Sesudah lima penolakan, pemain hanya bisa memakai nama samaran, dan nama yang diganti guru diblokir lewat sidik tanpa menyimpan tulisannya (P-44 dan P-50; DRAF D-4 dan D-6).
+  - "Ganti semua nama" juga mengubah ruang menjadi mode daftar untuk pemain berikutnya (P-48; D-5).
+  - Layar kelas tidak pernah menulis nama lama: konfirmasinya "Keluarkan pemain ini?", dan pitanya "Nama pemain diganti." serta "Pemain dikeluarkan." (P-54).
+  - Tombol "Pemain" dan pintasan `P` di layar kelas, karena lobi hanya menampilkan 40 nama dan saat bermain hanya 10 besar yang tampil (P-55).
+  - Penghapusan otomatis memakai 365 hari sejak ruang dibuat, paling banyak 50 ruang per malam, dengan log audit `ruang.hapus_otomatis` dan kait uji lokal `/api/uji/pembersihan` (P-62 sampai P-65; D-8).
+- **Pemeriksaan di luar repositori:** aturan P-43 dengan 146 kata Lampiran A (dibaca langsung dari spesifikasi) menolak semua bentuk samaran AC-14, meloloskan ke-260 nama samaran dan 84 nama biasa (termasuk Cok Agung, Wayan Jingga, Basuki, Pantai Kuta, Ganjar, dan Dicky), dan memakan sekitar 2,2 mikrodetik per nama di Node. Pemeriksaan potongan yang melintasi spasi menolak Wayan Jingga, Sunda Lima, dan Ian Jingga, jadi tidak dipakai.
+- **DRAF yang menunggu pemilik proyek:** D-1 daftar kata penyaring, D-2 kata identitas, D-3 karakter nama, D-4 batas penolakan, D-5 Ganti semua nama mengubah mode, D-6 blokir nama yang diganti guru, D-7 cakupan teks per huruf, D-8 arti 12 bulan, dan D-9 teks yang tampil.
+- **Berkas Sesi B dan C:** tidak ada permintaan baru sejak Plan JS-14 (ZIP yang sama).
+- **Galeri:** `build:pages` tetap 178 berkas identik byte dengan `main`.
