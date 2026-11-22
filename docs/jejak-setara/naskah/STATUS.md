@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| Tahap saat ini | **Plan naskah tambahan K-17 sampai K-40** (21 November 2026): usulan di bagian [Plan naskah tambahan (K-17 sampai K-40)](#plan-naskah-tambahan-k-17-sampai-k-40) menunggu "Setuju: naskah tambahan". Sebelumnya: naskah pendukung [`refleksi.md`](refleksi.md) dan [`panduan-guru.md`](panduan-guru.md) (20 November 2026, Permintaan A-12 dan A-13), dan **JS-05 Selesai** (10 November 2026; [`specs/JS-05-konten.md`](../specs/JS-05-konten.md), [`tests/JS-05-hasil.md`](../tests/JS-05-hasil.md)) |
-| Pekerjaan | Naskah final 16 kejadian dan rujukannya (selesai 5 November 2026), lalu JS-05: skema konten, bank awal, semai ke D1, dan `content:check:jejak` (selesai 10 November 2026), lalu naskah pendukung untuk JS-11 dan JS-16 (20 November 2026), lalu Plan 24 naskah tambahan K-17 sampai K-40, tiga per zona (21 November 2026) |
-| Tanggal | 21 November 2026 |
-| Acuan | ZIP repositori `main` dari pemilik proyek (berkas bertanggal 21 November 2026): JS-01 sampai JS-12 dan JS-22 Selesai (JS-09 Selesai 21 Nov 2026); Plan JS-13 menunggu `Setuju: JS-13`; JS-19 (termasuk impor dan ekspor bank) belum direncanakan |
-| Berkas yang boleh diubah sesi ini | Sesi naskah tambahan (21 November 2026): hanya `docs/jejak-setara/naskah/` (pemilik proyek). Di tahap Plan ini hanya `naskah/STATUS.md` yang diubah. Batas JS-05 tercatat di "Catatan untuk JS-05". Perubahan berkas lain ditulis di "Permintaan untuk Sesi A" |
+| Tahap saat ini | **Naskah tambahan, giliran 1 dari 8** (22 November 2026): K-17, K-18, dan K-19 (Z1) di [`tambahan/`](tambahan/NASKAH-TAMBAHAN.md) menunggu "Setuju: naskah tambahan Z1". [Plan naskah tambahan (K-17 sampai K-40)](#plan-naskah-tambahan-k-17-sampai-k-40) disetujui pemilik proyek pada 22 November 2026 ("Setuju: naskah tambahan", semua saran a). Sebelumnya: naskah pendukung [`refleksi.md`](refleksi.md) dan [`panduan-guru.md`](panduan-guru.md) (20 November 2026), dan **JS-05 Selesai** (10 November 2026; [`specs/JS-05-konten.md`](../specs/JS-05-konten.md), [`tests/JS-05-hasil.md`](../tests/JS-05-hasil.md)) |
+| Pekerjaan | Naskah final 16 kejadian dan rujukannya (selesai 5 November 2026), lalu JS-05: skema konten, bank awal, semai ke D1, dan `content:check:jejak` (selesai 10 November 2026), lalu naskah pendukung untuk JS-11 dan JS-16 (20 November 2026), lalu 24 naskah tambahan K-17 sampai K-40, tiga per zona: Plan disetujui dan giliran 1 diserahkan 22 November 2026 |
+| Tanggal | 22 November 2026 |
+| Acuan | ZIP repositori `main` dari pemilik proyek (berkas bertanggal 21 November 2026): JS-01 sampai JS-12 dan JS-22 Selesai (JS-09 Selesai 21 Nov 2026); Plan JS-13 menunggu `Setuju: JS-13`; JS-19 (termasuk impor dan ekspor bank) belum direncanakan. Ditambah `STATUS.md` dari `naskah-tambahan-plan.zip` (21 November 2026) |
+| Berkas yang boleh diubah sesi ini | Sesi naskah tambahan (sejak 21 November 2026): hanya `docs/jejak-setara/naskah/` (pemilik proyek). Giliran 1 mengubah `naskah/STATUS.md` dan menambah folder `naskah/tambahan/` (usulan 6a). Batas JS-05 tercatat di "Catatan untuk JS-05". Perubahan berkas lain ditulis di "Permintaan untuk Sesi A" |
 
 ## Riwayat
 
@@ -45,6 +45,8 @@
 | 10 Nov 2026 | Selesai JS-05 | Pemeriksaan penutup di ZIP `main` 10 Nov 2026 dengan dependensi terpasang (`install --frozen-lockfile`, Node 22.23.4): `content:check:jejak` 10 berkas, 254 uji lulus, 0 dilewati (`bank-peta` kini berjalan karena peta JS-06 ada); `test:jejak` 33 berkas, 705 uji lulus; `test:jejak:server` 2 berkas, 19 uji lulus; `build:jejak` berhasil. Isi repositori cocok dengan Revisi 1: `DASAR_ID` dan id contoh K-01, versi kerja K-01, dan Paket inti 16 sama dengan P-40; `semai.mjs --sql` 73.724 byte tanpa kata "terverifikasi", sama dengan laporan. Satu ketidakcocokan: `server/jejak-setara/seed/kontrak-d1.sql` masih ada di `main` (AC-17), karena menyalin isi ZIP tidak menghapus berkas. Berkas itu tidak dipakai kode mana pun, dan kedua perintah uji konten tetap lulus tanpanya; pemilik proyek menyetujui penghapusannya di commit penutup ini. Pemilik proyek melaporkan "Jejak: uji" terakhir hijau. Syarat di laporan uji ("final bila Revisi 1 disetujui dan 'Jejak: uji' hijau") terpenuhi, jadi keputusan Lulus Revisi 1 kini final. JS-05 Selesai. Permintaan A-11 ditambahkan, dan status A-1 sampai A-10 disesuaikan dengan tanggapan Sesi A di `PLAN.md`. Kode, naskah, spesifikasi, dan laporan uji tidak diubah |
 | 20 Nov 2026 | Naskah pendukung | Atas permintaan pemilik proyek, dari ZIP `main` sesudah JS-12 dan JS-22 Selesai: `refleksi.md` (tiga pasang usulan kalimat refleksi untuk rekap pemain, bahan Specify JS-11 usulan 3; saran Pasangan 1) dan `panduan-guru.md` (draf panduan guru satu halaman, bahan Plan JS-16; bagian yang menunggu JS-11 dan JS-09 bertanda [menyusul]) ditulis. Permintaan A-11 menjadi Diterapkan sesuai tanggapan Sesi A di `PLAN.md` (Plan JS-10), lalu Permintaan A-12 dan A-13 ditambahkan. Pemeriksaan: kalimat refleksi 45–74 karakter; bagian "Halaman untuk guru" muat satu halaman A4 (margin 2 cm, huruf setara Calibri 11 pt); `content:check:jejak` lulus; `build:pages` 178 berkas identik byte dengan `main`. Kode, naskah K-xx, `NASKAH.md`, dan bank awal tidak diubah |
 | 21 Nov 2026 | Plan naskah tambahan | Chat Sesi B sebelumnya berhenti sesudah menulis usulan Plan 24 kejadian baru, dan berkasnya belum tersimpan. Atas permintaan pemilik proyek, usulan itu diperiksa ulang terhadap ZIP `main` 21 Nov 2026 dan ditulis ulang sebagai entri "Plan naskah tambahan (K-17 sampai K-40)": rujukan dibetulkan (koreksi a), judul ditulis ulang (b), 15 tema diganti (c), ukuran giliran menjadi satu zona atau tiga kejadian (d, KT-B2 diubah), cara memasukkan ke basis data dibandingkan (e), kejadian yang perlu peninjauan khusus ditandai (f), dan paket diusulkan ulang (g). Permintaan A-14 diajukan bersyarat (usulan 8). Status Permintaan A-12 menjadi Diterapkan dan A-13 menjadi Diterima, sesuai tanggapan Sesi A di `PLAN.md`. Menunggu "Setuju: naskah tambahan". Kode, naskah K-01 sampai K-16, `NASKAH.md`, dan bank awal tidak diubah |
+| 22 Nov 2026 | Plan naskah tambahan disetujui | Pemilik proyek membalas "Setuju: naskah tambahan": semua saran (a) di usulan 1 sampai 8 dipilih (KT-B8 sampai KT-B14 dan Permintaan A-14). Keputusannya dicatat di "Keputusan Plan naskah tambahan (22 November 2026)" |
+| 22 Nov 2026 | Naskah tambahan, giliran 1 (Z1) | K-17 "Bendera yang sudah robek", K-18 "Memilih sekolah lanjutan", dan K-19 "Pasir menutup jalan gang" ditulis di `naskah/tambahan/`, beserta `NASKAH-TAMBAHAN.md`. Rujukan baru JR-24, JR-25, dan JR-26 dipra-periksa (KT-B7). Ketiga naskah lolos `periksaKejadian` (aturan validasi konsol) tanpa galat dan tanpa peringatan, dan terbaca sama oleh parser uji `naskah-cocok`. Permintaan A-14 diajukan, dan permintaan aset usulan 7a ditulis di "Untuk Sesi C". Menunggu "Setuju: naskah tambahan Z1". Kode, naskah K-01 sampai K-16, `NASKAH.md`, dan bank awal tidak diubah |
 
 ## Plan naskah tambahan (K-17 sampai K-40)
 
@@ -54,7 +56,7 @@ Semua rujukan baru berstatus **perlu verifikasi**. Nomor pasalnya sudah dicari d
 
 | | |
 |---|---|
-| Status | Direncanakan (21 Nov 2026), menunggu "Setuju: naskah tambahan" |
+| Status | Disetujui pemilik proyek (22 Nov 2026, semua saran a). Giliran 1 (Z1) diserahkan 22 Nov 2026; giliran 2 sampai 8 belum ditulis. Daftar dan status per kejadian ada di `tambahan/NASKAH-TAMBAHAN.md` |
 | Memenuhi | Tambahan isi bank untuk JFR-15, JFR-16, dan JFR-45 (kejadian per zona, dialog dua langkah dan kartu dampak, serta pustaka rujukan), dan paket untuk JFR-46 |
 | Bergantung pada | JS-05 (skema dan bank awal) dan JS-12 (penyunting konsol dan pustaka rujukan), keduanya Selesai. Peta JS-06 memuat 12 titik kejadian per zona. Cara memasukkan ke basis data mengikuti usulan 3 |
 | Berkas yang dibuat atau diubah | Sekarang: `naskah/STATUS.md`. Sesudah disetujui, setiap giliran: tiga berkas `naskah/tambahan/K-xx.md`, `naskah/tambahan/NASKAH-TAMBAHAN.md`, dan `naskah/STATUS.md` (usulan 6). `naskah/NASKAH.md`, `K-01.md` sampai `K-16.md`, dan bank awal tidak diubah |
@@ -130,7 +132,7 @@ Kejadian berikut mendapat catatan peninjauan khusus di naskahnya, seperti K-02, 
 
 ### Rujukan baru (perlu verifikasi)
 
-Nomor JR-24 sampai JR-43 diberikan menurut kejadian pertama yang memakainya (usulan 5). Teks rujukan mengikuti gaya KT-B4 dan masih usulan; teks finalnya ditulis di naskah giliran masing-masing. Kolom "Yang dibutuhkan kejadian" adalah isi yang harus ada di pasal itu, bukan kutipan bunyi pasal. Rujukan lama yang dipakai ulang tidak perlu dicek ulang bunyinya, cukup kecocokannya dengan kejadian baru. Bila tautan tidak terbuka, cari jenis, nomor, dan tahunnya di https://peraturan.bpk.go.id.
+Nomor JR-24 sampai JR-43 diberikan menurut kejadian pertama yang memakainya (usulan 5). Teks rujukan mengikuti gaya KT-B4 dan masih usulan; teks finalnya ditulis di naskah giliran masing-masing dan di `tambahan/NASKAH-TAMBAHAN.md`. Di giliran 1, dua rujukan mendapat pasal kedua agar kartu dampak punya dasar untuk hak dan kewajibannya: JR-24 menjadi "UU No. 24 Tahun 2009, Pasal 24 huruf c dan Pasal 65", dan JR-26 menjadi "UU No. 22 Tahun 2009 tentang LLAJ, Pasal 1 angka 12 dan Pasal 28 ayat (1)". Kolom "Yang dibutuhkan kejadian" adalah isi yang harus ada di pasal itu, bukan kutipan bunyi pasal. Rujukan lama yang dipakai ulang tidak perlu dicek ulang bunyinya, cukup kecocokannya dengan kejadian baru. Bila tautan tidak terbuka, cari jenis, nomor, dan tahunnya di https://peraturan.bpk.go.id.
 
 | JR | Teks rujukan (usulan) | Dipakai di | Tautan | Yang dibutuhkan kejadian | Yang perlu dicek |
 |---|---|---|---|---|---|
@@ -309,6 +311,21 @@ Dari 24 tema, 9 dipertahankan atau dirumuskan ulang, dan 15 diganti: 10 karena t
 | Pasal 7 untuk hak bermain anak | Pasal 11 UU 23/2002 jo. UU 35/2014 (JR-17) | Tidak ada tema baru tentang bermain; K-12 sudah ada |
 | UU No. 5 Tahun 1974 | Tidak dipakai | — |
 | Pasal 8 UU 8/2016 (K-35 lama) | Pasal 8 tentang hak privasi; hak kesehatan ada di Pasal 12 | JR-39 (Pasal 12 huruf a) di K-35 |
+
+## Keputusan Plan naskah tambahan (22 November 2026)
+
+Pemilik proyek membalas "Setuju: naskah tambahan", jadi semua saran (a) berlaku.
+
+| Kode | Keputusan |
+|---|---|
+| KT-B8 | 1a: 24 tema di "Daftar tema" Plan naskah tambahan |
+| KT-B9 | 2a: giliran Z1 sampai Z8 berurutan, tiga kejadian per giliran |
+| KT-B10 | 3a: semai tambahan. Perlu Plan kecil sendiri dengan batas berkas di luar `naskah/`, serta catatan Architecture bagian 10.6 dari Sesi A. Sampai itu selesai, kejadian tambahan belum masuk basis data mana pun |
+| KT-B11 | 4a: Paket inti 16 (tetap), Paket lanjutan 24 (K-17 sampai K-40), dan Paket lengkap 40 |
+| KT-B12 | 5a: JR-24 sampai JR-43 nomor tetap, menurut kejadian pertama yang memakainya |
+| KT-B13 | 6a: naskah di subfolder `naskah/tambahan/`, dengan `NASKAH-TAMBAHAN.md` sebagai daftar dan pustakanya |
+| KT-B14 | 7a: aset baru hanya prasasti (K-32) serta kukang dalam kandang dan penjualnya (K-33), ditambah pedagang kedua (K-26). Permintaannya di "Untuk Sesi C" |
+| Usulan 8 | 8a: Permintaan A-14 diajukan ke Sesi A |
 
 ## JS-05 — Konten
 
@@ -669,13 +686,19 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 | A-11 | `docs/jejak-setara/PLAN.md` dan `docs/jejak-setara/Architecture.md` bagian 5.4 atau 10.6 | (1) Ubah baris JS-05 di tabel status menjadi: Status "Selesai (10 Nov 2026), dikerjakan Sesi B; Revisi 1 disetujui 8 Nov 2026; riwayat di `naskah/STATUS.md`", dan Laporan uji "[JS-05-hasil.md](tests/JS-05-hasil.md), lulus Revisi 1 (pemeriksaan pengganti; perintah resmi lulus di pemeriksaan penutup 10 Nov 2026, dan "Jejak: uji" hijau)". (2) Entri JS-08 dan catatan "Build JS-08 (spesifikasi disetujui 9 Nov 2026)": JS-05 sudah Selesai, dan `server/jejak-setara/seed/kontrak-d1.sql` dihapus di commit penutup JS-05, jadi Build JS-08 bisa dimulai dari ZIP `main` sesudah commit itu. (3) Sisa A-7: catat di Architecture bahwa id kejadian, versi kerja, dan paket bank awal berupa UUID versi 5 tetap dari `DASAR_ID` di `semai.mjs`, yang tidak boleh diubah sesudah semai pertama (spesifikasi JS-05 P-40, D-6) | AGENTS bagian 10 (definisi selesai: `PLAN.md` diperbarui); `PLAN.md` dan Architecture hanya diubah Sesi A | Diterapkan (Sesi A, Build JS-08, 11 Nov 2026; dinyatakan di `PLAN.md`, tanggapan Plan JS-10, 14 Nov 2026): butir 1 di tabel status `PLAN.md`, butir 2 di catatan "Build JS-08 (spesifikasi disetujui 9 Nov 2026)", dan butir 3 di Architecture bagian 10.6. Status diubah Sesi B, 20 Nov 2026 |
 | A-12 | Spesifikasi JS-11 dan `app/jejak-setara/teks.ts` (Specify JS-11) | Baca [`refleksi.md`](refleksi.md) saat Specify JS-11 (usulan 3 Plan JS-11). Berkas itu memuat tiga pasang kalimat refleksi untuk rekap pribadi, masing-masing satu kalimat hak dan satu kalimat kewajiban, paling banyak 80 karakter; saran Sesi B: Pasangan 1. Tulis pasangan yang dipilih, atau ketiganya sebagai DRAF, di spesifikasi, lalu teks finalnya masuk `teks.ts`. Juga perlu dijawab di Specify JS-11: saat guru menutup ruang, HP pindah ke layar "Ruang ditutup" (JS-03), jadi siswa perlu sempat menyalin kalimat refleksi lebih dulu (bagian "Catatan untuk Specify JS-11" di `refleksi.md`) | JFR-32 meminta dua kalimat refleksi untuk ditulis di buku; usulan 3a Plan JS-11 menyebut teks final ditetapkan di Specify dan bisa ditinjau Sesi B | Diterapkan (Specify dan Build JS-11, Pasangan 1; JS-11 Selesai 20 Nov 2026, menurut tanggapan Sesi A di `PLAN.md`). Status diubah Sesi B, 21 Nov 2026 |
 | A-13 | Panduan guru JS-16 (tempat dan bentuknya ditetapkan di Plan JS-16) | Pakai [`panduan-guru.md`](panduan-guru.md) sebagai bahan panduan guru satu halaman di Plan JS-16. Draf ini hanya memuat fitur yang Selesai sampai JS-12 dan JS-22; bagian bertanda [menyusul] dilengkapi sesudah JS-11 dan JS-09 Selesai. Bagian "Catatan penyusunan" memuat sumber setiap bagian, isi yang dipangkas agar muat satu halaman, dan tujuh hal yang perlu diperiksa ulang, antara lain domain (KT-06), bagian kuota sesudah Workers Paid aktif, dan batas pemain untuk siswa yang berganti HP | PRD bagian 16: guru menjalankan sesi tanpa bantuan sesudah membaca panduan satu halaman. Saran mode layar diperluas dari risiko entri JS-10 di `PLAN.md` sudah dimasukkan | Diterima (Sesi A, Specify JS-11, 20 Nov 2026); dikerjakan di Plan JS-16 |
-| A-14 | Konsol, bagian paket di bank kejadian (JS-12); bila perlu kode temuan baru di `inti/konten/periksa.ts` | Tampilkan peringatan, tanpa menolak, bila satu paket memuat lebih dari 6 kejadian di satu zona, misalnya: "Di ruang berbatas lebih dari 50 pemain, kejadian ketujuh dan seterusnya di zona ini tidak akan tampil." | Peta memuat 12 titik per zona, dan ruang berbatas lebih dari 50 pemain memakai dua titik per kejadian. `periksaPaketPeta` hanya menolak paket di atas 12 kejadian per zona, sedangkan `saringMenurutTitik` di server melewatkan sisanya tanpa pesan (Plan naskah tambahan, hasil percobaan 1) | Menunggu "Setuju: naskah tambahan" (usulan 8); diajukan bila 8a dipilih |
+| A-14 | Konsol, bagian paket di bank kejadian (JS-12); bila perlu kode temuan baru di `inti/konten/periksa.ts` | Tampilkan peringatan, tanpa menolak, bila satu paket memuat lebih dari 6 kejadian di satu zona, misalnya: "Di ruang berbatas lebih dari 50 pemain, kejadian ketujuh dan seterusnya di zona ini tidak akan tampil." | Peta memuat 12 titik per zona, dan ruang berbatas lebih dari 50 pemain memakai dua titik per kejadian. `periksaPaketPeta` hanya menolak paket di atas 12 kejadian per zona, sedangkan `saringMenurutTitik` di server melewatkan sisanya tanpa pesan (Plan naskah tambahan, hasil percobaan 1) | Diajukan (22 Nov 2026): usulan 8a disetujui pemilik proyek |
 
 ## Untuk Sesi C (diteruskan pemilik proyek)
 
 - O-42 (`obj_sanggah`) tidak diperlukan: KT-10 dijawab versi A (7 Nov 2026).
 - Usulan 4a dipilih (7 Nov 2026): lapak (K-07) dan pos keamanan (K-08) menjadi objek peta Z4, bukan bagian set kejadian, dan K-12 memakai satu anak SD selain Gita. Daftar set setiap kejadian ada di D-1 spesifikasi JS-05, dan masuk `NASKAH.md` sesudah disetujui. Siswa umum mengikuti KT-C9a, jadi K-04 memakai S5 (berseragam), bukan S2.
 - Usulan 6a dipilih (7 Nov 2026): titik kejadian setiap zona di JS-06 ditata sesuai tabel latar D-2 spesifikasi JS-05, terutama Z3, Z6, dan Z7. Begitu `app/jejak-setara/peta/kampung.json` ada, uji `bank-peta` memeriksa jumlah titik setiap zona untuk Paket inti 16.
+- **Naskah tambahan, usulan 7a (disetujui 22 Nov 2026).** Aset baru yang dibutuhkan, semuanya untuk set tokoh kejadian, bukan objek peta:
+  - Wajib untuk K-32 (Z6, taman tepi sungai): prasasti peringatan dari batu, berpapan keterangan, bukan benda suci.
+  - Wajib untuk K-33 (Z6): kukang dalam kandang kecil dan penjualnya (warga dewasa), tanpa gambar hewan yang terluka.
+  - Disarankan untuk K-26 (Z4, lorong pasar): pedagang kedua yang berbeda dari pedagang N-14 di K-07, agar pedagang yang sama tidak tampil lagi sebagai tokoh bermasalah.
+  - Benda lain di naskah tambahan (bendera lusuh, tumpukan pasir, motor jatuh, lubang jalan, amplop) cukup disebut di teks situasi.
+  - Gambar perlu Disetujui di `CREDITS.md`, lalu masuk daftar kunci aset Sesi A, sebelum K-26, K-32, dan K-33 disemai. Giliran 1 (Z1) tidak memerlukan aset baru.
 
 ## Catatan untuk JS-05
 
@@ -708,15 +731,17 @@ Pegangan agar tokoh Sehari Setara muncul dengan watak yang sama (AGENTS bagian 8
 | 4 | Tanda "Terverifikasi" untuk 23 rujukan | Peninjau, di konsol (JS-12) | Bank awal disemai dengan semua rujukan berstatus `belum`. Menurut pemilik proyek, per 16 Nov 2026 di lingkungan uji 21 dari 23 rujukan sudah terverifikasi dan 16 kejadian Paket inti 16 terbit (`PLAN.md`, "Lingkungan uji JS-12"). `NASKAH.md` mencatat setiap rujukan bank awal dipakai sedikitnya satu kejadian Paket inti 16, sedangkan `PLAN.md` mencatat kedua rujukan yang belum diverifikasi tidak dipakai kejadian Paket inti 16; kode kedua rujukan itu belum tercatat di sini |
 | 5 | Memilih pasangan kalimat refleksi (`refleksi.md`) | Pemilik proyek, di Gerbang 2 JS-11 | Selesai: Pasangan 1 dipakai di JS-11 (Permintaan A-12, Diterapkan) |
 | 6 | Panduan guru final | Sesi A, di JS-16 | Bahan: `panduan-guru.md` (Permintaan A-13) |
-| 7 | Membalas Plan naskah tambahan | Pemilik proyek | "Setuju: naskah tambahan", atau pilihan lain per usulan (bagian "Cara membalas") |
-| 8 | Melihat di konsol uji apakah sudah ada kejadian berkode K-17 ke atas atau rujukan JR-24 ke atas, misalnya dari percobaan JS-12 | Pemilik proyek | Cukup dilihat di daftar kejadian dan pustaka rujukan konsol, tanpa mengubah apa pun. Bila ada, nomor di Plan disesuaikan sebelum giliran 1 dimasukkan ke basis data (Plan naskah tambahan, risiko 2) |
-| 9 | Aset baru untuk K-32, K-33, dan bila dipilih K-26 (usulan 7) | Pemilik proyek, diteruskan ke Sesi C | Sesudah usulan 7 diputuskan. Gambarnya harus Disetujui sebelum kejadian Z6 (dan K-26) disimpan atau disemai |
+| 7 | Membalas Plan naskah tambahan | Pemilik proyek | Selesai: disetujui 22 Nov 2026, semua saran (a) |
+| 8 | Melihat di konsol uji apakah sudah ada kejadian berkode K-17 ke atas atau rujukan JR-24 ke atas, misalnya dari percobaan JS-12 | Pemilik proyek | Cukup dilihat di daftar kejadian dan pustaka rujukan konsol, tanpa mengubah apa pun. Bila ada, nomor disesuaikan sebelum semai tambahan dijalankan (Plan naskah tambahan, risiko 2) |
+| 9 | Aset baru untuk K-26, K-32, dan K-33 (usulan 7a) | Pemilik proyek, diteruskan ke Sesi C | Permintaannya di bagian "Untuk Sesi C". Gambarnya harus Disetujui sebelum ketiga kejadian itu disemai |
+| 10 | Menilai giliran 1 (K-17, K-18, K-19) | Pemilik proyek | "Setuju: naskah tambahan Z1", atau revisi yang ditulis bebas |
+| 11 | Plan semai tambahan (usulan 3a) | Sesi B, dengan catatan Architecture dari Sesi A | Ditulis sesudah giliran 8 disetujui, atau lebih awal bila pemilik proyek ingin mencoba sebagian kejadian di lingkungan uji. Perlu batas berkas baru dari pemilik proyek |
 
 Pesan untuk Sesi C (bagian "Untuk Sesi C") sudah terlaksana: JS-06 Selesai 8 Nov 2026, dan uji `bank-peta` kini berjalan dan lulus (pemeriksaan penutup 10 Nov 2026).
 
 ## Cara membalas
 
-- **Plan naskah tambahan:** balas "Setuju: naskah tambahan" untuk menerima semua saran (a) di usulan 1 sampai 8. Untuk memilih alternatif, sebutkan nomornya, misalnya "Setuju: naskah tambahan, kecuali 3b dan 4c". Perubahan tema cukup ditulis bebas. Sesudah disetujui, giliran 1 dimulai, dan setiap giliran disetujui dengan "Setuju: naskah tambahan Z1", "Setuju: naskah tambahan Z2", dan seterusnya.
+- **Naskah tambahan:** balas "Setuju: naskah tambahan Z1" bila ketiga naskah giliran 1 (K-17, K-18, K-19) disetujui. Permintaan revisi cukup ditulis bebas, misalnya kalimat yang ingin diganti. Giliran berikutnya disetujui dengan "Setuju: naskah tambahan Z2", "Setuju: naskah tambahan Z3", dan seterusnya. (Plan naskah tambahan sudah disetujui pada 22 November 2026.)
 - JS-05 sudah Selesai, dan naskah pendukung (20 Nov 2026) tidak membuka gerbang Sesi B. Sesudah commit, pastikan "Jejak: uji" tetap hijau. Bila merah, kirim tangkapan layarnya ke Sesi B.
 - Pasangan kalimat refleksi dipilih di Gerbang 2 JS-11 (Sesi A). Revisi `refleksi.md` atau `panduan-guru.md` sebelum itu cukup ditulis bebas ke Sesi B.
 - Perbaikan naskah sesudah semai pertama dilakukan di konsol (JS-12), bukan di repositori (Catatan untuk JS-05). Permintaan lain cukup ditulis bebas.
