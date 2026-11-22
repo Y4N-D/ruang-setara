@@ -866,3 +866,59 @@ def npc2(nama, pose="diam", bingkai=0):
 
 def strip_npc2(nama, pose):
     return strip([npc2(nama, pose, b) for b in range(2)])                            # noqa: F405
+
+
+# =========================================================================== aset tambahan: tokoh naskah tambahan
+# Penjual kukang (N-21, K-33; Plan aset tambahan disetujui 22 Nov 2026, KT-C29 a). Badan, kaki, dan kepala memakai
+# fungsi kelompok N2 tanpa mengubahnya; yang baru hanya gaya kepala topi_bundar dan tas selempang. Tidak bertas
+# punggung (usulan 9a). "pedagang2" adalah draf N-22 yang hanya dipakai lembar uji gaya preview/uji_gaya_tambahan.png:
+# permintaannya dicabut dan tidak dibuat sebagai aset (KT-C30 a), jadi tidak ada di POSE_NPC3 dan tidak punya PNG.
+NPC3 = {
+    "penjual": dict(ukuran="dewasa", skin=SK2, skin_d=SK3, hair=HR1, gaya="topi_bundar", topi=(SKYD, NAVY, SIANG1),   # noqa: F405
+                    atas="kaus", warna=(TEAL, GRASS), bawah=(DUSK, INK), kaki="panjang", alas="sandal",             # noqa: F405
+                    selempang=(WOODD, WOOD)),                                                                       # noqa: F405
+    "pedagang2": dict(ukuran="dewasa", skin=SK4, skin_d=HR2, hair=HR1, gaya="kuncir", ikat=SUN, atas="kaus",         # noqa: F405
+                      lengan_panjang=True, warna=(SKYD, NAVY), bawah=(WOODD, HR2), kaki="rok_panjang",              # noqa: F405
+                      alas="sandal", celemek=(LEAF, GRASS)),                                                        # noqa: F405
+}
+POSE_NPC3 = {"penjual": ["diam"]}
+
+
+def _kepala_npc3(c, s, y0):
+    """Kepala tokoh aset tambahan: gaya baru topi_bundar; gaya lain memakai kepala N2 dan N1 apa adanya."""
+    if s["gaya"] != "topi_bundar":
+        _kepala_npc2(c, s, y0)
+        return
+    sk, sd, h = s["skin"], s["skin_d"], s["hair"]
+    t, td, tk = s["topi"]
+    _kepala_kulit(c, sk, y0)
+    c.r(2, y0 + 4, 2, 2, h); c.r(12, y0 + 4, 2, 2, h)                                 # rambut di pelipis
+    c.r(3, y0, 10, 3, t); c.hl(4, 6, y0, tk)                                          # mahkota topi dan kilau
+    c.hl(3, 12, y0 + 2, td)                                                           # pita topi
+    c.r(1, y0 + 3, 14, 1, t); c.p(14, y0 + 3, td); c.p(1, y0 + 3, tk)                  # tepi topi melingkar
+    c.p(2, y0 + 7, sd); c.p(13, y0 + 7, sd)                                           # telinga
+    c.r(5, y0 + 6, 1, 2, INK); c.r(10, y0 + 6, 1, 2, INK)                             # noqa: F405  mata 1x2
+    c.hl(7, 8, y0 + 8, sd)                                                            # mulut
+
+
+def npc3(nama, pose="diam", bingkai=0):
+    """Satu bingkai tokoh aset tambahan (dewasa 16x26, titik kaki (8, 23))."""
+    s = NPC3[nama]
+    (w, h), _ = UKURAN_NPC[s["ukuran"]]
+    c = C(w, h)                                                                      # noqa: F405
+    top = 1 + bingkai
+    y0b = top + 10
+    _badan_npc2(c, s, y0b, 10, pose)
+    if s.get("selempang"):                                                            # tas selempang di pinggul kiri
+        tali, tas = s["selempang"]
+        for i in range(6):
+            c.p(10 - i, y0b + i, tali)
+        c.r(3, y0b + 5, 3, 3, tas); c.hl(3, 5, y0b + 5, tali); c.p(5, y0b + 7, tali)
+    _kepala_npc3(c, s, top)
+    c.outline()
+    _bayangan_elips(c, 3, h - 4, 10, 4)
+    return c
+
+
+def strip_npc3(nama, pose):
+    return strip([npc3(nama, pose, b) for b in range(2)])                            # noqa: F405

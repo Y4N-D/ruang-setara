@@ -35,10 +35,17 @@ sys.path.insert(0, str(HERE))
 from pixelart import *          # noqa: E402,F401,F403
 from atas_tokoh import (AVATAR, ARAH, BINGKAI, KETERANGAN, WARNA_TAS, avatar, strip_avatar,   # noqa: E402
                         ikon_kepala, ganti_tas, NPC, POSE_NPC, UKURAN_NPC, npc, strip_npc,
-                        NPC2, POSE_NPC2, npc2, strip_npc2, JANGKAR, UKURAN, TAS)
+                        NPC2, POSE_NPC2, npc2, strip_npc2, JANGKAR, UKURAN, TAS,
+                        NPC3, POSE_NPC3, npc3, strip_npc3)
 from atas_ubin import (MASA, NAMA_MASA, KOLOM, NOMOR, BLOB, WILAYAH, SUSUNAN, UKURAN_LEMBAR,   # noqa: E402
                        ubin_rumput, ubin_wilayah, lembar_ubin, nomor_tanah)
 from atas_objek import POTONG_ATAP, OBJEK, KODE_OBJEK, PAGAR, obj_rumah_a, pisah   # noqa: E402
+from atas_tambahan import OBJEK_TAMBAHAN, KODE_TAMBAHAN, obj_prasasti, obj_kandang_kukang   # noqa: E402
+# Properti tambahan (O-52, O-53) ikut daftar objek build_jejak.py untuk aset, pratinjau, dan manifest, tanpa mengubah
+# atas_objek.py, yang termasuk sidik sumber peta (JS-06 P-23). build_peta.py tetap hanya membaca atas_objek.py.
+assert not set(OBJEK_TAMBAHAN) & set(OBJEK), "nama objek tambahan bentrok dengan atas_objek.py"
+OBJEK.update(OBJEK_TAMBAHAN)
+KODE_OBJEK.update(KODE_TAMBAHAN)
 from atas_ikon import (SKILL, ARAH_KOMPAS, ARAH_DIRI, tanda_kejadian, tanda_dibuka, tanda_selesai,   # noqa: E402
                        tanda_kotak, tanda_kompas, tanda_diri, tanda_debu, tanda_kilau, ikon_lari, ikon_kompas,
                        ikon_petunjuk, ikon_teropong, ikon_karcis, ikon_zona, ikon_mini, ikon_menyambung,
@@ -119,6 +126,14 @@ for _n, _poses in POSE_NPC2.items():
         ASSETS[f"npc_{_n}_bawah_{_pose}"] = ("npc", lambda n=_n, p=_pose: strip_npc2(n, p),
                                               (UKURAN_NPC[NPC2[_n]["ukuran"]][0][0] * 2, UKURAN_NPC[NPC2[_n]["ukuran"]][0][1]))
 
+# Aset tambahan (Ditinjau, 22 Nov 2026): tokoh untuk naskah tambahan, di folder npc/. Properti O-52 (prasasti) dan
+# O-53 (kandang kukang) sudah terdaftar lewat OBJEK di atas. Draf N-22 tidak ada di POSE_NPC3 (KT-C30 a).
+KODE_NPC.update({"penjual": "N-21"})
+for _n, _poses in POSE_NPC3.items():
+    for _pose in _poses:
+        ASSETS[f"npc_{_n}_bawah_{_pose}"] = ("npc", lambda n=_n, p=_pose: strip_npc3(n, p),
+                                              (UKURAN_NPC[NPC3[_n]["ukuran"]][0][0] * 2, UKURAN_NPC[NPC3[_n]["ukuran"]][0][1]))
+
 # Kelompok I (Ditinjau): ikon, di folder ikon/
 IKON_BARU = {"ikon_lari": ("I-01", ikon_lari, (16, 16)), "ikon_kompas": ("I-02", ikon_kompas, (16, 16)),
              "ikon_petunjuk": ("I-03", ikon_petunjuk, (16, 16)), "ikon_teropong": ("I-04", ikon_teropong, (16, 16)),
@@ -160,6 +175,11 @@ DISETUJUI = {nama: "6 November 2026" for nama in ASSETS
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC)                  # kelompok N1
              or (nama.startswith("npc_") and nama.split("_")[1] in NPC2)                 # kelompok N2
              or nama in IKON_BARU or nama in IKON_ULANG}                                 # kelompok I
+# Aset tambahan (Daftar_Aset.md, bagian "Aset tambahan untuk naskah tambahan"): nama berkas -> tanggal. Diisi sesudah
+# pemilik proyek menyetujui setiap aset; sampai itu O-52, O-53, dan N-21 berstatus Ditinjau dan tidak masuk CREDITS.md
+# maupun manifest.ts. Kuncinya masuk kunci-aset.ts lewat Permintaan A-17 (Sesi A), di commit yang sama (KT-C31 a).
+DISETUJUI_TAMBAHAN = {}
+DISETUJUI.update(DISETUJUI_TAMBAHAN)
 
 # Efek suara dan musik latar berstatus Disetujui: nama berkas tanpa .wav -> tanggal (Daftar_Aset.md, bagian "Efek
 # suara"). Semuanya, ditambah salinan klik dan bunyi teks, masuk CREDITS.md. Efek (sfx_*) juga masuk kelompok SUARA di
@@ -365,7 +385,8 @@ def tulis_manifest(out_dir, ukuran, suara=frozenset()):
     npc_ts = []
     for nama in sorted(n for n in DISETUJUI if n.startswith("npc_")):
         tokoh, pose = nama.split("_")[1], nama.split("_")[-1]
-        kx, ky = KAKI_MOTOR if pose == "motor" else UKURAN_NPC[(NPC.get(tokoh) or NPC2[tokoh])["ukuran"]][1]
+        kx, ky = KAKI_MOTOR if pose == "motor" else UKURAN_NPC[(NPC.get(tokoh) or NPC2.get(tokoh)
+                                                                or NPC3[tokoh])["ukuran"]][1]
         w, h = ukuran.get(nama, (0, 0))
         if not (0 <= kx < w // BINGKAI_ASET[nama] and 0 <= ky < h):
             masalah.append(f"manifest: titik kaki {nama} ({kx}, {ky}) di luar bingkai")
@@ -1613,6 +1634,234 @@ def pratinjau_ikon_hud():
     return L.im
 
 
+# ---------------------------------------------------------------------------
+# Pratinjau aset tambahan: properti dan tokoh naskah tambahan (K-26, K-32, K-33)
+# ---------------------------------------------------------------------------
+def _latar_tambahan(w, h, bahan="rumput", masa="siang"):
+    """Latar w x h ubin: rumput bervarian, atau ubin wilayah (paving, semen) tanpa tepi."""
+    m = MASA[masa]
+    c = C(w * 16, h * 16)                                                         # noqa: F405
+    for ty in range(h):
+        for tx in range(w):
+            t = ubin_rumput(m, (tx + ty) % 4) if bahan == "rumput" else ubin_wilayah(bahan, 0, m)
+            c.paste(t, tx * 16, ty * 16)
+    return c
+
+
+def _npc3_di(nama, x_kaki, y_kaki):
+    jx, jy = UKURAN_NPC[NPC3[nama]["ukuran"]][1]
+    spr = npc3(nama, "diam", 0)
+    return (spr, spr, x_kaki - jx + 8, y_kaki - jy + 21, False)
+
+
+def _tokoh_besar(L, spr, cx, y_bawah, k, kode, nama, ciri):
+    g = besar(spr, k)
+    L.tempel(g, int(cx - g.width / 2), y_bawah - g.height)
+    L.label(kode, cx, y_bawah + 6, "tebal")
+    L.label(nama, cx, y_bawah + 26)
+    if ciri:
+        L.label(ciri, cx, y_bawah + 46)
+
+
+def _set_k32(masa="siang"):
+    """Set K-32: teman (siswa umum S2) di samping prasasti, taman tepi sungai."""
+    peta = [".......", ".......", ".......", "wwwwwww", "WWWWWWW"]
+    g = render_peta(peta, masa, (("prasasti", 2, 1),), [_npc2_di("siswa2", "diam", 22, 46)])
+    g.paste(tanda_kejadian(), 36, 6)
+    return g
+
+
+def _set_k33(masa="siang"):
+    """Set K-33: penjual dan kukang dalam kandang, di pinggir lapangan taman."""
+    peta = ["ggggggg", "ggggggg", ".......", ".......", "......."]
+    g = render_peta(peta, masa, (("kandang_kukang", 4, 3),), [_npc3_di("penjual", 56, 62)])
+    g.paste(tanda_kejadian(), 50, 22)
+    return g
+
+
+def _pandangan_tambahan(masa="siang"):
+    """Pandangan pemain 320 x 180 piksel logis di zona 6 dengan kedua set dan tiga pemain."""
+    peta = [
+        "...........ggggggggg",
+        "...........ggggggggg",
+        ".*.........ggggggggg",
+        "...........ggggggggg",
+        "......+.............",
+        "pppppppppppppppppppp",
+        "....................",
+        "..^.................",
+        "..........d.........",
+        "wwwwwwwwwwwwwwwwwwww",
+        "WWWWWWWWWWWWWWWWWWWW",
+        "WWWWWWWWWWWWWWWWWWWW",
+    ]
+    objek = (("pohon", 0, 0), ("pohon_b", 5, 0), ("bangku", 8, 3), ("prasasti", 3, 6), ("batu", 10, 7),
+             ("semak", 18, 7), ("tempat_sampah", 16, 6), ("kandang_kukang", 15, 3), ("semak_b", 1, 4))
+    tokoh = [_npc2_di("siswa2", "diam", 41, 110), _npc3_di("penjual", 230, 62),
+             _pemain(2, 150, 76, "kanan", "jalan", 1, tas="mango"),
+             _pemain(5, 286, 130, "atas", "diam", 0, tas="berry"),
+             _pemain(8, 96, 140, "bawah", "jalan", 1, tas="sky-d")]
+    g = render_peta(peta, masa, objek, tokoh)
+    g.paste(tanda_kejadian(), 52, 78)
+    g.paste(tanda_kejadian(), 226, 22)
+    return g.im.crop((0, 0, 320, 180))
+
+
+def pratinjau_uji_gaya_tambahan():
+    """Lembar uji gaya Plan aset tambahan (22 Nov 2026), dibangun ulang sama piksel. N-22 hanya draf (KT-C30 a)."""
+    L = Lembar(1440, 1350)
+    L.judul("Uji gaya — Aset naskah tambahan (K-26, K-32, K-33)",
+            "Sesi C · Plan 22 Nov 2026 · usulan, belum Disetujui")
+    L.panel(20, 70, 400, 400, "O-52 prasasti · K-32 (×5)")
+    g = _latar_tambahan(3, 3)
+    g.paste(obj_prasasti(), 7, 7)
+    L.tempel(besar(g, 5), 100, 108)
+    for j, t in enumerate(("batu alam berlumut, tulisan samar tanpa huruf",
+                           "papan keterangan cagar budaya, tanpa huruf",
+                           "2 × 2 ubin; puncak di lapisan atas")):
+        L.label(t, 220, 372 + j * 22)
+    L.panel(440, 70, 420, 400, "O-53 kandang kukang · K-33")
+    g = _latar_tambahan(2, 2)
+    g.paste(obj_kandang_kukang(), 7, 7)
+    L.tempel(besar(g, 5), 456, 120)
+    L.label("×5 di atas rumput", 536, 290)
+    L.tempel(besar(obj_kandang_kukang(), 10), 660, 110)
+    L.label("×10", 750, 290)
+    for j, t in enumerate(("kukang duduk tenang memeluk dahan",
+                           "mata besar terbuka, tanpa luka dan warna merah",
+                           "jeruji tidak menutupi wajah · 1 × 1 ubin")):
+        L.label(t, 650, 340 + j * 22)
+    L.panel(880, 70, 540, 400, "N-21 penjual kukang · K-33 (×5)")
+    y = 280
+    _tokoh_besar(L, npc3("penjual", "diam", 0), 945, y, 5, "N-21", "bingkai 1", "")
+    _tokoh_besar(L, npc3("penjual", "diam", 1), 1045, y, 5, "N-21", "bingkai 2", "")
+    L.d.line([(1105, 120), (1105, 340)], fill=MIST[:3], width=2)                  # noqa: F405
+    _tokoh_besar(L, npc2("warga1", "diam", 0), 1170, y, 5, "N-10", "warga 1", "")
+    _tokoh_besar(L, npc2("pedagang", "diam", 0), 1265, y, 5, "N-14", "pedagang", "")
+    _tokoh_besar(L, npc2("polisi", "diam", 0), 1360, y, 5, "N-16", "polisi", "")
+    for j, t in enumerate(("topi bundar sky-d, kaus teal, tas selempang cokelat",
+                           "dewasa 16 × 26, diam 2 bingkai, tanpa tas punggung",
+                           "pembanding di kanan: warga, pedagang, dan polisi")):
+        L.label(t, 1150, 372 + j * 22)
+    L.panel(20, 490, 560, 400, "N-22 pedagang kedua · K-26 (opsional, ×5)")
+    y = 700
+    _tokoh_besar(L, npc3("pedagang2", "diam", 0), 110, y, 5, "N-22", "bingkai 1", "kaus sky-d")
+    _tokoh_besar(L, npc3("pedagang2", "diam", 1), 210, y, 5, "N-22", "bingkai 2", "celemek leaf")
+    L.d.line([(262, 540), (262, 780)], fill=MIST[:3], width=2)                    # noqa: F405
+    _tokoh_besar(L, npc2("pedagang", "diam", 0), 330, y, 5, "N-14", "pedagang", "pasar K-07")
+    _tokoh_besar(L, npc("ibu", "diam", 0), 440, y, 5, "N-02", "Ibu", "set K-26")
+    for j, t in enumerate(("Dicabut 22 Nov 2026: penjual K-26 tidak tampil di set.",
+                           "Draf ini hanya untuk usulan 4 (dipakai nanti atau tidak).")):
+        L.label(t, 300, 822 + j * 22)
+    L.panel(600, 490, 820, 400, "Set kejadian di zona 6 (×3)")
+    L.tempel(besar(_set_k32(), 3), 630, 534)
+    L.label("K-32 · teman (S2) dan prasasti", 798, 784, "tebal")
+    L.tempel(besar(_set_k33(), 3), 1010, 534)
+    L.label("K-33 · penjual dan kandang kukang", 1178, 784, "tebal")
+    L.label("Kunci usulan naskah: obj_prasasti, npc_penjual_bawah_diam, obj_kandang_kukang", 1010, 822)
+    L.label("Teman K-32: siswa umum S2 yang sudah Disetujui (npc_siswa2_bawah_diam)", 1010, 844)
+    L.panel(20, 910, 1400, 420, "Pandangan pemain 320 × 180 piksel logis (×1 di kiri, ×2 di tengah)")
+    g = _pandangan_tambahan()
+    L.tempel(g, 40, 956)
+    L.tempel(besar(g, 2), 380, 956)
+    L.d.rectangle([380, 956, 380 + 640 - 1, 956 + 360 - 1], outline=INK[:3], width=2)   # noqa: F405
+    teks = ["×2 mendekati ukuran di layar HP", "(731 × 411 px CSS).", "Prasasti tetap terbaca sebagai batu",
+            "bertulisan dan berpapan, berbeda dari", "batu biasa (O-51) di tepi sungai.",
+            "Kandang dan penjual terbaca dari jauh.", "", "0 piksel di luar palet; ukuran sesuai ubin;",
+            "lima berkas, jumlah 2,3 KB."]
+    for j, t in enumerate(teks):
+        L.d.text((1040, 960 + j * 26), t, font=L.f["kecil"], fill=INK[:3])         # noqa: F405
+    for j, t in enumerate(("Pemain di pratinjau: A2, A5, dan A8", "(bertas). Tokoh baru tidak bertas",
+                           "punggung, jadi tidak tertukar.")):
+        L.d.text((40, 1150 + j * 24), t, font=L.f["kecil"], fill=DUSK[:3])        # noqa: F405
+    return L.im
+
+
+def pratinjau_tambahan_lembar():
+    L = Lembar(1440, 800)
+    L.judul("Aset tambahan — Properti dan tokoh naskah tambahan", "Sesi C · 22 Nov 2026 · Ditinjau · O-52, O-53, N-21")
+    L.panel(20, 70, 560, 420, "O-52 prasasti · K-32")
+    g = _latar_tambahan(3, 3)
+    g.paste(obj_prasasti(), 7, 7)
+    L.tempel(besar(g, 5), 40, 112)
+    L.label("×5 di atas rumput", 160, 360)
+    atas, bawah = pisah(obj_prasasti(), 17)
+    for bagian, y, berkas, ket in ((atas, 116, "obj_prasasti_atas.png", "34 × 17 · lapisan 40 (atas)"),
+                                   (bawah, 252, "obj_prasasti.png", "34 × 17 · lapisan 20 (bawah)")):
+        L.d.rectangle([338, y - 2, 338 + 136 + 3, y + 68 + 1], outline=MIST[:3], width=2)   # noqa: F405  batas kanvas
+        L.tempel(besar(bagian, 4), 340, y)
+        L.label(berkas, 408, y + 76, "tebal")
+        L.label(ket, 408, y + 96)
+    for j, t in enumerate(("2 × 2 ubin, dipotong di baris 17; padat di baris ubin bawah",
+                           "kunci set tokoh: obj_prasasti (tanpa akhiran _atas)")):
+        L.label(t, 300, 410 + j * 22)
+    L.panel(600, 70, 400, 420, "O-53 kandang kukang · K-33")
+    g = _latar_tambahan(2, 2)
+    g.paste(obj_kandang_kukang(), 7, 7)
+    L.tempel(besar(g, 5), 616, 120)
+    L.label("×5 di atas rumput", 696, 290)
+    L.tempel(besar(obj_kandang_kukang(), 10), 800, 110)
+    L.label("×10", 890, 300)
+    for j, t in enumerate(("obj_kandang_kukang.png · 18 × 18", "1 × 1 ubin, padat; satu berkas",
+                           "kunci set tokoh: obj_kandang_kukang")):
+        L.label(t, 800, 366 + j * 22, "tebal" if j == 0 else "kecil")
+    L.panel(1020, 70, 400, 420, "N-21 penjual kukang · K-33")
+    _tokoh_besar(L, npc3("penjual", "diam", 0), 1150, 300, 5, "bingkai 1", "diam", "")
+    _tokoh_besar(L, npc3("penjual", "diam", 1), 1290, 300, 5, "bingkai 2", "bernapas", "")
+    for j, t in enumerate(("npc_penjual_bawah_diam.png · 32 × 26", "dewasa, 2 bingkai, titik kaki (8, 23)",
+                           "kunci set tokoh: npc_penjual_bawah_diam")):
+        L.label(t, 1220, 366 + j * 22, "tebal" if j == 0 else "kecil")
+    L.panel(20, 510, 1400, 270, "Ukuran asli (×1) dan ×2 di atas rumput, paving, dan semen")
+    for i, bahan in enumerate(("rumput", "paving", "semen")):
+        g = _latar_tambahan(8, 3, bahan)
+        g.paste(obj_prasasti(), 7, 7)
+        g.paste(obj_kandang_kukang(), 55, 23)
+        g.paste(npc3("penjual", "diam", 0), 82, 15)
+        g.paste(npc2("siswa2", "diam", 0), 102, 17)
+        x = 40 + i * 460
+        L.tempel(g, x, 560)
+        L.tempel(besar(g, 2), x + 140, 560)
+        L.label(bahan, x + 268, 664, "tebal")
+    L.label("Pembanding di kanan setiap latar: siswa umum S2 (N-19), teman di K-32.", 720, 700)
+    L.label("Semua tanpa tulisan, huruf, logo, lambang, atau tanda keagamaan; kukang tanpa luka dan tanpa warna merah.",
+            720, 724)
+    return L.im
+
+
+def pratinjau_tambahan_set():
+    L = Lembar(1440, 1020)
+    L.judul("Aset tambahan — Set kejadian K-32 dan K-33", "Sesi C · 22 Nov 2026 · Ditinjau · tiga masa dan pandangan pemain")
+    for i, masa in enumerate(MASA):
+        L.tempel(besar(_set_k32(masa), 2), 20 + i * 236, 76)
+        L.label(f"K-32 · {NAMA_MASA[masa].lower()} (×2)", 20 + i * 236 + 112, 244, "tebal")
+        L.tempel(besar(_set_k33(masa), 2), 736 + i * 236, 76)
+        L.label(f"K-33 · {NAMA_MASA[masa].lower()} (×2)", 736 + i * 236 + 112, 244, "tebal")
+    L.panel(20, 280, 700, 260, "Lapisan atas prasasti (×3)")
+    peta = [".......", ".......", ".......", "......."]
+    tokoh = [_pemain(3, 42, 30, "atas", "jalan", 1, tas="rose"), _pemain(1, 40, 62, "bawah", "diam", 0, tas="sun"),
+             _pemain(6, 90, 46, "kanan", "jalan", 1, tas="teal")]
+    L.tempel(besar(render_peta(peta, "siang", (("prasasti", 2, 1),), tokoh), 3), 40, 324)
+    for j, t in enumerate(("A3 di belakang batu: kakinya tertutup", "puncak batu dan papan (lapisan 40).",
+                           "A1 di depan batu: digambar di atas", "kaki batu (lapisan 20).",
+                           "Baris ubin bawah padat, jadi pemain", "tidak bisa menembus batu.")):
+        L.d.text((396, 330 + j * 26), t, font=L.f["kecil"], fill=INK[:3])          # noqa: F405
+    L.panel(740, 280, 680, 260, "Pemain lewat di dekat penjual (×3)")
+    peta = ["ggggggg", "ggggggg", ".......", "......."]
+    tokoh = [_npc3_di("penjual", 56, 46), _pemain(3, 94, 60, "kanan", "jalan", 1, tas="coral"),
+             _pemain(7, 22, 30, "bawah", "jalan", 1, tas="leaf")]
+    L.tempel(besar(render_peta(peta, "siang", (("kandang_kukang", 4, 2),), tokoh), 3), 760, 324)
+    for j, t in enumerate(("Penjual tanpa tas punggung, jadi", "tidak tertukar dengan pemain yang",
+                           "bertas. Kandang 1 × 1 ubin tetap", "terlihat di samping kaki penjual.")):
+        L.d.text((1116, 330 + j * 26), t, font=L.f["kecil"], fill=INK[:3])         # noqa: F405
+    L.panel(20, 560, 1400, 440, "Pandangan pemain 320 × 180 piksel logis, sore (×2)")
+    L.tempel(besar(_pandangan_tambahan("sore"), 2), 40, 606)
+    for j, t in enumerate(("Masa sore: hanya lembar ubin yang berganti;", "objek dan tokoh sama di ketiga masa.",
+                           "", "Prasasti dan papannya tetap terbaca", "di atas rumput sore.", "",
+                           "Teman K-32 memakai siswa umum S2", "(npc_siswa2_bawah_diam).")):
+        L.d.text((720, 616 + j * 26), t, font=L.f["kecil"], fill=INK[:3])          # noqa: F405
+    return L.im
+
+
 PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringkasan,
             "ava_pose_semua": pratinjau_ava_pose_semua, "ubin_contoh": pratinjau_ubin_contoh,
             "ubin_masa": pratinjau_ubin_masa, "ubin_dekat": pratinjau_ubin_dekat,
@@ -1624,7 +1873,8 @@ PREVIEWS = {"uji_gaya": pratinjau_uji_gaya, "ava_ringkasan": pratinjau_ava_ringk
             "npc2_peta": pratinjau_npc2_peta, "obj3_lembar": pratinjau_obj3_lembar,
             "obj3_set": pratinjau_obj3_set, "obj4_lembar": pratinjau_obj4_lembar,
             "obj4_peta": pratinjau_obj4_peta, "ikon_lembar": pratinjau_ikon_lembar,
-            "ikon_hud": pratinjau_ikon_hud}
+            "ikon_hud": pratinjau_ikon_hud, "uji_gaya_tambahan": pratinjau_uji_gaya_tambahan,
+            "tambahan_lembar": pratinjau_tambahan_lembar, "tambahan_set": pratinjau_tambahan_set}
 for _n in AVATAR:
     PREVIEWS[f"pose_ava_{_n}"] = (lambda n=_n: pratinjau_pose_avatar(n))
 ANIMASI = {"ava_gerak": pratinjau_ava_gerak, "tanda_gerak": pratinjau_tanda_gerak}
