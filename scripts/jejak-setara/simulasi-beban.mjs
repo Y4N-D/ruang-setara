@@ -120,14 +120,18 @@ const V = (await (await fetch(`${alamat}/api/sehat`)).json()).protokol;
 const KUNCI_ADMIN_LOKAL = "lokal-kunci-admin-bukan-rahasia";
 const PAKET_INTI = "9880c4d5-8294-51c9-971a-e95531a2e039";
 let cookie = "";
-const tajukKonsol = () => ({ "X-Jejak": "1", Origin: alamat, "Content-Type": "application/json", "CF-Connecting-IP": "10.66.0.1", Cookie: cookie });
+// Cloudflare menghentikan permintaan klien yang membawa tajuk CF-Connecting-IP (galat 1000, HTTP 403; dokumentasi
+// Cloudflare "Error 1000"), jadi alamat tiruan itu hanya dikirim ke Worker lokal (perbaikan Test JS-15, 23 Nov 2026).
+const tajukKonsol = () => ({ "X-Jejak": "1", Origin: alamat, "Content-Type": "application/json", ...(SASARAN === "lokal" ? { "CF-Connecting-IP": "10.66.0.1" } : {}), Cookie: cookie });
+/** Galat permintaan konsol dengan awal isi jawabannya, agar log alur kerja langsung menunjukkan penyebabnya. */
+const galatJawaban = async (nama, j) => new Error(`${nama} ${j.status}: ${(await j.text().catch(() => "")).slice(0, 300)}`);
 const cookieDari = (j) => (j.headers.get("set-cookie") ?? "").split(";")[0];
 
 /** Sesi konsol: lokal lewat admin awal berkunci lokal; uji lewat akun di JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI. */
 async function masukKonsol() {
   if (SASARAN === "uji") {
     const j = await fetch(`${alamat}/api/masuk`, { method: "POST", headers: tajukKonsol(), body: JSON.stringify({ email: process.env.JEJAK_UJI_EMAIL, sandi: process.env.JEJAK_UJI_SANDI }) });
-    if (j.status !== 200) throw new Error(`masuk ${j.status}`);
+    if (j.status !== 200) throw await galatJawaban("masuk", j);
     cookie = cookieDari(j);
     return;
   }
@@ -137,11 +141,11 @@ async function masukKonsol() {
     headers: { "X-Jejak-Kunci-Admin": KUNCI_ADMIN_LOKAL, "Content-Type": "application/json", "CF-Connecting-IP": "10.66.0.1" },
     body: JSON.stringify({ email, sandi: "sandi sementara beban", namaTampilan: "Admin beban" }),
   });
-  if (awal.status !== 200) throw new Error(`admin awal ${awal.status}`);
+  if (awal.status !== 200) throw await galatJawaban("admin awal", awal);
   const masuk = await fetch(`${alamat}/api/masuk`, { method: "POST", headers: tajukKonsol(), body: JSON.stringify({ email, sandi: "sandi sementara beban" }) });
   cookie = cookieDari(masuk);
   const ganti = await fetch(`${alamat}/api/sandi`, { method: "POST", headers: tajukKonsol(), body: JSON.stringify({ sandiBaru: "kalimat sandi beban lokal" }) });
-  if (ganti.status !== 200) throw new Error(`ganti sandi ${ganti.status}`);
+  if (ganti.status !== 200) throw await galatJawaban("ganti sandi", ganti);
   cookie = cookieDari(ganti);
 }
 
@@ -149,7 +153,7 @@ async function masukKonsol() {
 const layarKelas = new Map();
 async function bukaLayarKelas(id, kode) {
   const t = await fetch(`${alamat}/api/ruang/${id}/tiket`, { method: "POST", headers: tajukKonsol(), body: "{}" });
-  if (t.status !== 200) throw new Error(`tiket ${t.status}`);
+  if (t.status !== 200) throw await galatJawaban("tiket", t);
   const { tiket } = await t.json();
   const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/kelas/${id}?tiket=${encodeURIComponent(tiket)}`, { headers: { Origin: alamat } });
   const l = { ws, info: null, jenis: {}, status: null };
@@ -180,7 +184,7 @@ async function buatRuang() {
     headers: tajukKonsol(),
     body: JSON.stringify({ labelKelas: "Uji beban", paketId: PAKET_INTI, durasiMenit: 20, batasPemain: Math.max(2, Math.min(100, BOT)), batasTerlambatMenit: 10, modeNomorAbsen: false, uji: true , modeNama: MODE_NAMA }),
   });
-  if (j.status !== 201) throw new Error(`ruang ${j.status}`);
+  if (j.status !== 201) throw await galatJawaban("ruang", j);
   const { ruang } = await j.json();
   idRuangKode.set(ruang.kode, ruang.id);
   const l = await bukaLayarKelas(ruang.id, ruang.kode);
@@ -557,38 +561,6 @@ const persen = (larik, q) => {
 /** `ping` dengan `rttMs` terakhir bila server sudah versi 4 atau lebih (JS-15, P-27 dan P-29). */
 const pesanPing = (rttMs) => (V >= 4 && rttMs !== undefined && rttMs !== null ? { v: V, t: "ping", tKlien: Date.now(), rttMs } : { v: V, t: "ping", tKlien: Date.now() });
 
-/**
- * JS-15 (P-6): satu sambungan pengukur tanpa identitas di lobi ruang pertama mengirim 30 `ping` berjeda 1 detik sebelum
- * bot lain bergabung; hasilnya p95 waktu pulang-pergi saat sepi. Null bila pengukur gagal tersambung.
- */
-async function ukurSepi(kode) {
-  const rtt = [];
-  try {
-    const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/ruang/${kode}`, { headers: { Origin: alamat } });
-    let siap = false;
-    ws.onmessage = (e) => {
-      const m = JSON.parse(String(e.data));
-      if (m.t === "selamat_datang") siap = true;
-      if (m.t === "pong") rtt.push(Date.now() - m.tKlien);
-    };
-    await new Promise((ok, gagal) => {
-      ws.onopen = () => ok();
-      ws.onerror = () => gagal(new Error("pengukur gagal tersambung"));
-    });
-    ws.send(JSON.stringify({ v: V, t: "halo", peran: "pemain" }));
-    for (let i = 0; i < 50 && !siap; i++) await tidur(100);
-    for (let i = 0; i < 30; i++) {
-      ws.send(JSON.stringify({ v: V, t: "ping", tKlien: Date.now() }));
-      await tidur(1000);
-    }
-    await tidur(500);
-    ws.close();
-  } catch {
-    return null;
-  }
-  return rtt.length > 0 ? persen(rtt, 0.95) : null;
-}
-
 async function jalankanFase(bot, fase, detik, hz) {
   for (const b of bot) {
     b.naik = 0;
@@ -631,14 +603,30 @@ try {
     kodeRuangIndeks.set(kode, r);
     kodeRuang.push(kode);
   }
-  const rttSepiMsP95 = SASARAN === "uji" ? await ukurSepi(kodeRuang[0]) : null;
   const bot = [];
+  // JS-15 (P-6): di lingkungan uji, bot pertama ruang pertama mengukur 30 `ping` berjeda 1 detik saat sepi, sebelum bot
+  // lain bergabung, lalu tetap bermain sebagai bot biasa. Sambungan pengukur terpisah tidak dipakai, karena pemain tanpa
+  // identitas yang terputus baru dilepas sesudah 5 menit dan tempatnya membuat bot terakhir ditolak RUANG_PENUH.
+  let rttSepiMsP95 = null;
+  if (SASARAN === "uji") {
+    const pengukur = await buatBot(kodeRuang[0], 0);
+    pengukur.rtt = [];
+    for (let i = 0; i < 30; i++) {
+      pengukur.kirim(pesanPing(undefined));
+      await tidur(1000);
+    }
+    await tidur(500);
+    rttSepiMsP95 = pengukur.rtt.length > 0 ? persen(pengukur.rtt, 0.95) : null;
+    pengukur.rtt = [];
+    bot.push(pengukur);
+  }
   const mulaiGabung = Date.now();
   if (LAJU_GABUNG > 0) {
     // JS-15 (P-5): paling banyak LAJU_GABUNG sambungan per detik per proses, di bawah pembatas 300 per menit per alamat IP.
     const janji = [];
     for (const kode of kodeRuang)
       for (let i = 0; i < BOT; i++) {
+        if (bot.length > 0 && kode === kodeRuang[0] && i === 0) continue; // bot pengukur sudah bergabung
         janji.push(buatBot(kode, i));
         await tidur(1000 / LAJU_GABUNG);
       }

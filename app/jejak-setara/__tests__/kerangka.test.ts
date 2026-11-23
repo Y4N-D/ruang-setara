@@ -804,6 +804,13 @@ describe("JS-15: alur kerja Jejak: uji beban dan langkah anggaran ukuran (P-10 s
     expect(agents).not.toContain("16. **Paket gratis (sampai JS-14):**");
   });
 
+  it("sim:beban tidak mengirim tajuk CF-Connecting-IP ke Cloudflare (galat 1000 / 403, run uji beban #1, 23 Nov 2026)", () => {
+    const sim = baca("scripts/jejak-setara/simulasi-beban.mjs");
+    expect(sim).toContain('...(SASARAN === "lokal" ? { "CF-Connecting-IP": "10.66.0.1" } : {})');
+    expect(sim.match(/"CF-Connecting-IP"/g)).toHaveLength(3);
+    expect(sim).toContain('const tajuk = SASARAN === "lokal" ? { Origin: alamat, "CF-Connecting-IP"');
+  });
+
   it("Jejak: uji memeriksa anggaran ukuran sesudah build:jejak", () => {
     const uji = baca(".github/workflows/jejak-uji.yml");
     expect(uji.indexOf("node scripts/jejak-setara/anggaran.mjs --ringkasan")).toBeGreaterThan(uji.indexOf("pnpm@11.25.0 build:jejak"));
