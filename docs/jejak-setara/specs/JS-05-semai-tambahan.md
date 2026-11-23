@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| Status | Disetujui 22 November 2026 (Gerbang 2), dan **Revisi 1** disetujui hari yang sama (KT-B20 a). Build berjalan; ZIP-nya diserahkan sesudah keempat syarat di bawah terpenuhi (KT-B15a) |
+| Status | Disetujui 22 November 2026 (Gerbang 2), dan **Revisi 1** disetujui hari yang sama (KT-B20 a). Dibangun dan diuji 23 November 2026 di atas `main` commit `38985d0`, dengan keputusan Lulus ([tests/JS-05-semai-tambahan-hasil.md](../tests/JS-05-semai-tambahan-hasil.md)). AC-12 diperiksa pemilik proyek sesudah push |
 | Sesi | B (Naskah dan rujukan). Rencana dan status ada di `docs/jejak-setara/naskah/STATUS.md`, bagian "Plan semai tambahan (lanjutan JS-05)", bukan di `PLAN.md` (AGENTS bagian 4.1) |
 | Keputusan Gerbang 1 | Balasan "Setuju: semai tambahan" (22 Nov 2026): semua saran (a), yaitu KT-B15 sampai KT-B19 dijawab a, dan Permintaan A-16 serta A-17 diajukan |
 | Keputusan Gerbang 2 | Balasan "Spesifikasi disetujui: semai tambahan" (22 Nov 2026): D-1 sampai D-4 diterima tanpa perubahan |
 | Revisi 1 | 22 November 2026, sesudah `test:jejak:server` gagal di Build (bagian "Revisi 1" di bawah). Disetujui 22 Nov 2026 ("Spesifikasi disetujui: semai tambahan"): KT-B20 dijawab a, serta D-5 dan AC-14 diterima |
 | Batas berkas | `docs/jejak-setara/naskah/`, `server/jejak-setara/seed/`, `scripts/jejak-setara/semai.mjs`, berkas berawalan `naskah-` atau `bank-` di `app/jejak-setara/__tests__/konten/`, serta spesifikasi ini dan laporan ujinya (Plan semai tambahan, disetujui 22 Nov 2026). Perubahan berkas lain ditulis sebagai Permintaan untuk Sesi A di `STATUS.md` |
-| Syarat sebelum Build diserahkan | (1) Permintaan A-15 diterapkan ("Tuli" di `NAMA_DIRI`). (2) Aset prasasti, kukang dalam kandang, dan penjualnya Disetujui di `CREDITS.md`, dan kuncinya masuk `KUNCI_ASET_DISETUJUI` (A-17). (3) Kunci final itu dicatat di naskah (P-24). (4) Permintaan A-18 diterapkan: variabel `JEJAK_SEMAI_TANPA_TAMBAHAN` di `server-lokal.mjs` (Revisi 1). Build boleh dimulai sesudah Gerbang 2, tetapi ZIP-nya baru diserahkan sesudah keempat syarat ini terpenuhi (KT-B15a) |
+| Syarat sebelum Build diserahkan | (1) Permintaan A-15 diterapkan ("Tuli" di `NAMA_DIRI`). (2) Aset prasasti, kukang dalam kandang, dan penjualnya Disetujui di `CREDITS.md`, dan kuncinya masuk `KUNCI_ASET_DISETUJUI` (A-17). (3) Kunci final itu dicatat di naskah (P-24). (4) Permintaan A-18 diterapkan: variabel `JEJAK_SEMAI_TANPA_TAMBAHAN` di `server-lokal.mjs` (Revisi 1). Build boleh dimulai sesudah Gerbang 2, tetapi ZIP-nya baru diserahkan sesudah keempat syarat ini terpenuhi (KT-B15a). Keempatnya terpenuhi 23 November 2026 |
 
 ## Revisi 1 (22 November 2026)
 
