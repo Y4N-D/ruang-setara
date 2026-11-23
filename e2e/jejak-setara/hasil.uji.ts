@@ -46,7 +46,7 @@ const tunggu = (page: Page) => page.waitForTimeout(700); // masa tunggu 600 ms s
 
 async function gabung(page: Page, kode: string, avatar: number): Promise<string> {
   await page.goto(`/?kode=${kode}`);
-  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   const nama = page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio").first();
   const teks = (await nama.textContent())?.replace("▶", "").trim() ?? "";
   await nama.click();

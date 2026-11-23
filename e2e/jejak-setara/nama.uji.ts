@@ -47,7 +47,7 @@ test("nama buatan siswa: identitas, galat, menu nama dan panel Pemain di layar k
   // P-36 sampai P-39: layar identitas mode bebas di HP.
   const a = await pemain(browser, baseURL!, true);
   await a.page.goto(`/?kode=${kode}`);
-  await expect(a.page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(a.page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   const isian = a.page.getByLabel("Nama pemain");
   await expect(isian).toBeVisible();
   await expect(a.page.getByText("Jangan memakai nama lengkap. Nama ini tampil di layar kelas.")).toBeVisible();
@@ -179,7 +179,7 @@ test("konsol: kelompok Nama pemain di dialog Ruang baru dan kredit suara di hala
   const hp = await browser.newContext({ baseURL, viewport: { width: 731, height: 411 }, isMobile: true, hasTouch: true });
   const h = await hp.newPage();
   await h.goto(`/?kode=${kode}`);
-  await expect(h.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(h.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   await expect(h.getByLabel("Nama pemain")).toBeVisible();
   await hp.close();
   await ctx.close();

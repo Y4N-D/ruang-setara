@@ -51,7 +51,7 @@ test("HP: privasi di layar Kode, Menu, Pengaturan, Tentang, pengaturan bertahan,
   // P-5: tombol Menu dan suara di baris kaki layar identitas.
   await page.getByLabel("Kode ruang").fill(kode);
   await page.getByRole("button", { name: "Masuk" }).tap();
-  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   await expect(page.locator(".js-kaki-identitas").getByRole("button", { name: "Buka menu pengaturan" })).toBeVisible();
   await page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio").first().tap();
   await page.getByRole("radio", { name: "Avatar 2" }).tap();
@@ -110,7 +110,7 @@ test("laptop: satu ronde hanya dengan papan ketik, Esc dan M, teks per huruf, di
   const { kode, titik } = await ruangKejadianSendiri(request, "K-13");
   const { ctx, page } = await konteks(browser, baseURL!);
   await page.goto(`/?kode=${kode}`);
-  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   // Papan ketik saja: fokus dan tombol, tanpa klik.
   const nama1 = page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio").first();
   const nama = ((await nama1.textContent()) ?? "").replace("▶", "").trim();

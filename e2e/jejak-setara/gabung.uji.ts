@@ -50,7 +50,7 @@ async function konteks(browser: Browser, baseURL: string, hp = false): Promise<{
 /** Membuka tautan ruang, memilih nama pertama dan avatar ke-n, lalu masuk lobi. Mengembalikan nama. */
 async function gabung(page: Page, kode: string, avatar = 1): Promise<string> {
   await page.goto(`/?kode=${kode}`);
-  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   const nama = page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio").first();
   const teks = (await nama.textContent())?.replace("▶", "").trim() ?? "";
   await nama.click();
@@ -107,7 +107,7 @@ test("layar Kode: format salah, kode tidak ada, keyboard saja, dan acak ulang na
   const kode = await buatRuang(request);
   await isian.fill(kode.toLowerCase());
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   await fotoEmpat(page, "identitas");
   const radioNama = page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio");
   const awal = await radioNama.allTextContents();
@@ -147,14 +147,14 @@ test("ruang penuh dan mode nomor absen (AC-8, AC-18)", async ({ browser, baseURL
   await expect(a.page.getByRole("main").getByText("Nomor absen harus 1 sampai 50.")).toBeVisible();
   await a.page.getByLabel("Nomor absenmu").fill("7");
   await a.page.getByRole("button", { name: "Lanjut" }).click();
-  await expect(a.page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(a.page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   await b.page.goto(`/?kode=${kodeAbsen}`);
   await b.page.getByLabel("Nomor absenmu").fill("7");
   await b.page.getByRole("button", { name: "Lanjut" }).click();
   await expect(b.page.getByRole("main").getByText("Nomor absen ini sudah dipakai di ruang ini. Periksa lagi nomormu.")).toBeVisible();
   await b.page.getByLabel("Nomor absenmu").fill("8");
   await b.page.getByRole("button", { name: "Lanjut" }).click();
-  await expect(b.page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(b.page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   for (const p of [a, b, c]) await p.ctx.close();
 });
 

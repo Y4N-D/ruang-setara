@@ -426,6 +426,8 @@ Penegasan JS-13 (spesifikasi `specs/JS-13-statistik.md`, P-5 sampai P-9): persen
 | Biaya | Server di bawah Rp 500.000 per bulan (bagian 14) |
 | Bahasa | Bahasa Indonesia baku yang ramah untuk siswa SMP; kalimat pendek |
 
+**Hasil uji JS-15 (23 November 2026, [laporan](tests/JS-15-hasil.md)).** Di Cloudflare: 1 ruang × 50 pemain lulus semua ambang; 1 ruang × 100 pemain (batas aplikasi) dan 10 ruang × 50 pemain serentak berjalan tanpa sambungan yang gagal pulih dan tanpa data hilang. Data per pemain 1,1–1,3 MB per ronde 15 menit, dan lobi 2,84 MB per 15 menit dalam keadaan terburuk. Layar Kode siap 1,2 detik di HP lambat pada 10 Mbps. Putus 30 detik dan 2 menit tersambung lagi tanpa kehilangan skor. Waktu pulang-pergi dari mesin uji di Amerika tidak mewakili wifi sekolah; angkanya diukur saat uji coba kelas lewat "Pemakaian ronde ini". Biaya seluruh uji beban US$0 di luar langganan.
+
 ## 13. Privasi dan perlindungan data
 
 Pemain adalah anak di bawah umur. Prinsipnya: **kumpulkan sesedikit mungkin, simpan secukupnya, dan tampilkan seperlunya.**

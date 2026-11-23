@@ -180,7 +180,7 @@ async function gabung(
     });
   }
   await page.goto(`/?kode=${kode}`);
-  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   const pilihan = page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio").first();
   const nama = (await pilihan.textContent())?.replace("▶", "").trim() ?? "";
   await pilihan.click();

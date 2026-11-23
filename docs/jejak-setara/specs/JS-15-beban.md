@@ -1,6 +1,6 @@
 # JS-15 — Uji beban dan ketahanan jaringan, anggaran ukuran, perbaikan kinerja
 
-Status: disetujui (23 November 2026, `Spesifikasi disetujui: JS-15`; D-1 sampai D-4 = a; D-5 a menggantikan D-4 a pada 23 November 2026). Build selesai 23 November 2026; catatan Build di akhir dokumen. Disusun Sesi A dari entri Plan JS-15 yang disetujui pemilik proyek (`Setuju: JS-15`, 23 November 2026: saran setiap usulan diterima, yaitu 1a sampai 10a), dari ZIP `main` commit `e3e24a5` ditambah commit Plan JS-15.
+Status: disetujui (23 November 2026, `Spesifikasi disetujui: JS-15`; D-1 sampai D-4 = a; D-5 a menggantikan D-4 a pada 23 November 2026). Build selesai 23 November 2026; catatan Build di akhir dokumen. Test selesai 23 November 2026 ([laporan](../tests/JS-15-hasil.md)); D-10 a dipilih untuk menilai `s2` dan `s3`. Disusun Sesi A dari entri Plan JS-15 yang disetujui pemilik proyek (`Setuju: JS-15`, 23 November 2026: saran setiap usulan diterima, yaitu 1a sampai 10a), dari ZIP `main` commit `e3e24a5` ditambah commit Plan JS-15.
 
 ## Ringkasan
 

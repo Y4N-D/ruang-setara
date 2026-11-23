@@ -77,7 +77,7 @@ describe("gabungHasil (P-14)", () => {
     });
     const l = gabungHasil("s2", [satu, ...Array.from({ length: 4 }, () => hasil(2, 50))]);
     expect(l.rincian[0]).toMatchObject({ ruang: [], putus: 0 });
-    expect(l.rincian.find((x) => x.bagian === 2)).toMatchObject({ ruang: ["AAAAA", "BBBBB"], putus: 3, bersih: 30 });
+    expect(l.rincian.find((x: { bagian: number | null }) => x.bagian === 2)).toMatchObject({ ruang: ["AAAAA", "BBBBB"], putus: 3, bersih: 30 });
     const teks = teksRingkasan(l);
     expect(teks).toContain("| 2 | AAAAA BBBBB | 210 | 240 | - | 30 | 3 | 0 |");
     expect(teks).toContain("Putus per ruang: AAAAA 3, BBBBB 0. Putus per menit sejak ronde mulai: menit 7: 3.");

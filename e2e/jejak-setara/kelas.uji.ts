@@ -32,7 +32,7 @@ async function konteks(browser: Browser, baseURL: string, ukuran = { width: 1280
 
 async function gabung(page: Page, kode: string, avatar: number): Promise<string> {
   await page.goto(`/?kode=${kode}`);
-  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   const nama = page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio").first();
   const teks = (await nama.textContent())?.trim() ?? "";
   await nama.click();

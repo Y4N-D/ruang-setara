@@ -62,7 +62,7 @@ async function konteks(browser: Browser, baseURL: string, hp = false): Promise<{
 /** Bergabung lewat tautan ruang, memilih nama pertama dan avatar ke-n, lalu menunggu dunia lobi. */
 async function gabung(page: Page, kode: string, avatar = 1): Promise<string> {
   await page.goto(`/?kode=${kode}`);
-  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   const nama = page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio").first();
   const teks = (await nama.textContent())?.replace("▶", "").trim() ?? "";
   await nama.click();
