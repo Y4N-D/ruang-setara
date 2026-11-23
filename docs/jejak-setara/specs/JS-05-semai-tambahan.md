@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Disetujui 22 November 2026 (Gerbang 2), dan **Revisi 1** disetujui hari yang sama (KT-B20 a). Dibangun dan diuji 23 November 2026 di atas `main` commit `38985d0`, dengan keputusan Lulus ([tests/JS-05-semai-tambahan-hasil.md](../tests/JS-05-semai-tambahan-hasil.md)). AC-12 diperiksa pemilik proyek sesudah push |
+| Status | Disetujui 22 November 2026 (Gerbang 2), dan **Revisi 1** disetujui hari yang sama (KT-B20 a). Dibangun dan diuji 23 November 2026 di atas `main` commit `38985d0`, dengan keputusan Lulus ([tests/JS-05-semai-tambahan-hasil.md](../tests/JS-05-semai-tambahan-hasil.md)). AC-12 dikonfirmasi pemilik proyek 23 November 2026 dengan balasan "Diterima: semai tambahan". **Selesai** |
 | Sesi | B (Naskah dan rujukan). Rencana dan status ada di `docs/jejak-setara/naskah/STATUS.md`, bagian "Plan semai tambahan (lanjutan JS-05)", bukan di `PLAN.md` (AGENTS bagian 4.1) |
 | Keputusan Gerbang 1 | Balasan "Setuju: semai tambahan" (22 Nov 2026): semua saran (a), yaitu KT-B15 sampai KT-B19 dijawab a, dan Permintaan A-16 serta A-17 diajukan |
 | Keputusan Gerbang 2 | Balasan "Spesifikasi disetujui: semai tambahan" (22 Nov 2026): D-1 sampai D-4 diterima tanpa perubahan |

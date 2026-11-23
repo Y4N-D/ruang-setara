@@ -21,7 +21,7 @@ Di atasnya ditambahkan berkas Build Sesi B. Lingkungan: Linux, Node 22.23.5, dan
 | AC-9 Pengurai naskah | Lulus | `naskah-cocok.test.ts` (63 uji) lulus tanpa diubah |
 | AC-10 Perintah resmi | Lulus | `content:check:jejak`, `test:jejak`, `test:jejak:server`, dan `build:jejak` lulus. Rinciannya di bagian berikut |
 | AC-11 Semai lokal sungguhan | Lulus | Basis data A: semai pertama menulis semuanya, dan semai kedua tidak mengubah satu baris pun (potret isi sama). Basis data B, yang diberi K-17 buatan sendiri: semai mencetak "ditunda" yang menyebut K-17 dan tidak menulis apa pun. Sesudah K-17 itu dihapus, semai berikutnya selesai |
-| AC-12 Sesudah push | Menunggu pemilik proyek | Diperiksa sesudah commit dan push (bagian "Daftar periksa manual") |
+| AC-12 Sesudah push | Lulus | Sesudah commit dan push, pemilik proyek menjalankan daftar periksa manual di bawah dan membalas "Diterima: semai tambahan" (23 November 2026). Artinya alur kerja hijau dan ketiga hal di konsol uji terlihat |
 | AC-13 Batas berkas | Lulus | Berkas yang berubah terhadap `main` hanya yang ada di daftar berkas spesifikasi (lihat "Berkas yang diserahkan"). `bank-awal.json` tidak berubah |
 | AC-14 Variabel server uji lokal | Lulus | Uji perintah P-17a lulus. Di basis data C, semai dengan `JEJAK_SEMAI_TANPA_TAMBAHAN=1` menghasilkan 23 rujukan, 16 kejadian, dan 1 paket, lalu semai tanpa variabel di folder yang sama menulis kejadian tambahan. Server uji lokal di `main` memasang variabel ini (A-18), dan uji `kerangka.test.ts` dari Sesi A memastikannya |
 
@@ -113,4 +113,4 @@ Diubah: `scripts/jejak-setara/semai.mjs`, `app/jejak-setara/__tests__/konten/nas
 
 ## Keputusan: Lulus
 
-AC-1 sampai AC-11, AC-13, dan AC-14 lulus. AC-12 diperiksa pemilik proyek sesudah push.
+AC-1 sampai AC-14 lulus. AC-12 dikonfirmasi pemilik proyek 23 November 2026 dengan balasan "Diterima: semai tambahan".
