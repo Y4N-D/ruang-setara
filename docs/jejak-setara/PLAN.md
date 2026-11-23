@@ -18,7 +18,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-12 | Selesai (16 Nov 2026) | [JS-12-bank.md](specs/JS-12-bank.md) | [JS-12-hasil.md](tests/JS-12-hasil.md), lulus (AC-8 diterima) |
 | JS-13 | Selesai (22 Nov 2026; `Diterima: JS-13`) | [JS-13-statistik.md](specs/JS-13-statistik.md) | [JS-13-hasil.md](tests/JS-13-hasil.md) |
 | JS-14 | Selesai (22 Nov 2026; `Diterima: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | [JS-14-hasil.md](tests/JS-14-hasil.md) |
-| JS-15 | Direncanakan (23 Nov 2026), menunggu `Setuju: JS-15` | — | — |
+| JS-15 | Disetujui (23 Nov 2026); spesifikasi menunggu `Spesifikasi disetujui: JS-15` | [JS-15-beban.md](specs/JS-15-beban.md) | — |
 | JS-16 | Belum direncanakan | — | — |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
 
@@ -1584,7 +1584,7 @@ Dikerjakan dalam mode ZIP dari `main` commit `ef82f70` (ZIP 22 Nov 2026), sebelu
 
 ## JS-15 — Uji beban dan ketahanan jaringan, anggaran ukuran, perbaikan kinerja
 
-- Status: Direncanakan (23 Nov 2026), menunggu `Setuju: JS-15`.
+- Status: Disetujui (23 Nov 2026). Riwayat 23 Nov 2026: direncanakan; disetujui (balasan `Setuju: JS-15`; saran setiap usulan diterima, yaitu 1a sampai 10a); spesifikasi ditulis ([JS-15-beban.md](specs/JS-15-beban.md)), menunggu `Spesifikasi disetujui: JS-15` dan jawaban D-1 sampai D-4. Pemilik proyek melaporkan Workers Paid sudah dibayar (23 Nov 2026). Langkah 3 sampai 6 di "Langkah pemilik proyek" (tanggal, peringatan anggaran, batas pakai, dan tangkapan layar) belum dikonfirmasi, dan wajib selesai sebelum Build.
 - Memenuhi: PRD bagian 12 (Kapasitas, Latensi, Kinerja HP, Muatan awal, Data seluler, Ketahanan, dan Biaya); Architecture 11.3, 13.1, 13.2, dan 14 (baris Jaringan dan Beban); sisa AC-20 JS-03 (10 ruang × 50 bot); serta catatan Plan JS-15 di "Catatan untuk Plan berikutnya" (tabel di akhir entri ini).
 - Bergantung pada: JS-11 (Selesai 20 Nov 2026). Fitur sebelumnya di urutan Sesi A, JS-14, Selesai dan diterima 22 Nov 2026 dengan laporan Lulus (penyimpangan AC-24 diterima). Bagian jarak jauh juga menunggu Workers Paid aktif (langkah pemilik proyek di bawah).
 - File yang dibuat/diubah (perkiraan, dipastikan di Specify):
