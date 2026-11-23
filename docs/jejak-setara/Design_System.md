@@ -528,9 +528,10 @@ Kit Jejak Setara berada di `scripts/game/art/` dan memakai ulang `palette.json` 
 
 | Berkas | Isi |
 |---|---|
-| `atas_tokoh.py` | Avatar A1–A8, tokoh Sehari Setara versi tampak atas, warga umum; parameter arah, pose, dan bingkai |
+| `atas_tokoh.py` | Avatar A1–A8, tokoh Sehari Setara versi tampak atas, warga umum, tokoh aset tambahan (penjual kukang N-21); parameter arah, pose, dan bingkai |
 | `atas_ubin.py` | Ubin tanah, jalan, air, dan pasir dengan kunci bahan; pemetaan bahan per masa (bagian 4) |
 | `atas_objek.py` | Bangunan, pohon, pagar, properti kejadian, kotak bantuan, halte |
+| `atas_tambahan.py` | Properti tambahan untuk set kejadian: O-52 prasasti dan O-53 kandang kukang. Dipisah dari `atas_objek.py` karena `atas_objek.py` termasuk sidik sumber peta (JS-06 P-23); `build_jejak.py` menggabungkannya ke daftar objek (Permintaan C-18) |
 | `atas_ikon.py` | Penanda kejadian, ikon skill, ikon zona, ikon peta mini |
 | `build_jejak.py` | Daftar aset Jejak Setara, ekspor PNG ke `app/jejak-setara/assets/`, pratinjau, dan pemeriksaan |
 
