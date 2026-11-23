@@ -60,6 +60,8 @@ const BAGIAN = Number(ambil("--bagian", "1"));
 const KELUARAN = ambil("--keluaran", "");
 // Hanya untuk menguji sambung ulang bot: menutup sambungan bot kedua sekian detik sesudah menjelajah dimulai.
 const UJI_PUTUS_DETIK = Number(ambil("--uji-putus-bot", "0"));
+// Hanya untuk menguji sambung ulang layar kelas tiruan (D-8 a).
+const UJI_PUTUS_KELAS_DETIK = Number(ambil("--uji-putus-kelas", "0"));
 const tidur = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
@@ -153,12 +155,18 @@ async function masukKonsol() {
 
 /** Layar kelas per ruang: sambungan bertiket dan hitungan pesan per jenis (JS-10, AC-24). */
 const layarKelas = new Map();
-async function bukaLayarKelas(id, kode) {
+/**
+ * JS-15 (D-8 a): layar kelas tiruan menyambung ulang seperti layar kelas konsol (JS-10, P-15; sambungan-kelas.ts): tiket
+ * baru, jeda 1, 2, 4, lalu 8 detik, paling banyak 6 kali berturut-turut; 4000 (ruang ditutup) dan 4001 (dibuka di tab
+ * lain) akhir. Setiap penutupan dicatat beserta kodenya.
+ */
+async function sambungKelas(id, l) {
   const t = await fetch(`${alamat}/api/ruang/${id}/tiket`, { method: "POST", headers: tajukKonsol(), body: "{}" });
   if (t.status !== 200) throw await galatJawaban("tiket", t);
   const { tiket } = await t.json();
   const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/kelas/${id}?tiket=${encodeURIComponent(tiket)}`, { headers: { Origin: alamat } });
-  const l = { ws, info: null, jenis: {}, status: null };
+  l.ws = ws;
+  l.info = null;
   ws.onmessage = (e) => {
     const teks = String(e.data);
     const m = JSON.parse(teks);
@@ -169,12 +177,33 @@ async function bukaLayarKelas(id, kode) {
     if (m.t === "info_kelas") l.info = m;
     if (m.t === "status_ruang") l.status = m.status;
   };
+  ws.onclose = (e) => {
+    if (l.berhenti || ws !== l.ws) return;
+    l.putusRinci.push({ kode: e.code, pada: Date.now() });
+    if (e.code === 4000 || e.code === 4001 || l.gagalSambung >= 6) return;
+    l.gagalSambung++;
+    setTimeout(
+      () =>
+        void sambungKelas(id, l)
+          .then(() => {
+            l.sambungUlang++;
+            l.gagalSambung = 0;
+          })
+          .catch(() => {}),
+      Math.min(8000, 1000 * 2 ** (l.gagalSambung - 1)),
+    );
+  };
   await new Promise((ok, gagal) => {
     ws.onopen = () => ok();
     ws.onerror = () => gagal(new Error("layar kelas gagal tersambung"));
   });
   ws.send(JSON.stringify({ v: V, t: "halo", peran: "guru" }));
   for (let i = 0; i < 100 && !l.info; i++) await tidur(50);
+}
+
+async function bukaLayarKelas(id, kode) {
+  const l = { ws: null, info: null, jenis: {}, status: null, putusRinci: [], sambungUlang: 0, gagalSambung: 0, berhenti: false };
+  await sambungKelas(id, l);
   layarKelas.set(kode, l);
   return l;
 }
@@ -198,9 +227,24 @@ const kodeRuangIndeks = new Map();
 const kejadianRuang = [];
 /** Pesan layar kelas lewat WebSocket bertiket (pengganti kait `kelas` ruang coba). */
 const kelas = async (kode, pesan) => {
-  layarKelas.get(kode)?.ws.send(JSON.stringify({ v: V, ...pesan }));
+  const l = layarKelas.get(kode);
+  if (!l) return;
+  // JS-15 (D-8 a): kirim hanya saat tersambung; tunggu sambung ulang paling lama 30 detik, lalu gagal dengan jelas.
+  for (let i = 0; i < 300 && !(l.ws?.readyState === 1 && l.info); i++) await tidur(100);
+  if (l.ws?.readyState !== 1) throw new Error(`layar kelas ${kode} tidak tersambung; penutupan: ${JSON.stringify(l.putusRinci)}`);
+  l.ws.send(JSON.stringify({ v: V, ...pesan }));
   await tidur(200);
 };
+/** JS-15 (D-8 a): `akhiri` dipastikan sampai: status ruang harus menjadi `selesai`, dicoba dua kali. */
+async function akhiriRuang(kode) {
+  const l = layarKelas.get(kode);
+  for (let coba = 0; coba < 2; coba++) {
+    await kelas(kode, { t: "akhiri" });
+    for (let i = 0; i < 150 && l.status !== "selesai" && l.status !== "pembahasan"; i++) await tidur(100);
+    if (l.status === "selesai" || l.status === "pembahasan") return;
+  }
+  throw new Error(`ruang ${kode} tidak berakhir sesudah akhiri; status ${l.status}; penutupan layar kelas: ${JSON.stringify(l.putusRinci)}`);
+}
 const statistik = async (kode) => (await fetch(`${alamat}/api/uji/ruang/${kode}/statistik`)).json();
 await masukKonsol();
 
@@ -716,9 +760,11 @@ try {
   }
   const waktuGanti = setTimeout(() => void gantiLima(5), (DETIK * 1000) / 2);
   const waktuUjiPutus = UJI_PUTUS_DETIK > 0 ? setTimeout(() => bot[1]?.ws.close(4100, "uji putus"), UJI_PUTUS_DETIK * 1000) : null;
+  const waktuUjiPutusKelas = UJI_PUTUS_KELAS_DETIK > 0 ? setTimeout(() => layarKelas.get(kodeRuang[0])?.ws.close(4100, "uji putus kelas"), UJI_PUTUS_KELAS_DETIK * 1000) : null;
   const jelajah = await jalankanFase(bot, "jelajah", DETIK, hz);
   clearTimeout(waktuGanti);
   if (waktuUjiPutus) clearTimeout(waktuUjiPutus);
+  if (waktuUjiPutusKelas) clearTimeout(waktuUjiPutusKelas);
   const namaPemain = {
     mode: MODE_NAMA,
     diganti: diganti.length,
@@ -741,7 +787,7 @@ try {
       pemakaianSebelumAkhir.push((await (await fetch(`${alamat}/api/ruang/${idRuangKode.get(kode)}`, { headers: tajukKonsol() })).json()).pemakaian ?? null);
   for (const kode of kodeRuang) {
     waktuRuang.get(kode).mainAkhir = Date.now();
-    await kelas(kode, { t: "akhiri" });
+    await akhiriRuang(kode);
   }
   // JS-11 (AC-23): setiap bot menerima `selesai` (paling lama 10 detik), lalu kiriman ke D1 ditunggu kosong (P-15)
   // dan hasilnya dibaca dari D1 sebelum ruang ditutup.
@@ -763,6 +809,7 @@ try {
     hasilAkhir.push(await (await fetch(`${alamat}/api/ruang/${id}/hasil`, { headers: tajukKonsol() })).json());
   }
   for (const b of bot) b.berhenti = true; // penutupan ruang memutus semua bot dengan sengaja
+  for (const l of layarKelas.values()) l.berhenti = true; // 4000 sesudah tutup_ruang memang disengaja
   for (const kode of kodeRuang) await kelas(kode, { t: "tutup_ruang" });
   // JS-15 (P-8): data ruang uji beban dihapus sesudah ditutup, kecuali --simpan-ruang.
   const ruangDihapus = [];
@@ -855,6 +902,9 @@ try {
     sambunganPutusTakTerduga: putusTakTerduga,
     sambungUlangPulih,
     kodeTutupTakTerduga,
+    // JS-15 (D-8 a): layar kelas tiruan.
+    layarKelasSambungUlang: [...layarKelas.values()].reduce((s, l) => s + l.sambungUlang, 0),
+    kodeTutupLayarKelas: [...layarKelas.values()].flatMap((l) => l.putusRinci.map((p) => p.kode)),
     // Lokal dari kait uji server; di lingkungan uji dari galat TERLALU_CEPAT yang diterima bot (JS-15, P-14).
     pesanDitolakServer: SASARAN === "lokal" ? stat.reduce((s, x) => s + (x.pelanggaran ?? 0), 0) : jumlah((b) => b.ditolak ?? 0),
     alasanKoreksiServer: stat.map((x) => x.koreksiAlasan ?? {}),

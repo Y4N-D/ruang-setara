@@ -89,6 +89,8 @@ export function gabungHasil(skenario, daftarHasil) {
       // D-6 a: sambung ulang bot yang pulih, dengan kode penutupannya (bukan ambang; hanya catatan).
       sambungUlangPulih: jumlah(daftarHasil, (h) => h.sambungUlangPulih ?? 0),
       pingTersendat: jumlah(daftarHasil, (h) => h.jelajah?.pingTersendat ?? 0),
+      layarKelasSambungUlang: jumlah(daftarHasil, (h) => h.layarKelasSambungUlang ?? 0),
+      kodeTutupLayarKelas: daftarHasil.flatMap((h) => h.kodeTutupLayarKelas ?? []),
       rttMsMaks: Math.max(0, ...daftarHasil.map((h) => h.jelajah?.rttMsMaks ?? 0)),
       kodeTutupTakTerduga: daftarHasil.reduce((o, h) => {
         for (const [k, n] of Object.entries(h.kodeTutupTakTerduga ?? {})) o[k] = (o[k] ?? 0) + n;
@@ -111,6 +113,7 @@ export function teksRingkasan(laporan) {
     "",
     `Ruang ${r.ruang} × ${r.botPerRuang} bot dari ${r.pekerjaan} pekerjaan. Permintaan Durable Object: perkiraan ±${r.perkiraanPermintaanDO}, penghitung ruang ${r.pemakaianPermintaanDO}. p95 pulang-pergi HP menurut server: ${r.rttServerP95MsMaks ?? "-"} ms.`,
     `Ping tersendat (lebih dari 2 detik): ${r.pingTersendat}; waktu pulang-pergi terlama ${r.rttMsMaks} ms.`,
+    `Layar kelas tiruan: sambung ulang ${r.layarKelasSambungUlang}${r.kodeTutupLayarKelas.length ? ` (kode penutupan: ${r.kodeTutupLayarKelas.join(", ")})` : ""}.`,
     `Sambung ulang yang pulih: ${r.sambungUlangPulih}${Object.keys(r.kodeTutupTakTerduga).length ? ` (kode penutupan: ${Object.entries(r.kodeTutupTakTerduga).map(([k, n]) => `${k} × ${n}`).join(", ")})` : ""}.`,
     "",
   ].join("\n");
