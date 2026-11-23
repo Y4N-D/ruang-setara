@@ -9,8 +9,9 @@ import { SKENARIO } from "./biaya-beban.mjs";
 
 export const AMBANG = {
   koreksiPersenMaks: 1,
-  // D-6 a: sambung ulang yang pulih paling banyak 2% bot (1 dari 50); lebih dari itu menandakan masalah server.
-  sambungUlangPersenMaks: 2,
+  // D-6 a dan D-7 a: sambung ulang yang pulih paling banyak 5% bot; dua run s1 masing-masing punya satu putus jaringan
+  // (2%), jadi 2% tidak menyisakan ruang, sedangkan masalah server memutus jauh lebih banyak bot.
+  sambungUlangPersenMaks: 5,
   mbPer15MenitMaks: 3,
   kenaikanRttMsMaks: 50,
   selisihPermintaanMaks: 0.25,
@@ -87,6 +88,8 @@ export function gabungHasil(skenario, daftarHasil) {
       rttServerP95MsMaks: rtt.length > 0 ? Math.max(...rtt) : null,
       // D-6 a: sambung ulang bot yang pulih, dengan kode penutupannya (bukan ambang; hanya catatan).
       sambungUlangPulih: jumlah(daftarHasil, (h) => h.sambungUlangPulih ?? 0),
+      pingTersendat: jumlah(daftarHasil, (h) => h.jelajah?.pingTersendat ?? 0),
+      rttMsMaks: Math.max(0, ...daftarHasil.map((h) => h.jelajah?.rttMsMaks ?? 0)),
       kodeTutupTakTerduga: daftarHasil.reduce((o, h) => {
         for (const [k, n] of Object.entries(h.kodeTutupTakTerduga ?? {})) o[k] = (o[k] ?? 0) + n;
         return o;
@@ -107,6 +110,7 @@ export function teksRingkasan(laporan) {
     ...baris,
     "",
     `Ruang ${r.ruang} × ${r.botPerRuang} bot dari ${r.pekerjaan} pekerjaan. Permintaan Durable Object: perkiraan ±${r.perkiraanPermintaanDO}, penghitung ruang ${r.pemakaianPermintaanDO}. p95 pulang-pergi HP menurut server: ${r.rttServerP95MsMaks ?? "-"} ms.`,
+    `Ping tersendat (lebih dari 2 detik): ${r.pingTersendat}; waktu pulang-pergi terlama ${r.rttMsMaks} ms.`,
     `Sambung ulang yang pulih: ${r.sambungUlangPulih}${Object.keys(r.kodeTutupTakTerduga).length ? ` (kode penutupan: ${Object.entries(r.kodeTutupTakTerduga).map(([k, n]) => `${k} × ${n}`).join(", ")})` : ""}.`,
     "",
   ].join("\n");

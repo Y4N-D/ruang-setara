@@ -43,12 +43,15 @@ describe("gabungHasil (P-14)", () => {
     expect(gagal(gabungHasil("s2", [hasil(2, 50), hasil(2, 50)]))).toEqual(["Jumlah pekerjaan dengan hasil", "Bot menerima selesai", "Peserta di D1 per ruang", "Selisih permintaan Durable Object per ruang dari perkiraan (%)"]);
   });
 
-  it("D-6 a: sambung ulang yang pulih paling banyak 2% bot; kode penutupan masuk ringkasan", () => {
+  it("D-6 a dan D-7 a: sambung ulang yang pulih paling banyak 5% bot; kode penutupan dan ping tersendat masuk ringkasan", () => {
     const satu = gabungHasil("s1", [hasil(1, 50, { sambungUlangPulih: 1, kodeTutupTakTerduga: { "1006": 1 } })]);
     expect(gagal(satu)).toEqual([]);
     expect(satu.ringkasan).toMatchObject({ sambungUlangPulih: 1, kodeTutupTakTerduga: { "1006": 1 } });
     expect(teksRingkasan(satu)).toContain("Sambung ulang yang pulih: 1 (kode penutupan: 1006 × 1).");
-    expect(gagal(gabungHasil("s1", [hasil(1, 50, { sambungUlangPulih: 2 })]))).toEqual(["Sambung ulang yang pulih (% bot)"]);
+    expect(gagal(gabungHasil("s1", [hasil(1, 50, { sambungUlangPulih: 2 })]))).toEqual([]);
+    expect(gagal(gabungHasil("s1", [hasil(1, 50, { sambungUlangPulih: 3 })]))).toEqual(["Sambung ulang yang pulih (% bot)"]);
+    const tersendat = gabungHasil("s1", [hasil(1, 50, { jelajah: { gerakDikoreksiPersen: 0, mbTurunPerPemainPer15Menit: 1, rttMsP95: 240, rttMsMaks: 6400, pingTersendat: 3 } })]);
+    expect(teksRingkasan(tersendat)).toContain("Ping tersendat (lebih dari 2 detik): 3; waktu pulang-pergi terlama 6400 ms.");
   });
 
   it("s2: lima pekerjaan, sepuluh ruang main bersamaan sedikitnya 14 menit", () => {

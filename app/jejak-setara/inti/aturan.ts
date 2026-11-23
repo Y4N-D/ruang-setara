@@ -330,7 +330,9 @@ export function dapatMemeriksa(jarakPx: number): boolean {
 export const BATAS = {
   pesanByte: 2048,
   pesanPerDetik: 20,
-  lonjakan: 40,
+  // JS-15 (D-7 a): semula 40. Jaringan yang tersendat bisa mengirim belasan detik gerak sekaligus; 200 menampungnya,
+  // sedangkan rata-rata tetap 20 per detik dan banjir sungguhan tetap ditutup sesudah 10 pelanggaran.
+  lonjakan: 200,
   pelanggaranGalat: 3,
   jendelaPelanggaranMs: 10_000,
   pelanggaranTutup: 10,

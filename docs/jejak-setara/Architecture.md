@@ -477,7 +477,7 @@ Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 M
 ### 6.6 Validasi dan pembatasan
 
 - Ukuran pesan masuk paling besar 2 KB.
-- Batas per sambungan: 20 pesan per detik rata-rata dengan lonjakan sampai 40. Pesan berlebih dibuang; 3 pelanggaran dalam 10 detik mengirim `galat TERLALU_CEPAT`, dan 10 pelanggaran menutup sambungan.
+- Batas per sambungan: 20 pesan per detik rata-rata dengan lonjakan sampai 200 (sejak JS-15, D-7 a; semula 40, yang membuat HP jujur di jaringan tersendat terputus dengan kode 1008). Pesan berlebih dibuang; 3 pelanggaran dalam 10 detik mengirim `galat TERLALU_CEPAT`, dan 10 pelanggaran menutup sambungan.
 - `nama` harus dari saran server, atau di ruang nama buatan siswa berbentuk sah, unik, dan lolos penyaring (JS-14); `avatar` dari daftar; `nomorAbsen` bilangan 1–50.
 - Pesan pemain diabaikan bila tidak sesuai status ruang (misalnya `gerak` saat `jeda`).
 

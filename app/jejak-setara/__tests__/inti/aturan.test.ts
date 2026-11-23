@@ -416,7 +416,7 @@ describe("batas (P-39)", () => {
     expect(BATAS).toEqual({
       pesanByte: 2048,
       pesanPerDetik: 20,
-      lonjakan: 40,
+      lonjakan: 200,
       pelanggaranGalat: 3,
       jendelaPelanggaranMs: 10000,
       pelanggaranTutup: 10,

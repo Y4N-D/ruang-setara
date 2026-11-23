@@ -299,7 +299,7 @@ function buatBot(kode, nomor) {
     // JS-11 (AC-23): pesan `selesai` terakhir dan ukurannya dalam bita.
     pesanSelesai: null, byteSelesai: 0,
     // JS-15 (D-6 a): sambung ulang dengan token seperti HP, beserta catatan setiap penutupan yang tidak disengaja.
-    token: null, sambungUlang: 0, gagalSambung: 0, putusRinci: [], menyambung: false, berhenti: false,
+    token: null, sambungUlang: 0, gagalSambung: 0, putusRinci: [], menyambung: false, berhenti: false, gerakDilewati: 0,
     // JS-09 (P-50): keadaan skill dari `pribadi` terakhir, perkiraan selisih jam server dari `pong`, dan hitungan.
     muatan: { lari: 0, kompas: 0, petunjuk: 0 }, aktifSampai: {}, kotakMenunggu: new Map(), selisihJam: 0, pakaiTerakhir: {}, menungguSkill: {},
     tujuanKompas: null, lariSampaiLokal: 0, kotak: { sepatu: 0, kompas: 0, buku: 0 }, dipakai: { lari: 0, kompas: 0, petunjuk: 0 },
@@ -447,10 +447,10 @@ function buatBot(kode, nomor) {
       b.antreTerima = pada;
       setTimeout(() => proses(teks), pada - Date.now());
     };
-    // JS-15 (D-6 a): penutupan yang tidak disambung ulang, sama dengan HP: pelanggaran (1008), ruang ditutup (4000),
-    // ditolak (4003), dikeluarkan (4004), dan versi berbeda (4005). Penutupan lain, misalnya 1006 karena jaringan, disambung
-    // ulang dengan token sampai 6 kali berturut-turut (jeda 1, 2, 4, lalu 8 detik).
-    const AKHIR = new Set([1008, 4000, 4003, 4004, 4005]);
+    // JS-15 (D-6 a, D-7 a): penutupan yang tidak disambung ulang sama dengan TUTUP_BERHENTI HP (pemain/jaringan.ts): ruang
+    // ditutup (4000), ditolak (4003), dikeluarkan (4004), dan versi berbeda (4005). Penutupan lain, termasuk pelanggaran
+    // batas pesan (1008) karena jaringan tersendat dan 1006, disambung ulang dengan token sampai 6 kali berturut-turut.
+    const AKHIR = new Set([4000, 4003, 4004, 4005]);
     const sambung = () => {
       const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/ruang/${kode}`, { headers: tajuk });
       b.ws = ws;
@@ -497,6 +497,7 @@ function langkahBot(b, sekarang, hz, fase) {
     // Sampai di titik: laporan berhenti lebih dulu bila masih tercatat berjalan, lalu periksa (P-24).
     b.jalur = [];
     if (b.jalan) {
+      if (b.ws.bufferedAmount > 0) return void b.gerakDilewati++; // seperti HP (gerakDiri.kirimBila), dicoba lagi nanti
       b.jalan = false;
       b.gerak++;
       b.kirimTerakhir = sekarang;
@@ -578,6 +579,8 @@ function langkahBot(b, sekarang, hz, fase) {
   const selang = 1000 / hz;
   const berhenti = !berjalan && b.jalan;
   if ((berjalan && sekarang - b.kirimTerakhir >= selang) || berhenti) {
+    // JS-15 (D-7 a): seperti HP, gerak dilewati selama pesan sebelumnya belum terkirim; kesempatan berikutnya membawa posisi terbaru.
+    if (b.ws.bufferedAmount > 0) return void b.gerakDilewati++;
     b.kirimTerakhir = sekarang;
     b.jalan = berjalan;
     b.gerak++;
@@ -731,6 +734,11 @@ try {
   const stat = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
   // Pesan layar kelas sampai akhir menjelajah, sebelum ruang diakhiri (JS-10, AC-24).
   const kelasJelajah = kodeRuang.map((kode) => JSON.parse(JSON.stringify(layarKelas.get(kode)?.jenis ?? {})));
+  // JS-15: pemakaian dibaca juga sebelum ronde diakhiri, selagi waktu pulang-pergi (hanya di memori ruang) pasti ada.
+  const pemakaianSebelumAkhir = [];
+  if (SASARAN === "uji")
+    for (const kode of kodeRuang)
+      pemakaianSebelumAkhir.push((await (await fetch(`${alamat}/api/ruang/${idRuangKode.get(kode)}`, { headers: tajukKonsol() })).json()).pemakaian ?? null);
   for (const kode of kodeRuang) {
     waktuRuang.get(kode).mainAkhir = Date.now();
     await kelas(kode, { t: "akhiri" });
@@ -749,6 +757,8 @@ try {
       if (d.langsung?.kirimanTertunda === false) break;
       await tidur(200);
     }
+    const sebelum = pemakaianSebelumAkhir[pemakaianApi.length];
+    if (pemakaian && sebelum && pemakaian.rttSampel == null) Object.assign(pemakaian, { rttMedianMs: sebelum.rttMedianMs, rttP95Ms: sebelum.rttP95Ms, rttSampel: sebelum.rttSampel });
     pemakaianApi.push(pemakaian);
     hasilAkhir.push(await (await fetch(`${alamat}/api/ruang/${id}/hasil`, { headers: tajukKonsol() })).json());
   }
@@ -794,6 +804,10 @@ try {
       ...jelajah,
       rttMsP50: persen(bot.flatMap((b) => b.rtt), 0.5),
       rttMsP95: persen(bot.flatMap((b) => b.rtt), 0.95),
+      // JS-15 (D-7 a): tanda jaringan tersendat.
+      rttMsMaks: bot.reduce((m, b) => b.rtt.reduce((x, r) => Math.max(x, r), m), 0),
+      pingTersendat: bot.reduce((s, b) => s + b.rtt.filter((r) => r > 2000).length, 0),
+      gerakDilewati: bot.reduce((s, b) => s + b.gerakDilewati, 0),
       gerakDikirim: jumlah((b) => b.gerak),
       gerakDikoreksi: jumlah((b) => b.koreksi),
       gerakDikoreksiPersen: +((100 * jumlah((b) => b.koreksi)) / Math.max(1, jumlah((b) => b.gerak))).toFixed(3),

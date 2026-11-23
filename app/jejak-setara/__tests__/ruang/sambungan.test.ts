@@ -1,4 +1,5 @@
 // Batas per sambungan (spesifikasi JS-03, P-16 dan P-17; AC-6).
+import { BATAS } from "../../inti/aturan";
 import { PROTOKOL_VERSI } from "../../inti/versi";
 import { describe, expect, it } from "vitest";
 import { ambilToken, bacaPesanPemain, catatPelanggaran, panjangUtf8, sambunganBaru } from "../../../../server/jejak-setara/src/ruang/sambungan";
@@ -14,10 +15,10 @@ describe("ukuran UTF-8", () => {
   });
 });
 
-describe("ember token 20 per detik dengan lonjakan 40", () => {
-  it("40 pesan langsung boleh, ke-41 ditolak, lalu terisi lagi 20 per detik", () => {
+describe("ember token 20 per detik dengan lonjakan 200 (JS-15, D-7 a)", () => {
+  it("200 pesan langsung boleh, ke-201 ditolak, lalu terisi lagi 20 per detik", () => {
     const k = sambunganBaru(0);
-    for (let i = 0; i < 40; i++) expect(ambilToken(k, 0), String(i)).toBe(true);
+    for (let i = 0; i < 200; i++) expect(ambilToken(k, 0), String(i)).toBe(true);
     expect(ambilToken(k, 0)).toBe(false);
     expect(ambilToken(k, 49)).toBe(false);
     expect(ambilToken(k, 50)).toBe(true);
@@ -62,7 +63,7 @@ describe("membaca pesan mentah", () => {
     const k = sambunganBaru(0);
     const hasil = bacaPesanPemain(k, halo, 0);
     expect(hasil).toEqual({ jenis: "sah", pesan: { v: PROTOKOL_VERSI, t: "halo", peran: "pemain" } });
-    for (let i = 0; i < 39; i++) bacaPesanPemain(k, halo, 0);
+    for (let i = 0; i < BATAS.lonjakan - 1; i++) bacaPesanPemain(k, halo, 0);
     expect(bacaPesanPemain(k, halo, 0).jenis).toBe("pelanggaran");
   });
 });
