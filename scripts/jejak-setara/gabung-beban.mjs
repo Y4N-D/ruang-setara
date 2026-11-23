@@ -77,7 +77,29 @@ export function gabungHasil(skenario, daftarHasil) {
     tambah("Semua ruang main bersamaan (menit)", Math.round(tt / 6000) / 10, `≥ ${AMBANG.tumpangTindihS2Ms / 60_000}`, tt >= AMBANG.tumpangTindihS2Ms);
   }
   const rtt = daftarHasil.flatMap((h) => (h.pemakaianRuang ?? []).map((p) => p?.rttP95Ms ?? null)).filter((x) => x !== null);
+  // Rincian per pekerjaan dan per ruang, untuk membedakan gangguan jaringan dari masalah satu ruang (JS-15, s2).
+  const rincian = daftarHasil
+    .map((h) => ({
+      bagian: h.bagian ?? null,
+      ruang: (h.waktuRuang ?? []).map((w) => w.kode).filter(Boolean),
+      sepiP95: h.rttSepiMsP95 ?? null,
+      ramaiP95: h.jelajah?.rttMsP95 ?? null,
+      jedaLoopP95: h.jelajah?.jedaEventLoopMsP95 ?? null,
+      bersih: h.rttSepiMsP95 == null ? null : Math.max(0, Math.round((h.jelajah?.rttMsP95 ?? 0) - h.rttSepiMsP95 - (h.jelajah?.jedaEventLoopMsP95 ?? 0))),
+      putus: Object.values(h.putusPerRuang ?? {}).reduce((s, n) => s + n, 0),
+      tersendat: h.jelajah?.pingTersendat ?? 0,
+    }))
+    .sort((a, b) => (a.bagian ?? 0) - (b.bagian ?? 0));
+  const gabungObjek = (kunci) =>
+    daftarHasil.reduce((o, h) => {
+      for (const [k, n] of Object.entries(h[kunci] ?? {})) o[k] = (o[k] ?? 0) + n;
+      return o;
+    }, {});
+  const rttServerPerRuang = Object.fromEntries(
+    daftarHasil.flatMap((h) => (h.waktuRuang ?? []).flatMap((w, i) => (w.kode ? [[w.kode, h.pemakaianRuang?.[i]?.rttP95Ms ?? null]] : []))),
+  );
   return {
+    rincian,
     skenario,
     waktu: new Date().toISOString(),
     lulus: ambang.every((a) => a.lulus),
@@ -97,6 +119,10 @@ export function gabungHasil(skenario, daftarHasil) {
       layarKelasSambungUlang: jumlah(daftarHasil, (h) => h.layarKelasSambungUlang ?? 0),
       kodeTutupLayarKelas: daftarHasil.flatMap((h) => h.kodeTutupLayarKelas ?? []),
       rttMsMaks: Math.max(0, ...daftarHasil.map((h) => h.jelajah?.rttMsMaks ?? 0)),
+      putusPerRuang: gabungObjek("putusPerRuang"),
+      putusPerMenit: gabungObjek("putusPerMenit"),
+      pingTersendatPerRuang: gabungObjek("pingTersendatPerRuang"),
+      rttServerPerRuang,
       kodeTutupTakTerduga: daftarHasil.reduce((o, h) => {
         for (const [k, n] of Object.entries(h.kodeTutupTakTerduga ?? {})) o[k] = (o[k] ?? 0) + n;
         return o;
@@ -120,6 +146,17 @@ export function teksRingkasan(laporan) {
     `Ping tersendat (lebih dari 2 detik): ${r.pingTersendat}; waktu pulang-pergi terlama ${r.rttMsMaks} ms.`,
     `Kenaikan p95 mentah ${r.kenaikanRttMentahMsMaks} ms, dengan p95 jeda event loop mesin bot ${r.jedaEventLoopMsP95Maks} ms.`,
     `Layar kelas tiruan: sambung ulang ${r.layarKelasSambungUlang}${r.kodeTutupLayarKelas.length ? ` (kode penutupan: ${r.kodeTutupLayarKelas.join(", ")})` : ""}.`,
+    ...(laporan.rincian?.length
+      ? [
+          "",
+          "| Pekerjaan | Ruang | Sepi p95 (ms) | Ramai p95 (ms) | Jeda loop p95 (ms) | Kenaikan bersih (ms) | Putus | Ping tersendat |",
+          "|---|---|---|---|---|---|---|---|",
+          ...laporan.rincian.map((x) => `| ${x.bagian ?? "-"} | ${x.ruang.join(" ") || "-"} | ${x.sepiP95 ?? "-"} | ${x.ramaiP95 ?? "-"} | ${x.jedaLoopP95 ?? "-"} | ${x.bersih ?? "-"} | ${x.putus} | ${x.tersendat} |`),
+          "",
+        ]
+      : []),
+    `Putus per ruang: ${Object.entries(r.putusPerRuang ?? {}).map(([k, n]) => `${k} ${n}`).join(", ") || "-"}. Putus per menit sejak ronde mulai: ${Object.entries(r.putusPerMenit ?? {}).sort((a, b) => Number(a[0]) - Number(b[0])).map(([m, n]) => `menit ${m}: ${n}`).join(", ") || "-"}.`,
+    `Ping tersendat per ruang: ${Object.entries(r.pingTersendatPerRuang ?? {}).map(([k, n]) => `${k} ${n}`).join(", ") || "-"}. p95 pulang-pergi menurut server per ruang: ${Object.entries(r.rttServerPerRuang ?? {}).map(([k, n]) => `${k} ${n ?? "-"} ms`).join(", ") || "-"}.`,
     `Sambung ulang yang pulih: ${r.sambungUlangPulih}${Object.keys(r.kodeTutupTakTerduga).length ? ` (kode penutupan: ${Object.entries(r.kodeTutupTakTerduga).map(([k, n]) => `${k} × ${n}`).join(", ")})` : ""}.`,
     "",
   ].join("\n");

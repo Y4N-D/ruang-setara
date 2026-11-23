@@ -798,7 +798,9 @@ try {
   }
   // JS-11 (AC-23): setiap bot menerima `selesai` (paling lama 10 detik), lalu kiriman ke D1 ditunggu kosong (P-15)
   // dan hasilnya dibaca dari D1 sebelum ruang ditutup.
-  for (let i = 0; i < 100 && bot.some((b) => b.pesanSelesai === null); i++) await tidur(100);
+  // JS-15: bot yang sedang menyambung ulang diberi waktu (paling lama 30 detik), karena server mengirim ulang `selesai`
+  // kepada pemain yang tersambung kembali sesudah ronde berakhir (kirimKeadaanKejadian), seperti pada HP.
+  for (let i = 0; i < 300 && bot.some((b) => b.pesanSelesai === null && (b.menyambung || i < 100)); i++) await tidur(100);
   const hasilAkhir = [];
   const pemakaianApi = [];
   for (const kode of kodeRuang) {
@@ -911,6 +913,18 @@ try {
     sambunganPutusTakTerduga: putusTakTerduga,
     sambungUlangPulih,
     kodeTutupTakTerduga,
+    // JS-15: rincian putus untuk membedakan gangguan jaringan (tersebar) dari ruang yang dimulai ulang (menumpuk di satu
+    // ruang pada satu waktu): per ruang, dan per menit sejak ronde ruang itu mulai.
+    putusPerRuang: Object.fromEntries(kodeRuang.map((kode) => [kode, bot.filter((b) => b.kode === kode).reduce((s, b) => s + b.putusRinci.length, 0)])),
+    putusPerMenit: bot.reduce((o, b) => {
+      const mulai = waktuRuang.get(b.kode)?.mainMulai ?? 0;
+      for (const p of b.putusRinci) {
+        const m = Math.floor((p.pada - mulai) / 60_000);
+        o[m] = (o[m] ?? 0) + 1;
+      }
+      return o;
+    }, {}),
+    pingTersendatPerRuang: Object.fromEntries(kodeRuang.map((kode) => [kode, bot.filter((b) => b.kode === kode).reduce((s, b) => s + b.rtt.filter((r) => r > 2000).length, 0)])),
     // JS-15 (D-8 a): layar kelas tiruan.
     layarKelasSambungUlang: [...layarKelas.values()].reduce((s, l) => s + l.sambungUlang, 0),
     kodeTutupLayarKelas: [...layarKelas.values()].flatMap((l) => l.putusRinci.map((p) => p.kode)),

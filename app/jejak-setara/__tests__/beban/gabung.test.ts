@@ -64,6 +64,26 @@ describe("gabungHasil (P-14)", () => {
     ]);
   });
 
+  it("rincian per pekerjaan, putus per ruang dan per menit, dan p95 server per ruang masuk ringkasan", () => {
+    const satu = hasil(2, 50, {
+      bagian: 2,
+      waktuRuang: [
+        { kode: "AAAAA", mainMulai: 0, mainAkhir: 15 * MENIT },
+        { kode: "BBBBB", mainMulai: 0, mainAkhir: 15 * MENIT },
+      ],
+      putusPerRuang: { AAAAA: 3, BBBBB: 0 },
+      putusPerMenit: { "7": 3 },
+      pingTersendatPerRuang: { AAAAA: 4, BBBBB: 0 },
+    });
+    const l = gabungHasil("s2", [satu, ...Array.from({ length: 4 }, () => hasil(2, 50))]);
+    expect(l.rincian[0]).toMatchObject({ ruang: [], putus: 0 });
+    expect(l.rincian.find((x) => x.bagian === 2)).toMatchObject({ ruang: ["AAAAA", "BBBBB"], putus: 3, bersih: 30 });
+    const teks = teksRingkasan(l);
+    expect(teks).toContain("| 2 | AAAAA BBBBB | 210 | 240 | - | 30 | 3 | 0 |");
+    expect(teks).toContain("Putus per ruang: AAAAA 3, BBBBB 0. Putus per menit sejak ronde mulai: menit 7: 3.");
+    expect(teks).toContain("Ping tersendat per ruang: AAAAA 4, BBBBB 0. p95 pulang-pergi menurut server per ruang: AAAAA 230 ms, BBBBB 230 ms.");
+  });
+
   it("s2: lima pekerjaan, sepuluh ruang main bersamaan sedikitnya 14 menit", () => {
     const lima = Array.from({ length: 5 }, () => hasil(2, 50));
     expect(gagal(gabungHasil("s2", lima))).toEqual([]);
