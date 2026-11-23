@@ -29,6 +29,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { register } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { monitorEventLoopDelay } from "node:perf_hooks";
 import { BATAS_PERMINTAAN_PER_RUN, perkiraanBiaya, SKENARIO as TABEL_SKENARIO, teksPerkiraan } from "./biaya-beban.mjs";
 
 const akar = fileURLToPath(new URL("../../", import.meta.url));
@@ -690,9 +691,10 @@ try {
   if (SASARAN === "uji") {
     const pengukur = await buatBot(kodeRuang[0], 0);
     pengukur.rtt = [];
-    for (let i = 0; i < 30; i++) {
+    // JS-15 (D-9 a): 60 ping berjeda 500 ms (tetap 30 detik), agar p95 saat sepi tidak hanya bergantung pada 2 sampel.
+    for (let i = 0; i < 60; i++) {
       pengukur.kirim(pesanPing(undefined));
-      await tidur(1000);
+      await tidur(500);
     }
     await tidur(500);
     rttSepiMsP95 = pengukur.rtt.length > 0 ? persen(pengukur.rtt, 0.95) : null;
@@ -759,11 +761,16 @@ try {
     b.rtt = [];
   }
   const waktuGanti = setTimeout(() => void gantiLima(5), (DETIK * 1000) / 2);
+  // JS-15 (D-9 a): jeda event loop mesin bot selama menjelajah. Balasan server yang tiba saat mesin bot sibuk baru diproses
+  // sesudah jeda ini, jadi jeda itu ikut terukur sebagai waktu pulang-pergi walaupun bukan berasal dari server.
+  const jedaLoop = monitorEventLoopDelay({ resolution: 10 });
+  jedaLoop.enable();
   const waktuUjiPutus = UJI_PUTUS_DETIK > 0 ? setTimeout(() => bot[1]?.ws.close(4100, "uji putus"), UJI_PUTUS_DETIK * 1000) : null;
   const waktuUjiPutusKelas = UJI_PUTUS_KELAS_DETIK > 0 ? setTimeout(() => layarKelas.get(kodeRuang[0])?.ws.close(4100, "uji putus kelas"), UJI_PUTUS_KELAS_DETIK * 1000) : null;
   const jelajah = await jalankanFase(bot, "jelajah", DETIK, hz);
   clearTimeout(waktuGanti);
   if (waktuUjiPutus) clearTimeout(waktuUjiPutus);
+  jedaLoop.disable();
   if (waktuUjiPutusKelas) clearTimeout(waktuUjiPutusKelas);
   const namaPemain = {
     mode: MODE_NAMA,
@@ -855,6 +862,8 @@ try {
       rttMsMaks: bot.reduce((m, b) => b.rtt.reduce((x, r) => Math.max(x, r), m), 0),
       pingTersendat: bot.reduce((s, b) => s + b.rtt.filter((r) => r > 2000).length, 0),
       gerakDilewati: bot.reduce((s, b) => s + b.gerakDilewati, 0),
+      jedaEventLoopMsP95: Math.round(jedaLoop.percentile(95) / 1e5) / 10,
+      jedaEventLoopMsMaks: Math.round(jedaLoop.max / 1e5) / 10,
       gerakDikirim: jumlah((b) => b.gerak),
       gerakDikoreksi: jumlah((b) => b.koreksi),
       gerakDikoreksiPersen: +((100 * jumlah((b) => b.koreksi)) / Math.max(1, jumlah((b) => b.gerak))).toFixed(3),

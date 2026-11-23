@@ -52,10 +52,13 @@ export function gabungHasil(skenario, daftarHasil) {
   const mb = Math.max(0, ...daftarHasil.map((h) => h.jelajah?.mbTurunPerPemainPer15Menit ?? Infinity));
   tambah("Data turun per pemain per 15 menit (MB)", mb, `≤ ${AMBANG.mbPer15MenitMaks}`, mb <= AMBANG.mbPer15MenitMaks);
   if (s.sasaran === "uji") {
-    const kenaikan = daftarHasil.map((h) => (h.rttSepiMsP95 == null ? null : (h.jelajah?.rttMsP95 ?? Infinity) - h.rttSepiMsP95));
+    // D-9 a: kenaikan bersih = kenaikan p95 dikurangi p95 jeda event loop mesin bot (kesibukan mesin bot, bukan server).
+    const kenaikan = daftarHasil.map((h) =>
+      h.rttSepiMsP95 == null ? null : Math.max(0, Math.round((h.jelajah?.rttMsP95 ?? Infinity) - h.rttSepiMsP95 - (h.jelajah?.jedaEventLoopMsP95 ?? 0))),
+    );
     const ada = kenaikan.every((k) => k !== null);
     const maks = ada ? Math.max(...kenaikan) : null;
-    tambah("Kenaikan p95 pulang-pergi (ms)", maks ?? "-", `≤ ${AMBANG.kenaikanRttMsMaks}`, ada && maks <= AMBANG.kenaikanRttMsMaks, ada ? "" : "pengukur sepi gagal");
+    tambah("Kenaikan p95 pulang-pergi bersih (ms)", maks ?? "-", `≤ ${AMBANG.kenaikanRttMsMaks}`, ada && maks <= AMBANG.kenaikanRttMsMaks, ada ? "" : "pengukur sepi gagal");
   }
   const selisih = daftarHasil.flatMap((h) =>
     (h.pemakaianRuang ?? []).map((p) => (p?.perkiraanPermintaan == null ? null : p.perkiraanPermintaan / h.perkiraanBiaya.permintaanDOPerRuang - 1)),
@@ -89,6 +92,8 @@ export function gabungHasil(skenario, daftarHasil) {
       // D-6 a: sambung ulang bot yang pulih, dengan kode penutupannya (bukan ambang; hanya catatan).
       sambungUlangPulih: jumlah(daftarHasil, (h) => h.sambungUlangPulih ?? 0),
       pingTersendat: jumlah(daftarHasil, (h) => h.jelajah?.pingTersendat ?? 0),
+      kenaikanRttMentahMsMaks: Math.max(0, ...daftarHasil.map((h) => (h.rttSepiMsP95 == null ? 0 : (h.jelajah?.rttMsP95 ?? 0) - h.rttSepiMsP95))),
+      jedaEventLoopMsP95Maks: Math.max(0, ...daftarHasil.map((h) => h.jelajah?.jedaEventLoopMsP95 ?? 0)),
       layarKelasSambungUlang: jumlah(daftarHasil, (h) => h.layarKelasSambungUlang ?? 0),
       kodeTutupLayarKelas: daftarHasil.flatMap((h) => h.kodeTutupLayarKelas ?? []),
       rttMsMaks: Math.max(0, ...daftarHasil.map((h) => h.jelajah?.rttMsMaks ?? 0)),
@@ -113,6 +118,7 @@ export function teksRingkasan(laporan) {
     "",
     `Ruang ${r.ruang} × ${r.botPerRuang} bot dari ${r.pekerjaan} pekerjaan. Permintaan Durable Object: perkiraan ±${r.perkiraanPermintaanDO}, penghitung ruang ${r.pemakaianPermintaanDO}. p95 pulang-pergi HP menurut server: ${r.rttServerP95MsMaks ?? "-"} ms.`,
     `Ping tersendat (lebih dari 2 detik): ${r.pingTersendat}; waktu pulang-pergi terlama ${r.rttMsMaks} ms.`,
+    `Kenaikan p95 mentah ${r.kenaikanRttMentahMsMaks} ms, dengan p95 jeda event loop mesin bot ${r.jedaEventLoopMsP95Maks} ms.`,
     `Layar kelas tiruan: sambung ulang ${r.layarKelasSambungUlang}${r.kodeTutupLayarKelas.length ? ` (kode penutupan: ${r.kodeTutupLayarKelas.join(", ")})` : ""}.`,
     `Sambung ulang yang pulih: ${r.sambungUlangPulih}${Object.keys(r.kodeTutupTakTerduga).length ? ` (kode penutupan: ${Object.entries(r.kodeTutupTakTerduga).map(([k, n]) => `${k} × ${n}`).join(", ")})` : ""}.`,
     "",

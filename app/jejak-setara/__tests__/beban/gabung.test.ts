@@ -33,8 +33,8 @@ describe("gabungHasil (P-14)", () => {
     expect(gagal(gabungHasil("s1", [hasil(1, 50, { pesanDitolakServer: 2 })]))).toEqual(["Pesan ditolak server"]);
     expect(gagal(gabungHasil("s1", [hasil(1, 50, { jelajah: { gerakDikoreksiPersen: 1, mbTurunPerPemainPer15Menit: 2, rttMsP95: 240 } })]))).toEqual(["Gerak jujur dikoreksi (%)"]);
     expect(gagal(gabungHasil("s1", [hasil(1, 50, { jelajah: { gerakDikoreksiPersen: 0, mbTurunPerPemainPer15Menit: 3.2, rttMsP95: 240 } })]))).toEqual(["Data turun per pemain per 15 menit (MB)"]);
-    expect(gagal(gabungHasil("s1", [hasil(1, 50, { jelajah: { gerakDikoreksiPersen: 0, mbTurunPerPemainPer15Menit: 2, rttMsP95: 261 } })]))).toEqual(["Kenaikan p95 pulang-pergi (ms)"]);
-    expect(gagal(gabungHasil("s1", [hasil(1, 50, { rttSepiMsP95: null })]))).toEqual(["Kenaikan p95 pulang-pergi (ms)"]);
+    expect(gagal(gabungHasil("s1", [hasil(1, 50, { jelajah: { gerakDikoreksiPersen: 0, mbTurunPerPemainPer15Menit: 2, rttMsP95: 261 } })]))).toEqual(["Kenaikan p95 pulang-pergi bersih (ms)"]);
+    expect(gagal(gabungHasil("s1", [hasil(1, 50, { rttSepiMsP95: null })]))).toEqual(["Kenaikan p95 pulang-pergi bersih (ms)"]);
     expect(gagal(gabungHasil("s1", [hasil(1, 50, { akhirRonde: { botMenerimaSelesai: 49, pesertaD1: [49] } })]))).toEqual(["Bot menerima selesai", "Peserta di D1 per ruang"]);
     const p = perkiraanBiaya({ ruang: 1, botPerRuang: 50, detikLobi: 180, detikJelajah: 900 }).permintaanDOPerRuang;
     expect(gagal(gabungHasil("s1", [hasil(1, 50, { pemakaianRuang: [{ perkiraanPermintaan: Math.round(p * 1.3) }] })]))).toEqual([
@@ -54,6 +54,16 @@ describe("gabungHasil (P-14)", () => {
     expect(teksRingkasan(tersendat)).toContain("Ping tersendat (lebih dari 2 detik): 3; waktu pulang-pergi terlama 6400 ms.");
   });
 
+  it("D-9 a: kenaikan p95 dikurangi p95 jeda event loop mesin bot; angka mentah tetap di ringkasan", () => {
+    const sibuk = gabungHasil("s1", [hasil(1, 50, { jelajah: { gerakDikoreksiPersen: 0, mbTurunPerPemainPer15Menit: 1, rttMsP95: 268, jedaEventLoopMsP95: 31.5 } })]);
+    expect(gagal(sibuk)).toEqual([]);
+    expect(sibuk.ambang.find((a) => a.nama === "Kenaikan p95 pulang-pergi bersih (ms)")!.nilai).toBe(27);
+    expect(teksRingkasan(sibuk)).toContain("Kenaikan p95 mentah 58 ms, dengan p95 jeda event loop mesin bot 31.5 ms.");
+    expect(gagal(gabungHasil("s1", [hasil(1, 50, { jelajah: { gerakDikoreksiPersen: 0, mbTurunPerPemainPer15Menit: 1, rttMsP95: 290, jedaEventLoopMsP95: 20 } })]))).toEqual([
+      "Kenaikan p95 pulang-pergi bersih (ms)",
+    ]);
+  });
+
   it("s2: lima pekerjaan, sepuluh ruang main bersamaan sedikitnya 14 menit", () => {
     const lima = Array.from({ length: 5 }, () => hasil(2, 50));
     expect(gagal(gabungHasil("s2", lima))).toEqual([]);
@@ -64,7 +74,7 @@ describe("gabungHasil (P-14)", () => {
 
   it("lokal-10x50 tidak menilai kenaikan pulang-pergi (tanpa pengukur sepi)", () => {
     const l = gabungHasil("lokal-10x50", [{ ...hasil(10, 50), rttSepiMsP95: null, perkiraanBiaya: perkiraanBiaya({ ruang: 10, botPerRuang: 50, detikLobi: 60, detikJelajah: 300 }), pemakaianRuang: Array.from({ length: 10 }, () => ({ perkiraanPermintaan: perkiraanBiaya({ ruang: 10, botPerRuang: 50, detikLobi: 60, detikJelajah: 300 }).permintaanDOPerRuang })) }]);
-    expect(l.ambang.map((a) => a.nama)).not.toContain("Kenaikan p95 pulang-pergi (ms)");
+    expect(l.ambang.map((a) => a.nama)).not.toContain("Kenaikan p95 pulang-pergi bersih (ms)");
     expect(l.lulus).toBe(true);
   });
 });
