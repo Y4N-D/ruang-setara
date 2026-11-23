@@ -6,7 +6,7 @@
 | Tanggal | 23 November 2026 |
 | Sesi | Sesi A (mesin), mode ZIP dari `main` commit `e3e24a5` ditambah ZIP Gerbang 1 dan 2, ZIP Build, dan ZIP perbaikan-1 sampai perbaikan-8 JS-15 |
 | Lingkungan | Uji lokal: Node 22.23.5, pnpm 11.25.0, Chromium 1243 (Playwright, lewat `JEJAK_CHROMIUM`), Miniflare dari dependensi terkunci, mesin 1 vCPU. Uji beban jarak jauh: alur kerja "Jejak: uji beban" di mesin GitHub `ubuntu-24.04` (4 vCPU) menuju Worker `jejak-setara-uji` (Workers Paid sejak 23 November 2026, ruang di Asia Pasifik) |
-| Status | Menunggu `Diterima: JS-15`. Semua kriteria otomatis lulus, dan s2 serta s3 lulus menurut D-10 a. Satu penyimpangan perlu diterima: ekspor CSV ruang 100 pemain di lingkungan uji tidak dijalankan (AC-11; bagian "Penyimpangan") |
+| Status | Diterima pemilik proyek 24 November 2026 (`Diterima: JS-15`). Semua kriteria otomatis lulus, dan s2 serta s3 lulus menurut D-10 a. Penyimpangan 1 (ekspor CSV ruang 100 pemain di lingkungan uji tidak dijalankan; AC-11) diterima dengan saran (a) |
 
 ## Ringkasan
 
