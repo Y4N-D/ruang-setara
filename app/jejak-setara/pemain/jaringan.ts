@@ -4,7 +4,7 @@
 // dibaca agar `gerak` tidak diantrekan (P-16). JS-22 (P-8 sampai P-10): sesudah 10 kali gagal berturut-turut klien
 // memeriksa apakah ruang masih ada, lalu mencoba setiap 30 detik; sesudah 10 menit gagal, klien berhenti.
 import { BATAS } from "../inti/aturan";
-import { PROTOKOL_VERSI, skemaServerPemain, type KodeGalat, type PesanPemain, type PesanServerPemain } from "../inti/protokol";
+import { BATAS_PESAN, PROTOKOL_VERSI, skemaServerPemain, type KodeGalat, type PesanPemain, type PesanServerPemain } from "../inti/protokol";
 
 /** Jeda percobaan sambung ulang: 0,5, 1, 2, 4, lalu 8 detik seterusnya (P-29). */
 export const JADWAL_SAMBUNG_ULANG_MS = [500, 1000, 2000, 4000, 8000] as const;
@@ -89,6 +89,8 @@ export class KlienRuang {
   private pewaktuUlang: unknown = null;
   private pewaktuPing: unknown = null;
   private sampel: SampelJam[] = [];
+  /** JS-15 (P-27): waktu pulang-pergi terakhir, dikirim di `ping` berikutnya; kosong lagi di setiap sambungan baru. */
+  private rttTerakhir: number | null = null;
   private nomorAbsen: number | null;
   private readonly alamat: string;
   private readonly kode: string;
@@ -201,8 +203,10 @@ export class KlienRuang {
 
   private mulaiPing(): void {
     this.hentiPing();
+    this.rttTerakhir = null;
     const ping = () => {
-      this.kirim({ v: PROTOKOL_VERSI, t: "ping", tKlien: this.dep.jam() });
+      const tKlien = this.dep.jam();
+      this.kirim(this.rttTerakhir === null ? { v: PROTOKOL_VERSI, t: "ping", tKlien } : { v: PROTOKOL_VERSI, t: "ping", tKlien, rttMs: this.rttTerakhir });
       this.pewaktuPing = this.dep.pasang(ping, BATAS.pingMs);
     };
     ping();
@@ -257,6 +261,7 @@ export class KlienRuang {
     } else if (p.t === "pong") {
       const kini = this.dep.jam();
       const rtt = Math.max(0, kini - p.tKlien);
+      this.rttTerakhir = Math.min(BATAS_PESAN.rttMsMaks, Math.round(rtt));
       this.sampel.push({ rtt, selisih: p.waktuServer + rtt / 2 - kini });
       if (this.sampel.length > 5) this.sampel.shift();
     } else if (p.t === "galat" && GALAT_BERHENTI.has(p.kode)) {

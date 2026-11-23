@@ -41,9 +41,36 @@ describe("pemakaian per ruang (P-15 sampai P-17)", () => {
     const ringkasan = JSON.parse(d1<{ ringkasan_json: string }>(`SELECT ringkasan_json FROM ruang WHERE id = '${id}'`)[0].ringkasan_json) as { pemakaian: Record<string, number> };
     expect(ringkasan.pemakaian.sambungan).toBeGreaterThanOrEqual(2);
     expect(ringkasan.pemakaian.barisSqlite).toBeGreaterThan(0);
+    // JS-15 (D-3 a): waktu pulang-pergi tidak ditulis ke D1.
+    expect(Object.keys(ringkasan.pemakaian).filter((k) => k.startsWith("rtt"))).toEqual([]);
     const detail = await konsol("GET", `/api/ruang/${id}`);
     expect(detail.isi.langsung).toBeNull();
     expect((detail.isi.pemakaian as Record<string, number>).sambungan).toBeGreaterThanOrEqual(2);
+    a.ws.close();
+  }, 30_000);
+});
+
+describe("JS-15: waktu pulang-pergi HP di pemakaian (P-27 sampai P-29, AC-22)", () => {
+  it("ping dengan rttMs dari pemain masuk median, p95, dan sampel; ping tanpa rttMs dan rttMs tidak sah tidak dihitung", async () => {
+    const { isi } = await buatRuang({});
+    const kode = String(isi.kode);
+    const id = String(isi.ruangId);
+    const a = await gabung(kode);
+    const kosong = (await konsol("GET", `/api/ruang/${id}`)).isi.pemakaian as Record<string, number | null>;
+    expect([kosong.rttMedianMs, kosong.rttP95Ms, kosong.rttSampel]).toEqual([null, null, 0]);
+    for (const rttMs of [35, 42, 48, 51, 57, 63, 66, 74, 88, 240]) a.kirim({ v: V, t: "ping", tKlien: Date.now(), rttMs } as Pesan);
+    a.kirim({ v: V, t: "ping", tKlien: Date.now() } as Pesan);
+    a.kirim({ v: V, t: "ping", tKlien: Date.now(), rttMs: 60_001 } as Pesan);
+    await tungguSampai(
+      async () => ((await konsol("GET", `/api/ruang/${id}`)).isi.pemakaian as Record<string, number>).rttSampel,
+      (n) => n >= 10,
+      10_000,
+    );
+    const p = (await konsol("GET", `/api/ruang/${id}`)).isi.pemakaian as Record<string, number>;
+    expect([p.rttMedianMs, p.rttP95Ms, p.rttSampel]).toEqual([60, 250, 10]);
+    // Layar kelas tidak punya pesan ping: pesan itu ditolak skema kelas dan tidak menambah sampel.
+    await kelas(kode, { v: V, t: "ping", tKlien: Date.now(), rttMs: 10 });
+    expect(((await konsol("GET", `/api/ruang/${id}`)).isi.pemakaian as Record<string, number>).rttSampel).toBe(10);
     a.ws.close();
   }, 30_000);
 });

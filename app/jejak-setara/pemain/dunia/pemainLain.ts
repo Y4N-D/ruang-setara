@@ -6,6 +6,13 @@ import type { Arah, StatusRuang, WarnaTas } from "../../inti/tipe";
 
 /** Tunda tampilan = 100 + 2J ms, dijepit 120–250 ms; J dan d̄ rata-rata bergerak eksponensial α 0,1 (P-20). */
 export const TUNDA = { dasarMs: 100, kaliJitter: 2, minMs: 120, maksMs: 250, jitterAwalMs: 25, alfa: 0.1 } as const;
+/** JS-15 (P-24): di lobi dan hitung mundur `dunia` paling sering setiap 200 ms, jadi tunda tampilan paling sedikit 220 ms. */
+export const TUNDA_LOBI_MIN_MS = 220;
+
+/** Tunda tampilan untuk status ruang: 120–250 ms di `main` (P-20 JS-07), paling sedikit 220 ms di lobi dan hitung mundur. */
+export function tundaUntukStatus(tundaMs: number, status: StatusRuang): number {
+  return status === "lobi" || status === "hitung_mundur" ? Math.max(TUNDA_LOBI_MIN_MS, tundaMs) : tundaMs;
+}
 /** Penerusan paling lama 100 ms sesudah butir terakhir (P-21). */
 export const TERUS_MAKS_MS = 100;
 /** Di status `main`, pemain yang tidak muncul di `dunia` selama 2,5 detik disembunyikan (P-22). */
@@ -173,7 +180,7 @@ export class PemainLain {
    * tidak muncul selama 2,5 detik tidak digambar; di lobi dan hitung mundur tetap di posisi terakhirnya (P-22).
    */
   tampil(jamServer: number, jamLokal: number, status: StatusRuang): PemainTampil[] {
-    const t = jamServer - this.tunda.tundaMs;
+    const t = jamServer - tundaUntukStatus(this.tunda.tundaMs, status);
     const hasil: PemainTampil[] = [];
     for (const [id, c] of this.catatan) {
       const info = this.info.get(id);

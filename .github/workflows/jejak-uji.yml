@@ -61,6 +61,10 @@ jobs:
       - name: Build Jejak
         run: npx -y pnpm@11.25.0 build:jejak
 
+      # JS-15 (P-21): anggaran ukuran Architecture 11.3; run merah bila ada butir yang melewati batas.
+      - name: Periksa anggaran ukuran
+        run: node scripts/jejak-setara/anggaran.mjs --ringkasan
+
   deploy-uji:
     name: Deploy uji
     needs: uji

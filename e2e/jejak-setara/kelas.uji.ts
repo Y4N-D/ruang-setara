@@ -225,7 +225,8 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   await expect(g.getByText(`${nama[2]} dikeluarkan.`)).toBeVisible();
   // JS-22 (P-17): admin melihat pemakaian ronde di detail ruang.
   await expect(g.getByRole("heading", { name: "Pemakaian ronde ini" })).toBeVisible();
-  await expect(g.getByRole("row", { name: /Permintaan Durable Object \(perkiraan\)/ })).toContainText("kuota harian paket gratis");
+  // JS-15 (D-1 a): persen dari kuota bulanan Workers Paid, bukan lagi kuota harian paket gratis (JS-22).
+  await expect(g.getByRole("row", { name: /Permintaan Durable Object \(perkiraan\)/ })).toContainText("kuota bulanan Workers Paid");
   await g.screenshot({ path: `${FOTO}/konsol-detail-1280x720.png`, fullPage: true });
 
   // Tutup ruang dari layar kelas: semua sambungan berhenti (P-14).

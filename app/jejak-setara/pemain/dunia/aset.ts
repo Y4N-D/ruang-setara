@@ -4,6 +4,7 @@
 import { AVATAR, IKON, KUNCI_TAS, NPC, OBJEK, TANDA, UBIN, WARNA_TAS } from "../../assets/manifest";
 import type { Arah, Masa, WarnaTas } from "../../inti/tipe";
 import { GERBANG, OBJEK_PETA } from "./petaKampung";
+import { batasiSerentak, MUAT_SERENTAK } from "./penjadwal";
 
 export type Rgb = readonly [number, number, number];
 
@@ -187,9 +188,10 @@ function muatSatu(url: string): Promise<HTMLImageElement> {
   });
 }
 
-/** Memuat semua gambar dunia; gambar yang gagal dicoba lagi sekali. */
-export async function muatAsetDunia(): Promise<AsetDunia> {
+/** Memuat semua gambar dunia, paling banyak MUAT_SERENTAK bersamaan (JS-15, P-23); gambar yang gagal dicoba lagi sekali. */
+export async function muatAsetDunia(serentak: number = MUAT_SERENTAK): Promise<AsetDunia> {
   const cache = new Map<string, HTMLImageElement>();
+  const batas = batasiSerentak(serentak);
   const muat = async (url: string) => {
     const ada = cache.get(url);
     if (ada) return ada;
@@ -202,7 +204,7 @@ export async function muatAsetDunia(): Promise<AsetDunia> {
     cache.set(url, img);
     return img;
   };
-  await Promise.all(daftarUrlDunia().map(muat));
+  await Promise.all(daftarUrlDunia().map((url) => batas(() => muat(url))));
   const ambil = (url: string) => cache.get(url) as HTMLImageElement;
   const objek = new Map<string, { bawah: HTMLImageElement; atas: HTMLImageElement | null }>();
   for (const j of [...jenisObjekDunia(), ...jenisObjekKejadian()]) {

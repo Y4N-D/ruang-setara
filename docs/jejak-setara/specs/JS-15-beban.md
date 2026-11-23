@@ -1,6 +1,6 @@
 # JS-15 — Uji beban dan ketahanan jaringan, anggaran ukuran, perbaikan kinerja
 
-Status: draf spesifikasi (23 November 2026), menunggu `Spesifikasi disetujui: JS-15`. Disusun Sesi A dari entri Plan JS-15 yang disetujui pemilik proyek (`Setuju: JS-15`, 23 November 2026: saran setiap usulan diterima, yaitu 1a sampai 10a), dari ZIP `main` commit `e3e24a5` ditambah commit Plan JS-15.
+Status: disetujui (23 November 2026, `Spesifikasi disetujui: JS-15`; D-1 sampai D-4 = a). Build selesai 23 November 2026; catatan Build di akhir dokumen. Disusun Sesi A dari entri Plan JS-15 yang disetujui pemilik proyek (`Setuju: JS-15`, 23 November 2026: saran setiap usulan diterima, yaitu 1a sampai 10a), dari ZIP `main` commit `e3e24a5` ditambah commit Plan JS-15.
 
 ## Ringkasan
 
@@ -337,3 +337,15 @@ Tidak ada aset baru.
 - Konsol yang terbuka saat deploy: banner versi muncul sesudah tab kembali terlihat atau rute berubah.
 - Layar Kode di HP pemilik proyek terasa langsung tampil.
 - Bagian "Pemakaian ronde ini" menampilkan waktu pulang-pergi HP pemilik proyek.
+
+## Catatan Build (23 November 2026)
+
+- **Workers Paid:** tanggal aktif dicatat 23 November 2026 dari laporan pemilik proyek ("sudah membayar langganan"). Tangkapan layar peringatan anggaran dan batas pakai belum diterima; keduanya wajib terpasang sebelum ZIP Build di-push.
+- **Proksi jaringan (P-15):** dua kesalahan di alat uji sendiri ditemukan dan diperbaiki saat Build. Jawaban terpotong bila sambungan ditutup sebelum data tertunda terkirim, dan urutan potongan bisa tertukar karena pewaktu Node dengan lama berbeda tidak dijamin berurutan; kini setiap arah memakai satu antrean dan satu pewaktu.
+- **Penanda versi konsol (P-26):** menu konsol berpindah dengan `history.pushState`, bukan perubahan alamat yang memicu `hashchange`, jadi pemeriksaan dipicu perubahan rute di React (termasuk sekali saat konsol dimuat). Banner dipasang di kedua tata letak konsol (biasa dan ganti sandi wajib).
+- **Layar Kode lebih dulu (P-23, AC-18):** dengan `ukur-muat.mjs` di mesin yang sama, layar Kode siap 4,25 → 1,20 detik pada 10 Mbps dengan CPU 4× lebih lambat, 0,99 → 1,05 detik pada CPU normal, dan 3,04 → 2,33 detik pada 3 Mbps. Gambar dunia selesai lebih lambat di CPU 4× (95% termuat pada 3,07 → 5,18 detik), karena pemuatannya kini mulai sesudah layar Kode tampil dan paling banyak 6 sekaligus. Bergabung lewat `?kode=` menunggu gambar itu (P-50 JS-03), jadi pembantu `gabung` di `kejadian.uji.ts` kini menunggu sampai 20 detik. Lewat latensi 300 ms pulang-pergi, Worker lokal (HTTP/1.1) butuh 16,4 detik sampai layar nama; batas 6 gambar ditinjau sesudah uji beban jarak jauh, karena Cloudflare memakai HTTP/2.
+- **Waktu pulang-pergi (P-27 sampai P-29):** ringkasan pemakaian di D1 (`ruang.ringkasan_json`) sengaja tidak memuat nilai ini (D-3 a), walaupun ringkasan itu sudah ditulis saat ruang ditutup; menyimpannya hanya butuh mengubah satu baris bila kelak diinginkan, tanpa migrasi.
+- **Kiriman lobi (P-24, AC-19), D-5 untuk pemilik proyek:** dengan D-4 a (200 ms), 50 bot yang terus berjalan di lobi menerima 5,75 `dunia` per detik dan 3,67 MB per 15 menit, di atas sasaran AC-19 (≤ 5,5 dan ≤ 3 MB). Percobaan sementara (dikembalikan sesudahnya): 200 ms dengan kerangka penuh setiap 3 detik 5,80 dan 3,49 MB; 300 ms 4,70 dan 3,05 MB; 300 ms dengan kerangka penuh setiap 3 detik 4,83 dan 2,91 MB. Usulan D-5: (a, saran) 300 ms dan kerangka penuh setiap 3 detik di lobi dan hitung mundur, dengan tunda tampilan lobi paling sedikit 320 ms; (b) tetap 200 ms dan sasaran lobi menjadi ≤ 4 MB, karena batas 3 MB PRD 12 berlaku untuk ronde (ronde sendiri 2,06 MB); (c) 300 ms saja. ZIP Build memakai D-4 a sesuai spesifikasi yang disetujui; pilihan D-5 diterapkan bersama laporan Test.
+- **Potongan kode:** impor dinamis layar kelas membuat bundler memisahkan satu potongan bersama kecil (`sfx_peringatan-*.js`) yang juga dimuat layar pemain; kode layar pemain tetap 139,6 KB dari batas 200 KB, dan kode konsol turun 141,2 → 135,5 KB.
+- **Uji lama yang disesuaikan:** `kelas.uji.ts` kini mengharapkan "kuota bulanan Workers Paid" (D-1 a), dan uji jarak kiriman lobi di `inti-ruang.test.ts` mengikuti P-24.
+

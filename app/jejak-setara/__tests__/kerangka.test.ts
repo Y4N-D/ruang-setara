@@ -138,8 +138,8 @@ describe("Worker kerangka", () => {
     }
   });
 
-  it("PROTOKOL_VERSI bernilai 3 (JS-14) dan sama dengan protokol jawaban Worker", async () => {
-    expect(PROTOKOL_VERSI).toBe(3);
+  it("PROTOKOL_VERSI bernilai 4 (JS-15) dan sama dengan protokol jawaban Worker", async () => {
+    expect(PROTOKOL_VERSI).toBe(4);
     const isi = (await (await minta("/api/sehat")).json()) as { protokol: number };
     expect(isi.protokol).toBe(PROTOKOL_VERSI);
   });
@@ -329,7 +329,29 @@ describe("Teks dan halaman", () => {
     const datarPemain = ratakanTeks(TEKS);
     const datarKonsol = ratakanTeks(TEKS_KONSOL);
     for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
-    for (const [k, t] of Object.entries(konsol)) expect(datarKonsol[k], k).toBe(t);
+    // JS-15 (D-1 a): persen pemakaian dari kuota bulanan Workers Paid.
+    for (const [k, t] of Object.entries(konsol)) expect(datarKonsol[k], k).toBe(kunciJs15().ubah[k] ?? t);
+  });
+
+  it("JS-15: TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-15 (AC-20 sampai AC-22, AC-24)", () => {
+    const { konsol, ubah } = kunciJs15();
+    expect(Object.keys(konsol).sort()).toEqual(
+      [
+        "detail.pemakaianRttMedian",
+        "detail.pemakaianRttP95",
+        "detail.pemakaianRttSampel",
+        "detail.pemakaianMs",
+        "detail.pemakaianKosong",
+        "versiKonsol.baru",
+        "versiKonsol.muatUlang",
+        "kelas.memuatLayar",
+        "kelas.gagalMuatLayar",
+      ].sort(),
+    );
+    expect(Object.keys(ubah)).toEqual(["detail.pemakaianNilai"]);
+    const datar = ratakanTeks(TEKS_KONSOL);
+    for (const [k, t] of Object.entries({ ...konsol, ...ubah })) expect(datar[k], k).toBe(t);
+    expect(Object.keys(datar).filter((k) => k.startsWith("versiKonsol.")).sort()).toEqual(["versiKonsol.baru", "versiKonsol.muatUlang"]);
   });
 
   it("JS-10: TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-10 (AC-25), dengan teks JS-10 yang diubah JS-11", () => {
@@ -341,7 +363,11 @@ describe("Teks dan halaman", () => {
     for (const [kunci, teks] of Object.entries(harapan)) expect(datar[kunci], kunci).toBe(teks);
     const kunciJs10 = Object.keys(datar).filter(
       (k) =>
-        KUNCI_JS10.some((awal) => k === awal || k.startsWith(`${awal}.`)) && !KUNCI_JS22_KONSOL.includes(k) && !(k in js11.konsol) && !(k in kunciJs14().konsol),
+        KUNCI_JS10.some((awal) => k === awal || k.startsWith(`${awal}.`)) &&
+        !KUNCI_JS22_KONSOL.includes(k) &&
+        !(k in js11.konsol) &&
+        !(k in kunciJs14().konsol) &&
+        !(k in kunciJs15().konsol),
     );
     expect(kunciJs10.sort()).toEqual(Object.keys(harapan).sort());
   });
@@ -419,6 +445,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(kunciJs13()),
         ...Object.keys(kunciJs14().konsol),
         ...Object.keys(TEKS_A14_KONSOL),
+        ...Object.keys(kunciJs15().konsol),
       ]),
     ).toEqual({
       merek: "Jejak Setara",
@@ -649,7 +676,7 @@ describe("Token dan tajuk", () => {
     );
   });
 
-  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi) dan JS-04 (P-33, dengan ITERASI_SANDI 4000 sejak penutupan JS-04), dengan Database ID uji yang sudah diisi", () => {
+  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi), JS-04 (P-33), dan JS-15 (P-1: lingkungan uji 100.000 iterasi, 12 ruang aktif, batas CPU 1.000 ms), dengan Database ID uji yang sudah diisi", () => {
     expect(JSON.parse(baca("server/jejak-setara/wrangler.jsonc"))).toEqual({
       "$schema": "../../node_modules/wrangler/config-schema.json",
       "name": "jejak-setara-lokal",
@@ -677,7 +704,8 @@ describe("Token dan tajuk", () => {
       "env": {
         "uji": {
           "name": "jejak-setara-uji",
-          "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "4000", "RUANG_AKTIF_MAKS": "3" },
+          "vars": { "LINGKUNGAN": "uji", "ITERASI_SANDI": "100000", "RUANG_AKTIF_MAKS": "12" },
+          "limits": { "cpu_ms": 1000 },
           "observability": { "enabled": true, "logs": { "enabled": true, "invocation_logs": false }, "traces": { "enabled": false } },
           "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
           "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara-uji", "database_id": "8870d944-5d38-4c97-b8bf-819f7676eeb1", "migrations_dir": "migrations" }],
@@ -718,7 +746,7 @@ describe("JS-22: alur kerja Jejak (P-11 sampai P-14, P-22)", () => {
   });
 
   it("alur kerja Jejak memakai checkout@v5, setup-node@v5, dan ubuntu-24.04; deploy-pages.yml tidak berubah", () => {
-    for (const berkas of ["jejak-uji.yml", "jejak-admin-awal.yml", "jejak-hentikan.yml"]) {
+    for (const berkas of ["jejak-uji.yml", "jejak-admin-awal.yml", "jejak-hentikan.yml", "jejak-uji-beban.yml"]) {
       const isi = baca(`.github/workflows/${berkas}`);
       expect(isi, berkas).not.toMatch(/actions\/(checkout|setup-node)@v4|ubuntu-latest/);
       expect(isi, berkas).toContain("runs-on: ubuntu-24.04");
@@ -742,6 +770,43 @@ describe("JS-22: alur kerja Jejak (P-11 sampai P-14, P-22)", () => {
       }
     }
     expect(diperiksa).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe("JS-15: alur kerja Jejak: uji beban dan langkah anggaran ukuran (P-10 sampai P-13, P-21; AC-5, AC-16)", () => {
+  const beban = baca(".github/workflows/jejak-uji-beban.yml");
+  it("hanya workflow_dispatch dengan pilihan skenario dan konfirmasi UJI BEBAN; izin baca saja dan satu run sekaligus", () => {
+    expect(beban).toMatch(/^on:\n  workflow_dispatch:\n/m);
+    expect(beban).not.toMatch(/^\s+push:/m);
+    expect(beban).toContain("          - singkat\n          - s1\n          - s2\n          - s3\n          - lokal-10x50\n");
+    expect(beban).toContain('if [ "$KONFIRMASI" != "UJI BEBAN" ]; then');
+    expect(beban).toMatch(/^permissions:\n  contents: read\n/m);
+    expect(beban).toMatch(/^concurrency:\n  group: jejak-uji-beban\n  cancel-in-progress: false\n/m);
+    expect(beban.match(/timeout-minutes: (\d+)/g)).toEqual(["timeout-minutes: 40", "timeout-minutes: 40", "timeout-minutes: 40"]);
+  });
+
+  it("hanya menuju lingkungan uji, memeriksa rahasia dan /api/sehat, lalu membagi bot dan menggabungkan hasil", () => {
+    expect(beban).toContain("ALAMAT_UJI: https://jejak-setara-uji.ruangsetara.workers.dev");
+    expect(beban).not.toMatch(/jejak-setara\.ruangsetara|CLOUDFLARE_API_TOKEN|wrangler deploy/);
+    expect(beban).toContain("ADA_EMAIL: ${{ secrets.JEJAK_UJI_EMAIL != '' }}");
+    expect(beban).toContain('s.lingkungan !== "uji" || s.darurat');
+    expect(beban).toContain("bagian: ${{ fromJSON(needs.periksa.outputs.matriks) }}");
+    expect(beban).toContain('const mulai = nama === "s2" ? Date.now() + 6 * 60_000 : 0;');
+    expect(beban).toContain("--saya-paham-biaya");
+    expect(beban).toContain("node scripts/jejak-setara/gabung-beban.mjs --skenario \"$SKENARIO\" --masukan hasil --keluaran hasil-uji-beban.json --ringkasan");
+    expect(beban).toContain("retention-days: 30");
+  });
+
+  it("AGENTS 7 butir 16 berisi aturan uji beban berbayar, bukan lagi aturan paket gratis (P-9)", () => {
+    const agents = baca("docs/jejak-setara/AGENTS.md");
+    expect(agents).toContain("16. **Uji beban jarak jauh (Workers Paid sejak 23 November 2026, JS-15):**");
+    expect(agents).toContain("run di atas 400.000 permintaan Durable Object ditolak");
+    expect(agents).not.toContain("16. **Paket gratis (sampai JS-14):**");
+  });
+
+  it("Jejak: uji memeriksa anggaran ukuran sesudah build:jejak", () => {
+    const uji = baca(".github/workflows/jejak-uji.yml");
+    expect(uji.indexOf("node scripts/jejak-setara/anggaran.mjs --ringkasan")).toBeGreaterThan(uji.indexOf("pnpm@11.25.0 build:jejak"));
   });
 });
 
@@ -1091,6 +1156,27 @@ const PETA_KUNCI_JS14: Record<string, string> = {
 const TEKS_KHUSUS_JS14: Record<string, string> = { "detail.namaPemain": "Nama pemain" };
 /** Kunci lama yang teksnya diubah JS-14 (P-61). */
 const UBAH_JS14 = ["hasil.kolomNama", "csv.nama"];
+
+/** Teks konsol JS-15: tabel baru dan tabel yang diubah (D-1 a) di bagian Teks yang tampil (final). */
+function kunciJs15(): { konsol: Record<string, string>; ubah: Record<string, string> } {
+  const isi = baca("docs/jejak-setara/specs/JS-15-beban.md");
+  const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"), isi.indexOf("\n## Data, protokol"));
+  const urai = (teks: string): Record<string, string> => {
+    const hasil: Record<string, string> = {};
+    for (const baris of teks.split("\n")) {
+      if (!baris.startsWith("| ") || !baris.endsWith(" |")) continue;
+      const kolom = baris.slice(2, -2).split(" | ");
+      if (kolom.length !== 3 || kolom[0] === "Tempat" || kolom[0].startsWith("---")) continue;
+      const kunci = [...kolom[1].matchAll(/`([^`]+)`/g)].map((m) => m[1]);
+      const nilai = kunci.length > 1 ? kolom[2].split(" · ") : [kolom[2]];
+      expect(nilai.length, baris).toBe(kunci.length);
+      kunci.forEach((k, i) => (hasil[k] = nilai[i]));
+    }
+    return hasil;
+  };
+  const batas = bagian.indexOf("**Konsol (`teks-konsol.ts`), diubah");
+  return { konsol: urai(bagian.slice(0, batas)), ubah: urai(bagian.slice(batas)) };
+}
 
 function kunciJs14(): { pemain: Record<string, string>; konsol: Record<string, string>; ubah: Record<string, string> } {
   const isi = baca("docs/jejak-setara/specs/JS-14-pengaturan.md");

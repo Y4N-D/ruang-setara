@@ -57,7 +57,7 @@ const PEMAIN_KE_SERVER: Record<string, [Pesan, Pesan]> = {
   tutup_dialog: [pesan("tutup_dialog", { kejadianId: "K-13" }), pesan("tutup_dialog")],
   pakai_skill: [pesan("pakai_skill", { skill: "petunjuk", kejadianId: "K-13" }), pesan("pakai_skill", { skill: "terbang" })],
   ambil_kotak: [pesan("ambil_kotak", { kotakId: "kotak-z1-1" }), pesan("ambil_kotak", { kotakId: huruf(33) })],
-  ping: [pesan("ping", { tKlien: 123456.7 }), pesan("ping", { tKlien: -1 })],
+  ping: [pesan("ping", { tKlien: 123456.7, rttMs: 42 }), pesan("ping", { tKlien: -1 })],
   minta_nama: [pesan("minta_nama"), pesan("minta_nama", { nama: "Kancil Jingga" })],
 };
 
@@ -303,8 +303,14 @@ const KELOMPOK = [
 ] as const;
 
 describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
-  it("PROTOKOL_VERSI 3 sejak JS-14 (P-58)", () => {
-    expect(PROTOKOL_VERSI).toBe(3);
+  it("PROTOKOL_VERSI 4 sejak JS-15 (P-30)", () => {
+    expect(PROTOKOL_VERSI).toBe(4);
+  });
+
+  it("JS-15 (P-27): ping boleh membawa rttMs bilangan bulat 0–60.000", () => {
+    const sah = (isi: Record<string, unknown>) => skemaPemain.safeParse(pesan("ping", { tKlien: 1, ...isi })).success;
+    expect([sah({}), sah({ rttMs: 0 }), sah({ rttMs: 87 }), sah({ rttMs: 60_000 })]).toEqual([true, true, true, true]);
+    expect([sah({ rttMs: -1 }), sah({ rttMs: 60_001 }), sah({ rttMs: 12.5 }), sah({ rttMs: "80" }), sah({ rttMs: null })]).toEqual([false, false, false, false, false]);
   });
 
   it("JS-08 (P-64): kejadian_terlihat dengan setTokoh 1–4 id; butir dunia enam unsur dengan dialog boolean", () => {

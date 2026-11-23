@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan **Jejak Setara** di repositori `ruang-setara`. Baca seluruh file ini, lalu PRD, Design System, dan Architecture Jejak Setara, sebelum mengubah apa pun.
 
+Versi 0.9 (23 November 2026): Workers Paid aktif; bagian 0, 5, 6, dan 7 butir 16 diperbarui untuk uji beban berbayar (JS-15, P-9).
 Versi 0.8 (22 November 2026): nama buatan siswa sebagai pilihan guru di bagian 7 butir 4 dan daftar periksa bagian 9, serta baris JS-14 di bagian 5 (Gerbang 1 JS-14).
 Versi 0.7 (21 November 2026): kit suara, kredit efek suara, dan `assets:build:jejak` untuk suara di bagian 6 dan 9 (Permintaan C-14 dan C-15, Plan JS-13).
 Versi 0.6 (14 November 2026): JS-22 Pengaman biaya ditambahkan ke backlog bagian 5 (usulan 14a JS-10).
@@ -25,7 +26,7 @@ Versi 0.1 (4 November 2026): dokumen pertama.
 | Frasa persetujuan | `Setuju: F-xx` · `Spesifikasi disetujui: F-xx` | `Setuju: JS-xx` · `Spesifikasi disetujui: JS-xx` · `Rilis: vX.Y` |
 
 - Saat mengerjakan Jejak Setara, **dokumen ini menggantikan `AGENTS.md` akar**. Aturan `AGENTS.md` akar tetap berlaku penuh untuk Sehari Setara dan galeri.
-- Aturan "tanpa jaringan luar" dan "tanpa server" milik Sehari Setara **tidak** berlaku untuk Jejak Setara, karena pemilik proyek memilih mode real-time dengan server Cloudflare (PRD bagian 14 dan 21: paket gratis untuk JS-03 sampai JS-14, paket berbayar sebelum JS-15 atau uji coba kelas pertama). Aturan pengganti ada di bagian 7.
+- Aturan "tanpa jaringan luar" dan "tanpa server" milik Sehari Setara **tidak** berlaku untuk Jejak Setara, karena pemilik proyek memilih mode real-time dengan server Cloudflare (PRD bagian 14 dan 21: paket gratis untuk JS-03 sampai JS-14, paket berbayar sebelum JS-15 atau uji coba kelas pertama). Aturan pengganti ada di bagian 7. Workers Paid aktif sejak 23 November 2026 (Plan JS-15).
 - Bila satu pekerjaan menyentuh keduanya (misalnya kit gambar bersama atau tautan galeri), kedua panduan berlaku. Bila bertentangan, **berhenti dan tanyakan**.
 - Jejak Setara dimulai sesudah F-10 dan F-11 berstatus "Selesai" di `docs/sehari-setara/PLAN.md`, kecuali pemilik proyek memutuskan lain.
 - Sejak JS-01, `AGENTS.md` akar memuat penunjuk ke dokumen ini.
@@ -164,7 +165,7 @@ flowchart TD
 **Versi 1.1 (P1):** JS-17 kode QR dan kode masuk ulang (JFR-03, 07); JS-18 Teropong, Angkot, dan bantuan gerak (JFR-13, 25); JS-19 log audit, pengaturan umum, ruang uji, impor dan ekspor bank (JFR-39, 40, 47, 48); JS-20 statistik kelas dan per siswa serta cetak ringkasan (JFR-51, 52, 54); JS-21 musik latar.
 
 - Pembuatan aset gambar dan penulisan naskah kejadian berjalan **paralel** dan dilacak di `Daftar_Aset.md` dan JS-05. Selama aset belum "Disetujui", fitur memakai *placeholder* berupa kotak warna palet dengan label kunci aset. *Placeholder* wajib diganti sebelum rilis 1.0.
-- Sebelum Build JS-03, pemilik proyek menyelesaikan langkah 1 dan 3–6 Architecture bagian 18 dengan paket gratis. Langkah 2 (mengaktifkan Workers Paid) dikerjakan sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu. Agen mengingatkannya di Plan JS-15 dan sebelum uji coba kelas (keputusan pemilik proyek, 7 November 2026).
+- Sebelum Build JS-03, pemilik proyek menyelesaikan langkah 1 dan 3–6 Architecture bagian 18 dengan paket gratis. Langkah 2 (mengaktifkan Workers Paid) dikerjakan sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu. Agen mengingatkannya di Plan JS-15 dan sebelum uji coba kelas (keputusan pemilik proyek, 7 November 2026). Workers Paid diaktifkan pemilik proyek pada 23 November 2026 (Plan JS-15); basis data produksi (langkah 3) dibuat sebelum Build JS-16 (usulan 9a JS-15).
 
 ## 6. Perintah
 
@@ -176,7 +177,7 @@ npx pnpm@11.25.0 test:jejak              # uji unit inti, inti ruang, dan klien
 npx pnpm@11.25.0 test:jejak:server       # uji Worker dan D1
 npx pnpm@11.25.0 build:jejak             # build halaman dan Worker ke dist-jejak/
 npx pnpm@11.25.0 test:e2e:jejak          # uji Playwright multi-konteks
-npx pnpm@11.25.0 sim:beban               # 50 bot per ruang; lokal saja sampai paket berbayar aktif
+npx pnpm@11.25.0 sim:beban               # 50 bot per ruang, lokal; ke lingkungan uji hanya lewat "Jejak: uji beban" (JS-15)
 npx pnpm@11.25.0 db:migrasi:lokal        # migrasi D1 lokal
 npx pnpm@11.25.0 peta:build              # python scripts/jejak-setara/peta/build_peta.py: bangun ulang peta + pemeriksaan
 npx pnpm@11.25.0 assets:build:jejak      # python scripts/game/art/build_jejak.py: bangun ulang aset gambar dan suara + pemeriksaan
@@ -201,7 +202,7 @@ Nama skrip ditetapkan di JS-01 dan terdaftar di `package.json` sejak ZIP akhir J
 13. **Jangan commit** `node_modules/`, `dist-jejak/`, `dist-pages/`, `.wrangler/`, atau berkas `.dev.vars`.
 14. **Protokol:** perubahan yang tidak kompatibel menaikkan `PROTOKOL_VERSI`.
 15. **Produksi:** agen tidak pernah melakukan deploy ke produksi (bagian 4.5).
-16. **Paket gratis (sampai JS-14):** jangan menjalankan `sim:beban` atau uji otomatis dengan banyak sambungan ke lingkungan uji. Kuota harian Cloudflare dipakai bersama semua percobaan, dan permintaan yang melewatinya gagal sampai kuota pulih pukul 08.00 WITA (Architecture bagian 13.4).
+16. **Uji beban jarak jauh (Workers Paid sejak 23 November 2026, JS-15):** `sim:beban` atau uji otomatis dengan banyak sambungan ke lingkungan uji hanya dijalankan lewat alur kerja "Jejak: uji beban", hanya atas perintah pemilik proyek, dan setiap run mencetak perkiraan biaya lebih dulu; run di atas 400.000 permintaan Durable Object ditolak. Peringatan anggaran 3 USD dan batas pakai 5 USD untuk Workers dan Durable Objects tetap terpasang (Architecture bagian 13).
 
 ## 8. Aturan konten pembelajaran
 

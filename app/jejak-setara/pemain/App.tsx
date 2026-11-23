@@ -30,6 +30,7 @@ import { PROTOKOL_VERSI } from "../inti/versi";
 import type { StatusRuang, WarnaTas } from "../inti/tipe";
 import { isiTeks, TEKS } from "../teks";
 import { buatKanvasPeramban, muatAsetDunia } from "./dunia/aset";
+import { depPeramban, mulaiSaatSenggang } from "./dunia/penjadwal";
 import { penjagaPeramban } from "./dunia/layarMenyala";
 import { nomorZona } from "./dunia/kejadian";
 import { perangkatSentuh } from "./dunia/masukan";
@@ -556,7 +557,7 @@ export default function App() {
     gantiLayar("kode");
   };
 
-  // Aset dunia dimuat lebih dulu; tombol "Masuk" baru aktif sesudahnya (JS-07, bagian "Status antarmuka").
+  // Aset dunia dimuat sesudah layar Kode tampil (JS-15, P-23); tombol "Masuk" tetap menunggu aset (JS-07, "Status antarmuka").
   useEffect(() => {
     let aktif = true;
     const coba = (sisa: number) => {
@@ -570,9 +571,10 @@ export default function App() {
         },
       );
     };
-    coba(2);
+    const batalMulai = mulaiSaatSenggang(() => coba(2), depPeramban());
     return () => {
       aktif = false;
+      batalMulai();
     };
   }, [mesin]);
 

@@ -435,7 +435,7 @@ describe("JS-07: gerak dan dunia di lobi tanpa putaran (P-45, P-47, P-48)", () =
     expect(b.id).not.toBe(a.id);
   });
 
-  it("paling sering setiap 100 ms; laporan berhenti (jalan false) langsung dikirim", () => {
+  it("paling sering setiap 200 ms; laporan berhenti dikirim paling cepat 100 ms sesudah kiriman terakhir, sisanya saat ping (JS-15, P-24)", () => {
     const k = ruangKampung();
     const a = masuk(k, "s1");
     masuk(k, "s2");
@@ -444,12 +444,19 @@ describe("JS-07: gerak dan dunia di lobi tanpa putaran (P-45, P-47, P-48)", () =
     const y0 = pa.posisi!.y;
     const t = DIBUAT + 10_000;
     expect(duniaKe(gerak(k, "s1", x0 + 3, y0, 1, t), "s2")).toHaveLength(1);
-    expect(duniaKe(gerak(k, "s1", x0 + 6, y0, 2, t + 50), "s2")).toHaveLength(0);
-    expect(duniaKe(gerak(k, "s1", x0 + 9, y0, 3, t + 100), "s2")).toHaveLength(1);
-    const henti = gerak(k, "s1", x0 + 9, y0, 4, t + 120, false);
+    expect(duniaKe(gerak(k, "s1", x0 + 6, y0, 2, t + 100), "s2")).toHaveLength(0);
+    expect(duniaKe(gerak(k, "s1", x0 + 9, y0, 3, t + 200), "s2")).toHaveLength(1);
+    // Berhenti 50 ms sesudah kiriman terakhir: tertahan, lalu ikut terkirim saat ping berikutnya.
+    expect(duniaKe(gerak(k, "s1", x0 + 9, y0, 4, t + 250, false), "s2")).toHaveLength(0);
+    const ping = semuaSah(terimaPemain(k, "s2", { v: PROTOKOL_VERSI, t: "ping", tKlien: 1 }, t + 320, acak));
+    expect(duniaKe(ping, "s2")).toHaveLength(1);
+    expect(duniaKe(ping, "s2")[0].p[0]).toEqual([a.id, x0 + 9, y0, "kanan", false, false]);
+    expect(duniaKe(semuaSah(terimaPemain(k, "s2", { v: PROTOKOL_VERSI, t: "ping", tKlien: 2 }, t + 2000, acak)), "s2")).toHaveLength(0);
+    // Berhenti ≥ 100 ms sesudah kiriman terakhir langsung dikirim.
+    gerak(k, "s1", x0 + 12, y0, 5, t + 2500);
+    const henti = gerak(k, "s1", x0 + 12, y0, 6, t + 2620, false);
     expect(duniaKe(henti, "s2")).toHaveLength(1);
-    expect(duniaKe(henti, "s2")[0].p[0]).toEqual([a.id, x0 + 9, y0, "kanan", false, false]);
-    expect(DUNIA_LOBI).toEqual({ jedaMs: 100, kerangkaPenuhMs: 1000 });
+    expect(DUNIA_LOBI).toEqual({ jedaMs: 200, jedaBerhentiMs: 100, kerangkaPenuhMs: 1000 });
   });
 
   it("kerangka penuh di lobi paling sering sekali per detik per pemain, memuat pemain yang diam", () => {

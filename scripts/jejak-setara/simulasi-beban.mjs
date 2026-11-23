@@ -18,14 +18,18 @@
 // bot bermuatan Lari cepat yang sedang berjalan memakainya lalu bergerak 115,2 piksel per detik sampai `aktifSampai.lari`
 // (jam server diperkirakan dari `pong`); bot tanpa sasaran kejadian yang bermuatan Kompas memakainya lalu berjalan ke
 // ubin dari `kompas`; di Langkah 1, bot bermuatan Petunjuk memakainya lalu memilih pilihan acak yang tidak dicoret.
-// Lingkungan uji hanya dengan pilihan tertulis: --sasaran uji --alamat <URL> --saya-paham-kuota, serta akun konsol di
-// JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI; perkiraan permintaan Durable Object dicetak lebih dulu, dan lebih dari 20.000
-// ditolak.
+// JS-15 (P-4 sampai P-8, paket berbayar): lingkungan uji hanya dengan pilihan tertulis --sasaran uji --saya-paham-biaya,
+// serta akun konsol admin di JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI. Perkiraan biaya (biaya-beban.mjs) dicetak lebih dulu,
+// dan run di atas 400.000 permintaan Durable Object ditolak. Di mode uji: bot bergabung paling banyak --laju-gabung
+// (bawaan 4) per detik, satu sambungan pengukur mengirim 30 `ping` di lobi sebelum bot lain bergabung, --mulai-pada
+// <milidetik epoch> memulai ronde bersama, dan sesudah ronde pemakaian dibaca dari GET /api/ruang/{id} lalu data ruang
+// dihapus lewat DELETE /api/ruang/{id} (kecuali --simpan-ruang). Bot mengirim `rttMs` di `ping` (JS-15, P-29).
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { register } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { BATAS_PERMINTAAN_PER_RUN, perkiraanBiaya, SKENARIO as TABEL_SKENARIO, teksPerkiraan } from "./biaya-beban.mjs";
 
 const akar = fileURLToPath(new URL("../../", import.meta.url));
 const arg = process.argv.slice(2);
@@ -33,18 +37,27 @@ const ambil = (nama, bawaan) => {
   const i = arg.indexOf(nama);
   return i >= 0 && arg[i + 1] ? arg[i + 1] : bawaan;
 };
-const RUANG = Number(ambil("--ruang", "1"));
-const BOT = Number(ambil("--bot", "50"));
-const DETIK = Number(ambil("--detik", "120"));
+// JS-15 (P-12): --skenario <nama> mengisi ruang, bot, lama, dan sasaran dari tabel biaya-beban.mjs; pilihan lain tetap menang.
+const SK = TABEL_SKENARIO[ambil("--skenario", "")] ?? null;
+const RUANG = Number(ambil("--ruang", String(SK?.ruang ?? 1)));
+const BOT = Number(ambil("--bot", String(SK?.bot ?? 50)));
+const DETIK = Number(ambil("--detik", String(SK?.detikJelajah ?? 120)));
 const JITTER = Number(ambil("--jitter-ms", "0"));
 const LATENSI = Number(ambil("--latensi-ms", "0"));
 const JITTER_EKSP = Number(ambil("--jitter-eksp-ms", "0"));
-const LOBI_DETIK = Number(ambil("--lobi-detik", "30"));
+const LOBI_DETIK = Number(ambil("--lobi-detik", String(SK?.detikLobi ?? 30)));
 const DIAM_DETIK = Number(ambil("--diam-detik", "5"));
-const SASARAN = ambil("--sasaran", "lokal");
+const SASARAN = ambil("--sasaran", SK?.sasaran ?? "lokal");
 const PORT = Number(ambil("--port", "4330"));
 const MODE_NAMA = ambil("--mode-nama", "daftar") === "bebas" ? "bebas" : "daftar"; // JS-14
-const BATAS_PERMINTAAN_UJI = 20_000;
+// JS-15: alamat lingkungan uji, laju bergabung, jam mulai bersama, dan identitas run untuk alur kerja "Jejak: uji beban".
+const ALAMAT_UJI = "https://jejak-setara-uji.ruangsetara.workers.dev";
+const LAJU_GABUNG = Number(ambil("--laju-gabung", SASARAN === "uji" ? "4" : "0"));
+const MULAI_PADA = Number(ambil("--mulai-pada", "0")) > 0 ? Number(ambil("--mulai-pada", "0")) : null;
+const SIMPAN_RUANG = arg.includes("--simpan-ruang");
+const SKENARIO = ambil("--skenario", null);
+const BAGIAN = Number(ambil("--bagian", "1"));
+const KELUARAN = ambil("--keluaran", "");
 const tidur = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
@@ -76,17 +89,17 @@ const perkiraanPermintaan = (pesanNaikPerDetik, bot) => Math.round((pesanNaikPer
 
 let alamat = `http://127.0.0.1:${PORT}`;
 let server = null;
+const perkiraanRun = perkiraanBiaya({ ruang: RUANG, botPerRuang: BOT, detikLobi: LOBI_DETIK, detikJelajah: DETIK });
 if (SASARAN === "uji") {
-  alamat = ambil("--alamat", "");
-  const perkiraan = RUANG * perkiraanPermintaan(BOT * 6.5, BOT) * (DETIK / 900);
-  console.log(`Perkiraan permintaan Durable Object untuk percobaan ini: ±${Math.round(perkiraan)} (kuota gratis 100.000 per hari).`);
-  if (!alamat || !arg.includes("--saya-paham-kuota") || !process.env.JEJAK_UJI_EMAIL || !process.env.JEJAK_UJI_SANDI) {
-    console.error("Lingkungan uji butuh --alamat, --saya-paham-kuota, serta JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI (Architecture 13.4).");
-    process.exit(2);
+  alamat = ambil("--alamat", ALAMAT_UJI);
+  console.log(teksPerkiraan(perkiraanRun));
+  if (!arg.includes("--saya-paham-biaya") || !process.env.JEJAK_UJI_EMAIL || !process.env.JEJAK_UJI_SANDI) {
+    console.error("Lingkungan uji butuh --saya-paham-biaya, serta JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI untuk akun admin uji beban (JS-15, P-4).");
+    process.exit(1);
   }
-  if (perkiraan > BATAS_PERMINTAAN_UJI) {
-    console.error(`Ditolak: lebih dari ${BATAS_PERMINTAAN_UJI} permintaan. Jalankan secara lokal atau tunggu paket berbayar (JS-15).`);
-    process.exit(2);
+  if (perkiraanRun.permintaanDO > BATAS_PERMINTAAN_PER_RUN) {
+    console.error(`Ditolak: perkiraan lebih dari ${BATAS_PERMINTAAN_PER_RUN.toLocaleString("id-ID")} permintaan Durable Object per run (JS-15, P-4).`);
+    process.exit(1);
   }
 } else {
   const opsi = ["scripts/jejak-setara/server-lokal.mjs", "--port", String(PORT)];
@@ -310,9 +323,11 @@ function buatBot(kode, nomor) {
       else if (m.t === "nama_baru") (b.namaBaru ??= new Set()).add(m.id);
       else if (m.t === "galat" && (m.kode === "NAMA_DITOLAK" || m.kode === "NAMA_DIPAKAI")) b.galatNama = (b.galatNama ?? 0) + 1;
       else if (m.t === "dunia") b.dunia++;
+      else if (m.t === "galat" && m.kode === "TERLALU_CEPAT") b.ditolak = (b.ditolak ?? 0) + 1;
       else if (m.t === "pong") {
         const rtt = Date.now() - m.tKlien;
         b.rtt.push(rtt);
+        b.rttTerakhir = Math.min(60_000, Math.max(0, Math.round(rtt))); // JS-15 (P-29)
         b.selisihJam = m.waktuServer - (m.tKlien + rtt / 2);
       }
       else if (m.t === "kejadian_terlihat") {
@@ -539,6 +554,41 @@ const persen = (larik, q) => {
   return s.length ? s[Math.min(s.length - 1, Math.floor(q * s.length))] : null;
 };
 
+/** `ping` dengan `rttMs` terakhir bila server sudah versi 4 atau lebih (JS-15, P-27 dan P-29). */
+const pesanPing = (rttMs) => (V >= 4 && rttMs !== undefined && rttMs !== null ? { v: V, t: "ping", tKlien: Date.now(), rttMs } : { v: V, t: "ping", tKlien: Date.now() });
+
+/**
+ * JS-15 (P-6): satu sambungan pengukur tanpa identitas di lobi ruang pertama mengirim 30 `ping` berjeda 1 detik sebelum
+ * bot lain bergabung; hasilnya p95 waktu pulang-pergi saat sepi. Null bila pengukur gagal tersambung.
+ */
+async function ukurSepi(kode) {
+  const rtt = [];
+  try {
+    const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/ruang/${kode}`, { headers: { Origin: alamat } });
+    let siap = false;
+    ws.onmessage = (e) => {
+      const m = JSON.parse(String(e.data));
+      if (m.t === "selamat_datang") siap = true;
+      if (m.t === "pong") rtt.push(Date.now() - m.tKlien);
+    };
+    await new Promise((ok, gagal) => {
+      ws.onopen = () => ok();
+      ws.onerror = () => gagal(new Error("pengukur gagal tersambung"));
+    });
+    ws.send(JSON.stringify({ v: V, t: "halo", peran: "pemain" }));
+    for (let i = 0; i < 50 && !siap; i++) await tidur(100);
+    for (let i = 0; i < 30; i++) {
+      ws.send(JSON.stringify({ v: V, t: "ping", tKlien: Date.now() }));
+      await tidur(1000);
+    }
+    await tidur(500);
+    ws.close();
+  } catch {
+    return null;
+  }
+  return rtt.length > 0 ? persen(rtt, 0.95) : null;
+}
+
 async function jalankanFase(bot, fase, detik, hz) {
   for (const b of bot) {
     b.naik = 0;
@@ -556,7 +606,7 @@ async function jalankanFase(bot, fase, detik, hz) {
     for (const b of bot) langkahBot(b, sekarang, hz, fase);
     if (sekarang - ping >= 5000) {
       ping = sekarang;
-      for (const b of bot) if (b.ws.readyState === 1) b.kirim({ v: V, t: "ping", tKlien: Date.now() });
+      for (const b of bot) if (b.ws.readyState === 1) b.kirim(pesanPing(b.rttTerakhir));
     }
     await tidur(1000 / hz / 2);
   }
@@ -581,10 +631,23 @@ try {
     kodeRuangIndeks.set(kode, r);
     kodeRuang.push(kode);
   }
+  const rttSepiMsP95 = SASARAN === "uji" ? await ukurSepi(kodeRuang[0]) : null;
   const bot = [];
   const mulaiGabung = Date.now();
-  for (const kode of kodeRuang) bot.push(...(await Promise.all(Array.from({ length: BOT }, (_, i) => buatBot(kode, i)))));
+  if (LAJU_GABUNG > 0) {
+    // JS-15 (P-5): paling banyak LAJU_GABUNG sambungan per detik per proses, di bawah pembatas 300 per menit per alamat IP.
+    const janji = [];
+    for (const kode of kodeRuang)
+      for (let i = 0; i < BOT; i++) {
+        janji.push(buatBot(kode, i));
+        await tidur(1000 / LAJU_GABUNG);
+      }
+    bot.push(...(await Promise.all(janji)));
+  } else for (const kode of kodeRuang) bot.push(...(await Promise.all(Array.from({ length: BOT }, (_, i) => buatBot(kode, i)))));
   const lamaGabung = Date.now() - mulaiGabung;
+  if (MULAI_PADA !== null && Date.now() - MULAI_PADA > 60_000) {
+    throw new Error(`jam mulai bersama sudah lewat ${Math.round((Date.now() - MULAI_PADA) / 1000)} detik saat ruang siap (JS-15, P-7)`);
+  }
   const hz = frekuensi(BOT);
   await tidur(1500);
   // 1. Semua bot diam di lobi: tidak ada kiriman `dunia` dan tidak ada pengatur waktu putaran (P-47; AC-17, AC-20).
@@ -598,7 +661,9 @@ try {
     putaranServer: statDiamAkhir.map((x, i) => x.putaran - statDiamAwal[i].putaran),
   };
   // 2. Berjalan di halaman lobi (P-45, P-47).
-  const lobi = await jalankanFase(bot, "lobi", LOBI_DETIK, hz);
+  // JS-15 (P-7): dengan --mulai-pada, bot berjalan di lobi sampai jam mulai bersama.
+  const detikLobi = MULAI_PADA === null ? LOBI_DETIK : Math.max(5, (MULAI_PADA - Date.now()) / 1000);
+  const lobi = await jalankanFase(bot, "lobi", detikLobi, hz);
   // JS-14 (AC-25): layar kelas mengganti 5 nama per ruang di lobi, dan 5 nama lain saat menjelajah.
   const diganti = [];
   const gantiLima = async (awal) => {
@@ -614,7 +679,12 @@ try {
   const koreksiLobi = bot.reduce((s, b) => s + b.koreksi, 0);
   const gerakLobi = bot.reduce((s, b) => s + b.gerak, 0);
   // 3. Ronde: mulai lewat layar kelas, lalu menjelajah kampung.
-  for (const kode of kodeRuang) await kelas(kode, { t: "mulai" });
+  if (MULAI_PADA !== null && MULAI_PADA > Date.now()) await tidur(MULAI_PADA - Date.now());
+  const waktuRuang = new Map(kodeRuang.map((kode) => [kode, { kode, mainMulai: null, mainAkhir: null }]));
+  for (const kode of kodeRuang) {
+    waktuRuang.get(kode).mainMulai = Date.now() + 3000; // hitung mundur 3 detik
+    await kelas(kode, { t: "mulai" });
+  }
   await jalankanFase(bot, "diam", 3.5, hz);
   for (const b of bot) {
     b.koreksi = 0;
@@ -635,25 +705,53 @@ try {
   const stat = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
   // Pesan layar kelas sampai akhir menjelajah, sebelum ruang diakhiri (JS-10, AC-24).
   const kelasJelajah = kodeRuang.map((kode) => JSON.parse(JSON.stringify(layarKelas.get(kode)?.jenis ?? {})));
-  for (const kode of kodeRuang) await kelas(kode, { t: "akhiri" });
+  for (const kode of kodeRuang) {
+    waktuRuang.get(kode).mainAkhir = Date.now();
+    await kelas(kode, { t: "akhiri" });
+  }
   // JS-11 (AC-23): setiap bot menerima `selesai` (paling lama 10 detik), lalu kiriman ke D1 ditunggu kosong (P-15)
   // dan hasilnya dibaca dari D1 sebelum ruang ditutup.
   for (let i = 0; i < 100 && bot.some((b) => b.pesanSelesai === null); i++) await tidur(100);
   const hasilAkhir = [];
+  const pemakaianApi = [];
   for (const kode of kodeRuang) {
     const id = idRuangKode.get(kode);
+    let pemakaian = null;
     for (let i = 0; i < 100; i++) {
       const d = await (await fetch(`${alamat}/api/ruang/${id}`, { headers: tajukKonsol() })).json();
+      pemakaian = d.pemakaian ?? pemakaian; // JS-15 (P-8): sebelum ruang ditutup, termasuk waktu pulang-pergi
       if (d.langsung?.kirimanTertunda === false) break;
       await tidur(200);
     }
+    pemakaianApi.push(pemakaian);
     hasilAkhir.push(await (await fetch(`${alamat}/api/ruang/${id}/hasil`, { headers: tajukKonsol() })).json());
   }
   for (const kode of kodeRuang) await kelas(kode, { t: "tutup_ruang" });
+  // JS-15 (P-8): data ruang uji beban dihapus sesudah ditutup, kecuali --simpan-ruang.
+  const ruangDihapus = [];
+  if (SASARAN === "uji" && !SIMPAN_RUANG) {
+    for (const kode of kodeRuang) {
+      let status = 0;
+      for (let i = 0; i < 5 && !(status >= 200 && status < 300); i++) {
+        if (i > 0) await tidur(1000);
+        status = (await fetch(`${alamat}/api/ruang/${idRuangKode.get(kode)}`, { method: "DELETE", headers: tajukKonsol() })).status;
+      }
+      ruangDihapus.push(status);
+    }
+  }
   const jumlah = (f) => bot.reduce((s, b) => s + f(b), 0);
   const denganSelesai = bot.filter((b) => b.pesanSelesai !== null);
+  const pemakaianRuang = SASARAN === "lokal" ? stat.map((x) => x.pemakaian ?? null) : pemakaianApi;
   const hasil = {
     waktu: new Date().toISOString(),
+    // JS-15: identitas run, perkiraan biaya, pengukur sepi, jam ronde per ruang, dan penghapusan data ruang.
+    skenario: SKENARIO,
+    bagian: BAGIAN,
+    mulaiPada: MULAI_PADA,
+    perkiraanBiaya: perkiraanRun,
+    rttSepiMsP95,
+    waktuRuang: [...waktuRuang.values()],
+    ruangDihapus,
     sasaran: SASARAN,
     ruang: RUANG,
     botPerRuang: BOT,
@@ -714,22 +812,23 @@ try {
       ringkasanHasil: hasilAkhir.map((h) => h.ringkasan ?? null),
     },
     sambunganPutusTakTerduga: putusTakTerduga,
-    pesanDitolakServer: stat.reduce((s, x) => s + (x.pelanggaran ?? 0), 0),
+    // Lokal dari kait uji server; di lingkungan uji dari galat TERLALU_CEPAT yang diterima bot (JS-15, P-14).
+    pesanDitolakServer: SASARAN === "lokal" ? stat.reduce((s, x) => s + (x.pelanggaran ?? 0), 0) : jumlah((b) => b.ditolak ?? 0),
     alasanKoreksiServer: stat.map((x) => x.koreksiAlasan ?? {}),
-    barisSqliteDitulisPerRuang: stat.map((x) => x.barisDitulis),
-    barisD1DitulisPerRuang: stat.map((x) => x.pemakaian?.barisD1 ?? null), // JS-09 (P-50)
+    barisSqliteDitulisPerRuang: SASARAN === "lokal" ? stat.map((x) => x.barisDitulis) : pemakaianApi.map((p) => p?.barisSqlite ?? null),
+    barisD1DitulisPerRuang: pemakaianRuang.map((p) => p?.barisD1 ?? null), // JS-09 (P-50)
     // JS-10 (AC-24): pesan ke layar kelas selama sambungan (dari layar kelas), dan hitungan server.
     layarKelas: kelasJelajah.map((jenis) =>
       Object.fromEntries(Object.entries(jenis).map(([t, x]) => [t, { n: x.n, byteRata: Math.round(x.byte / Math.max(1, x.n)), byteMaks: x.byteMaks }])),
     ),
     // JS-22 (P-15): pemakaian per ruang menurut penghitung Durable Object, untuk dibandingkan dengan perkiraan di atas.
-    pemakaianRuang: stat.map((x) => x.pemakaian ?? null),
+    pemakaianRuang,
     pesanKeLayarKelasServer: stat.map((x) => x.keluarKelas ?? 0),
     byteKeLayarKelasServer: stat.map((x) => x.byteKelas ?? 0),
     perkiraanPermintaanDurableObjectPerSesi15MenitPerRuang: perkiraanPermintaan(jelajah.pesanNaikPerPemainPerDetik * BOT, BOT),
   };
   mkdirSync(join(akar, "test-results-jejak"), { recursive: true });
-  const berkas = join(akar, "test-results-jejak", `beban-${RUANG}x${BOT}-${Date.now()}.json`);
+  const berkas = KELUARAN || join(akar, "test-results-jejak", `beban-${RUANG}x${BOT}-${Date.now()}.json`);
   writeFileSync(berkas, JSON.stringify(hasil, null, 2));
   console.log(JSON.stringify(hasil, null, 2));
   for (const b of bot) b.ws.close();

@@ -451,7 +451,7 @@ Pemain adalah anak di bawah umur. Prinsipnya: **kumpulkan sesedikit mungkin, sim
 | Masa | Paket | Biaya | Cukup untuk |
 |---|---|---|---|
 | JS-03 sampai JS-14 | Paket gratis (Workers Free) | Rp 0 | Pengembangan, lingkungan uji, dan percobaan pemilik proyek dengan beberapa perangkat. Kuotanya harian, dan permintaan yang melewati kuota gagal sampai kuota pulih pukul 08.00 WITA (Architecture bagian 13.4) |
-| Sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu | Paket berbayar (Workers Paid) | US$5 per bulan | Uji beban penuh, uji coba kelas, dan pemakaian kelas sehari-hari |
+| Sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu | Paket berbayar (Workers Paid) | US$5 per bulan | Uji beban penuh, uji coba kelas, dan pemakaian kelas sehari-hari Aktif sejak 23 Nov 2026 (Plan JS-15). |
 
 - Biaya paket berbayar tetap US$5 per bulan, sekitar **Rp 91.000** dengan kurs sekitar Rp 18.150 per dolar AS (3 November 2026), belum termasuk pajak atau biaya kartu bila ada.
 - Perkiraan pemakaian 100 sesi kelas per bulan masih jauh di dalam kuota paket berbayar, sehingga tagihan biasanya tetap US$5 (rincian di Architecture bagian 13).
@@ -502,7 +502,7 @@ Semua aset gambar digambar dengan kode oleh Claude, mengikuti Design System bagi
 | Rujukan keliru di soal buatan guru | Kejadian tidak bisa terbit sebelum semua rujukannya ditandai Terverifikasi oleh Peninjau |
 | Akun admin dibobol | Sandi di-hash, pembatasan percobaan masuk, sesi yang kedaluwarsa, log audit |
 | Biaya melonjak | Kuota paket jauh di atas pemakaian kelas; batas pemain dan pesan per ruang; pemantauan pemakaian bulanan |
-| Kuota harian paket gratis habis selama pengembangan | Uji beban hanya di komputer lokal; lingkungan uji dipakai seperlunya; paket berbayar diaktifkan sebelum JS-15 atau uji coba kelas pertama |
+| Kuota harian paket gratis habis selama pengembangan | Uji beban hanya di komputer lokal; lingkungan uji dipakai seperlunya; paket berbayar diaktifkan sebelum JS-15 atau uji coba kelas pertama Workers Paid aktif sejak 23 Nov 2026; uji beban jarak jauh lewat alur kerja "Jejak: uji beban" (JS-15). |
 | Pemilik proyek bukan programmer | Penyiapan server dalam langkah bernomor; rilis produksi dengan satu tombol; pemulihan akun admin lewat alur kerja GitHub |
 | Gaya visual tampak atas tidak selaras dengan Sehari Setara | Palet, huruf, bingkai, dan kit gambar yang sama; pratinjau disetujui sebelum dipakai |
 
@@ -573,3 +573,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 22 Nov 2026 | JS-13 Selesai: diterima pemilik proyek (`Diterima: JS-13`) sesudah uji manual halaman Statistik dan dasbor | Pemilik proyek |
 | 22 Nov 2026 | Gerbang 1 JS-14 (`Setuju: JS-14`, usulan 1a sampai 16a): pengaturan pemain disimpan di `sessionStorage` tab; suara HP bawaan mati dan berkasnya baru diunduh saat dinyalakan, sedangkan layar kelas bawaan nyala 60%; nama buatan siswa sebagai pilihan guru (KT-14); guru mengganti nama atau mengeluarkan pemain dari konsol dan layar kelas, dan bisa mengganti semua nama buatan siswa sekaligus; data ruang yang melewati 12 bulan dihapus otomatis sejak JS-14; protokol naik ke versi 3 |
 | 22 Nov 2026 | JS-14 Selesai: diterima pemilik proyek (`Diterima: JS-14`); kenaikan kode konsol 4,40 KB, di atas batas spesifikasi 3 KB, diterima seperti AC-23 JS-09 |
+| 23 Nov 2026 | Workers Paid diaktifkan pemilik proyek (Plan JS-15). JS-15 disetujui dengan saran usulan 1a sampai 10a, dan spesifikasinya dengan D-1 sampai D-4 = a: persen pemakaian dari kuota bulanan Workers Paid, uji beban lewat alur kerja "Jejak: uji beban", waktu pulang-pergi HP hanya di "Pemakaian ronde ini", dan kiriman lobi dijarangkan; lingkungan produksi pindah ke JS-16 |

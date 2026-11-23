@@ -313,11 +313,25 @@ export const TEKS_KONSOL = {
     pemakaianSqlite: "Baris penyimpanan ruang ditulis",
     pemakaianSambungan: "Sambungan",
     pemakaianAlarm: "Alarm",
-    pemakaianNilai: "{n} ({p}% kuota harian paket gratis)",
+    pemakaianNilai: "{n} ({p}% kuota bulanan Workers Paid)",
     pemakaianCatatan: "Angka perkiraan dari server ruang. Bandingkan dengan dasbor Cloudflare bila perlu.",
+    // JS-15 (P-29): waktu pulang-pergi HP.
+    pemakaianRttMedian: "Waktu pulang-pergi HP, median",
+    pemakaianRttP95: "Waktu pulang-pergi HP, p95",
+    pemakaianRttSampel: "Sampel waktu pulang-pergi",
+    pemakaianMs: "{n} ms",
+    pemakaianKosong: "Belum ada data",
     kirimanGagal: "Sebagian data ronde ini gagal disimpan ke basis data.",
   },
+  // JS-15 (P-26): banner versi konsol.
+  versiKonsol: {
+    baru: "Versi konsol yang baru sudah tersedia. Muat ulang halaman agar tampilan dan data cocok.",
+    muatUlang: "Muat ulang",
+  },
   kelas: {
+    // JS-15 (P-25): layar kelas dimuat dinamis.
+    memuatLayar: "Memuat layar kelas…",
+    gagalMuatLayar: "Layar kelas gagal dimuat. Muat ulang halaman.",
     // JS-14 (P-29 sampai P-31, P-53 sampai P-57): suara, kelola nama, dan panel Pemain.
     suaraNyala: "Suara nyala. Tekan untuk mematikan.",
     suaraMati: "Suara mati. Tekan untuk menyalakan.",

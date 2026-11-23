@@ -64,7 +64,9 @@ async function konteks(browser: Browser, baseURL: string, hp = false): Promise<{
 const dunia = (page: Page) => page.locator("canvas.js-kanvas-dunia");
 async function gabung(page: Page, kode: string, avatar = 1): Promise<string> {
   await page.goto(`/?kode=${kode}`);
-  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible();
+  // JS-15 (P-23): kode dari alamat diperiksa sesudah gambar dunia termuat, dan pemuatan itu kini dimulai sesudah layar
+  // Kode tampil, paling banyak 6 sekaligus; dua peramban di mesin uji 1 vCPU bisa butuh lebih dari 5 detik.
+  await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 });
   const nama = page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio").first();
   const teks = (await nama.textContent())?.replace("▶", "").trim() ?? "";
   await nama.click();

@@ -23,6 +23,7 @@ import {
   type CatatanBerulang,
   type Pemakaian,
 } from "./pengaman";
+import { HistogramRtt } from "./rtt";
 import type { Arah, KejadianRuang, ModeNama, StatusRuang, Tingkat, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
 import { TEKS } from "../../../../app/jejak-setara/teks";
 import { kirimKeD1 } from "../db/ruang";
@@ -133,6 +134,8 @@ export class RuangJejak {
   private kirimanGagalSejak: number | null = null;
   private kirimanBerhenti = false;
   private pemakaian: Pemakaian = { ...PEMAKAIAN_KOSONG };
+  // JS-15 (P-28): waktu pulang-pergi HP pemain, hanya di memori.
+  private readonly rtt = new HistogramRtt();
   private antrean: Promise<unknown> = Promise.resolve();
   private readonly statistik = {
     masuk: 0,
@@ -531,7 +534,7 @@ export class RuangJejak {
       pemain: this.keadaan?.pemain.size ?? 0,
       sambungan: this.ctx.getWebSockets("pemain").length,
       sambunganKelas: this.ctx.getWebSockets("kelas").length,
-      pemakaian: this.ringkasPemakaian(),
+      pemakaian: this.ringkasPemakaianKonsol(),
       alarmDipakai: this.alarmDipakai,
       antreanKiriman: this.sql.exec<{ n: number }>("SELECT COUNT(*) AS n FROM kiriman").one().n + jumlahAntrean(this.sql),
       menungguHalo: this.keadaan?.batasHalo.size ?? 0,
@@ -641,6 +644,8 @@ export class RuangJejak {
       await this.terapkan(terimaHalo(k, sid, m, Date.now(), acakKripto, calon, hashMasuk));
       return;
     }
+    // JS-15 (P-28): waktu pulang-pergi dari HP pemain; pesan layar kelas tidak lewat sini.
+    if (m.t === "ping" && m.rttMs !== undefined) this.rtt.tambah(m.rttMs);
     await this.terapkan(terimaPemain(k, sid, m, sekarang, acakKripto));
   }
 
@@ -743,7 +748,7 @@ export class RuangJejak {
       pemain,
       kirimanBerhenti: this.kirimanBerhenti,
       kirimanTertunda: !this.antreanKosong(), // JS-11, P-15
-      pemakaian: this.ringkasPemakaian(),
+      pemakaian: this.ringkasPemakaianKonsol(),
     };
   }
 
@@ -1010,9 +1015,14 @@ export class RuangJejak {
     return jawabJson({ ok: true, alarmDipakai: this.alarmDipakai }, 200);
   }
 
-  /** Pemakaian ronde untuk konsol dan `ringkasan_json` (P-16, P-17). */
+  /** Pemakaian ronde untuk `ringkasan_json` (P-16, P-17), tanpa waktu pulang-pergi (JS-15, D-3 a). */
   private ringkasPemakaian() {
     return { ...this.pemakaian, perkiraanPermintaan: perkiraanPermintaan(this.pemakaian) };
+  }
+
+  /** Pemakaian ronde untuk konsol, ditambah median, p95, dan sampel waktu pulang-pergi HP (JS-15, P-29). */
+  private ringkasPemakaianKonsol() {
+    return { ...this.ringkasPemakaian(), ...this.rtt.ringkas() };
   }
 
   /**

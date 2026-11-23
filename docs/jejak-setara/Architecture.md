@@ -230,10 +230,10 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 | `KUNCI_SANDI` | Rahasia Worker | Kunci tambahan (*pepper*) hash sandi |
 | `KUNCI_IP` | Rahasia Worker | Kunci HMAC untuk kunci pembatas percobaan masuk (email, dan alamat IP ditambah tanggal) |
 | `KUNCI_ADMIN` | Rahasia Worker | Kunci sekali pakai untuk `POST /api/admin-awal`, dibuat lalu diganti nilai acak baru setiap "Jejak: admin awal" dijalankan (JS-04) |
-| `RUANG_AKTIF_MAKS` | Variabel Worker | Batas ruang aktif sekaligus di lingkungan itu: `lokal` 1000 (agar uji dan simulasi beban bisa membuat banyak ruang), `uji` 3, `produksi` 20; nilai tidak sah dianggap 3 (JS-10, P-4). `KUNCI_COBA` (JS-03) tidak dipakai lagi sejak JS-10 |
+| `RUANG_AKTIF_MAKS` | Variabel Worker | Batas ruang aktif sekaligus di lingkungan itu: `lokal` 1000 (agar uji dan simulasi beban bisa membuat banyak ruang), `uji` 3, `produksi` 20; nilai tidak sah dianggap 3 (JS-10, P-4). `KUNCI_COBA` (JS-03) tidak dipakai lagi sejak JS-10 Sejak JS-15: `uji` 12, agar uji beban 10 ruang serentak muat (P-1). |
 | `DARURAT` | Rahasia Worker | Hanya ada selama "Jejak: hentikan" aktif. Worker menjawab 503 `LAYANAN_BERHENTI` untuk semua `/api/*` (kecuali `/api/sehat`) dan `/ws/*`, dan setiap Durable Object yang bangun menjalankan berhenti paksa (JS-22) |
 | `LINGKUNGAN` | Variabel Worker | `lokal` (pengembangan dan uji di mesin agen), `uji`, atau `produksi` |
-| `ITERASI_SANDI` | Variabel Worker | Jumlah iterasi PBKDF2 untuk hash baru: 4.000 selama paket gratis (diturunkan dari 15.000 di penutupan JS-04, bagian 10.3), 100.000 sesudah paket berbayar aktif (JS-04) |
+| `ITERASI_SANDI` | Variabel Worker | Jumlah iterasi PBKDF2 untuk hash baru: 4.000 selama paket gratis (diturunkan dari 15.000 di penutupan JS-04, bagian 10.3), 100.000 sesudah paket berbayar aktif (JS-04) Sejak JS-15: `uji` 100.000, karena Workers Paid aktif (P-1). |
 
 Rahasia tidak pernah ditulis di repositori, log, atau pesan galat.
 
@@ -402,7 +402,7 @@ Worker memeriksa tajuk `Origin` (hanya domain Jejak Setara sendiri dan `localhos
 
 ### 6.2 Amplop pesan
 
-Setiap pesan adalah objek JSON `{ "v": 3, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08, 3 sejak JS-14). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
+Setiap pesan adalah objek JSON `{ "v": 4, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08, 3 sejak JS-14, 4 sejak JS-15). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
 
 ### 6.3 Pesan pemain
 
@@ -420,7 +420,7 @@ Setiap pesan adalah objek JSON `{ "v": 3, "t": "<tipe>", ...isi }`. `v` adalah `
 | `tutup_dialog` | `kejadianId` | Menutup dialog |
 | `pakai_skill` | `skill`, `kejadianId?` | `kejadianId` hanya untuk Petunjuk |
 | `ambil_kotak` | `kotakId` | Tidak dikirim layar pemain sejak JS-09: server mengambil kotak dari ruas gerak (bagian 8.5) dan mengabaikan pesan ini tanpa mencatat pelanggaran |
-| `ping` | `tKlien` | Setiap 5 detik |
+| `ping` | `tKlien`; `rttMs` pilihan, waktu pulang-pergi terakhir yang diukur HP (bilangan bulat 0–60.000, sejak JS-15) | Setiap 5 detik |
 
 **Dari server ke pemain**
 
@@ -804,7 +804,7 @@ export const SUARA: Record<NamaSuara, string>;     // C-15: URL WAV berhash, han
 | Jingle akhir `sfx_akhir.wav`, hanya layar kelas (C-14) | ≤ 160 KB |
 | Musik latar `musik_kelas.wav`, hanya layar kelas (WAV 11.025 Hz, C-16) | ≤ 1 MB |
 
-Jingle akhir dan musik latar tidak dihitung dalam "Seluruh aset layar pemain", karena HP pemain tidak memuatnya. Per 21 November 2026, aset layar pemain 205,3 KB dan aset khusus layar kelas 967,4 KB (`Daftar_Aset.md`, bagian "Efek suara").
+Jingle akhir dan musik latar tidak dihitung dalam "Seluruh aset layar pemain", karena HP pemain tidak memuatnya. Sejak JS-15, `scripts/jejak-setara/anggaran.mjs` memeriksa semua butir ini sesudah `build:jejak` di "Jejak: uji" dan membuat run merah bila ada yang terlampaui (P-20 sampai P-22). Per 21 November 2026, aset layar pemain 205,3 KB dan aset khusus layar kelas 967,4 KB (`Daftar_Aset.md`, bagian "Efek suara").
 
 ## 12. Keamanan dan privasi
 
@@ -846,7 +846,7 @@ Rincian di PRD bagian 13. Ketentuan teknisnya:
 
 ## 13. Kinerja, kapasitas, dan biaya
 
-Sejak JS-22, admin melihat pemakaian setiap ronde di halaman detail ruang (permintaan Durable Object, baris D1 dan baris penyimpanan ruang yang ditulis, sambungan, dan alarm, dengan persen kuota harian paket gratis). Sebelum Workers Paid aktif (JS-15), pemilik proyek menjalankan langkah Spend Management: (1) **Billing → Billable Usage → Create budget alert** 3 USD; (2) **Billing → Spend Management**: batas pakai Workers dan Durable Objects masing-masing 5 USD, pastikan **On**; (3) isi email pemberitahuan bila kolomnya tersedia. Batas Workers berlaku untuk semua Worker di akun dan menghentikan pemanggilan baru sampai periode tagihan berikutnya atau sampai batas diubah; biaya langganan tidak dihitung, dan pemblokiran tidak seketika.
+Sejak JS-22, admin melihat pemakaian setiap ronde di halaman detail ruang (permintaan Durable Object, baris D1 dan baris penyimpanan ruang yang ditulis, sambungan, dan alarm, dengan persen kuota bulanan Workers Paid sejak JS-15, serta median, p95, dan sampel waktu pulang-pergi HP yang hanya disimpan di memori ruang). Workers Paid aktif sejak 23 November 2026 (JS-15). Di hari yang sama, sebelum uji apa pun, pemilik proyek memasang: (1) **Manage Account → Billing → Billable Usage → Create budget alert** 3 USD, yang hanya tersedia untuk akun berbayar sehingga baru bisa sesudah Workers Paid aktif; (2) **Billing → Spend Management**: batas pakai Workers dan Durable Objects masing-masing 5 USD, pastikan **On**. Batas yang dibuat di dasbor tidak mengirim email; pemberitahuan datang dari peringatan anggaran. Batas pakai kembali ke nol di tanggal langganan, pemblokirannya tidak seketika, dan masih beta (dokumentasi Cloudflare, 13 November 2026). Batas Workers berlaku untuk semua Worker di akun dan menghentikan pemanggilan baru sampai periode tagihan berikutnya atau sampai batas diubah; biaya langganan tidak dihitung, dan pemblokiran tidak seketika.
 
 ### 13.1 Sasaran
 
@@ -912,6 +912,15 @@ Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* dan *Limits* 
 - Satu Durable Object punya batas lunak sekitar 1.000 permintaan per detik. Ruang 100 pemain yang banyak bergerak mendekati batas itu (sekitar 740 pesan per detik di percobaan Plan JS-03).
 - Saat pindah ke paket berbayar, kode dan data tidak berubah; yang berubah hanya kuota (bagian 18, langkah 2).
 
+### 13.5 Paket berbayar (sejak JS-15)
+
+Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* Workers 18 November 2026; *Spending limits and alerts* dan *Budget alerts* 13 November 2026) pada 23 November 2026.
+
+- Workers Paid minimal US$5 per bulan per akun. Kuota bulanan: 10 juta permintaan Worker dan 30 juta milidetik CPU; Durable Objects 1 juta permintaan dan 400.000 GB-detik; baris SQLite Durable Object dan D1 masing-masing 25 miliar dibaca dan 50 juta ditulis. Pesan WebSocket masuk ditagih 20 : 1, pesan keluar gratis, dan permintaan aset statis gratis.
+- Kelebihan dibulatkan ke unit berikutnya: permintaan Durable Object US$0,15 per juta, baris tulis US$1,00 per juta, dan durasi US$12,50 per juta GB-detik. Workers Logs termasuk 20 juta catatan per bulan; tarifnya beralih ke harga Cloudflare Observability mulai 1 Desember 2026, tetapi lingkungan uji hanya mencatat galat.
+- Lingkungan uji (`wrangler.jsonc`, `env.uji`) memakai `limits.cpu_ms` 1.000 untuk Worker dan setiap peristiwa Durable Object, `RUANG_AKTIF_MAKS` 12, dan `ITERASI_SANDI` 100.000 (JS-15, P-1). Anggaran CPU Durable Object diisi ulang setiap ada pesan masuk, dan HP mengirim `ping` setiap 5 detik.
+- Uji beban jarak jauh berjalan di mesin GitHub lewat alur kerja "Jejak: uji beban" (gratis untuk repositori publik), dengan perkiraan biaya dari `scripts/jejak-setara/biaya-beban.mjs`: satu putaran lengkap (uji singkat, 1 × 50, 10 × 50 serentak, dan 1 × 100 bot, masing-masing 15 menit) sekitar 25% kuota permintaan Durable Object sebulan, tanpa biaya di luar langganan selama kuota belum habis. Angka hasil uji ditulis di laporan JS-15.
+
 ## 14. Pengujian
 
 | Lapisan | Alat | Cakupan |
@@ -920,8 +929,8 @@ Diperiksa terhadap dokumentasi resmi Cloudflare (halaman *Pricing* dan *Limits* 
 | Konten dan peta | Vitest + zod | Bank awal (bagian 5.4), kecocokan rujukan dengan pustaka awal, keterjangkauan peta, jarak antartitik, kecukupan titik per zona |
 | Worker dan D1 | Vitest di Node terhadap Worker hasil build yang dijalankan `vite preview` (`test:jejak:server`; Gerbang 1 JS-03, usulan 3a) | Rute API, izin per peran, autentikasi, pembatas percobaan, migrasi, versi dan status kejadian, statistik, CSV |
 | Ujung ke ujung | Playwright, beberapa konteks peramban, terhadap `vite preview` (berkas `e2e/jejak-setara/*.uji.ts`) | Guru masuk, membuat ruang, dan membuka layar kelas; tiga pemain bergabung (satu dengan emulasi HP Android dan sentuhan); mulai; bergerak lewat kait uji; memeriksa dan menjawab kejadian; papan skor berubah; jeda dan lanjut; sambungan diputus lalu tersambung kembali; dikeluarkan; ronde berakhir; podium; pembahasan; rekap pribadi; ekspor CSV |
-| Jaringan | Playwright + pembatas jaringan | Jaringan lambat dan terputus-putus; latensi 300 ms; sambung ulang |
-| Beban | `sim:beban` (Node 22, WebSocket bawaan) | 50 bot per ruang dan 10 ruang serentak, serta 1 ruang × 100 bot, selama 15 menit: CPU per putaran, ukuran dan jumlah pesan, lalu lintas per pemain, p95 waktu pulang-pergi, dan perkiraan biaya. Selama paket gratis, hanya terhadap Worker lokal (bagian 13.4) |
+| Jaringan | Playwright + pembatas jaringan | Jaringan lambat dan terputus-putus; latensi 300 ms; sambung ulang Sejak JS-15: `scripts/jejak-setara/proksi-jaringan.mjs` (latensi, jitter, dan putus 30 detik atau 2 menit) dengan `e2e/jejak-setara/jaringan.uji.ts`; waktu muat dengan `ukur-muat.mjs` |
+| Beban | `sim:beban` (Node 22, WebSocket bawaan) | 50 bot per ruang dan 10 ruang serentak, serta 1 ruang × 100 bot, selama 15 menit: CPU per putaran, ukuran dan jumlah pesan, lalu lintas per pemain, p95 waktu pulang-pergi, dan perkiraan biaya. Selama paket gratis, hanya terhadap Worker lokal (bagian 13.4) Sejak JS-15 ke lingkungan uji lewat alur kerja "Jejak: uji beban" (skenario `singkat`, `s1`, `s2`, `s3`, `lokal-10x50`), dengan ambang lulus di `gabung-beban.mjs` |
 | Manual | Daftar periksa AGENTS | HP kelas bawah, proyektor dari 8 m, wifi sekolah, kurangi gerak, keyboard saja, uji coba kelas |
 
 Tangkapan layar uji: HP 731 × 411 (emulasi Android), laptop 1280 × 720, dan layar kelas 1024 × 768 serta 1920 × 1080.
@@ -963,13 +972,14 @@ Langkah ini dikerjakan pemilik proyek, dengan pendampingan agen dalam bahasa sed
 | Sesudah hasil Build JS-03 di-push | 8 |
 | Sebelum Build JS-04 | 6 (dua rahasia admin) |
 | Sesudah hasil JS-04 di-push | 9 |
-| Sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu | 2, lalu 3 (basis data produksi) |
+| Sebelum Build JS-15 (dikerjakan 23 Nov 2026) | 2, lalu peringatan anggaran dan batas pakai di hari yang sama (bagian 13) |
+| Sebelum Build JS-16 | 3 (basis data produksi; usulan 9a JS-15) |
 | Sebelum uji coba kelas (disarankan) | 7 |
 | Saat rilis | 10 |
 
 1. **Buat akun Cloudflare** di cloudflare.com dengan email Anda. Akun baru langsung memakai paket gratis (Workers Free), tanpa kartu.
-2. **(Ditunda sampai sebelum JS-15 atau uji coba kelas pertama) Aktifkan paket Workers Paid** (US$5 per bulan) di menu Workers & Pages → Plans. Siapkan kartu yang bisa dipakai untuk pembayaran internasional, atau metode lain yang ditawarkan Cloudflare. Kode dan data tidak berubah; yang berubah hanya kuota (bagian 13.4).
-3. **Buat basis data D1** di menu Storage & Databases → D1. Sekarang cukup `jejak-setara-uji`; `jejak-setara` (produksi) dibuat bersama langkah 2. Salin **Database ID** dan kirimkan kepada agen. ID ini bukan rahasia.
+2. **(Dikerjakan 23 November 2026, sebelum Build JS-15) Aktifkan paket Workers Paid** (US$5 per bulan) di menu Workers & Pages → Plans. Siapkan kartu yang bisa dipakai untuk pembayaran internasional, atau metode lain yang ditawarkan Cloudflare. Kode dan data tidak berubah; yang berubah hanya kuota (bagian 13.4).
+3. **Buat basis data D1** di menu Storage & Databases → D1. Sekarang cukup `jejak-setara-uji`; `jejak-setara` (produksi) dibuat sebelum Build JS-16 (usulan 9a JS-15). Salin **Database ID** dan kirimkan kepada agen. ID ini bukan rahasia.
 4. **Buat token API** di My Profile → API Tokens → Create Token. Pakai templat "Edit Cloudflare Workers", lalu tambahkan izin D1 Edit. Salin tokennya; token hanya tampil sekali. **Jangan kirim token ke chat**; token hanya disimpan di GitHub (langkah 6).
 5. **Catat Account ID** yang tampil di halaman Workers & Pages.
 6. **Simpan rahasia di GitHub:** buka repositori `ruang-setara` → Settings → Secrets and variables → Actions → New repository secret. Sebelum Build JS-03: `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`. Sebelum Build JS-04: `JEJAK_ADMIN_EMAIL` dan `JEJAK_ADMIN_SANDI_SEMENTARA` (minimal 12 karakter).

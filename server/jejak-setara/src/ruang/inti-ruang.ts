@@ -86,8 +86,12 @@ export const URUTAN_WARNA_TAS: readonly WarnaTas[] = ["sun", "mango", "coral", "
 export const AVATAR_TERSEDIA: readonly number[] = [0, 1, 2, 3, 4, 5, 6, 7];
 /** Setengah kotak 480 × 270 piksel logis di sekitar pemain (P-43). */
 const SETENGAH_KOTAK = { x: 240, y: 135 } as const;
-/** Kiriman `dunia` di lobi dan hitung mundur (JS-07): jarak antarkiriman dan jarak antar-kerangka penuh. */
-export const DUNIA_LOBI = { jedaMs: 100, kerangkaPenuhMs: 1000 } as const;
+/**
+ * Kiriman `dunia` di lobi dan hitung mundur (JS-07): jarak antarkiriman dan jarak antar-kerangka penuh. JS-15 (P-24,
+ * D-4 a): jarak naik dari 100 ke 200 ms; pemain yang berhenti tetap dikirim lebih cepat, paling cepat 100 ms sesudah
+ * kiriman terakhir.
+ */
+export const DUNIA_LOBI = { jedaMs: 200, jedaBerhentiMs: 100, kerangkaPenuhMs: 1000 } as const;
 /** Di status `main`, kerangka penuh dikirim setiap putaran ke-10 (JS-07, P-48). */
 export const KERANGKA_PENUH_SETIAP = 10;
 /** Status ruang yang menampilkan dunia di layar pemain (JS-07): posisi awal dan kerangka penuh dikirim. */
@@ -583,6 +587,15 @@ function kirimDuniaLobi(k: KeadaanRuang, o: Keluaran, sekarang: number): void {
     if (g) g.berubah = false;
   }
   k.duniaLobiTerakhir = sekarang;
+}
+
+/**
+ * JS-15 (P-24): kiriman lobi untuk perubahan yang tertahan, misalnya pemain yang berhenti kurang dari 100 ms sesudah
+ * kiriman terakhir. Dipanggil saat `ping` masuk, jadi lobi tetap tanpa putaran.
+ */
+function kirimDuniaLobiTertunda(k: KeadaanRuang, o: Keluaran, sekarang: number): void {
+  const jeda = k.duniaLobiTerakhir === null ? Infinity : sekarang - k.duniaLobiTerakhir;
+  if (jeda >= DUNIA_LOBI.jedaBerhentiMs && pemainAktif(k).some((p) => k.gerak.get(p.id)?.berubah)) kirimDuniaLobi(k, o, sekarang);
 }
 
 /** Waktu ronde tanpa jeda sejak mulaiPada. */
@@ -1368,7 +1381,7 @@ export function terimaPemain(k: KeadaanRuang, sid: string, pesan: PesanPemain, s
         // Lobi dan hitung mundur tanpa putaran: `dunia` mengikuti gerak yang masuk (P-47).
         if (k.status !== "main") {
           const jeda = k.duniaLobiTerakhir === null ? Infinity : sekarang - k.duniaLobiTerakhir;
-          if (!pesan.jalan || jeda >= DUNIA_LOBI.jedaMs) kirimDuniaLobi(k, o, sekarang);
+          if (jeda >= (pesan.jalan ? DUNIA_LOBI.jedaMs : DUNIA_LOBI.jedaBerhentiMs)) kirimDuniaLobi(k, o, sekarang);
         }
         return o;
       }
@@ -1382,6 +1395,8 @@ export function terimaPemain(k: KeadaanRuang, sid: string, pesan: PesanPemain, s
     }
     case "ping":
       kirimKe(o, sid, { v: V, t: "pong", tKlien: pesan.tKlien, waktuServer: sekarang });
+      // JS-15 (P-24): perubahan lobi yang tertahan jarak kiriman ikut terkirim saat `ping` berikutnya dari siapa pun.
+      if (k.status === "lobi" || k.status === "hitung_mundur") kirimDuniaLobiTertunda(k, o, sekarang);
       return o;
     case "periksa":
       terimaPeriksa(k, o, p, sid, pesan.kejadianId, sekarang);

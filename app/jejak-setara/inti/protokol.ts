@@ -35,6 +35,7 @@ export const BATAS_PESAN = {
   duniaMaks: 64, // isi `dunia` paling banyak 64 pemain
   kejadianMaks: 64,
   seqMaks: 1_000_000_000,
+  rttMsMaks: 60_000, // JS-15 (P-27): waktu pulang-pergi di `ping`
   koordinatPxMaks: 8192, // peta terbesar: 512 ubin × 16 piksel
   koordinatUbinMaks: 511,
   avatarMaks: 7, // 8 avatar: 0–7
@@ -136,7 +137,8 @@ const pKunci2 = /* @__PURE__ */ pesan("kunci_2", () => ({ kejadianId: id(), opsi
 const pTutupDialog = /* @__PURE__ */ pesan("tutup_dialog", () => ({ kejadianId: id() }));
 const pPakaiSkill = /* @__PURE__ */ pesan("pakai_skill", () => ({ skill: skill(), kejadianId: id().optional() }));
 const pAmbilKotak = /* @__PURE__ */ pesan("ambil_kotak", () => ({ kotakId: id() }));
-const pPing = /* @__PURE__ */ pesan("ping", () => ({ tKlien: waktu() }));
+// JS-15 (P-27): `rttMs` = waktu pulang-pergi terakhir yang diukur HP; `ping` pertama tanpa nilai ini.
+const pPing = /* @__PURE__ */ pesan("ping", () => ({ tKlien: waktu(), rttMs: angkaBulat(0, BATAS_PESAN.rttMsMaks).optional() }));
 
 export const skemaPemain = /* @__PURE__ */ z.discriminatedUnion("t", [
   pHalo,

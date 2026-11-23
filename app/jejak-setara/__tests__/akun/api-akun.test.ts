@@ -280,6 +280,15 @@ describe.skipIf(!sqlite)("hash ulang saat masuk (P-2, AC-1)", () => {
     expect(await hitungHash(() => masuk(naik, "admin@sekolah.sch.id", SANDI_AWAL))).toBe(1);
   });
 
+  it("JS-15 (P-2, AC-2): akun 4.000 iterasi diperbarui ke 100.000 iterasi lingkungan uji saat masuk", async () => {
+    const { d1, env } = lingkungan({ ITERASI_SANDI: "4000" });
+    await adminAwal(env);
+    const uji = { ...env, ITERASI_SANDI: "100000" } as Env;
+    expect(await masuk(uji, "admin@sekolah.sch.id", SANDI_AWAL)).not.toBe("");
+    expect(d1.baris("SELECT iterasi FROM pengguna")).toEqual([{ iterasi: 100_000 }]);
+    expect(await hitungHash(() => masuk(uji, "admin@sekolah.sch.id", SANDI_AWAL))).toBe(1);
+  });
+
   it("iterasi akun di atas target tidak diubah", async () => {
     const { d1, env } = lingkungan({ ITERASI_SANDI: "3000" });
     await adminAwal(env);

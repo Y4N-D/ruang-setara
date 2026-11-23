@@ -19,6 +19,8 @@ interface PropsKerangka {
   rute: Rute;
   wajib: boolean;
   pemberitahuan: Pemberitahuan | null;
+  /** JS-15 (P-26): banner versi konsol, di atas isi halaman. */
+  banner?: ReactNode;
   keluar: () => void;
   children: ReactNode;
 }
@@ -81,7 +83,7 @@ function WilayahPemberitahuan({ pemberitahuan }: { pemberitahuan: Pemberitahuan 
   );
 }
 
-export default function Kerangka({ akun, rute, wajib, pemberitahuan, keluar, children }: PropsKerangka) {
+export default function Kerangka({ akun, rute, wajib, pemberitahuan, banner, keluar, children }: PropsKerangka) {
   const [menuTerbuka, setMenuTerbuka] = useState(false);
   const idMenu = useId();
   const pengguna = isiTeks(TEKS_KONSOL.pengguna, { nama: akun.namaTampilan, peran: TEKS_KONSOL.peran[akun.peran] });
@@ -101,6 +103,7 @@ export default function Kerangka({ akun, rute, wajib, pemberitahuan, keluar, chi
             {tombolKeluar}
           </header>
           <main className="js-konsol-isi">
+            {banner}
             <WilayahPemberitahuan pemberitahuan={pemberitahuan} />
             {children}
           </main>
@@ -134,6 +137,7 @@ export default function Kerangka({ akun, rute, wajib, pemberitahuan, keluar, chi
           <DaftarMenu akun={akun} rute={rute} pilih={() => setMenuTerbuka(false)} />
         </nav>
         <main className="js-konsol-isi">
+          {banner}
           <WilayahPemberitahuan pemberitahuan={pemberitahuan} />
           {children}
         </main>

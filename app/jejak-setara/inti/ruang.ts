@@ -176,10 +176,14 @@ export const skemaPemakaian = z.object({
   barisD1: z.number().int().min(0),
   internal: z.number().int().min(0),
   perkiraanPermintaan: z.number().int().min(0),
+  // JS-15 (P-29): waktu pulang-pergi HP; ringkasan lama di D1 tidak memuatnya (D-3 a).
+  rttMedianMs: z.number().int().min(0).nullable().optional(),
+  rttP95Ms: z.number().int().min(0).nullable().optional(),
+  rttSampel: z.number().int().min(0).optional(),
 });
 export type PemakaianRuang = z.infer<typeof skemaPemakaian>;
-/** JS-22 (P-17, D-3): kuota harian paket gratis untuk persen pemakaian (permintaan Durable Object dan baris ditulis). */
-export const KUOTA_HARIAN_GRATIS = 100_000;
+/** JS-15 (D-1 a): kuota bulanan Workers Paid untuk persen pemakaian; menggantikan kuota harian paket gratis JS-22. */
+export const KUOTA_BULANAN_BERBAYAR = { permintaan: 1_000_000, barisDitulis: 50_000_000 } as const;
 export type Langsung = z.infer<typeof skemaLangsung>;
 export const skemaDetailRuang = z.object({ ruang: skemaRingkasanRuang, langsung: skemaLangsung.nullable(), pemakaian: skemaPemakaian.nullable().optional() });
 export type DetailRuang = z.infer<typeof skemaDetailRuang>;

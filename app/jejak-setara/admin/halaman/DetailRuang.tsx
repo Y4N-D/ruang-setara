@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Saya } from "../../inti/akun";
 import {
-  KUOTA_HARIAN_GRATIS,
+  KUOTA_BULANAN_BERBAYAR,
   STATUS_BOLEH_TUTUP,
   STATUS_HASIL,
   type AksiKelola,
@@ -267,26 +267,32 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
   );
 }
 
-/** JS-22 (P-17): pemakaian ronde untuk admin, dengan persen kuota harian paket gratis (D-3). */
+/**
+ * JS-22 (P-17): pemakaian ronde untuk admin. Sejak JS-15 persennya dari kuota bulanan Workers Paid (D-1 a), dan ada
+ * median, p95, serta sampel waktu pulang-pergi HP (P-29).
+ */
 function BagianPemakaian({ p }: { p: PemakaianRuang }) {
-  const nilai = (n: number, persen: boolean) =>
-    persen ? isiTeks(t.pemakaianNilai, { n: FORMAT_ANGKA.format(n), p: FORMAT_PERSEN.format((n * 100) / KUOTA_HARIAN_GRATIS) }) : FORMAT_ANGKA.format(n);
-  const baris: [string, number, boolean][] = [
-    [t.pemakaianPermintaan, p.perkiraanPermintaan, true],
-    [t.pemakaianD1, p.barisD1, true],
-    [t.pemakaianSqlite, p.barisSqlite, true],
-    [t.pemakaianSambungan, p.sambungan, false],
-    [t.pemakaianAlarm, p.alarm, false],
+  const persen = (n: number, kuota: number) => isiTeks(t.pemakaianNilai, { n: FORMAT_ANGKA.format(n), p: FORMAT_PERSEN.format((n * 100) / kuota) });
+  const ms = (n: number | null | undefined) => (n === null || n === undefined ? t.pemakaianKosong : isiTeks(t.pemakaianMs, { n: FORMAT_ANGKA.format(n) }));
+  const baris: [string, string][] = [
+    [t.pemakaianPermintaan, persen(p.perkiraanPermintaan, KUOTA_BULANAN_BERBAYAR.permintaan)],
+    [t.pemakaianD1, persen(p.barisD1, KUOTA_BULANAN_BERBAYAR.barisDitulis)],
+    [t.pemakaianSqlite, persen(p.barisSqlite, KUOTA_BULANAN_BERBAYAR.barisDitulis)],
+    [t.pemakaianSambungan, FORMAT_ANGKA.format(p.sambungan)],
+    [t.pemakaianAlarm, FORMAT_ANGKA.format(p.alarm)],
+    [t.pemakaianRttMedian, ms(p.rttMedianMs)],
+    [t.pemakaianRttP95, ms(p.rttP95Ms)],
+    [t.pemakaianRttSampel, FORMAT_ANGKA.format(p.rttSampel ?? 0)],
   ];
   return (
     <section className="js-ruang-pemakaian" aria-labelledby="js-ruang-pemakaian-judul">
       <h2 id="js-ruang-pemakaian-judul">{t.pemakaianJudul}</h2>
       <table className="js-konsol-tabel">
         <tbody>
-          {baris.map(([label, n, persen]) => (
+          {baris.map(([label, isi]) => (
             <tr key={label}>
               <th scope="row">{label}</th>
-              <td>{nilai(n, persen)}</td>
+              <td>{isi}</td>
             </tr>
           ))}
         </tbody>

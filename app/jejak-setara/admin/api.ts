@@ -2,6 +2,7 @@
 // mengubah data membawa `X-Jejak: 1` (P-10); peramban menambahkan `Origin` sendiri. Galat jaringan menjadi `JARINGAN`,
 // dan jawaban yang bentuknya tidak dikenal menjadi `UMUM` (bagian "Teks yang tampil", Galat).
 import { useEffect, useState } from "react";
+import { PERISTIWA_GAGAL_URAI } from "./versi-konsol";
 import { z } from "zod";
 import {
   KODE_GALAT_AKUN,
@@ -91,7 +92,10 @@ async function panggil<T>(metode: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", j
     return galatDari(kode, jawaban.status, json);
   }
   const hasil = skema.safeParse(json);
-  return hasil.success ? { ok: true, data: hasil.data } : galatDari("UMUM", jawaban.status);
+  if (hasil.success) return { ok: true, data: hasil.data };
+  // JS-15 (P-26): bentuk jawaban yang tidak dikenal bisa berarti konsol ini lebih lama dari server.
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(PERISTIWA_GAGAL_URAI));
+  return galatDari("UMUM", jawaban.status);
 }
 
 const skemaKeluar = z.object({ ok: z.literal(true) });

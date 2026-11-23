@@ -1,0 +1,157 @@
+# Uji beban jarak jauh ke lingkungan uji Cloudflare (spesifikasi JS-15, P-10 sampai P-14). Hanya dijalankan pemilik
+# proyek lewat tombol "Run workflow". Bot berjalan di mesin GitHub (gratis untuk repositori publik); skenario s2 dibagi
+# ke lima pekerjaan paralel agar setiap mesin memakai alamat IP sendiri dan semua ruang mulai bersama. Alur kerja ini
+# hanya menuju lingkungan uji, dan setiap pekerjaan bot mencetak perkiraan biaya lebih dulu (biaya-beban.mjs).
+name: "Jejak: uji beban"
+
+on:
+  workflow_dispatch:
+    inputs:
+      skenario:
+        description: "Skenario: singkat (2 menit), s1 (1 x 50), s2 (10 x 50), s3 (1 x 100), lokal-10x50 (Worker lokal)"
+        type: choice
+        options:
+          - singkat
+          - s1
+          - s2
+          - s3
+          - lokal-10x50
+        required: true
+      konfirmasi:
+        description: "Ketik UJI BEBAN untuk menjalankan"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jejak-uji-beban
+  cancel-in-progress: false
+
+env:
+  ALAMAT_UJI: https://jejak-setara-uji.ruangsetara.workers.dev
+
+jobs:
+  periksa:
+    name: Periksa
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    outputs:
+      matriks: ${{ steps.atur.outputs.matriks }}
+      mulai: ${{ steps.atur.outputs.mulai }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Periksa konfirmasi, rahasia, dan lingkungan uji
+        env:
+          SKENARIO: ${{ inputs.skenario }}
+          KONFIRMASI: ${{ inputs.konfirmasi }}
+          ADA_EMAIL: ${{ secrets.JEJAK_UJI_EMAIL != '' }}
+          ADA_SANDI: ${{ secrets.JEJAK_UJI_SANDI != '' }}
+        run: |
+          if [ "$KONFIRMASI" != "UJI BEBAN" ]; then
+            echo "::error::Konfirmasi harus diketik persis UJI BEBAN."
+            exit 1
+          fi
+          if [ "$SKENARIO" != "lokal-10x50" ]; then
+            if [ "$ADA_EMAIL" != "true" ] || [ "$ADA_SANDI" != "true" ]; then
+              echo "::error::Rahasia JEJAK_UJI_EMAIL dan JEJAK_UJI_SANDI (akun admin uji beban) belum diisi."
+              exit 1
+            fi
+            curl -fsS "$ALAMAT_UJI/api/sehat" -o sehat.json || { echo "::error::Lingkungan uji tidak menjawab /api/sehat."; exit 1; }
+            node -e 'const s = JSON.parse(require("fs").readFileSync("sehat.json", "utf8")); if (s.ok !== true || s.lingkungan !== "uji" || s.darurat) { console.error("::error::/api/sehat bukan lingkungan uji yang sehat: " + JSON.stringify(s)); process.exit(1); }'
+          fi
+
+      - name: Atur pembagian dan jam mulai bersama
+        id: atur
+        env:
+          SKENARIO: ${{ inputs.skenario }}
+        run: |
+          node --input-type=module -e '
+            import { appendFileSync } from "node:fs";
+            import { perkiraanSkenario, SKENARIO, teksPerkiraan } from "./scripts/jejak-setara/biaya-beban.mjs";
+            const nama = process.env.SKENARIO;
+            const s = SKENARIO[nama];
+            console.log(`Skenario ${nama}: ${s.pekerjaan} pekerjaan x ${s.ruang} ruang x ${s.bot} bot.`);
+            console.log(teksPerkiraan(perkiraanSkenario(nama)));
+            const mulai = nama === "s2" ? Date.now() + 6 * 60_000 : 0;
+            appendFileSync(process.env.GITHUB_OUTPUT, `matriks=${JSON.stringify(Array.from({ length: s.pekerjaan }, (_, i) => i + 1))}\nmulai=${mulai}\n`);
+          '
+
+  bot:
+    name: Bot ${{ matrix.bagian }}
+    needs: periksa
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        bagian: ${{ fromJSON(needs.periksa.outputs.matriks) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Pasang dependensi
+        run: npx -y pnpm@11.25.0 install --frozen-lockfile
+
+      - name: Jalankan bot
+        env:
+          JEJAK_UJI_EMAIL: ${{ secrets.JEJAK_UJI_EMAIL }}
+          JEJAK_UJI_SANDI: ${{ secrets.JEJAK_UJI_SANDI }}
+          SKENARIO: ${{ inputs.skenario }}
+          BAGIAN: ${{ matrix.bagian }}
+          MULAI: ${{ needs.periksa.outputs.mulai }}
+          WRANGLER_SEND_METRICS: "false"
+        run: >-
+          node scripts/jejak-setara/simulasi-beban.mjs --skenario "$SKENARIO" --bagian "$BAGIAN" --mulai-pada "$MULAI"
+          --saya-paham-biaya --keluaran "test-results-jejak/beban-$SKENARIO-$BAGIAN.json"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: beban-${{ inputs.skenario }}-${{ matrix.bagian }}
+          path: test-results-jejak/beban-${{ inputs.skenario }}-${{ matrix.bagian }}.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  gabung:
+    name: Gabung dan nilai
+    needs: [periksa, bot]
+    if: ${{ always() && needs.periksa.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: beban-${{ inputs.skenario }}-*
+          path: hasil
+
+      - name: Nilai ambang lulus
+        env:
+          SKENARIO: ${{ inputs.skenario }}
+        run: node scripts/jejak-setara/gabung-beban.mjs --skenario "$SKENARIO" --masukan hasil --keluaran hasil-uji-beban.json --ringkasan
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hasil-uji-beban-${{ inputs.skenario }}
+          path: hasil-uji-beban.json
+          if-no-files-found: warn
+          retention-days: 30
