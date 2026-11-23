@@ -218,14 +218,23 @@ export function upgradeMentah(jalur: string, tajuk: Record<string, string>, port
   });
 }
 
+/**
+ * Menjalankan SQL di D1 lokal Worker uji. Worker yang sedang menulis D1 (misalnya ringkasan ruang yang baru ditutup)
+ * bisa mengunci berkas SQLite sesaat, sehingga wrangler gagal dengan SQLITE_BUSY; percobaan diulang sampai 5 kali
+ * dengan jeda yang makin panjang (JS-15, Test: "Jejak: uji" 23 Nov 2026, uji masa simpan JS-11).
+ */
 export function d1<T = Record<string, unknown>>(sql: string, keadaan = "test-results-jejak/keadaan-4320"): T[] {
-  const h = spawnSync(
-    process.execPath,
-    ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "jejak-setara-lokal", "--local", "--persist-to", keadaan, "--config", "server/jejak-setara/wrangler.jsonc", "--json", "--command", sql],
-    { cwd: AKAR, encoding: "utf8", env: { ...process.env, WRANGLER_SEND_METRICS: "false", CI: "1" } },
-  );
-  if (h.status !== 0) throw new Error(h.stderr || h.stdout);
-  return (JSON.parse(h.stdout) as { results: T[] }[])[0].results;
+  for (let coba = 1; ; coba++) {
+    const h = spawnSync(
+      process.execPath,
+      ["node_modules/wrangler/bin/wrangler.js", "d1", "execute", "jejak-setara-lokal", "--local", "--persist-to", keadaan, "--config", "server/jejak-setara/wrangler.jsonc", "--json", "--command", sql],
+      { cwd: AKAR, encoding: "utf8", env: { ...process.env, WRANGLER_SEND_METRICS: "false", CI: "1" } },
+    );
+    if (h.status === 0) return (JSON.parse(h.stdout) as { results: T[] }[])[0].results;
+    const pesan = h.stderr || h.stdout;
+    if (coba >= 5 || !/SQLITE_BUSY|database is locked/.test(pesan)) throw new Error(pesan);
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 300 * coba);
+  }
 }
 
 export async function nyalakanServer(port: number, opsi: string[]): Promise<ChildProcess> {
