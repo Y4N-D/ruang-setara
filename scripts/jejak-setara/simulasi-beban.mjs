@@ -58,6 +58,8 @@ const SIMPAN_RUANG = arg.includes("--simpan-ruang");
 const SKENARIO = ambil("--skenario", null);
 const BAGIAN = Number(ambil("--bagian", "1"));
 const KELUARAN = ambil("--keluaran", "");
+// Hanya untuk menguji sambung ulang bot: menutup sambungan bot kedua sekian detik sesudah menjelajah dimulai.
+const UJI_PUTUS_DETIK = Number(ambil("--uji-putus-bot", "0"));
 const tidur = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
@@ -296,6 +298,8 @@ function buatBot(kode, nomor) {
     lihat: new Map(), selesai: new Set(), sasaran: null, dialog: null, menungguSampai: 0, terlihat: 0, terbuka: 0, jawaban: 0, pribadi: 0, poin: 0,
     // JS-11 (AC-23): pesan `selesai` terakhir dan ukurannya dalam bita.
     pesanSelesai: null, byteSelesai: 0,
+    // JS-15 (D-6 a): sambung ulang dengan token seperti HP, beserta catatan setiap penutupan yang tidak disengaja.
+    token: null, sambungUlang: 0, gagalSambung: 0, putusRinci: [], menyambung: false, berhenti: false,
     // JS-09 (P-50): keadaan skill dari `pribadi` terakhir, perkiraan selisih jam server dari `pong`, dan hitungan.
     muatan: { lari: 0, kompas: 0, petunjuk: 0 }, aktifSampai: {}, kotakMenunggu: new Map(), selisihJam: 0, pakaiTerakhir: {}, menungguSkill: {},
     tujuanKompas: null, lariSampaiLokal: 0, kotak: { sepatu: 0, kompas: 0, buku: 0 }, dipakai: { lari: 0, kompas: 0, petunjuk: 0 },
@@ -304,21 +308,27 @@ function buatBot(kode, nomor) {
     // Di lokal, setiap ruang dianggap sekolah sendiri (alamat IP berbeda) agar pembatas 300 sambungan per menit
     // per alamat (D-5) tidak menahan simulasi; di Cloudflare tajuk ini diisi jaringan Cloudflare, bukan klien.
     const tajuk = SASARAN === "lokal" ? { Origin: alamat, "CF-Connecting-IP": `10.0.0.${kodeRuangIndeks.get(kode) + 1}` } : { Origin: alamat };
-    const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/ruang/${kode}`, { headers: tajuk });
-    b.ws = ws;
     const tundaNaik = LATENSI > 0 || JITTER_EKSP > 0 || JITTER > 0;
     const kirim = (p) => {
       b.naik++;
       const teks = JSON.stringify(p);
-      if (!tundaNaik) return ws.readyState === 1 && ws.send(teks);
+      if (!tundaNaik) return b.ws.readyState === 1 && b.ws.send(teks);
       const pada = Math.max(b.antreKirim, Date.now() + LATENSI + eksponensial(JITTER_EKSP) + Math.random() * JITTER);
       b.antreKirim = pada;
-      setTimeout(() => ws.readyState === 1 && ws.send(teks), pada - Date.now());
+      setTimeout(() => b.ws.readyState === 1 && b.ws.send(teks), pada - Date.now());
     };
     b.kirim = kirim;
     const proses = (teks) => {
       const m = JSON.parse(teks);
       if (m.t === "selamat_datang") {
+        b.token = m.token;
+        if (b.menyambung) {
+          // Sambung ulang dengan token: identitas dan skor dipulihkan server, jadi tidak memilih nama lagi.
+          b.menyambung = false;
+          b.sambungUlang++;
+          b.gagalSambung = 0;
+          return;
+        }
         b.id = m.pemainId;
         // JS-14: di ruang nama buatan siswa, bot mengetik namanya sendiri; penolakan dijawab dengan saran.
         const nama = MODE_NAMA === "bebas" ? `Bot ${String(nomor + 1).padStart(3, "0")}` : m.saranNama[0];
@@ -428,8 +438,7 @@ function buatBot(kode, nomor) {
         }
       } else if (m.t === "galat" && m.kode !== "NAMA_DIPAKAI") gagal(new Error(m.kode));
     };
-    ws.onopen = () => kirim({ v: V, t: "halo", peran: "pemain" });
-    ws.onmessage = (e) => {
+    const terima = (e) => {
       const teks = String(e.data);
       b.turun++;
       b.byteTurun += teks.length;
@@ -438,8 +447,31 @@ function buatBot(kode, nomor) {
       b.antreTerima = pada;
       setTimeout(() => proses(teks), pada - Date.now());
     };
-    ws.onclose = () => (b.putus = true);
-    ws.onerror = () => gagal(new Error("sambungan gagal"));
+    // JS-15 (D-6 a): penutupan yang tidak disambung ulang, sama dengan HP: pelanggaran (1008), ruang ditutup (4000),
+    // ditolak (4003), dikeluarkan (4004), dan versi berbeda (4005). Penutupan lain, misalnya 1006 karena jaringan, disambung
+    // ulang dengan token sampai 6 kali berturut-turut (jeda 1, 2, 4, lalu 8 detik).
+    const AKHIR = new Set([1008, 4000, 4003, 4004, 4005]);
+    const sambung = () => {
+      const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/ruang/${kode}`, { headers: tajuk });
+      b.ws = ws;
+      ws.onopen = () => kirim(b.token ? { v: V, t: "halo", peran: "pemain", token: b.token } : { v: V, t: "halo", peran: "pemain" });
+      ws.onmessage = terima;
+      ws.onclose = (e) => {
+        if (b.berhenti || ws !== b.ws) return;
+        b.putusRinci.push({ kode: e.code, pada: Date.now() });
+        if (AKHIR.has(e.code) || !b.id || b.gagalSambung >= 6) {
+          b.putus = true;
+          b.menyambung = false;
+          return;
+        }
+        b.tersinkron = false;
+        b.menyambung = true;
+        b.gagalSambung++;
+        setTimeout(() => !b.berhenti && sambung(), Math.min(8000, 1000 * 2 ** (b.gagalSambung - 1)));
+      };
+      ws.onerror = () => !b.id && gagal(new Error("sambungan gagal"));
+    };
+    sambung();
   });
 }
 
@@ -680,8 +712,10 @@ try {
     b.rtt = [];
   }
   const waktuGanti = setTimeout(() => void gantiLima(5), (DETIK * 1000) / 2);
+  const waktuUjiPutus = UJI_PUTUS_DETIK > 0 ? setTimeout(() => bot[1]?.ws.close(4100, "uji putus"), UJI_PUTUS_DETIK * 1000) : null;
   const jelajah = await jalankanFase(bot, "jelajah", DETIK, hz);
   clearTimeout(waktuGanti);
+  if (waktuUjiPutus) clearTimeout(waktuUjiPutus);
   const namaPemain = {
     mode: MODE_NAMA,
     diganti: diganti.length,
@@ -689,7 +723,11 @@ try {
     galatNama: bot.reduce((s, b) => s + (b.galatNama ?? 0), 0),
   };
   // Dihitung sebelum ruang diakhiri dan ditutup, karena penutupan ruang memutus semua bot dengan sengaja.
-  const putusTakTerduga = bot.filter((b) => b.putus).length;
+  // JS-15 (D-6 a): yang dihitung putus hanyalah bot yang tidak pulih (menyerah atau masih menyambung ulang).
+  const putusTakTerduga = bot.filter((b) => b.putus || b.menyambung).length;
+  const sambungUlangPulih = bot.reduce((s, b) => s + b.sambungUlang, 0);
+  const kodeTutupTakTerduga = {};
+  for (const b of bot) for (const p of b.putusRinci) kodeTutupTakTerduga[p.kode] = (kodeTutupTakTerduga[p.kode] ?? 0) + 1;
   const stat = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
   // Pesan layar kelas sampai akhir menjelajah, sebelum ruang diakhiri (JS-10, AC-24).
   const kelasJelajah = kodeRuang.map((kode) => JSON.parse(JSON.stringify(layarKelas.get(kode)?.jenis ?? {})));
@@ -714,6 +752,7 @@ try {
     pemakaianApi.push(pemakaian);
     hasilAkhir.push(await (await fetch(`${alamat}/api/ruang/${id}/hasil`, { headers: tajukKonsol() })).json());
   }
+  for (const b of bot) b.berhenti = true; // penutupan ruang memutus semua bot dengan sengaja
   for (const kode of kodeRuang) await kelas(kode, { t: "tutup_ruang" });
   // JS-15 (P-8): data ruang uji beban dihapus sesudah ditutup, kecuali --simpan-ruang.
   const ruangDihapus = [];
@@ -800,6 +839,8 @@ try {
       ringkasanHasil: hasilAkhir.map((h) => h.ringkasan ?? null),
     },
     sambunganPutusTakTerduga: putusTakTerduga,
+    sambungUlangPulih,
+    kodeTutupTakTerduga,
     // Lokal dari kait uji server; di lingkungan uji dari galat TERLALU_CEPAT yang diterima bot (JS-15, P-14).
     pesanDitolakServer: SASARAN === "lokal" ? stat.reduce((s, x) => s + (x.pelanggaran ?? 0), 0) : jumlah((b) => b.ditolak ?? 0),
     alasanKoreksiServer: stat.map((x) => x.koreksiAlasan ?? {}),

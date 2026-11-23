@@ -43,6 +43,14 @@ describe("gabungHasil (P-14)", () => {
     expect(gagal(gabungHasil("s2", [hasil(2, 50), hasil(2, 50)]))).toEqual(["Jumlah pekerjaan dengan hasil", "Bot menerima selesai", "Peserta di D1 per ruang", "Selisih permintaan Durable Object per ruang dari perkiraan (%)"]);
   });
 
+  it("D-6 a: sambung ulang yang pulih paling banyak 2% bot; kode penutupan masuk ringkasan", () => {
+    const satu = gabungHasil("s1", [hasil(1, 50, { sambungUlangPulih: 1, kodeTutupTakTerduga: { "1006": 1 } })]);
+    expect(gagal(satu)).toEqual([]);
+    expect(satu.ringkasan).toMatchObject({ sambungUlangPulih: 1, kodeTutupTakTerduga: { "1006": 1 } });
+    expect(teksRingkasan(satu)).toContain("Sambung ulang yang pulih: 1 (kode penutupan: 1006 × 1).");
+    expect(gagal(gabungHasil("s1", [hasil(1, 50, { sambungUlangPulih: 2 })]))).toEqual(["Sambung ulang yang pulih (% bot)"]);
+  });
+
   it("s2: lima pekerjaan, sepuluh ruang main bersamaan sedikitnya 14 menit", () => {
     const lima = Array.from({ length: 5 }, () => hasil(2, 50));
     expect(gagal(gabungHasil("s2", lima))).toEqual([]);

@@ -9,6 +9,8 @@ import { SKENARIO } from "./biaya-beban.mjs";
 
 export const AMBANG = {
   koreksiPersenMaks: 1,
+  // D-6 a: sambung ulang yang pulih paling banyak 2% bot (1 dari 50); lebih dari itu menandakan masalah server.
+  sambungUlangPersenMaks: 2,
   mbPer15MenitMaks: 3,
   kenaikanRttMsMaks: 50,
   selisihPermintaanMaks: 0.25,
@@ -34,6 +36,9 @@ export function gabungHasil(skenario, daftarHasil) {
   tambah("Jumlah pekerjaan dengan hasil", daftarHasil.length, s.pekerjaan, daftarHasil.length === s.pekerjaan);
   const putus = jumlah(daftarHasil, (h) => h.sambunganPutusTakTerduga ?? 0);
   tambah("Sambungan putus tak terduga", putus, 0, putus === 0);
+  const pulih = jumlah(daftarHasil, (h) => h.sambungUlangPulih ?? 0);
+  const persenPulih = Math.round((pulih * 1000) / totalBot) / 10;
+  tambah("Sambung ulang yang pulih (% bot)", persenPulih, `≤ ${AMBANG.sambungUlangPersenMaks}`, persenPulih <= AMBANG.sambungUlangPersenMaks);
   const ditolak = jumlah(daftarHasil, (h) => h.pesanDitolakServer ?? 0);
   tambah("Pesan ditolak server", ditolak, 0, ditolak === 0);
   const koreksi = Math.max(0, ...daftarHasil.map((h) => h.jelajah?.gerakDikoreksiPersen ?? 100));
@@ -80,6 +85,12 @@ export function gabungHasil(skenario, daftarHasil) {
       perkiraanPermintaanDO: jumlah(daftarHasil, (h) => h.perkiraanBiaya?.permintaanDO ?? 0),
       pemakaianPermintaanDO: jumlah(daftarHasil, (h) => jumlah(h.pemakaianRuang ?? [], (p) => p?.perkiraanPermintaan ?? 0)),
       rttServerP95MsMaks: rtt.length > 0 ? Math.max(...rtt) : null,
+      // D-6 a: sambung ulang bot yang pulih, dengan kode penutupannya (bukan ambang; hanya catatan).
+      sambungUlangPulih: jumlah(daftarHasil, (h) => h.sambungUlangPulih ?? 0),
+      kodeTutupTakTerduga: daftarHasil.reduce((o, h) => {
+        for (const [k, n] of Object.entries(h.kodeTutupTakTerduga ?? {})) o[k] = (o[k] ?? 0) + n;
+        return o;
+      }, {}),
     },
   };
 }
@@ -96,6 +107,7 @@ export function teksRingkasan(laporan) {
     ...baris,
     "",
     `Ruang ${r.ruang} × ${r.botPerRuang} bot dari ${r.pekerjaan} pekerjaan. Permintaan Durable Object: perkiraan ±${r.perkiraanPermintaanDO}, penghitung ruang ${r.pemakaianPermintaanDO}. p95 pulang-pergi HP menurut server: ${r.rttServerP95MsMaks ?? "-"} ms.`,
+    `Sambung ulang yang pulih: ${r.sambungUlangPulih}${Object.keys(r.kodeTutupTakTerduga).length ? ` (kode penutupan: ${Object.entries(r.kodeTutupTakTerduga).map(([k, n]) => `${k} × ${n}`).join(", ")})` : ""}.`,
     "",
   ].join("\n");
 }
