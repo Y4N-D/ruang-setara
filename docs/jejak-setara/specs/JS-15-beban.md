@@ -1,6 +1,6 @@
 # JS-15 — Uji beban dan ketahanan jaringan, anggaran ukuran, perbaikan kinerja
 
-Status: disetujui (23 November 2026, `Spesifikasi disetujui: JS-15`; D-1 sampai D-4 = a). Build selesai 23 November 2026; catatan Build di akhir dokumen. Disusun Sesi A dari entri Plan JS-15 yang disetujui pemilik proyek (`Setuju: JS-15`, 23 November 2026: saran setiap usulan diterima, yaitu 1a sampai 10a), dari ZIP `main` commit `e3e24a5` ditambah commit Plan JS-15.
+Status: disetujui (23 November 2026, `Spesifikasi disetujui: JS-15`; D-1 sampai D-4 = a; D-5 a menggantikan D-4 a pada 23 November 2026). Build selesai 23 November 2026; catatan Build di akhir dokumen. Disusun Sesi A dari entri Plan JS-15 yang disetujui pemilik proyek (`Setuju: JS-15`, 23 November 2026: saran setiap usulan diterima, yaitu 1a sampai 10a), dari ZIP `main` commit `e3e24a5` ditambah commit Plan JS-15.
 
 ## Ringkasan
 
@@ -129,7 +129,7 @@ Lingkungan produksi dikerjakan di JS-16 (usulan 9a). Koreksi dokumen dari pemeri
   - gambar yang gagal dicoba lagi.
 
   Sasaran: dengan `ukur-muat.mjs` (cara percobaan Plan), median layar Kode siap ≤ 2 detik pada 10 Mbps, latensi 40 ms, dan CPU 4× lebih lambat (sebelumnya 5,04 detik), dan tidak lebih lambat dari 1,2 detik pada CPU normal. Waktu sampai aset dunia siap ikut dilaporkan.
-- **P-24. Kiriman lobi.** `DUNIA_LOBI.jedaMs` naik dari 100 menjadi 200 ms di status `lobi` dan `hitung_mundur`; kerangka penuh tetap setiap 1.000 ms. Di layar pemain, tunda tampilan pemain lain di kedua status itu paling sedikit 220 ms (di status `main` tetap 120–250 ms, P-20 JS-07), agar gerak di lobi tetap halus. Sasaran `sim:beban` lokal 1 × 50 dengan bot yang terus berjalan di lobi: `dunia` ≤ 5,5 per pemain per detik dan ≤ 3 MB per pemain per 15 menit (sebelumnya 11,85 dan 5,88 MB).
+- **P-24. Kiriman lobi.** `DUNIA_LOBI.jedaMs` naik dari 100 menjadi 300 ms di status `lobi` dan `hitung_mundur`, dan kerangka penuh dari 1.000 menjadi 3.000 ms (D-5 a, menggantikan 200 ms dan 1.000 ms dari D-4 a). Di layar pemain, tunda tampilan pemain lain di kedua status itu paling sedikit 320 ms (di status `main` tetap 120–250 ms, P-20 JS-07), agar gerak di lobi tetap halus. Sasaran `sim:beban` lokal 1 × 50 dengan bot yang terus berjalan di lobi: `dunia` ≤ 5,5 per pemain per detik dan ≤ 3 MB per pemain per 15 menit (sebelumnya 11,85 dan 5,88 MB).
 - **P-25. Layar kelas di konsol.** `LayarKelas` (`#/kelas/{id}`) dimuat dengan impor dinamis (`React.lazy` dan `Suspense`), sehingga potongan kodenya tidak dimuat di halaman konsol lain. Selama dimuat, layar menampilkan "Memuat layar kelas…". Bila potongan gagal dimuat (misalnya berkas lama sudah hilang sesudah deploy), layar menampilkan pesan gagal dan tombol "Muat ulang".
 - **P-26. Penanda versi konsol.** Saat dimuat, konsol mencatat nama berkas `admin-*.js` yang sedang berjalan. Pemeriksaan dilakukan saat tab kembali terlihat, saat rute berubah, dan saat respons API gagal diurai, paling sering sekali per 60 detik. Setiap pemeriksaan mengambil `/admin/` dengan `cache: "no-store"` dan membandingkan nama berkas itu.
   - Bila berbeda, banner tampil di atas isi halaman konsol (`role="status"`), berisi teks final dan tombol "Muat ulang", sampai halaman dimuat ulang.
@@ -159,7 +159,7 @@ Lingkungan produksi dikerjakan di JS-16 (usulan 9a). Koreksi dokumen dari pemeri
 - `s2` menjalankan 10 ruang × 50 bot dari lima mesin GitHub dengan alamat IP berbeda. Setiap mesin membuka paling banyak 4 sambungan per detik (P-5), dan semua ruang mulai bersama (P-7).
 - `s3` menguji satu Durable Object dengan 100 pemain, sekitar 500–740 pesan per detik, di bawah batas lunak sekitar 1.000 permintaan per detik per objek.
 - Histogram pulang-pergi (P-28) menggabungkan semua HP di satu ruang. Ruang lain tidak tercampur.
-- Batas kiriman lobi (P-24) berlaku per ruang. Setiap pemain tetap menerima kerangka penuh setiap 1.000 ms.
+- Batas kiriman lobi (P-24) berlaku per ruang. Setiap pemain tetap menerima kerangka penuh setiap 3.000 ms (D-5 a).
 - Putus satu pemain (P-16, P-17) tidak mengubah ronde pemain lain.
 
 ## Status antarmuka
@@ -246,8 +246,9 @@ Tidak ada aset baru.
   - (a, saran) Hanya di "Pemakaian ronde ini" selama Durable Object ruang masih aktif. Saat uji coba kelas JS-16, angkanya diambil sebagai tangkapan layar sesudah ronde selesai.
   - (b) Disimpan ke D1 saat ronde selesai (migrasi `0003`, tambahan kerja).
 - **D-4. Jarak kiriman `dunia` di lobi.**
-  - (a, saran) 200 ms (paling sering 5 kali per detik).
+  - (a, saran) 200 ms (paling sering 5 kali per detik). Dipilih 23 November 2026, lalu diganti D-5 a sesudah pengukuran Build.
   - (b) 150 ms: lebih halus, tetapi perkiraan data lobi sekitar 3,9 MB per 15 menit, di atas batas 3 MB.
+- **D-5. Jarak kiriman `dunia` di lobi sesudah pengukuran Build** (catatan Build). Dijawab pemilik proyek 23 November 2026: (a, saran) 300 ms dan kerangka penuh setiap 3 detik di lobi dan hitung mundur, dengan tunda tampilan lobi paling sedikit 320 ms. Alternatif yang tidak dipilih: (b) tetap 200 ms dengan sasaran lobi ≤ 4 MB; (c) 300 ms saja.
 
 ## Kriteria penerimaan
 
@@ -283,7 +284,7 @@ Tidak ada aset baru.
 **Perbaikan kinerja**
 
 - [ ] AC-18 Median layar Kode siap ≤ 2 detik pada 10 Mbps, 40 ms, CPU 4× lebih lambat, dan ≤ 1,2 detik pada CPU normal (`ukur-muat.mjs`, tiga kali, sebelum dan sesudah dicatat). Penjadwal muat diuji unit: paling banyak 6 gambar bersamaan dan mulai sesudah layar Kode tampil. Uji JS-07 tentang "Masuk" yang menunggu aset dan `?kode=` tetap lulus (P-23).
-- [ ] AC-19 `sim:beban` lokal 1 × 50 dengan bot yang terus berjalan di lobi: `dunia` ≤ 5,5 per pemain per detik dan ≤ 3 MB per pemain per 15 menit. Tunda tampilan per status diuji unit (220 ms di `lobi` dan `hitung_mundur`, 120–250 ms di `main`), dan uji JS-07 tentang gerak pemain lain tetap lulus (P-24).
+- [ ] AC-19 `sim:beban` lokal 1 × 50 dengan bot yang terus berjalan di lobi: `dunia` ≤ 5,5 per pemain per detik dan ≤ 3 MB per pemain per 15 menit. Tunda tampilan per status diuji unit (320 ms di `lobi` dan `hitung_mundur`, 120–250 ms di `main`), dan uji JS-07 tentang gerak pemain lain tetap lulus (P-24).
 - [ ] AC-20 Layar kelas berada di potongan kode terpisah yang tidak dimuat dasbor (`anggaran.mjs` mencatatnya). Uji ujung ke ujung melihat "Memuat layar kelas…" atau langsung layar kelas, lalu layar kelas tampil. Kode konsol awal tidak lebih besar dari sebelum JS-15 (P-25).
 - [ ] AC-21 Uji ujung ke ujung mengganti jawaban `/admin/` dengan nama `admin-*.js` lain. Sesudah rute berubah, banner `versiKonsol.baru` tampil dengan tombol "Muat ulang", dan banner tidak tampil di layar kelas. Pemeriksaan tidak lebih sering dari sekali per 60 detik (uji unit, P-26).
 
@@ -309,7 +310,7 @@ Tidak ada aset baru.
 - Tambahan di uji yang ada:
   - protokol: `ping` dengan `rttMs` dan `PROTOKOL_VERSI` 4;
   - `pemainLain`: tunda per status;
-  - `inti-ruang`: jarak kiriman lobi 200 ms;
+  - `inti-ruang`: jarak kiriman lobi 300 ms dan kerangka penuh 3 detik;
   - `kerangka.test.ts`: `wrangler.jsonc`, kedua alur kerja, teks final JS-15, dan aturan AGENTS 7 butir 16.
 
 ### Uji server (`test:jejak:server`)
@@ -345,7 +346,7 @@ Tidak ada aset baru.
 - **Penanda versi konsol (P-26):** menu konsol berpindah dengan `history.pushState`, bukan perubahan alamat yang memicu `hashchange`, jadi pemeriksaan dipicu perubahan rute di React (termasuk sekali saat konsol dimuat). Banner dipasang di kedua tata letak konsol (biasa dan ganti sandi wajib).
 - **Layar Kode lebih dulu (P-23, AC-18):** dengan `ukur-muat.mjs` di mesin yang sama, layar Kode siap 4,25 → 1,20 detik pada 10 Mbps dengan CPU 4× lebih lambat, 0,99 → 1,05 detik pada CPU normal, dan 3,04 → 2,33 detik pada 3 Mbps. Gambar dunia selesai lebih lambat di CPU 4× (95% termuat pada 3,07 → 5,18 detik), karena pemuatannya kini mulai sesudah layar Kode tampil dan paling banyak 6 sekaligus. Bergabung lewat `?kode=` menunggu gambar itu (P-50 JS-03), jadi pembantu `gabung` di `kejadian.uji.ts` kini menunggu sampai 20 detik. Lewat latensi 300 ms pulang-pergi, Worker lokal (HTTP/1.1) butuh 16,4 detik sampai layar nama; batas 6 gambar ditinjau sesudah uji beban jarak jauh, karena Cloudflare memakai HTTP/2.
 - **Waktu pulang-pergi (P-27 sampai P-29):** ringkasan pemakaian di D1 (`ruang.ringkasan_json`) sengaja tidak memuat nilai ini (D-3 a), walaupun ringkasan itu sudah ditulis saat ruang ditutup; menyimpannya hanya butuh mengubah satu baris bila kelak diinginkan, tanpa migrasi.
-- **Kiriman lobi (P-24, AC-19), D-5 untuk pemilik proyek:** dengan D-4 a (200 ms), 50 bot yang terus berjalan di lobi menerima 5,75 `dunia` per detik dan 3,67 MB per 15 menit, di atas sasaran AC-19 (≤ 5,5 dan ≤ 3 MB). Percobaan sementara (dikembalikan sesudahnya): 200 ms dengan kerangka penuh setiap 3 detik 5,80 dan 3,49 MB; 300 ms 4,70 dan 3,05 MB; 300 ms dengan kerangka penuh setiap 3 detik 4,83 dan 2,91 MB. Usulan D-5: (a, saran) 300 ms dan kerangka penuh setiap 3 detik di lobi dan hitung mundur, dengan tunda tampilan lobi paling sedikit 320 ms; (b) tetap 200 ms dan sasaran lobi menjadi ≤ 4 MB, karena batas 3 MB PRD 12 berlaku untuk ronde (ronde sendiri 2,06 MB); (c) 300 ms saja. ZIP Build memakai D-4 a sesuai spesifikasi yang disetujui; pilihan D-5 diterapkan bersama laporan Test.
+- **Kiriman lobi (P-24, AC-19), D-5 untuk pemilik proyek (dijawab D-5 a, 23 November 2026):** dengan D-4 a (200 ms), 50 bot yang terus berjalan di lobi menerima 5,75 `dunia` per detik dan 3,67 MB per 15 menit, di atas sasaran AC-19 (≤ 5,5 dan ≤ 3 MB). Percobaan sementara (dikembalikan sesudahnya): 200 ms dengan kerangka penuh setiap 3 detik 5,80 dan 3,49 MB; 300 ms 4,70 dan 3,05 MB; 300 ms dengan kerangka penuh setiap 3 detik 4,83 dan 2,91 MB. Usulan D-5: (a, saran) 300 ms dan kerangka penuh setiap 3 detik di lobi dan hitung mundur, dengan tunda tampilan lobi paling sedikit 320 ms; (b) tetap 200 ms dan sasaran lobi menjadi ≤ 4 MB, karena batas 3 MB PRD 12 berlaku untuk ronde (ronde sendiri 2,06 MB); (c) 300 ms saja. ZIP Build memakai D-4 a; D-5 a diterapkan di ZIP perbaikan sesudah Build.
 - **Potongan kode:** impor dinamis layar kelas membuat bundler memisahkan satu potongan bersama kecil (`sfx_peringatan-*.js`) yang juga dimuat layar pemain; kode layar pemain tetap 139,6 KB dari batas 200 KB, dan kode konsol turun 141,2 → 135,5 KB.
 - **Run uji beban #1 (23 Nov 2026, skenario `singkat`) gagal sebelum bot pertama bergabung, karena dua kesalahan di jalur lingkungan uji `simulasi-beban.mjs` yang belum pernah berjalan di Cloudflare:** (1) tajuk `CF-Connecting-IP` tiruan ikut terkirim ke Cloudflare, yang menolak permintaan klien bertajuk itu (galat 1000, HTTP 403, menurut dokumentasi Cloudflare "Error 1000"); kini tajuk itu hanya untuk Worker lokal. (2) Sambungan pengukur saat sepi (P-6) memakai satu tempat ruang yang baru dilepas server sesudah 5 menit, sehingga bot terakhir ditolak `RUANG_PENUH`; kini bot pertama yang mengukur, lalu tetap bermain. Galat permintaan konsol kini memuat awal isi jawaban. Jalur lingkungan uji lalu dijalankan utuh terhadap Worker lokal dengan akun admin (1 × 20 bot): pengukur sepi, bergabung 4 per detik, 0 putus, 0 ditolak, 20 peserta di D1, pemakaian terbaca, dan ruang terhapus. Run #1 tidak membuat ruang, jadi biayanya praktis nol.
 - **Uji lama yang disesuaikan:** `kelas.uji.ts` kini mengharapkan "kuota bulanan Workers Paid" (D-1 a), dan uji jarak kiriman lobi di `inti-ruang.test.ts` mengikuti P-24.

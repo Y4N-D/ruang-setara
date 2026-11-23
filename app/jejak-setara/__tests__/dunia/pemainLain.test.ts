@@ -1,7 +1,7 @@
 // Pemain lain: tunda adaptif, interpolasi, penerusan, dan sembunyi (spesifikasi JS-07, P-19 sampai P-22; AC-9).
 import { describe, expect, it } from "vitest";
 import { acakBerbenih } from "../../inti/acak";
-import { PemainLain, posisiPada, SEMBUNYI_MS, TERUS_MAKS_MS, TUNDA, TundaAdaptif, type Butir } from "../../pemain/dunia/pemainLain";
+import { PemainLain, posisiPada, SEMBUNYI_MS, TERUS_MAKS_MS, TUNDA, TUNDA_LOBI_MIN_MS, TundaAdaptif, tundaUntukStatus, type Butir } from "../../pemain/dunia/pemainLain";
 
 const info = { nama: "Kancil Jingga", avatar: 2, warnaTas: "teal" as const };
 
@@ -86,3 +86,15 @@ describe("penyangga dan sembunyi (P-19, P-22)", () => {
     expect(l.tampil(1050 + tunda, 1200, "main")[0].x).toBeCloseTo(5, 6);
   });
 });
+
+describe("tunda tampilan per status (JS-15, P-24, D-5 a)", () => {
+  it("lobi dan hitung mundur paling sedikit 320 ms; main tetap 120–250 ms", () => {
+    expect(TUNDA_LOBI_MIN_MS).toBe(320);
+    for (const t of [TUNDA.minMs, 150, TUNDA.maksMs]) {
+      expect(tundaUntukStatus(t, "main")).toBe(t);
+      expect(tundaUntukStatus(t, "lobi")).toBe(320);
+      expect(tundaUntukStatus(t, "hitung_mundur")).toBe(320);
+    }
+  });
+});
+

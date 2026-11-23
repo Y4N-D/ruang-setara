@@ -6,10 +6,10 @@ import type { Arah, StatusRuang, WarnaTas } from "../../inti/tipe";
 
 /** Tunda tampilan = 100 + 2J ms, dijepit 120–250 ms; J dan d̄ rata-rata bergerak eksponensial α 0,1 (P-20). */
 export const TUNDA = { dasarMs: 100, kaliJitter: 2, minMs: 120, maksMs: 250, jitterAwalMs: 25, alfa: 0.1 } as const;
-/** JS-15 (P-24): di lobi dan hitung mundur `dunia` paling sering setiap 200 ms, jadi tunda tampilan paling sedikit 220 ms. */
-export const TUNDA_LOBI_MIN_MS = 220;
+/** JS-15 (P-24, D-5 a): di lobi dan hitung mundur `dunia` paling sering setiap 300 ms, jadi tunda tampilan paling sedikit 320 ms. */
+export const TUNDA_LOBI_MIN_MS = 320;
 
-/** Tunda tampilan untuk status ruang: 120–250 ms di `main` (P-20 JS-07), paling sedikit 220 ms di lobi dan hitung mundur. */
+/** Tunda tampilan untuk status ruang: 120–250 ms di `main` (P-20 JS-07), paling sedikit 320 ms di lobi dan hitung mundur. */
 export function tundaUntukStatus(tundaMs: number, status: StatusRuang): number {
   return status === "lobi" || status === "hitung_mundur" ? Math.max(TUNDA_LOBI_MIN_MS, tundaMs) : tundaMs;
 }

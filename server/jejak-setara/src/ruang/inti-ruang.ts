@@ -88,10 +88,10 @@ export const AVATAR_TERSEDIA: readonly number[] = [0, 1, 2, 3, 4, 5, 6, 7];
 const SETENGAH_KOTAK = { x: 240, y: 135 } as const;
 /**
  * Kiriman `dunia` di lobi dan hitung mundur (JS-07): jarak antarkiriman dan jarak antar-kerangka penuh. JS-15 (P-24,
- * D-4 a): jarak naik dari 100 ke 200 ms; pemain yang berhenti tetap dikirim lebih cepat, paling cepat 100 ms sesudah
- * kiriman terakhir.
+ * D-5 a): jarak naik dari 100 ke 300 ms dan kerangka penuh dari 1 ke 3 detik, agar lobi ≤ 3 MB per pemain per 15 menit;
+ * pemain yang berhenti tetap dikirim lebih cepat, paling cepat 100 ms sesudah kiriman terakhir.
  */
-export const DUNIA_LOBI = { jedaMs: 200, jedaBerhentiMs: 100, kerangkaPenuhMs: 1000 } as const;
+export const DUNIA_LOBI = { jedaMs: 300, jedaBerhentiMs: 100, kerangkaPenuhMs: 3000 } as const;
 /** Di status `main`, kerangka penuh dikirim setiap putaran ke-10 (JS-07, P-48). */
 export const KERANGKA_PENUH_SETIAP = 10;
 /** Status ruang yang menampilkan dunia di layar pemain (JS-07): posisi awal dan kerangka penuh dikirim. */
