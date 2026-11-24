@@ -2037,6 +2037,7 @@ Tidak ada permintaan baru (A-19 atau C-19). Berkas Sesi B dan C tidak disentuh.
 
 - Plan ini disusun dari salinan kerja Sesi A: ZIP `main` 24 Nov 2026 ditambah semua ZIP Sesi A sesudahnya. Permintaan Sesi B atau C yang masuk sesudah 24 Nov belum terlihat; bila ada, ditanggapi di Specify.
 - Produksi, dibaca lewat konektor Cloudflare hanya sebagai jumlah: v0.9 berjalan, ada 1 akun admin, Peninjau belum dicentang, dan belum ada rujukan terverifikasi.
+- Perbaikan uji (25 Nov 2026): "Jejak: uji" sesudah push Plan ini gagal di `skill.uji-server.ts`, karena baris CSV dicari dengan potongan nama. Dari 260 nama samaran, 26 pasang saling memuat ("Kancil Merah" terkandung di "Kancil Merah Muda"), sehingga baris pemain lain bisa terambil. Baris kini dicari lewat kolom yang sama persis dengan nama. Pola yang sama tidak ada di uji lain. Kode aplikasi tidak berubah.
 
 #### Hasil percobaan risiko
 
