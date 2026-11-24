@@ -487,8 +487,8 @@ Semua aset gambar digambar dengan kode oleh Claude, mengikuti Design System bagi
 
 ## 17. Ruang lingkup rilis
 
-- **Versi 1.0:** semua kebutuhan P0, Paket inti 16, dan peta 8 zona.
-- **Versi 1.1:** P1 (QR, kode masuk ulang, bantuan gerak, Teropong, Angkot, log audit, pengaturan umum, ruang uji, impor-ekspor bank, statistik kelas dan per siswa, cetak ringkasan) serta musik latar.
+- **Versi 1.0:** semua kebutuhan P0, Paket inti 16, peta 8 zona, serta kode QR dan kode masuk ulang (JFR-03 dan JFR-07, ditarik dari 1.1 di Gerbang 1 JS-16, 24 Nov 2026).
+- **Versi 1.1:** P1 (bantuan gerak, Teropong, Angkot, log audit, pengaturan umum, ruang uji, impor-ekspor bank, statistik kelas dan per siswa, cetak ringkasan) serta musik latar.
 - **Nanti (P2):** rekap pribadi sebagai gambar, mode tim, mode latihan mandiri tanpa ruang, dan paket kejadian tambahan.
 
 ## 18. Risiko dan mitigasi
@@ -532,9 +532,9 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | KT-03 | Siapa yang boleh menyunting draf kejadian | Dijawab pemilik proyek (15 Nov 2026, Plan JS-12): mengikuti saran, admin dan guru menyunting draf, hanya admin yang menerbitkan; cakupan suntingan guru ditetapkan di Gerbang 1 JS-12 |
 | KT-04 | Tambahan warna khusus peta bila 36 warna tidak cukup | Coba dulu dengan 36 warna; tambahan paling banyak 4 warna lewat persetujuan |
 | KT-05 | Huruf sistem untuk tabel dan formulir konsol admin | Dijawab pemilik proyek (14 Nov 2026, Gerbang 1 JS-04): ya; judul, menu, dan tombol tetap Pixelify Sans |
-| KT-06 | Domain sendiri | Ya, sebelum uji coba kelas |
-| KT-07 | Dependensi baru (QR dan alat uji Workers) | Diputuskan di Plan fitur terkait dengan izin tertulis |
-| KT-08 | Pintu masuk dari galeri dan dari layar judul Sehari Setara | Galeri: ya; layar judul Sehari Setara: diputuskan sesudah F-11 |
+| KT-06 | Domain sendiri | Dijawab pemilik proyek (24 Nov 2026, Plan JS-16): belum; produksi memakai alamat `workers.dev` Worker `jejak-setara` dulu, dibantu kode QR di lobi layar kelas |
+| KT-07 | Dependensi baru (QR dan alat uji Workers) | Diputuskan di Plan fitur terkait dengan izin tertulis. QR dijawab pemilik proyek (24 Nov 2026, Gerbang 1 JS-16): pembuat kode QR ditulis sendiri tanpa dependensi |
+| KT-08 | Pintu masuk dari galeri dan dari layar judul Sehari Setara | Dijawab pemilik proyek (24 Nov 2026, Plan JS-16): ya, dari galeri dan dari layar judul Sehari Setara (tautan teks kecil di bawah pita tombol), di-push sesudah uji coba kelas lulus (JS-16c) |
 | KT-09 | Masa simpan data hasil | 12 bulan, bisa diatur 3–24 bulan |
 | KT-10 | Nuansa lokal Bali di kejadian toleransi (misalnya hari suci tertentu) | Dijawab pemilik proyek (7 Nov 2026): K-02 memakai versi A, umum tanpa menyebut hari suci tertentu |
 | KT-11 | Kecocokan TP dengan RPM | Dikonfirmasi pemilik proyek |
@@ -576,3 +576,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 22 Nov 2026 | Gerbang 1 JS-14 (`Setuju: JS-14`, usulan 1a sampai 16a): pengaturan pemain disimpan di `sessionStorage` tab; suara HP bawaan mati dan berkasnya baru diunduh saat dinyalakan, sedangkan layar kelas bawaan nyala 60%; nama buatan siswa sebagai pilihan guru (KT-14); guru mengganti nama atau mengeluarkan pemain dari konsol dan layar kelas, dan bisa mengganti semua nama buatan siswa sekaligus; data ruang yang melewati 12 bulan dihapus otomatis sejak JS-14; protokol naik ke versi 3 |
 | 22 Nov 2026 | JS-14 Selesai: diterima pemilik proyek (`Diterima: JS-14`); kenaikan kode konsol 4,40 KB, di atas batas spesifikasi 3 KB, diterima seperti AC-23 JS-09 |
 | 23 Nov 2026 | Workers Paid diaktifkan pemilik proyek (Plan JS-15). JS-15 disetujui dengan saran usulan 1a sampai 10a, dan spesifikasinya dengan D-1 sampai D-4 = a: persen pemakaian dari kuota bulanan Workers Paid, uji beban lewat alur kerja "Jejak: uji beban", waktu pulang-pergi HP hanya di "Pemakaian ronde ini", dan kiriman lobi dijarangkan; lingkungan produksi pindah ke JS-16 |
+| 24 Nov 2026 | Gerbang 1 JS-16 (`Setuju: JS-16, 8d`; `Izinkan dependensi: @fontsource/vt323 5.3.0`): kode QR dan kode masuk ulang masuk rilis 1.0; produksi memakai `workers.dev` dulu (KT-06); tautan dari galeri dan layar judul Sehari Setara (KT-08); huruf Jejak Setara diganti VT323 untuk judul dan teks, dengan tinggi huruf kapital disamakan dan nama huruf sebagai token pusat, tanpa mengubah Sehari Setara; pembuat kode QR ditulis sendiri (KT-07); JS-16 dipecah menjadi JS-16a (produksi), JS-16b (tampilan), dan JS-16c (panduan, tautan, uji coba, rilis); rilis persiapan v0.9 sebelum v1.0 |
