@@ -17,7 +17,7 @@ Diuji di mesin agen (Linux, Node 22.23.5, pnpm 11.25.0, Chromium 1243) dari ZIP 
 | AC-15 | Lulus | `rilis/v0.9.md` memuat keenam judul templat 12.4. Architecture 4.2, 4.4, 4.5, 15, dan 18; AGENTS 4.5 butir 6 dan 12.4; `PLAN.md`; PRD 21 |
 | AC-16 | Lulus dengan penyimpangan | Semua perintah lulus, kecuali 3 dari 61 uji ujung ke ujung yang tidak lulus karena kinerja mesin agen (penyimpangan 1) |
 | AC-17 | Lulus | Berkas yang berubah hanya yang ada di Rencana uji (daftar berkas di serah terima) |
-| AC-18 | Menunggu | Uji manual pemilik proyek sesudah `Rilis: v0.9` |
+| AC-18 | Lulus, kecuali centang Peninjau | Diperiksa 25 Nov 2026 lewat konektor Cloudflare, hanya jumlah tanpa email: Worker `jejak-setara` terpasang 24 Nov 2026; D1 produksi berisi 43 rujukan, 40 kejadian, dan 3 paket; satu akun admin aktif yang sudah masuk dan sudah mengganti sandi sementara. Centang Peninjau belum ada. Uji "Jejak: hentikan" produksi tidak dilaporkan |
 
 ## Perintah yang dijalankan dan hasilnya
 
@@ -72,8 +72,19 @@ Tidak ada tampilan yang berubah, jadi tangkapan layar empat ukuran tidak diambil
 
 ## Uji manual pemilik proyek
 
-AC-18 menunggu `Rilis: v0.9`. Langkahnya ada di serah terima dan di `rilis/v0.9.md`, bagian "Yang perlu dicek di lingkungan uji".
+Pemilik proyek menjalankan "Jejak: produksi" (v0.9) pada 24 November 2026, lalu "Jejak: admin awal" dengan lingkungan produksi. Pemeriksaan 25 November 2026 lewat konektor Cloudflare hanya membaca jumlah:
+
+| Butir | Hasil |
+|---|---|
+| Worker `jejak-setara` | Terpasang 24 Nov 2026 |
+| Isi bank produksi | 43 rujukan, 40 kejadian, 3 paket |
+| Akun admin produksi | 1 akun admin aktif, sudah masuk, dan sudah mengganti sandi sementara |
+| Peninjau | Belum dicentang; wajib sebelum verifikasi Bagian A |
+| Rujukan terverifikasi | 0 (verifikasi Bagian A belum dimulai) |
+| "Jejak: hentikan" produksi | Tidak dilaporkan |
+
+Sebelum akun produksi dibuat, tercatat 3 percobaan masuk yang gagal di produksi: rahasia GitHub sudah diganti, tetapi "Jejak: admin awal" belum dijalankan dengan lingkungan produksi. Sesudah alur kerja itu dijalankan, masuk berhasil.
 
 ## Keputusan: Lulus
 
-Lulus, dengan penyimpangan 1 dan 2 yang perlu diterima pemilik proyek (saran a). AC-18 menyusul sesudah `Rilis: v0.9`.
+Lulus. Diterima pemilik proyek 25 November 2026 (`Diterima: JS-16a`). Penyimpangan 1 dan 2 dicatat diterima dengan saran (a): `skill.uji.ts` utuh dan `gabung.uji.ts:130` ditangani di awal Test JS-16b. Centang Peninjau di konsol produksi masih perlu dikerjakan pemilik proyek.
