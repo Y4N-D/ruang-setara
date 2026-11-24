@@ -19,7 +19,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-13 | Selesai (22 Nov 2026; `Diterima: JS-13`) | [JS-13-statistik.md](specs/JS-13-statistik.md) | [JS-13-hasil.md](tests/JS-13-hasil.md) |
 | JS-14 | Selesai (22 Nov 2026; `Diterima: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | [JS-14-hasil.md](tests/JS-14-hasil.md) |
 | JS-15 | Selesai (24 Nov 2026; `Diterima: JS-15`) | [JS-15-beban.md](specs/JS-15-beban.md) | [JS-15-hasil.md](tests/JS-15-hasil.md) |
-| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Plan lanjutan (25 Nov 2026), menunggu `Setuju: JS-16b`. JS-16c: belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus |
+| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Spesifikasi (25 Nov 2026), menunggu `Spesifikasi disetujui: JS-16b`. JS-16c: belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
 
 ## Backlog
@@ -2017,7 +2017,7 @@ Tidak ada permintaan baru (A-19 atau C-19). Berkas Sesi B dan C tidak disentuh.
 
 ### Plan lanjutan JS-16b — Huruf VT323, kode QR, kode masuk ulang (25 Nov 2026)
 
-- Status: **Direncanakan (25 Nov 2026)**, menunggu `Setuju: JS-16b`. Dasar: Gerbang 1 JS-16 (usulan 8d, 9a, 10a, dan 15a; izin `@fontsource/vt323` 5.3.0), percobaan 1 sampai 5 di entri JS-16, dan catatan Test serta penerimaan JS-16a.
+- Status: **Disetujui (25 Nov 2026)** dengan `Setuju: JS-16b` (usulan 1 sampai 7 = a). **Spesifikasi** [JS-16b-tampilan.md](specs/JS-16b-tampilan.md), menunggu `Spesifikasi disetujui: JS-16b`. Dasar: Gerbang 1 JS-16 (usulan 8d, 9a, 10a, dan 15a; izin `@fontsource/vt323` 5.3.0), percobaan 1 sampai 5 di entri JS-16, dan catatan Test serta penerimaan JS-16a.
 - Memenuhi: JFR-03 dan JFR-07 (rilis 1.0); KT-07 (pembuat QR tanpa dependensi); Design System 0, 3.6, 5, dan 15; catatan Plan JS-14 (tombol lobi 48 px); penyimpangan 1 dan 2 JS-16a (saran a); catatan penerimaan JS-16a ("Jejak: admin awal").
 - Bergantung pada: JS-16a Selesai (25 Nov 2026).
 - File yang dibuat/diubah (perkiraan, dipastikan di Specify):
