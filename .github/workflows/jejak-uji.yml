@@ -55,6 +55,10 @@ jobs:
       - name: Uji Jejak
         run: npx -y pnpm@11.25.0 test:jejak
 
+      # JS-16a (P-19; usulan 7a): satu kesalahan tipe di JS-15 lolos sampai Test karena alur kerja ini belum memeriksa tipe.
+      - name: Periksa tipe
+        run: npx -y pnpm@11.25.0 exec tsc --noEmit
+
       - name: Uji server Jejak
         run: npx -y pnpm@11.25.0 test:jejak:server
 

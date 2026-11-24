@@ -330,7 +330,9 @@ describe("Teks dan halaman", () => {
     const datarKonsol = ratakanTeks(TEKS_KONSOL);
     for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
     // JS-15 (D-1 a): persen pemakaian dari kuota bulanan Workers Paid.
-    for (const [k, t] of Object.entries(konsol)) expect(datarKonsol[k], k).toBe(kunciJs15().ubah[k] ?? t);
+    // JS-16a (bagian Teks): ringkasan "Jejak: hentikan" menyebut lingkungannya.
+    const js16a = kunciJs16a();
+    for (const [k, t] of Object.entries(konsol)) expect(datarKonsol[k], k).toBe(kunciJs15().ubah[k] ?? js16a[k] ?? t);
   });
 
   it("JS-15: TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-15 (AC-20 sampai AC-22, AC-24)", () => {
@@ -444,6 +446,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(js09.csv),
         ...Object.keys(kunciJs13()),
         ...Object.keys(kunciJs14().konsol),
+        ...Object.keys(kunciJs16a()),
         ...Object.keys(TEKS_A14_KONSOL),
         ...Object.keys(kunciJs15().konsol),
       ]),
@@ -604,7 +607,7 @@ describe("Teks dan halaman", () => {
         emailSalah: "JEJAK_ADMIN_EMAIL bukan alamat email.",
         sandiSalah: "JEJAK_ADMIN_SANDI_SEMENTARA harus 12 sampai 128 karakter. Isi ulang rahasianya, lalu jalankan lagi.",
         namaSalah: "Nama tampilan harus 1 sampai 40 karakter.",
-        belumSiap: "Konsol belum siap: kunci Worker belum dibuat. Jalankan ulang \"Jejak: uji\", lalu coba lagi.",
+        // belumSiap diubah JS-16a dan diperiksa uji JS-16a.
         gagal: "Akun admin gagal dibuat (status {status}).",
         kunciBaru: "Kunci Worker baru: {nama}.",
         kunciLengkap: "Kunci Worker sudah lengkap.",
@@ -676,7 +679,7 @@ describe("Token dan tajuk", () => {
     );
   });
 
-  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi), JS-04 (P-33), dan JS-15 (P-1: lingkungan uji 100.000 iterasi, 12 ruang aktif, batas CPU 1.000 ms), dengan Database ID uji yang sudah diisi", () => {
+  it("wrangler.jsonc persis spesifikasi JS-03 (bagian Konfigurasi), JS-04 (P-33), dan JS-15 (P-1: lingkungan uji 100.000 iterasi, 12 ruang aktif, batas CPU 1.000 ms), dengan Database ID uji yang sudah diisi; JS-16a (AC-1): lingkungan produksi dengan Database ID produksi", () => {
     expect(JSON.parse(baca("server/jejak-setara/wrangler.jsonc"))).toEqual({
       "$schema": "../../node_modules/wrangler/config-schema.json",
       "name": "jejak-setara-lokal",
@@ -714,6 +717,19 @@ describe("Token dan tajuk", () => {
             { "name": "BATAS_WS", "namespace_id": "3102", "simple": { "limit": 300, "period": 60 } },
             { "name": "BATAS_MASUK", "namespace_id": "3103", "simple": { "limit": 10, "period": 60 } }
           ]
+        },
+        "produksi": {
+          "name": "jejak-setara",
+          "vars": { "LINGKUNGAN": "produksi", "ITERASI_SANDI": "100000", "RUANG_AKTIF_MAKS": "20" },
+          "limits": { "cpu_ms": 1000 },
+          "observability": { "enabled": true, "logs": { "enabled": true, "invocation_logs": false }, "traces": { "enabled": false } },
+          "durable_objects": { "bindings": [{ "name": "RUANG", "class_name": "RuangJejak" }] },
+          "d1_databases": [{ "binding": "DB", "database_name": "jejak-setara", "database_id": "354bffcb-5eae-4dc2-b7a4-17a2d108e232", "migrations_dir": "migrations" }],
+          "ratelimits": [
+            { "name": "BATAS_PUBLIK", "namespace_id": "3201", "simple": { "limit": 300, "period": 60 } },
+            { "name": "BATAS_WS", "namespace_id": "3202", "simple": { "limit": 300, "period": 60 } },
+            { "name": "BATAS_MASUK", "namespace_id": "3203", "simple": { "limit": 10, "period": 60 } }
+          ]
         }
       }
     });
@@ -727,14 +743,14 @@ describe("JS-22: alur kerja Jejak (P-11 sampai P-14, P-22)", () => {
     expect(hentikan).toContain('name: "Jejak: hentikan"');
     expect(hentikan).toMatch(/workflow_dispatch:\n\s+inputs:\n\s+aksi:/);
     expect(hentikan).toMatch(/options:\n\s+- hentikan\n\s+- pulihkan/);
-    expect(hentikan).toMatch(/options:\n\s+- uji\n/);
+    expect(hentikan).toMatch(/options:\n\s+- uji\n\s+- produksi\n\s+default: uji\n/);
     expect(hentikan).toContain("CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}");
-    expect(hentikan).toContain("concurrency:\n  group: jejak-cloudflare-uji");
+    expect(hentikan).toContain("concurrency:\n  group: jejak-cloudflare-${{ inputs.lingkungan }}\n  cancel-in-progress: false\n");
   });
 
   it("jejak-hentikan.yml: hentikan menyimpan DARURAT=1, pulihkan menghapusnya; tidak mencetak nilai rahasia", () => {
-    expect(hentikan).toContain(`printf '1' | npx -y wrangler@4.92.0 secret put DARURAT --name "jejak-setara-$LINGKUNGAN" > /dev/null`);
-    expect(hentikan).toContain(`npx -y wrangler@4.92.0 secret delete DARURAT --name "jejak-setara-$LINGKUNGAN" > /dev/null`);
+    expect(hentikan).toContain(`printf '1' | npx -y wrangler@4.92.0 secret put DARURAT --name "$NAMA_WORKER" > /dev/null`);
+    expect(hentikan).toContain(`npx -y wrangler@4.92.0 secret delete DARURAT --name "$NAMA_WORKER" > /dev/null`);
     expect(hentikan).not.toMatch(/echo "\$CLOUDFLARE_API_TOKEN|set -x/);
   });
 
@@ -742,11 +758,15 @@ describe("JS-22: alur kerja Jejak (P-11 sampai P-14, P-22)", () => {
     expect(hentikan).toContain("for i in $(seq 1 24); do");
     expect(hentikan).toContain("sleep 5");
     expect(hentikan).toContain(`jq -r '.darurat // false'`);
-    for (const teks of Object.values(TEKS_KONSOL.alurHentikan)) expect(hentikan).toContain(teks);
+    const th = TEKS_KONSOL.alurHentikan;
+    expect(hentikan).toContain(`echo "${th.berhenti.replace("{lingkungan}", "$LINGKUNGAN")}" >> "$GITHUB_STEP_SUMMARY"`);
+    expect(hentikan).toContain(`echo "${th.pulih.replace("{lingkungan}", "$LINGKUNGAN")}" >> "$GITHUB_STEP_SUMMARY"`);
+    expect(hentikan).toContain(th.galat);
+    expect(hentikan).toContain(`printf '::error::${th.belumAda.replace("{lingkungan}", "%s")}\\n' "$LINGKUNGAN"`);
   });
 
   it("alur kerja Jejak memakai checkout@v5, setup-node@v5, dan ubuntu-24.04; deploy-pages.yml tidak berubah", () => {
-    for (const berkas of ["jejak-uji.yml", "jejak-admin-awal.yml", "jejak-hentikan.yml", "jejak-uji-beban.yml"]) {
+    for (const berkas of ["jejak-uji.yml", "jejak-admin-awal.yml", "jejak-hentikan.yml", "jejak-uji-beban.yml", "jejak-produksi.yml"]) {
       const isi = baca(`.github/workflows/${berkas}`);
       expect(isi, berkas).not.toMatch(/actions\/(checkout|setup-node)@v4|ubuntu-latest/);
       expect(isi, berkas).toContain("runs-on: ubuntu-24.04");
@@ -883,27 +903,27 @@ describe("JS-04: alur kerja admin awal dan kunci Worker (P-29, P-32; AC-10)", ()
     expect(awal).not.toMatch(/\n  push:/);
     expect(awal).toContain('default: "Admin"');
     expect(awal).toContain("permissions:\n  contents: read\n");
-    expect(awal).toContain("concurrency:\n  group: jejak-cloudflare-uji\n  cancel-in-progress: false\n");
+    expect(awal).toContain("concurrency:\n  group: jejak-cloudflare-${{ inputs.lingkungan }}\n  cancel-in-progress: false\n");
     expect(awal).toContain("timeout-minutes: 10");
   });
 
   it("langkah P-29 berurutan; langkah penutup selalu dijalankan sesudah kunci disimpan", () => {
     expect(namaLangkah(awal)).toEqual([
       "Periksa rahasia dan masukan",
+      "Cari dan periksa alamat lingkungan",
       "Simpan kunci sekali pakai",
-      "Cari alamat lingkungan uji",
       "Buat atau pulihkan akun",
       "Tutup kembali rute admin awal",
     ]);
     expect(awal).toContain("      - name: Simpan kunci sekali pakai\n        id: kunci\n");
     expect(awal).toContain("      - name: Tutup kembali rute admin awal\n        if: always() && steps.kunci.outcome != 'skipped'\n");
-    expect(awal).toContain("        run: openssl rand -hex 32 | tr -d '\\n' | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name jejak-setara-uji\n");
+    expect(awal).toContain("        run: openssl rand -hex 32 | tr -d '\\n' | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name \"$NAMA_WORKER\"\n");
   });
 
   it("kunci sekali pakai disamarkan; isi JSON disusun jq dari variabel lingkungan ke berkas 600; ulang 10 kali dengan jeda 3 detik", () => {
     expect(awal).toContain("KUNCI=$(openssl rand -hex 32)");
     expect(awal).toContain('echo "::add-mask::$KUNCI"');
-    expect(awal).toContain('printf \'%s\' "$KUNCI" | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name jejak-setara-uji');
+    expect(awal).toContain('printf \'%s\' "$KUNCI" | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name "$NAMA_WORKER"');
     expect(awal).toContain("jq -n '{email: env.JEJAK_ADMIN_EMAIL, sandi: env.JEJAK_ADMIN_SANDI_SEMENTARA, namaTampilan: env.NAMA_TAMPILAN}' > \"$ISI\"");
     expect(awal).toContain('chmod 600 "$ISI"');
     expect(awal).toContain("trap 'rm -f \"$ISI\" \"$JAWABAN\"' EXIT");
@@ -930,6 +950,8 @@ describe("JS-04: alur kerja admin awal dan kunci Worker (P-29, P-32; AC-10)", ()
       expect(awal).toContain(teks);
     }
     expect(awal).toContain(`echo "${t.alamat.replace("{alamat}", "$ALAMAT")}"`);
+    expect(awal).toContain(`echo "${t.lingkungan.replace("{lingkungan}", "$LINGKUNGAN")}"`);
+    expect(awal).toContain(`printf '::error::${t.belumAda.replace("{lingkungan}", "%s")}\\n' "$LINGKUNGAN"`);
     expect(awal).toContain(`echo "::error::${t.gagal.replace("{status}", "$STATUS")}"`);
   });
 
@@ -1212,4 +1234,162 @@ function kunciJs14(): { pemain: Record<string, string>; konsol: Record<string, s
   const konsol: Record<string, string> = {};
   for (const [k, t] of Object.entries(urai(bagian.slice(batas)))) (UBAH_JS14.includes(k) ? ubah : konsol)[k] = t;
   return { pemain, konsol, ubah };
+}
+
+describe("JS-16a: lingkungan produksi (AC-3, AC-4, AC-8 sampai AC-14)", () => {
+  const produksi = baca(".github/workflows/jejak-produksi.yml");
+  const uji = baca(".github/workflows/jejak-uji.yml");
+  const awal = baca(".github/workflows/jejak-admin-awal.yml");
+  const hentikan = baca(".github/workflows/jejak-hentikan.yml");
+  const skrip = baca("scripts/jejak-setara/produksi.mjs");
+  const tp = TEKS_KONSOL.alurProduksi;
+  /** Blok langkah sebuah job, mulai dari baris "    steps:" sampai sebelum job berikutnya. */
+  const langkahJob = (isi: string, job: string) => {
+    const sisa = isi.slice(isi.indexOf(`\n  ${job}:\n`) + 1);
+    const akhir = sisa.search(/\n  [a-z-]+:\n/);
+    const blok = akhir < 0 ? sisa : sisa.slice(0, akhir);
+    return blok.slice(blok.indexOf("\n    steps:\n"));
+  };
+  const namaLangkah = (blok: string) => [...blok.matchAll(/\n      - name: ([^\n]+)\n/g)].map((m) => m[1]);
+
+  it("hanya lewat tombol Run workflow, dengan masukan versi dan darurat; izin baca; antrean produksi tanpa pembatalan (P-1, P-13; AC-3)", () => {
+    expect(produksi).toContain('name: "Jejak: produksi"');
+    expect(produksi).toMatch(/\non:\n  workflow_dispatch:\n    inputs:\n      versi:\n/);
+    expect(produksi).not.toMatch(/\n  (push|pull_request|schedule|workflow_run):/);
+    expect(produksi).toContain(`        description: "${tp.masukanVersi}"\n        type: string\n        required: true\n`);
+    expect(produksi).toContain(`        description: "${tp.masukanDarurat}"\n        type: boolean\n        default: false\n`);
+    expect(produksi).toContain("permissions:\n  contents: read\n");
+    expect(produksi).toContain("concurrency:\n  group: jejak-cloudflare-produksi\n  cancel-in-progress: false\n");
+    expect(produksi).toContain('      VERSI_MASUKAN: ${{ inputs.versi }}\n      DEPLOY_DARURAT: ${{ inputs.darurat }}\n');
+    // Masukan formulir hanya masuk lewat variabel lingkungan, tidak pernah langsung ke skrip (mencegah sisipan perintah).
+    expect(produksi.split("\n").filter((b) => b.includes("${{ inputs."))).toEqual([
+      "      VERSI_MASUKAN: ${{ inputs.versi }}",
+      "      DEPLOY_DARURAT: ${{ inputs.darurat }}",
+    ]);
+  });
+
+  it("job Uji sama dengan job Uji di Jejak: uji; job Produksi menunggu Uji dengan langkah berurutan (P-2; AC-4)", () => {
+    expect(langkahJob(produksi, "uji")).toBe(langkahJob(uji, "uji"));
+    expect(produksi).toContain("  produksi:\n    name: Produksi\n    needs: uji\n");
+    expect(namaLangkah(langkahJob(produksi, "produksi"))).toEqual([
+      "Periksa rilis dan rahasia",
+      "Pasang dependensi",
+      "Periksa ruang produksi",
+      "Build Jejak (produksi)",
+      "Migrasi D1 produksi",
+      "Semai bank",
+      "Siapkan kunci Worker",
+      "Deploy Worker produksi",
+      "Periksa lingkungan produksi",
+    ]);
+    expect(produksi).toContain("      - name: Periksa rilis dan rahasia\n        run: node scripts/jejak-setara/produksi.mjs periksa-rilis\n");
+    expect(produksi).toContain("      - name: Periksa ruang produksi\n        run: node scripts/jejak-setara/produksi.mjs ruang-aktif\n");
+  });
+
+  it("perintah build, migrasi, semai, dan deploy sama persis dengan spesifikasi (P-7 sampai P-11; AC-8)", () => {
+    expect(produksi).toContain("        run: npx -y pnpm@11.25.0 build:jejak\n        env:\n          CLOUDFLARE_ENV: produksi\n");
+    expect(produksi).toContain("        run: npx wrangler d1 migrations apply jejak-setara --remote --env produksi --config server/jejak-setara/wrangler.jsonc\n");
+    expect(produksi).toContain("        run: node scripts/jejak-setara/semai.mjs --jalankan -- --remote --env produksi\n");
+    expect(produksi).not.toContain("JEJAK_SEMAI_TANPA_TAMBAHAN");
+    expect(produksi).toContain("      - name: Deploy Worker produksi\n        working-directory: web/jejak-setara\n        run: |\n          set -euo pipefail\n");
+    expect(produksi).toContain('npx wrangler deploy --secrets-file "$RUNNER_TEMP/kunci-worker.json" | tee "$RUNNER_TEMP/deploy.log"');
+    expect(produksi).toContain(`trap 'rm -f "$RUNNER_TEMP/kunci-worker.json"' EXIT`);
+  });
+
+  it("Siapkan kunci Worker untuk jejak-setara: hanya kunci yang belum ada, gagal bila daftar tidak terbaca, tanpa mencetak nilai (P-10; AC-9)", () => {
+    const blok = produksi.slice(produksi.indexOf("      - name: Siapkan kunci Worker\n"), produksi.indexOf("      - name: Deploy Worker produksi\n"));
+    expect(blok).toContain("          set -euo pipefail\n");
+    expect(blok).toContain(`jq -e 'any(.result[]; .id == "jejak-setara")'`);
+    expect(blok).toContain("ADA=$(npx wrangler secret list --name jejak-setara --format json | jq -r '.[].name')");
+    expect(blok).toContain("for NAMA in KUNCI_SANDI KUNCI_IP KUNCI_TIKET; do");
+    expect(blok).toContain(`chmod 600 "$RUNNER_TEMP/kunci-worker.json"`);
+    expect(produksi).not.toMatch(/secret (put|delete)|KUNCI_ADMIN|DARURAT=|set -x/);
+    for (const baris of produksi.split("\n").filter((b) => /\becho\b/.test(b) && !b.includes("::add-mask::"))) {
+      expect(baris).not.toMatch(/\$\{?(NILAI|ISI|DAFTAR|CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID)\b/);
+    }
+  });
+
+  it("Periksa lingkungan produksi: 10 kali dengan jeda 3 detik, dan ringkasan sesuai teks (P-12; AC-10)", () => {
+    const blok = produksi.slice(produksi.indexOf("      - name: Periksa lingkungan produksi\n"));
+    expect(blok).toContain("for i in $(seq 1 10); do");
+    expect(blok).toContain("sleep 3");
+    expect(blok).toContain(`grep -q '"lingkungan":"produksi"'`);
+    expect(blok).toContain(`echo "${tp.terpasang.replace("{versi}", "$VERSI").replace("{alamat}", "$ALAMAT")}"`);
+    expect(blok).toContain(`echo "${tp.muatUlang}"`);
+    expect(blok).toContain(`echo '::error::${tp.tidakMenjawab}'`);
+  });
+
+  it("admin awal dan hentikan: lingkungan uji dan produksi, Worker dan alamat dipilih di shell, alamat diperiksa sebelum rahasia diubah (P-15 sampai P-18; AC-11, AC-12)", () => {
+    const blokCari = (isi: string) => {
+      const a = isi.indexOf("      - name: Cari dan periksa alamat lingkungan\n");
+      return isi.slice(a, isi.indexOf("\n\n", a));
+    };
+    for (const isi of [awal, hentikan]) {
+      expect(isi).toContain('      lingkungan:\n        description: "Lingkungan"\n        type: choice\n        options:\n          - uji\n          - produksi\n        default: uji\n        required: true\n');
+      expect(isi).toContain("concurrency:\n  group: jejak-cloudflare-${{ inputs.lingkungan }}\n  cancel-in-progress: false\n");
+      expect(isi).toContain("      LINGKUNGAN: ${{ inputs.lingkungan }}\n");
+      expect(isi).toContain("      ALAMAT_TETAP_UJI: ${{ vars.JEJAK_ALAMAT_UJI }}\n      ALAMAT_TETAP_PRODUKSI: ${{ vars.JEJAK_ALAMAT_PRODUKSI }}\n");
+      // Ungkapan && dan || GitHub tidak dipakai untuk memilih alamat (P-15).
+      expect(isi).not.toMatch(/\$\{\{[^}]*(&&|\|\|)[^}]*\}\}/);
+      const cari = blokCari(isi);
+      expect(cari).toContain('            NAMA_WORKER="jejak-setara"\n            ALAMAT="$ALAMAT_TETAP_PRODUKSI"\n');
+      expect(cari).toContain('            NAMA_WORKER="jejak-setara-uji"\n            ALAMAT="$ALAMAT_TETAP_UJI"\n');
+      expect(cari).toContain('            ALAMAT="https://$NAMA_WORKER.$SUB.workers.dev"\n');
+      expect(cari).toContain("for i in $(seq 1 3); do");
+      expect(cari).toContain(`*"\\"lingkungan\\":\\"$LINGKUNGAN\\""*)`);
+      expect(isi.indexOf("      - name: Cari dan periksa alamat lingkungan\n")).toBeLessThan(isi.search(/wrangler@4\.92\.0 secret (put|delete)/));
+      expect(isi).not.toContain("jejak-setara-$LINGKUNGAN");
+    }
+    expect(blokCari(awal)).toBe(blokCari(hentikan));
+    expect(TEKS_KONSOL.alurHentikan.belumAda).toBe(TEKS_KONSOL.alurAdminAwal.belumAda);
+    expect(awal).toContain(`        description: "${TEKS_KONSOL.alurAdminAwal.masukanLingkungan}"\n`);
+  });
+
+  it("Jejak: uji memeriksa tipe tepat sesudah Uji Jejak (P-19; AC-13)", () => {
+    const nama = namaLangkah(langkahJob(uji, "uji"));
+    expect(nama[nama.indexOf("Uji Jejak") + 1]).toBe("Periksa tipe");
+    expect(uji).toContain("      - name: Periksa tipe\n        run: npx -y pnpm@11.25.0 exec tsc --noEmit\n");
+  });
+
+  it("TEKS_KONSOL sama persis dengan tabel bagian Teks spesifikasi JS-16a (AC-14)", () => {
+    const js16a = kunciJs16a();
+    expect(Object.keys(js16a).sort()).toEqual(
+      [
+        ...["masukanVersi", "masukanDarurat", "bukanMain", "versiSalah", "catatanTidakAda", "idBelumDiisi", "ruangKosong", "ruangAktif"].map((x) => `alurProduksi.${x}`),
+        ...["ruangDarurat", "ruangGagal", "terpasang", "muatUlang", "tidakMenjawab"].map((x) => `alurProduksi.${x}`),
+        ...["masukanLingkungan", "lingkungan", "belumAda", "belumSiap"].map((x) => `alurAdminAwal.${x}`),
+        ...["berhenti", "pulih", "belumAda"].map((x) => `alurHentikan.${x}`),
+      ].sort(),
+    );
+    const datar = ratakanTeks(TEKS_KONSOL);
+    for (const [kunci, teks] of Object.entries(js16a)) expect(datar[kunci], kunci).toBe(teks);
+    expect(Object.keys(TEKS_KONSOL.alurProduksi).sort()).toEqual(Object.keys(js16a).filter((x) => x.startsWith("alurProduksi.")).map((x) => x.slice(13)).sort());
+  });
+
+  it("produksi.mjs memakai teks yang sama dengan TEKS_KONSOL (AC-14)", () => {
+    for (const kunci of ["bukanMain", "versiSalah", "catatanTidakAda", "idBelumDiisi", "ruangKosong", "ruangAktif", "ruangDarurat", "ruangGagal"] as const) {
+      expect(skrip).toContain(JSON.stringify(tp[kunci]));
+    }
+    expect(skrip).toContain(JSON.stringify(TEKS_KONSOL.alurAdminAwal.rahasiaCloudflare));
+  });
+});
+
+/** JS-16a (bagian Teks, AC-14): kunci bertitik dan teks dari tabel spesifikasi JS-16a; "Sama dengan `x.y`" merujuk baris lain. */
+function kunciJs16a(): Record<string, string> {
+  const isi = baca("docs/jejak-setara/specs/JS-16a-produksi.md");
+  const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"), isi.indexOf("## Data, protokol, API, dan migrasi"));
+  const hasil: Record<string, string> = {};
+  let grup = "";
+  for (const baris of bagian.split("\n")) {
+    const judul = baris.match(/^\*\*`TEKS_KONSOL\.(\w+)`/);
+    if (judul) {
+      grup = judul[1];
+      continue;
+    }
+    const sel = baris.match(/^\| `(\w+)`[^|]*\| (.+) \|$/);
+    if (!grup || !sel) continue;
+    const rujukan = sel[2].match(/^Sama dengan `(\w+)\.(\w+)`$/);
+    hasil[`${grup}.${sel[1]}`] = rujukan ? hasil[`${rujukan[1]}.${rujukan[2]}`] : sel[2];
+  }
+  return hasil;
 }

@@ -1,6 +1,6 @@
 # JS-16a — Lingkungan produksi
 
-Status: **Spesifikasi (24 Nov 2026)**, menunggu `Spesifikasi disetujui: JS-16a`. Bagian pertama JS-16 (Gerbang 1: `Setuju: JS-16, 8d`; usulan 1a sampai 7a berlaku untuk bagian ini).
+Status: **Disetujui (24 Nov 2026)** dengan `Spesifikasi disetujui: JS-16a` (D-1 sampai D-4 = a). Database ID D1 produksi diterima hari yang sama. Bagian pertama JS-16 (Gerbang 1: `Setuju: JS-16, 8d`; usulan 1a sampai 7a berlaku untuk bagian ini).
 
 ## Ringkasan
 
@@ -249,6 +249,8 @@ Tidak ada.
 - Verifikasi rujukan dan penerbitan kejadian, yang dikerjakan akun Peninjau di konsol produksi.
 
 ## DRAF untuk ditinjau pemilik proyek
+
+Diputuskan pemilik proyek 24 Nov 2026: D-1 sampai D-4 = a.
 
 - **D-1 Konfirmasi di formulir "Jejak: produksi".**
   - (a, saran) Kotak "Nomor rilis" yang harus cocok dengan berkas catatan rilis di repositori, ditambah kotak centang darurat.

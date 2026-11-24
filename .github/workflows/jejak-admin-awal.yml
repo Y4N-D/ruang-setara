@@ -1,4 +1,5 @@
-# Membuat akun admin pertama, atau memulihkan akun admin, di lingkungan uji (spesifikasi JS-04, P-28 sampai P-30).
+# Membuat akun admin pertama, atau memulihkan akun admin, di lingkungan uji atau produksi (spesifikasi JS-04, P-28 sampai
+# P-30; JS-16a, P-15 sampai P-17).
 # Email dan sandi sementara dibaca dari rahasia GitHub JEJAK_ADMIN_EMAIL dan JEJAK_ADMIN_SANDI_SEMENTARA, dan isinya
 # tidak pernah dicetak. Kunci sekali pakai KUNCI_ADMIN dibuat setiap kali dijalankan, lalu selalu diganti nilai acak baru
 # yang tidak disimpan di mana pun, sehingga rute admin awal kembali tertutup. Setiap `secret put` membuat versi Worker
@@ -12,12 +13,20 @@ on:
         description: "Nama tampilan admin (1–40 karakter)"
         required: true
         default: "Admin"
+      lingkungan:
+        description: "Lingkungan"
+        type: choice
+        options:
+          - uji
+          - produksi
+        default: uji
+        required: true
 
 permissions:
   contents: read
 
 concurrency:
-  group: jejak-cloudflare-uji
+  group: jejak-cloudflare-${{ inputs.lingkungan }}
   cancel-in-progress: false
 
 jobs:
@@ -31,8 +40,10 @@ jobs:
       JEJAK_ADMIN_EMAIL: ${{ secrets.JEJAK_ADMIN_EMAIL }}
       JEJAK_ADMIN_SANDI_SEMENTARA: ${{ secrets.JEJAK_ADMIN_SANDI_SEMENTARA }}
       NAMA_TAMPILAN: ${{ inputs.nama_tampilan }}
+      LINGKUNGAN: ${{ inputs.lingkungan }}
       WRANGLER_SEND_METRICS: "false"
-      ALAMAT_TETAP: ${{ vars.JEJAK_ALAMAT_UJI }}
+      ALAMAT_TETAP_UJI: ${{ vars.JEJAK_ALAMAT_UJI }}
+      ALAMAT_TETAP_PRODUKSI: ${{ vars.JEJAK_ALAMAT_PRODUKSI }}
     steps:
       # Aturan sama dengan server (P-19 dan P-27): email dipangkas dan berhuruf kecil, paling panjang 254 karakter;
       # sandi 12 sampai 128 titik kode sesudah NFC; nama 1 sampai 40 titik kode tanpa karakter kendali.
@@ -67,23 +78,44 @@ jobs:
         with:
           node-version: 22
 
+      # JS-16a (P-15, P-16, P-18): lingkungan menentukan Worker dan alamat. Variabel alamat uji dan produksi dibaca terpisah,
+      # agar alamat produksi yang kosong tidak jatuh ke alamat uji. Rahasia baru diubah sesudah /api/sehat menjawab dengan
+      # lingkungan yang dipilih, sehingga "secret put" tidak pernah membuat Worker kosong.
+      - name: Cari dan periksa alamat lingkungan
+        run: |
+          set -euo pipefail
+          if [ "$LINGKUNGAN" = "produksi" ]; then
+            NAMA_WORKER="jejak-setara"
+            ALAMAT="$ALAMAT_TETAP_PRODUKSI"
+          else
+            NAMA_WORKER="jejak-setara-uji"
+            ALAMAT="$ALAMAT_TETAP_UJI"
+          fi
+          if [ -z "$ALAMAT" ]; then
+            SUB=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
+            ALAMAT="https://$NAMA_WORKER.$SUB.workers.dev"
+          fi
+          for i in $(seq 1 3); do
+            SEHAT=$(curl -fsS "$ALAMAT/api/sehat" 2>/dev/null || true)
+            case "$SEHAT" in
+              *"\"lingkungan\":\"$LINGKUNGAN\""*)
+                echo "NAMA_WORKER=$NAMA_WORKER" >> "$GITHUB_ENV"
+                echo "ALAMAT=$ALAMAT" >> "$GITHUB_ENV"
+                exit 0
+                ;;
+            esac
+            sleep 3
+          done
+          printf '::error::Lingkungan %s belum ada atau tidak menjawab /api/sehat. Untuk produksi, jalankan "Jejak: produksi" lebih dulu.\n' "$LINGKUNGAN"
+          exit 1
+
       - name: Simpan kunci sekali pakai
         id: kunci
         run: |
           KUNCI=$(openssl rand -hex 32)
           echo "::add-mask::$KUNCI"
           echo "KUNCI=$KUNCI" >> "$GITHUB_ENV"
-          printf '%s' "$KUNCI" | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name jejak-setara-uji
-
-      - name: Cari alamat lingkungan uji
-        run: |
-          if [ -n "$ALAMAT_TETAP" ]; then
-            ALAMAT="$ALAMAT_TETAP"
-          else
-            SUB=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
-            ALAMAT="https://jejak-setara-uji.$SUB.workers.dev"
-          fi
-          echo "ALAMAT=$ALAMAT" >> "$GITHUB_ENV"
+          printf '%s' "$KUNCI" | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name "$NAMA_WORKER"
 
       # 200: selesai. 400, dan 503 KONSOL_BELUM_SIAP: berhenti dengan pesan. Lainnya (misalnya 403 atau 404 selama versi
       # Worker dengan kunci baru belum aktif) diulang paling banyak 10 kali dengan jeda 3 detik.
@@ -110,7 +142,7 @@ jobs:
               exit 1
             fi
             if [ "$STATUS" = "503" ] && [ "$KODE" = "KONSOL_BELUM_SIAP" ]; then
-              echo '::error::Konsol belum siap: kunci Worker belum dibuat. Jalankan ulang "Jejak: uji", lalu coba lagi.'
+              echo '::error::Konsol belum siap: kunci Worker belum dibuat. Jalankan ulang "Jejak: uji" atau "Jejak: produksi" sesuai lingkungan, lalu coba lagi.'
               exit 1
             fi
             sleep 3
@@ -127,6 +159,8 @@ jobs:
               echo 'Akun admin dibuat.'
             fi
             echo
+            echo "Lingkungan: $LINGKUNGAN"
+            echo
             echo "Alamat konsol: $ALAMAT/admin/"
             echo
             echo 'Masuk dengan email di rahasia JEJAK_ADMIN_EMAIL dan sandi sementara di rahasia JEJAK_ADMIN_SANDI_SEMENTARA, lalu buat sandi baru.'
@@ -136,4 +170,4 @@ jobs:
       # tidak dicetak dan tidak disimpan, sehingga rute admin awal menjawab 403 lagi.
       - name: Tutup kembali rute admin awal
         if: always() && steps.kunci.outcome != 'skipped'
-        run: openssl rand -hex 32 | tr -d '\n' | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name jejak-setara-uji
+        run: openssl rand -hex 32 | tr -d '\n' | npx -y wrangler@4.92.0 secret put KUNCI_ADMIN --name "$NAMA_WORKER"

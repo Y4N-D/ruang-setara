@@ -1,7 +1,8 @@
-# Alur kerja darurat Jejak Setara (spesifikasi JS-22, P-11 sampai P-14). "hentikan" menyimpan rahasia Worker DARURAT
-# bernilai 1, sehingga Worker menjawab 503 untuk semua API dan sambungan, dan setiap ruang yang bangun menutup dirinya;
-# "pulihkan" menghapus rahasia itu. Deploy biasa tidak menyentuh rahasia ini. Tidak ada nilai rahasia yang dicetak.
-# Pilihan produksi ditambahkan di JS-15.
+# Alur kerja darurat Jejak Setara (spesifikasi JS-22, P-11 sampai P-14; lingkungan produksi sejak JS-16a, P-18).
+# "hentikan" menyimpan rahasia Worker DARURAT bernilai 1, sehingga Worker menjawab 503 untuk semua API dan sambungan, dan
+# setiap ruang yang bangun menutup dirinya; "pulihkan" menghapus rahasia itu. Deploy biasa tidak menyentuh rahasia ini.
+# Tidak ada nilai rahasia yang dicetak. Sebelum rahasia diubah, alamat lingkungan diperiksa lewat /api/sehat, yang tetap
+# menjawab saat layanan dihentikan.
 name: "Jejak: hentikan"
 
 on:
@@ -19,6 +20,7 @@ on:
         type: choice
         options:
           - uji
+          - produksi
         default: uji
         required: true
 
@@ -26,7 +28,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: jejak-cloudflare-uji
+  group: jejak-cloudflare-${{ inputs.lingkungan }}
   cancel-in-progress: false
 
 jobs:
@@ -40,7 +42,8 @@ jobs:
       AKSI: ${{ inputs.aksi }}
       LINGKUNGAN: ${{ inputs.lingkungan }}
       WRANGLER_SEND_METRICS: "false"
-      ALAMAT_TETAP: ${{ vars.JEJAK_ALAMAT_UJI }}
+      ALAMAT_TETAP_UJI: ${{ vars.JEJAK_ALAMAT_UJI }}
+      ALAMAT_TETAP_PRODUKSI: ${{ vars.JEJAK_ALAMAT_PRODUKSI }}
     steps:
       - name: Periksa rahasia
         run: |
@@ -53,32 +56,57 @@ jobs:
         with:
           node-version: 22
 
+      # JS-16a (P-15, P-16, P-18): lingkungan menentukan Worker dan alamat. Variabel alamat uji dan produksi dibaca terpisah,
+      # agar alamat produksi yang kosong tidak jatuh ke alamat uji. Rahasia baru diubah sesudah /api/sehat menjawab dengan
+      # lingkungan yang dipilih, sehingga "secret put" tidak pernah membuat Worker kosong.
+      - name: Cari dan periksa alamat lingkungan
+        run: |
+          set -euo pipefail
+          if [ "$LINGKUNGAN" = "produksi" ]; then
+            NAMA_WORKER="jejak-setara"
+            ALAMAT="$ALAMAT_TETAP_PRODUKSI"
+          else
+            NAMA_WORKER="jejak-setara-uji"
+            ALAMAT="$ALAMAT_TETAP_UJI"
+          fi
+          if [ -z "$ALAMAT" ]; then
+            SUB=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
+            ALAMAT="https://$NAMA_WORKER.$SUB.workers.dev"
+          fi
+          for i in $(seq 1 3); do
+            SEHAT=$(curl -fsS "$ALAMAT/api/sehat" 2>/dev/null || true)
+            case "$SEHAT" in
+              *"\"lingkungan\":\"$LINGKUNGAN\""*)
+                echo "NAMA_WORKER=$NAMA_WORKER" >> "$GITHUB_ENV"
+                echo "ALAMAT=$ALAMAT" >> "$GITHUB_ENV"
+                exit 0
+                ;;
+            esac
+            sleep 3
+          done
+          printf '::error::Lingkungan %s belum ada atau tidak menjawab /api/sehat. Untuk produksi, jalankan "Jejak: produksi" lebih dulu.\n' "$LINGKUNGAN"
+          exit 1
+
       - name: Ubah rahasia DARURAT
         run: |
           set -euo pipefail
           if [ "$AKSI" = "hentikan" ]; then
-            printf '1' | npx -y wrangler@4.92.0 secret put DARURAT --name "jejak-setara-$LINGKUNGAN" > /dev/null
+            printf '1' | npx -y wrangler@4.92.0 secret put DARURAT --name "$NAMA_WORKER" > /dev/null
           else
-            printf 'y\n' | npx -y wrangler@4.92.0 secret delete DARURAT --name "jejak-setara-$LINGKUNGAN" > /dev/null || echo "Rahasia DARURAT sudah tidak ada."
+            printf 'y\n' | npx -y wrangler@4.92.0 secret delete DARURAT --name "$NAMA_WORKER" > /dev/null || echo "Rahasia DARURAT sudah tidak ada."
           fi
 
       - name: Periksa
         run: |
           set -euo pipefail
-          if [ -n "$ALAMAT_TETAP" ]; then
-            ALAMAT="$ALAMAT_TETAP"
-          else
-            SUB=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
-            ALAMAT="https://jejak-setara-$LINGKUNGAN.$SUB.workers.dev"
-          fi
           if [ "$AKSI" = "hentikan" ]; then HARAP=true; else HARAP=false; fi
           for i in $(seq 1 24); do
             DARURAT=$(curl -fsS "$ALAMAT/api/sehat" 2>/dev/null | jq -r '.darurat // false' 2>/dev/null || echo galat)
             if [ "$DARURAT" = "$HARAP" ]; then
               if [ "$AKSI" = "hentikan" ]; then
-                echo "Layanan uji dihentikan." >> "$GITHUB_STEP_SUMMARY"
+                echo "Layanan $LINGKUNGAN dihentikan." >> "$GITHUB_STEP_SUMMARY"
               else
-                echo "Layanan uji dipulihkan." >> "$GITHUB_STEP_SUMMARY"
+                echo "Layanan $LINGKUNGAN dipulihkan." >> "$GITHUB_STEP_SUMMARY"
               fi
               exit 0
             fi

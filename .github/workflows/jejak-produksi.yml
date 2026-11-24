@@ -1,0 +1,171 @@
+# Menerbitkan Jejak Setara ke lingkungan produksi (spesifikasi JS-16a, P-1 sampai P-14; Architecture 4.4; AGENTS 4.5).
+# Hanya dijalankan pemilik proyek lewat tombol "Run workflow" dari branch main, sesudah membalas "Rilis: vX.Y" dan catatan
+# rilisnya ada di docs/jejak-setara/rilis/. Agen tidak pernah menjalankannya. Job "Uji" sama dengan job "Uji" di "Jejak: uji".
+# Deploy ditolak selama ada ruang produksi yang belum ditutup, kecuali kotak darurat dicentang.
+name: "Jejak: produksi"
+
+on:
+  workflow_dispatch:
+    inputs:
+      versi:
+        description: "Nomor rilis yang sudah Anda setujui, misalnya v0.9"
+        type: string
+        required: true
+      darurat:
+        description: "Darurat: tetap deploy walaupun masih ada ruang yang belum ditutup"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jejak-cloudflare-produksi
+  cancel-in-progress: false
+
+jobs:
+  uji:
+    name: Uji
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      # setup-node@v5 menyalakan cache otomatis untuk pengelola paket di "packageManager" package.json (pnpm), lalu gagal
+      # karena pnpm belum terpasang: pnpm dijalankan lewat npx sesudah langkah ini. Cache itu dimatikan (perbaikan JS-22).
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Pasang dependensi
+        run: npx -y pnpm@11.25.0 install --frozen-lockfile
+
+      - name: Periksa konten Jejak
+        run: npx -y pnpm@11.25.0 content:check:jejak
+
+      - name: Uji Jejak
+        run: npx -y pnpm@11.25.0 test:jejak
+
+      # JS-16a (P-19; usulan 7a): satu kesalahan tipe di JS-15 lolos sampai Test karena alur kerja ini belum memeriksa tipe.
+      - name: Periksa tipe
+        run: npx -y pnpm@11.25.0 exec tsc --noEmit
+
+      - name: Uji server Jejak
+        run: npx -y pnpm@11.25.0 test:jejak:server
+
+      - name: Build Jejak
+        run: npx -y pnpm@11.25.0 build:jejak
+
+      # JS-15 (P-21): anggaran ukuran Architecture 11.3; run merah bila ada butir yang melewati batas.
+      - name: Periksa anggaran ukuran
+        run: node scripts/jejak-setara/anggaran.mjs --ringkasan
+
+  produksi:
+    name: Produksi
+    needs: uji
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: "false"
+      VERSI_MASUKAN: ${{ inputs.versi }}
+      DEPLOY_DARURAT: ${{ inputs.darurat }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # P-3: berhenti sebelum menyentuh Cloudflare bila bukan dari main, nomor rilis salah, catatan rilis belum ada, rahasia
+      # Cloudflare kosong, atau Database ID produksi belum diisi. Isi rahasia tidak dibaca. Nomor rilis yang lolos ditulis ke
+      # variabel VERSI untuk langkah berikutnya.
+      - name: Periksa rilis dan rahasia
+        run: node scripts/jejak-setara/produksi.mjs periksa-rilis
+
+      # Cache otomatis setup-node@v5 dimatikan; alasannya di job Uji.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Pasang dependensi
+        run: npx -y pnpm@11.25.0 install --frozen-lockfile
+
+      # P-4 sampai P-6: hanya jumlah ruang yang belum ditutup yang dibaca, tanpa kode ruang atau nama. Tabel ruang yang belum
+      # ada (D1 baru) dihitung 0; keluaran yang tidak terbaca selalu menghentikan run.
+      - name: Periksa ruang produksi
+        run: node scripts/jejak-setara/produksi.mjs ruang-aktif
+
+      - name: Build Jejak (produksi)
+        run: npx -y pnpm@11.25.0 build:jejak
+        env:
+          CLOUDFLARE_ENV: produksi
+
+      - name: Migrasi D1 produksi
+        run: npx wrangler d1 migrations apply jejak-setara --remote --env produksi --config server/jejak-setara/wrangler.jsonc
+
+      # P-9: bank awal lalu bank tambahan, sekali per basis data. Tidak ada rujukan yang ditandai terverifikasi dan tidak ada
+      # kejadian yang diterbitkan (AGENTS 7 butir 7).
+      - name: Semai bank
+        run: node scripts/jejak-setara/semai.mjs --jalankan -- --remote --env produksi
+
+      # P-10: sama dengan "Jejak: uji", untuk Worker jejak-setara. Daftar Worker dibaca lebih dulu: pada deploy pertama Worker
+      # itu belum ada, jadi semua kunci dibuat. Bila daftar Worker atau daftar rahasia gagal dibaca, langkah ini gagal dan tidak
+      # ada kunci yang dibuat ulang. Kunci yang sudah ada tidak pernah diganti, dan isinya tidak pernah dicetak.
+      - name: Siapkan kunci Worker
+        run: |
+          set -euo pipefail
+          DAFTAR=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts")
+          printf '%s' "$DAFTAR" | jq -e '.success == true' > /dev/null
+          if printf '%s' "$DAFTAR" | jq -e 'any(.result[]; .id == "jejak-setara")' > /dev/null; then
+            ADA=$(npx wrangler secret list --name jejak-setara --format json | jq -r '.[].name')
+          else
+            ADA=""
+          fi
+          ISI='{}'
+          BARU=""
+          for NAMA in KUNCI_SANDI KUNCI_IP KUNCI_TIKET; do
+            if ! printf '%s\n' "$ADA" | grep -qx "$NAMA"; then
+              NILAI=$(openssl rand -hex 32)
+              echo "::add-mask::$NILAI"
+              ISI=$(NILAI="$NILAI" jq -c --arg k "$NAMA" '. + {($k): env.NILAI}' <<< "$ISI")
+              BARU="${BARU:+$BARU, }$NAMA"
+            fi
+          done
+          if [ -n "$BARU" ]; then
+            umask 077
+            printf '%s' "$ISI" > "$RUNNER_TEMP/kunci-worker.json"
+            chmod 600 "$RUNNER_TEMP/kunci-worker.json"
+            echo "Kunci Worker baru: $BARU."
+          else
+            echo "Kunci Worker sudah lengkap."
+          fi
+
+      # P-11: deploy gagal membuat langkah ini merah (pipefail), sehingga pemeriksaan sesudahnya tidak tertipu versi lama.
+      - name: Deploy Worker produksi
+        working-directory: web/jejak-setara
+        run: |
+          set -euo pipefail
+          trap 'rm -f "$RUNNER_TEMP/kunci-worker.json"' EXIT
+          if [ -f "$RUNNER_TEMP/kunci-worker.json" ]; then
+            npx wrangler deploy --secrets-file "$RUNNER_TEMP/kunci-worker.json" | tee "$RUNNER_TEMP/deploy.log"
+          else
+            npx wrangler deploy | tee "$RUNNER_TEMP/deploy.log"
+          fi
+
+      # P-12: alamat workers.dev pertama di log deploy; 10 kali dengan jeda 3 detik.
+      - name: Periksa lingkungan produksi
+        run: |
+          ALAMAT=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' "$RUNNER_TEMP/deploy.log" | head -1)
+          for i in $(seq 1 10); do
+            if curl -fsS "$ALAMAT/api/sehat" | grep -q '"lingkungan":"produksi"'; then
+              {
+                echo "Rilis $VERSI terpasang di lingkungan produksi: $ALAMAT"
+                echo
+                echo "Guru yang sedang membuka konsol akan melihat ajakan memuat ulang halaman."
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo '::error::Lingkungan produksi tidak menjawab /api/sehat dengan lingkungan produksi. Lihat log langkah "Periksa lingkungan produksi".'
+          exit 1

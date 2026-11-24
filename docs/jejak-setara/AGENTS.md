@@ -139,6 +139,7 @@ flowchart TD
 3. Pemilik proyek membalas `Rilis: vX.Y`, lalu menjalankan alur kerja "Jejak: produksi" di tab Actions GitHub.
 4. Rilis tidak dilakukan selama ada ruang produksi yang sedang berjalan. Alur kerja produksi memeriksanya sendiri.
 5. Agen **tidak pernah** melakukan deploy ke produksi secara langsung.
+6. Rilis perbaikan tanpa fitur baru memakai nomor ketiga (`vX.Y.Z`, misalnya `v1.0.1`), dengan catatan rilis dan balasan `Rilis: vX.Y.Z` yang sama (JS-16a, P-21).
 
 ## 5. Backlog awal
 
@@ -376,10 +377,10 @@ Dipakai bila pemilik proyek menghubungkan folder repositori di komputernya ke ch
 ## Keputusan: Lulus | Kembali ke Build | Kembali ke Specify
 ```
 
-### 12.4 Catatan rilis `rilis/vX.Y.md`
+### 12.4 Catatan rilis `rilis/vX.Y.md` (atau `rilis/vX.Y.Z.md` untuk perbaikan)
 
 ```markdown
-# Rilis Jejak Setara vX.Y — [tanggal]
+# Rilis Jejak Setara vX.Y (atau vX.Y.Z) — [tanggal]
 ## Fitur yang masuk (JS-xx)
 ## Migrasi D1
 ## Perubahan protokol (PROTOKOL_VERSI)

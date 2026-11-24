@@ -828,9 +828,10 @@ export const TEKS_KONSOL = {
     tidakAda: "Tidak ada",
   },
   alurHentikan: {
-    berhenti: "Layanan uji dihentikan.",
-    pulih: "Layanan uji dipulihkan.",
+    berhenti: "Layanan {lingkungan} dihentikan.",
+    pulih: "Layanan {lingkungan} dipulihkan.",
     galat: "Pemeriksaan sesudah perubahan tidak cocok. Lihat log langkah \"Periksa\".",
+    belumAda: 'Lingkungan {lingkungan} belum ada atau tidak menjawab /api/sehat. Untuk produksi, jalankan "Jejak: produksi" lebih dulu.',
   },
   alurAdminAwal: {
     dibuat: "Akun admin dibuat.",
@@ -842,10 +843,29 @@ export const TEKS_KONSOL = {
     emailSalah: "JEJAK_ADMIN_EMAIL bukan alamat email.",
     sandiSalah: "JEJAK_ADMIN_SANDI_SEMENTARA harus 12 sampai 128 karakter. Isi ulang rahasianya, lalu jalankan lagi.",
     namaSalah: "Nama tampilan harus 1 sampai 40 karakter.",
-    belumSiap: 'Konsol belum siap: kunci Worker belum dibuat. Jalankan ulang "Jejak: uji", lalu coba lagi.',
+    belumSiap: 'Konsol belum siap: kunci Worker belum dibuat. Jalankan ulang "Jejak: uji" atau "Jejak: produksi" sesuai lingkungan, lalu coba lagi.',
     gagal: "Akun admin gagal dibuat (status {status}).",
     kunciBaru: "Kunci Worker baru: {nama}.",
     kunciLengkap: "Kunci Worker sudah lengkap.",
+    masukanLingkungan: "Lingkungan",
+    lingkungan: "Lingkungan: {lingkungan}",
+    belumAda: 'Lingkungan {lingkungan} belum ada atau tidak menjawab /api/sehat. Untuk produksi, jalankan "Jejak: produksi" lebih dulu.',
+  },
+  /** Alur kerja "Jejak: produksi" dan skrip scripts/jejak-setara/produksi.mjs (spesifikasi JS-16a, bagian Teks). */
+  alurProduksi: {
+    masukanVersi: "Nomor rilis yang sudah Anda setujui, misalnya v0.9",
+    masukanDarurat: "Darurat: tetap deploy walaupun masih ada ruang yang belum ditutup",
+    bukanMain: "Jalankan alur kerja ini dari branch main.",
+    versiSalah: "Nomor rilis harus berbentuk vX.Y atau vX.Y.Z, misalnya v0.9.",
+    catatanTidakAda: "Catatan rilis {versi} belum ada di docs/jejak-setara/rilis/. Minta agen menulisnya lebih dulu.",
+    idBelumDiisi: "Database ID produksi belum diisi di server/jejak-setara/wrangler.jsonc (Architecture bagian 18, langkah 3).",
+    ruangKosong: "Tidak ada ruang produksi yang sedang berjalan.",
+    ruangAktif: "Ada {jumlah} ruang produksi yang belum ditutup. Tunggu sampai kelas selesai atau tutup ruangnya dari konsol, lalu jalankan lagi.",
+    ruangDarurat: "Peringatan: deploy dilanjutkan walaupun ada {jumlah} ruang yang belum ditutup. Pemain di ruang itu akan tersambung ulang.",
+    ruangGagal: "Daftar ruang produksi tidak bisa dibaca. Coba lagi beberapa menit lagi.",
+    terpasang: "Rilis {versi} terpasang di lingkungan produksi: {alamat}",
+    muatUlang: "Guru yang sedang membuka konsol akan melihat ajakan memuat ulang halaman.",
+    tidakMenjawab: 'Lingkungan produksi tidak menjawab /api/sehat dengan lingkungan produksi. Lihat log langkah "Periksa lingkungan produksi".',
   },
 } as const;
 

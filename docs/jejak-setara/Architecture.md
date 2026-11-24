@@ -179,7 +179,7 @@ JS-01, hanya lingkungan lokal:
 }
 ```
 
-JS-03 (isi lengkap di spesifikasi JS-03, bagian "Konfigurasi"): Durable Object `RuangJejak` (binding `RUANG`) dengan migrasi `v1` kelas SQLite; D1 (binding `DB`: `jejak-setara-lokal` di lokal, `jejak-setara-uji` di lingkungan `uji`); dua pembatas percobaan, `BATAS_PUBLIK` dan `BATAS_WS` (300 per menit per alamat IP); pemicu harian `0 19 * * *` (03.00 WITA); dan lingkungan bernama `uji` (Worker `jejak-setara-uji`). Lingkungan `produksi` ditambahkan menjelang rilis. Binding, variabel, dan pembatas ditulis ulang di setiap lingkungan karena tidak diwariskan dari lingkungan teratas, sedangkan migrasi Durable Object diwariskan (percobaan Plan JS-03). Plugin Vite memakai folder keadaan lokal `JEJAK_KEADAAN` (bawaan `.wrangler/state`), sama dengan `db:migrasi:lokal`.
+JS-03 (isi lengkap di spesifikasi JS-03, bagian "Konfigurasi"): Durable Object `RuangJejak` (binding `RUANG`) dengan migrasi `v1` kelas SQLite; D1 (binding `DB`: `jejak-setara-lokal` di lokal, `jejak-setara-uji` di lingkungan `uji`); dua pembatas percobaan, `BATAS_PUBLIK` dan `BATAS_WS` (300 per menit per alamat IP); pemicu harian `0 19 * * *` (03.00 WITA); dan lingkungan bernama `uji` (Worker `jejak-setara-uji`). Lingkungan `produksi` (Worker `jejak-setara`, D1 `jejak-setara`) ditambahkan di JS-16a dengan kunci yang sama persis seperti `uji`: `ITERASI_SANDI` 100.000, `RUANG_AKTIF_MAKS` 20, batas CPU 1.000 ms, pembatas `3201` sampai `3203`, dan Workers Logs hanya untuk galat. Binding, variabel, dan pembatas ditulis ulang di setiap lingkungan karena tidak diwariskan dari lingkungan teratas, sedangkan migrasi Durable Object diwariskan (percobaan Plan JS-03). Plugin Vite memakai folder keadaan lokal `JEJAK_KEADAAN` (bawaan `.wrangler/state`), sama dengan `db:migrasi:lokal`.
 
 JS-04 (spesifikasi JS-04, P-33): variabel `ITERASI_SANDI` (`4000` di `lokal` dan `uji` sejak penutupan JS-04; semula `15000`) dan pembatas `BATAS_MASUK` (100 per menit di `lokal`, 10 per menit di `uji`). Lingkungan teratas (lokal) juga memuat kunci tiruan `KUNCI_SANDI`, `KUNCI_IP`, dan `KUNCI_ADMIN` yang nilainya berakhiran "bukan-rahasia"; di `uji`, ketiganya rahasia Worker (bagian 4.5).
 
@@ -212,11 +212,11 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 
 | Berkas | Nama di tab Actions | Pemicu | Langkah |
 |---|---|---|---|
-| `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara (daftar jalur di berkasnya), atau tombol "Run workflow" | Sejak JS-01: pasang → `content:check:jejak` → `test:jejak` → `build:jejak`. Sejak JS-03 ditambah "Uji server Jejak", lalu pekerjaan "Deploy uji" di cabang `main` (push atau tombol): build dengan `CLOUDFLARE_ENV=uji`, migrasi D1 jarak jauh, `wrangler deploy` di folder `web/jejak-setara`, dan pemeriksaan `/api/sehat`. Deploy dilewati dengan pemberitahuan bila rahasia atau Database ID uji belum diisi. Sejak JS-08 ditambah "Semai bank awal". Sejak JS-04 ditambah "Siapkan kunci Worker": `KUNCI_SANDI` dan `KUNCI_IP` yang belum ada dibuat acak, lalu ikut versi yang sama lewat `wrangler deploy --secrets-file` |
+| `jejak-uji.yml` | Jejak: uji | Push ke `main` yang mengubah berkas Jejak Setara (daftar jalur di berkasnya), atau tombol "Run workflow" | Sejak JS-01: pasang → `content:check:jejak` → `test:jejak` → `build:jejak`. Sejak JS-03 ditambah "Uji server Jejak", lalu pekerjaan "Deploy uji" di cabang `main` (push atau tombol): build dengan `CLOUDFLARE_ENV=uji`, migrasi D1 jarak jauh, `wrangler deploy` di folder `web/jejak-setara`, dan pemeriksaan `/api/sehat`. Deploy dilewati dengan pemberitahuan bila rahasia atau Database ID uji belum diisi. Sejak JS-08 ditambah "Semai bank awal". Sejak JS-04 ditambah "Siapkan kunci Worker": `KUNCI_SANDI` dan `KUNCI_IP` yang belum ada dibuat acak, lalu ikut versi yang sama lewat `wrangler deploy --secrets-file`. Sejak JS-16a ditambah "Periksa tipe" (`tsc --noEmit`) tepat sesudah "Uji Jejak" |
 | `jejak-ruang-coba.yml`, `jejak-kendali-coba.yml` | Jejak: ruang coba, Jejak: kendali ruang coba | — | Dihapus di JS-10 (P-32). Ruang dibuat dari konsol (`POST /api/ruang`) dan dikendalikan lewat layar kelas bertiket |
-| `jejak-hentikan.yml` | Jejak: hentikan | Manual: aksi `hentikan` atau `pulihkan`, lingkungan `uji` | Menyimpan atau menghapus rahasia Worker `DARURAT`, lalu memeriksa `/api/sehat` (JS-22, P-11 sampai P-14) |
-| `jejak-produksi.yml` | Jejak: produksi | Tombol "Run workflow" oleh pemilik proyek | Sama, untuk produksi (build dengan `CLOUDFLARE_ENV=produksi`); berhenti bila ada ruang produksi berstatus `main` atau `jeda` (dicek lewat API) |
-| `jejak-admin-awal.yml` | Jejak: admin awal | Tombol "Run workflow" dengan masukan nama tampilan | Menyimpan kunci sekali pakai `KUNCI_ADMIN`, memanggil `POST /api/admin-awal` untuk membuat akun admin pertama atau memulihkan akun admin dengan email dan sandi sementara dari rahasia GitHub, lalu mengganti kunci itu dengan nilai acak baru agar rute tertutup lagi (JS-04) |
+| `jejak-hentikan.yml` | Jejak: hentikan | Manual: aksi `hentikan` atau `pulihkan`, lingkungan `uji` atau `produksi` (sejak JS-16a) | Memeriksa alamat lingkungan lewat `/api/sehat`, menyimpan atau menghapus rahasia Worker `DARURAT`, lalu memeriksa `/api/sehat` lagi (JS-22, P-11 sampai P-14; JS-16a, P-18) |
+| `jejak-produksi.yml` | Jejak: produksi | Tombol "Run workflow" oleh pemilik proyek dari `main`, dengan nomor rilis dan kotak darurat (JS-16a) | Job "Uji" sama dengan "Jejak: uji". Job "Produksi": periksa rilis dan rahasia (catatan `docs/jejak-setara/rilis/{versi}.md` harus ada), periksa ruang produksi yang belum `ditutup` lewat kueri jumlah di D1 (berhenti bila ada, kecuali kotak darurat dicentang), build dengan `CLOUDFLARE_ENV=produksi`, migrasi D1, semai bank awal dan tambahan, "Siapkan kunci Worker", deploy, lalu pemeriksaan `/api/sehat` (JS-16a, P-1 sampai P-14) |
+| `jejak-admin-awal.yml` | Jejak: admin awal | Tombol "Run workflow" dengan masukan nama tampilan dan lingkungan (`uji` atau `produksi`, sejak JS-16a) | Memeriksa alamat lingkungan lewat `/api/sehat` (JS-16a), menyimpan kunci sekali pakai `KUNCI_ADMIN`, memanggil `POST /api/admin-awal` untuk membuat akun admin pertama atau memulihkan akun admin dengan email dan sandi sementara dari rahasia GitHub, lalu mengganti kunci itu dengan nilai acak baru agar rute tertutup lagi (JS-04) |
 
 `deploy-pages.yml` yang sudah ada tidak diubah.
 
@@ -225,7 +225,8 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 | Nama | Tempat | Isi |
 |---|---|---|
 | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | Rahasia GitHub | Untuk deploy dan migrasi |
-| `JEJAK_ADMIN_EMAIL`, `JEJAK_ADMIN_SANDI_SEMENTARA` | Rahasia GitHub | Untuk `jejak-admin-awal.yml` |
+| `JEJAK_ADMIN_EMAIL`, `JEJAK_ADMIN_SANDI_SEMENTARA` | Rahasia GitHub | Untuk `jejak-admin-awal.yml`, di lingkungan uji dan produksi; isi sandi sementara diganti sebelum run produksi pertama (JS-16a, usulan 5a) |
+| `JEJAK_ALAMAT_UJI`, `JEJAK_ALAMAT_PRODUKSI` | Variabel GitHub, boleh kosong | Alamat tetap lingkungan bila kelak memakai domain sendiri; bila kosong, alamat `workers.dev` dipakai "Jejak: admin awal" dan "Jejak: hentikan" (JS-16a) |
 | `KUNCI_TIKET` | Rahasia Worker (`wrangler secret`) | Kunci HMAC tiket layar kelas; dibuat langkah "Siapkan kunci Worker" bila belum ada, dan bernilai tiruan di `lokal` (JS-10) |
 | `KUNCI_SANDI` | Rahasia Worker | Kunci tambahan (*pepper*) hash sandi |
 | `KUNCI_IP` | Rahasia Worker | Kunci HMAC untuk kunci pembatas percobaan masuk (email, dan alamat IP ditambah tanggal) |
@@ -233,7 +234,7 @@ Uji Jejak Setara yang memerlukan runtime Workers **tidak** masuk `pnpm test`, ag
 | `RUANG_AKTIF_MAKS` | Variabel Worker | Batas ruang aktif sekaligus di lingkungan itu: `lokal` 1000 (agar uji dan simulasi beban bisa membuat banyak ruang), `uji` 3, `produksi` 20; nilai tidak sah dianggap 3 (JS-10, P-4). `KUNCI_COBA` (JS-03) tidak dipakai lagi sejak JS-10 Sejak JS-15: `uji` 12, agar uji beban 10 ruang serentak muat (P-1). |
 | `DARURAT` | Rahasia Worker | Hanya ada selama "Jejak: hentikan" aktif. Worker menjawab 503 `LAYANAN_BERHENTI` untuk semua `/api/*` (kecuali `/api/sehat`) dan `/ws/*`, dan setiap Durable Object yang bangun menjalankan berhenti paksa (JS-22) |
 | `LINGKUNGAN` | Variabel Worker | `lokal` (pengembangan dan uji di mesin agen), `uji`, atau `produksi` |
-| `ITERASI_SANDI` | Variabel Worker | Jumlah iterasi PBKDF2 untuk hash baru: 4.000 selama paket gratis (diturunkan dari 15.000 di penutupan JS-04, bagian 10.3), 100.000 sesudah paket berbayar aktif (JS-04) Sejak JS-15: `uji` 100.000, karena Workers Paid aktif (P-1). |
+| `ITERASI_SANDI` | Variabel Worker | Jumlah iterasi PBKDF2 untuk hash baru: 4.000 selama paket gratis (diturunkan dari 15.000 di penutupan JS-04, bagian 10.3), 100.000 sesudah paket berbayar aktif (JS-04) Sejak JS-15: `uji` 100.000, karena Workers Paid aktif (P-1). Sejak JS-16a: `produksi` 100.000. |
 
 Rahasia tidak pernah ditulis di repositori, log, atau pesan galat.
 
@@ -940,11 +941,11 @@ Ambang kinerja otomatis sejak JS-08 (AC-19), dari histogram waktu gambar di ukur
 
 ## 15. Operasional
 
-- **Rilis:** push ke `main` memperbarui lingkungan **uji** secara otomatis. Sesudah dicoba, pemilik proyek menekan "Run workflow" pada `jejak-produksi.yml`. Alur itu menolak berjalan bila ada ruang produksi yang sedang `main` atau `jeda`.
+- **Rilis:** push ke `main` memperbarui lingkungan **uji** secara otomatis. Sesudah dicoba, pemilik proyek menekan "Run workflow" pada `jejak-produksi.yml`. Alur itu meminta nomor rilis yang catatan rilisnya ada, menguji ulang kode, dan menolak berjalan bila ada ruang produksi yang belum `ditutup`, kecuali kotak darurat dicentang (JS-16a).
 - **Migrasi D1:** hanya maju dan tidak merusak. Perubahan yang menghapus kolom dilakukan dalam dua rilis (berhenti memakai dulu, baru menghapus).
 - **Kembali ke versi sebelumnya:** versi Worker sebelumnya dipulihkan dengan fitur *rollback* Workers. Data D1 dapat dipulihkan ke titik waktu sampai 7 hari ke belakang di paket gratis dan 30 hari di paket berbayar (*Time Travel*).
 - **Cadangan konten:** admin mengunduh ekspor bank (JSON) setiap akhir bulan; agen juga boleh menyimpannya ke repositori atas permintaan pemilik proyek.
-- **Pemulihan akun admin:** isi rahasia `JEJAK_ADMIN_SANDI_SEMENTARA` dengan sandi baru, jalankan `jejak-admin-awal.yml`, masuk, lalu ganti sandi. Alur kerja itu juga mengaktifkan kembali akun tersebut sebagai admin dan mengeluarkannya dari semua perangkat (JS-04).
+- **Pemulihan akun admin:** isi rahasia `JEJAK_ADMIN_SANDI_SEMENTARA` dengan sandi baru, jalankan `jejak-admin-awal.yml` dengan lingkungan yang sesuai, masuk, lalu ganti sandi. Alur kerja itu juga mengaktifkan kembali akun tersebut sebagai admin dan mengeluarkannya dari semua perangkat (JS-04).
 - **Pemantauan:** selama paket gratis, pemakaian harian dicek di dasbor Cloudflare sesudah percobaan dengan banyak perangkat. Sesudah paket berbayar aktif, pemakaian dan tagihan dicek setiap bulan, dan pemberitahuan penagihan diaktifkan bila tersedia di akun.
 - **Sebelum kelas:** buat ruang uji, masuk dengan satu HP lewat wifi sekolah, lalu tutup ruang uji.
 
@@ -974,19 +975,20 @@ Langkah ini dikerjakan pemilik proyek, dengan pendampingan agen dalam bahasa sed
 | Sebelum Build JS-04 | 6 (dua rahasia admin) |
 | Sesudah hasil JS-04 di-push | 9 |
 | Sebelum Build JS-15 (dikerjakan 23 Nov 2026) | 2, lalu peringatan anggaran dan batas pakai di hari yang sama (bagian 13) |
-| Sebelum Build JS-16 | 3 (basis data produksi; usulan 9a JS-15) |
+| Sebelum Build JS-16a (dikerjakan 24 Nov 2026) | 3 (basis data produksi) |
+| Sesudah rilis produksi pertama (`Rilis: v0.9`) | 9 untuk produksi |
 | Sebelum uji coba kelas (disarankan) | 7 |
 | Saat rilis | 10 |
 
 1. **Buat akun Cloudflare** di cloudflare.com dengan email Anda. Akun baru langsung memakai paket gratis (Workers Free), tanpa kartu.
 2. **(Dikerjakan 23 November 2026, sebelum Build JS-15) Aktifkan paket Workers Paid** (US$5 per bulan) di menu Workers & Pages → Plans. Siapkan kartu yang bisa dipakai untuk pembayaran internasional, atau metode lain yang ditawarkan Cloudflare. Kode dan data tidak berubah; yang berubah hanya kuota (bagian 13.4).
-3. **Buat basis data D1** di menu Storage & Databases → D1. Sekarang cukup `jejak-setara-uji`; `jejak-setara` (produksi) dibuat sebelum Build JS-16 (usulan 9a JS-15). Salin **Database ID** dan kirimkan kepada agen. ID ini bukan rahasia.
+3. **Buat basis data D1** di menu Storage & databases → D1 SQLite Database → Create Database (nama menu di dasbor per 24 November 2026). `jejak-setara-uji` dibuat sebelum Build JS-03; `jejak-setara` (produksi, lokasi Asia-Pacific) dibuat 24 November 2026, sebelum Build JS-16a. Salin **Database ID** dan kirimkan kepada agen. ID ini bukan rahasia.
 4. **Buat token API** di My Profile → API Tokens → Create Token. Pakai templat "Edit Cloudflare Workers", lalu tambahkan izin D1 Edit. Salin tokennya; token hanya tampil sekali. **Jangan kirim token ke chat**; token hanya disimpan di GitHub (langkah 6).
 5. **Catat Account ID** yang tampil di halaman Workers & Pages.
 6. **Simpan rahasia di GitHub:** buka repositori `ruang-setara` → Settings → Secrets and variables → Actions → New repository secret. Sebelum Build JS-03: `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`. Sebelum Build JS-04: `JEJAK_ADMIN_EMAIL` dan `JEJAK_ADMIN_SANDI_SEMENTARA` (minimal 12 karakter).
 7. **(Disarankan) Domain sendiri:** beli domain, tambahkan ke Cloudflare (paket gratis cukup untuk DNS), ganti *nameserver* di tempat membeli domain, lalu sambungkan domain ke Worker `jejak-setara` lewat Settings → Domains & Routes.
 8. **Deploy pertama** ke lingkungan uji terjadi otomatis sesudah perubahan fitur server di-push ke `main`. Bila deploy pertama gagal karena akun belum punya subdomain `workers.dev`, buka Workers & Pages, pilih nama subdomain, lalu jalankan ulang alur kerja; agen memberi langkahnya. Agen memberi tahu alamat lingkungan uji.
-9. **Buat akun admin pertama:** buka tab Actions di GitHub → "Jejak: admin awal" → Run workflow, isi "Nama tampilan", lalu klik tombol hijau Run workflow. Buka alamat konsol di ringkasan alur kerja, masuk dengan email `JEJAK_ADMIN_EMAIL` dan sandi sementara, lalu buat sandi baru.
-10. **Terbitkan ke produksi:** Actions → "Jejak: produksi" → Run workflow.
+9. **Buat akun admin pertama:** buka tab Actions di GitHub → "Jejak: admin awal" → Run workflow, isi "Nama tampilan", lalu klik tombol hijau Run workflow. Buka alamat konsol di ringkasan alur kerja, masuk dengan email `JEJAK_ADMIN_EMAIL` dan sandi sementara, lalu buat sandi baru. Untuk produksi (JS-16a): ganti isi `JEJAK_ADMIN_SANDI_SEMENTARA` lebih dulu, pilih lingkungan `produksi` di formulir, lalu sesudah masuk centang **Peninjau** pada akun Anda di menu Akun.
+10. **Terbitkan ke produksi:** sesudah membalas `Rilis: vX.Y`, buka Actions → "Jejak: produksi" → Run workflow, isi nomor rilis (misalnya `v0.9`), lalu klik Run workflow. Kotak darurat hanya dicentang untuk perbaikan mendesak saat ada kelas yang sedang berjalan (JS-16a).
 
 Kunci rahasia Worker (`KUNCI_TIKET`, `KUNCI_SANDI`, `KUNCI_IP`) dibuat oleh alur kerja deploy dengan nilai acak, sehingga pemilik proyek tidak perlu mengetiknya (bagian 4.5).
