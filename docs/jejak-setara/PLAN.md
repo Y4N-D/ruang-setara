@@ -19,7 +19,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-13 | Selesai (22 Nov 2026; `Diterima: JS-13`) | [JS-13-statistik.md](specs/JS-13-statistik.md) | [JS-13-hasil.md](tests/JS-13-hasil.md) |
 | JS-14 | Selesai (22 Nov 2026; `Diterima: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | [JS-14-hasil.md](tests/JS-14-hasil.md) |
 | JS-15 | Selesai (24 Nov 2026; `Diterima: JS-15`) | [JS-15-beban.md](specs/JS-15-beban.md) | [JS-15-hasil.md](tests/JS-15-hasil.md) |
-| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b dan JS-16c: belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus |
+| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Plan lanjutan (25 Nov 2026), menunggu `Setuju: JS-16b`. JS-16c: belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
 
 ## Backlog
@@ -2014,3 +2014,81 @@ Tidak ada permintaan baru (A-19 atau C-19). Berkas Sesi B dan C tidak disentuh.
 - Akun admin produksi dibuat lewat "Jejak: admin awal" dengan lingkungan produksi, lalu sudah dipakai masuk dan sandinya sudah diganti. Sebelumnya tercatat 3 percobaan masuk gagal, karena rahasia GitHub sudah diganti tetapi akun produksi belum dibuat.
 - Belum: centang Peninjau di konsol produksi, lalu verifikasi Bagian A (JR-01 sampai JR-23 dan K-01 sampai K-16). Uji "Jejak: hentikan" produksi belum dilaporkan.
 - Berikutnya: Plan lanjutan JS-16b (huruf VT323, kode QR, dan kode masuk ulang).
+
+### Plan lanjutan JS-16b — Huruf VT323, kode QR, kode masuk ulang (25 Nov 2026)
+
+- Status: **Direncanakan (25 Nov 2026)**, menunggu `Setuju: JS-16b`. Dasar: Gerbang 1 JS-16 (usulan 8d, 9a, 10a, dan 15a; izin `@fontsource/vt323` 5.3.0), percobaan 1 sampai 5 di entri JS-16, dan catatan Test serta penerimaan JS-16a.
+- Memenuhi: JFR-03 dan JFR-07 (rilis 1.0); KT-07 (pembuat QR tanpa dependensi); Design System 0, 3.6, 5, dan 15; catatan Plan JS-14 (tombol lobi 48 px); penyimpangan 1 dan 2 JS-16a (saran a); catatan penerimaan JS-16a ("Jejak: admin awal").
+- Bergantung pada: JS-16a Selesai (25 Nov 2026).
+- File yang dibuat/diubah (perkiraan, dipastikan di Specify):
+  - **Huruf.** `package.json` dan `pnpm-lock.yaml` (`@fontsource/vt323` 5.3.0, sudah diizinkan); impor huruf di `web/jejak-setara/main.tsx` dan `admin/main.tsx`; `styles/jejak.css` (sekitar 50 baris) dan `styles/kelas.css` (26 baris), dengan nama huruf diganti token `--js-huruf-judul` dan `--js-huruf-teks`; label nama di kanvas `pemain/LayarDunia.tsx`; kredit di `teks.ts` dan `teks-konsol.ts`; uji yang memeriksa nama huruf (`kerangka.test.ts`, `e2e/jejak-setara/kerangka.uji.ts`, dan `konsol.uji.ts`).
+  - **Kode QR.** Modul pembuat QR baru, lobi layar kelas di `admin/kelas/`, `kelas.css`, teks, dan uji unit dengan matriks contoh.
+  - **Kode masuk ulang.** `inti/protokol.ts` dan `inti/versi.ts`, inti ruang dan `RuangJejak` (SQLite ruang), rute `kelola` di `api/ruang.ts`, halaman detail ruang di konsol, layar Gabung pemain, teks, serta uji unit, server, dan ujung ke ujung.
+  - **Lain-lain.** Tombol lobi 48 px di `kelas.css`; batas tunggu di `e2e/jejak-setara/gabung.uji.ts` (usulan 7); `jejak-admin-awal.yml` bila usulan 6a atau 6b dipilih.
+  - **Dokumen.** Design System 0, 3.6, 5, dan 15; Architecture 1, 6, 7, dan 10; PRD 7 dan 21; dokumen ini.
+- Migrasi D1: tidak ada. Kode masuk ulang disimpan di SQLite ruang (tabel baru di Durable Object, dibuat dengan `CREATE TABLE IF NOT EXISTS`).
+- Pesan protokol baru/berubah: `halo` pemain mendapat `kodeMasukUlang` opsional, ada kode galat baru, dan `PROTOKOL_VERSI` naik ke 5 (usulan 4). Skema `kode_masuk_ulang` di `protokol-kelas.ts`, yang belum pernah dipakai, ditetapkan di Specify. `sim:beban` wajib di Test.
+- Aset yang dibutuhkan: tidak ada aset baru; ikon memakai set yang sudah Disetujui (dipastikan di Specify).
+- Dependensi baru: `@fontsource/vt323` 5.3.0 (sudah diizinkan 24 Nov 2026). Pembuat QR tanpa dependensi.
+- Ukuran: L.
+- Rilis: tidak ada rilis produksi di akhir JS-16b. Produksi naik ke v1.0 sesudah panduan guru (JS-16c), sesuai usulan 2a JS-16.
+
+#### Pemeriksaan awal (25 Nov 2026)
+
+- Plan ini disusun dari salinan kerja Sesi A: ZIP `main` 24 Nov 2026 ditambah semua ZIP Sesi A sesudahnya. Permintaan Sesi B atau C yang masuk sesudah 24 Nov belum terlihat; bila ada, ditanggapi di Specify.
+- Produksi, dibaca lewat konektor Cloudflare hanya sebagai jumlah: v0.9 berjalan, ada 1 akun admin, Peninjau belum dicentang, dan belum ada rujukan terverifikasi.
+
+#### Hasil percobaan risiko
+
+Dikerjakan 25 November 2026 di luar repositori; salinan uji sementara dihapus sesudahnya.
+
+1. **Dukungan `font-size-adjust` dua nilai** (caniuse, dibaca 25 Nov 2026): Chrome dan Edge 127+, Safari dan Safari iOS 17+, Firefox 92+, dan Samsung Internet 28+. Peramban sasaran PRD 12 mendukungnya, kecuali Samsung Internet sebelum versi 28; di sana VT323 tampil tanpa penyesuaian, yaitu lebih kecil (seperti varian a0 di maket JS-16).
+2. **Titik ubah huruf.** Nama huruf ditulis langsung di sekitar 50 baris `jejak.css` dan 26 baris `kelas.css`. Kanvas label nama menulis "Pixelify Sans" di tiga tempat dengan ukuran 13 px (`LABEL.huruf`). Kanvas tidak mengenal `font-size-adjust`, jadi label memakai faktor skala dari metrik: 0,7 ÷ 0,56 = 1,25, atau 16,25 px.
+3. **Ukuran berkas huruf.** VT323 latin woff2 (17,9 KB) menggantikan Press Start 2P (7,7 KB) dan Pixelify Sans (12,5 KB) di Jejak, sehingga aset turun sekitar 2,3 KB. Sehari Setara tetap memakai kedua huruf lamanya.
+4. **Prototipe pembuat QR sendiri** (mode byte, koreksi galat M, versi 1–10): 3,7 KB minify dan 1,8 KB gzip (`lean-qr` 3,8 KB gzip).
+   - Dengan mask dipaksa, 1.600 dari 1.600 matriks (200 teks acak × 8 mask, versi 1 sampai 10) sama persis dengan `lean-qr` mode byte.
+   - Keluaran `qrcode-generator` sama dengan salah satu dari 8 mask prototipe di 200 dari 200 teks; bedanya hanya pilihan mask, karena tiap pustaka menghitung penalti sedikit berbeda.
+   - Tautan produksi menjadi QR versi 4 (33 modul).
+5. **Penyebab `gabung.uji.ts:130` (penyimpangan 2 JS-16a): batas tunggu di uji.** Sejak JS-15 (P-23), kode di alamat `?kode=` baru diperiksa sesudah gambar dunia termuat. Pembantu `gabung()` sudah menunggu sampai 20 detik, tetapi pemeriksaan "Ruang sudah penuh" masih memakai bawaan 5 detik. Dengan batas 20 detik pada salinan sementara, uji itu lulus 3 dari 3 kali (sebelumnya gagal 3 dari 5 kali). Server tidak bermasalah.
+6. **Jalur masuk ulang yang sudah ada.** Pemain yang membawa token yang sama sudah bisa mengambil alih sambungan lamanya (ditutup dengan kode 4001 "diganti") tanpa melewati pemeriksaan ruang penuh, terkunci, dan terlambat. Kode masuk ulang memakai jalur yang sama, ditambah token baru untuk HP baru.
+
+#### Sudah diputuskan di Gerbang 1 JS-16
+
+- Huruf VT323 untuk `--js-huruf-judul` dan `--js-huruf-teks`, dengan tinggi huruf kapital disamakan (8d).
+- Pembuat QR ditulis sendiri, dengan tombol "Perbesar QR" (9a).
+- Kode masuk ulang dibuat dari konsol dan hanya tampil di laptop guru; berlaku 10 menit, sekali pakai, satu kode aktif per pemain, disimpan sebagai hash; tidak berlaku untuk pemain yang dikeluarkan (10a).
+- Tombol "Kunci ruang" dan "Mulai" 48 px (15a).
+
+#### Usulan
+
+1. **Cara menyamakan ukuran VT323.**
+   - (a, saran) `font-size-adjust: cap-height 1` untuk judul dan `cap-height 0.7` untuk teks, ditulis sekali bersama kedua token. Kanvas memakai faktor skala tetap dari metrik. Angka ukuran di Design System 5 tetap berlaku.
+   - (b) Faktor skala di token (misalnya `calc(13px * var(--js-skala-teks))`) untuk semua deklarasi ukuran huruf: berlaku juga di Samsung Internet lama, tetapi mengubah sekitar 80 deklarasi.
+2. **Pilihan mask QR.**
+   - (a, saran) Penalti mengikuti ISO/IEC 18004 seperti implementasi rujukan Nayuki (MIT), dengan uji matriks contoh yang dibuat sekali dengan `lean-qr` mode byte untuk 8 mask dan versi 1–10.
+   - (b) Satu mask tetap untuk semua QR: lebih sederhana, tetapi tidak sesuai standar dan bisa lebih sulit dipindai.
+3. **Perbesar QR.**
+   - (a, saran) Tombol "Perbesar QR" dan pintasan `Q` di lobi layar kelas. QR tampil setinggi layar dengan zona tenang, lalu `Esc` atau `Q` menutupnya.
+   - (b) Tanpa tombol; QR tetap 36u.
+4. **Protokol kode masuk ulang.**
+   - (a, saran) `halo` pemain mendapat `kodeMasukUlang` opsional (6 karakter dari abjad kode ruang). `PROTOKOL_VERSI` naik ke 5 agar klien lama dimuat ulang. Ada galat baru `KODE_MASUK_ULANG_SALAH`, dan kode salah dihitung sebagai pelanggaran sambungan.
+   - (b) Pesan baru tersendiri sebelum `halo`.
+5. **Tempat tombol "Kode masuk ulang".**
+   - (a, saran) Di halaman detail ruang konsol, pada baris setiap pemain yang sudah bernama, untuk admin dan guru pemilik ruang. Kode tampil di dialog, dengan hitung mundur 10 menit dan tombol salin.
+   - (b) Di menu nama layar kelas (JS-14): tidak disarankan karena tampil di proyektor.
+6. **Pilihan lingkungan "Jejak: admin awal"** (catatan penerimaan JS-16a).
+   - (a, saran) Pilihan pertama "pilih lingkungan" menjadi bawaan, dan run berhenti dengan pesan bila tidak diganti.
+   - (b) Bawaan tetap `uji`, ditambah pengingat di ringkasan "Jejak: produksi".
+   - (c) Tidak diubah di JS-16b.
+7. **Uji yang tertunda dari JS-16a.**
+   - (a, saran) `gabung.uji.ts:130` memakai batas tunggu 20 detik (percobaan 5). `skill.uji.ts` dijalankan utuh dan sendirian di awal Test JS-16b; bila `:405` tetap gagal di pemeriksaan kinerja mesin agen, hasilnya dicatat dengan pembanding kode sebelum perubahan, seperti di JS-16a.
+   - (b) Batas kinerja `skill.uji.ts:405` dilonggarkan.
+
+#### Risiko
+
+1. **VT323 di proyektor.** Garisnya tipis, jadi keterbacaan dari 8 m tetap butir wajib uji coba kelas. Maket layar sungguhan dibuat di Build.
+2. **Samsung Internet sebelum versi 28.** Teks tampil lebih kecil (usulan 1a).
+3. **Perubahan protokol.** Klien lama dimuat ulang sesudah rilis, jadi rilis dilakukan di luar jam pelajaran.
+4. **Kode masuk ulang disalahgunakan.** Kode hanya tampil di laptop guru, berlaku 10 menit, sekali pakai, disimpan sebagai hash, dan kode salah dihitung sebagai pelanggaran.
+5. **Pilihan mask QR.** Setiap mask menghasilkan QR yang sah; jarak pindai diukur saat uji coba kelas.
+6. **Tangkapan layar uji.** Banyak yang berubah karena huruf baru; semuanya diperbarui di Test.
