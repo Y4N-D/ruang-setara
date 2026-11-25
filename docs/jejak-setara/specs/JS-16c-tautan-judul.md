@@ -1,6 +1,6 @@
 # JS-16c — Tautan layar judul Sehari Setara dan rilis v1.0
 
-Status: **Spesifikasi (25 Nov 2026)**, menunggu `Spesifikasi disetujui: JS-16c`. Dasar: Plan lanjutan JS-16c yang dipersempit (`Setuju: JS-16c`, usulan 1 sampai 7 = a).
+Status: **Disetujui (25 Nov 2026)**, `Spesifikasi disetujui: JS-16c` (D-1 dan D-2 = a). Diuji: [JS-16c-hasil.md](../tests/JS-16c-hasil.md). Dasar: Plan lanjutan JS-16c yang dipersempit (`Setuju: JS-16c`, usulan 1 sampai 7 = a).
 
 ## Ringkasan
 

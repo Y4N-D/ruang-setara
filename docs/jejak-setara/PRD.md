@@ -534,7 +534,7 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | KT-05 | Huruf sistem untuk tabel dan formulir konsol admin | Dijawab pemilik proyek (14 Nov 2026, Gerbang 1 JS-04): ya; judul, menu, dan tombol tetap Pixelify Sans |
 | KT-06 | Domain sendiri | Dijawab pemilik proyek (24 Nov 2026, Plan JS-16): belum; produksi memakai alamat `workers.dev` Worker `jejak-setara` dulu, dibantu kode QR di lobi layar kelas |
 | KT-07 | Dependensi baru (QR dan alat uji Workers) | Diputuskan di Plan fitur terkait dengan izin tertulis. QR dijawab pemilik proyek (24 Nov 2026, Gerbang 1 JS-16): pembuat kode QR ditulis sendiri tanpa dependensi |
-| KT-08 | Pintu masuk dari galeri dan dari layar judul Sehari Setara | Dijawab pemilik proyek (24 Nov 2026, Plan JS-16): ya, dari galeri dan dari layar judul Sehari Setara (tautan teks kecil di bawah pita tombol), di-push sesudah uji coba kelas lulus (JS-16c) |
+| KT-08 | Pintu masuk dari galeri dan dari layar judul Sehari Setara | Dijawab pemilik proyek (24 Nov 2026, Plan JS-16): ya, dari galeri dan dari layar judul Sehari Setara. Sejak 25 Nov 2026 (JS-16c yang dipersempit), tautan layar judul ada di bawah kalimat pengantar, karena pita tombol menempel di tepi bawah layar, dan terbit sebelum uji coba kelas sesudah rilis v1.0. Tautan galeri menyusul di JS-16d |
 | KT-09 | Masa simpan data hasil | 12 bulan, bisa diatur 3–24 bulan |
 | KT-10 | Nuansa lokal Bali di kejadian toleransi (misalnya hari suci tertentu) | Dijawab pemilik proyek (7 Nov 2026): K-02 memakai versi A, umum tanpa menyebut hari suci tertentu |
 | KT-11 | Kecocokan TP dengan RPM | Dikonfirmasi pemilik proyek |

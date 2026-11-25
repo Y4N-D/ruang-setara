@@ -1435,3 +1435,18 @@ function kunciJs16b(): { pemain: Record<string, string>; konsol: Record<string, 
   const hapus = [...bagian.matchAll(/`(kelas\.cara\w*)`/g)].map((m) => m[1]);
   return { pemain, konsol, hapus };
 }
+
+describe("JS-16c: catatan rilis v1.0 (P-7; AC-9)", () => {
+  it("memuat keenam judul templat 12.4 dan isi P-7", () => {
+    const isi = baca("docs/jejak-setara/rilis/v1.0.md");
+    expect(isi.match(/^## .+$/gm)).toEqual([
+      "## Fitur yang masuk (JS-xx)",
+      "## Migrasi D1",
+      "## Perubahan protokol (PROTOKOL_VERSI)",
+      "## Yang perlu dicek di lingkungan uji",
+      "## Risiko",
+      "## Cara kembali ke versi sebelumnya",
+    ]);
+    for (const kata of ["JS-16b", "JS-16c", "JS-16d", "`PROTOKOL_VERSI` naik dari 4 ke 5", "Jejak: hentikan", "Rollback"]) expect(isi, kata).toContain(kata);
+  });
+});
