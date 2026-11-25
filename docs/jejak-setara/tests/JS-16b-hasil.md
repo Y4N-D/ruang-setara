@@ -71,4 +71,4 @@ Tidak ada langkah produksi di JS-16b. Bila ingin melihat langsung di lingkungan 
 
 ## Keputusan: Lulus
 
-Lulus, dengan penyimpangan 1 dan 2 yang perlu diterima pemilik proyek (saran a).
+Lulus. Diterima pemilik proyek 25 November 2026 (`Diterima: JS-16b; penyimpangan 1a, 2a`).

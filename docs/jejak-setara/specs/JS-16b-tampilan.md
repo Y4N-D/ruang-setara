@@ -37,7 +37,7 @@ Sehari Setara dan galeri tidak berubah. Tidak ada rilis produksi di akhir JS-16b
   --js-huruf-teks-sesuai: cap-height 0.7;
   ```
 
-  **Diubah di Test JS-16b (25 Nov 2026, menunggu persetujuan pemilik proyek):** `--js-huruf-teks-sesuai` menjadi `cap-height 0.64`, karena 0,7 membuat pilihan jawaban di HP 640 × 360 meluap 27 px; dengan 0,64 tinggi huruf kecil VT323 sama dengan huruf teks lama. Ditambah dua token tinggi baris, `--js-huruf-judul-baris: 1` dan `--js-huruf-teks-baris: 1.2`, untuk aturan yang dulu memakai tinggi baris `normal`.
+  **Diubah di Test JS-16b (25 Nov 2026), diterima pemilik proyek (penyimpangan 1a dan 2a):** `--js-huruf-teks-sesuai` menjadi `cap-height 0.64`, karena 0,7 membuat pilihan jawaban di HP 640 × 360 meluap 27 px; dengan 0,64 tinggi huruf kecil VT323 sama dengan huruf teks lama. Ditambah dua token tinggi baris, `--js-huruf-judul-baris: 1` dan `--js-huruf-teks-baris: 1.2`, untuk aturan yang dulu memakai tinggi baris `normal`.
 
   Setiap aturan yang dulu memakai Press Start 2P kini memakai `font-family: var(--js-huruf-judul); font-size-adjust: var(--js-huruf-judul-sesuai);`. Setiap aturan yang dulu memakai Pixelify Sans kini memakai pasangan token teks.
 
