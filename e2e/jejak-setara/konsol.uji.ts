@@ -72,7 +72,7 @@ async function masuk(page: Page, email: string, sandi: string) {
   await page.goto("/admin/");
   await kolom(page, "Email").fill(email);
   await kolom(page, "Sandi").fill(sandi);
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
 }
 
 async function gantiSandiWajib(page: Page, sandi: string) {
@@ -123,13 +123,13 @@ test("admin 1280 × 720: halaman masuk, sandi salah, sandi sementara, ganti sand
   await expect(page.getByText("Konsol guru dan admin")).toBeVisible();
   await expect(page.locator(".js-status")).toHaveText("✓ Server siap");
   await expect(page.getByText("Aset visual digambar dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN.")).toBeVisible();
-  await expect(page.getByText("Huruf Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.")).toBeVisible();
+  await expect(page.getByText("Huruf VT323, SIL Open Font License 1.1.")).toBeVisible();
   await expect(kolom(page, "Email")).toHaveAttribute("autocomplete", "username");
   await expect(kolom(page, "Email")).toHaveAttribute("type", "email");
   await expect(kolom(page, "Sandi")).toHaveAttribute("autocomplete", "current-password");
 
   // Kolom kosong: tanpa permintaan ke server.
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveText("Isi email dan sandi.");
   await expect(kolom(page, "Email")).toBeFocused();
   expect(permintaanMasuk).toEqual([]);
@@ -141,7 +141,7 @@ test("admin 1280 × 720: halaman masuk, sandi salah, sandi sementara, ganti sand
   await tampilkan.click();
   await expect(kolom(page, "Sandi")).toHaveAttribute("type", "text");
   await expect(page.getByRole("button", { name: "Sembunyikan" })).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveText("Email atau sandi salah.");
   await expect(kolom(page, "Sandi")).toHaveValue("");
   await expect(kolom(page, "Sandi")).toBeFocused();
@@ -153,7 +153,7 @@ test("admin 1280 × 720: halaman masuk, sandi salah, sandi sementara, ganti sand
 
   // Sandi sementara: halaman "Buat sandi baru" dengan kepala tanpa menu.
   await kolom(page, "Sandi").fill(ADMIN.awal);
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Buat sandi baru" })).toBeVisible();
   await expect(page).toHaveURL(/#\/sandi$/);
   await expect(page.getByText("Anda masuk dengan sandi sementara. Buat sandi baru sebelum memakai konsol.")).toBeVisible();
@@ -222,7 +222,7 @@ test("admin: akun baru, dialog sandi sementara sekali tampil, salin sandi, dan t
   await expect(sementara.getByText("Berikan sandi ini langsung kepada pemilik akun. Sandi hanya tampil sekali dan wajib diganti saat masuk pertama.")).toBeVisible();
   sandiGuru = (await sementara.locator(".js-konsol-sandi-sementara").textContent()) ?? "";
   expect(sandiGuru).toMatch(POLA_SANDI);
-  await expect(sementara.locator(".js-konsol-sandi-sementara")).toHaveCSS("font-family", /Press Start 2P/);
+  await expect(sementara.locator(".js-konsol-sandi-sementara")).toHaveCSS("font-family", /VT323/);
   await expect(sementara.locator(".js-konsol-sandi-sementara")).toHaveCSS("font-size", "16px");
   await expect(sementara.getByRole("button", { name: "Salin sandi" })).toBeFocused();
 
@@ -251,7 +251,7 @@ test("admin: akun baru, dialog sandi sementara sekali tampil, salin sandi, dan t
   await expect(page.getByText(ringkasAkun(1, 1))).toBeVisible();
   await expect(page.getByRole("row", { name: /YAN \(Anda\)/ })).toContainText(/\d{1,2} \w{3} \d{4}, \d{2}\.\d{2}/);
   await expect(page.locator(".js-konsol-tabel td").first()).toHaveCSS("font-family", /system-ui/);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("font-family", /Pixelify Sans/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("font-family", /VT323/);
 
   // Email yang sudah dipakai: pesan di bawah kolom Email; Esc menutup dialog dan fokus kembali ke pembukanya.
   await tombolBaru.click();
@@ -327,7 +327,7 @@ test("nonaktif dan atur ulang: konfirmasi, sesi guru berakhir, aktif lagi, sandi
   await expect(guru.page).toHaveURL(/#\/masuk$/);
   await kolom(guru.page, "Email").fill(GURU.email);
   await kolom(guru.page, "Sandi").fill(GURU.sandi);
-  await guru.page.getByRole("button", { name: "Masuk" }).click();
+  await guru.page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(guru.page.getByRole("alert")).toHaveText("Email atau sandi salah.");
 
   // Aktifkan lagi, lalu atur ulang sandi lewat konfirmasi.
@@ -348,7 +348,7 @@ test("nonaktif dan atur ulang: konfirmasi, sesi guru berakhir, aktif lagi, sandi
   await expect(tombolUbah).toBeFocused();
 
   await kolom(guru.page, "Sandi").fill(baru);
-  await guru.page.getByRole("button", { name: "Masuk" }).click();
+  await guru.page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(guru.page.getByRole("heading", { name: "Buat sandi baru" })).toBeVisible();
   await gantiSandiWajib(guru.page, GURU.sandi + " lagi");
   sandiGuru = GURU.sandi + " lagi";
@@ -396,12 +396,12 @@ test("penguncian: lima sandi salah untuk satu email, lalu pesan TERKUNCI di perc
   await kolom(page, "Email").fill(GURU.email);
   for (let i = 0; i < 5; i++) {
     await kolom(page, "Sandi").fill(`sandi salah ${i}`);
-    await page.getByRole("button", { name: "Masuk" }).click();
+    await page.getByRole("button", { name: "Masuk", exact: true }).click();
     await expect(page.getByRole("alert")).toHaveText("Email atau sandi salah.");
     await expect(kolom(page, "Sandi")).toHaveValue("");
   }
   await kolom(page, "Sandi").fill(sandiGuru);
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveText("Terlalu banyak percobaan masuk. Tunggu 15 menit, lalu coba lagi.");
   await page.screenshot({ path: `${LAYAR}/konsol-terkunci-1280x720.png` });
   expect(catatan.konsol).toEqual([]);
@@ -427,7 +427,7 @@ test("papan ketik saja: masuk, ganti sandi, membuka dialog akun baru, mengisi, d
   await page.keyboard.press("Space");
   await expect(kolom(page, "Sandi")).toHaveAttribute("type", "text");
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Masuk" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Masuk", exact: true })).toBeFocused();
   await page.keyboard.press("Enter");
 
   await expect(page.getByRole("heading", { name: "Buat sandi baru" })).toBeVisible();
@@ -535,7 +535,7 @@ test("memuat, server tidak menjawab, menunggu, dan data gagal dimuat (AC-13, AC-
   });
   await kolom(page, "Email").fill(ADMIN.email);
   await kolom(page, "Sandi").fill(ADMIN.sandi);
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   const tombol = page.getByRole("button", { name: "Memeriksa…" });
   await expect(tombol).toHaveAttribute("aria-disabled", "true");
   await expect(kolom(page, "Email")).toBeVisible();
@@ -582,13 +582,13 @@ for (const ukuran of UKURAN) {
       await document.fonts.ready;
       return [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family.replaceAll('"', ""));
     });
-    expect(huruf).toEqual(expect.arrayContaining(["Press Start 2P", "Pixelify Sans"]));
-    await expect(page.locator(".js-konsol-merek-besar")).toHaveCSS("font-family", /Press Start 2P/);
+    expect(huruf).toEqual(expect.arrayContaining(["VT323"]));
+    await expect(page.locator(".js-konsol-merek-besar")).toHaveCSS("font-family", /VT323/);
     await foto("masuk");
 
     await kolom(page, "Email").fill(email);
     await kolom(page, "Sandi").fill(ADMIN.awal);
-    await page.getByRole("button", { name: "Masuk" }).click();
+    await page.getByRole("button", { name: "Masuk", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Buat sandi baru" })).toBeVisible();
     await foto("sandi-wajib");
     await gantiSandiWajib(page, ADMIN.sandi);

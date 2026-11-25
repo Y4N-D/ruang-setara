@@ -31,6 +31,7 @@ import PetaBesar from "./PetaBesar";
 import PetaMini, { gambarPetaMini, type PenandaPeta } from "./PetaMini";
 import { AjakanPeriksa, TombolPeriksa } from "./TombolPeriksa";
 import TombolSkill from "./TombolSkill";
+import { keluargaHurufLabel, ukuranLabel as ukuranHurufLabel } from "./huruf";
 
 type PesanGerak = Extract<PesanPemain, { t: "gerak" }>;
 
@@ -59,7 +60,7 @@ function kelompokP95(h: readonly number[]): number {
   }
   return KELOMPOK_WAKTU[KELOMPOK_WAKTU.length - 1];
 }
-/** Label nama: paling banyak 8 pemain lain terdekat (P-23, D-1a): Pixelify Sans 13 px, jarak dalam 2 px, garis 1 px. */
+/** Label nama: paling banyak 8 pemain lain terdekat (P-23, D-1a): huruf teks 13 px dikali FAKTOR_HURUF_TEKS (JS-16b, P-3), jarak dalam 2 px, garis 1 px. */
 const LABEL = { maks: 8, huruf: 13, jarak: 2, garis: 1 } as const;
 
 function ukuranLayar(): UkuranDunia {
@@ -348,7 +349,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
 
   // Font label nama dimuat sebelum dipakai di kanvas.
   useEffect(() => {
-    void document.fonts?.load(`${LABEL.huruf}px "Pixelify Sans"`).catch(() => undefined);
+    void document.fonts?.load(`${ukuranHurufLabel(LABEL.huruf, 1)}px ${keluargaHurufLabel()}`).catch(() => undefined);
   }, []);
 
   // Loop bingkai.
@@ -428,10 +429,11 @@ export default function LayarDunia(props: PropsLayarDunia) {
           kotorLabel = [];
           const r = t.rasio;
           const k = t.ukuran.k;
-          const huruf = Math.round(t.labelHuruf * r); // JS-14 (P-27)
+          const huruf = ukuranHurufLabel(t.labelHuruf, r); // JS-14 (P-27); JS-16b (P-3)
+          const keluarga = keluargaHurufLabel();
           const jarak = Math.round(LABEL.jarak * r);
           const garis = Math.max(1, Math.round(LABEL.garis * r));
-          const hurufSiap = document.fonts?.check(`${huruf}px "Pixelify Sans"`) ?? false;
+          const hurufSiap = document.fonts?.check(`${huruf}px ${keluarga}`) ?? false;
           for (const l of mesin.labelTerdekat(LABEL.maks)) {
             const kunci = `${l.nama}|${huruf}`;
             let g = hurufSiap ? gambarLabel.get(kunci) : undefined;
@@ -439,7 +441,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
               g = document.createElement("canvas");
               const cg = g.getContext("2d");
               if (!cg) continue;
-              cg.font = `${huruf}px "Pixelify Sans", monospace`;
+              cg.font = `${huruf}px ${keluarga}`;
               const w = Math.ceil(cg.measureText(l.nama).width);
               g.width = w + 2 * jarak + 2 * garis;
               g.height = huruf + 2 * jarak + 2 * garis;
@@ -448,7 +450,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
               cg.fillStyle = "#FFF6E0";
               cg.fillRect(garis, garis, g.width - 2 * garis, g.height - 2 * garis);
               cg.fillStyle = "#1F2A44";
-              cg.font = `${huruf}px "Pixelify Sans", monospace`;
+              cg.font = `${huruf}px ${keluarga}`;
               cg.textBaseline = "middle";
               cg.fillText(l.nama, garis + jarak, g.height / 2 + garis / 2);
               if (hurufSiap) gambarLabel.set(kunci, g);

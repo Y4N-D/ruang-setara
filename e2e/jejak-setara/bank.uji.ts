@@ -27,7 +27,7 @@ test("admin menyunting kejadian dengan validasi langsung dan pratinjau, lalu mem
   await g.goto("/admin/");
   await g.getByLabel("Email", { exact: true }).fill(email);
   await g.getByLabel("Sandi", { exact: true }).fill("sandi sementara bank");
-  await g.getByRole("button", { name: "Masuk" }).click();
+  await g.getByRole("button", { name: "Masuk", exact: true }).click();
   await g.getByLabel("Sandi baru", { exact: true }).fill("kalimat sandi admin bank");
   await g.getByLabel("Ulangi sandi baru", { exact: true }).fill("kalimat sandi admin bank");
   await g.getByRole("button", { name: "Simpan sandi" }).click();
@@ -120,7 +120,7 @@ test("Permintaan A-14: penyusun paket memperingatkan zona yang lebih dari 6 keja
   await g.goto("/admin/");
   await g.getByLabel("Email", { exact: true }).fill(email);
   await g.getByLabel("Sandi", { exact: true }).fill("sandi sementara paket");
-  await g.getByRole("button", { name: "Masuk" }).click();
+  await g.getByRole("button", { name: "Masuk", exact: true }).click();
   await g.getByLabel("Sandi baru", { exact: true }).fill("kalimat sandi admin paket");
   await g.getByLabel("Ulangi sandi baru", { exact: true }).fill("kalimat sandi admin paket");
   await g.getByRole("button", { name: "Simpan sandi" }).click();

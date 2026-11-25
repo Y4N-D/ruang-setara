@@ -7,6 +7,7 @@
 import { PROTOKOL_VERSI, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
 import { skemaKelas, type PesanKelas } from "../../../../app/jejak-setara/inti/protokol-kelas";
 import { skemaKelola, STATUS_BOLEH_TUTUP } from "../../../../app/jejak-setara/inti/ruang";
+import { normalkanKodeMasukUlang } from "../../../../app/jejak-setara/inti/aturan";
 import { tulisRingkasanRuang } from "../db/ruang";
 import {
   ALARM_GESER_MS,
@@ -28,7 +29,7 @@ import type { Arah, KejadianRuang, ModeNama, StatusRuang, Tingkat, TitikPeta, Wa
 import { TEKS } from "../../../../app/jejak-setara/teks";
 import { kirimKeD1 } from "../db/ruang";
 import type { Env } from "../env";
-import { base64url, jawabGalat, jawabJson, sha256Hex } from "../keamanan";
+import { base64url, buatKodeMasukUlang, jawabGalat, jawabJson, sha256Hex } from "../keamanan";
 import {
   alarm,
   buatKeadaan,
@@ -40,6 +41,8 @@ import {
   sambunganPutus,
   tenggatBerikut,
   terimaHalo,
+  aturKodeMasukUlang,
+  MASA_KODE_MASUK_ULANG_MS,
   terimaKelas,
   terimaPemain,
   titikKejadianRuang,
@@ -293,6 +296,8 @@ export class RuangJejak {
     // JS-09 (P-14). IF NOT EXISTS, sehingga ruang yang dibuat sebelum JS-09 tetap jalan.
     this.sql.exec("CREATE TABLE IF NOT EXISTS skill (pemain_id TEXT PRIMARY KEY, isi_json TEXT NOT NULL)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS petunjuk (pemain_id TEXT NOT NULL, kode TEXT NOT NULL, opsi TEXT NOT NULL, PRIMARY KEY (pemain_id, kode))");
+    // JS-16b (P-12): kode masuk ulang aktif, satu per pemain; hanya hash SHA-256-nya yang disimpan.
+    this.sql.exec("CREATE TABLE IF NOT EXISTS kode_masuk_ulang (pemain_id TEXT PRIMARY KEY, hash TEXT NOT NULL, berlaku_sampai INTEGER NOT NULL)");
   }
 
   private pulihkan(): void {
@@ -337,8 +342,13 @@ export class RuangJejak {
       .exec<{ pemain_id: string; kode: string; opsi: string }>("SELECT pemain_id, kode, opsi FROM petunjuk")
       .toArray()
       .map((r) => ({ pemainId: r.pemain_id, kode: r.kode, opsi: r.opsi }));
+    const kodeMasukUlang = this.sql
+      .exec<{ pemain_id: string; hash: string; berlaku_sampai: number }>("SELECT pemain_id, hash, berlaku_sampai FROM kode_masuk_ulang")
+      .toArray()
+      .map((r) => ({ pemainId: r.pemain_id, hash: r.hash, berlakuSampai: r.berlaku_sampai }));
     this.keadaan = pulihkanKeadaan(
       {
+        kodeMasukUlang,
         ruang,
         status: (meta.get("status") as StatusRuang | undefined) ?? "lobi",
         waktu: (meta.get("waktu") as WaktuRuang | undefined) ?? { ...WAKTU_AWAL },
@@ -377,6 +387,20 @@ export class RuangJejak {
   }
 
   private tulisSimpanan(s: Simpanan): void {
+    if (s.jenis === "kode_masuk_ulang") {
+      const c = this.sql.exec(
+        "INSERT INTO kode_masuk_ulang (pemain_id, hash, berlaku_sampai) VALUES (?, ?, ?) ON CONFLICT(pemain_id) DO UPDATE SET hash = excluded.hash, berlaku_sampai = excluded.berlaku_sampai",
+        s.pemainId,
+        s.hash,
+        s.berlakuSampai,
+      );
+      this.catatTulis(c.rowsWritten);
+      return;
+    }
+    if (s.jenis === "hapus_kode_masuk_ulang") {
+      this.catatTulis(this.sql.exec("DELETE FROM kode_masuk_ulang WHERE pemain_id = ?", s.pemainId).rowsWritten);
+      return;
+    }
     if (s.jenis === "meta") return this.tulisMeta(s.kunci, s.nilai);
     if (s.jenis === "jawaban") return this.tulisJawaban(s.jawaban);
     if (s.jenis === "terlihat") {
@@ -639,9 +663,10 @@ export class RuangJejak {
     const m = hasil.pesan;
     if (m.t === "halo") {
       const hashMasuk = m.token ? await sha256Hex(m.token) : null;
+      const hashKode = m.kodeMasukUlang ? await sha256Hex(normalkanKodeMasukUlang(m.kodeMasukUlang)) : null; // JS-16b (P-14)
       const token = base64url(crypto.getRandomValues(new Uint8Array(32)));
       const calon = { pemainId: base64url(crypto.getRandomValues(new Uint8Array(6))), token, hashToken: await sha256Hex(token) };
-      await this.terapkan(terimaHalo(k, sid, m, Date.now(), acakKripto, calon, hashMasuk));
+      await this.terapkan(terimaHalo(k, sid, m, Date.now(), acakKripto, calon, hashMasuk, hashKode));
       return;
     }
     // JS-15 (P-28): waktu pulang-pergi dari HP pemain; pesan layar kelas tidak lewat sini.
@@ -783,6 +808,16 @@ export class RuangJejak {
       const jumlah = gantiSemuaNama(k, o, Date.now(), acakKripto) ?? 0;
       await this.terapkan(o);
       return jawabJson({ ok: true, jumlah }, 200);
+    }
+    // JS-16b (P-11, P-12): kode masuk ulang untuk pemain bernama yang belum dikeluarkan; kode hanya dikirim ke konsol.
+    if (aksi === "kode_masuk_ulang") {
+      const p = pemainId ? k.pemain.get(pemainId) : undefined;
+      if (!p || p.nama === null || !pemainId) return jawabJson({ galat: { kode: "PEMAIN_TIDAK_ADA" } }, 404);
+      if (p.dikeluarkan || k.status === "ditutup") return jawabJson({ galat: { kode: "STATUS_TIDAK_SESUAI" } }, 409);
+      const kode = buatKodeMasukUlang();
+      const sekarang = Date.now();
+      await this.terapkan(aturKodeMasukUlang(k, pemainId, await sha256Hex(kode), sekarang));
+      return jawabJson({ ok: true, kode, berlakuSampai: sekarang + MASA_KODE_MASUK_ULANG_MS }, 200);
     }
     let pesan: PesanKelas;
     if (aksi === "kunci" || aksi === "buka_kunci") pesan = { v: V, t: "kunci_ruang", kunci: aksi === "kunci" };

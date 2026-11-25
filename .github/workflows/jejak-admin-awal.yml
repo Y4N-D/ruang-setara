@@ -17,9 +17,10 @@ on:
         description: "Lingkungan"
         type: choice
         options:
+          - pilih
           - uji
           - produksi
-        default: uji
+        default: pilih
         required: true
 
 permissions:
@@ -49,6 +50,11 @@ jobs:
       # sandi 12 sampai 128 titik kode sesudah NFC; nama 1 sampai 40 titik kode tanpa karakter kendali.
       - name: Periksa rahasia dan masukan
         run: |
+          # JS-16b (P-18): lingkungan wajib dipilih; bawaan "pilih" berhenti sebelum menyentuh Cloudflare.
+          if [ "$LINGKUNGAN" != "uji" ] && [ "$LINGKUNGAN" != "produksi" ]; then
+            echo '::error::Pilih lingkungan uji atau produksi di formulir, lalu jalankan lagi.'
+            exit 1
+          fi
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
             echo '::error::Rahasia Cloudflare belum diisi (Architecture bagian 18, langkah 6).'
             exit 1

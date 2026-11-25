@@ -61,11 +61,12 @@ export function LayarDitutup({ saatKembali }: { saatKembali: () => void }) {
   );
 }
 
-export function LayarGalat({ kode, saatKembali }: { kode: KodeGalat; saatKembali: () => void }) {
+export function LayarGalat({ kode, teks, saatKembali }: { kode: KodeGalat | null; teks?: string; saatKembali: () => void }) {
+  // JS-16b (P-15): `teks` dipakai untuk layar tanpa kode galat server, misalnya perangkat yang digantikan.
   const muatUlang = kode === "VERSI_BERBEDA";
   return (
     <Panel judul={TEKS.judul}>
-      <p className="js-isi">{TEKS.galat[kode]}</p>
+      <p className="js-isi">{teks ?? (kode ? TEKS.galat[kode] : "")}</p>
       <button type="button" className="js-tombol js-tombol-utama" onClick={muatUlang ? () => window.location.reload() : saatKembali}>
         {muatUlang ? TEKS.tombol.muatUlang : TEKS.tombol.kembali}
       </button>

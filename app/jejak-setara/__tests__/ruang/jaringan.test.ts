@@ -31,7 +31,7 @@ class SoketPalsu implements SoketMirip {
   }
 }
 
-function siapkan(simpanan: Record<string, string> = {}, opsi: { versiPeta?: number } = {}) {
+function siapkan(simpanan: Record<string, string> = {}, opsi: { versiPeta?: number; kodeMasukUlang?: string } = {}) {
   let jam = 1000;
   let nomor = 0;
   const pewaktu: { id: number; pada: number; kerja: () => void }[] = [];
@@ -193,10 +193,42 @@ describe("KlienRuang", () => {
     expect(u.soket).toHaveLength(1);
   });
 
+  it("JS-16b (P-13 sampai P-15): halo masuk ulang tanpa token, kode lain lewat sambungan yang sama, tanpa ping sebelum diterima, 1008 dan 4001 berhenti", () => {
+    const u = siapkan({ "jejak:token:K7MPA": TOKEN }, { kodeMasukUlang: "K7M2PA" });
+    u.klien.mulai();
+    u.soket[0].buka();
+    expect(u.soket[0].terkirim).toEqual([{ v: PROTOKOL_VERSI, t: "halo", peran: "pemain", kodeMasukUlang: "K7M2PA" }]);
+    u.majukan(6000);
+    expect(u.soket[0].terkirim.map((p) => p.t)).toEqual(["halo"]);
+    u.klien.ulangiMasukUlang("ABCDEF");
+    expect(u.soket[0].terkirim.at(-1)).toEqual({ v: PROTOKOL_VERSI, t: "halo", peran: "pemain", kodeMasukUlang: "ABCDEF" });
+    u.soket[0].putus(1008);
+    expect(u.klien.keadaan).toBe("berhenti");
+    expect(u.soket).toHaveLength(1);
+
+    const v = siapkan({}, { kodeMasukUlang: "K7M2PA" });
+    v.klien.mulai();
+    v.soket[0].buka();
+    v.soket[0].terima({ ...datang, token: "B".repeat(43) });
+    expect(v.isi.get("jejak:token:K7MPA")).toBe("B".repeat(43));
+    v.soket[0].putus(1006);
+    v.majukan(5000);
+    expect(v.soket[1].terkirim.length).toBe(0);
+    v.soket[1].buka();
+    expect(v.soket[1].terkirim[0]).toEqual({ v: PROTOKOL_VERSI, t: "halo", peran: "pemain", token: "B".repeat(43) });
+    v.soket[1].terima(datang);
+    v.soket[1].putus(4001);
+    expect(v.klien.keadaan).toBe("berhenti");
+    expect(v.isi.has("jejak:token:K7MPA")).toBe(false);
+  });
+
   it("ping setiap 5 detik; pong memperbarui selisih jam", () => {
     const u = siapkan();
     u.klien.mulai();
     u.soket[0].buka();
+    // JS-16b: ping baru dimulai sesudah selamat_datang.
+    expect(u.soket[0].terkirim.map((p) => p.t)).toEqual(["halo"]);
+    u.soket[0].terima(datang);
     expect(u.soket[0].terkirim.map((p) => p.t)).toEqual(["halo", "ping"]);
     u.majukan(5000);
     expect(u.soket[0].terkirim.filter((p) => p.t === "ping")).toHaveLength(2);

@@ -19,7 +19,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-13 | Selesai (22 Nov 2026; `Diterima: JS-13`) | [JS-13-statistik.md](specs/JS-13-statistik.md) | [JS-13-hasil.md](tests/JS-13-hasil.md) |
 | JS-14 | Selesai (22 Nov 2026; `Diterima: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | [JS-14-hasil.md](tests/JS-14-hasil.md) |
 | JS-15 | Selesai (24 Nov 2026; `Diterima: JS-15`) | [JS-15-beban.md](specs/JS-15-beban.md) | [JS-15-hasil.md](tests/JS-15-hasil.md) |
-| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Spesifikasi (25 Nov 2026), menunggu `Spesifikasi disetujui: JS-16b`. JS-16c: belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus |
+| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Diuji (25 Nov 2026), lulus dengan penyimpangan 1 dan 2 yang perlu diterima; menunggu `Diterima: JS-16b`. JS-16c: belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus; [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus dengan penyimpangan 1 dan 2 |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
 
 ## Backlog
@@ -234,6 +234,7 @@ Keputusan pemilik proyek, 21 November 2026 (awal Plan JS-13): sesudah JS-09, Ses
 - Plan lanjutan JS-16c (dari Gerbang 1 JS-16, 24 Nov 2026): tautan galeri dan tautan teks kecil di layar judul Sehari Setara (11a), dengan izin mengubah AGENTS butir 12, `AGENTS.md` akar butir 4, serta Architecture bagian 11 dan `PLAN.md` Sehari Setara; di-push sesudah uji coba kelas lulus (2a). Panduan guru menjadi halaman konsol yang bisa dicetak satu halaman A4 (12a), uji coba dua sesi di kelas yang sama dengan dua guru (13a), dan CSV ruang kelas sungguhan (14a).
 - Test JS-16b (dari Test JS-16a, 24 Nov 2026): jalankan ulang `skill.uji.ts` utuh di awal Test (`:405` gagal di pemeriksaan kinerja mesin agen, juga di kode asli; `:970` dan `:1065` bergantung padanya karena mode serial), dan selidiki `gabung.uji.ts:130` "ruang penuh dan mode nomor absen", yang peka waktu: saat gagal, pemain ketiga masuk lobi berisi 2 pemain. JS-16b mengubah alur masuk (kode masuk ulang), jadi uji ini wajib stabil di sana. Playwright di mesin agen memakai `JEJAK_CHROMIUM` (Chromium 1243).
 - Plan lanjutan JS-16b atau perbaikan alur kerja (dari penerimaan JS-16a, 25 Nov 2026): pemilik proyek sempat mencoba masuk ke konsol produksi sebelum "Jejak: admin awal" dijalankan dengan lingkungan produksi (3 percobaan gagal). Pertimbangkan pilihan `lingkungan` tanpa nilai bawaan, dan satu kalimat di ringkasan "Jejak: produksi" yang mengingatkan langkah admin awal produksi.
+- Plan lanjutan JS-16c (dari Test JS-16b, 25 Nov 2026): panduan guru menjelaskan kode QR di lobi (tombol "Perbesar QR" atau `Q` untuk siswa yang duduk jauh) dan kode masuk ulang (tombol di halaman detail ruang, berlaku 10 menit dan sekali pakai, hanya tampil di laptop; HP lama berhenti sendiri). Tangkapan layar panduan memakai huruf VT323. Bila penyimpangan 1 JS-16b tidak diterima, ukuran teks kembali ke 0,7 sebelum panduan dibuat.
 
 ## JS-01 — Kerangka
 
@@ -2017,7 +2018,7 @@ Tidak ada permintaan baru (A-19 atau C-19). Berkas Sesi B dan C tidak disentuh.
 
 ### Plan lanjutan JS-16b — Huruf VT323, kode QR, kode masuk ulang (25 Nov 2026)
 
-- Status: **Disetujui (25 Nov 2026)** dengan `Setuju: JS-16b` (usulan 1 sampai 7 = a). **Spesifikasi** [JS-16b-tampilan.md](specs/JS-16b-tampilan.md), menunggu `Spesifikasi disetujui: JS-16b`. Dasar: Gerbang 1 JS-16 (usulan 8d, 9a, 10a, dan 15a; izin `@fontsource/vt323` 5.3.0), percobaan 1 sampai 5 di entri JS-16, dan catatan Test serta penerimaan JS-16a.
+- Status: **Disetujui (25 Nov 2026)** dengan `Setuju: JS-16b` (usulan 1 sampai 7 = a). Spesifikasi [JS-16b-tampilan.md](specs/JS-16b-tampilan.md) disetujui 25 Nov 2026 (D-1 sampai D-4 = a), lalu **Diuji (25 Nov 2026)**: laporan [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus dengan penyimpangan 1 (ukuran teks VT323 0,64) dan 2 (token tinggi baris) yang perlu diterima pemilik proyek. Dasar: Gerbang 1 JS-16 (usulan 8d, 9a, 10a, dan 15a; izin `@fontsource/vt323` 5.3.0), percobaan 1 sampai 5 di entri JS-16, dan catatan Test serta penerimaan JS-16a.
 - Memenuhi: JFR-03 dan JFR-07 (rilis 1.0); KT-07 (pembuat QR tanpa dependensi); Design System 0, 3.6, 5, dan 15; catatan Plan JS-14 (tombol lobi 48 px); penyimpangan 1 dan 2 JS-16a (saran a); catatan penerimaan JS-16a ("Jejak: admin awal").
 - Bergantung pada: JS-16a Selesai (25 Nov 2026).
 - File yang dibuat/diubah (perkiraan, dipastikan di Specify):

@@ -76,9 +76,10 @@ const GALAT_BERHENTI: ReadonlySet<KodeGalat> = new Set<KodeGalat>([
   "DIKELUARKAN",
   "VERSI_BERBEDA",
 ]);
-/** Kode penutupan yang tidak dicoba lagi: ditutup, ditolak masuk, dikeluarkan, versi berbeda (P-29).
+/** Kode penutupan yang tidak dicoba lagi: ditutup, diganti perangkat lain (JS-16b, P-15), ditolak masuk, dikeluarkan,
+ *  versi berbeda (P-29).
  *  Pelanggaran batas pesan (1008) dicoba lagi, karena jaringan yang tersendat bisa mengirim pesan berdempet. */
-const TUTUP_BERHENTI: ReadonlySet<number> = new Set([4000, 4003, 4004, 4005]);
+const TUTUP_BERHENTI: ReadonlySet<number> = new Set([4000, 4001, 4003, 4004, 4005]);
 
 export class KlienRuang {
   keadaan: KeadaanKlien = "menghubungkan";
@@ -92,6 +93,8 @@ export class KlienRuang {
   /** JS-15 (P-27): waktu pulang-pergi terakhir, dikirim di `ping` berikutnya; kosong lagi di setiap sambungan baru. */
   private rttTerakhir: number | null = null;
   private nomorAbsen: number | null;
+  /** JS-16b (P-13): kode dari guru untuk halo pertama di HP baru; dihapus sesudah selamat_datang. */
+  private kodeMasukUlang: string | null;
   private readonly alamat: string;
   private readonly kode: string;
   private readonly dep: Ketergantungan;
@@ -106,11 +109,12 @@ export class KlienRuang {
     dep: Ketergantungan,
     saatPesan: (p: PesanServerPemain) => void,
     saatKeadaan: (k: KeadaanKlien, kodeTutup: number | null) => void,
-    opsi: { versiPeta?: number } = {},
+    opsi: { versiPeta?: number; kodeMasukUlang?: string } = {},
   ) {
     this.alamat = alamat;
     this.kode = kode;
     this.nomorAbsen = nomorAbsen;
+    this.kodeMasukUlang = opsi.kodeMasukUlang ?? null;
     this.dep = dep;
     this.saatPesan = saatPesan;
     this.saatKeadaan = saatKeadaan;
@@ -139,6 +143,12 @@ export class KlienRuang {
   /** Mengirim halo lagi dengan nomor absen lain (sesudah NOMOR_ABSEN_DIPAKAI). */
   ulangiHalo(nomorAbsen: number | null): void {
     this.nomorAbsen = nomorAbsen;
+    this.kirimHalo();
+  }
+
+  /** JS-16b (P-14): mengirim halo lagi dengan kode dari guru yang lain (sesudah KODE_MASUK_ULANG_SALAH). */
+  ulangiMasukUlang(kode: string): void {
+    this.kodeMasukUlang = kode;
     this.kirimHalo();
   }
 
@@ -180,7 +190,8 @@ export class KlienRuang {
     s.onopen = () => {
       if (s !== this.soket) return;
       this.kirimHalo();
-      this.mulaiPing();
+      // JS-16b: ping baru dimulai sesudah selamat_datang. Ping dari sambungan yang belum diterima (menunggu nomor absen
+      // atau kode dari guru yang lain) ditutup server dengan 4002, sehingga halo yang sama terkirim berulang.
     };
     s.onmessage = (ev) => {
       if (s === this.soket) this.terima(ev.data);
@@ -194,6 +205,11 @@ export class KlienRuang {
   }
 
   private kirimHalo(): void {
+    // JS-16b (P-13): kode masuk ulang dikirim tanpa token dan tanpa nomor absen.
+    if (this.kodeMasukUlang !== null) {
+      this.kirim({ v: PROTOKOL_VERSI, t: "halo", peran: "pemain", kodeMasukUlang: this.kodeMasukUlang });
+      return;
+    }
     const token = this.dep.penyimpanan?.getItem(kunciToken(this.kode)) ?? null;
     const halo: PesanPemain = { v: PROTOKOL_VERSI, t: "halo", peran: "pemain" };
     if (token) halo.token = token;
@@ -255,6 +271,8 @@ export class KlienRuang {
     }
     if (p.t === "selamat_datang") {
       this.dep.penyimpanan?.setItem(kunciToken(this.kode), p.token);
+      this.kodeMasukUlang = null; // JS-16b: sambung ulang berikutnya memakai token baru
+      this.mulaiPing();
       this.percobaan = 0;
       this.gagalSejak = null;
       this.ubahKeadaan("tersambung");
@@ -282,8 +300,13 @@ export class KlienRuang {
     this.hentiPing();
     this.soket = null;
     if (this.keadaan === "berhenti") return;
+    // JS-16b (P-14): kode dari guru yang salah lima kali menutup sambungan (1008); tidak dicoba lagi dengan kode yang sama.
+    if (kode === 1008 && this.kodeMasukUlang !== null) {
+      this.berhenti(kode);
+      return;
+    }
     if (TUTUP_BERHENTI.has(kode)) {
-      if (kode === 4000 || kode === 4004) this.hapusToken();
+      if (kode === 4000 || kode === 4001 || kode === 4004) this.hapusToken();
       this.berhenti(kode);
       return;
     }

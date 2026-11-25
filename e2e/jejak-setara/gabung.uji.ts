@@ -102,7 +102,7 @@ test("layar Kode: format salah, kode tidak ada, keyboard saja, dan acak ulang na
   await expect(page.getByRole("main").getByText("Kode berisi 5 huruf atau angka.")).toBeVisible();
   await isian.fill("zzzzz");
   await expect(isian).toHaveValue("ZZZZZ");
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("main").getByText("Kode ruang tidak ditemukan. Periksa lagi kodenya.")).toBeVisible();
   const kode = await buatRuang(request);
   await isian.fill(kode.toLowerCase());
@@ -133,7 +133,8 @@ test("ruang penuh dan mode nomor absen (AC-8, AC-18)", async ({ browser, baseURL
   await gabung(a.page, kode, 1);
   await gabung(b.page, kode, 2);
   await c.page.goto(`/?kode=${kode}`);
-  await expect(c.page.getByRole("main").getByText("Ruang sudah penuh. Beri tahu gurumu.")).toBeVisible();
+  // JS-16b (P-19): kode di alamat ?kode= baru diperiksa sesudah gambar dunia termuat (JS-15, P-23), seperti gabung().
+  await expect(c.page.getByRole("main").getByText("Ruang sudah penuh. Beri tahu gurumu.")).toBeVisible({ timeout: 20_000 });
   await fotoEmpat(c.page, "galat-penuh");
   await c.page.getByRole("button", { name: "Kembali" }).click();
   await expect(c.page.getByLabel("Kode ruang")).toBeVisible();
@@ -215,7 +216,7 @@ test("mulai, jeda, lanjut, dikeluarkan, selesai, dan ditutup lewat kait uji (AC-
   await expect(a.page.getByRole("heading", { name: "Ronde selesai" })).toBeVisible();
   await expect(a.page.getByText("Tunggu arahan guru.")).toBeHidden();
   await a.page.getByRole("button", { name: "Kembali" }).click();
-  await expect(a.page.getByRole("button", { name: "Masuk" })).toBeVisible();
+  await expect(a.page.getByRole("button", { name: "Masuk", exact: true })).toBeVisible();
   expect(catatan).toEqual({ konsol: [], respons: [] });
   await a.ctx.close();
   await b.ctx.close();

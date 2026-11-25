@@ -90,7 +90,7 @@ for (const halaman of HALAMAN) {
         await document.fonts.ready;
         return [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family.replaceAll('"', ""));
       });
-      expect(huruf).toEqual(expect.arrayContaining(["Press Start 2P", "Pixelify Sans"]));
+      expect(huruf).toEqual(expect.arrayContaining(["VT323"]));
 
       await page.waitForLoadState("networkidle");
       await page.screenshot({ path: `${LAYAR}/${halaman.berkas}-${ukuran.nama}.png` });

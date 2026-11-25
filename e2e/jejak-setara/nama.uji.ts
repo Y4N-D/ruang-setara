@@ -20,7 +20,7 @@ async function masukKonsol(page: Page): Promise<void> {
   await page.goto("/admin/");
   await page.getByLabel("Email", { exact: true }).fill(EMAIL);
   await page.getByLabel("Sandi", { exact: true }).fill(SANDI);
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Dasbor" })).toBeVisible({ timeout: 15_000 });
 }
 
@@ -41,7 +41,8 @@ test("nama buatan siswa: identitas, galat, menu nama dan panel Pemain di layar k
   await masukKonsol(g);
   await g.goto(`/admin/#/kelas/${id}`);
   await expect(g.locator(".js-kelas-kode")).toHaveText(kode, { timeout: 20_000 });
-  await expect(g.getByText("Tulis nama pemain dan pilih avatar")).toBeVisible();
+  // JS-16b (D-1a): kode QR menggantikan tiga langkah bergabung di kotak kanan lobi.
+  await expect(g.locator(".js-kelas-qr svg.js-kelas-qr-gambar")).toBeVisible();
   await expect(g.getByRole("button", { name: "Suara nyala. Tekan untuk mematikan." })).toHaveAttribute("aria-pressed", "true");
 
   // P-36 sampai P-39: layar identitas mode bebas di HP.

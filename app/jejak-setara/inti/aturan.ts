@@ -356,6 +356,13 @@ export const ABJAD_KODE = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 export const POLA_KODE_RUANG = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{5}$/;
 
 /** Kode yang diketik: huruf kecil menjadi besar; spasi dan tanda hubung dibuang (P-11). */
+/** JS-16b (P-12, P-13): kode masuk ulang 6 karakter dari ABJAD_KODE; huruf kecil diterima lalu dinormalkan. */
+export const PANJANG_KODE_MASUK_ULANG = 6;
+export const POLA_KODE_MASUK_ULANG = /^[A-Za-z0-9]{6}$/;
+export function normalkanKodeMasukUlang(masukan: string): string {
+  return masukan.trim().toUpperCase();
+}
+
 export function normalkanKode(masukan: string): string {
   return masukan.toUpperCase().replace(/[\s-]+/g, "");
 }

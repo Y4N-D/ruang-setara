@@ -138,8 +138,8 @@ describe("Worker kerangka", () => {
     }
   });
 
-  it("PROTOKOL_VERSI bernilai 4 (JS-15) dan sama dengan protokol jawaban Worker", async () => {
-    expect(PROTOKOL_VERSI).toBe(4);
+  it("PROTOKOL_VERSI bernilai 5 (JS-16b) dan sama dengan protokol jawaban Worker", async () => {
+    expect(PROTOKOL_VERSI).toBe(5);
     const isi = (await (await minta("/api/sehat")).json()) as { protokol: number };
     expect(isi.protokol).toBe(PROTOKOL_VERSI);
   });
@@ -156,6 +156,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(kunciJs11().pemain),
         ...Object.keys(kunciJs09().pemain),
         ...Object.keys(kunciJs14().pemain),
+        ...Object.keys(kunciJs16b().pemain),
       ]),
     ).toEqual({
       judulTabPemain: "Jejak Setara",
@@ -359,7 +360,10 @@ describe("Teks dan halaman", () => {
   it("JS-10: TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-10 (AC-25), dengan teks JS-10 yang diubah JS-11", () => {
     const js11 = kunciJs11();
     // JS-11 (AC-21): tabel "Teks JS-10 yang berubah" menggantikan baris yang sama di spesifikasi JS-10.
-    const harapan = { ...uraiTabelTeks(baca("docs/jejak-setara/specs/JS-10-kelas.md")), ...js11.js10 };
+    const harapan: Record<string, string> = { ...uraiTabelTeks(baca("docs/jejak-setara/specs/JS-10-kelas.md")), ...js11.js10 };
+    // JS-16b (D-1a): kode QR menggantikan tiga langkah bergabung; kuncinya dihapus dan teks baru diperiksa uji JS-16b.
+    const js16b = kunciJs16b();
+    for (const k of js16b.hapus) delete harapan[k];
     expect(Object.keys(harapan).length).toBeGreaterThan(150);
     const datar = ratakanTeks(TEKS_KONSOL);
     for (const [kunci, teks] of Object.entries(harapan)) expect(datar[kunci], kunci).toBe(teks);
@@ -369,7 +373,8 @@ describe("Teks dan halaman", () => {
         !KUNCI_JS22_KONSOL.includes(k) &&
         !(k in js11.konsol) &&
         !(k in kunciJs14().konsol) &&
-        !(k in kunciJs15().konsol),
+        !(k in kunciJs15().konsol) &&
+        !(k in js16b.konsol),
     );
     expect(kunciJs10.sort()).toEqual(Object.keys(harapan).sort());
   });
@@ -424,8 +429,13 @@ describe("Teks dan halaman", () => {
     expect(Object.keys(ubah).sort()).toEqual([...UBAH_JS14].sort());
     const datarPemain = ratakanTeks(TEKS);
     const datarKonsol = ratakanTeks(TEKS_KONSOL);
-    for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
-    for (const [k, t] of Object.entries({ ...konsol, ...ubah })) expect(datarKonsol[k], k).toBe(t);
+    const js16b = kunciJs16b();
+    for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(js16b.pemain[k] ?? t);
+    for (const [k, t] of Object.entries({ ...konsol, ...ubah })) {
+      // JS-16b: kunci yang dihapus tidak ada lagi; kunci yang diubah memakai teks JS-16b.
+      if (js16b.hapus.includes(k)) expect(datarKonsol[k], k).toBeUndefined();
+      else expect(datarKonsol[k], k).toBe(js16b.konsol[k] ?? t);
+    }
     // Kelompok baru JS-14 di layar pemain tidak memuat kunci di luar spesifikasi.
     for (const grup of ["menu", "suara", "pengaturan", "privasi", "tentang", "namaBebas", "ketik"]) {
       const ada = Object.keys(datarPemain).filter((k) => k.startsWith(`${grup}.`));
@@ -447,6 +457,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(kunciJs13()),
         ...Object.keys(kunciJs14().konsol),
         ...Object.keys(kunciJs16a()),
+        ...Object.keys(kunciJs16b().konsol),
         ...Object.keys(TEKS_A14_KONSOL),
         ...Object.keys(kunciJs15().konsol),
       ]),
@@ -482,7 +493,7 @@ describe("Teks dan halaman", () => {
         memeriksa: "Memeriksa…",
         isiKosong: "Isi email dan sandi.",
         kreditAset: "Aset visual digambar dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN.",
-        kreditHuruf: "Huruf Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.",
+        // kreditHuruf diubah JS-16b (P-4) dan diperiksa uji JS-16b.
       },
       sandi: {
         judulWajib: "Buat sandi baru",
@@ -658,7 +669,7 @@ function tokenRoot(css: string, awalan: string): Record<string, string> {
 
 describe("Token dan tajuk", () => {
   it("jejak.css memuat semua token Design System bagian 4 dengan nilai persis", () => {
-    expect(tokenRoot(baca("app/jejak-setara/styles/jejak.css"), "js")).toEqual({ ...TOKEN_DASAR, ...TOKEN_JS10, ...TOKEN_PERAN });
+    expect(tokenRoot(baca("app/jejak-setara/styles/jejak.css"), "js")).toEqual({ ...TOKEN_DASAR, ...TOKEN_JS10, ...TOKEN_PERAN, ...TOKEN_HURUF });
   });
 
   it("token dasar sama dengan token --ss- Sehari Setara (malam hanya ada di Jejak Setara)", () => {
@@ -1324,8 +1335,12 @@ describe("JS-16a: lingkungan produksi (AC-3, AC-4, AC-8 sampai AC-14)", () => {
       const a = isi.indexOf("      - name: Cari dan periksa alamat lingkungan\n");
       return isi.slice(a, isi.indexOf("\n\n", a));
     };
+    // JS-16b (P-18): "Jejak: admin awal" berbawaan "pilih"; "Jejak: hentikan" tetap berbawaan uji.
+    expect(awal).toContain('      lingkungan:\n        description: "Lingkungan"\n        type: choice\n        options:\n          - pilih\n          - uji\n          - produksi\n        default: pilih\n        required: true\n');
+    expect(hentikan).toContain('      lingkungan:\n        description: "Lingkungan"\n        type: choice\n        options:\n          - uji\n          - produksi\n        default: uji\n        required: true\n');
+    expect(awal).toContain(`echo '::error::${TEKS_KONSOL.alurAdminAwal.pilihLingkungan}'`);
+    expect(awal.indexOf(TEKS_KONSOL.alurAdminAwal.pilihLingkungan)).toBeLessThan(awal.indexOf("::error::Rahasia Cloudflare"));
     for (const isi of [awal, hentikan]) {
-      expect(isi).toContain('      lingkungan:\n        description: "Lingkungan"\n        type: choice\n        options:\n          - uji\n          - produksi\n        default: uji\n        required: true\n');
       expect(isi).toContain("concurrency:\n  group: jejak-cloudflare-${{ inputs.lingkungan }}\n  cancel-in-progress: false\n");
       expect(isi).toContain("      LINGKUNGAN: ${{ inputs.lingkungan }}\n");
       expect(isi).toContain("      ALAMAT_TETAP_UJI: ${{ vars.JEJAK_ALAMAT_UJI }}\n      ALAMAT_TETAP_PRODUKSI: ${{ vars.JEJAK_ALAMAT_PRODUKSI }}\n");
@@ -1392,4 +1407,31 @@ function kunciJs16a(): Record<string, string> {
     hasil[`${grup}.${sel[1]}`] = rujukan ? hasil[`${rujukan[1]}.${rujukan[2]}`] : sel[2];
   }
   return hasil;
+}
+
+/** JS-16b (P-2): token huruf pusat di :root jejak.css. */
+const TOKEN_HURUF = {
+  "huruf-judul": '"VT323", monospace',
+  "huruf-judul-sesuai": "cap-height 1",
+  "huruf-teks": '"VT323", monospace',
+  "huruf-teks-sesuai": "cap-height 0.64",
+  "huruf-judul-baris": "1",
+  "huruf-teks-baris": "1.2",
+};
+
+/** JS-16b (bagian Teks): teks pemain dan konsol dari tabel spesifikasi, serta kunci yang dihapus (D-1a). */
+function kunciJs16b(): { pemain: Record<string, string>; konsol: Record<string, string>; hapus: string[] } {
+  const isi = baca("docs/jejak-setara/specs/JS-16b-tampilan.md");
+  const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"), isi.indexOf("## Data, protokol, API, dan migrasi"));
+  const pemain: Record<string, string> = {};
+  const konsol: Record<string, string> = {};
+  let sasaran: Record<string, string> | null = null;
+  for (const baris of bagian.split("\n")) {
+    if (baris.startsWith("**Pemain")) sasaran = pemain;
+    else if (baris.startsWith("**Konsol")) sasaran = konsol;
+    const sel = baris.match(/^\| `([\w.]+)` \| (.+) \|$/);
+    if (sasaran && sel) sasaran[sel[1]] = sel[2];
+  }
+  const hapus = [...bagian.matchAll(/`(kelas\.cara\w*)`/g)].map((m) => m[1]);
+  return { pemain, konsol, hapus };
 }

@@ -28,7 +28,7 @@ function Kartu({ judul, children }: { judul: string; children: ReactNode }) {
   );
 }
 
-/** Kalimat berisi "{n}" dengan angka berhuruf Press Start 2P. */
+/** Kalimat berisi "{n}" dengan angka berhuruf judul (token JS-16b). */
 function KalimatAngka({ teks, n }: { teks: string; n: number }) {
   const [sebelum, sesudah] = teks.split("{n}");
   return (

@@ -9,7 +9,7 @@ async function masukKonsol(page: Page): Promise<void> {
   await page.goto("/admin/");
   await page.getByLabel("Email", { exact: true }).fill(EMAIL);
   await page.getByLabel("Sandi", { exact: true }).fill(SANDI);
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Dasbor" })).toBeVisible({ timeout: 15_000 });
 }
 
@@ -31,7 +31,7 @@ test("banner versi konsol muncul sesudah deploy (rute berubah) dan tidak di laya
   await expect(banner).toHaveCount(0);
   await page.getByLabel("Email", { exact: true }).fill(EMAIL);
   await page.getByLabel("Sandi", { exact: true }).fill(SANDI);
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Dasbor" })).toBeVisible({ timeout: 15_000 });
   await expect(banner).toBeVisible({ timeout: 10_000 });
   await page.getByRole("link", { name: "Ruang" }).first().click();

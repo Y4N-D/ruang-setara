@@ -119,11 +119,11 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 |---|---|---|
 | JFR-01 | Guru atau admin yang sudah masuk membuat ruang: label kelas (misalnya "IX B"), paket kejadian, durasi 10, 15 (bawaan), atau 20 menit, skill yang aktif, batas pemain (bawaan 40, paling banyak 100), batas bergabung terlambat (bawaan 5 menit sesudah mulai), dan mode nomor absen (mati secara bawaan; hanya untuk ruang sampai 50 pemain), dan nama pemain: daftar nama samaran (bawaan) atau nama buatan siswa | P0 |
 | JFR-02 | Ruang mendapat kode 5 karakter tanpa huruf dan angka yang mirip (misalnya tanpa O dan 0) serta tautan pendek untuk dibuka di HP | P0 |
-| JFR-03 | Kode QR tautan ruang di lobi layar kelas | P1 |
+| JFR-03 | Kode QR tautan ruang di lobi layar kelas | P1, dikerjakan untuk rilis 1.0 di JS-16b |
 | JFR-04 | Siswa masuk tanpa akun: buka tautan, ketik kode, isi nomor absen bila mode nomor absen aktif, lalu pilih satu dari tiga saran nama samaran (boleh acak ulang) atau, di ruang nama buatan siswa, ketik nama pemain 3–14 karakter yang unik di ruang itu dan lolos penyaring kata, lalu pilih satu dari 8 avatar | P0 |
 | JFR-05 | Lobi: pemain bisa berjalan di halaman lobi tanpa kejadian sambil menunggu; layar kelas menampilkan jumlah dan nama samaran pemain | P0 |
 | JFR-06 | Guru dapat mengunci ruang, mengganti nama pemain dengan nama dari daftar, dan mengeluarkan pemain dengan konfirmasi, dari konsol dan layar kelas | P0 |
-| JFR-07 | Kode masuk ulang dari guru untuk pemain yang berganti perangkat, dengan skor dan progres tetap | P1 |
+| JFR-07 | Kode masuk ulang dari guru untuk pemain yang berganti perangkat, dengan skor dan progres tetap | P1, dikerjakan untuk rilis 1.0 di JS-16b |
 | JFR-08 | Menyambung ulang otomatis bila koneksi putus atau HP terkunci sebentar, dengan skor dan progres utuh | P0 |
 
 ### B. Penjelajahan
@@ -579,3 +579,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 24 Nov 2026 | Gerbang 1 JS-16 (`Setuju: JS-16, 8d`; `Izinkan dependensi: @fontsource/vt323 5.3.0`): kode QR dan kode masuk ulang masuk rilis 1.0; produksi memakai `workers.dev` dulu (KT-06); tautan dari galeri dan layar judul Sehari Setara (KT-08); huruf Jejak Setara diganti VT323 untuk judul dan teks, dengan tinggi huruf kapital disamakan dan nama huruf sebagai token pusat, tanpa mengubah Sehari Setara; pembuat kode QR ditulis sendiri (KT-07); JS-16 dipecah menjadi JS-16a (produksi), JS-16b (tampilan), dan JS-16c (panduan, tautan, uji coba, rilis); rilis persiapan v0.9 sebelum v1.0 |
 | 24 Nov 2026 | Spesifikasi JS-16a disetujui (`Spesifikasi disetujui: JS-16a`, D-1 sampai D-4 = a): formulir "Jejak: produksi" berisi nomor rilis dan kotak darurat, kode diuji ulang di setiap deploy produksi, rilis ditahan oleh semua ruang yang belum ditutup, dan alamat diperiksa sebelum rahasia diubah. D1 produksi `jejak-setara` dibuat pemilik proyek (lokasi Asia-Pacific) |
 | 25 Nov 2026 | Gerbang 1 JS-16b (`Setuju: JS-16b`, usulan 1 sampai 7 = a): ukuran VT323 disamakan dengan `font-size-adjust` (tinggi kapital 1 untuk judul, 0,7 untuk teks); pola penutup QR menurut ISO/IEC 18004; tombol "Perbesar QR" (`Q`); `halo` membawa kode masuk ulang dengan `PROTOKOL_VERSI` 5; tombol "Kode masuk ulang" di halaman detail ruang konsol; pilihan lingkungan "pilih" di "Jejak: admin awal"; batas tunggu uji ruang penuh 20 detik |
+| 25 Nov 2026 | Spesifikasi JS-16b disetujui (`Spesifikasi disetujui: JS-16b`, D-1 sampai D-4 = a): kode QR menggantikan tiga langkah bergabung di lobi; kode masuk ulang salah paling banyak 5 kali per sambungan; pembuatan kode dicatat di log audit tanpa kodenya; perangkat yang tergantikan (4001) selalu berhenti dengan pesan |

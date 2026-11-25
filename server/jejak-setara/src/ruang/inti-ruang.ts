@@ -176,6 +176,8 @@ export interface KeadaanRuang {
   sambungan: Map<string, string | null>; // sambunganId → pemainId
   sambunganPemain: Map<string, string>; // pemainId → sambunganId
   batasHalo: Map<string, number>; // sambunganId → batas waktu halo (P-15)
+  kodeMasukUlang: Map<string, { hash: string; berlakuSampai: number }>; // JS-16b (P-12): pemainId → kode aktif
+  salahMasukUlang: Map<string, number>; // JS-16b (P-14): sambunganId → jumlah kode salah
   urutanBerikut: number;
   // Hanya di memori (JS-07): waktu kiriman `dunia` lobi terakhir, kerangka penuh terakhir per pemain,
   // dan nomor putaran `main`.
@@ -213,7 +215,9 @@ export type Simpanan =
   | { jenis: "jawaban"; jawaban: JawabanRuang } // JS-08, P-61
   | { jenis: "terlihat"; pemainId: string; titikId: string; kode: string; pada: number } // JS-08, P-61
   | { jenis: "skill"; pemainId: string; isi: string } // JS-09, P-14
-  | { jenis: "petunjuk"; pemainId: string; kode: string; opsi: string }; // JS-09, P-14
+  | { jenis: "petunjuk"; pemainId: string; kode: string; opsi: string } // JS-09, P-14
+  | { jenis: "kode_masuk_ulang"; pemainId: string; hash: string; berlakuSampai: number } // JS-16b, P-12
+  | { jenis: "hapus_kode_masuk_ulang"; pemainId: string }; // JS-16b, P-12
 
 export interface BarisPeserta {
   id: string;
@@ -302,6 +306,8 @@ export function buatKeadaan(ruang: DataRuang, peta: PetaRuang, kejadian: readonl
     sambungan: new Map(),
     sambunganPemain: new Map(),
     batasHalo: new Map(),
+    kodeMasukUlang: new Map(),
+    salahMasukUlang: new Map(),
     urutanBerikut: 1,
     duniaLobiTerakhir: null,
     kerangkaTerakhir: new Map(),
@@ -325,6 +331,8 @@ export function buatKeadaan(ruang: DataRuang, peta: PetaRuang, kejadian: readonl
 
 export interface DataPulih {
   ruang: DataRuang;
+  /** JS-16b (P-12): kode masuk ulang yang masih tersimpan di SQLite ruang. */
+  kodeMasukUlang?: { pemainId: string; hash: string; berlakuSampai: number }[];
   status: StatusRuang;
   waktu: WaktuRuang;
   terkunci: boolean;
@@ -358,6 +366,7 @@ export function pulihkanKeadaan(d: DataPulih, peta: PetaRuang, sekarang: number)
   k.sambunganTerakhirPutus = d.sambunganTerakhirPutus;
   if (d.modeNama === "daftar" || d.modeNama === "bebas") k.modeNama = d.modeNama;
   k.namaDiblokir = [...(d.namaDiblokir ?? [])];
+  for (const c of d.kodeMasukUlang ?? []) k.kodeMasukUlang.set(c.pemainId, { hash: c.hash, berlakuSampai: c.berlakuSampai });
   for (const p of d.pemain) {
     k.pemain.set(p.id, { ...p, terhubung: false });
     k.urutanBerikut = Math.max(k.urutanBerikut, p.urutan + 1);
@@ -1191,6 +1200,7 @@ function tolakSambungan(k: KeadaanRuang, o: Keluaran, sid: string, kode: KodeGal
   o.tutup.push({ sambunganId: sid, kode: kodeTutup, alasan });
   k.sambungan.delete(sid);
   k.batasHalo.delete(sid);
+  k.salahMasukUlang.delete(sid);
   return o;
 }
 
@@ -1240,11 +1250,52 @@ export function terimaHalo(
   acak: () => number,
   calon: CalonPemain,
   hashTokenMasuk: string | null,
+  hashKodeMasukUlang: string | null = null,
 ): Keluaran {
   const o = keluaranKosong();
   if (!k.sambungan.has(sid)) k.sambungan.set(sid, null);
   if (k.sambungan.get(sid)) return o; // halo kedua diabaikan
   bersihkanTanpaIdentitas(k, o, sekarang);
+
+  // JS-16b (P-14): kode masuk ulang dari guru memindahkan pemainnya ke sambungan ini dengan token baru. Pemeriksaan
+  // terkunci, penuh, terlambat, dan nomor absen dilewati karena pemainnya sudah tercatat.
+  if (pesan.kodeMasukUlang !== undefined) {
+    if (pesan.token !== undefined || pesan.nomorAbsen !== undefined) {
+      return tolakSambungan(k, o, sid, null, KODE_TUTUP.pelanggaran, "kode masuk ulang bersama token");
+    }
+    if (k.status === "ditutup") return tolakSambungan(k, o, sid, "RUANG_TIDAK_ADA", KODE_TUTUP.ditutup, "ruang ditutup");
+    hapusKodeKedaluwarsa(k, o, sekarang);
+    const cocok = hashKodeMasukUlang === null ? undefined : [...k.kodeMasukUlang].find(([, c]) => c.hash === hashKodeMasukUlang);
+    const p = cocok ? k.pemain.get(cocok[0]) : undefined;
+    if (!cocok || !p) {
+      const salah = (k.salahMasukUlang.get(sid) ?? 0) + 1;
+      k.salahMasukUlang.set(sid, salah);
+      if (salah >= BATAS_SALAH_MASUK_ULANG) {
+        return tolakSambungan(k, o, sid, "KODE_MASUK_ULANG_SALAH", KODE_TUTUP.pelanggaran, "kode masuk ulang salah");
+      }
+      kirimKe(o, sid, galat("KODE_MASUK_ULANG_SALAH"));
+      k.batasHalo.set(sid, sekarang + 2 * 60_000); // waktu untuk mengetik ulang kode
+      return o; // sambungan tetap terbuka; klien boleh mengirim halo lagi
+    }
+    k.kodeMasukUlang.delete(p.id); // sekali pakai
+    o.simpan.push({ jenis: "hapus_kode_masuk_ulang", pemainId: p.id });
+    if (p.dikeluarkan) return tolakSambungan(k, o, sid, "DIKELUARKAN", KODE_TUTUP.dikeluarkan, "dikeluarkan");
+    const sidLama = k.sambunganPemain.get(p.id);
+    if (sidLama !== undefined && sidLama !== sid) {
+      o.tutup.push({ sambunganId: sidLama, kode: KODE_TUTUP.diganti, alasan: "diganti" });
+      k.sambungan.delete(sidLama);
+    }
+    p.hashToken = calon.hashToken; // token perangkat lama tidak berlaku lagi
+    ikat(k, o, sid, p);
+    p.terhubung = true;
+    p.terputusSejak = null;
+    simpanPemain(o, p);
+    sambutan(k, o, sid, p, calon.token, sekarang);
+    kirimPosisiAwal(k, o, p, sid, sekarang);
+    kirimKeadaanKejadian(k, o, p, sid, sekarang);
+    o.kelas.push(pesanLobi(k));
+    return o;
+  }
 
   if (hashTokenMasuk !== null && pesan.token) {
     const lama = [...k.pemain.values()].find((p) => p.hashToken === hashTokenMasuk);
@@ -1304,6 +1355,28 @@ export function terimaHalo(
   ikat(k, o, sid, p);
   simpanPemain(o, p);
   sambutan(k, o, sid, p, calon.token, sekarang);
+  return o;
+}
+
+/** JS-16b (P-12): masa berlaku kode masuk ulang dan batas kode salah per sambungan (D-2a). */
+export const MASA_KODE_MASUK_ULANG_MS = 10 * 60_000;
+export const BATAS_SALAH_MASUK_ULANG = 5;
+
+function hapusKodeKedaluwarsa(k: KeadaanRuang, o: Keluaran, sekarang: number): void {
+  for (const [pemainId, c] of k.kodeMasukUlang) {
+    if (c.berlakuSampai > sekarang) continue;
+    k.kodeMasukUlang.delete(pemainId);
+    o.simpan.push({ jenis: "hapus_kode_masuk_ulang", pemainId });
+  }
+}
+
+/** JS-16b (P-11, P-12): kode masuk ulang baru untuk satu pemain; kode lama pemain itu diganti. Hanya hash yang disimpan. */
+export function aturKodeMasukUlang(k: KeadaanRuang, pemainId: string, hash: string, sekarang: number): Keluaran {
+  const o = keluaranKosong();
+  hapusKodeKedaluwarsa(k, o, sekarang);
+  const berlakuSampai = sekarang + MASA_KODE_MASUK_ULANG_MS;
+  k.kodeMasukUlang.set(pemainId, { hash, berlakuSampai });
+  o.simpan.push({ jenis: "kode_masuk_ulang", pemainId, hash, berlakuSampai });
   return o;
 }
 
@@ -1424,6 +1497,7 @@ export function sambunganPutus(k: KeadaanRuang, sid: string, sekarang: number): 
   const pid = k.sambungan.get(sid);
   k.sambungan.delete(sid);
   k.batasHalo.delete(sid);
+  k.salahMasukUlang.delete(sid);
   if (pid && k.sambunganPemain.get(pid) === sid) {
     // Sambungan putus menutup dialog pemain itu; status jawabannya tetap (P-36).
     if (k.dialog.delete(pid)) tandaiBerubah(k, pid);
@@ -1583,7 +1657,7 @@ export function terimaKelas(k: KeadaanRuang, pesan: PesanKelas, sekarang: number
       return o;
     }
     default:
-      return o; // halo dan kode_masuk_ulang (JS-17)
+      return o; // halo
   }
 }
 

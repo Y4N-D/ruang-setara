@@ -39,7 +39,6 @@ const kAkhiri = /* @__PURE__ */ pesan("akhiri", () => ({}));
 const kTambahWaktu = /* @__PURE__ */ pesan("tambah_waktu", () => ({ detik: angkaBulat(1, BATAS_PESAN.tambahWaktuDetikMaks) }));
 const kKunciRuang = /* @__PURE__ */ pesan("kunci_ruang", () => ({ kunci: z.boolean() }));
 const kKeluarkan = /* @__PURE__ */ pesan("keluarkan", () => ({ pemainId: id() }));
-const kKodeMasukUlang = /* @__PURE__ */ pesan("kode_masuk_ulang", () => ({ pemainId: id() }));
 const kPembahasan = /* @__PURE__ */ pesan("pembahasan", () => ({ kejadianId: id() }));
 const kTutupRuang = /* @__PURE__ */ pesan("tutup_ruang", () => ({}));
 const kGantiNama = /* @__PURE__ */ pesan("ganti_nama", () => ({ pemainId: id() })); // JS-14 (P-46)
@@ -54,7 +53,6 @@ export const skemaKelas = /* @__PURE__ */ z.discriminatedUnion("t", [
   kTambahWaktu,
   kKunciRuang,
   kKeluarkan,
-  kKodeMasukUlang,
   kPembahasan,
   kTutupRuang,
   kGantiNama,

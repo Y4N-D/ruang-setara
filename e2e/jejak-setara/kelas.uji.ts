@@ -97,7 +97,7 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   await g.goto("/admin/");
   await g.getByLabel("Email", { exact: true }).fill(email);
   await g.getByLabel("Sandi", { exact: true }).fill("sandi sementara kelas");
-  await g.getByRole("button", { name: "Masuk" }).click();
+  await g.getByRole("button", { name: "Masuk", exact: true }).click();
   await g.getByLabel("Sandi baru", { exact: true }).fill("kalimat sandi guru kelas");
   await g.getByLabel("Ulangi sandi baru", { exact: true }).fill("kalimat sandi guru kelas");
   await g.getByRole("button", { name: "Simpan sandi" }).click();

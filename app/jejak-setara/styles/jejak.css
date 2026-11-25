@@ -1,5 +1,16 @@
 /* Gaya Jejak Setara (spesifikasi JS-01). Token dari Design System Jejak Setara bagian 4. */
 :root {
+  /* JS-16b (P-2): nama huruf Jejak Setara hanya ditulis di sini. Ukuran huruf di Design System 5 tetap berlaku; VT323
+     disamakan tinggi huruf kapitalnya dengan huruf judul lama (1,0 em), dan tinggi huruf kecilnya dengan huruf teks lama (0,45 em), yaitu
+     tinggi kapital 0,64 em. Nilai 0,7 di spesifikasi membuat pilihan jawaban di HP 640 x 360 meluap (Test JS-16b, penyimpangan 1). */
+  --js-huruf-judul: "VT323", monospace;
+  --js-huruf-judul-sesuai: cap-height 1;
+  --js-huruf-teks: "VT323", monospace;
+  --js-huruf-teks-sesuai: cap-height 0.64;
+  /* Tinggi baris bawaan huruf lama (1 dan 1.2 em). Dipakai aturan yang dulu memakai tinggi baris "normal", karena VT323
+     yang diperbesar font-size-adjust memiliki tinggi baris normal yang lebih besar dan menggeser tata letak (Test JS-16b). */
+  --js-huruf-judul-baris: 1;
+  --js-huruf-teks-baris: 1.2;
   /* Sama nilainya dengan token --ss- Sehari Setara */
   --js-ink: #1F2A44;  --js-dusk: #3A4A6B;  --js-mist: #C9D4E5;
   --js-cream: #FFF6E0; --js-white: #FFFFFF;
@@ -35,7 +46,9 @@ body {
 body {
   background: var(--js-ink);
   color: var(--js-text);
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
 }
 
 /* Satu piksel antarmuka = 2 px CSS (Design System bagian 10), disimpan di wadah tiap layar (.js-layar, .js-dunia,
@@ -63,7 +76,8 @@ body {
 
 .js-bingkai h1 {
   margin: 0 0 12px;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 22px;
   font-weight: 400;
   line-height: 1.4;
@@ -151,7 +165,8 @@ body {
 
 .js-label {
   margin: 0;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 12px;
   line-height: 1.5;
   color: var(--js-text-2);
@@ -172,12 +187,16 @@ body {
   border-radius: 0;
   background: var(--js-white);
   color: var(--js-ink);
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 22px;
 }
 
 .js-isian-kode {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 20px;
   letter-spacing: 0.4em;
   text-align: center;
@@ -193,7 +212,9 @@ body {
   border-radius: 0;
   background: var(--js-cream);
   color: var(--js-ink);
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 20px;
   text-align: left;
   cursor: pointer;
@@ -201,7 +222,9 @@ body {
 
 .js-tombol-utama {
   background: var(--js-sun);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 14px;
   text-align: center;
 }
@@ -288,7 +311,9 @@ body {
 .js-kode-besar,
 .js-angka-besar {
   margin: 0;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 28px;
   letter-spacing: 0.3em;
   color: var(--js-ink);
@@ -334,7 +359,8 @@ body {
 }
 
 .js-lapisan-judul {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 16px;
   line-height: 1.5;
 }
@@ -468,7 +494,9 @@ body {
 }
 
 .js-kode-sedang {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 18px;
   letter-spacing: 0.2em;
 }
@@ -527,7 +555,9 @@ body {
 }
 
 .js-hitung-mundur-judul {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 16px;
   margin-bottom: 8px;
 }
@@ -545,7 +575,9 @@ body {
   align-items: center;
   padding: 0 12px;
   color: var(--js-ink);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 14px;
 }
 
@@ -673,7 +705,8 @@ body {
   border: 4px solid var(--js-ink);
   background: var(--js-mango);
   color: var(--js-ink);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 13px;
   line-height: 1.4;
   text-align: center;
@@ -711,7 +744,9 @@ body {
 
 .js-peta-besar-kepala h2 {
   margin: 0;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 16px;
   font-weight: 400;
   color: var(--js-cream);
@@ -831,7 +866,8 @@ body {
 
 .js-ajakan-putar p {
   margin: 0;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 16px;
   line-height: 1.6;
 }
@@ -875,7 +911,7 @@ body {
    Kejadian JS-08 (spesifikasi JS-08; Design System 3.3 sampai 3.5, 5, 10, 11, dan 13).
    Ukuran huruf: lembar (HP) judul 13, situasi 17, pilihan 16, label 13 px; panel (laptop) 16, 20, 18, 14 px. */
 
-/* Skor dan peringkat di kanan bilah atas (P-57); "#–" memakai Pixelify Sans karena Press Start 2P tanpa tanda minus. */
+/* Skor dan peringkat di kanan bilah atas (P-57). */
 .js-skor {
   position: relative;
   margin-left: auto;
@@ -893,11 +929,15 @@ body {
 }
 
 .js-peringkat {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
 }
 
 .js-tanpa-peringkat {
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 16px;
 }
 
@@ -939,7 +979,9 @@ body {
   border-radius: 50%;
   background: var(--js-mist);
   color: var(--js-dusk);
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 14px;
   cursor: pointer;
   touch-action: manipulation;
@@ -982,7 +1024,9 @@ body {
   padding: 2px 4px;
   border: 2px solid var(--js-ink);
   background: var(--js-sun);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 12px;
   text-align: center;
 }
@@ -1093,7 +1137,8 @@ body {
   border: 2px solid var(--js-ink);
   background: var(--js-white);
   color: var(--js-ink);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 12px;
   line-height: 1;
 }
@@ -1113,7 +1158,9 @@ body {
   border: 2px solid var(--js-ink);
   background: var(--js-sun);
   color: var(--js-ink);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 12px;
   text-align: center;
 }
@@ -1202,7 +1249,8 @@ body {
 .js-dialog-kepala h2 {
   margin: 0;
   flex: 1;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 16px;
   line-height: 1.4;
 }
@@ -1291,7 +1339,8 @@ body {
   border-radius: 0;
   background: var(--js-cream);
   color: var(--js-ink);
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
   font-size: 18px;
   line-height: 1.2;
   text-align: left;
@@ -1306,7 +1355,8 @@ body {
 .js-pilihan-dialog .js-huruf {
   flex: none;
   min-width: 2ch;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 12px;
   line-height: 1.8;
 }
@@ -1421,7 +1471,9 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 13px;
 }
 
@@ -1492,7 +1544,9 @@ body {
   border: 4px solid var(--js-ink);
   background: var(--js-leaf);
   color: var(--js-ink);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 13px;
 }
 
@@ -1542,7 +1596,9 @@ body {
 .js-kartu h3 {
   margin: 0 0 2px;
   color: var(--js-dusk);
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 14px;
 }
 
@@ -1584,7 +1640,9 @@ body {
 }
 
 .js-skor-akhir-angka {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
 }
 
 /* Layar rekap pribadi dan refleksi (spesifikasi JS-11, P-4 sampai P-9): halaman digulir biasa; tanda selalu berikon
@@ -1595,7 +1653,8 @@ body {
 
 .js-rekap h2 {
   margin: 8px 0;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
@@ -1663,7 +1722,8 @@ body {
   justify-content: space-between;
   gap: 4px 12px;
   margin: 0 0 6px;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
@@ -1749,8 +1809,8 @@ body {
 
 /* ---------------------------------------------------------------------------------------------
    Konsol guru dan admin JS-04 (spesifikasi JS-04, P-38 sampai P-50; Design System 3.7, 5, dan 10).
-   Huruf sistem untuk tabel, kolom isian, label, pesan, dan teks isi (KT-05); Pixelify Sans untuk judul halaman, menu,
-   dan tombol; Press Start 2P untuk merek dan sandi sementara. Tanpa garis pindai. */
+   Huruf sistem untuk tabel, kolom isian, label, pesan, dan teks isi (KT-05); huruf teks untuk judul halaman, menu,
+   dan tombol; huruf judul untuk merek dan sandi sementara (token JS-16b). Tanpa garis pindai. */
 .js-konsol-ruang {
   --js-px: 2px;
   --js-huruf-sistem: system-ui, "Segoe UI", Roboto, "Noto Sans", sans-serif;
@@ -1781,7 +1841,7 @@ body {
   margin: 0;
 }
 
-/* Tombol: Pixelify Sans, sedikitnya 48 px, garis ink 2 piksel antarmuka. */
+/* Tombol: huruf teks, sedikitnya 48 px, garis ink 2 piksel antarmuka. */
 .js-konsol-tombol {
   box-sizing: border-box;
   min-height: 48px;
@@ -1791,7 +1851,8 @@ body {
   border-radius: 0;
   background: var(--js-cream);
   color: var(--js-ink);
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
   font-size: 18px;
   line-height: 1.2;
   text-align: center;
@@ -1963,7 +2024,8 @@ body {
 
 .js-konsol-merek-besar {
   margin: 0;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 20px;
   font-weight: 400;
   line-height: 1.4;
@@ -2015,7 +2077,8 @@ body {
   margin: 0;
   padding: 0 16px;
   color: var(--js-cream);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -2040,7 +2103,9 @@ body {
   min-height: 48px;
   padding: 8px 16px 8px 40px;
   color: var(--js-cream);
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 18px;
   text-decoration: none;
 }
@@ -2083,7 +2148,8 @@ body {
 }
 
 .js-konsol-kepala h1 {
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
   font-size: 22px;
   font-weight: 400;
   line-height: 1.3;
@@ -2128,7 +2194,8 @@ body {
 
 .js-konsol-isi h2 {
   margin: 0 0 12px;
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
   font-size: 20px;
   font-weight: 400;
   line-height: 1.3;
@@ -2140,7 +2207,8 @@ body {
 
 .js-konsol-isi .js-konsol-judul-isi {
   margin: 0 0 8px;
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
   font-size: 22px;
   font-weight: 400;
   line-height: 1.3;
@@ -2195,7 +2263,9 @@ body {
 }
 
 .js-konsol-angka {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 16px;
 }
 
@@ -2322,7 +2392,8 @@ body {
 
 .js-konsol-dialog h2 {
   margin: 0 0 16px;
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
   font-size: 22px;
   font-weight: 400;
   line-height: 1.3;
@@ -2349,7 +2420,8 @@ body {
   border: 2px dashed var(--js-ink);
   background: var(--js-white);
   color: var(--js-ink);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: 16px;
   line-height: 1.6;
   text-align: center;
@@ -2448,7 +2520,8 @@ body {
   background: var(--js-cream);
   color: var(--js-ink);
   border: 4px solid var(--js-ink);
-  font: 16px/1 "Pixelify Sans", monospace;
+  font: 16px/1 var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
   cursor: pointer;
 }
 .js-hud-suara {
@@ -2461,7 +2534,8 @@ body {
   padding: 3px 4px;
   background: var(--js-sun);
   border: 2px solid var(--js-ink);
-  font: 12px/1 "Press Start 2P", monospace;
+  font: 12px/1 var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
 }
 .js-hud-tombol:focus-visible {
   outline: 4px solid var(--js-sun);
@@ -2515,7 +2589,8 @@ body {
 }
 .js-atur h2 {
   margin: 0 0 8px;
-  font: 16px/1.4 "Press Start 2P", monospace;
+  font: 16px/1.4 var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
 }
 .js-atur h2:focus-visible {
   outline: 4px solid var(--js-sun);
@@ -2557,7 +2632,8 @@ body {
   display: grid;
   gap: 6px;
   margin: 0;
-  font: 15px/1.35 "Pixelify Sans", monospace;
+  font: 15px/1.35 var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
 }
 .js-privasi dt {
   color: var(--js-dusk);
@@ -2568,7 +2644,8 @@ body {
 .js-kredit {
   margin: 8px 0 0;
   padding-left: 18px;
-  font: 14px/1.4 "Pixelify Sans", monospace;
+  font: 14px/1.4 var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
 }
 .js-privasi-singkat {
   display: flex;
@@ -2576,7 +2653,8 @@ body {
   gap: 8px;
   margin-top: 8px;
   color: var(--js-dusk);
-  font: 13px/1.35 "Pixelify Sans", monospace;
+  font: 13px/1.35 var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
 }
 .js-privasi-singkat p {
   flex: 1;
@@ -2590,8 +2668,21 @@ body {
 }
 .js-penghitung {
   color: var(--js-dusk);
-  font: 13px "Pixelify Sans", monospace;
+  font: 13px var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
 }
 .js-situasi[role="button"] {
   cursor: pointer;
+}
+
+/* JS-16b (P-11): kode masuk ulang di dialog konsol, dengan huruf judul agar mudah dibacakan. */
+.js-konsol-kode-ulang {
+  margin: 8px 0;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
+  font-size: 32px;
+  letter-spacing: 6px;
+  color: var(--js-ink);
 }

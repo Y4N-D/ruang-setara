@@ -96,6 +96,18 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
   // JS-14 (P-53 sampai P-56): menu nama, konfirmasi keluarkan tanpa nama, panel Pemain, dan pita tanpa nama lama.
   const [menuNama, setMenuNama] = useState<string | null>(null);
   const [panelPemain, setPanelPemain] = useState<HTMLElement | null | false>(false);
+  // JS-16b (P-9): lapisan Perbesar QR di lobi; tertutup sendiri saat ronde dimulai, lalu fokus kembali ke tombolnya.
+  const [qrBesar, setQrBesar] = useState(false);
+  const tombolQr = useRef<HTMLButtonElement>(null);
+  const bukaTutupQr = useCallback(() => {
+    setQrBesar((b) => {
+      if (b) window.setTimeout(() => tombolQr.current?.focus(), 0);
+      return !b;
+    });
+  }, []);
+  useEffect(() => {
+    if (status !== "lobi") setQrBesar(false);
+  }, [status]);
   const [keluarkanPemain, setKeluarkanPemain] = useState<{ id: string; pembuka: HTMLElement | null } | null>(null);
   const [pita, setPita] = useState<string | null>(null);
   const waktuPita = useRef<number | undefined>(undefined);
@@ -202,6 +214,14 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
         return;
       }
       if (konfirmasi || keluarkanPemain || panelPemain !== false || menuNama) return;
+      // JS-16b (P-9): selama lapisan Perbesar QR terbuka, hanya Q dan Esc yang bekerja (menutupnya).
+      if (qrBesar) {
+        if (tombol === "q" || tombol === "Escape") {
+          e.preventDefault();
+          bukaTutupQr();
+        }
+        return;
+      }
       let ditangani = true;
       if (tombol === " ") {
         if (status === "lobi" && data.lobi.length > 0) aksi.mulai();
@@ -212,6 +232,7 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
       else if (tombol === "a" && (status === "main" || status === "jeda")) bukaKonfirmasi("akhiri");
       else if (tombol === "l" && status !== null && status !== "ditutup") aksi.kunci();
       else if (tombol === "f") aksi.layarPenuh();
+      else if (tombol === "q" && status === "lobi") bukaTutupQr();
       else if (tombol === "p" && status !== null && status !== "ditutup") setPanelPemain(document.activeElement instanceof HTMLElement ? document.activeElement : null);
       else if (tombol === "ArrowRight" && status === "selesai") minta(0);
       else if (tombol === "ArrowRight" && status === "pembahasan") minta(Math.min(indeks + 1, (info?.kejadian.length ?? 1) - 1));
@@ -231,7 +252,7 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
   else if (sambungan === "tidakAda") isi = <Pesan teks={t.tidakAda} tombol={{ label: t.keKonsol, href: "/admin/" }} />;
   else if (sambungan === "terputus") isi = <Pesan teks={t.terputus} tombol={{ label: t.cobaLagi, aksi: ulangi }} />;
   else if (!info || !data.status || !status) isi = <Pesan teks={t.menyambung} />;
-  else if (status === "lobi") isi = <Lobi info={info} pemain={data.lobi} mulai={aksi.mulai} kunci={aksi.kunci} bisaMulai={data.lobi.length > 0} kelola={panelPemain === false ? kelola : { ...kelola, terbuka: null }} tombolPemain={tombolPemain} />;
+  else if (status === "lobi") isi = <Lobi info={info} pemain={data.lobi} mulai={aksi.mulai} kunci={aksi.kunci} bisaMulai={data.lobi.length > 0} kelola={panelPemain === false ? kelola : { ...kelola, terbuka: null }} tombolPemain={tombolPemain} qrBesar={qrBesar} bukaTutupQr={bukaTutupQr} tombolQr={tombolQr} />;
   else if (status === "hitung_mundur") {
     isi = (
       <div className="js-kelas-layar">

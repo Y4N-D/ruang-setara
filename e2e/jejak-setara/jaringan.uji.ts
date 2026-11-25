@@ -179,7 +179,7 @@ test("layar kelas ditutup 60 detik lalu dibuka lagi: ronde tetap berjalan dan pa
     await layar.goto("/admin/");
     await layar.getByLabel("Email", { exact: true }).fill(EMAIL);
     await layar.getByLabel("Sandi", { exact: true }).fill(SANDI);
-    await layar.getByRole("button", { name: "Masuk" }).click();
+    await layar.getByRole("button", { name: "Masuk", exact: true }).click();
     await expect(layar.getByRole("heading", { name: "Dasbor" })).toBeVisible({ timeout: 15_000 });
     await layar.goto(`/admin/#/kelas/${idDariKode(kode)}`);
     await expect(layar.getByText(nama).first()).toBeVisible({ timeout: 20_000 });

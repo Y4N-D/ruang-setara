@@ -23,7 +23,7 @@ export const RUANG_AKTIF_MAKS_BAWAAN = 3;
 export const STATUS_RUANG = ["lobi", "hitung_mundur", "main", "jeda", "selesai", "pembahasan", "ditutup"] as const;
 export type StatusRuangKonsol = (typeof STATUS_RUANG)[number];
 // JS-14 (P-51): ganti nama dan ganti semua nama.
-export const AKSI_KELOLA = ["kunci", "buka_kunci", "keluarkan", "tutup", "ganti_nama", "ganti_semua_nama"] as const;
+export const AKSI_KELOLA = ["kunci", "buka_kunci", "keluarkan", "tutup", "ganti_nama", "ganti_semua_nama", "kode_masuk_ulang"] as const; // JS-16b (P-11)
 /** JS-14 (P-32): mode nama ruang. */
 export const MODE_NAMA = ["daftar", "bebas"] as const;
 export type AksiKelola = (typeof AKSI_KELOLA)[number];

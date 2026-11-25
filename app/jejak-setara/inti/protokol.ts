@@ -11,6 +11,7 @@ import { z } from "zod";
 // Versi protokol bersama klien dan server (Architecture JA-07); naikkan bila protokol berubah tidak kompatibel.
 // Nilainya di versi.ts agar halaman tanpa skema tidak ikut membawa zod (JS-03).
 import { PROTOKOL_VERSI } from "./versi";
+import { POLA_KODE_MASUK_ULANG } from "./aturan";
 export { PROTOKOL_VERSI };
 
 /** Kode galat protokol (Architecture 6.7). Kalimat yang tampil ditetapkan di JS-03. */
@@ -26,6 +27,7 @@ export const KODE_GALAT = [
   "BUKAN_JANGKAUAN",
   "NOMOR_ABSEN_DIPAKAI", // JS-03
   "NAMA_DITOLAK", // JS-14 (P-42): nama buatan siswa tidak sah, tertangkap penyaring, atau diblokir
+  "KODE_MASUK_ULANG_SALAH", // JS-16b (P-14): kode dari guru salah atau kedaluwarsa
 ] as const;
 export type KodeGalat = (typeof KODE_GALAT)[number];
 
@@ -121,6 +123,7 @@ const pHalo = /* @__PURE__ */ pesan("halo", () => ({
   peran: z.literal("pemain"),
   token: z.string().regex(POLA_TOKEN).optional(), // 32 byte acak, base64url tanpa padding
   nomorAbsen: angkaBulat(BATAS_PESAN.nomorAbsenMin, BATAS_PESAN.nomorAbsenMaks).optional(),
+  kodeMasukUlang: z.string().regex(POLA_KODE_MASUK_ULANG).optional(), // JS-16b (P-13)
 }));
 const pPilihIdentitas = /* @__PURE__ */ pesan("pilih_identitas", () => ({ nama: nama(), avatar: avatar() }));
 const pMintaNama = /* @__PURE__ */ pesan("minta_nama", () => ({})); // tombol "Acak ulang" (JS-03)

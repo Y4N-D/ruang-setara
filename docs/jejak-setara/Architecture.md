@@ -42,6 +42,8 @@ Pengukuran pertama di lingkungan uji dilakukan di penutupan JS-04 (14 November 2
 
 Dependensi yang mungkin diperlukan dan **wajib izin tertulis** pemilik proyek: alat uji Worker (misalnya `@cloudflare/vitest-pool-workers`) dan pembuat kode QR. Semua kebutuhan lain memakai paket yang sudah ada: `react`, `zod`, `wrangler`, `@cloudflare/workers-types`, `@cloudflare/vite-plugin`, `vite`, `vitest`, `@playwright/test`, `@fontsource/*`, dan primitif `radix-ui` untuk komponen konsol.
 
+Sejak JS-16b: `@fontsource/vt323` 5.3.0 (izin 24 Nov 2026) menggantikan kedua paket huruf lama di Jejak Setara, yang tetap dipasang untuk Sehari Setara. Pembuat kode QR ditulis sendiri tanpa dependensi (`app/jejak-setara/admin/kelas/qr.ts`; KT-07), dan hanya dimuat layar kelas.
+
 ## 2. Konteks sistem
 
 ```mermaid
@@ -411,7 +413,7 @@ Setiap pesan adalah objek JSON `{ "v": 4, "t": "<tipe>", ...isi }`. `v` adalah `
 
 | `t` | Isi | Kapan |
 |---|---|---|
-| `halo` | `peran: "pemain"`, `token?`, `nomorAbsen?` | Pesan pertama; `token` dipakai untuk menyambung ulang |
+| `halo` | `peran: "pemain"`, `token?`, `nomorAbsen?`, `kodeMasukUlang?` | Pesan pertama; `token` dipakai untuk menyambung ulang. Sejak JS-16b (P-13, P-14), `kodeMasukUlang` (6 karakter, tanpa `token` dan `nomorAbsen`) memindahkan pemain ke HP baru dengan token baru |
 | `pilih_identitas` | `nama`, `avatar` | Di layar gabung; `nama` harus salah satu saran server, kecuali di ruang nama buatan siswa: nama 3–14 karakter yang unik dan lolos penyaring (JS-14) |
 | `minta_nama` | — | Tombol "Acak ulang"; dijawab `saran_nama` (JS-03) |
 | `gerak` | `x`, `y`, `arah`, `jalan` (boolean), `seq` | Paling banyak 10 per detik saat bergerak, 1 per detik saat diam |
@@ -453,7 +455,7 @@ Setiap pesan adalah objek JSON `{ "v": 4, "t": "<tipe>", ...isi }`. `v` adalah `
 |---|---|---|
 | Kelas → server | `halo` | `peran: "guru"` (tiket sudah diperiksa Worker) |
 | Kelas → server | `mulai` · `jeda` · `lanjut` · `tambah_waktu` · `akhiri` | `tambah_waktu` berisi `detik` (120) |
-| Kelas → server | `kunci_ruang` · `keluarkan` · `kode_masuk_ulang` | `kunci` (boolean) · `pemainId` · `pemainId` (P1) |
+| Kelas → server | `kunci_ruang` · `keluarkan` | `kunci` (boolean) · `pemainId`. Kode masuk ulang tidak lewat layar kelas, tetapi lewat rute `kelola` konsol (JS-16b, P-16) |
 | Kelas → server | `ganti_nama` · `ganti_semua_nama` | `pemainId` · — (JS-14; juga dipakai aksi kelola konsol) |
 | Kelas → server | `pembahasan` · `tutup_ruang` | `kejadianId` |
 | Server → kelas | `lobi` | Daftar pemain (nama, avatar, warna tas, terhubung) |
@@ -497,10 +499,13 @@ Perkiraan lalu lintas satu pemain dalam ronde 15 menit: ±2 MB turun dan ±0,4 M
 | `BUKAN_JANGKAUAN` | Memeriksa kejadian dari tempat yang terlalu jauh | Tidak ditampilkan; posisi dikoreksi |
 | `NOMOR_ABSEN_DIPAKAI` | Nomor absen sudah dipakai pemain lain di ruang itu (JS-03) | "Nomor absen ini sudah dipakai di ruang ini. Periksa lagi nomormu." |
 | `NAMA_DITOLAK` | Nama buatan siswa tidak berbentuk sah, tertangkap penyaring, atau pernah diganti guru di ruang itu (JS-14) | "Nama itu tidak bisa dipakai. Coba nama lain." |
+| `KODE_MASUK_ULANG_SALAH` | Kode masuk ulang dari guru salah, sudah dipakai, atau kedaluwarsa; sambungan tetap terbuka sampai kesalahan kelima (JS-16b) | "Kode dari guru salah atau sudah tidak berlaku. Minta kode baru." |
 
 Teks akhir ditetapkan di spesifikasi JS-03 dan disimpan di `teks.ts`.
 
 ### 6.8 Jam dan sambung ulang
+
+Sejak JS-16b (P-12 sampai P-15): kode masuk ulang dibuat dari konsol lewat aksi kelola `kode_masuk_ulang`, berlaku 10 menit, sekali pakai, satu kode aktif per pemain, dan disimpan sebagai hash SHA-256 di tabel SQLite ruang `kode_masuk_ulang`. `halo` dengan kode yang cocok melewati pemeriksaan terkunci, penuh, terlambat, dan nomor absen, mengganti `hashToken` pemain, lalu menutup sambungan lama dengan 4001. Kode salah dijawab `KODE_MASUK_ULANG_SALAH` dengan sambungan tetap terbuka; kesalahan kelima menutupnya dengan 1008. Klien berhenti pada 4001 dan menghapus tokennya, dan sejak JS-16b baru mulai ping sesudah `selamat_datang`, karena ping dari sambungan yang belum diterima ditutup dengan 4002.
 
 - Semua hitungan waktu berpatokan pada `waktuServer`. Klien menaksir selisih jam dari median lima `pong` terakhir.
 - Bila sambungan putus, klien mencoba lagi dengan jeda 0,5, 1, 2, 4, lalu 8 detik (paling lama 10 detik), sambil menampilkan "Menyambung ulang…".
@@ -675,7 +680,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `GET /api/log` | Log audit | Admin |
 | `GET /api/bank/ekspor`; `POST /api/bank/impor` | Ekspor dan impor JSON bank | Admin |
 | `GET /api/publik/ruang/{KODE}` | Apakah kode ada, apakah mode nomor absen aktif, dan mode nama awal ruang (JS-14); dibaca dari D1 tanpa memanggil ruang (JS-03) | Umum, dibatasi frekuensinya |
-| `GET /api/ruang/pilihan`; `POST /api/ruang/{id}/kelola` | Paket aktif untuk dialog ruang baru; kunci, buka kunci, keluarkan, dan tutup dari konsol (JS-10), serta ganti nama dan ganti semua nama (JS-14) | Admin, guru (miliknya) |
+| `GET /api/ruang/pilihan`; `POST /api/ruang/{id}/kelola` | Paket aktif untuk dialog ruang baru; kunci, buka kunci, keluarkan, dan tutup dari konsol (JS-10), kode masuk ulang (JS-16b; jawaban `kode` dan `berlakuSampai`, log audit `ruang.kode_masuk_ulang` tanpa kode), serta ganti nama dan ganti semua nama (JS-14) | Admin, guru (miliknya) |
 | `/api/uji/ruang/{KODE}/statistik` · `/putuskan` · `/kejadian` · `/pindahkan` · `/pengaman` | Kait uji lokal (JS-07, JS-08); hanya di `lokal`, 404 di lingkungan lain. Pengganti kait ruang coba sejak JS-10 | Uji |
 | `POST /api/uji/pembersihan` | Kait uji lokal: menjalankan penghapusan sesudah masa simpan dengan waktu yang diberikan (JS-14); hanya di `lokal`, 404 di lingkungan lain | Uji |
 

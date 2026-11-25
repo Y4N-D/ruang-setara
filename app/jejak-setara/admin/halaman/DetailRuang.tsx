@@ -24,6 +24,12 @@ import { TautanLayar, teksSkill } from "./Ruang";
 
 const t = TEKS_KONSOL.detail;
 const FORMAT_JAM = new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+const FORMAT_JAM_MENIT = new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" });
+/** JS-16b (P-11): sisa masa berlaku kode masuk ulang sebagai menit:detik. */
+export function formatSisa(ms: number): string {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
 const FORMAT_ANGKA = new Intl.NumberFormat("id-ID");
 const FORMAT_PERSEN = new Intl.NumberFormat("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 /** Muat ulang daftar pemain selama halaman tampil (P-9). */
@@ -51,6 +57,15 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
   /** JS-11 (P-25): hasil dimuat lagi sesudah "Keluarkan" berhasil. */
   const [keluarkanKe, setKeluarkanKe] = useState(0);
   const muat = useCallback(() => setPutaran((p) => p + 1), []);
+  /** JS-16b (P-11): kode masuk ulang yang sedang ditampilkan, dengan hitung mundur setiap detik. */
+  const [kodeUlang, setKodeUlang] = useState<{ nama: string; kode: string; berlakuSampai: number } | null>(null);
+  const [kini, setKini] = useState(() => Date.now());
+  useEffect(() => {
+    if (!kodeUlang) return;
+    setKini(Date.now());
+    const pewaktu = window.setInterval(() => setKini(Date.now()), 1000);
+    return () => window.clearInterval(pewaktu);
+  }, [kodeUlang]);
 
   useEffect(() => {
     let aktif = true;
@@ -104,6 +119,17 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
       umumkan(a === "ganti_nama" ? isiTeks(t.okGantiNama, { nama: h.data.nama ?? "" }) : isiTeks(t.okGantiSemua, { n: h.data.jumlah ?? 0 }));
       muat();
     } else if (!galatSesi(h)) setGalatAksi(h.pesan);
+  }
+
+  // JS-16b (P-11, P-12): membuat kode masuk ulang untuk satu pemain; kodenya hanya tampil di dialog ini.
+  async function buatKodeUlang(pemainId: string, nama: string) {
+    setSibuk(true);
+    const h = await api.kodeMasukUlang(id, pemainId);
+    setSibuk(false);
+    if (h.ok) {
+      setGalatAksi(null);
+      setKodeUlang({ nama, kode: h.data.kode, berlakuSampai: h.data.berlakuSampai });
+    } else if (!galatSesi(h)) setGalatAksi(t.kodeMasukUlangGagal);
   }
 
   if (muatan.jenis === "memuat") return <p role="status">{t.memuat}</p>;
@@ -220,6 +246,18 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
                     <button type="button" className="js-konsol-tombol" aria-label={isiTeks(t.gantiNamaLabel, { nama: p.nama })} disabled={sibuk} onClick={() => void kelolaNama("ganti_nama", p.id)}>
                       {t.gantiNama}
                     </button>
+                    <button
+                      type="button"
+                      className="js-konsol-tombol"
+                      aria-label={isiTeks(t.kodeMasukUlangLabel, { nama: p.nama })}
+                      disabled={sibuk}
+                      onClick={(e) => {
+                        setPembuka(e.currentTarget);
+                        void buatKodeUlang(p.id, p.nama);
+                      }}
+                    >
+                      {t.kodeMasukUlang}
+                    </button>
                     <button type="button" className="js-konsol-tombol" aria-label={isiTeks(t.keluarkanLabel, { nama: p.nama })} disabled={sibuk} onClick={buka({ jenis: "keluarkan", pemainId: p.id, nama: p.nama })}>
                       {t.keluarkan}
                     </button>
@@ -233,6 +271,35 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
       )}
       {pemakaian ? <BagianPemakaian p={pemakaian} /> : null}
       {ditutup && akun.peran === "admin" ? <BagianHapus ruang={ruang} galatSesi={galatSesi} buka={bukaHalaman} /> : null}
+      {kodeUlang ? (
+        <Dialog judul={isiTeks(t.kodeMasukUlangJudul, { nama: kodeUlang.nama })} tutup={() => setKodeUlang(null)} kembaliKe={pembuka}>
+          {kodeUlang.berlakuSampai > kini ? (
+            <>
+              <p className="js-konsol-kode-ulang">{kodeUlang.kode}</p>
+              <p>{isiTeks(t.kodeMasukUlangPetunjuk, { kodeRuang: ruang.kode })}</p>
+              <p role="status">{isiTeks(t.kodeMasukUlangBerlaku, { jam: FORMAT_JAM_MENIT.format(kodeUlang.berlakuSampai), sisa: formatSisa(kodeUlang.berlakuSampai - kini) })}</p>
+            </>
+          ) : (
+            <p role="status">{t.kodeMasukUlangHabis}</p>
+          )}
+          <div className="js-konsol-tombol-baris">
+            {kodeUlang.berlakuSampai > kini ? (
+              <button
+                type="button"
+                className="js-konsol-tombol"
+                onClick={() => {
+                  void navigator.clipboard?.writeText(kodeUlang.kode).then(() => umumkan(t.kodeMasukUlangTersalin), () => undefined);
+                }}
+              >
+                {t.kodeMasukUlangSalin}
+              </button>
+            ) : null}
+            <button type="button" className="js-konsol-tombol js-konsol-tombol-utama" data-fokus-awal onClick={() => setKodeUlang(null)}>
+              {t.kodeMasukUlangTutup}
+            </button>
+          </div>
+        </Dialog>
+      ) : null}
       {konfirmasi ? (
         <Dialog
           judul={

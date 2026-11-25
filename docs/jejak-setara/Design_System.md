@@ -17,7 +17,7 @@ Jejak Setara harus terasa **sekeluarga** dengan Sehari Setara. Karena itu sebagi
 | Diwarisi tanpa perubahan (lihat dokumen Sehari Setara) | Ditetapkan baru di dokumen ini |
 |---|---|
 | Palet 36 warna dan aturan kontras (bagian 4) | Perspektif tampak atas 3/4, ubin, dan lapisan dunia |
-| Huruf Press Start 2P dan Pixelify Sans (bagian 5) | Tukar palet per masa untuk peta |
+| Huruf VT323 lewat token `--js-huruf-judul` dan `--js-huruf-teks` (bagian 5; sejak JS-16b tidak lagi sama dengan Sehari Setara) | Tukar palet per masa untuk peta |
 | Garis pindai, piksel tajam, tanpa kedip (bagian 6) | Tokoh tampak atas dan avatar pemain |
 | Bingkai piksel, tombol pilihan, dan kartu dampak (bagian 7) | Tata letak HP, layar kelas, dan konsol admin |
 | Aturan menulis (*sentence case*, kalimat pendek) | Penanda kejadian, kotak bantuan, dan ikon skill |
@@ -100,7 +100,7 @@ Contoh skala: HP 412 × 915 CSS px dengan rasio piksel 2,625 dalam posisi mendat
 - Pada HP yang lebih lebar dari 16:9, sisa ruang kiri-kanan menjadi bingkai `ink` dan kontrol boleh menempati bingkai itu. Pada layar 16:9, kontrol menimpa sudut dunia; pemain sendiri selalu berada di tengah, jauh dari kontrol.
 - HP tegak menampilkan ajakan "Putar HP ke posisi mendatar" dengan ikon, tanpa dunia di belakangnya.
 - Tombol "Layar penuh" di lobi memakai layar penuh peramban dan mengunci orientasi mendatar bila perangkat mendukung.
-- **Menu dan suara (JS-14):** kelompok tombol di kiri atas dunia (`left: 8px; top: 36px`): "Menu" (tulisan Pixelify Sans 16 px) lalu tombol suara (`ikon_suara_nyala` atau `ikon_suara_mati` pada skala 2), masing-masing setinggi 48 px, bergaris `ink` 4 px, berlatar `cream`, dan berjarak 8 px. Di laptop, tanda `Esc` dan `M` berada di dalam tombolnya. Keduanya tampil di lobi, hitung mundur, ronde, dan di atas lapisan jeda, dan tersembunyi selama dialog, peta besar, lapisan menyambung ulang, ajakan memutar HP, atau panel terbuka. Di layar identitas keduanya berada di baris kaki di kiri "Gabung", dan di rekap di kanan judul. Panah Kompas tidak menutupi kelompok ini (spesifikasi JS-14, P-4 sampai P-7).
+- **Menu dan suara (JS-14):** kelompok tombol di kiri atas dunia (`left: 8px; top: 36px`): "Menu" (tulisan huruf teks 16 px) lalu tombol suara (`ikon_suara_nyala` atau `ikon_suara_mati` pada skala 2), masing-masing setinggi 48 px, bergaris `ink` 4 px, berlatar `cream`, dan berjarak 8 px. Di laptop, tanda `Esc` dan `M` berada di dalam tombolnya. Keduanya tampil di lobi, hitung mundur, ronde, dan di atas lapisan jeda, dan tersembunyi selama dialog, peta besar, lapisan menyambung ulang, ajakan memutar HP, atau panel terbuka. Di layar identitas keduanya berada di baris kaki di kiri "Gabung", dan di rekap di kanan judul. Panah Kompas tidak menutupi kelompok ini (spesifikasi JS-14, P-4 sampai P-7).
 
 ### 3.4 Layar pemain di laptop
 
@@ -109,7 +109,7 @@ Tata letaknya sama, tetapi kontrol sentuh disembunyikan bila perangkat tidak mem
 ### 3.5 Dialog kejadian
 
 - **HP:** lembar yang menutupi area dunia di bawah bilah atas, sehingga sisa waktu tetap terlihat (JS-08). **Laptop:** panel di tengah selebar 70% pandangan, di bawah bilah atas. Dunia di belakangnya tetap berjalan, tetapi avatar pemain diam.
-- **Kepala:** ikon zona, judul kejadian (Press Start 2P), dan chip langkah "Langkah 1 dari 2".
+- **Kepala:** ikon zona, judul kejadian (huruf judul), dan chip langkah "Langkah 1 dari 2".
 - **Isi:** kotak situasi bergaya kotak narasi Sehari Setara, pertanyaan, lalu pilihan:
   - Langkah 1: empat tombol pilihan A–D, berbentuk kisi 2 × 2 di layar mendatar.
   - Langkah 2: tiga tombol pilihan A–C bersusun, karena teksnya lebih panjang; isi bisa digulir.
@@ -154,12 +154,12 @@ Memakai satuan `--u: min(1vh, 0.5625vw)` dan skala huruf proyektor Sehari Setara
 └──────────────────────────────────────────────────────────┘
 ```
 
-- Kode ruang memakai Press Start 2P 10u dengan jarak antarhuruf lebar. Tautan memakai Pixelify Sans 3,6u.
-- Papan 10 besar: peringkat, ikon avatar 16p, nama samaran (3,1u), skor (Press Start 2P 2,8u), dan jumlah kejadian selesai. Baris yang naik peringkat tidak dianimasikan, cukup berganti isi. Sejak JS-11, tanda ✓ pada jumlah kejadian selesai berupa ikon `ikon_centang` setinggi 2,5u diikuti angka, dengan teks pembaca layar "{n} kejadian selesai"; sketsa di atas tetap memakai ✓ sebagai lambang.
-- **Jeda:** lapisan `ink` 70% di atas layar dengan tulisan "Dijeda" (Press Start 2P 4,4u, `cream`).
+- Kode ruang memakai huruf judul 10u dengan jarak antarhuruf lebar. Tautan memakai huruf teks 3,6u.
+- Papan 10 besar: peringkat, ikon avatar 16p, nama samaran (3,1u), skor (huruf judul 2,8u), dan jumlah kejadian selesai. Baris yang naik peringkat tidak dianimasikan, cukup berganti isi. Sejak JS-11, tanda ✓ pada jumlah kejadian selesai berupa ikon `ikon_centang` setinggi 2,5u diikuti angka, dengan teks pembaca layar "{n} kejadian selesai"; sketsa di atas tetap memakai ✓ sebagai lambang.
+- **Jeda:** lapisan `ink` 70% di atas layar dengan tulisan "Dijeda" (huruf judul 4,4u, `cream`).
 - **Podium:** tiga avatar di atas balok berwarna `sun` (1), `mist` (2), dan `wood` (3; token `--js-wood` sejak JS-10), masing-masing dengan angka peringkat, nama samaran, dan skor; daftar 4–10 di sampingnya. Latar bernuansa malam (`#4A4F9C`) dengan teks `cream`. Yang tampil hanya pemain yang sudah mendapat skor.
 - **Pembahasan:** satu kartu per kejadian berisi judul, situasi, grafik batang Langkah 1 (empat pilihan dengan persentase; pilihan yang benar diberi ikon `ikon_centang` dan tulisan "Jawaban tepat", sejak JS-11), grafik batang Langkah 2 (tingkat tepat, kurang tepat, dan berisiko dengan ikon dan tulisan), lalu kartu dampak. Navigasi "Sebelumnya" dan "Berikutnya". Sejak Build JS-10, batang persen menjadi latar kotak opsinya (warna tingkat atau `leaf` untuk jawaban tepat, sebagian tembus), agar setiap opsi hanya satu blok dan kejadian bank awal muat di layar 16:9 tanpa digulir; isi yang lebih panjang digulir di dalam kartu.
-- **Lobi (JS-10):** daftar nama lima kolom (avatar 4,4u, nama 2,8u; nama panjang mengecil sampai 2,5u lalu dipotong), urut bergabung, paling banyak 40 nama lalu "+n lainnya". Kotak kanan berisi tiga langkah bergabung sampai kode QR tersedia (JS-17).
+- **Lobi (JS-10):** daftar nama lima kolom (avatar 4,4u, nama 2,8u; nama panjang mengecil sampai 2,5u lalu dipotong), urut bergabung, paling banyak 40 nama lalu "+n lainnya". Sejak JS-16b (P-8, P-9, P-17; D-1a), kotak kanan berisi kode QR alamat gabung (sedikitnya 36u, modul `ink` di atas putih dengan zona tenang 4 modul), satu kalimat keterangan, dan tombol "Perbesar QR" (`Q`) yang membuka lapisan setinggi layar; tiga langkah bergabung tidak dipakai lagi. Tombol "Kunci ruang" dan "Mulai" sedikitnya 48 px.
 - **Peta kelas (JS-10):** delapan kotak zona berwarna (sebagian tembus) dengan ikon zona, dan titik 2,5 ubin berwarna tas bergaris `ink`; warna tas rose dan berry memakai nilai palet aksen bagian 8 karena belum punya token. Letak kejadian tidak digambar.
 - **Suara dan kelola pemain (JS-14):** tombol suara 48 × 48 di kepala, di kanan jumlah pemain, dengan tulisan "Klik untuk menyalakan suara" di kirinya bila peramban menahan suara. Nama di daftar lobi menjadi tombol yang membuka menu "Ganti nama", "Keluarkan", dan "Batal" (butir 48 px, bergaris `ink` 3 px, "Keluarkan" berlatar `coral`). Tombol "Pemain" dengan tanda `P` di baris kontrol membuka panel lima kolom berisi semua nama, tanpa skor dan peringkat. Konfirmasi dan pita di proyektor tidak pernah memuat nama pemain.
 
@@ -278,21 +278,23 @@ Aturan praktis Sehari Setara tetap berlaku: **teks di atas warna aksen selalu `i
 
 | Peran | Huruf | Catatan |
 |---|---|---|
-| Judul layar, judul kejadian, angka (skor, waktu, kode ruang) | **Press Start 2P** | Maksimal 6 kata; tidak untuk paragraf; tidak memuat tanda minus (pakai Pixelify Sans untuk angka negatif) |
-| Situasi, pilihan, label, tombol | **Pixelify Sans** | |
-| Tabel dan formulir konsol admin | Huruf sistem (`system-ui, "Segoe UI", Roboto, "Noto Sans", sans-serif`) | Diputuskan pemilik proyek 14 Nov 2026 (KT-05, Gerbang 1 JS-04): ya. Judul, menu, dan tombol tetap Pixelify Sans |
+| Judul layar, judul kejadian, angka (skor, waktu, kode ruang) | **VT323** lewat `--js-huruf-judul`, dengan `font-size-adjust: cap-height 1` (`--js-huruf-judul-sesuai`) | Maksimal 6 kata; tidak untuk paragraf. Tanda minus boleh dipakai sejak JS-16b (P-5) |
+| Situasi, pilihan, label, tombol | **VT323** lewat `--js-huruf-teks`, dengan `font-size-adjust: cap-height 0.64` (`--js-huruf-teks-sesuai`; tinggi huruf kecil sama dengan huruf teks lama) | Label nama di kanvas memakai ukuran × 8/7, karena kanvas tidak mengenal `font-size-adjust` (JS-16b, P-3; penyimpangan 1 Test JS-16b) |
+| Tabel dan formulir konsol admin | Huruf sistem (`system-ui, "Segoe UI", Roboto, "Noto Sans", sans-serif`) | Diputuskan pemilik proyek 14 Nov 2026 (KT-05, Gerbang 1 JS-04): ya. Judul, menu, dan tombol memakai huruf teks |
+
+Sejak JS-16b (P-1 sampai P-5), nama huruf Jejak Setara hanya ditulis di empat token `:root` di `jejak.css`, dan paket hurufnya `@fontsource/vt323` 5.3.0 (subset latin, berbobot 400). Angka ukuran di tabel berikut tetap berlaku, karena `font-size-adjust` menyamakan ukuran VT323 dengan huruf lama: tinggi huruf kapital 1,0 em untuk judul, dan untuk teks tinggi huruf kecil yang sama dengan huruf teks lama (tinggi kapital 0,64 em). Aturan yang dulu memakai tinggi baris `normal` memakai token `--js-huruf-judul-baris` (1) dan `--js-huruf-teks-baris` (1,2), agar tata letak tidak bergeser. Sehari Setara tetap memakai Press Start 2P dan Pixelify Sans.
 | Cadangan | `monospace` | Bila huruf gagal dimuat |
 
 ### Skala ukuran
 
 | Gaya | HP (px CSS) | Laptop (px CSS) | Layar kelas | Konsol |
 |---|---|---|---|---|
-| Judul layar | 16 | 22 | 4,4u | 22 (Pixelify Sans) |
+| Judul layar | 16 | 22 | 4,4u | 22 (huruf teks) |
 | Judul kejadian | 13 | 16 | 2,8u | — |
 | Teks situasi | 17 | 20 | 3,6u | 16 |
 | Teks pilihan | 16 | 18 | 3,1u | 15 |
 | Label kecil | 13 (batas minimum) | 14 | 2,5u | 13 |
-| Angka HUD | 12 (Press Start 2P) | 14 | 2,8u | — |
+| Angka HUD | 12 (huruf judul) | 14 | 2,8u | — |
 | Kode ruang | — | — | 10u | 20 |
 
 Aturan menulis Sehari Setara berlaku: huruf kapital hanya di awal kalimat, satu baris paling banyak sekitar 60 karakter, dan situasi paling banyak 3 kalimat.
@@ -426,7 +428,7 @@ Semua panel memakai **bingkai piksel** Sehari Setara: garis `ink` 2 piksel antar
 | **Bilah atas** | Busur hari mini (tiga titik masa; ikon matahari di titik berjalan), jam cerita, sisa waktu (angka berlatar `mango` dengan teks `ink` pada dua menit terakhir), skor dengan ikon bintang, dan peringkat "#n". Latarnya mengikuti masa: pagi `#FFD9A8`, siang `#6EC6F2`, sore `#FFC27A`, teks `ink` |
 | **Joystick** | Lingkaran `cream` 85% bergaris `ink`, kenop `sun`. Tidak tampil di perangkat tanpa layar sentuh |
 | **Tombol Periksa** | Biasa: `mist` dengan teks `dusk` ("Periksa"), nonaktif `aria-disabled`. Dalam jangkauan: `sun` dengan teks `ink`. Ditekan: geser keras 1 piksel antarmuka |
-| **Tombol skill** | Bulat 48 px bergaris `ink` 4 px dengan ikon skill 16 × 16 pada skala 2, dan lencana muatan 22 × 22 (garis `ink` 2 px, latar `white`, angka Press Start 2P 12 px di perangkat sentuh dan 14 px di laptop) di sudut kiri atas. Bermuatan: `cream`. Tanpa muatan: `mist`, lencana "0", `aria-disabled`. Sedang aktif (Lari cepat dan Kompas): cincin dalam `sun` 4 px, nonaktif sampai skill selesai. Jeda 2 detik: blok `ink` 70% yang menyusut dari atas ke bawah dalam 8 langkah. Ditekan: geser 1 piksel antarmuka sampai jawaban tiba, paling lama 2 detik. Fokus: garis luar `sun` 4 px seperti Periksa (JS-09) |
+| **Tombol skill** | Bulat 48 px bergaris `ink` 4 px dengan ikon skill 16 × 16 pada skala 2, dan lencana muatan 22 × 22 (garis `ink` 2 px, latar `white`, angka huruf judul 12 px di perangkat sentuh dan 14 px di laptop) di sudut kiri atas. Bermuatan: `cream`. Tanpa muatan: `mist`, lencana "0", `aria-disabled`. Sedang aktif (Lari cepat dan Kompas): cincin dalam `sun` 4 px, nonaktif sampai skill selesai. Jeda 2 detik: blok `ink` 70% yang menyusut dari atas ke bawah dalam 8 langkah. Ditekan: geser 1 piksel antarmuka sampai jawaban tiba, paling lama 2 detik. Fokus: garis luar `sun` 4 px seperti Periksa (JS-09) |
 | **Peta mini** | Bingkai piksel; zona dalam warna dominannya; panah diri; penanda kejadian yang sudah terlihat; halte |
 | **Pemberitahuan** | Pita di atas tengah selama 3 detik, misalnya "+1 Lari cepat" atau "Dua menit lagi". Sejak JS-09, lebar luarnya paling besar lebar dunia yang tampil dikurangi 256 px (berjarak sedikitnya 4 px dari peta mini), teks panjang terbungkus menjadi dua baris rata tengah, dan pita tampil satu per satu dalam antrean paling banyak 3 butir. Pita skill tidak tampil selama dialog. Diumumkan ke pembaca layar; pita skill tidak memakai `role="status"`, karena teksnya masuk antrean pengumuman |
 | **Tombol pilihan A–D** | Aturan tombol pilihan Sehari Setara: biasa `cream`, fokus atau terpilih `sun` dengan ▶ dan cincin dalam, nonaktif `mist`. Sesudah dikunci: pilihan benar `leaf` berlabel "Jawaban tepat", pilihan pemain yang keliru `mango` berlabel "Pilihanmu". Dicoret Petunjuk (JS-09): `mist`, teks `dusk` bergaris coret, tanpa ▶. Selalu dengan tulisan, bukan hanya warna |
@@ -581,5 +583,5 @@ Status setiap aset dicatat di `docs/jejak-setara/Daftar_Aset.md` dengan format y
 Cantumkan di layar "Tentang" Jejak Setara dan di halaman masuk konsol:
 
 - Aset visual digambar dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN.
-- Huruf Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.
+- Huruf VT323, SIL Open Font License 1.1. (Sejak JS-16b; Sehari Setara tetap memakai Press Start 2P dan Pixelify Sans.)
 - Efek suara dibuat dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN (Permintaan C-14). Asal dan lisensi setiap berkas dicatat di `app/jejak-setara/assets/CREDITS.md` dengan format "Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]". Bunyi klik dan bunyi teks mengikuti catatan Sehari Setara (butir S-6 spesifikasi F-07).

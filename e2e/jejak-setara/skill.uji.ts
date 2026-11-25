@@ -743,7 +743,8 @@ test("HP dan laptop di ruang yang sama: kotak, Lari cepat, Kompas, Petunjuk, +1 
   periksaPita(await tataHud(hp.page), "HP 731x411 Petunjuk dipakai di Langkah 1.", 1);
   await hp.page.setViewportSize({ width: 915, height: 356 });
   await hp.page.waitForTimeout(250);
-  periksaPita(await tataHud(hp.page), "HP 915x356 Petunjuk dipakai di Langkah 1.", 2);
+  // JS-16b (P-2): VT323 lebih sempit daripada huruf teks lama, jadi pita ini kini muat satu baris.
+  periksaPita(await tataHud(hp.page), "HP 915x356 Petunjuk dipakai di Langkah 1.", 1);
   await hp.page.screenshot({ path: `${FOTO}/pita-dua-baris-915x356.png` });
   await hp.page.setViewportSize({ width: 731, height: 411 });
   await hp.page.waitForTimeout(400);
@@ -959,7 +960,7 @@ async function adminMasuk(browser: Browser, baseURL: string, request: APIRequest
   await page.goto("/admin/");
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Sandi", { exact: true }).fill("sandi sementara skill");
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await page.getByLabel("Sandi baru", { exact: true }).fill("kalimat sandi admin skill");
   await page.getByLabel("Ulangi sandi baru", { exact: true }).fill("kalimat sandi admin skill");
   await page.getByRole("button", { name: "Simpan sandi" }).click();

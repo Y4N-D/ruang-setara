@@ -101,6 +101,8 @@ async function panggil<T>(metode: "GET" | "POST" | "PATCH" | "PUT" | "DELETE", j
 const skemaKeluar = z.object({ ok: z.literal(true) });
 // JS-14 (P-51): ganti nama menjawab nama baru, ganti semua nama menjawab jumlahnya.
 const skemaKelolaNama = z.object({ ok: z.literal(true), nama: z.string().nullable().optional(), jumlah: z.number().int().min(0).optional() });
+/** JS-16b (P-11): jawaban kode masuk ulang. */
+const skemaKodeMasukUlang = z.object({ ok: z.literal(true), kode: z.string().regex(/^[A-Z0-9]{6}$/), berlakuSampai: z.number().int() });
 
 export interface IsiRujukanApi {
   teks: string;
@@ -140,6 +142,8 @@ export const api = {
   kelolaRuang: (id: string, aksi: AksiKelola, pemainId?: string) => panggil("POST", `/api/ruang/${encodeURIComponent(id)}/kelola`, { aksi, pemainId }, skemaKeluar),
   kelolaNama: (id: string, aksi: "ganti_nama" | "ganti_semua_nama", pemainId?: string) =>
     panggil("POST", `/api/ruang/${encodeURIComponent(id)}/kelola`, { aksi, pemainId }, skemaKelolaNama),
+  kodeMasukUlang: (id: string, pemainId: string) =>
+    panggil("POST", `/api/ruang/${encodeURIComponent(id)}/kelola`, { aksi: "kode_masuk_ulang", pemainId }, skemaKodeMasukUlang),
   tiketRuang: (id: string) => panggil("POST", `/api/ruang/${encodeURIComponent(id)}/tiket`, {}, skemaTiket),
   // JS-11 (P-17, P-21, P-24, P-33): riwayat, hasil, rincian, dan hapus data ruang.
   riwayatRuang: (q: URLSearchParams) => panggil("GET", `/api/ruang/riwayat${q.toString() ? `?${q.toString()}` : ""}`, undefined, skemaRiwayat),

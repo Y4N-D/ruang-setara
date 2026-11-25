@@ -120,3 +120,12 @@ export async function bolehLewat(pembatas: PembatasLaju | undefined, request: Re
     return true;
   }
 }
+
+/** JS-16b (P-12): kode masuk ulang 6 karakter acak kriptografis dari ABJAD_KODE, tanpa bias modulo (248 = 31 × 8). */
+export function buatKodeMasukUlang(): string {
+  let hasil = "";
+  while (hasil.length < 6) {
+    for (const b of crypto.getRandomValues(new Uint8Array(16))) if (b < 248 && hasil.length < 6) hasil += ABJAD_KODE[b % 31];
+  }
+  return hasil;
+}

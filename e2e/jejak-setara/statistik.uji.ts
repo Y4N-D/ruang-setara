@@ -76,7 +76,7 @@ async function masukKonsol(browser: Browser, baseURL: string, email: string, san
   await page.goto("/admin/");
   await kolom(page, "Email").fill(email);
   await kolom(page, "Sandi").fill(sandi);
-  await page.getByRole("button", { name: "Masuk" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Buat sandi baru" })).toBeVisible();
   await kolom(page, "Sandi baru").fill(sandiBaru);
   await kolom(page, "Ulangi sandi baru").fill(sandiBaru);

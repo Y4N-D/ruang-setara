@@ -24,7 +24,7 @@ import {
   type KeadaanDialog,
 } from "../bersama/dialogKeadaan";
 import type { SkillP0 } from "../inti/aturan";
-import { normalkanKode, POLA_KODE_RUANG } from "../inti/aturan";
+import { normalkanKode, normalkanKodeMasukUlang, POLA_KODE_MASUK_ULANG, POLA_KODE_RUANG } from "../inti/aturan";
 import type { KodeGalat, PesanPemain, PesanServerPemain } from "../inti/protokol";
 import { PROTOKOL_VERSI } from "../inti/versi";
 import type { StatusRuang, WarnaTas } from "../inti/tipe";
@@ -36,7 +36,7 @@ import { nomorZona } from "./dunia/kejadian";
 import { perangkatSentuh } from "./dunia/masukan";
 import { MesinDunia } from "./dunia/mesin";
 import { VERSI_PETA } from "./dunia/petaKampung";
-import { LayarAbsen, LayarIdentitas, LayarIdentitasBebas, LayarKode, LayarMenghubungkan } from "./Gabung";
+import { LayarAbsen, LayarIdentitas, LayarIdentitasBebas, LayarKode, LayarMasukUlang, LayarMenghubungkan } from "./Gabung";
 import { KelompokMenuSuara, PanelPengaturan, PanelPrivasi, PanelTentang, type JenisLembar } from "./PanelPengaturan";
 import { LABEL_HURUF, useKurangiGerak, usePengaturan } from "./pengaturan";
 import { buatPemutarSuara, bunyiTeksJatuh, LAJU_TEKS, type NamaSuara } from "./suara";
@@ -47,7 +47,7 @@ import { LayarDitutup, LayarGalat, type SkorAkhir, type WaktuStatus, LayarBerhen
 import { LayarRekap } from "./Rekap";
 import { akhirRekap, penyebabDariKode, type AkhirRekap, type ButirRekap, type PenyebabBerakhir } from "./rekapKeadaan";
 
-type NamaLayar = "kode" | "absen" | "menghubungkan" | "identitas" | "dunia" | "ronde" | "ditutup" | "galat";
+type NamaLayar = "kode" | "masukUlang" | "absen" | "menghubungkan" | "identitas" | "dunia" | "ronde" | "ditutup" | "galat";
 
 interface PemainLobi {
   nama: string;
@@ -97,6 +97,8 @@ export default function App() {
   const [koneksi, setKoneksi] = useState<KeadaanKlien>("menghubungkan");
   const [terputusSejak, setTerputusSejak] = useState<number | null>(null);
   const [galatKode, setGalatKode] = useState<KodeGalat | null>(null);
+  /** JS-16b (P-15): teks layar galat tanpa kode server, misalnya perangkat yang digantikan. */
+  const [galatTeks, setGalatTeks] = useState<string | null>(null);
   const [berhentiJenis, setBerhentiJenis] = useState<"layanan" | "putus" | null>(null); // JS-22, P-10
   const [pengaturan, setPengaturan] = useState({ durasiMenit: 15, batasPemain: 40 });
   // JS-14: pengaturan pemain (P-1 sampai P-3), suara (P-20 sampai P-23), panel Menu (P-8 sampai P-11), dan mode nama.
@@ -419,6 +421,11 @@ export default function App() {
             setGalatForm(TEKS.galat.NOMOR_ABSEN_DIPAKAI);
             gantiLayar("absen");
             umumkan(TEKS.galat.NOMOR_ABSEN_DIPAKAI);
+          } else if (p.kode === "KODE_MASUK_ULANG_SALAH") {
+            // JS-16b (P-14): sambungan tetap terbuka; siswa boleh mengetik kode lain.
+            setGalatForm(TEKS.masukUlang.galatSalah);
+            gantiLayar("masukUlang");
+            umumkan(TEKS.masukUlang.galatSalah);
           } else if (p.kode === "RUANG_TIDAK_ADA") {
             if (!tahanRekap("tidak_ada")) gantiLayar("ditutup");
           } else if (p.kode !== "TERLALU_CEPAT" && p.kode !== "BUKAN_JANGKAUAN") {
@@ -457,6 +464,12 @@ export default function App() {
         else if (kodeTutup === KODE_LAYANAN_BERHENTI || kodeTutup === KODE_PUTUS_LAMA) {
           setBerhentiJenis(kodeTutup === KODE_LAYANAN_BERHENTI ? "layanan" : "putus");
           gantiLayar("galat");
+        } else if (kodeTutup === 4001) {
+          // JS-16b (P-15): pemain ini sudah masuk dari perangkat lain.
+          setGalatTeks(TEKS.masukUlang.diganti);
+          gantiLayar("galat");
+        } else if (kodeTutup === 1008 && layarRef.current === "masukUlang") {
+          setGalatForm(TEKS.masukUlang.galatTerlaluSering); // JS-16b (P-14): kode salah kelima
         } else if (kodeTutup === 4004 || kodeTutup === 4005) {
           setGalatKode(kodeTutup === 4004 ? "DIKELUARKAN" : "VERSI_BERBEDA");
           gantiLayar("galat");
@@ -467,7 +480,7 @@ export default function App() {
   );
 
   const sambungkan = useCallback(
-    (k: string, nomorAbsen: number | null) => {
+    (k: string, nomorAbsen: number | null, kodeMasukUlang?: string) => {
       klien.current?.berhenti();
       pemainId.current = null;
       beridentitas.current = false;
@@ -491,7 +504,7 @@ export default function App() {
         (s, kt) => {
           if (klien.current === c) tanganiKeadaan(s, kt);
         },
-        { versiPeta: VERSI_PETA },
+        { versiPeta: VERSI_PETA, kodeMasukUlang },
       );
       klien.current = c;
       setKoneksi("menghubungkan");
@@ -542,6 +555,44 @@ export default function App() {
     }
   };
 
+  // JS-16b (P-13, P-14): masuk ulang dengan kode dari guru. Selama sambungan ke ruang yang sama masih terbuka sesudah
+  // kode salah, kode berikutnya dikirim lewat sambungan itu.
+  const kirimMasukUlang = async (masukanRuang: string, masukanKode: string) => {
+    const k = normalkanKode(masukanRuang);
+    const kodeGuru = normalkanKodeMasukUlang(masukanKode);
+    if (!POLA_KODE_RUANG.test(k)) {
+      setGalatForm(TEKS.kode.galatFormat);
+      return;
+    }
+    if (!POLA_KODE_MASUK_ULANG.test(kodeGuru)) {
+      setGalatForm(TEKS.masukUlang.galatFormat);
+      return;
+    }
+    setGalatForm(null);
+    const c = klien.current;
+    if (c && c.keadaan !== "berhenti" && kode === k) {
+      c.ulangiMasukUlang(kodeGuru);
+      gantiLayar("menghubungkan");
+      return;
+    }
+    setMemeriksa(true);
+    try {
+      const jawaban = await fetch(`/api/publik/ruang/${k}`, { cache: "no-store", headers: { Accept: "application/json" } });
+      if (jawaban.status === 404) setGalatForm(TEKS.galat.RUANG_TIDAK_ADA);
+      else if (jawaban.status === 503) setGalatForm(TEKS.api.LAYANAN_BERHENTI);
+      else if (jawaban.status === 429) setGalatForm(TEKS.kode.galatTerlaluSering);
+      else if (!jawaban.ok) setGalatForm(TEKS.kode.galatJaringan);
+      else {
+        setKode(k);
+        sambungkan(k, null, kodeGuru);
+      }
+    } catch {
+      setGalatForm(TEKS.kode.galatJaringan);
+    } finally {
+      setMemeriksa(false);
+    }
+  };
+
   const kembali = () => {
     klien.current?.berhenti();
     klien.current = null;
@@ -552,6 +603,7 @@ export default function App() {
     setPemain({});
     setGalatForm(null);
     setGalatKode(null);
+    setGalatTeks(null);
     setBerhentiJenis(null);
     hapusRekap();
     gantiLayar("kode");
@@ -711,7 +763,26 @@ export default function App() {
   let isi: ReactNode;
   switch (layar) {
     case "kode":
-      isi = <LayarKode awal={kodeAwal} memeriksa={memeriksa} siap={asetSiap} galat={galatForm} saatKirim={kirimKode} saatPrivasi={() => bukaLembar("privasi")} />;
+      isi = <LayarKode awal={kodeAwal} memeriksa={memeriksa} siap={asetSiap} galat={galatForm} saatKirim={kirimKode} saatPrivasi={() => bukaLembar("privasi")} saatMasukUlang={() => {
+            setGalatForm(null);
+            gantiLayar("masukUlang");
+          }} />;
+      break;
+    case "masukUlang":
+      isi = (
+        <LayarMasukUlang
+          awalRuang={kode || kodeAwal}
+          memeriksa={memeriksa}
+          galat={galatForm}
+          saatKirim={(r, g) => void kirimMasukUlang(r, g)}
+          saatKembali={() => {
+            klien.current?.berhenti();
+            klien.current = null;
+            setGalatForm(null);
+            gantiLayar("kode");
+          }}
+        />
+      );
       break;
     case "absen":
       isi = <LayarAbsen galat={galatForm} saatKirim={kirimAbsen} />;
@@ -809,7 +880,7 @@ export default function App() {
       isi = <LayarDitutup saatKembali={kembali} />;
       break;
     case "galat":
-      isi = berhentiJenis ? <LayarBerhenti jenis={berhentiJenis} /> : <LayarGalat kode={galatKode ?? "VERSI_BERBEDA"} saatKembali={kembali} />;
+      isi = berhentiJenis ? <LayarBerhenti jenis={berhentiJenis} /> : <LayarGalat kode={galatTeks ? null : (galatKode ?? "VERSI_BERBEDA")} teks={galatTeks ?? undefined} saatKembali={kembali} />;
       break;
   }
 

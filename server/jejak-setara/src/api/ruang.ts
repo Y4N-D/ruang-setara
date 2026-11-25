@@ -329,7 +329,20 @@ async function kelola(request: Request, env: Env, url: URL, id: string): Promise
   if (milik.ruang.status === "ditutup") return galatRuang(isi.aksi === "tutup" ? "STATUS_TIDAK_SESUAI" : "RUANG_TIDAK_ADA", isi.aksi === "tutup" ? 409 : 404);
   const jawaban = await stubRuang(env, milik.ruang).fetch("https://ruang/kelola", { method: "POST", body: JSON.stringify(isi) });
   // JS-14 (P-51): jawaban berhasil membawa `nama` atau `jumlah` dari Durable Object.
-  if (jawaban.ok) return jawabJson({ ...((await jawaban.json().catch(() => ({}))) as Record<string, unknown>), ok: true }, 200);
+  if (jawaban.ok) {
+    const isiJawaban = (await jawaban.json().catch(() => ({}))) as Record<string, unknown>;
+    // JS-16b (P-12, D-3a): pembuatan kode masuk ulang dicatat di log audit tanpa kodenya.
+    if (isi.aksi === "kode_masuk_ulang") {
+      await pernyataanAudit(env.DB, {
+        penggunaId: milik.sesi.akun.id,
+        aksi: "ruang.kode_masuk_ulang",
+        sasaran: milik.ruang.id,
+        rincian: { pemainId: isi.pemainId ?? null },
+        sekarang: Date.now(),
+      }).run();
+    }
+    return jawabJson({ ...isiJawaban, ok: true }, 200);
+  }
   const galat = ((await jawaban.json().catch(() => null)) as { galat?: { kode?: string } } | null)?.galat?.kode;
   const kode: KodeGalatRuang =
     galat === "PEMAIN_TIDAK_ADA" || galat === "STATUS_TIDAK_SESUAI" || galat === "ISI_SALAH" || galat === "BUKAN_NAMA_BEBAS" ? galat : "RUANG_TIDAK_ADA";

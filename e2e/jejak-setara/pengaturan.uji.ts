@@ -50,7 +50,7 @@ test("HP: privasi di layar Kode, Menu, Pengaturan, Tentang, pengaturan bertahan,
 
   // P-5: tombol Menu dan suara di baris kaki layar identitas.
   await page.getByLabel("Kode ruang").fill(kode);
-  await page.getByRole("button", { name: "Masuk" }).tap();
+  await page.getByRole("button", { name: "Masuk", exact: true }).tap();
   await expect(page.getByRole("heading", { name: "Pilih nama dan avatar" })).toBeVisible({ timeout: 20_000 }); // JS-15 (P-23): gambar dunia dimuat dulu
   await expect(page.locator(".js-kaki-identitas").getByRole("button", { name: "Buka menu pengaturan" })).toBeVisible();
   await page.getByRole("radiogroup", { name: "Nama samaran" }).getByRole("radio").first().tap();

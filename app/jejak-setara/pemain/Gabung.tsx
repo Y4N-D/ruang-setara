@@ -2,7 +2,7 @@
 // JS-07: tombol "Masuk" baru aktif sesudah aset dunia termuat.
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import PenandaServer from "../bersama/PenandaServer";
-import { normalkanKode, POLA_KODE_RUANG } from "../inti/aturan";
+import { normalkanKode, POLA_KODE_MASUK_ULANG, POLA_KODE_RUANG } from "../inti/aturan";
 import { bentukNamaSah, NAMA_BEBAS_MAKS, rapikanNama } from "../inti/nama";
 import { isiTeks, TEKS } from "../teks";
 import { IKON_AVATAR } from "./avatar";
@@ -36,6 +36,7 @@ export function LayarKode({
   galat,
   saatKirim,
   saatPrivasi,
+  saatMasukUlang,
 }: {
   awal: string;
   memeriksa: boolean;
@@ -45,6 +46,8 @@ export function LayarKode({
   saatKirim: (kode: string) => void;
   /** JS-14 (P-15): membuka panel Privasi. */
   saatPrivasi?: () => void;
+  /** JS-16b (P-13): membuka layar masuk dengan kode dari guru. */
+  saatMasukUlang?: () => void;
 }) {
   const [nilai, setNilai] = useState(awal);
   const sah = POLA_KODE_RUANG.test(normalkanKode(nilai));
@@ -83,8 +86,87 @@ export function LayarKode({
           {TEKS.kode.tombol}
         </button>
       </form>
+      {saatMasukUlang ? (
+        <button type="button" className="js-tombol" onClick={saatMasukUlang}>
+          {TEKS.kode.masukUlang}
+        </button>
+      ) : null}
       {saatPrivasi ? <PemberitahuanSingkat saatBuka={saatPrivasi} /> : null}
       <PenandaServer />
+    </Panel>
+  );
+}
+
+/** JS-16b (P-13): masuk lagi di HP baru dengan kode ruang dan kode dari guru. */
+export function LayarMasukUlang({
+  awalRuang,
+  memeriksa,
+  galat,
+  saatKirim,
+  saatKembali,
+}: {
+  awalRuang: string;
+  memeriksa: boolean;
+  galat: string | null;
+  saatKirim: (kodeRuang: string, kodeGuru: string) => void;
+  saatKembali: () => void;
+}) {
+  const [ruang, setRuang] = useState(awalRuang);
+  const [guru, setGuru] = useState("");
+  const sah = POLA_KODE_RUANG.test(normalkanKode(ruang)) && POLA_KODE_MASUK_ULANG.test(guru.trim());
+  return (
+    <Panel judul={TEKS.masukUlang.judul}>
+      <form
+        className="js-formulir"
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!memeriksa) saatKirim(ruang, guru);
+        }}
+      >
+        <p className="js-petunjuk" id="js-masuk-ulang-petunjuk">
+          {memeriksa ? TEKS.kode.memeriksa : TEKS.masukUlang.petunjuk}
+        </p>
+        <label className="js-label" htmlFor="js-masuk-ulang-ruang">
+          {TEKS.masukUlang.labelRuang}
+        </label>
+        <input
+          id="js-masuk-ulang-ruang"
+          className="js-isian js-isian-kode"
+          value={ruang}
+          onChange={(e) => setRuang(e.target.value.toUpperCase())}
+          maxLength={5}
+          autoCapitalize="characters"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          inputMode="text"
+        />
+        <label className="js-label" htmlFor="js-masuk-ulang-kode">
+          {TEKS.masukUlang.labelKode}
+        </label>
+        <input
+          id="js-masuk-ulang-kode"
+          className="js-isian js-isian-kode"
+          value={guru}
+          onChange={(e) => setGuru(e.target.value.toUpperCase())}
+          maxLength={6}
+          autoCapitalize="characters"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          inputMode="text"
+          aria-describedby={galat ? "js-masuk-ulang-petunjuk js-masuk-ulang-galat" : "js-masuk-ulang-petunjuk"}
+          aria-invalid={galat ? true : undefined}
+        />
+        <PitaGalat id="js-masuk-ulang-galat" teks={galat} />
+        <button type="submit" className="js-tombol js-tombol-utama" aria-disabled={!sah || memeriksa}>
+          {TEKS.masukUlang.tombol}
+        </button>
+      </form>
+      <button type="button" className="js-tombol" onClick={saatKembali}>
+        {TEKS.masukUlang.kembali}
+      </button>
     </Panel>
   );
 }

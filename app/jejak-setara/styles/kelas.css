@@ -5,7 +5,9 @@
    JS-10: halaman Ruang dan detail ruang di konsol */
 
 .js-ruang-kode {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 14px;
   letter-spacing: 3px;
 }
@@ -20,7 +22,9 @@
   gap: 8px;
 }
 .js-konsol-angka-kecil {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 12px;
 }
 .js-ruang-pilih {
@@ -43,7 +47,9 @@
 .js-ruang-kepala h2,
 .js-ruang-pemain h2 {
   margin: 0 0 8px;
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
 }
 .js-ruang-aksi {
   justify-content: flex-start;
@@ -131,7 +137,9 @@
   overflow: hidden;
   background: var(--js-cream);
   color: var(--js-ink);
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
 }
 .js-kelas-layar {
   position: relative;
@@ -173,7 +181,9 @@
   padding-right: 0;
 }
 .js-kelas-judul {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: calc(2.8 * var(--u));
 }
 .js-kelas-tanda-kepala {
@@ -199,19 +209,24 @@
   color: var(--js-mist);
 }
 .js-kelas-angka {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: calc(2.8 * var(--u));
 }
 .js-kelas-tombol {
   display: inline-flex;
   align-items: center;
   gap: calc(1 * var(--u));
-  min-height: calc(7 * var(--u));
+  /* JS-16b (P-17): sedikitnya 48 px juga di 1024 × 768. */
+  min-height: max(48px, calc(7 * var(--u)));
   padding: calc(1 * var(--u)) calc(2.6 * var(--u));
   border: calc(0.5 * var(--u)) solid var(--js-ink);
   background: var(--js-cream);
   color: var(--js-ink);
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-weight: 600;
   font-size: calc(3.1 * var(--u));
   text-decoration: none;
@@ -236,7 +251,9 @@
   background: var(--js-coral);
 }
 .js-kelas-tombol kbd {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: calc(1.6 * var(--u));
   border: calc(0.3 * var(--u)) solid var(--js-ink);
   padding: calc(0.4 * var(--u)) calc(0.6 * var(--u));
@@ -299,18 +316,47 @@
 }
 .js-kelas-kode {
   margin: 0;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
   font-size: calc(10 * var(--u));
   letter-spacing: calc(2.4 * var(--u));
   line-height: 1.1;
 }
-.js-kelas-cara ol {
-  margin: 0;
-  padding-left: calc(3.5 * var(--u));
+/* JS-16b (P-8, P-9): kode QR di kotak kanan lobi dan lapisan Perbesar QR. */
+.js-kelas-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(1.2 * var(--u));
+  text-align: center;
 }
-.js-kelas-cara li {
-  font-size: calc(3.1 * var(--u));
-  margin-bottom: calc(1 * var(--u));
+.js-kelas-qr .js-kelas-qr-gambar {
+  width: calc(36 * var(--u));
+  height: calc(36 * var(--u));
+  flex: none;
+}
+.js-kelas-qr-besar {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(4 * var(--u));
+  padding: calc(3 * var(--u));
+  background: var(--js-cream);
+}
+.js-kelas-qr-besar .js-kelas-qr-gambar {
+  width: min(80vh, 80vw);
+  height: min(80vh, 80vw);
+  flex: none;
+}
+.js-kelas-qr-besar-teks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(1.5 * var(--u));
 }
 .js-kelas-daftar {
   flex: 1;
@@ -356,7 +402,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: calc(16 * var(--u));
 }
 
@@ -398,7 +446,9 @@
   transform: translate(-50%, -50%);
 }
 .js-kelas-sisa {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: calc(4.4 * var(--u));
 }
 .js-kelas-isi-langsung {
@@ -516,7 +566,9 @@
 }
 .js-kelas-dijeda {
   margin: 0;
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: calc(4.4 * var(--u));
 }
 
@@ -559,7 +611,9 @@
   padding-top: calc(1.5 * var(--u));
   border: calc(0.5 * var(--u)) solid var(--js-ink);
   color: var(--js-ink);
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: calc(5 * var(--u));
 }
 .js-kelas-tiang-1 .js-kelas-balok { height: calc(22 * var(--u)); background: var(--js-sun); }
@@ -600,7 +654,9 @@
   align-items: center;
   gap: calc(1 * var(--u));
   margin: 0 0 calc(1 * var(--u));
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: calc(2.8 * var(--u));
 }
 .js-kelas-kartu h2 img {
@@ -730,7 +786,9 @@
 }
 .js-ruang-pemakaian h2 {
   margin: 0 0 8px;
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
 }
 .js-ruang-pemakaian th {
   text-align: left;
@@ -779,7 +837,9 @@
 }
 .js-sunting-kepala h2 {
   margin: 0;
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
 }
 .js-sunting-bilah {
   position: sticky;
@@ -833,7 +893,9 @@
 }
 .js-sunting-bagian legend {
   padding: 0 4px;
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
 }
 .js-sunting-kolom {
   display: flex;
@@ -953,7 +1015,9 @@
 }
 .js-pratinjau-kepala h2 {
   margin: 0;
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 18px;
 }
 .js-pratinjau-tombol {
@@ -1058,7 +1122,9 @@
   border-bottom: 0;
   background: var(--js-white);
   color: var(--js-ink);
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 18px;
   text-decoration: none;
 }
@@ -1128,11 +1194,15 @@
 .js-hasil h2,
 .js-hasil-hapus h2 {
   margin: 0 0 12px;
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
 }
 .js-hasil h3 {
   margin: 20px 0 8px;
-  font-family: "Pixelify Sans", sans-serif;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 18px;
   font-weight: 400;
 }
@@ -1292,7 +1362,9 @@
     margin: 0 0 8px;
   }
   .js-hasil-cetak-judul {
-    font-family: "Pixelify Sans", sans-serif;
+    font-family: var(--js-huruf-teks);
+    font-size-adjust: var(--js-huruf-teks-sesuai);
+    line-height: var(--js-huruf-teks-baris);
     font-size: 14pt;
   }
   .js-hasil .js-hasil-cetak-kaki {
@@ -1455,7 +1527,9 @@
   min-width: 150px;
 }
 .js-statistik-kode {
-  font-family: "Press Start 2P", monospace;
+  font-family: var(--js-huruf-judul);
+  font-size-adjust: var(--js-huruf-judul-sesuai);
+  line-height: var(--js-huruf-judul-baris);
   font-size: 11px;
 }
 .js-statistik-kejadian .js-konsol-tanda {
@@ -1515,7 +1589,9 @@
 }
 .js-statistik-rincian h3 {
   margin: 0 0 8px;
-  font-family: "Pixelify Sans", monospace;
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   font-size: 16px;
   font-weight: 400;
 }
@@ -1655,7 +1731,9 @@
   padding: calc(0.4 * var(--u)) calc(0.8 * var(--u));
   background: var(--js-sun);
   color: var(--js-ink);
-  font: calc(2 * var(--u)) "Pixelify Sans", monospace;
+  font: calc(2 * var(--u)) var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
 }
 .js-kelas-suara:focus-visible,
 .js-kelas-nama-tombol:focus-visible {
@@ -1699,7 +1777,9 @@
   background: var(--js-white);
   border: 2px solid var(--js-ink);
   color: var(--js-ink);
-  font: calc(2.8 * var(--u)) "Pixelify Sans", monospace;
+  font: calc(2.8 * var(--u)) var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  line-height: var(--js-huruf-teks-baris);
   text-align: left;
   cursor: pointer;
 }

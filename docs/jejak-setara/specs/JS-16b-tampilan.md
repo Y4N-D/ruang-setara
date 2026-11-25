@@ -37,6 +37,8 @@ Sehari Setara dan galeri tidak berubah. Tidak ada rilis produksi di akhir JS-16b
   --js-huruf-teks-sesuai: cap-height 0.7;
   ```
 
+  **Diubah di Test JS-16b (25 Nov 2026, menunggu persetujuan pemilik proyek):** `--js-huruf-teks-sesuai` menjadi `cap-height 0.64`, karena 0,7 membuat pilihan jawaban di HP 640 × 360 meluap 27 px; dengan 0,64 tinggi huruf kecil VT323 sama dengan huruf teks lama. Ditambah dua token tinggi baris, `--js-huruf-judul-baris: 1` dan `--js-huruf-teks-baris: 1.2`, untuk aturan yang dulu memakai tinggi baris `normal`.
+
   Setiap aturan yang dulu memakai Press Start 2P kini memakai `font-family: var(--js-huruf-judul); font-size-adjust: var(--js-huruf-judul-sesuai);`. Setiap aturan yang dulu memakai Pixelify Sans kini memakai pasangan token teks.
 
   Nama huruf hanya ditulis di keempat token itu; `jejak.css` dan `kelas.css` tidak lagi menulis nama huruf langsung. Angka ukuran huruf di Design System 5 tidak berubah. Huruf sistem untuk tabel dan formulir konsol (KT-05) juga tidak berubah.
@@ -137,28 +139,30 @@ Sehari Setara dan galeri tidak berubah. Tidak ada rilis produksi di akhir JS-16b
 | `masukUlang.galatFormat` | Kode dari guru berisi 6 huruf atau angka. |
 | `masukUlang.galatSalah` | Kode dari guru salah atau sudah tidak berlaku. Minta kode baru. |
 | `masukUlang.galatTerlaluSering` | Terlalu banyak percobaan. Minta kode baru dari gurumu, lalu coba lagi. |
-| `galat.diganti` | Kamu sudah masuk dari perangkat lain. Lanjutkan bermain di perangkat itu. |
+| `galat.KODE_MASUK_ULANG_SALAH` | Kode dari guru salah atau sudah tidak berlaku. Minta kode baru. |
+| `masukUlang.diganti` | Kamu sudah masuk dari perangkat lain. Lanjutkan bermain di perangkat itu. |
 | `tentang.kreditHuruf` | Huruf VT323, SIL Open Font License 1.1. |
 
 **Konsol (`TEKS_KONSOL`)**
 
 | Kunci | Teks |
 |---|---|
-| `ruang.kodeMasukUlang` | Kode masuk ulang |
-| `ruang.kodeMasukUlangLabel` | Buat kode masuk ulang untuk {nama} |
-| `ruang.kodeMasukUlangJudul` | Kode masuk ulang untuk {nama} |
-| `ruang.kodeMasukUlangPetunjuk` | Minta siswa membuka alamat ruang di HP barunya, mengetik kode ruang {kodeRuang}, memilih "Masuk dengan kode dari guru", lalu mengetik kode ini. |
-| `ruang.kodeMasukUlangBerlaku` | Berlaku sampai pukul {jam} (sisa {sisa}). |
-| `ruang.kodeMasukUlangHabis` | Kode sudah tidak berlaku. Buat kode baru bila masih perlu. |
-| `ruang.kodeMasukUlangSalin` | Salin kode |
-| `ruang.kodeMasukUlangTersalin` | Kode disalin. |
-| `ruang.kodeMasukUlangGagal` | Kode tidak bisa dibuat. Coba lagi. |
+| `detail.kodeMasukUlang` | Kode masuk ulang |
+| `detail.kodeMasukUlangLabel` | Buat kode masuk ulang untuk {nama} |
+| `detail.kodeMasukUlangJudul` | Kode masuk ulang untuk {nama} |
+| `detail.kodeMasukUlangPetunjuk` | Minta siswa membuka alamat ruang di HP barunya, mengetik kode ruang {kodeRuang}, memilih "Masuk dengan kode dari guru", lalu mengetik kode ini. |
+| `detail.kodeMasukUlangBerlaku` | Berlaku sampai pukul {jam} (sisa {sisa}). |
+| `detail.kodeMasukUlangHabis` | Kode sudah tidak berlaku. Buat kode baru bila masih perlu. |
+| `detail.kodeMasukUlangSalin` | Salin kode |
+| `detail.kodeMasukUlangTersalin` | Kode disalin. |
+| `detail.kodeMasukUlangGagal` | Kode tidak bisa dibuat. Coba lagi. |
+| `detail.kodeMasukUlangTutup` | Tutup |
 | `kelas.qrKeterangan` | Pindai dengan kamera HP untuk bergabung. |
 | `kelas.qrLabel` | Kode QR untuk bergabung ke ruang {kode} |
 | `kelas.perbesarQr` | Perbesar QR |
 | `kelas.tutupQr` | Tutup |
 | `alurAdminAwal.pilihLingkungan` | Pilih lingkungan uji atau produksi di formulir, lalu jalankan lagi. |
-| `…kreditHuruf` | Huruf VT323, SIL Open Font License 1.1. |
+| `masuk.kreditHuruf` | Huruf VT323, SIL Open Font License 1.1. |
 
 Kunci `kelas.caraJudul`, `kelas.cara1`, `kelas.cara2`, `kelas.cara3`, dan `kelas.cara3Bebas` dihapus bila D-1a dipilih.
 

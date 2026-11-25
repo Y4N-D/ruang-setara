@@ -70,7 +70,6 @@ const KELAS_KE_SERVER: Record<string, [Pesan, Pesan]> = {
   tambah_waktu: [pesan("tambah_waktu", { detik: 120 }), pesan("tambah_waktu", { detik: 0 })],
   kunci_ruang: [pesan("kunci_ruang", { kunci: true }), pesan("kunci_ruang", { kunci: "ya" })],
   keluarkan: [pesan("keluarkan", { pemainId: "p-7f3a" }), pesan("keluarkan")],
-  kode_masuk_ulang: [pesan("kode_masuk_ulang", { pemainId: "p-7f3a" }), pesan("kode_masuk_ulang", { pemainId: 7 })],
   pembahasan: [pesan("pembahasan", { kejadianId: "K-01" }), pesan("pembahasan", { kejadianId: "" })],
   tutup_ruang: [pesan("tutup_ruang"), pesan("tutup_ruang", { alasan: "selesai" })],
   // JS-14 (P-58)
@@ -303,8 +302,8 @@ const KELOMPOK = [
 ] as const;
 
 describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
-  it("PROTOKOL_VERSI 4 sejak JS-15 (P-30)", () => {
-    expect(PROTOKOL_VERSI).toBe(4);
+  it("PROTOKOL_VERSI 5 sejak JS-16b (P-16)", () => {
+    expect(PROTOKOL_VERSI).toBe(5);
   });
 
   it("JS-15 (P-27): ping boleh membawa rttMs bilangan bulat 0–60.000", () => {
@@ -334,7 +333,7 @@ describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
       ["halo", "pilih_identitas", "minta_nama", "gerak", "periksa", "kunci_1", "kunci_2", "tutup_dialog", "pakai_skill", "ambil_kotak", "ping"].sort(),
     );
     expect(tipe(skemaKelas)).toEqual(
-      ["halo", "mulai", "jeda", "lanjut", "tambah_waktu", "akhiri", "kunci_ruang", "keluarkan", "kode_masuk_ulang", "pembahasan", "tutup_ruang", "ganti_nama", "ganti_semua_nama"].sort(),
+      ["halo", "mulai", "jeda", "lanjut", "tambah_waktu", "akhiri", "kunci_ruang", "keluarkan", "pembahasan", "tutup_ruang", "ganti_nama", "ganti_semua_nama"].sort(),
     );
     expect(tipe(skemaServerPemain)).toEqual(
       [
@@ -377,6 +376,7 @@ describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
       "BUKAN_JANGKAUAN",
       "NOMOR_ABSEN_DIPAKAI",
       "NAMA_DITOLAK",
+      "KODE_MASUK_ULANG_SALAH", // JS-16b (P-14)
     ]);
   });
 
@@ -511,5 +511,18 @@ describe("batas nilai (P-34 sampai P-38)", () => {
       for (const [sah] of Object.values(contoh)) expect(JSON.stringify(sah).length).toBeLessThan(BATAS.pesanByte / 10);
     }
     expect(JSON.stringify(gerak).length).toBeLessThan(80);
+  });
+});
+
+describe("JS-16b: halo dengan kode masuk ulang (P-13, P-16)", () => {
+  it("halo menerima kodeMasukUlang 6 huruf atau angka, dan menolak bentuk lain", () => {
+    const halo = (kodeMasukUlang: unknown) => skemaPemain.safeParse({ v: PROTOKOL_VERSI, t: "halo", peran: "pemain", kodeMasukUlang }).success;
+    expect(halo("K7M2PA")).toBe(true);
+    expect(halo("k7m2pa")).toBe(true);
+    for (const salah of ["K7M2P", "K7M2PAA", "K7M-PA", 123456, ""]) expect(halo(salah), String(salah)).toBe(false);
+  });
+
+  it("skema layar kelas tidak lagi menerima kode_masuk_ulang; kode dibuat lewat rute kelola", () => {
+    expect(skemaKelas.safeParse({ v: PROTOKOL_VERSI, t: "kode_masuk_ulang", pemainId: "p-7f3a" }).success).toBe(false);
   });
 });

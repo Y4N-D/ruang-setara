@@ -21,6 +21,20 @@ export const TEKS = {
     galatFormat: "Kode berisi 5 huruf atau angka.",
     galatJaringan: "Tidak bisa menghubungi server. Periksa wifi atau data selulermu.",
     galatTerlaluSering: "Terlalu banyak percobaan. Tunggu sebentar.",
+    masukUlang: "Masuk dengan kode dari guru", // JS-16b (P-13)
+  },
+  // JS-16b (P-13 sampai P-15): masuk lagi di HP baru dengan kode dari guru.
+  masukUlang: {
+    judul: "Masuk dengan kode dari guru",
+    petunjuk: "Pakai ini bila kamu pindah HP. Minta kode 6 huruf atau angka dari gurumu.",
+    labelRuang: "Kode ruang",
+    labelKode: "Kode dari guru",
+    tombol: "Masuk",
+    kembali: "Kembali",
+    galatFormat: "Kode dari guru berisi 6 huruf atau angka.",
+    galatSalah: "Kode dari guru salah atau sudah tidak berlaku. Minta kode baru.",
+    galatTerlaluSering: "Terlalu banyak percobaan. Minta kode baru dari gurumu, lalu coba lagi.",
+    diganti: "Kamu sudah masuk dari perangkat lain. Lanjutkan bermain di perangkat itu.",
   },
   absen: {
     judul: "Nomor absen",
@@ -158,6 +172,7 @@ export const TEKS = {
     BUKAN_JANGKAUAN: "Terlalu jauh dari kejadian.",
     NOMOR_ABSEN_DIPAKAI: "Nomor absen ini sudah dipakai di ruang ini. Periksa lagi nomormu.",
     NAMA_DITOLAK: "Nama itu tidak bisa dipakai. Coba nama lain.", // JS-14 (P-42)
+    KODE_MASUK_ULANG_SALAH: "Kode dari guru salah atau sudah tidak berlaku. Minta kode baru.", // JS-16b (P-14)
   } satisfies Record<KodeGalat, string>,
   api: {
     KUNCI_SALAH: "Kunci ruang coba tidak cocok.",
@@ -251,7 +266,7 @@ export const TEKS = {
     isi: "Jejak Setara, bagian dari Ruang Setara.",
     kreditAset: "Aset visual digambar dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN.",
     kreditSuara: "Efek suara dibuat dengan kode oleh Claude (Anthropic) berdasarkan arahan dan persetujuan YAN.",
-    kreditHuruf: "Huruf Press Start 2P dan Pixelify Sans, SIL Open Font License 1.1.",
+    kreditHuruf: "Huruf VT323, SIL Open Font License 1.1.",
   },
   namaBebas: {
     label: "Nama pemain",
