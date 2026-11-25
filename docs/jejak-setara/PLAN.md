@@ -19,7 +19,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-13 | Selesai (22 Nov 2026; `Diterima: JS-13`) | [JS-13-statistik.md](specs/JS-13-statistik.md) | [JS-13-hasil.md](tests/JS-13-hasil.md) |
 | JS-14 | Selesai (22 Nov 2026; `Diterima: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | [JS-14-hasil.md](tests/JS-14-hasil.md) |
 | JS-15 | Selesai (24 Nov 2026; `Diterima: JS-15`) | [JS-15-beban.md](specs/JS-15-beban.md) | [JS-15-hasil.md](tests/JS-15-hasil.md) |
-| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Selesai (25 Nov 2026; `Diterima: JS-16b`, penyimpangan 1a dan 2a). JS-16c (dipersempit: tautan layar judul Sehari Setara dan rilis v1.0): Diuji (25 Nov 2026), lulus dengan penyimpangan 1 (uji Sehari Setara sebagian); menunggu `Rilis: v1.0` dan `Diterima: JS-16c`. JS-16d (panduan guru, tautan galeri, catatan uji coba): belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md), [JS-16c-tautan-judul.md](specs/JS-16c-tautan-judul.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus; [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus; [JS-16c-hasil.md](tests/JS-16c-hasil.md), lulus dengan penyimpangan 1 |
+| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Selesai (25 Nov 2026; `Diterima: JS-16b`, penyimpangan 1a dan 2a). JS-16c (dipersempit: tautan layar judul Sehari Setara dan rilis v1.0): Selesai (25 Nov 2026; `Diterima: JS-16c`, penyimpangan 1a; produksi v1.0 terpasang 25 Nov 2026). JS-16d (panduan guru, tautan galeri, catatan uji coba): belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md), [JS-16c-tautan-judul.md](specs/JS-16c-tautan-judul.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus; [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus; [JS-16c-hasil.md](tests/JS-16c-hasil.md), lulus |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
 
 ## Backlog
@@ -2105,7 +2105,7 @@ Dikerjakan 25 November 2026 di luar repositori; salinan uji sementara dihapus se
 
 ### Plan lanjutan JS-16c (dipersempit) — Tautan layar judul Sehari Setara dan rilis v1.0 (25 Nov 2026)
 
-- Status: **Disetujui (25 Nov 2026)** dengan `Setuju: JS-16c` (usulan 1 sampai 7 = a). Spesifikasi [JS-16c-tautan-judul.md](specs/JS-16c-tautan-judul.md) disetujui 25 Nov 2026 (D-1 dan D-2 = a), lalu **Diuji (25 Nov 2026)**: laporan [JS-16c-hasil.md](tests/JS-16c-hasil.md), lulus dengan penyimpangan 1. Catatan rilis [v1.0](rilis/v1.0.md).
+- Status: **Disetujui (25 Nov 2026)** dengan `Setuju: JS-16c` (usulan 1 sampai 7 = a). Spesifikasi [JS-16c-tautan-judul.md](specs/JS-16c-tautan-judul.md) disetujui 25 Nov 2026 (D-1 dan D-2 = a), lalu **Diuji (25 Nov 2026)**: laporan [JS-16c-hasil.md](tests/JS-16c-hasil.md), lulus; **diterima 25 Nov 2026** (`Diterima: JS-16c; penyimpangan 1a`). Catatan rilis [v1.0](rilis/v1.0.md).
 - Dasar: keputusan pemilik proyek 25 Nov 2026 (`Lanjutkan: JS-16c dipersempit`). JS-16c kini hanya berisi tautan dari layar judul Sehari Setara dan catatan rilis v1.0. Uji coba kelas dilakukan sesudahnya. Panduan guru (usulan 12a JS-16), tautan dari galeri (bagian galeri usulan 11a), dan pencatatan hasil uji coba (usulan 13a) pindah ke **JS-16d**.
 - Memenuhi: KT-08 (bagian layar judul Sehari Setara); PRD 17 (rilis 1.0); AGENTS 4.5.
 - Bergantung pada: JS-16b Selesai (25 Nov 2026). Uji coba kelas, bukan Build, juga bergantung pada verifikasi Bagian A di konsol produksi (pekerjaan pemilik proyek).
@@ -2154,3 +2154,10 @@ Dikerjakan 25 November 2026 pada hasil `build:pages` yang disajikan di bawah `/r
 2. **Tautan langsung terbit lewat GitHub Pages begitu di-push** (usulan 7a).
 3. **Produksi belum siap dipakai kelas** sampai Bagian A selesai. Uji coba kelas menunggu verifikasi itu, bukan Build JS-16c.
 4. **Uji coba tanpa panduan guru satu halaman.** Ukuran PRD 16 "guru menjalankan sesi tanpa bantuan" belum terukur. Draf panduan Sesi B boleh dicetak sebagai pegangan, dengan tiga koreksi yang disebut di chat (data per HP, kuota, dan kode masuk ulang).
+
+#### Diterima JS-16c (25 Nov 2026)
+
+- Pemilik proyek membalas `Diterima: JS-16c; penyimpangan 1a`. Sisa uji ujung ke ujung Sehari Setara dijalankan di awal Test JS-16d: sisa `alur-permainan`, `kartu-dampak`, dan `suara`, serta `akhir-rekap-refleksi`, `kuis-peran`, dan `tim-waktu-bintang`.
+- Produksi, dibaca lewat konektor Cloudflare hanya sebagai jumlah: Worker `jejak-setara` diperbarui 25 Nov 2026 pukul 11.26 UTC (rilis v1.0); empat ruang uji pemeriksaan sesudah rilis sudah ditutup; akun admin sudah Peninjau.
+- Belum, sebelum uji coba kelas: verifikasi Bagian A. Saat dibaca, 43 rujukan masih berstatus belum dan 40 kejadian masih menunggu tinjauan.
+- Berikutnya: uji coba kelas oleh pemilik proyek, lalu Plan lanjutan JS-16d (panduan guru, tautan galeri, catatan hasil uji coba, dan sisa uji Sehari Setara).

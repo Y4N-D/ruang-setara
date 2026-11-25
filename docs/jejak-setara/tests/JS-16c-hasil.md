@@ -39,4 +39,4 @@ Tautan layar judul Sehari Setara dan catatan rilis v1.0, sesuai spesifikasi [JS-
 
 ## Keputusan: Lulus
 
-Lulus, dengan penyimpangan 1 yang perlu diterima pemilik proyek (saran a).
+Lulus. Diterima pemilik proyek 25 November 2026 (`Diterima: JS-16c; penyimpangan 1a`): sisa uji ujung ke ujung Sehari Setara dijalankan di awal Test JS-16d.
