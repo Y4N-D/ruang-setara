@@ -20,7 +20,10 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-14 | Selesai (22 Nov 2026; `Diterima: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | [JS-14-hasil.md](tests/JS-14-hasil.md) |
 | JS-15 | Selesai (24 Nov 2026; `Diterima: JS-15`) | [JS-15-beban.md](specs/JS-15-beban.md) | [JS-15-hasil.md](tests/JS-15-hasil.md) |
 | JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Selesai (25 Nov 2026; `Diterima: JS-16b`, penyimpangan 1a dan 2a). JS-16c (dipersempit: tautan layar judul Sehari Setara dan rilis v1.0): Selesai (25 Nov 2026; `Diterima: JS-16c`, penyimpangan 1a; produksi v1.0 terpasang 25 Nov 2026). JS-16d (panduan guru, tautan galeri, catatan uji coba): belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md), [JS-16c-tautan-judul.md](specs/JS-16c-tautan-judul.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus; [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus; [JS-16c-hasil.md](tests/JS-16c-hasil.md), lulus |
+| JS-18 | Direncanakan (25 Nov 2026; rencana v1.1, menunggu Gerbang 1). Plan lanjutan sesudah JS-23 Selesai | — | — |
+| JS-21 | Direncanakan (25 Nov 2026; rencana rinci di "Rencana v1.1", menunggu Gerbang 1) | — | — |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
+| JS-23 | Direncanakan (25 Nov 2026; fitur baru rencana v1.1, menunggu Gerbang 1). Plan lanjutan sesudah JS-21 Selesai dan PC-1 Disetujui | — | — |
 
 ## Backlog
 
@@ -46,7 +49,7 @@ Salinan backlog AGENTS bagian 5 (versi 0.1, 4 November 2026), ditambah kolom ses
 | JS-16 | Tautan dari galeri, panduan guru satu halaman, uji coba kelas, rilis 1.0; sejak Gerbang 1 JS-16 juga lingkungan produksi, huruf VT323, kode QR, dan kode masuk ulang, dipecah JS-16a, JS-16b, JS-16c, dan JS-16d | KT-06, KT-07, KT-08; PRD bagian 16 dan 17; JFR-03, JFR-07 | L | JS-13, JS-14, JS-15 | Sesi A (jalur utama) |
 | JS-22 | Pengaman biaya: pengaman alarm dan percobaan ulang, alur kerja "Jejak: hentikan", penghitung pemakaian per ruang, serta peringatan anggaran dan batas biaya (ditambahkan 14 Nov 2026, usulan 14a JS-10) | Architecture 12.1 dan 13 | M | JS-10 | Sesi A (sesudah JS-10) |
 
-**Versi 1.1 (P1):** ~~JS-17 kode QR dan kode masuk ulang (JFR-03, 07)~~, dikerjakan di JS-16b untuk rilis 1.0 (Gerbang 1 JS-16, 24 Nov 2026); JS-18 Teropong, Angkot, dan bantuan gerak (JFR-13, 25); JS-19 log audit, pengaturan umum, ruang uji, impor dan ekspor bank (JFR-39, 40, 47, 48); JS-20 statistik kelas dan per siswa serta cetak ringkasan (JFR-51, 52, 54); JS-21 musik latar (berkas M-01 `app/jejak-setara/assets/sfx/musik_kelas.wav` sudah Disetujui 21 Nov 2026; JS-21 memutarnya di layar kelas dan menghentikannya saat jeda, hitung mundur, dan jingle akhir; Permintaan C-16).
+**Versi 1.1 (P1):** ~~JS-17 kode QR dan kode masuk ulang (JFR-03, 07)~~, dikerjakan di JS-16b untuk rilis 1.0 (Gerbang 1 JS-16, 24 Nov 2026); JS-18 Teropong, Angkot, dan bantuan gerak (JFR-13, 25); JS-19 log audit, pengaturan umum, ruang uji, impor dan ekspor bank (JFR-39, 40, 47, 48); JS-20 statistik kelas dan per siswa serta cetak ringkasan (JFR-51, 52, 54); JS-21 musik latar (berkas M-01 `app/jejak-setara/assets/sfx/musik_kelas.wav` sudah Disetujui 21 Nov 2026; JS-21 memutarnya di layar kelas dan menghentikannya saat jeda, hitung mundur, dan jingle akhir; Permintaan C-16). **Rencana v1.1 (25 Nov 2026, menunggu Gerbang 1):** atas permintaan pemilik proyek, v1.1 berisi JS-21, fitur baru JS-23 (peta bermedan), dan JS-18 (Teropong dan Angkot), dan dirilis sebelum uji coba kelas; bantuan gerak, JS-19, dan JS-20 mengikuti jawaban KT-15 (entri "Rencana v1.1" di akhir dokumen ini).
 
 - Pembuatan aset gambar (Sesi C) dan penulisan naskah kejadian (Sesi B) berjalan paralel dengan backlog ini. Selama aset belum "Disetujui", fitur memakai *placeholder* berupa kotak warna palet dengan label kunci aset. *Placeholder* wajib diganti sebelum rilis 1.0.
 - Sebelum Build JS-03, pemilik proyek menyelesaikan langkah 1 dan 3–6 Architecture bagian 18 dengan paket gratis. Langkah 2 (Workers Paid) dikerjakan sebelum JS-15 atau uji coba kelas pertama (bagian "Keputusan server" di bawah). Sesi A mengingatkannya di Plan JS-03 dan Plan JS-15.
@@ -195,16 +198,16 @@ Keputusan pemilik proyek, 21 November 2026 (awal Plan JS-13): sesudah JS-09, Ses
 - Plan JS-15 (dari Build JS-11, 20 Nov 2026): ekspor CSV jawaban untuk 100 pemain × 64 kejadian memakan sekitar 18 ms CPU di mesin agen (rincian dan CSV), di atas batas 10 ms paket gratis; Paket inti 16 (sekitar 4 ms untuk 100 pemain) aman. Ukur ulang di Workers Paid dan pertimbangkan batas jumlah kejadian per ekspor bila perlu. **Ditanggapi di rencana JS-15 (tabel "Catatan Plan JS-15 yang ditanggapi").**
 - Plan berikutnya yang menyentuh dasbor atau uji (dari Build JS-11, 20 Nov 2026): tautan ruang di kartu dasbor "Ruang yang sedang berjalan" (JS-10) setinggi 44 px, di bawah target 48 px yang diperiksa uji JS-04. Uji itu gagal bila semua uji ujung ke ujung dijalankan dalam satu perintah, karena ruang yang ditinggalkan uji lain tampil di dasbor admin. Perbaiki tinggi tautannya, dan tutup ruang uji di akhir setiap uji yang membuatnya. **Dikerjakan di Build JS-09 (21 Nov 2026, P-48 dan P-49):** tautan setinggi 48 px, ruang uji ditutup di `test.afterAll`, dan `konsol.uji.ts` menghitung jumlah akun dari keadaan awal; seluruh uji ujung ke ujung lulus dalam satu perintah.
 - Plan JS-14 (dari Plan JS-09, 20 Nov 2026): efek suara `sfx_kotak` (kotak terambil) dan `sfx_skill` (skill aktif) dari Design System 12 belum ada; JS-09 hanya memakai pita dan pengumuman pembaca layar. **Sejak 21 Nov 2026 ada:** S-02 dan S-03 Disetujui dan masuk kelompok `SUARA` di `manifest.ts` (Sesi C; tanggapan Plan JS-13).
-- Plan JS-18 (dari Plan JS-09, 20 Nov 2026): kotak teropong dan karcis belum ada di `kampung.json` (usulan KT-C14a JS-06). JS-18 meminta Sesi C menambahkannya, lalu membuka `skillAktif` untuk Teropong dan Angkot, yang di JS-09 ditolak `POST /api/ruang`.
-- Plan JS-18 (dari Specify JS-09, 21 Nov 2026): lengkung tombol skill di perangkat sentuh (spesifikasi JS-09 P-34) hanya punya tiga tempat di sekitar tombol Periksa, dan kotak aman panah Kompas (P-26) menyisakan 160 px di kanan. Teropong dan Angkot memerlukan susunan HUD baru yang diukur ulang dengan maket di ketiga ukuran HP, dan daftar skill yang diterima `POST /api/ruang` (`SKILL_P0`) diperluas.
-- Plan JS-18 dan Plan lain yang mengukur HUD (dari Build JS-09, 21 Nov 2026): HP 731 × 411 dengan rasio 2,625 menampilkan dunia skala 6 (731 × 411), bukan 610 × 343. Dunia 610 × 343 tampil di HP 640 × 360 dengan rasio 2,625 dan di HP dengan bilah peramban 915 × 356, dan dunia 640 × 360 di HP 640 × 360 dengan rasio 3. Maket dan uji ukuran HUD memakai keempat pasangan itu (laporan JS-09, Temuan 2).
+- Plan JS-18 (dari Plan JS-09, 20 Nov 2026): kotak teropong dan karcis belum ada di `kampung.json` (usulan KT-C14a JS-06). JS-18 meminta Sesi C menambahkannya, lalu membuka `skillAktif` untuk Teropong dan Angkot, yang di JS-09 ditolak `POST /api/ruang`. **Ditanggapi di rencana v1.1 (PC-2 dan garis besar JS-18).**
+- Plan JS-18 (dari Specify JS-09, 21 Nov 2026): lengkung tombol skill di perangkat sentuh (spesifikasi JS-09 P-34) hanya punya tiga tempat di sekitar tombol Periksa, dan kotak aman panah Kompas (P-26) menyisakan 160 px di kanan. Teropong dan Angkot memerlukan susunan HUD baru yang diukur ulang dengan maket di ketiga ukuran HP, dan daftar skill yang diterima `POST /api/ruang` (`SKILL_P0`) diperluas. **Ditanggapi di rencana v1.1 (percobaan 5 dan usulan 7).**
+- Plan JS-18 dan Plan lain yang mengukur HUD (dari Build JS-09, 21 Nov 2026): HP 731 × 411 dengan rasio 2,625 menampilkan dunia skala 6 (731 × 411), bukan 610 × 343. Dunia 610 × 343 tampil di HP 640 × 360 dengan rasio 2,625 dan di HP dengan bilah peramban 915 × 356, dan dunia 640 × 360 di HP 640 × 360 dengan rasio 3. Maket dan uji ukuran HUD memakai keempat pasangan itu (laporan JS-09, Temuan 2). **Dipakai di percobaan 5 rencana v1.1.**
 - Plan JS-13 (dari Specify JS-09, 21 Nov 2026): `jawaban.petunjuk_dipakai` di D1 baru terisi sejak JS-09. Jawaban dari ruang yang dimainkan sebelum JS-09 di-deploy bernilai 0, jadi statistik pemakaian Petunjuk lintas ruang hanya menghitung ruang sesudah tanggal itu, atau menyebut batas itu di tampilannya. **Tanggal itu (penutupan JS-09):** JS-09 terpasang di lingkungan uji lewat "Jejak: uji" untuk commit `9b0edec` pada 21 Nov 2026. Alur kerja produksi belum ada, jadi batas ini hanya berlaku untuk basis data uji. **Dipakai di rencana JS-13 (usulan 9).**
 - Plan JS-14 (dari Specify JS-09, 21 Nov 2026): titik pemicu `sfx_kotak` adalah `pemberitahuan` `kotak_lari`, `kotak_kompas`, dan `kotak_petunjuk`, dan titik pemicu `sfx_skill` adalah `pribadi` yang memulai masa aktif Lari cepat atau Kompas serta `petunjuk` (spesifikasi JS-09 P-16, P-19, P-24, dan P-28).
 - Plan JS-16 (dari Specify JS-09, 21 Nov 2026; Permintaan A-13 Sesi B): bagian [menyusul] panduan guru tentang skill memakai teks final spesifikasi JS-09: nama skill dan keterangan di dialog Ruang baru (P-7 dan bagian "Teks yang tampil (final)"), kotak bantuan dan batas 2 muatan (P-16), serta Petunjuk yang tidak mengurangi skor (P-31). **Masuk rencana JS-16 (usulan 12).**
 - Plan berikutnya (dari penutupan JS-09, 21 Nov 2026): ZIP `main` sesudah commit `9b0edec` memuat Permintaan C-14, C-15, dan C-16 Sesi C di `Daftar_Aset.md` (Diajukan 21 Nov 2026): format, aturan volume, dan kredit efek suara S-01 sampai S-08; kelompok `SUARA` di `manifest.ts`; dan musik latar layar kelas M-01. Ketiganya meminta perubahan Design System, Architecture, AGENTS, dan catatan JS-21 di dokumen ini, dan ditanggapi di Plan JS-13 bersama pembacaan berkas status Sesi B dan C (AGENTS 4.1). Berkas suaranya sudah ada di `app/jejak-setara/assets/sfx/`, tetapi belum diputar kode game; catatan Plan JS-14 tentang `sfx_kotak` dan `sfx_skill` (dari Plan dan Specify JS-09) dibaca bersama C-15. **Ditanggapi di Plan JS-13 (21 Nov 2026):** ketiganya diterapkan di Design System 12, 14, dan 15, Architecture 3, 11.2, dan 11.3, AGENTS 6 dan 9, serta catatan JS-21 (entri JS-13, bagian "Tanggapan permintaan Sesi B dan C").
 
 - Plan JS-14 (dari Plan JS-13, 21 Nov 2026; Permintaan C-14 dan C-15): efek suara layar pemain diputar dari kelompok `SUARA` di `manifest.ts`, sedangkan layar kelas mengimpor WAV langsung dari `assets/sfx/` (P-35 JS-10). Keras-pelan sudah seimbang di berkasnya, jadi cukup satu pengatur volume (60% di layar kelas, Design System 12). Semua bunyi mulai dan berakhir di sampel 0. Kredit suara di layar "Tentang" memakai kalimat Design System 15. Titik pemicu `sfx_kotak` dan `sfx_skill` ada di catatan Plan JS-14 dari Specify JS-09 di atas. WAV menjadi berkas berhash (C-13), jadi tidak menambah kode layar pemain; yang diukur hanya kode pemutarnya.
-- Plan JS-21 (dari Plan JS-13, 21 Nov 2026; Permintaan C-16): musik latar M-01 `assets/sfx/musik_kelas.wav` sudah Disetujui. Layar kelas mengimpornya langsung, memutarnya berulang di bawah efek, dan menghentikannya saat jeda, hitung mundur, dan jingle akhir (Design System 12). Berkasnya sekitar 0,8 MB dan hanya dimuat layar kelas.
+- Plan JS-21 (dari Plan JS-13, 21 Nov 2026; Permintaan C-16): musik latar M-01 `assets/sfx/musik_kelas.wav` sudah Disetujui. Layar kelas mengimpornya langsung, memutarnya berulang di bawah efek, dan menghentikannya saat jeda, hitung mundur, dan jingle akhir (Design System 12). Berkasnya sekitar 0,8 MB dan hanya dimuat layar kelas. **Masuk rencana rinci JS-21 (rencana v1.1).**
 - Semua fitur server (dari Plan JS-13, 21 Nov 2026): kueri D1 dengan saringan pilihan berbentuk `(?n IS NULL OR kolom = ?n)` membuat SQLite tidak memakai indeks, sehingga seluruh tabel dibaca walaupun saringannya sempit (percobaan Plan JS-13: statistik dengan saringan 30 hari tetap membaca semua baris `jawaban`). Kueri yang membaca banyak baris memilih baris induk lebih dulu lewat indeks, dan jumlah baris yang dibacanya diukur dengan `meta.rows_read` pada data tiruan. Subkueri di daftar kolom dengan `ORDER BY … LIMIT` dihitung untuk semua baris yang cocok sebelum dipotong, jadi pilih dan potong barisnya lebih dulu.
 - Plan JS-15 (dari Plan JS-13, bila usulan 11b JS-13 dipilih): kueri riwayat JS-11 (`GET /api/ruang/riwayat`) menghitung jumlah pemain dan rata-rata skor untuk semua ruang yang cocok sebelum dipotong 50; pada data tiruan setahun sekitar 100 ribu baris per halaman. Perbaiki dengan memilih dan memotong ruang lebih dulu. **Ditanggapi di rencana JS-15 (tabel "Catatan Plan JS-15 yang ditanggapi").**
 - Semua fitur konsol (dari Plan JS-13, 21 Nov 2026): teks pembaca layar (`.js-sr`, posisi mutlak) di dalam tabel yang digulir menyamping bisa meluapkan seluruh halaman bila wadah gulungnya tidak berposisi. Maket Plan JS-13 di 1024 × 768 meluap 160 px sampai wadahnya diberi `position: relative`. Periksa pola ini di tabel lain yang memuat `.js-sr`.
@@ -235,6 +238,9 @@ Keputusan pemilik proyek, 21 November 2026 (awal Plan JS-13): sesudah JS-09, Ses
 - Test JS-16b (dari Test JS-16a, 24 Nov 2026): jalankan ulang `skill.uji.ts` utuh di awal Test (`:405` gagal di pemeriksaan kinerja mesin agen, juga di kode asli; `:970` dan `:1065` bergantung padanya karena mode serial), dan selidiki `gabung.uji.ts:130` "ruang penuh dan mode nomor absen", yang peka waktu: saat gagal, pemain ketiga masuk lobi berisi 2 pemain. JS-16b mengubah alur masuk (kode masuk ulang), jadi uji ini wajib stabil di sana. Playwright di mesin agen memakai `JEJAK_CHROMIUM` (Chromium 1243).
 - Plan lanjutan JS-16b atau perbaikan alur kerja (dari penerimaan JS-16a, 25 Nov 2026): pemilik proyek sempat mencoba masuk ke konsol produksi sebelum "Jejak: admin awal" dijalankan dengan lingkungan produksi (3 percobaan gagal). Pertimbangkan pilihan `lingkungan` tanpa nilai bawaan, dan satu kalimat di ringkasan "Jejak: produksi" yang mengingatkan langkah admin awal produksi.
 - Plan lanjutan JS-16c (dari Test JS-16b, 25 Nov 2026): panduan guru menjelaskan kode QR di lobi (tombol "Perbesar QR" atau `Q` untuk siswa yang duduk jauh) dan kode masuk ulang (tombol di halaman detail ruang, berlaku 10 menit dan sekali pakai, hanya tampil di laptop; HP lama berhenti sendiri). Tangkapan layar panduan memakai huruf VT323. Penyimpangan 1 JS-16b diterima, jadi ukuran teks 0,64 tetap dipakai.
+
+- Specify JS-21 (dari Plan v1.1, 25 Nov 2026): Architecture 6.2 masih menulis `PROTOKOL_VERSI` 4 dan amplop `{ "v": 4, … }`, padahal `inti/versi.ts` bernilai 5 sejak JS-16b. Diperbaiki bersama dokumen JS-21.
+- Plan lanjutan JS-16d (dari Plan v1.1, 25 Nov 2026): panduan guru memuat fitur v1.1 (peta bermedan, Teropong, Angkot, dan tombol Musik), dan tangkapan layarnya diambil sesudah rilis v1.1.
 
 ## JS-01 — Kerangka
 
@@ -2161,3 +2167,189 @@ Dikerjakan 25 November 2026 pada hasil `build:pages` yang disajikan di bawah `/r
 - Produksi, dibaca lewat konektor Cloudflare hanya sebagai jumlah: Worker `jejak-setara` diperbarui 25 Nov 2026 pukul 11.26 UTC (rilis v1.0); empat ruang uji pemeriksaan sesudah rilis sudah ditutup; akun admin sudah Peninjau.
 - Belum, sebelum uji coba kelas: verifikasi Bagian A. Saat dibaca, 43 rujukan masih berstatus belum dan 40 kejadian masih menunggu tinjauan.
 - Berikutnya: uji coba kelas oleh pemilik proyek, lalu Plan lanjutan JS-16d (panduan guru, tautan galeri, catatan hasil uji coba, dan sisa uji Sehari Setara).
+
+## Rencana v1.1 — JS-21, JS-23, dan JS-18 (musik latar, peta bermedan, Teropong dan Angkot)
+
+- Status: **Direncanakan (25 Nov 2026)**, menunggu Gerbang 1. Permintaan pemilik proyek (25 Nov 2026): rilis v1.1 sebelum uji coba kelas, berisi (1) peta bermedan di peta mini (tertutup dan peta besar) serta peta kelas, dengan penanda pemain, halte, dan arah tetap tampil dan kejadian yang belum terlihat tetap tersembunyi; (2) Teropong dan Angkot (JS-18) dengan kotaknya di peta, HUD yang memuat lima skill di ketiga ukuran HP, dan pilihan skill per ruang di konsol; (3) musik latar M-01 di layar kelas (JS-21): berulang, berhenti saat jeda, hitung mundur, dan jingle akhir, serta bisa dimatikan. JS-16d (panduan guru dan tautan galeri) ditunda sampai fitur ini selesai, dan uji coba kelas sesudahnya. Dikerjakan dalam mode ZIP dari ZIP `main` 25 Nov 2026. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Seperti JS-16, gerbang ini menyetujui pemecahan, urutan, rencana rinci JS-21, dan permintaan PC-1 serta PC-2 untuk Sesi C; JS-23 dan JS-18 mendapat Plan lanjutan singkat saat dimulai (AGENTS 4.1: satu fitur sekali rencana). Nomor JS-23 belum pernah dipakai: usulan 1b JS-14 yang menyebutnya untuk nama pemain tidak dipilih.
+- Memenuhi: PRD 17 (versi 1.1, diubah menurut KT-15); JFR-11 dan JFR-28 (peta mini dan peta kelas kini bermedan); JFR-25 (Teropong dan Angkot); JFR-26 (skill per ruang, kini lima); PRD 8.5 dan 9 (kotak teropong di Z6, karcis di halte); Design System 3.3, 3.4, 3.6, 9, 10, 12, 13, dan 14; Architecture 6.3, 8.5, 9, 10.9, 11.2, dan 11.3; Permintaan C-16; serta catatan Plan JS-18 dan JS-21.
+- Bergantung pada: JS-07, JS-09, JS-10, dan JS-14 (peta mini, peta besar, skill, peta kelas, dan suara layar kelas), semuanya Selesai; JS-16c Selesai (produksi v1.0). JS-23 menunggu PC-1 Disetujui, dan JS-18 menunggu JS-23 Selesai, PC-2 Disetujui, serta jawaban KT-16 sampai KT-18.
+
+### Pemeriksaan awal (25 Nov 2026)
+
+- ZIP sesuai keadaan yang disebut pemilik proyek: tabel status mencatat JS-16a, JS-16b, dan JS-16c Selesai serta JS-16d belum, dan `rilis/v1.0.md` ada.
+- Folder `docs/jejak-setara/audit/` tidak ada, jadi tidak ada temuan audit.
+- `naskah/STATUS.md` (23 Nov 2026) dan `Daftar_Aset.md` (versi 1.3, 23 Nov 2026) tidak memuat permintaan baru (tabel tanggapan di bawah).
+- `install --frozen-lockfile` berhasil dalam 20 detik, dan `build:pages` dasar menghasilkan 178 berkas.
+
+### Keadaan sekarang
+
+- **Peta mini** (`pemain/PetaMini.tsx`): 112 × 75 px berisi seluruh kampung pada 0,7 px per ubin, dengan delapan zona berwarna dan garis batas `ink`, halte, kejadian yang sudah terlihat, dan panah diri.
+- **Peta besar** (`pemain/PetaBesar.tsx`): skala bulat terbesar yang muat, paling kecil 2 px per ubin (HP 731 × 411: 3; dunia 610 × 343 dan 640 × 360: 2; laptop 960 × 540: 4; 1280 × 720: 6), dengan zona berwarna, label zona, halte, kejadian yang sudah terlihat, dan "Kamu di sini".
+- **Peta kelas** (`admin/kelas/PetaKelas.tsx`): SVG 160 × 100 satuan berisi kotak zona 55% dengan ikon zona dan titik pemain 2,5 ubin berwarna tas. Konsol tidak memuat berkas peta (usulan 7a JS-10).
+- **Skill:** `SKILL` di `inti/aturan.ts` sudah memuat Teropong (muatan 1, 30 detik) dan Angkot (muatan 1), dan `SKILL_KOTAK` memetakan kotak `teropong` dan `karcis`. Pembuatan ruang hanya menerima `SKILL_P0`, `pribadi` selalu mengirim muatan Teropong dan Angkot 0, dan `pakai_skill` hanya membawa `skill` dan `kejadianId`.
+- **Peta:** `kampung.json` memuat 24 kotak tanpa teropong dan karcis, serta empat halte: dua di Z3, satu di Z7, dan satu di Z8. Tidak ada halte di Z1, Z2, Z4, Z5, dan Z6, dan sel setiap halte bebas. Medan terdiri dari rumput, setapak, paving, semen, pasir, aspal, air, dan air dalam; tidak ada sawah.
+- **Aset:** peti T-07 dan T-08 serta ikon I-04 dan I-05 (teropong dan karcis) Disetujui sejak 6 Nov 2026, dan M-01 `musik_kelas.wav` sejak 21 Nov 2026.
+- **Suara layar kelas** (`admin/kelas/suara-kelas.ts`): tiga efek, satu pengatur volume 60%, konteks dibuat pada ketukan pertama, dan pilihan suara di `sessionStorage`. Musik belum diputar.
+- **Protokol:** `PROTOKOL_VERSI` 5 (`inti/versi.ts`). Architecture 6.2 masih menulis versi 4.
+
+### Hasil percobaan risiko
+
+Dikerjakan 25 November 2026 di luar repositori, pada salinan ZIP `main` dengan dependensi terpasang dan Chromium 1243.
+
+1. **Gambar medan.** Pratinjau Sesi C `preview/peta_siang.png` (2.560 × 1.600 px, 29 warna, semuanya warna palet) dikecilkan dengan warna terbanyak per blok. Hasilnya 1 px per ubin 160 × 100 (20 warna, PNG palet 1.225 B), 2 px per ubin 320 × 200 (24 warna, 3.260 B), dan 4 px per ubin 640 × 400 (29 warna, 9.572 B), bertiga sekitar 14 KB. Aset layar pemain sekarang 233,46 KB dari 2 MB.
+2. **Skala tampil.** Peta besar 2–6 px CSS per ubin (keadaan sekarang). Peta kelas, diukur dengan `jejak.css` dan `kelas.css` asli di Chromium: 508 × 319 px (3,18 px per ubin) di 1024 × 768, 634 × 398 px (3,96) di 1280 × 720, dan 950 × 597 px (5,94) di 1920 × 1080. Peta mini tertutup 0,7 px CSS per ubin, atau sekitar 1,8–2,1 piksel perangkat di HP (rasio 2,625–3) dan 0,7 di laptop rasio 1.
+3. **Ketajaman di layar kelas.** Gambar 4 px per ubin di elemen `<image>` SVG dengan `image-rendering: pixelated` tetap 29 warna (tajam) di 1024 × 768 dan 1920 × 1080. Tanpa aturan itu, peramban menghaluskannya menjadi 4.853 dan 10.707 warna (kabur).
+4. **Maket peta** (di atas tangkapan layar uji JS-09, dengan huruf lama). Peta mini seluruh kampung dengan gambar 2 px per ubin terbaca di HP: jalan, laut, sungai, sekolah, pasar, dan atap rumah. Di laptop rasio 1 rinciannya berkurang, tetapi jalan utama dan laut tetap terbaca. Jendela sekitar 56 × 37 ubin yang mengikuti pemain pada 2 px per ubin lebih rinci, tetapi kejadian di luar jendela tidak tampil. Di peta kelas, titik pemain 2,5 ubin terlihat, tetapi kurang menonjol di atas atap berwarna (usulan 6).
+5. **HUD lima tombol** (maket di atas tangkapan layar JS-09: HP 731 × 411, HP 915 × 356 dengan dunia 610 × 343, dan HP 640 × 360). Lengkung tiga tombol tetap di tempatnya, ditambah Teropong dan Angkot di baris bawah kiri Petunjuk (`right` 158 dan 216 px, `bottom` 24 px). Jarak antartombol sedikitnya 10 px, ke Periksa sedikitnya 20 px, dan ke peta mini sedikitnya 80 px, sama dengan JS-09. Tombol paling kiri berawal di lebar dunia dikurangi 264 px (346, 376, dan 467 px), jadi tetap di separuh kanan, tempat joystick tidak muncul. Kotak aman panah Kompas (P-26 JS-09) perlu dihitung ulang, karena baris bawah menjangkau 264 px dari kanan, lebih jauh dari batas kanan 160 px sekarang. Lengkung kedua di luar lengkung pertama hanya berjarak 32 px dari peta mini di dunia 610 × 343. Di laptop, kolom lima tombol berakhir 424 px dari atas pada 1280 × 720, jauh dari peta mini.
+6. **Musik M-01.** 846.764 B (0,81 MB, batas 1 MB), mono 16 bit 11.025 Hz, 38,4 detik. Sampel pertama dan terakhir 0, puncak 6.172 (sekitar −14,5 dBFS), dan RMS −25,4 dBFS. Sesudah diurai di konteks 48 kHz, musik memakai sekitar 7,4 MB memori laptop guru. Hanya layar kelas yang memuatnya.
+7. **Ukuran dasar** (`build:jejak` dan `anggaran.mjs`): kode layar pemain 140,52 KB, konsol 136,98 KB, potongan layar kelas 10,25 KB, aset layar pemain 233,46 KB (251 berkas), dan kedua berkas peta 13,49 KB gzip.
+8. **Galeri.** `build:pages` sesudah entri ini: 178 berkas identik byte dengan build dasar.
+
+### Usulan
+
+1. **Pemecahan dan urutan.**
+   - (a, saran) Tiga fitur berurutan: **JS-21** musik latar (S), lalu **JS-23** peta bermedan (M, fitur baru), lalu **JS-18** Teropong dan Angkot (L). JS-21 didahulukan karena asetnya sudah Disetujui dan tidak menunggu Sesi C, sehingga Sesi C mengerjakan PC-1 dan PC-2 bersamaan. JS-23 mendahului JS-18, karena Teropong tampil di peta mini dan Angkot memilih halte di peta besar, keduanya di atas peta yang baru.
+   - (b) Satu fitur besar: satu gerbang, tetapi terlalu luas untuk diuji, dan musik baru bisa dicoba sesudah semuanya selesai.
+   - (c) JS-23 lebih dulu, mengikuti urutan permintaan: Build-nya menunggu gambar Sesi C.
+2. **Rilis.**
+   - (a, saran) Satu rilis v1.1 sesudah ketiganya Selesai dan dicoba di lingkungan uji (bagian "Rencana rilis v1.1").
+   - (b) v1.1 sesudah JS-21 dan JS-23, lalu v1.2 untuk JS-18: peta bermedan lebih cepat sampai produksi, tetapi dua kali rilis di luar jam pelajaran.
+3. **Peta mini tertutup** (JS-23; menentukan PC-1).
+   - (a, saran) Seluruh kampung seperti sekarang, kini dengan medan: gambar 2 px per ubin di layar berasio 2 ke atas dan 1 px per ubin di bawahnya, digambar tanpa penghalusan. Semua kejadian yang pernah terlihat tetap tampak sekilas (JFR-11).
+   - (b) Jendela sekitar 56 × 37 ubin yang mengikuti pemain, 2 px CSS per ubin: lebih rinci, tetapi kejadian di luar jendela hanya terlihat di peta besar.
+4. **Masa di gambar medan** (PC-1).
+   - (a, saran) Satu gambar masa siang untuk semua masa. Peta dibaca sebagai denah, dan air sore yang jingga (`SORE3`) tidak membingungkan di peta kecil.
+   - (b) Tiga masa mengikuti dunia: sekitar tiga kali ukurannya, masih di bawah 50 KB.
+5. **Ukuran gambar medan** (PC-1).
+   - (a, saran) Tiga gambar, 1, 2, dan 4 px per ubin, dari satu kode Sesi C, agar setiap tampilan memakai gambar yang paling dekat ukurannya: peta mini 1 atau 2, peta besar dan peta kelas 4.
+   - (b) Satu gambar 4 px per ubin yang dikecilkan peramban: lebih sedikit berkas, tetapi garis tipis hilang di peta mini laptop.
+6. **Titik pemain di peta kelas** (JS-23).
+   - (a, saran) Titik 3 ubin bergaris ganda (putih di dalam, `ink` di luar) di atas medan penuh warna, dengan ikon zona tetap kecil di sudut zona.
+   - (b) Medan diredupkan agar titik 2,5 ubin menonjol: warna peta tampak pucat di proyektor.
+   - (c) Titik seperti sekarang.
+7. **HUD lima tombol** (JS-18).
+   - (a, saran) Lengkung tiga tombol tetap, Teropong dan Angkot di baris bawah kiri Petunjuk (percobaan 5); di laptop kolom lima tombol dengan tanda `1` sampai `5`.
+   - (b) Lengkung kedua di luar lengkung pertama: hanya 32 px dari peta mini di dunia 610 × 343.
+   - (c) Angkot hanya muncul saat pemain dekat halte: HUD tetap empat tombol, tetapi isinya berubah-ubah.
+8. **Protokol** (JS-18; JS-21 dan JS-23 tanpa perubahan protokol).
+   - (a, saran) `pakai_skill` mendapat `halteId` pilihan untuk Angkot, `pemberitahuan` mendapat kode untuk kotak teropong, kotak karcis, dan Angkot, lalu `PROTOKOL_VERSI` naik dari 5 ke 6 agar semua HP memuat HUD baru. Pemain yang pindah halte menerima `koreksi`, anggaran jarak geraknya diatur ulang, dan pemain lain serta layar kelas memindahkan avatar dan titiknya seketika, tanpa meluncur melintasi peta.
+   - (b) Versi tetap 5: HP yang tidak dimuat ulang tidak menampilkan kedua tombol baru.
+
+### Keputusan terbuka yang perlu dijawab
+
+- **KT-15 Lingkup v1.1 dan bantuan gerak (JFR-13).** Backlog menulis JS-18 sebagai "Teropong, Angkot, dan bantuan gerak", sedangkan permintaan pemilik proyek hanya menyebut Teropong dan Angkot. (a, saran) v1.1 berisi JS-21, JS-23, dan JS-18 (Teropong dan Angkot). Bantuan gerak dan daftar "Kejadian terdekat" pindah ke fitur baru JS-24 sesudah uji coba kelas, JS-19 dan JS-20 menjadi v1.2, dan PRD 17 diubah. (b) Bantuan gerak ikut JS-18: JS-18 menjadi sangat besar, dan v1.1 lebih lambat.
+- **KT-16 Aturan Teropong.** PRD 8.5: "memperlihatkan kejadian dalam radius 12 ubin di peta mini selama 30 detik". (a, saran) Selama 30 detik, setiap titik aktif yang belum selesai dalam radius 12 ubin dari posisi pemain saat itu terungkap, lalu tetap tercatat seperti kejadian yang pernah terlihat; radiusnya ikut berpindah bersama pemain, dan lingkarannya tampil di peta mini dan peta besar selama aktif. (b) Sekali, dari tempat Teropong dipakai, dan tetap tercatat. (c) Sekali, lalu penandanya hilang lagi sesudah 30 detik bila kejadian itu belum benar-benar terlihat: perlu pesan baru dan keadaan sementara di peta.
+- **KT-17 Aturan Angkot.** PRD 8.5 dan JFR-25: "pindah ke halte lain yang dipilih", "jalan pintas antarhalte". (a, saran) Hanya dari halte: pemain berdiri paling jauh 1,5 ubin dari titik halte, dan tombol Angkot menyala seperti Periksa saat dekat halte. Tujuan dipilih di peta besar mode "Pilih halte tujuan" (tombol bulat 48 px bernomor, ditambah daftar untuk papan ketik dan pembaca layar), lalu pemain langsung pindah ke titik halte tujuan tanpa animasi, dan karcis terpakai. Angkot tidak bisa dipakai selama dialog; Lari cepat dan Kompas yang aktif tetap berjalan. (b) Dari mana saja ke halte mana pun: lebih kuat, tetapi menyimpang dari "antarhalte".
+- **KT-18 Halte di sisi barat.** (a, saran) Tetap empat halte untuk v1.1, sehingga peta hanya berubah di kotak; ditinjau lagi sesudah uji coba kelas. (b) Sesi C menambah halte di sisi barat (Z1, Z5, atau Z6 bila ada jalan aspal): Angkot lebih berguna, tetapi peta, uji peta, dan gambar medan berubah lagi (PC-3).
+
+### Rencana rinci JS-21 — Musik latar layar kelas
+
+- Status: Direncanakan (25 Nov 2026).
+- Memenuhi: PRD 17 (musik latar, v1.1); Design System 12 (M-01 diputar pelan di bawah efek, berhenti saat jeda, hitung mundur, dan jingle akhir); Architecture 11.2 dan 11.3 (layar kelas mengimpor WAV langsung, batas 1 MB); Permintaan C-16; catatan Plan JS-21.
+- Bergantung pada: JS-14 (Selesai; suara layar kelas) dan M-01 (Disetujui 21 Nov 2026).
+- File yang dibuat/diubah (dipastikan di Specify):
+  - Konsol: `admin/kelas/suara-kelas.ts` (musik diunduh bersama efek, diputar berulang, dihentikan dengan turun pelan, dan dilanjutkan dari posisi terakhir), `admin/kelas/LayarKelas.tsx` (kapan musik diputar, tombol Musik, dan pintasannya), `teks-konsol.ts`, dan `styles/kelas.css`.
+  - Uji: uji suara layar kelas di `app/jejak-setara/__tests__/` dengan konteks tiruan (keadaan musik di setiap status, putar ulang, berhenti, lanjut, dan pilihan tersimpan); uji ujung ke ujung di `e2e/jejak-setara/` (tombol Musik dan pintasannya, pilihan tersimpan di tab, dan layar pemain tidak mengunduh `musik_kelas.wav`); `scripts/jejak-setara/anggaran.mjs` (baris musik latar ≤ 1 MB, karena berkasnya kini ikut terbangun).
+  - Dokumen: `specs/JS-21-musik.md` dan `tests/JS-21-hasil.md`; Design System 3.6, 12, dan 13; Architecture 6.2 (versi 5), 10.9, dan 11.3; PRD 17, 20, dan 21; AGENTS 5 (JS-23, dan JS-24 bila KT-15 a); dan dokumen ini.
+  - Tidak disentuh: server, protokol, layar pemain, `package.json`, alur kerja, `wrangler.jsonc`, berkas Sesi B dan C, Sehari Setara, dan galeri.
+- Migrasi D1: tidak ada.
+- Pesan protokol baru/berubah: tidak ada (`PROTOKOL_VERSI` tetap 5).
+- Aset yang dibutuhkan: M-01 `assets/sfx/musik_kelas.wav` (Disetujui). Tombol Musik bertulisan, tanpa ikon baru.
+- Hasil percobaan risiko: percobaan 6 dan 7 di atas. Potongan layar kelas diperkirakan naik kurang dari 1 KB gzip; kode layar pemain dan konsol awal tidak berubah.
+- Usulan:
+  1. **Kapan musik diputar.** (a, saran) Di lobi dan selama ronde (`main`); berhenti saat hitung mundur, jeda, dan sejak ronde selesai (jingle, podium, dan pembahasan), agar guru bisa bicara saat pembahasan. (b) Hanya selama ronde. (c) Juga di podium sesudah jingle.
+  2. **Sesudah jeda.** (a, saran) Musik lanjut dari posisi terakhir. (b) Mulai dari awal.
+  3. **Mematikan musik.** (a, saran) Tombol bertulisan "Musik" setinggi 48 px di kepala layar kelas, di kiri tombol suara, dengan pintasan `U`; pilihannya disimpan di `sessionStorage` tab seperti suara. Tombol suara dan `M` tetap mematikan semua bunyi, termasuk musik. (b) Cukup tombol suara dan `M`, sesuai "satu pengatur volume" di Design System 12. (c) Musik bawaan mati, dinyalakan guru.
+  4. **Volume.** (a, saran) Pengatur 60% yang sama; keras terdengar musik sudah sekitar −24 LUFS, lebih pelan daripada efek. (b) Musik separuhnya (30%).
+  5. **Unduhan.** (a, saran) Diunduh bersama ketiga efek saat konteks audio dibuat (ketukan pertama guru, biasanya di lobi), sekali per tab. (b) Diunduh saat pertama kali dibutuhkan.
+  6. **Berhenti tanpa letup.** (a, saran) Musik punya pengatur volume sendiri di bawah pengatur 60%, yang turun ke nol dalam sekitar 80 ms sebelum musik berhenti. (b) Langsung berhenti.
+  7. **Ukuran.** (a, saran) Batas kriteria penerimaan: potongan layar kelas naik paling banyak 1 KB gzip, sedangkan kode layar pemain dan konsol awal tidak berubah.
+  8. **Uji.** (a, saran) Uji unit dan ujung ke ujung di atas, ditambah pemeriksaan manual di laptop guru dan proyektor (musik berulang mulus; berhenti saat jeda, hitung mundur, dan jingle; tombol Musik dan `U`), karena Chromium di mesin agen memutar audio tanpa ketukan. `sim:beban` tidak wajib, karena server dan protokol tidak berubah.
+- Keputusan terbuka yang perlu dijawab: KT-15 (lingkup v1.1). Rencana JS-21 tidak menunggu KT-16 sampai KT-18.
+- Dependensi baru: tidak ada.
+- Risiko: peramban menahan bunyi sampai ada ketukan (sudah ditangani tanda "Klik untuk menyalakan suara" JS-14); musik mengganggu saat guru menjelaskan (usulan 1 dan 3); dan memori sekitar 7,4 MB di laptop guru sesudah musik diurai.
+- Ukuran: S.
+
+### Garis besar JS-23 — Peta bermedan (Plan lanjutan saat dimulai)
+
+- Memenuhi: JFR-11 dan JFR-28 (medan sebenarnya); Design System 3.3, 3.6, 10, dan 14; Architecture 11.2 dan 11.3.
+- Bergantung pada: JS-21 Selesai dan PC-1 Disetujui.
+- Perkiraan isi: `PetaMini.tsx` dan `PetaBesar.tsx` menggambar gambar medan di bawah halte, kejadian yang sudah terlihat, label zona (peta besar), dan panah diri; `PetaKelas.tsx` memakai gambar 4 px per ubin dengan `image-rendering: pixelated` dan titik pemain menurut usulan 6; teks dan gaya; serta uji unit, ujung ke ujung, dan tangkapan layar empat ukuran. Kejadian yang belum terlihat tetap tidak digambar, dan peta kelas tetap tanpa letak kejadian (JFR-28). Tanpa migrasi, tanpa perubahan protokol, dan tanpa perubahan server.
+- Ukuran: M.
+
+### Garis besar JS-18 — Teropong dan Angkot (Plan lanjutan saat dimulai)
+
+- Memenuhi: JFR-25 dan JFR-26 (lima skill); PRD 8.5 dan 9; Design System 3.3, 3.4, 9, 10, dan 13; Architecture 6.3, 8.2, 8.5, dan 12.1.
+- Bergantung pada: JS-23 Selesai, PC-2 Disetujui, dan jawaban KT-16 sampai KT-18.
+- Perkiraan isi: aturan murni di `inti/aturan.ts` dan `server/jejak-setara/src/ruang/skill-ruang.ts` (Teropong, Angkot, dan jangkauan halte); inti ruang (kotak baru, `pakai_skill` dengan halte, pengungkapan Teropong di putaran 100 ms, dan pindah halte lewat `koreksi`); `inti/ruang.ts` dan dialog Ruang baru (lima skill); HUD (usulan 7); peta besar mode pilih halte dan lingkaran Teropong; teks dan bunyi (`sfx_kotak`, `sfx_skill`); daftar skill aktif di detail dan hasil ruang; `simulasi-beban.mjs`; serta uji unit, server, ujung ke ujung, dan `sim:beban` (wajib, karena protokol dan inti ruang berubah). Protokol menurut usulan 8. Tanpa migrasi D1.
+- Ukuran: L.
+
+### Permintaan untuk Sesi C (diteruskan pemilik proyek sesudah Gerbang 1)
+
+Sesi C menjawab di `Daftar_Aset.md`. Angka di bawah memakai pilihan saran; bila pemilik proyek memilih lain di usulan 3 sampai 5, Sesi A memperbarui permintaan ini di ZIP berikutnya.
+
+**PC-1 Gambar medan peta (untuk JS-23).**
+
+- Berkas baru di folder baru `app/jejak-setara/assets/peta/`: `peta_medan_1.png` (160 × 100 px, 1 px per ubin), `peta_medan_2.png` (320 × 200 px, 2 px per ubin), dan `peta_medan_4.png` (640 × 400 px, 4 px per ubin). Pola nama baru `peta_medan_{n}.png`, dengan n piksel per ubin.
+- Isi: kampung masa siang seperti di dunia: bahan tanah (rumput, setapak, paving, semen, pasir, aspal, air, dan air dalam), marka bila terbaca, bangunan dan objek beserta bagian atasnya (atap dan tajuk pohon), pagar, dan jembatan, dengan gerbang lobi dalam keadaan terbuka.
+- Tanpa: tokoh, avatar, penanda, kotak bantuan, titik kejadian atau tanda tempatnya, tulisan, dan garis pindai.
+- Letak: ubin (x, y) tepat menempati piksel x·n sampai (x+1)·n − 1 dan y·n sampai (y+1)·n − 1, agar antarmuka menaruh halte, kejadian, panah, dan titik pemain dengan rumus yang sama.
+- Warna: hanya 36 warna palet, tanpa piksel semi-transparan.
+- Keterbacaan, diperiksa di pratinjau: jalan aspal dan gang tetap bersambung di ketiga ukuran; laut, sungai, dan pantai terbaca; bangunan penanda zona tampak sebagai blok atap berwarna khasnya; dan pohon tampak bila muat.
+- Anggaran: `peta_medan_1.png` ≤ 4 KB, `peta_medan_2.png` ≤ 8 KB, dan `peta_medan_4.png` ≤ 20 KB, bertiga ≤ 32 KB (pengecilan sederhana di percobaan 1: 1,2 KB, 3,3 KB, dan 9,6 KB).
+- Dibangun dari sumber peta oleh `peta:build` atau `assets:build:jejak`, dengan pemeriksaan yang gagal bila sumber peta berubah tanpa membangun ulang ketiga gambar (misalnya memakai sidik `sumber` yang sama dengan `kampung_gambar.json`).
+- Manifest: kelompok baru `PETA` di `manifest.ts`, misalnya `export const PETA = { medan1: url, medan2: url, medan4: url }`; bentuk akhirnya disepakati di Plan lanjutan JS-23. Layar kelas mengimpor `peta_medan_4.png` langsung, karena konsol tidak mengimpor manifest (P-35 JS-10).
+- Kredit di `CREDITS.md`, dan pratinjau `preview/peta_medan.png`: ketiga gambar diperbesar, tiruan peta mini 112 × 75 px pada rasio 1 dan 2,625, peta besar 3 px per ubin, dan peta kelas 1024 × 768.
+
+**PC-2 Kotak teropong dan karcis di `kampung.json` (untuk JS-18).**
+
+- `teropong`: tiga kotak di Z6, tersebar di bagian barat, tengah, dan timur zona itu (Z6 selebar 100 ubin), seperti pola tiga kotak per jenis per zona.
+- `karcis`: satu kotak di dekat setiap halte (empat kotak), 1–3 ubin dari titik halte, di sel bebas, bukan di titik halte itu sendiri, di luar ruang kosong 3 × 3 titik kejadian, dan sedikitnya 2 ubin dari kotak lain.
+- Semua lolos uji peta yang ada (terjangkau dari titik muncul dan jalan tetap selebar 2 ubin), dan kedua berkas peta tetap ≤ 60 KB gzip. Gambar kotak dan ikonnya sudah Disetujui (T-07, T-08, I-04, dan I-05), jadi tidak ada aset gambar baru.
+- Bila PC-1 sudah ada, gambar medan ikut dibangun ulang dengan perintah yang sama, walaupun kotak tidak digambar di medan.
+
+**PC-3 Halte di sisi barat (hanya bila KT-18 b).** Sesi C menilai jalan aspal di Z1, Z5, dan Z6, lalu mengusulkan letak halte baru beserta objek halte dan rambunya.
+
+**Status lama.** C-14, C-15, C-16, dan C-18 sudah diterapkan Sesi A (Plan JS-13 dan Gerbang 1 JS-15), tetapi `Daftar_Aset.md` masih menulis "Diajukan"; Sesi C bisa mengubahnya menjadi Diterapkan.
+
+### Rencana rilis v1.1
+
+1. JS-21, JS-23, dan JS-18 masing-masing melewati Specify, Build, dan Test, lalu di-push. "Jejak: uji" memasang setiap bagian di lingkungan uji, dan pemilik proyek mencobanya di sana.
+2. Sesudah JS-18 Selesai, Sesi A menulis `rilis/v1.1.md` (templat 12.4): fitur, migrasi D1 (tidak ada), protokol (5 ke 6 bila usulan 8a), pemeriksaan sesudah rilis, risiko, dan cara kembali.
+3. Pemilik proyek membalas `Rilis: v1.1`, lalu menjalankan "Jejak: produksi" dengan nomor `v1.1` di luar jam pelajaran (sore sesudah sekolah, malam, atau akhir pekan). Alur kerja menolak berjalan selama ada ruang produksi yang belum ditutup, dan kotak darurat tidak dicentang.
+4. Sesudah hijau: `/api/sehat` produksi menjawab protokol 6; satu ruang uji dengan dua HP untuk Teropong, Angkot, peta bermedan, dan musik di layar kelas; lalu ruang ditutup. HP, layar kelas, dan konsol yang masih terbuka dengan versi lama diminta memuat ulang.
+5. Cara kembali: **Workers & Pages → jejak-setara → Deployments**, pilih versi v1.0, lalu **Rollback**. D1 tidak berubah, jadi data tidak perlu dipulihkan; protokol kembali ke 5, dan klien memuat ulang sekali lagi.
+6. Sesudah v1.1: verifikasi Bagian A di konsol produksi bila belum selesai, Plan lanjutan JS-16d (panduan guru yang memuat peta bermedan, Teropong, Angkot, dan tombol Musik, serta tautan galeri), lalu uji coba kelas.
+
+### Risiko
+
+1. **Menunggu Sesi C.** Build JS-23 dan JS-18 menunggu PC-1 dan PC-2 Disetujui. Penanganannya: permintaan diteruskan sesudah Gerbang 1, dan JS-21 dibangun sambil menunggu.
+2. **Protokol 6.** Klien lama diminta memuat ulang. Penanganannya: rilis di luar jam pelajaran, dan alur kerja menahan rilis selama ada ruang produksi terbuka.
+3. **Pindah halte dan pemeriksaan gerak.** Server berwenang atas posisi baru, anggaran jarak diatur ulang, dan avatar di layar lain berpindah tanpa meluncur. Diuji di server, ujung ke ujung, dan `sim:beban`.
+4. **Teropong membuka letak kejadian.** Sesuai Architecture 12.1 (lokasi dikirim lewat skill), dibatasi radius 12 ubin dan muatan 1.
+5. **HUD padat di HP kecil.** Maket menunjukkan jarak yang aman; tangkapan layar Test memakai tiga ukuran HP dan laptop, dan kotak aman panah Kompas disesuaikan.
+6. **Peta kelas dari 8 m.** Titik pemain di atas medan diperiksa saat uji coba kelas (usulan 6).
+7. **Musik mengganggu.** Bisa dimatikan sendiri tanpa mematikan efek (usulan 3a JS-21) dan berhenti sejak ronde selesai.
+8. **Ukuran kode.** Layar pemain 140,52 KB dari 200 KB. JS-18 diperkirakan +3 sampai +5 KB (pembanding JS-09: +4,64 KB), dan JS-23 sekitar +1 KB.
+9. **Galeri.** Setiap ZIP dicek dengan `build:pages`, dan ke-178 berkas harus identik byte.
+
+### Tanggapan permintaan Sesi B dan C (Plan v1.1, 25 Nov 2026)
+
+Dibaca dari ZIP `main` 25 Nov 2026: `naskah/STATUS.md` (23 Nov 2026) dan `Daftar_Aset.md` (versi 1.3, 23 Nov 2026).
+
+| Kode | Permintaan singkat | Tanggapan Sesi A | Perubahan |
+|---|---|---|---|
+| A-1 sampai A-18 (Sesi B) | Berbagai permintaan sampai 23 Nov 2026 | Semuanya sudah diterapkan; tidak ada A-19 | Tidak ada |
+| C-14, C-15, C-16, dan C-18 (Sesi C) | Dokumen efek suara, musik latar, dan `atas_tambahan.py` | Sudah diterapkan (Plan JS-13 dan Gerbang 1 JS-15), tetapi `Daftar_Aset.md` masih menulis "Diajukan". C-16 kini dipakai JS-21 | Tidak ada; Sesi C bisa mengubah statusnya |
+
+### Catatan Plan yang ditanggapi
+
+| Catatan di "Catatan untuk Plan berikutnya" | Tanggapan |
+|---|---|
+| Plan JS-18 (dari Plan JS-09): kotak teropong dan karcis belum ada di `kampung.json`, dan `skillAktif` dibuka untuk keduanya | PC-2 dan garis besar JS-18 |
+| Plan JS-18 (dari Specify JS-09): tiga tempat di lengkung, kotak aman panah Kompas, dan `SKILL_P0` | Percobaan 5 dan usulan 7 |
+| Plan JS-18 (dari Build JS-09): empat pasangan ukuran HP | Percobaan 5 memakai ketiga ukuran dunia |
+| Plan JS-21 (dari Plan JS-13): musik M-01 di layar kelas | Rencana rinci JS-21 |
+
+- Dependensi baru: tidak ada untuk ketiga fitur.
+- Ukuran: L secara keseluruhan: JS-21 S, JS-23 M, dan JS-18 L.
