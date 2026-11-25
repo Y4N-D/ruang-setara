@@ -1548,3 +1548,8 @@ Alasannya: F-02 adalah fitur pertama yang berisi uji unit. F-04 adalah fitur per
       - `tsc --noEmit` di salinan bersih tanpa `next-env.d.ts` (usulan 4). ESLint `--max-warnings 0` pada berkas game dan uji yang baru atau diubah. Untuk `app/page.tsx`: masalah ESLint sesudah F-11 sama persis dengan sebelum F-11 (4 galat dan 1 peringatan di baris yang sama), dan tidak ada masalah di baris baru.
       - Daftar periksa manual AGENTS bagian 9 dan daftar usulan 9.
       - Tidak ada dependensi baru.
+
+## Catatan dari Jejak Setara (JS-16c, 25 Nov 2026)
+
+- Layar judul mendapat tautan "Main bersama kelas di Jejak Setara" di bawah kalimat pengantar, lewat siklus Jejak Setara JS-16c (`docs/jejak-setara/specs/JS-16c-tautan-judul.md`), dengan izin pemilik proyek (KT-08 Jejak Setara).
+- Uji yang bertambah: `app/sehari-setara/__tests__/tautan-jejak.test.ts`, serta dua uji JS-16c di `e2e/judul-pengaturan-prolog.spec.ts`. Uji layar judul yang sudah ada tidak berubah.

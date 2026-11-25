@@ -527,6 +527,8 @@ Sejak F-11 keduanya sudah dibuat di `app/page.tsx`, tanpa CSS baru:
 
 "Kembali ke galeri" membuka galeri dari layar sambutan. Di versi Vinext kedua tautan berakhir di halaman 404 (bagian 4).
 
+Sejak JS-16c (25 Nov 2026), layar judul punya satu tautan keluar: "Main bersama kelas di Jejak Setara", di zona judul tepat di bawah kalimat pengantar. Pita tombol tidak berubah. Alamatnya diambil dari konstanta `ALAMAT_JEJAK_SETARA` di `app/tautan-jejak-setara.ts`; ini satu-satunya alamat penuh di Sehari Setara dan pengecualian aturan path relatif. Tautan dibuka di tab yang sama, ditahan selama masa tunggu layar judul seperti "Kembali ke galeri", dan memuat keterangan "(situs lain)" untuk pembaca layar. Tautan itu tidak memuat apa pun dari situs lain sebelum diklik.
+
 ## 12. Pengujian
 
 | Lapisan | Alat | Cakupan |

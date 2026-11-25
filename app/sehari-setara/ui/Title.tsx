@@ -1,6 +1,7 @@
 // Layar judul dan dialog "Cara bermain" Sehari Setara (spesifikasi F-10). Masa tunggu, bunyi, dan aksi diatur
 // PlayScreen; layar ini menampilkan latar, judul, dan tombol, dan dialog mengunci fokus di dalamnya.
 import { Fragment, useEffect, useRef, type MouseEvent } from "react";
+import { ALAMAT_JEJAK_SETARA } from "../../tautan-jejak-setara";
 import { copy } from "../content/copy";
 import type { Scene } from "../engine/types";
 import { AboutDialog, useTitleDialog } from "./About";
@@ -33,7 +34,7 @@ interface TitleScreenProps {
   onStart(): void;
   onHowTo(): void;
   onAbout(): void;
-  /** Klik "Kembali ke galeri"; PlayScreen membatalkannya selama masa tunggu. */
+  /** Klik "Kembali ke galeri" atau tautan Jejak Setara (JS-16c, P-3); PlayScreen membatalkannya selama masa tunggu. */
   onGallery(event: MouseEvent<HTMLAnchorElement>): void;
   onCloseHowTo(): void;
   onCloseAbout(): void;
@@ -69,6 +70,11 @@ export function TitleScreen(props: TitleScreenProps) {
           {copy.gameName}
         </h1>
         <p className="ss-title-lead">{copy.title.lead}</p>
+        {/* JS-16c (P-1 sampai P-5): tautan ke Jejak Setara di tab yang sama; alamat penuh dari satu konstanta. */}
+        <a className="ss-title-link" href={ALAMAT_JEJAK_SETARA} aria-disabled={waiting} onClick={onGallery}>
+          {copy.title.jejak}
+          <span className="ss-sr"> {copy.title.jejakSitusLain}</span>
+        </a>
       </div>
       <div className="ss-title-actions" style={band}>
         <button ref={startRef} type="button" className="ss-button" aria-disabled={waiting} onClick={onStart}>

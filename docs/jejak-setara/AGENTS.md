@@ -199,7 +199,7 @@ Nama skrip ditetapkan di JS-01 dan terdaftar di `package.json` sejak ZIP akhir J
 9. **Hormati anggaran** ukuran dan kinerja (Architecture bagian 11.3 dan 13.1). Laporkan bila terlampaui.
 10. **Aksesibilitas bukan opsional:** keyboard, fokus terlihat, target sentuh ≥ 48 px, `aria-live`, kurangi gerak, dan makna tidak hanya lewat warna.
 11. **Dependensi** (`package.json`, lockfile) hanya berubah dengan izin tertulis `Izinkan dependensi: …`.
-12. **Jangan menyentuh** Sehari Setara, galeri, atau `deploy-pages.yml`. Pengecualiannya hanya paragraf penunjuk di `AGENTS.md` akar (JS-01) dan tautan galeri (JS-16), keduanya dengan izin pemilik proyek.
+12. **Jangan menyentuh** Sehari Setara, galeri, atau `deploy-pages.yml`. Pengecualiannya hanya paragraf penunjuk di `AGENTS.md` akar (JS-01), tautan dari layar judul Sehari Setara (JS-16c), dan tautan galeri (JS-16d), semuanya dengan izin pemilik proyek. Perubahan yang menyentuh Sehari Setara juga mengikuti `AGENTS.md` akar dan uji Sehari Setara.
 13. **Jangan commit** `node_modules/`, `dist-jejak/`, `dist-pages/`, `.wrangler/`, atau berkas `.dev.vars`.
 14. **Protokol:** perubahan yang tidak kompatibel menaikkan `PROTOKOL_VERSI`.
 15. **Produksi:** agen tidak pernah melakukan deploy ke produksi (bagian 4.5).

@@ -17,6 +17,9 @@ export const copy = {
     start: "Mulai",
     howTo: "Cara bermain",
     about: "Tentang",
+    // JS-16c (P-1, P-5): tautan ke Jejak Setara di bawah kalimat pengantar; keterangan untuk pembaca layar.
+    jejak: "Main bersama kelas di Jejak Setara",
+    jejakSitusLain: "(situs lain)",
   },
   howTo: {
     title: "Cara bermain",

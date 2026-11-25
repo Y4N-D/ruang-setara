@@ -2477,6 +2477,30 @@ body {
   text-wrap: balance;
 }
 
+/* JS-16c (P-1): tautan ke Jejak Setara di bawah kalimat pengantar, berwarna dan berukuran sama dengan kalimat itu;
+   tinggi sentuh sedikitnya 24 px (WCAG 2.5.8) dan fokus sama dengan tombol. */
+.ss-title-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: calc(var(--u) * 0.6) calc(var(--u) * 1);
+  color: inherit;
+  font-size: calc(var(--u) * 3.1);
+  line-height: 1.3;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.ss-title-link:focus-visible {
+  background: var(--ss-focus);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.ss-title-link[aria-disabled="true"] {
+  cursor: default;
+}
+
 .ss-title-actions {
   position: absolute;
   z-index: 50;

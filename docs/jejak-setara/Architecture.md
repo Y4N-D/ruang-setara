@@ -958,7 +958,7 @@ Ambang kinerja otomatis sejak JS-08 (AC-19), dari histogram waktu gambar di ukur
 
 - Galeri mendapat satu tautan "Main Jejak Setara" ke alamat Jejak Setara. Ini satu-satunya perubahan pada kode galeri dan memerlukan persetujuan pemilik proyek (keputusan terbuka KT-08 PRD).
 - Karena alamatnya berbeda situs, tautan ini menjadi pengecualian dari aturan "path relatif" Sehari Setara. Alamatnya disimpan di satu konstanta.
-- Sehari Setara tidak diubah. Tautan dari layar judulnya diputuskan sesudah F-11.
+- Sejak JS-16c, layar judul Sehari Setara punya tautan "Main bersama kelas di Jejak Setara" di bawah kalimat pengantar, dengan alamat dari konstanta `ALAMAT_JEJAK_SETARA` di `app/tautan-jejak-setara.ts` (Architecture Sehari Setara 11). Tautan galeri menyusul di JS-16d dan memakai konstanta yang sama.
 
 ## 17. Konvensi kode
 

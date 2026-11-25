@@ -146,7 +146,7 @@ python scripts/game/art/build_assets.py  # bangun ulang aset dari kode + pemerik
 1. **Path relatif saja.** Jangan pernah memakai URL yang diawali `/`. Aset melalui `manifest.ts`; tautan antarhalaman memakai `sehari-setara/` dan `../`.
 2. **Tanpa jaringan luar.** Tidak ada CDN, analitik, pelacak, iklan, atau API pihak ketiga.
 3. **Tanpa data siswa.** Tidak ada login, input nama siswa, atau penyimpanan data pribadi.
-4. **Tidak menyentuh galeri** selain dua titik integrasi di Architecture bagian 11.
+4. **Tidak menyentuh galeri** selain dua titik integrasi di Architecture bagian 11. Titik ketiga milik Sehari Setara sendiri: tautan "Main bersama kelas di Jejak Setara" di layar judul (JS-16c). Tautan itu satu-satunya alamat penuh di Sehari Setara, diambil dari konstanta `ALAMAT_JEJAK_SETARA` di `app/tautan-jejak-setara.ts`, dan menjadi pengecualian aturan path relatif.
 5. **Ikuti Design System.** Hanya token warna dan huruf yang sudah ditetapkan; teks di atas warna aksen memakai `ink`.
 6. **Hormati anggaran ukuran** (Architecture bagian 8). Laporkan bila terlampaui.
 7. **Aksesibilitas bukan opsional:** keyboard, fokus terlihat, `aria-live`, kurangi gerak, makna tidak hanya lewat warna.

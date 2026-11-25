@@ -1632,3 +1632,56 @@ for (const size of SIZES) {
     expectClean(log);
   });
 }
+
+/* ---------------- JS-16c: tautan Jejak Setara ---------------- */
+
+test("JS-16c: tautan Jejak Setara di bawah kalimat pengantar, di dalam zona judul di enam ukuran; fokus, kontras, dan pembaca layar (AC-1, AC-2, AC-4, AC-5)", async ({ page }) => {
+  await openTitle(page, { size: "1280x720" });
+  const tautan = page.locator(".ss-title-zone > a.ss-title-link");
+  await expect(tautan).toHaveAttribute("href", "https://jejak-setara.ruangsetara.workers.dev/");
+  expect(await tautan.getAttribute("target")).toBeNull();
+  await expect(tautan).toHaveAccessibleName("Main bersama kelas di Jejak Setara (situs lain)");
+  await expect(page.locator(".ss-title-actions > *")).toHaveText(["Mulai", "Cara bermain", "Tentang", "Kembali ke galeri"]);
+  for (const [lebar, tinggi] of [[1280, 720], [1366, 768], [1920, 1080], [1024, 768], [731, 411], [640, 360]]) {
+    const ukuran = `${lebar}x${tinggi}`;
+    await page.setViewportSize({ width: lebar, height: tinggi });
+    await expect.poll(async () => Math.round((await page.locator(".ss-screen").boundingBox())?.height ?? 0)).toBeGreaterThan(0);
+    const zona = await box(page.locator(".ss-title-zone"));
+    const kalimat = await box(page.locator(".ss-title-lead"));
+    const t = await box(tautan);
+    expect(t.t, `${ukuran}: di bawah kalimat pengantar`).toBeGreaterThanOrEqual(kalimat.b - 0.01);
+    expect(t.b, `${ukuran}: di dalam zona judul`).toBeLessThanOrEqual(zona.b + 0.01);
+    expect(t.l, `${ukuran}: kiri`).toBeGreaterThanOrEqual(zona.l - 0.01);
+    expect(t.r, `${ukuran}: kanan`).toBeLessThanOrEqual(zona.r + 0.01);
+    expect(await tautan.evaluate((el) => el.getBoundingClientRect().height), `${ukuran}: tinggi sentuh`).toBeGreaterThanOrEqual(24);
+    expect(await lines(page.locator(".ss-title-lead")), `${ukuran}: kalimat pengantar satu baris`).toBe(1);
+    expect(await overflowing(page, ".ss-title"), ukuran).toEqual([]);
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await titleStart(page).focus();
+  await page.keyboard.press("Shift+Tab");
+  await expect(tautan).toBeFocused();
+  await expectContrast(page, ".ss-title-zone", "tautan Jejak Setara");
+  await shot(page, "judul_tautan_jejak_1280x720.png");
+});
+
+test("JS-16c: tautan Jejak Setara ditahan selama masa tunggu, lalu bisa diklik (AC-3)", async ({ page }) => {
+  await openTitle(page, { paused: true });
+  await page.evaluate(() => {
+    const w = window as unknown as { ssKlikJejak: boolean[] };
+    w.ssKlikJejak = [];
+    window.addEventListener("click", (event) => {
+      if (!(event.target instanceof Element) || !event.target.closest("a.ss-title-link")) return;
+      w.ssKlikJejak.push(event.defaultPrevented);
+      event.preventDefault();
+    });
+  });
+  const tautan = page.locator("a.ss-title-link");
+  await page.clock.runFor(599);
+  await expect(tautan).toHaveAttribute("aria-disabled", "true");
+  await tautan.click({ force: true });
+  await page.clock.runFor(1);
+  await expect(tautan).not.toHaveAttribute("aria-disabled", /.*/);
+  await tautan.click();
+  expect(await page.evaluate(() => (window as unknown as { ssKlikJejak: boolean[] }).ssKlikJejak)).toEqual([true, false]);
+});
