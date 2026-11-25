@@ -488,7 +488,8 @@ Semua aset gambar digambar dengan kode oleh Claude, mengikuti Design System bagi
 ## 17. Ruang lingkup rilis
 
 - **Versi 1.0:** semua kebutuhan P0, Paket inti 16, peta 8 zona, serta kode QR dan kode masuk ulang (JFR-03 dan JFR-07, ditarik dari 1.1 di Gerbang 1 JS-16, 24 Nov 2026).
-- **Versi 1.1:** P1 (bantuan gerak, Teropong, Angkot, log audit, pengaturan umum, ruang uji, impor-ekspor bank, statistik kelas dan per siswa, cetak ringkasan) serta musik latar.
+- **Versi 1.1:** musik latar layar kelas (JS-21), peta bermedan di peta mini, peta besar, dan peta kelas (JS-23), serta Teropong dan Angkot (JFR-25, JS-18), dirilis sebelum uji coba kelas (Gerbang 1 rencana v1.1, 25 Nov 2026; KT-15).
+- **Versi 1.2:** P1 lainnya: bantuan gerak dan daftar "Kejadian terdekat" (JFR-13, JS-24), log audit, pengaturan umum, ruang uji, dan impor-ekspor bank (JS-19), serta statistik kelas dan per siswa dan cetak ringkasan (JS-20).
 - **Nanti (P2):** rekap pribadi sebagai gambar, mode tim, mode latihan mandiri tanpa ruang, dan paket kejadian tambahan.
 
 ## 18. Risiko dan mitigasi
@@ -541,6 +542,10 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | KT-12 | Durasi bawaan 15 menit dan 16 kejadian | Ditinjau ulang sesudah uji coba kelas |
 | KT-13 | Langkah 2 tetap bisa dijawab sesudah dialog ditutup | Dijawab pemilik proyek (9 Nov 2026, Gerbang 1 JS-08): ya, tanpa pengurangan skor |
 | KT-14 | Nama pemain buatan siswa | Dijawab pemilik proyek (22 Nov 2026, Gerbang 1 JS-14): nama buatan siswa menjadi pilihan guru saat membuat ruang, dengan penyaring kata di server, batas 3–14 karakter, nama unik di ruang, dan pesan agar tidak memakai nama lengkap; bawaan tetap daftar nama samaran |
+| KT-15 | Lingkup v1.1 dan bantuan gerak (JFR-13) | Dijawab pemilik proyek (25 Nov 2026, Gerbang 1 rencana v1.1): v1.1 berisi JS-21, JS-23, dan JS-18 (Teropong dan Angkot); bantuan gerak pindah ke JS-24 di v1.2 bersama JS-19 dan JS-20 |
+| KT-16 | Aturan Teropong | Dijawab pemilik proyek (25 Nov 2026): selama 30 detik, setiap titik aktif yang belum selesai dalam radius 12 ubin dari posisi pemain saat itu terungkap dan tetap tercatat seperti kejadian yang pernah terlihat; lingkaran radiusnya tampil di peta mini dan peta besar selama aktif |
+| KT-17 | Aturan Angkot | Dijawab pemilik proyek (25 Nov 2026): hanya dari halte (paling jauh 1,5 ubin dari titik halte); tujuan dipilih di peta besar, pemain langsung pindah ke titik halte tujuan, dan karcis terpakai; tidak bisa selama dialog |
+| KT-18 | Halte di sisi barat | Dijawab pemilik proyek (25 Nov 2026): tetap empat halte untuk v1.1; ditinjau lagi sesudah uji coba kelas |
 
 ## 21. Catatan keputusan
 
@@ -583,3 +588,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 25 Nov 2026 | `Diterima: JS-16b; penyimpangan 1a, 2a`: ukuran teks VT323 memakai tinggi kapital 0,64 (tinggi huruf kecil sama dengan huruf teks lama), dan dua token tinggi baris menjaga tata letak lama |
 | 25 Nov 2026 | JS-16c dipersempit (`Lanjutkan: JS-16c dipersempit`, lalu `Setuju: JS-16c`, usulan 1 sampai 7 = a): tautan teks "Main bersama kelas di Jejak Setara" di zona judul layar judul Sehari Setara, di bawah kalimat pengantar (pita tombol sudah menempel di tepi bawah layar); alamat di satu konstanta; rilis v1.0 sebelum tautan terbit; panduan guru, tautan galeri, dan catatan uji coba pindah ke JS-16d |
 | 25 Nov 2026 | `Rilis: v1.0` dan `Diterima: JS-16c; penyimpangan 1a`: produksi naik ke v1.0, tautan layar judul Sehari Setara terbit, dan sisa uji ujung ke ujung Sehari Setara dijalankan di awal JS-16d |
+| 25 Nov 2026 | Gerbang 1 rencana v1.1 (`Setuju: JS-21`, semua saran a): v1.1 berisi JS-21 musik latar, JS-23 peta bermedan, dan JS-18 Teropong dan Angkot, dirilis sebelum uji coba kelas, dengan JS-16d sesudahnya; KT-15 sampai KT-18 dijawab (bagian 20); peta mini tertutup tetap seluruh kampung dengan medan; satu gambar medan masa siang dalam tiga ukuran (1, 2, dan 4 px per ubin) dari Sesi C (PC-1); titik pemain di peta kelas 3 ubin bergaris ganda; lima tombol skill dengan Teropong dan Angkot di baris bawah; protokol naik ke versi 6 di JS-18; musik diputar di lobi dan selama ronde, lanjut dari posisi terakhir, dengan tombol "Musik" dan pintasan `U` |

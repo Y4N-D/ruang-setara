@@ -20,10 +20,10 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-14 | Selesai (22 Nov 2026; `Diterima: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | [JS-14-hasil.md](tests/JS-14-hasil.md) |
 | JS-15 | Selesai (24 Nov 2026; `Diterima: JS-15`) | [JS-15-beban.md](specs/JS-15-beban.md) | [JS-15-hasil.md](tests/JS-15-hasil.md) |
 | JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Selesai (25 Nov 2026; `Diterima: JS-16b`, penyimpangan 1a dan 2a). JS-16c (dipersempit: tautan layar judul Sehari Setara dan rilis v1.0): Selesai (25 Nov 2026; `Diterima: JS-16c`, penyimpangan 1a; produksi v1.0 terpasang 25 Nov 2026). JS-16d (panduan guru, tautan galeri, catatan uji coba): belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md), [JS-16c-tautan-judul.md](specs/JS-16c-tautan-judul.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus; [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus; [JS-16c-hasil.md](tests/JS-16c-hasil.md), lulus |
-| JS-18 | Direncanakan (25 Nov 2026; rencana v1.1, menunggu Gerbang 1). Plan lanjutan sesudah JS-23 Selesai | — | — |
-| JS-21 | Direncanakan (25 Nov 2026; rencana rinci di "Rencana v1.1", menunggu Gerbang 1) | — | — |
+| JS-18 | Disetujui dalam rencana v1.1 (25 Nov 2026; `Setuju: JS-21`). Plan lanjutan sesudah JS-23 Selesai | — | — |
+| JS-21 | Spesifikasi ditulis (25 Nov 2026), menunggu `Spesifikasi disetujui: JS-21`. Plan disetujui 25 Nov 2026 (`Setuju: JS-21`, rencana v1.1) | [JS-21-musik.md](specs/JS-21-musik.md) | — |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
-| JS-23 | Direncanakan (25 Nov 2026; fitur baru rencana v1.1, menunggu Gerbang 1). Plan lanjutan sesudah JS-21 Selesai dan PC-1 Disetujui | — | — |
+| JS-23 | Disetujui dalam rencana v1.1 (25 Nov 2026; `Setuju: JS-21`). Plan lanjutan sesudah JS-21 Selesai dan PC-1 Disetujui | — | — |
 
 ## Backlog
 
@@ -49,7 +49,7 @@ Salinan backlog AGENTS bagian 5 (versi 0.1, 4 November 2026), ditambah kolom ses
 | JS-16 | Tautan dari galeri, panduan guru satu halaman, uji coba kelas, rilis 1.0; sejak Gerbang 1 JS-16 juga lingkungan produksi, huruf VT323, kode QR, dan kode masuk ulang, dipecah JS-16a, JS-16b, JS-16c, dan JS-16d | KT-06, KT-07, KT-08; PRD bagian 16 dan 17; JFR-03, JFR-07 | L | JS-13, JS-14, JS-15 | Sesi A (jalur utama) |
 | JS-22 | Pengaman biaya: pengaman alarm dan percobaan ulang, alur kerja "Jejak: hentikan", penghitung pemakaian per ruang, serta peringatan anggaran dan batas biaya (ditambahkan 14 Nov 2026, usulan 14a JS-10) | Architecture 12.1 dan 13 | M | JS-10 | Sesi A (sesudah JS-10) |
 
-**Versi 1.1 (P1):** ~~JS-17 kode QR dan kode masuk ulang (JFR-03, 07)~~, dikerjakan di JS-16b untuk rilis 1.0 (Gerbang 1 JS-16, 24 Nov 2026); JS-18 Teropong, Angkot, dan bantuan gerak (JFR-13, 25); JS-19 log audit, pengaturan umum, ruang uji, impor dan ekspor bank (JFR-39, 40, 47, 48); JS-20 statistik kelas dan per siswa serta cetak ringkasan (JFR-51, 52, 54); JS-21 musik latar (berkas M-01 `app/jejak-setara/assets/sfx/musik_kelas.wav` sudah Disetujui 21 Nov 2026; JS-21 memutarnya di layar kelas dan menghentikannya saat jeda, hitung mundur, dan jingle akhir; Permintaan C-16). **Rencana v1.1 (25 Nov 2026, menunggu Gerbang 1):** atas permintaan pemilik proyek, v1.1 berisi JS-21, fitur baru JS-23 (peta bermedan), dan JS-18 (Teropong dan Angkot), dan dirilis sebelum uji coba kelas; bantuan gerak, JS-19, dan JS-20 mengikuti jawaban KT-15 (entri "Rencana v1.1" di akhir dokumen ini).
+**Versi 1.1 (P1):** ~~JS-17 kode QR dan kode masuk ulang (JFR-03, 07)~~, dikerjakan di JS-16b untuk rilis 1.0 (Gerbang 1 JS-16, 24 Nov 2026); JS-18 Teropong, Angkot, dan bantuan gerak (JFR-13, 25); JS-19 log audit, pengaturan umum, ruang uji, impor dan ekspor bank (JFR-39, 40, 47, 48); JS-20 statistik kelas dan per siswa serta cetak ringkasan (JFR-51, 52, 54); JS-21 musik latar (berkas M-01 `app/jejak-setara/assets/sfx/musik_kelas.wav` sudah Disetujui 21 Nov 2026; JS-21 memutarnya di layar kelas dan menghentikannya saat jeda, hitung mundur, dan jingle akhir; Permintaan C-16). **Rencana v1.1 (disetujui 25 Nov 2026, `Setuju: JS-21`):** atas permintaan pemilik proyek, v1.1 berisi JS-21, fitur baru JS-23 (peta bermedan), dan JS-18 (Teropong dan Angkot), dan dirilis sebelum uji coba kelas; bantuan gerak pindah ke JS-24 di v1.2 bersama JS-19 dan JS-20 (KT-15 a) (entri "Rencana v1.1" di akhir dokumen ini).
 
 - Pembuatan aset gambar (Sesi C) dan penulisan naskah kejadian (Sesi B) berjalan paralel dengan backlog ini. Selama aset belum "Disetujui", fitur memakai *placeholder* berupa kotak warna palet dengan label kunci aset. *Placeholder* wajib diganti sebelum rilis 1.0.
 - Sebelum Build JS-03, pemilik proyek menyelesaikan langkah 1 dan 3–6 Architecture bagian 18 dengan paket gratis. Langkah 2 (Workers Paid) dikerjakan sebelum JS-15 atau uji coba kelas pertama (bagian "Keputusan server" di bawah). Sesi A mengingatkannya di Plan JS-03 dan Plan JS-15.
@@ -61,7 +61,7 @@ Keputusan pemilik proyek, 5 November 2026. Tiga sesi Claude bekerja bersamaan. S
 
 | Sesi | Pekerjaan | Status dicatat di |
 |---|---|---|
-| Sesi A (mesin) | JS-01, JS-02, JS-03, lalu JS-07, JS-08, dan JS-04 (urutan 8 Nov 2026), lalu JS-10, JS-22, JS-12, JS-11, dan JS-09 (urutan 14 Nov 2026; JS-22 dari usulan 14a JS-10), lalu JS-13, JS-14, JS-15, dan JS-16 (urutan 21 Nov 2026) | Dokumen ini |
+| Sesi A (mesin) | JS-01, JS-02, JS-03, lalu JS-07, JS-08, dan JS-04 (urutan 8 Nov 2026), lalu JS-10, JS-22, JS-12, JS-11, dan JS-09 (urutan 14 Nov 2026; JS-22 dari usulan 14a JS-10), lalu JS-13, JS-14, JS-15, dan JS-16 (urutan 21 Nov 2026), lalu JS-21, JS-23, dan JS-18 sebelum JS-16d (rencana v1.1, 25 Nov 2026) | Dokumen ini |
 | Sesi B (naskah) | Naskah 16 kejadian dan rujukan, lalu JS-05, lalu naskah tambahan K-17 sampai K-40 dan semai tambahan sebagai lanjutan JS-05 (Permintaan A-16, 23 Nov 2026) | `docs/jejak-setara/naskah/STATUS.md` |
 | Sesi C (aset dan peta) | Aset gambar tampak atas, lalu peta JS-06 | `docs/jejak-setara/Daftar_Aset.md` |
 
@@ -98,6 +98,11 @@ Keputusan pemilik proyek, 21 November 2026 (awal Plan JS-13): sesudah JS-09, Ses
 
 - Dependensi tetap terpenuhi: JS-13 bergantung pada JS-11 dan JS-12, JS-14 pada JS-09, JS-15 pada JS-11, dan JS-16 pada JS-13, JS-14, dan JS-15.
 - Workers Paid tetap diaktifkan sebelum JS-15 atau uji coba kelas pertama, mana yang lebih dulu (bagian "Keputusan server: paket gratis dulu"); Sesi A mengingatkannya di Plan JS-15.
+
+Keputusan pemilik proyek, 25 November 2026 (Gerbang 1 rencana v1.1, `Setuju: JS-21`): sebelum JS-16d dan uji coba kelas, Sesi A mengerjakan **JS-21 (musik latar), lalu JS-23 (peta bermedan), lalu JS-18 (Teropong dan Angkot)**, lalu menulis catatan rilis v1.1.
+
+- Dependensi: JS-21 hanya bergantung pada JS-14 (Selesai); JS-23 menunggu PC-1 Sesi C Disetujui; JS-18 menunggu JS-23 Selesai dan PC-2 Disetujui.
+- Bantuan gerak (JFR-13) pindah ke JS-24 di v1.2, bersama JS-19 dan JS-20 (KT-15 a).
 
 ## Catatan untuk Plan berikutnya
 
@@ -239,8 +244,9 @@ Keputusan pemilik proyek, 21 November 2026 (awal Plan JS-13): sesudah JS-09, Ses
 - Plan lanjutan JS-16b atau perbaikan alur kerja (dari penerimaan JS-16a, 25 Nov 2026): pemilik proyek sempat mencoba masuk ke konsol produksi sebelum "Jejak: admin awal" dijalankan dengan lingkungan produksi (3 percobaan gagal). Pertimbangkan pilihan `lingkungan` tanpa nilai bawaan, dan satu kalimat di ringkasan "Jejak: produksi" yang mengingatkan langkah admin awal produksi.
 - Plan lanjutan JS-16c (dari Test JS-16b, 25 Nov 2026): panduan guru menjelaskan kode QR di lobi (tombol "Perbesar QR" atau `Q` untuk siswa yang duduk jauh) dan kode masuk ulang (tombol di halaman detail ruang, berlaku 10 menit dan sekali pakai, hanya tampil di laptop; HP lama berhenti sendiri). Tangkapan layar panduan memakai huruf VT323. Penyimpangan 1 JS-16b diterima, jadi ukuran teks 0,64 tetap dipakai.
 
-- Specify JS-21 (dari Plan v1.1, 25 Nov 2026): Architecture 6.2 masih menulis `PROTOKOL_VERSI` 4 dan amplop `{ "v": 4, … }`, padahal `inti/versi.ts` bernilai 5 sejak JS-16b. Diperbaiki bersama dokumen JS-21.
+- Specify JS-21 (dari Plan v1.1, 25 Nov 2026): Architecture 6.2 masih menulis `PROTOKOL_VERSI` 4 dan amplop `{ "v": 4, … }`, padahal `inti/versi.ts` bernilai 5 sejak JS-16b. Diperbaiki bersama dokumen JS-21. **Diperbaiki di Specify JS-21 (Architecture 6.2).**
 - Plan lanjutan JS-16d (dari Plan v1.1, 25 Nov 2026): panduan guru memuat fitur v1.1 (peta bermedan, Teropong, Angkot, dan tombol Musik), dan tangkapan layarnya diambil sesudah rilis v1.1.
+- Specify JS-23 dan JS-18 (dari Gerbang 1 rencana v1.1, 25 Nov 2026): JFR-11 dan JFR-28 ditulis ulang untuk peta bermedan di Specify JS-23, dan aturan KT-16 serta KT-17 masuk PRD 8.5 dan JFR-25 di Specify JS-18. PC-1 dan PC-2 sudah final (semua saran a), jadi Sesi C bisa mulai sebelum JS-21 selesai.
 
 ## JS-01 — Kerangka
 
@@ -2170,7 +2176,7 @@ Dikerjakan 25 November 2026 pada hasil `build:pages` yang disajikan di bawah `/r
 
 ## Rencana v1.1 — JS-21, JS-23, dan JS-18 (musik latar, peta bermedan, Teropong dan Angkot)
 
-- Status: **Direncanakan (25 Nov 2026)**, menunggu Gerbang 1. Permintaan pemilik proyek (25 Nov 2026): rilis v1.1 sebelum uji coba kelas, berisi (1) peta bermedan di peta mini (tertutup dan peta besar) serta peta kelas, dengan penanda pemain, halte, dan arah tetap tampil dan kejadian yang belum terlihat tetap tersembunyi; (2) Teropong dan Angkot (JS-18) dengan kotaknya di peta, HUD yang memuat lima skill di ketiga ukuran HP, dan pilihan skill per ruang di konsol; (3) musik latar M-01 di layar kelas (JS-21): berulang, berhenti saat jeda, hitung mundur, dan jingle akhir, serta bisa dimatikan. JS-16d (panduan guru dan tautan galeri) ditunda sampai fitur ini selesai, dan uji coba kelas sesudahnya. Dikerjakan dalam mode ZIP dari ZIP `main` 25 Nov 2026. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Seperti JS-16, gerbang ini menyetujui pemecahan, urutan, rencana rinci JS-21, dan permintaan PC-1 serta PC-2 untuk Sesi C; JS-23 dan JS-18 mendapat Plan lanjutan singkat saat dimulai (AGENTS 4.1: satu fitur sekali rencana). Nomor JS-23 belum pernah dipakai: usulan 1b JS-14 yang menyebutnya untuk nama pemain tidak dipilih.
+- Status: **Disetujui (25 Nov 2026)** dengan `Setuju: JS-21`, yaitu semua saran (a): usulan 1a sampai 8a, usulan JS-21 1a sampai 8a, dan KT-15 sampai KT-18 pilihan a. JS-21: spesifikasi ditulis 25 Nov 2026 ([JS-21-musik.md](specs/JS-21-musik.md)), menunggu `Spesifikasi disetujui: JS-21`. Sebelumnya: **Direncanakan (25 Nov 2026)**. Permintaan pemilik proyek (25 Nov 2026): rilis v1.1 sebelum uji coba kelas, berisi (1) peta bermedan di peta mini (tertutup dan peta besar) serta peta kelas, dengan penanda pemain, halte, dan arah tetap tampil dan kejadian yang belum terlihat tetap tersembunyi; (2) Teropong dan Angkot (JS-18) dengan kotaknya di peta, HUD yang memuat lima skill di ketiga ukuran HP, dan pilihan skill per ruang di konsol; (3) musik latar M-01 di layar kelas (JS-21): berulang, berhenti saat jeda, hitung mundur, dan jingle akhir, serta bisa dimatikan. JS-16d (panduan guru dan tautan galeri) ditunda sampai fitur ini selesai, dan uji coba kelas sesudahnya. Dikerjakan dalam mode ZIP dari ZIP `main` 25 Nov 2026. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Seperti JS-16, gerbang ini menyetujui pemecahan, urutan, rencana rinci JS-21, dan permintaan PC-1 serta PC-2 untuk Sesi C; JS-23 dan JS-18 mendapat Plan lanjutan singkat saat dimulai (AGENTS 4.1: satu fitur sekali rencana). Nomor JS-23 belum pernah dipakai: usulan 1b JS-14 yang menyebutnya untuk nama pemain tidak dipilih.
 - Memenuhi: PRD 17 (versi 1.1, diubah menurut KT-15); JFR-11 dan JFR-28 (peta mini dan peta kelas kini bermedan); JFR-25 (Teropong dan Angkot); JFR-26 (skill per ruang, kini lima); PRD 8.5 dan 9 (kotak teropong di Z6, karcis di halte); Design System 3.3, 3.4, 3.6, 9, 10, 12, 13, dan 14; Architecture 6.3, 8.5, 9, 10.9, 11.2, dan 11.3; Permintaan C-16; serta catatan Plan JS-18 dan JS-21.
 - Bergantung pada: JS-07, JS-09, JS-10, dan JS-14 (peta mini, peta besar, skill, peta kelas, dan suara layar kelas), semuanya Selesai; JS-16c Selesai (produksi v1.0). JS-23 menunggu PC-1 Disetujui, dan JS-18 menunggu JS-23 Selesai, PC-2 Disetujui, serta jawaban KT-16 sampai KT-18.
 
@@ -2244,7 +2250,7 @@ Dikerjakan 25 November 2026 di luar repositori, pada salinan ZIP `main` dengan d
 
 ### Rencana rinci JS-21 — Musik latar layar kelas
 
-- Status: Direncanakan (25 Nov 2026).
+- Status: Disetujui (25 Nov 2026); spesifikasi ditulis 25 Nov 2026.
 - Memenuhi: PRD 17 (musik latar, v1.1); Design System 12 (M-01 diputar pelan di bawah efek, berhenti saat jeda, hitung mundur, dan jingle akhir); Architecture 11.2 dan 11.3 (layar kelas mengimpor WAV langsung, batas 1 MB); Permintaan C-16; catatan Plan JS-21.
 - Bergantung pada: JS-14 (Selesai; suara layar kelas) dan M-01 (Disetujui 21 Nov 2026).
 - File yang dibuat/diubah (dipastikan di Specify):
@@ -2286,7 +2292,7 @@ Dikerjakan 25 November 2026 di luar repositori, pada salinan ZIP `main` dengan d
 
 ### Permintaan untuk Sesi C (diteruskan pemilik proyek sesudah Gerbang 1)
 
-Sesi C menjawab di `Daftar_Aset.md`. Angka di bawah memakai pilihan saran; bila pemilik proyek memilih lain di usulan 3 sampai 5, Sesi A memperbarui permintaan ini di ZIP berikutnya.
+Sesi C menjawab di `Daftar_Aset.md`. Angka di bawah memakai pilihan saran; bila pemilik proyek memilih lain di usulan 3 sampai 5, Sesi A memperbarui permintaan ini di ZIP berikutnya. **Gerbang 1 (25 Nov 2026) memilih semua saran, jadi PC-1 dan PC-2 sudah final, dan PC-3 tidak diperlukan (KT-18 a).**
 
 **PC-1 Gambar medan peta (untuk JS-23).**
 
@@ -2353,3 +2359,20 @@ Dibaca dari ZIP `main` 25 Nov 2026: `naskah/STATUS.md` (23 Nov 2026) dan `Daftar
 
 - Dependensi baru: tidak ada untuk ketiga fitur.
 - Ukuran: L secara keseluruhan: JS-21 S, JS-23 M, dan JS-18 L.
+
+### Specify JS-21 (25 Nov 2026)
+
+Dikerjakan dalam mode ZIP dari ZIP `main` 25 Nov 2026 ditambah isi ZIP Gerbang 1 rencana v1.1. Spesifikasinya [JS-21-musik.md](specs/JS-21-musik.md), dengan 17 butir perilaku dan 17 kriteria penerimaan.
+
+- **Keputusan Gerbang 1 yang diterapkan di dokumen utama:** AGENTS versi 0.10 (bagian 5), PRD (17, KT-15 sampai KT-18 di bagian 20, dan 21), Design System (3.6, 12, dan 13), serta Architecture (6.2, 10.9, dan 11.3).
+- **Keputusan penting di spesifikasi:**
+  - Musik berbunyi hanya bila suara nyala, musik nyala, konteks berjalan, berkas terurai, dan status `lobi` atau `main`. Selama pita "Menyambung ulang…" tampil, musik mengikuti status terakhir (P-1 dan P-2).
+  - Satu posisi musik per tab, yang dilanjutkan setiap kali musik berbunyi lagi (P-4; D-3), dengan masuk dan keluar pelan 80 ms lewat penguat musik sendiri (P-5).
+  - Tombol Musik dan tombol suara berada dalam satu kelompok, dan tulisan "Klik untuk menyalakan suara" menjadi unsur pertama kelompok itu, sehingga tombol tidak bergeser (P-8).
+  - Kepala dan bilah saat bermain memakai ruang kanan 24u (P-9). Pengukuran Specify menemukan bahwa di v1.0 tombol suara sudah menutupi sebagian "Sisa …" di bilah saat bermain pada ketiga ukuran layar kelas; ruang kanan baru sekaligus memperbaikinya.
+  - Musik diunduh saat konteks dibuat bila musik nyala, atau saat musik pertama kali dinyalakan sesudahnya (P-13), sehingga guru yang mematikan musik tidak mengunduh 0,81 MB. Ini merinci usulan JS-21 5a.
+  - Atribut `data-musik` di `.js-kelas` untuk uji ujung ke ujung (P-16).
+- **Pengukuran di luar repositori** (CSS asli dan huruf VT323 di Chromium, 25 Nov 2026): tombol Musik 50 × 48 px di 1024 × 768, 62 × 48 px di 1280 × 720, dan 89 × 48 px di 1920 × 1080. Dengan ruang kanan 24u, jarak isi kanan kepala lobi dan podium ke tombol Musik 11, 27, dan 60 px, dan jarak "Sisa …" ke tombol Musik 13, 30, dan 65 px. Pada kode v1.0, tombol suara bertumpuk dengan "Sisa …" di ketiga ukuran, dan dengan isi kanan kepala lobi dan podium di 1024 × 768 (2 px).
+- **DRAF yang menunggu pemilik proyek:** D-1 tampilan tombol Musik saat mati (saran: tulisan tetap, bercoret, di latar `mist`), D-2 tulisan "Klik untuk menyalakan suara" di lobi sebelum klik pertama (saran: tampil), dan D-3 posisi musik saat ronde dimulai (saran: lanjut).
+- **Berkas Sesi B dan C:** tidak ada permintaan baru sejak Plan v1.1; tidak disentuh.
+- **Galeri:** `build:pages` tetap 178 berkas identik byte.

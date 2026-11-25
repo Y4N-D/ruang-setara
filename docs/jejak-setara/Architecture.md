@@ -405,7 +405,7 @@ Worker memeriksa tajuk `Origin` (hanya domain Jejak Setara sendiri dan `localhos
 
 ### 6.2 Amplop pesan
 
-Setiap pesan adalah objek JSON `{ "v": 4, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08, 3 sejak JS-14, 4 sejak JS-15). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
+Setiap pesan adalah objek JSON `{ "v": 5, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/versi.ts`, yang diekspor ulang `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08, 3 sejak JS-14, 4 sejak JS-15, 5 sejak JS-16b). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
 
 ### 6.3 Pesan pemain
 
@@ -737,7 +737,8 @@ Statistik per kejadian lintas ruang (JS-13; spesifikasi `specs/JS-13-statistik.m
 
 - Dibuka dari halaman detail ruang (`#/ruang/{id}`) dengan tautan "Buka layar kelas" di tab baru. Layar kelas meminta tiket sendiri, lalu tersambung ke Durable Object; bila terputus, ia meminta tiket baru dan menyambung lagi dengan jeda 1, 2, 4, 8, lalu 15 detik, dan berhenti saat ruang ditutup (4000), dibuka di tab lain (4001), atau sesudah 10 menit gagal (JS-10).
 - Satu ruang hanya punya satu layar kelas aktif. Sejak JS-14, guru bisa mengganti nama atau mengeluarkan pemain dari layar kelas lewat menu nama di lobi dan panel "Pemain", tanpa skor dan tanpa menulis nama lama lagi, selain dari halaman detail ruang.
-- Pintasan keyboard: `Spasi` mulai atau jeda/lanjut, `T` tambah 2 menit, `A` akhiri (dengan konfirmasi), `L` kunci ruang, `←` `→` berpindah kejadian di pembahasan, `F` layar penuh, `M` suara, dan `P` panel Pemain (JS-14).
+- Pintasan keyboard: `Spasi` mulai atau jeda/lanjut, `T` tambah 2 menit, `A` akhiri (dengan konfirmasi), `L` kunci ruang, `←` `→` berpindah kejadian di pembahasan, `F` layar penuh, `M` suara, `P` panel Pemain (JS-14), `Q` Perbesar QR di lobi (JS-16b), dan `U` musik (JS-21).
+- Musik latar (JS-21): `suara-kelas.ts` mengimpor `musik_kelas.wav` langsung dan memutarnya berulang di lobi dan selama ronde, dengan tombol "Musik" di samping tombol suara; rinciannya di spesifikasi JS-21.
 - Halaman ini tidak menampilkan lokasi kejadian selama ronde (JFR-28).
 
 ## 11. Peta, aset, dan anggaran
@@ -810,7 +811,7 @@ export const SUARA: Record<NamaSuara, string>;     // C-15: URL WAV berhash, han
 | Jingle akhir `sfx_akhir.wav`, hanya layar kelas (C-14) | ≤ 160 KB |
 | Musik latar `musik_kelas.wav`, hanya layar kelas (WAV 11.025 Hz, C-16) | ≤ 1 MB |
 
-Jingle akhir dan musik latar tidak dihitung dalam "Seluruh aset layar pemain", karena HP pemain tidak memuatnya. Sejak JS-15, `scripts/jejak-setara/anggaran.mjs` memeriksa semua butir ini sesudah `build:jejak` di "Jejak: uji" dan membuat run merah bila ada yang terlampaui (P-20 sampai P-22). Per 21 November 2026, aset layar pemain 205,3 KB dan aset khusus layar kelas 967,4 KB (`Daftar_Aset.md`, bagian "Efek suara").
+Jingle akhir dan musik latar tidak dihitung dalam "Seluruh aset layar pemain", karena HP pemain tidak memuatnya. Sejak JS-15, `scripts/jejak-setara/anggaran.mjs` memeriksa semua butir ini sesudah `build:jejak` di "Jejak: uji" dan membuat run merah bila ada yang terlampaui (P-20 sampai P-22). Baris musik latar baru tampil sejak JS-21, saat `musik_kelas.wav` mulai diimpor layar kelas. Per 21 November 2026, aset layar pemain 205,3 KB dan aset khusus layar kelas 967,4 KB (`Daftar_Aset.md`, bagian "Efek suara").
 
 ## 12. Keamanan dan privasi
 
