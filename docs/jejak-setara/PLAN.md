@@ -19,7 +19,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-13 | Selesai (22 Nov 2026; `Diterima: JS-13`) | [JS-13-statistik.md](specs/JS-13-statistik.md) | [JS-13-hasil.md](tests/JS-13-hasil.md) |
 | JS-14 | Selesai (22 Nov 2026; `Diterima: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | [JS-14-hasil.md](tests/JS-14-hasil.md) |
 | JS-15 | Selesai (24 Nov 2026; `Diterima: JS-15`) | [JS-15-beban.md](specs/JS-15-beban.md) | [JS-15-hasil.md](tests/JS-15-hasil.md) |
-| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Selesai (25 Nov 2026; `Diterima: JS-16b`, penyimpangan 1a dan 2a). JS-16c: belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus; [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus |
+| JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Selesai (25 Nov 2026; `Diterima: JS-16b`, penyimpangan 1a dan 2a). JS-16c (dipersempit: tautan layar judul Sehari Setara dan rilis v1.0): Plan lanjutan (25 Nov 2026), menunggu `Setuju: JS-16c`. JS-16d (panduan guru, tautan galeri, catatan uji coba): belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus; [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
 
 ## Backlog
@@ -43,7 +43,7 @@ Salinan backlog AGENTS bagian 5 (versi 0.1, 4 November 2026), ditambah kolom ses
 | JS-13 | Statistik per kejadian lintas ruang dan isi dasbor | JFR-37, 50 | M | JS-11, JS-12 | Sesi A (jalur utama) |
 | JS-14 | Pengaturan pemain, aksesibilitas, privasi, dan suara, ditambah nama buatan siswa, kelola nama oleh guru, dan penghapusan otomatis sesudah masa simpan (Gerbang 1 JS-14) | JFR-55, 56, 57; JFR-01, 04, 06 (diubah); PRD 13 | L | JS-09 | Sesi A (jalur utama) |
 | JS-15 | Uji beban dan ketahanan jaringan, anggaran ukuran, perbaikan kinerja | PRD bagian 12 | M | JS-11 | Sesi A (jalur utama) |
-| JS-16 | Tautan dari galeri, panduan guru satu halaman, uji coba kelas, rilis 1.0; sejak Gerbang 1 JS-16 juga lingkungan produksi, huruf VT323, kode QR, dan kode masuk ulang, dipecah JS-16a, JS-16b, dan JS-16c | KT-06, KT-07, KT-08; PRD bagian 16 dan 17; JFR-03, JFR-07 | L | JS-13, JS-14, JS-15 | Sesi A (jalur utama) |
+| JS-16 | Tautan dari galeri, panduan guru satu halaman, uji coba kelas, rilis 1.0; sejak Gerbang 1 JS-16 juga lingkungan produksi, huruf VT323, kode QR, dan kode masuk ulang, dipecah JS-16a, JS-16b, JS-16c, dan JS-16d | KT-06, KT-07, KT-08; PRD bagian 16 dan 17; JFR-03, JFR-07 | L | JS-13, JS-14, JS-15 | Sesi A (jalur utama) |
 | JS-22 | Pengaman biaya: pengaman alarm dan percobaan ulang, alur kerja "Jejak: hentikan", penghitung pemakaian per ruang, serta peringatan anggaran dan batas biaya (ditambahkan 14 Nov 2026, usulan 14a JS-10) | Architecture 12.1 dan 13 | M | JS-10 | Sesi A (sesudah JS-10) |
 
 **Versi 1.1 (P1):** ~~JS-17 kode QR dan kode masuk ulang (JFR-03, 07)~~, dikerjakan di JS-16b untuk rilis 1.0 (Gerbang 1 JS-16, 24 Nov 2026); JS-18 Teropong, Angkot, dan bantuan gerak (JFR-13, 25); JS-19 log audit, pengaturan umum, ruang uji, impor dan ekspor bank (JFR-39, 40, 47, 48); JS-20 statistik kelas dan per siswa serta cetak ringkasan (JFR-51, 52, 54); JS-21 musik latar (berkas M-01 `app/jejak-setara/assets/sfx/musik_kelas.wav` sudah Disetujui 21 Nov 2026; JS-21 memutarnya di layar kelas dan menghentikannya saat jeda, hitung mundur, dan jingle akhir; Permintaan C-16).
@@ -2102,3 +2102,55 @@ Dikerjakan 25 November 2026 di luar repositori; salinan uji sementara dihapus se
 - Penyimpangan 2a: `--js-huruf-judul-baris` (1) dan `--js-huruf-teks-baris` (1,2) dipakai 48 aturan yang dulu bertinggi baris `normal`.
 - Lingkungan uji memakai versi ini sesudah push. Produksi tetap v0.9 sampai rilis v1.0 (usulan 2a JS-16).
 - Berikutnya: Plan lanjutan JS-16c (panduan guru, tautan galeri dan layar judul Sehari Setara, uji coba kelas, dan rilis v1.0). Verifikasi Bagian A di konsol produksi bisa dikerjakan bersamaan, sesudah Peninjau dicentang.
+
+### Plan lanjutan JS-16c (dipersempit) — Tautan layar judul Sehari Setara dan rilis v1.0 (25 Nov 2026)
+
+- Status: **Direncanakan (25 Nov 2026)**, menunggu `Setuju: JS-16c`.
+- Dasar: keputusan pemilik proyek 25 Nov 2026 (`Lanjutkan: JS-16c dipersempit`). JS-16c kini hanya berisi tautan dari layar judul Sehari Setara dan catatan rilis v1.0. Uji coba kelas dilakukan sesudahnya. Panduan guru (usulan 12a JS-16), tautan dari galeri (bagian galeri usulan 11a), dan pencatatan hasil uji coba (usulan 13a) pindah ke **JS-16d**.
+- Memenuhi: KT-08 (bagian layar judul Sehari Setara); PRD 17 (rilis 1.0); AGENTS 4.5.
+- Bergantung pada: JS-16b Selesai (25 Nov 2026). Uji coba kelas, bukan Build, juga bergantung pada verifikasi Bagian A di konsol produksi (pekerjaan pemilik proyek).
+- File yang dibuat/diubah (perkiraan):
+  - **Baru:** `app/tautan-jejak-setara.ts` (satu konstanta alamat, usulan 4); `docs/jejak-setara/rilis/v1.0.md`; `docs/jejak-setara/specs/JS-16c-tautan-judul.md`; `docs/jejak-setara/tests/JS-16c-hasil.md`.
+  - **Sehari Setara:** `app/sehari-setara/ui/Title.tsx`, `content/copy.ts`, gaya tautan di `styles/game.css`, dan uji `e2e/judul-pengaturan-prolog.spec.ts` beserta uji konten bila perlu.
+  - **Dokumen:** `AGENTS.md` akar butir 4, AGENTS Jejak butir 12, `docs/sehari-setara/Architecture.md` bagian 11, `docs/sehari-setara/PLAN.md` (catatan singkat), Architecture Jejak 16, PRD 20 dan 21, dan dokumen ini.
+- Migrasi D1, protokol, dan aset: tidak ada.
+- Ukuran: S.
+
+#### Hasil percobaan risiko
+
+Dikerjakan 25 November 2026 pada hasil `build:pages` yang disajikan di bawah `/ruang-setara/`, dengan tombol kelima ditambahkan sementara lewat peramban. Kode tidak diubah.
+
+1. **Usulan 11a ("tautan teks kecil di bawah pita tombol") tidak mungkin dipakai.** Pita tombol menempati 157–180 dari 180 satuan tinggi layar judul, jadi menempel di tepi bawah layar.
+2. **Tombol kelima di pita tidak muat.** Dengan tombol "Main Jejak Setara" (sekitar 77,5 satuan), pita melebar sampai sekitar 320 satuan. Pita itu keluar dari layar di 1280 × 720, 1024 × 768, 1920 × 1080, dan 640 × 360, dan hanya pas di 731 × 411.
+3. **Zona judul masih punya ruang.** Di bawah kalimat pengantar tersisa 27,6 satuan tinggi di kelima ukuran. Latar di zona itu adalah langit tenang yang sudah dipakai judul dan kalimat pengantar.
+
+#### Usulan
+
+1. **Letak tautan.**
+   - (a, saran) Tautan teks di zona judul, tepat di bawah kalimat pengantar, berwarna dan bergaris bawah seperti tautan Sehari Setara lainnya.
+   - (b) Di dialog "Tentang": tata letak tidak berubah, tetapi tautan itu jarang terlihat.
+   - (c, tidak disarankan) Tombol kelima di pita (percobaan 2).
+2. **Teks tautan** (disimpan di `content/copy.ts`).
+   - (a, saran) "Main bersama kelas di Jejak Setara".
+   - (b) "Main Jejak Setara".
+3. **Cara membuka.**
+   - (a, saran) Di tab yang sama, seperti "Kembali ke galeri".
+   - (b) Di tab baru.
+4. **Alamat.**
+   - (a, saran) Satu konstanta `ALAMAT_JEJAK_SETARA = "https://jejak-setara.ruangsetara.workers.dev/"` di `app/tautan-jejak-setara.ts`. Konstanta ini dipakai Sehari Setara sekarang dan galeri nanti (JS-16d), sesuai Architecture Jejak 16. Alamat penuh ini menjadi pengecualian aturan "path relatif" Sehari Setara.
+   - (b) Konstanta di `content/copy.ts` Sehari Setara.
+5. **Masa tunggu layar judul.**
+   - (a, saran) Sama dengan "Kembali ke galeri": tautan ber-`aria-disabled` dan klik dibatalkan selama masa tunggu.
+6. **Nama rilis.**
+   - (a, saran) v1.0, karena semua cakupan PRD 17 (termasuk JFR-03 dan JFR-07) sudah ada. Catatan rilis menyebut bahwa panduan guru dan tautan galeri menyusul di JS-16d.
+   - (b) v0.10, dan v1.0 baru sesudah JS-16d.
+7. **Urutan terbit** (dua ZIP dalam satu serah terima Build).
+   - (a, saran) ZIP pertama berisi catatan rilis v1.0 dan dokumen. Langkahnya: push, balas `Rilis: v1.0`, lalu jalankan "Jejak: produksi". ZIP kedua berisi tautan layar judul, dan di-push sesudah produksi v1.0 hijau, agar tautan tidak terbit selagi produksi masih v0.9.
+   - (b) Satu ZIP: tautan terbit beberapa menit sebelum produksi naik ke v1.0.
+
+#### Risiko
+
+1. **Sehari Setara berubah.** Kedua panduan berlaku: `content:check`, `test`, `test:e2e`, dan `build:pages` dijalankan. Berkas `dist-pages/` yang boleh berubah hanya bagian Sehari Setara, dan sisanya harus identik byte.
+2. **Tautan langsung terbit lewat GitHub Pages begitu di-push** (usulan 7a).
+3. **Produksi belum siap dipakai kelas** sampai Bagian A selesai. Uji coba kelas menunggu verifikasi itu, bukan Build JS-16c.
+4. **Uji coba tanpa panduan guru satu halaman.** Ukuran PRD 16 "guru menjalankan sesi tanpa bantuan" belum terukur. Draf panduan Sesi B boleh dicetak sebagai pegangan, dengan tiga koreksi yang disebut di chat (data per HP, kuota, dan kode masuk ulang).
