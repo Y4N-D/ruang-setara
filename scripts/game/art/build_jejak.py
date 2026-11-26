@@ -8,6 +8,8 @@ Hasil:
     <out>/ava/ava_{n}_{arah}_{pose}.png, <out>/ikon/ikon_ava_{n}.png, <out>/ubin/ubin_{masa}.png  (ukuran asli 1x)
     <out>/sfx/sfx_{peristiwa}.wav, <out>/sfx/musik_kelas.wav  (efek suara dan musik latar dari kit suara
                                     scripts/game/suara/; klik dan bunyi teks disalin identik dari Sehari Setara)
+    <out>/peta/peta_medan_{n}.png   (gambar medan PC-1: dibangun peta:build dari sumber peta, bukan oleh berkas ini;
+                                    di sini hanya diperiksa, disalin bila <out> bukan folder aset, dan dicatat)
     <out>/CREDITS.md                (dibuat otomatis untuk aset berstatus Disetujui)
     <out>/manifest.ts               (dibuat otomatis untuk aset berstatus Disetujui; Architecture Jejak 11.2)
     <preview>/*.png dan *.gif       (pratinjau untuk persetujuan, docs/jejak-setara/preview/)
@@ -192,6 +194,17 @@ DISETUJUI_SUARA = {nama: "21 November 2026" for nama in ("sfx_kejadian", "sfx_ko
 # Klik dan bunyi teks Sehari Setara yang disalin identik byte ke sfx/ (usulan KT-C25 a): nama -> (ID di Sehari Setara, isi)
 SALINAN_SUARA = {"sfx_klik": ("S-01", "bunyi klik gaya A"), "sfx_teks": ("S-02", "bunyi teks gaya B")}
 
+# Gambar medan peta (PC-1; Daftar_Aset.md, bagian "Gambar medan peta dan kotak P1"): dibangun peta:build
+# (scripts/jejak-setara/peta/build_peta.py) dari sumber peta dengan sidik yang sama dengan kampung_gambar.json, jadi
+# tidak digambar ulang di sini. Berkas ini memeriksanya, lalu mencatat kredit dan kelompok PETA di manifest.ts
+# untuk gambar Disetujui. nama berkas tanpa .png -> (ID, piksel per ubin)
+MEDAN = {"peta_medan_1": ("G-01", 1), "peta_medan_2": ("G-02", 2), "peta_medan_4": ("G-03", 4)}
+BATAS_MEDAN = {"peta_medan_1": 4 * 1024, "peta_medan_2": 8 * 1024, "peta_medan_4": 20 * 1024}
+BATAS_MEDAN_TOTAL = 32 * 1024
+UBIN_PETA = (160, 100)              # ukuran peta dalam ubin (JS-06)
+# Gambar medan berstatus Disetujui: nama -> tanggal. Masih kosong: G-01 sampai G-03 Ditinjau (26 Nov 2026).
+DISETUJUI_PETA = {}
+
 BATAS_STRIP = 6 * 1024              # satu strip avatar atau tokoh
 BATAS_UBIN = 60 * 1024              # satu lembar ubin per masa
 BATAS_TOTAL = 2 * 1024 * 1024       # seluruh aset layar pemain
@@ -247,6 +260,16 @@ def tulis_kredit(out_dir):
             baris.append(f"| `{folder}/{n}.png` | {kode_aset(n)} | Digambar dengan kode (kit Sehari Setara) oleh "
                          f"Claude, disetujui YAN, {DISETUJUI[n]} |")
         baris.append("")
+    if DISETUJUI_PETA:
+        baris += ["## Gambar medan peta (`peta/`)", "",
+                  "Gambar medan dibangun `peta:build` (`scripts/jejak-setara/peta/build_peta.py`) dari sumber peta, lembar "
+                  "ubin siang, dan sprite objek yang sudah Disetujui, dengan sidik sumber yang sama dengan "
+                  "`app/jejak-setara/peta/kampung_gambar.json`. Kode adalah sumber utama; PNG tidak disunting manual.", "",
+                  "| File | ID | Atribusi |", "|---|---|---|"]
+        for n in sorted(DISETUJUI_PETA):
+            baris.append(f"| `peta/{n}.png` | {MEDAN[n][0]} | Digambar dengan kode (kit Sehari Setara) oleh Claude, "
+                         f"disetujui YAN, {DISETUJUI_PETA[n]} |")
+        baris.append("")
     suara = sorted(set(DISETUJUI_SUARA) | set(SALINAN_SUARA))
     if suara:
         baris += ["## Efek suara dan musik latar (`sfx/`)", "",
@@ -269,7 +292,7 @@ def tulis_kredit(out_dir):
         baris.append("")
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "CREDITS.md").write_text("\n".join(baris), encoding="utf-8")
-    return len(DISETUJUI) + len(suara)
+    return len(DISETUJUI) + len(DISETUJUI_PETA) + len(suara)
 
 
 # ---------------------------------------------------------------------------
@@ -323,11 +346,12 @@ def _dok(teks):
     return ["/**"] + [f" * {b}".rstrip() for b in baris] + [" */"]
 
 
-def tulis_manifest(out_dir, ukuran, suara=frozenset()):
+def tulis_manifest(out_dir, ukuran, suara=frozenset(), medan=None):
     """manifest.ts untuk aset berstatus Disetujui (Architecture Jejak 11.2). Jangan disunting manual.
 
     ukuran: nama aset -> (lebar, tinggi) PNG yang baru dibangun; suara: nama WAV di sfx/ yang baru dibangun atau
-    disalin. Mengembalikan (jumlah per kelompok, masalah).
+    disalin; medan: nama gambar medan -> (lebar, tinggi) yang sudah diperiksa periksa_medan. Mengembalikan (jumlah per
+    kelompok, masalah).
     Berkas hanya ditulis bila tidak ada masalah, sehingga manifest tidak pernah berbeda dari PNG-nya. Urutan
     kunci tetap (A1-A8, urutan WARNA_TAS, lalu abjad), jadi hasilnya sama setiap kali dibangun."""
     masalah, dirujuk = [], []
@@ -412,6 +436,16 @@ def tulis_manifest(out_dir, ukuran, suara=frozenset()):
     masalah += [f"manifest: sfx/{n}.wav tidak dibangun" for n in nama_suara if n not in suara]
     suara_ts = [f"  {n.removeprefix('sfx_')}: {_pengenal(n)}," for n in nama_suara]
 
+    # PETA (PC-1): ketiga gambar medan, hanya bila ketiganya Disetujui; berkasnya dibangun peta:build
+    peta_ts = []
+    if DISETUJUI_PETA:
+        medan = medan or {}
+        if set(DISETUJUI_PETA) != set(MEDAN):
+            masalah.append("manifest: PETA memerlukan ketiga gambar medan Disetujui bersama")
+        masalah += [f"manifest: peta/{n}.png tidak ada atau belum diperiksa" for n in sorted(DISETUJUI_PETA)
+                    if n not in medan]
+        peta_ts = [f"medan{MEDAN[n][1]}: {_pengenal(n)}" for n in sorted(DISETUJUI_PETA, key=lambda n: MEDAN[n][1])]
+
     # Kelengkapan: setiap aset Disetujui dirujuk tepat sekali, dan nama impor tidak bertabrakan
     if len(dirujuk) != len(set(dirujuk)):
         masalah.append("manifest: ada aset yang dirujuk lebih dari sekali")
@@ -422,9 +456,13 @@ def tulis_manifest(out_dir, ukuran, suara=frozenset()):
         masalah.append("manifest: nama impor bertabrakan")
 
     impor = []
-    for folder in sorted({ASSETS[n][0] for n in dirujuk} | ({"sfx"} if nama_suara else set())):
+    for folder in sorted({ASSETS[n][0] for n in dirujuk} | ({"sfx"} if nama_suara else set())
+                         | ({"peta"} if peta_ts else set())):
         if folder == "sfx":
             impor += [f'import {_pengenal(n)} from "./sfx/{n}.wav";' for n in nama_suara] + [""]
+            continue
+        if folder == "peta":
+            impor += [f'import {_pengenal(n)} from "./peta/{n}.png";' for n in sorted(DISETUJUI_PETA)] + [""]
             continue
         impor += [f'import {_pengenal(n)} from "./{folder}/{n}.png";'
                   for n in sorted({n for n in dirujuk if ASSETS[n][0] == folder})] + [""]
@@ -487,6 +525,14 @@ def tulis_manifest(out_dir, ukuran, suara=frozenset()):
                "- tanda_kotak_*: kecil, besar berkilau, lalu biasa."]),
         "export const TANDA: Readonly<Record<string, Gambar>> = {", *tanda_ts, "};",
     ]
+    if peta_ts:
+        teks += [
+            "",
+            *_dok("Gambar medan peta (PC-1): kampung masa siang dengan n piksel per ubin (medan1 160 × 100, medan2 "
+                  "320 × 200, dan medan4 640 × 400 piksel); ubin (x, y) menempati piksel x·n sampai (x+1)·n − 1. Dibangun "
+                  "peta:build dari sumber peta. Layar kelas mengimpor peta_medan_4.png langsung (P-35 JS-10)."),
+            "export const PETA = { " + ", ".join(peta_ts) + " } as const;",
+        ]
     if suara_ts:
         teks += [
             "",
@@ -499,7 +545,8 @@ def tulis_manifest(out_dir, ukuran, suara=frozenset()):
             "export type NamaSuara = keyof typeof SUARA;",
         ]
     jumlah = {"AVATAR": len(AVATAR), "OBJEK": len(jenis_ada), "NPC": len(npc_ts), "IKON": len(ikon_ts),
-              "TANDA": len(tanda_ts), "UBIN": len(lembar), "SUARA": len(suara_ts), "berkas": len(set(dirujuk))}
+              "TANDA": len(tanda_ts), "UBIN": len(lembar), "SUARA": len(suara_ts), "PETA": len(peta_ts),
+              "berkas": len(set(dirujuk)) + len(peta_ts)}
     if not masalah:
         out_dir.mkdir(parents=True, exist_ok=True)
         with open(out_dir / "manifest.ts", "w", encoding="utf-8", newline="\n") as f:
@@ -1896,6 +1943,48 @@ def build_previews(preview_dir, only=None):
                         duration=lama, loop=0)
 
 
+def periksa_medan(out_dir):
+    """Gambar medan PC-1 dari peta:build: ukuran 160n × 100n, PNG palet tanpa transparansi dengan warna palet saja,
+    sidik sumber sama dengan kampung_gambar.json, dan anggaran 4, 8, dan 20 KB (bertiga 32 KB). Disalin ke
+    <out_dir>/peta/ bila <out_dir> bukan folder aset repositori. Mengembalikan (ukuran, masalah, jumlah byte)."""
+    ukuran, masalah, total = {}, [], 0
+    if PETA_KAMPUNG is None:
+        print("  peta/ dilewati: sumber peta tidak ada di luar repositori")
+        return ukuran, masalah, total
+    asal = DEFAULT_OUT / "peta"
+    sidik = json.loads((PETA_KAMPUNG.parent / "kampung_gambar.json").read_text(encoding="utf-8"))["sumber"]
+    for nama, (kode, n) in MEDAN.items():
+        jalur = asal / f"{nama}.png"
+        if not jalur.exists():
+            masalah.append(f"peta/{nama}.png tidak ada; jalankan peta:build")
+            continue
+        isi = jalur.read_bytes()
+        im = Image.open(io.BytesIO(isi))
+        im.load()
+        harap = (UBIN_PETA[0] * n, UBIN_PETA[1] * n)
+        if im.size != harap:
+            masalah.append(f"peta/{nama}.png: ukuran {im.size}, seharusnya {harap}")
+        if im.mode != "P" or "transparency" in im.info:
+            masalah.append(f"peta/{nama}.png: harus PNG palet tanpa transparansi")
+        bad = palette_violations(im)                                              # noqa: F405
+        if bad:
+            masalah.append(f"peta/{nama}.png: {bad} piksel di luar palet atau semi-transparan")
+        if getattr(im, "text", {}).get("sumber") != sidik:
+            masalah.append(f"peta/{nama}.png: sidik sumber tidak sama dengan kampung_gambar.json; jalankan peta:build")
+        if len(isi) > BATAS_MEDAN[nama]:
+            masalah.append(f"peta/{nama}.png: {len(isi)} B, melebihi {BATAS_MEDAN[nama]} B")
+        if out_dir.resolve() != DEFAULT_OUT.resolve():
+            (out_dir / "peta").mkdir(parents=True, exist_ok=True)
+            (out_dir / "peta" / f"{nama}.png").write_bytes(isi)
+        ukuran[nama] = im.size
+        total += len(isi)
+        print(f"  peta/{nama}.png  {im.size[0]}x{im.size[1]}  {len(isi)} B  ({kode}, dibangun peta:build"
+              + (", Disetujui)" if nama in DISETUJUI_PETA else ", Ditinjau)"))
+    if total > BATAS_MEDAN_TOTAL:
+        masalah.append(f"gambar medan bertiga {total} B, melebihi {BATAS_MEDAN_TOTAL} B")
+    return ukuran, masalah, total
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
@@ -1976,14 +2065,21 @@ def main():
         suara_dibangun.add(nama)
         print(f"  sfx/{nama}.wav  salinan identik dari Sehari Setara  {len(isi)} B")
 
+    # Gambar medan PC-1: dibangun peta:build, di sini diperiksa dan dihitung dalam anggaran aset layar pemain
+    ukuran_medan = {}
+    if not args.only or set(args.only) & set(MEDAN):
+        ukuran_medan, masalah_medan, total_medan = periksa_medan(args.out)
+        masalah += masalah_medan
+        total += total_medan
+
     build_previews(args.preview, args.only)
     if not args.only:
         print(f"CREDITS.md: {tulis_kredit(args.out)} aset Disetujui")
-        jumlah, masalah_manifest = tulis_manifest(args.out, ukuran_png, suara_dibangun)
+        jumlah, masalah_manifest = tulis_manifest(args.out, ukuran_png, suara_dibangun, ukuran_medan)
         masalah += masalah_manifest
         print(f"manifest.ts: {jumlah['berkas']} gambar dan {jumlah['SUARA']} suara Disetujui (AVATAR {jumlah['AVATAR']}, "
               f"OBJEK {jumlah['OBJEK']}, NPC {jumlah['NPC']}, IKON {jumlah['IKON']}, TANDA {jumlah['TANDA']}, "
-              f"UBIN {jumlah['UBIN']}, SUARA {jumlah['SUARA']})"
+              f"UBIN {jumlah['UBIN']}, SUARA {jumlah['SUARA']}, PETA {jumlah['PETA']})"
               + (", tidak ditulis karena ada masalah" if masalah_manifest else ""))
     print(f"Total aset layar pemain: {total / 1024:.1f} KB (anggaran {BATAS_TOTAL / 1024 / 1024:.0f} MB); "
           f"khusus layar kelas: {total_kelas / 1024:.1f} KB")

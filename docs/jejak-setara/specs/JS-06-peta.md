@@ -7,6 +7,7 @@
 | Rencana | `docs/jejak-setara/Daftar_Aset.md`, bagian "JS-06 Peta: rencana" |
 | Keputusan Gerbang 1 | Balasan `Setuju: JS-06` (8 Nov 2026): semua saran (a), yaitu usulan 1a sampai 9a (KT-C11 sampai KT-C19) |
 | Dikerjakan | Sesi C (aset dan peta) |
+| Perubahan sesudah Selesai | Gambar medan PC-1 (26 Nov 2026, rencana v1.1): P-32 sampai P-36 di bagian "Perubahan sesudah JS-06" |
 
 ## Ringkasan
 
@@ -334,3 +335,17 @@ Belum ada butir yang berlaku, karena peta baru bisa dimainkan sesudah JS-07. Pen
 - **B-6.** Jumlah `sebar` disesuaikan dengan yang benar-benar tertaruh, sehingga bangun hanya memberi satu peringatan: kantong di bawah atap rumah Nara (D-4).
 - **B-7.** Draf peta disetujui dengan balasan `Setuju: peta` (8 Nov 2026) tanpa perubahan.
 - **B-8.** Id titik halte memakai pola `halte-{n}`, menggantikan pola pendek yang semula tertulis di P-13. Pemeriksaan `build:pages` (AC-14) menunjukkan bahwa id pendek untuk halte pertama dan ketiga terbaca Tailwind sebagai kelas tinggi, sehingga CSS galeri berubah. Dengan `halte-{n}`, ke-178 berkas galeri kembali identik byte. Bangunan halte memakai id otomatis `o-{x}-{y}`.
+
+## Perubahan sesudah JS-06
+
+### PC-1 Gambar medan (26 November 2026)
+
+Permintaan PC-1 rencana v1.1 di `PLAN.md` untuk JS-23 (peta bermedan), direncanakan di `Daftar_Aset.md` bagian "Gambar medan peta dan kotak P1" dan disetujui 25 Nov 2026 (`Setuju: PC-1 dan PC-2`, usulan KT-C32 sampai KT-C34 pilihan a). Gambar G-01 sampai G-03 berstatus Ditinjau sampai pemilik proyek menyetujuinya; sesudah itu kredit dan kelompok `PETA` di `manifest.ts` ditulis `build_jejak.py`.
+
+- **P-32. Gambar medan.** Diberikan sumber yang sah, ketika `peta:build` dijalankan, maka selain kedua berkas peta juga ditulis `app/jejak-setara/assets/peta/peta_medan_{n}.png` untuk n = 1, 2, dan 4, berukuran 160n × 100n piksel. Isinya kampung masa siang seperti di dunia (lapisan tanah, marka, bayangan, objek bagian bawah, lalu objek bagian atas, digambar dari kedua berkas peta, `ubin_siang.png`, dan sprite objek seperti P-30), dengan gerbang lobi terbuka, tanpa avatar, kotak, titik kejadian, penanda, tulisan, dan garis pindai. Ubin (x, y) menempati piksel x·n sampai (x+1)·n − 1 dan y·n sampai (y+1)·n − 1.
+- **P-33. Cara mengecilkan (KT-C32 a).** Setiap piksel medan mewakili blok 16/n × 16/n piksel dunia. Warna pemenangnya adalah warna dengan suara berbobot terbanyak, dengan bobot per piksel menurut lapisan teratasnya: tanah 4; marka (garis tengah, zebra, dan garis lapangan) 2 bila n = 1, 3 bila n = 2, dan 4 bila n = 4; bayangan 4; objek 8, kecuali piksel `ink` objek 4. Detail acak P-24 tidak digambar. Seri dimenangkan lapisan yang lebih atas, lalu warna yang lebih dulu di `palette.json`. Sebelum dihitung, piksel objek yang warnanya sama dengan warna terbanyak tanah di bawah jejak kaki objek itu diganti dengan warna terbanyak berikutnya di sprite itu selain `ink` (seri: urutan `palette.json`), sehingga tajuk pohon dan semak di atas rumput tampak `grass`.
+- **P-34. Berkas.** PNG palet berisi hanya warna yang dipakai, berurutan menurut `palette.json`, tanpa transparansi, dengan tepat satu potongan `tEXt` berkunci `sumber` berisi sidik P-23. PNG hanya ditulis bila ukuran, piksel, atau potongan teksnya berubah, sehingga pemampatan Pillow yang berbeda tidak membuat perubahan palsu. Karena `build_peta.py` termasuk sidik, setiap perubahan berkas itu juga mengubah `sumber` di `kampung_gambar.json` dan di ketiga gambar.
+- **P-35. Pemeriksaan.** Tambahan galat P-25: (12) `peta_medan_1.png` lebih dari 4 KB, `peta_medan_2.png` lebih dari 8 KB, `peta_medan_4.png` lebih dari 20 KB, atau bertiga lebih dari 32 KB; (13) jalan terputus: untuk aspal (`slate`, `dusk`, `white`), paving (`wood`, `wood-d`), dan tanah setapak (`skin-2`, `wood`), setiap sel bahan itu yang tidak tertutup jejak kaki objek harus punya piksel berwarna jalan di komponen piksel terbesar (4 tetangga) milik jaringan selnya. Pohon, kelapa, pisang, atau semak yang tidak punya satu piksel pun berbeda dari warna tanah selnya dicetak sebagai peringatan. `--periksa` juga gagal bila piksel atau sidik gambar medan berbeda dengan hasil bangun. Keluaran menambah dua baris, misalnya `Gambar medan: peta_medan_1.png 1,8 KB (18 warna) · … · jumlah 15,6 KB dari 32 KB` dan jumlah pohon dan semak yang tampak di setiap ukuran.
+- **P-36. Pratinjau.** `preview/peta_medan.png`: ketiga gambar diperbesar, tiruan peta mini 112 × 75 px pada rasio 1 dan 2,625, tiruan peta besar 3 px per ubin, dan tiruan peta kelas 1024 × 768. Tiruan bukan tata letak final; tampilan akhirnya ditetapkan JS-23.
+- **Uji.** `peta-medan.test.ts` (berawalan `peta-`, dijalankan `content:check:jejak` dan `test:jejak`): ukuran, PNG palet berwarna `palette.json` saja tanpa `tRNS`, data piksel utuh, anggaran setiap berkas dan bertiga, serta sidik di potongan `tEXt` yang sama dengan kelima berkas sumber dan `kampung_gambar.json`.
+- **Pemeriksaan ulang `build_jejak.py`.** `assets:build:jejak` tidak menggambar ulang medan, tetapi memeriksa ukuran, palet, transparansi, sidik, dan anggarannya, menghitungnya dalam anggaran aset layar pemain, dan menyalinnya bila `--out` bukan folder aset.

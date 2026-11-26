@@ -7,14 +7,17 @@ Pemakaian (dari folder repositori):
 
 Sumber (ditulis tangan): kampung.txt (tanah, satu karakter per ubin) dan objek.json (zona, objek, pagar, sebar,
 titik kejadian, kotak, halte, lobi, dan penanda). Hasil: app/jejak-setara/peta/kampung.json (bentuk JS-02, diperiksa
-bacaPeta) dan app/jejak-setara/peta/kampung_gambar.json (nomor ubin untuk layar pemain), serta pratinjau di
-docs/jejak-setara/preview/. Kit gambar (atas_ubin.py, atas_objek.py, build_jejak.py) dipakai tanpa diubah.
-Nomor aturan P-x mengikuti docs/jejak-setara/specs/JS-06-peta.md.
+bacaPeta), app/jejak-setara/peta/kampung_gambar.json (nomor ubin untuk layar pemain), gambar medan
+app/jejak-setara/assets/peta/peta_medan_{1,2,4}.png (PC-1: peta mini, peta besar, dan peta kelas), serta pratinjau
+di docs/jejak-setara/preview/. Kit gambar (atas_ubin.py, atas_objek.py, build_jejak.py) dipakai tanpa diubah.
+Nomor aturan P-x mengikuti docs/jejak-setara/specs/JS-06-peta.md (P-32 sampai P-36: bagian "Perubahan sesudah
+JS-06").
 """
 import argparse
 import gzip
 import hashlib
 import heapq
+import io
 import json
 import math
 import re
@@ -25,7 +28,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 sys.path.insert(0, str(REPO / "scripts" / "game" / "art"))
-from PIL import Image, ImageDraw  # noqa: E402
+from PIL import Image, ImageChops, ImageDraw, PngImagePlugin  # noqa: E402
 import pixelart as PA  # noqa: E402
 from atas_ubin import KOLOM, MASA, NAMA_MASA, NOMOR, SUSUNAN, lembar_ubin, nomor_tanah  # noqa: E402
 from atas_objek import OBJEK, PAGAR, pisah  # noqa: E402
@@ -70,6 +73,21 @@ UBIN_BAYANGAN = {NOMOR[k] for k in SUSUNAN if k[0] == "tumpang" and k[1].startsw
 UBIN_TUMPANG = {NOMOR[k] for k in SUSUNAN if k[0] == "tumpang"} - UBIN_BAYANGAN
 assert UBIN_TANAH == set(range(0, 4)) | set(range(40, 47)) | set(range(48, 377)), "susunan lembar berubah"
 assert UBIN_TUMPANG == set(range(4, 12)) | set(range(22, 40)) and UBIN_BAYANGAN == set(range(12, 22))
+# P-32 sampai P-35 (PC-1): gambar medan n piksel per ubin di app/jejak-setara/assets/peta/
+MEDAN_N = (1, 2, 4)
+FOLDER_MEDAN = ASET / "peta"
+BATAS_MEDAN = {1: 4 * 1024, 2: 8 * 1024, 4: 20 * 1024}
+BATAS_MEDAN_TOTAL = 32 * 1024
+LAP_TANAH, LAP_MARKA, LAP_BAYANGAN, LAP_OBJEK = range(4)
+# P-33: bobot suara per lapisan (tanah, marka, bayangan, objek); piksel ink di lapisan objek separuh bobot objek
+BOBOT_MEDAN = {1: (4, 2, 4, 8), 2: (4, 3, 4, 8), 4: (4, 4, 4, 8)}
+UBIN_MARKA = {NOMOR[k] for k in SUSUNAN if k[0] == "tumpang" and k[1].startswith(("garis_tengah", "zebra", "lapangan"))}
+PALET = [v[:3] for v in PA.PALETTE.values()]                  # 36 warna, urutan palette.json
+INDEKS_PALET = {c: i for i, c in enumerate(PALET)}
+assert len(PALET) == 36 == len(INDEKS_PALET), "palette.json harus berisi 36 warna berbeda"
+# P-35 galat 13: warna jalan setiap bahan di gambar medan masa siang
+WARNA_JALAN = {"aspal": (PA.SLATE, PA.DUSK, PA.WHITE), "paving": (PA.WOOD, PA.WOODD), "tanah": (PA.SK2, PA.WOOD)}
+VEGETASI = {"pohon", "pohon_b", "pohon_c", "pohon_kecil", "kelapa", "pisang", "semak", "semak_b"}
 
 
 # --------------------------------------------------------------------------- acak berbenih (sama dengan inti/acak.ts)
@@ -569,7 +587,8 @@ def bangun():
             "kotak": [{"id": i, "jenis": j, "zona": z, "x": x, "y": y} for i, j, z, x, y in sorted(KOTAK)],
             "halte": [{"id": i, "zona": z, "x": x, "y": y} for i, z, x, y in sorted(HALTE)],
             "gerbangLobi": dict(GERBANG), "titikMuncul": [{"x": t["x"], "y": t["y"]} for t in d["titikMuncul"]]}
-    gambar = {"versi": 1, "lebar": W, "tinggi": H, "kolom": KOLOM, "jumlahUbin": len(SUSUNAN), "sumber": sidik_sumber(),
+    P.sidik = sidik_sumber()
+    gambar = {"versi": 1, "lebar": W, "tinggi": H, "kolom": KOLOM, "jumlahUbin": len(SUSUNAN), "sumber": P.sidik,
               "daftar": daftar_ubin,
               "tanah": rle([idx[TANAH[y][x]] for y in range(H) for x in range(W)]),
               "tumpang": rle([idx[TUMP_N[y][x]] if TUMP_N[y][x] is not None else 0 for y in range(H) for x in range(W)]),
@@ -832,6 +851,223 @@ def _sprite(jenis):
     return _SPRITE[jenis]
 
 
+# --------------------------------------------------------------------------- gambar medan (PC-1, P-32 sampai P-35)
+_SPRITE_MEDAN = {}
+
+
+def _sprite_medan(jenis, dasar):
+    """P-33: bagian atas dan bawah objek untuk medan. Piksel yang sewarna dengan tanah di bawahnya (dasar) diganti
+    warna terbanyak berikutnya di sprite itu selain ink, agar tajuk pohon dan semak tampak di atas rumput."""
+    if (jenis, dasar) in _SPRITE_MEDAN:
+        return _SPRITE_MEDAN[(jenis, dasar)]
+    atas, bawah, tinggi_atas = _sprite(jenis)
+    jumlah = {}
+    for bagian in (atas, bawah):
+        if bagian is not None:
+            for c, p in bagian.getcolors(1 << 16):
+                if p[3]:
+                    jumlah[p[:3]] = jumlah.get(p[:3], 0) + c
+    hasil = (atas, bawah, tinggi_atas)
+    if dasar in jumlah:
+        calon = sorted((k for k in jumlah if k not in (dasar, PA.INK[:3])), key=lambda k: (-jumlah[k], INDEKS_PALET[k]))
+        ganti = (calon[0] if calon else PA.INK[:3]) + (255,)
+
+        def warnai(im):
+            if im is None:
+                return None
+            im = im.copy()
+            px = im.load()
+            for yy in range(im.height):
+                for xx in range(im.width):
+                    if px[xx, yy][3] and px[xx, yy][:3] == dasar:
+                        px[xx, yy] = ganti
+            return im
+        hasil = (warnai(atas), warnai(bawah), tinggi_atas)
+    _SPRITE_MEDAN[(jenis, dasar)] = hasil
+    return hasil
+
+
+def _warna_terbanyak(im, kotak):
+    """Warna terbanyak di potongan gambar; seri dimenangkan urutan palette.json."""
+    return max(im.crop(kotak).getcolors(1 << 16), key=lambda c: (c[0], -INDEKS_PALET[c[1][:3]]))[1][:3]
+
+
+def _lapisan_medan(P):
+    """P-32 dan P-33: dunia masa siang 2.560 × 1.600 tanpa detail acak, avatar, kotak, titik, dan tulisan, beserta
+    lapisan teratas setiap piksel (gambar L: 0 tanah, 1 marka, 2 bayangan, 3 objek)."""
+    lembar, cache = lembar_ubin("siang").im, {}
+
+    def ubin(n):
+        if n not in cache:
+            x, y = (n % KOLOM) * UBIN, (n // KOLOM) * UBIN
+            cache[n] = lembar.crop((x, y, x + UBIN, y + UBIN))
+        return cache[n]
+    dunia = Image.new("RGBA", (LEBAR * UBIN, TINGGI * UBIN))
+    lap = Image.new("L", dunia.size, LAP_TANAH)
+    for y in range(TINGGI):
+        for x in range(LEBAR):
+            dunia.paste(ubin(P.tanah[y][x]), (x * UBIN, y * UBIN))
+    tanah = dunia.copy()
+    for nilai, sumber, pilih in ((LAP_MARKA, P.tumpang, UBIN_MARKA), (LAP_BAYANGAN, P.bayangan, UBIN_BAYANGAN)):
+        for y in range(TINGGI):
+            for x in range(LEBAR):
+                if sumber[y][x] in pilih:
+                    t = ubin(sumber[y][x])
+                    dunia.alpha_composite(t, (x * UBIN, y * UBIN))
+                    lap.paste(nilai, (x * UBIN, y * UBIN, (x + 1) * UBIN, (y + 1) * UBIN), t.getchannel("A"))
+    urut = sorted(P.objek, key=lambda o: (o["y"] + OBJEK[o["jenis"]][1][1], o["x"]))
+    sprite = {}
+    for o in urut:
+        w, h = OBJEK[o["jenis"]][1]
+        dasar = _warna_terbanyak(tanah, (o["x"] * UBIN, o["y"] * UBIN, (o["x"] + w) * UBIN, (o["y"] + h) * UBIN))
+        sprite[o["id"]] = _sprite_medan(o["jenis"], dasar)
+    for bagian_bawah in (True, False):                 # semua bagian bawah lebih dulu, lalu bagian atas (Design System 7)
+        for o in urut:
+            atas, bawah, tinggi_atas = sprite[o["id"]]
+            im = bawah if bagian_bawah else atas
+            if im is None:
+                continue
+            xy = (o["x"] * UBIN - 1, o["y"] * UBIN - 1 + (tinggi_atas if bagian_bawah else 0))
+            dunia.paste(im, xy, im)
+            lap.paste(LAP_OBJEK, xy + (xy[0] + im.width, xy[1] + im.height), im.getchannel("A"))
+    return dunia.convert("RGB"), lap, tanah.convert("RGB")
+
+
+def _gambar_palet():
+    q = Image.new("P", (1, 1))
+    q.putpalette([v for c in PALET for v in c] + [0] * (768 - 3 * len(PALET)))
+    return q
+
+
+def _kecilkan_medan(nilai, n):
+    """P-33: satu piksel medan per blok 16/n × 16/n piksel dunia. Pemenangnya warna dengan suara berbobot terbanyak;
+    seri dimenangkan lapisan yang lebih atas, lalu urutan palette.json. nilai = indeks palet × 4 + lapisan."""
+    b, bobot = UBIN // n, BOBOT_MEDAN[n]
+    b_objek = bobot[LAP_OBJEK]
+    ink = INDEKS_PALET[PA.INK[:3]]
+    keluar = bytearray(LEBAR * n * TINGGI * n)
+    i = 0
+    for y in range(TINGGI * n):
+        for x in range(LEBAR * n):
+            skor, atas = {}, {}
+            for c, v in nilai.crop((x * b, y * b, x * b + b, y * b + b)).getcolors(b * b):
+                ci, li = v >> 2, v & 3
+                skor[ci] = skor.get(ci, 0) + c * (b_objek // 2 if li == LAP_OBJEK and ci == ink else bobot[li])
+                if li > atas.get(ci, -1):
+                    atas[ci] = li
+            keluar[i] = max(skor, key=lambda k: (skor[k], atas[k], -k))
+            i += 1
+    return keluar
+
+
+def _png_medan(indeks, n, sidik):
+    """P-34: PNG palet berisi warna yang dipakai saja (urutan palette.json), tanpa transparansi, dengan sidik sumber
+    di potongan tEXt berkunci "sumber"."""
+    pakai = sorted(set(indeks))
+    tabel = bytearray(256)
+    for j, c in enumerate(pakai):
+        tabel[c] = j
+    im = Image.frombytes("P", (LEBAR * n, TINGGI * n), bytes(indeks).translate(bytes(tabel)))
+    im.putpalette([v for c in pakai for v in PALET[c]])
+    info = PngImagePlugin.PngInfo()
+    info.add_text("sumber", sidik)
+    buf = io.BytesIO()
+    im.save(buf, "PNG", optimize=True, pnginfo=info)
+    return im, buf.getvalue()
+
+
+def medan_sama(jalur, im, sidik):
+    """Benar bila PNG di jalur berukuran, berpiksel, dan bersidik sama dengan hasil bangun (pemampatan boleh beda)."""
+    if not jalur.exists():
+        return False
+    try:
+        lama = Image.open(jalur)
+        lama.load()
+    except OSError:
+        return False
+    return (lama.mode == "P" and lama.size == im.size and "transparency" not in lama.info
+            and getattr(lama, "text", {}) == {"sumber": sidik}
+            and lama.convert("RGB").tobytes() == im.convert("RGB").tobytes())
+
+
+def _komponen(sel):
+    """Komponen bersambung (4 tetangga) dari himpunan sel atau piksel: {anggota: nomor komponen}."""
+    milik, nomor = {}, 0
+    for awal in sel:
+        if awal in milik:
+            continue
+        milik[awal] = nomor
+        dq = deque([awal])
+        while dq:
+            x, y = dq.popleft()
+            for q in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+                if q in sel and q not in milik:
+                    milik[q] = nomor
+                    dq.append(q)
+        nomor += 1
+    return milik
+
+
+def _periksa_jalan(P, n, im):
+    """P-35 galat 13: setiap sel aspal, paving, atau tanah setapak yang tidak tertutup jejak kaki objek harus punya
+    piksel berwarna jalan di komponen piksel terbesar milik jaringan selnya. Mengembalikan daftar sel yang lepas."""
+    px, lepas = im.convert("RGB").load(), []
+    for bahan, warna in WARNA_JALAN.items():
+        warna = {c[:3] for c in warna}
+        sel = {(x, y) for y in range(TINGGI) for x in range(LEBAR) if P.bahan[y][x] == bahan}
+        jaringan = _komponen(sel)
+        piksel = {(x, y) for cx, cy in sel for y in range(cy * n, cy * n + n) for x in range(cx * n, cx * n + n)
+                  if px[x, y] in warna}
+        kp = _komponen(piksel)
+        hitung = {}
+        for (x, y), k in kp.items():
+            j = jaringan[(x // n, y // n)]
+            hitung.setdefault(j, {})
+            hitung[j][k] = hitung[j].get(k, 0) + 1
+        utama = {j: max(h, key=lambda k: (h[k], -k)) for j, h in hitung.items()}
+        for (cx, cy), j in sorted(jaringan.items(), key=lambda t: (t[0][1], t[0][0])):
+            if P.occ[cy][cx] is None and not any(kp.get((x, y)) == utama.get(j) for y in range(cy * n, cy * n + n)
+                                                  for x in range(cx * n, cx * n + n)):
+                lepas.append((bahan, cx, cy))
+    return lepas
+
+
+def bangun_medan(P):
+    """P-32 sampai P-35: ketiga gambar medan dan pemeriksaannya. Mengisi P.medan = {n: (gambar P, isi PNG)} serta
+    P.medan_tampak = {n: (tampak, jumlah)} untuk pohon dan semak."""
+    dunia, lap, tanah = _lapisan_medan(P)
+    idx = dunia.quantize(palette=_gambar_palet(), dither=0)
+    if idx.convert("RGB").tobytes() != dunia.tobytes():
+        P.galat("gambar medan: ada warna di luar palet 36 warna (P-34)")
+        return
+    nilai = ImageChops.add(Image.frombytes("L", idx.size, idx.tobytes()).point(lambda v: v * 4), lap)
+    dasar = [[_warna_terbanyak(tanah, (x * UBIN, y * UBIN, (x + 1) * UBIN, (y + 1) * UBIN)) for x in range(LEBAR)]
+             for y in range(TINGGI)]
+    P.medan, P.medan_tampak, total = {}, {}, 0
+    for n in MEDAN_N:
+        im, isi = _png_medan(_kecilkan_medan(nilai, n), n, P.sidik)
+        P.medan[n] = (im, isi)
+        total += len(isi)
+        if len(isi) > BATAS_MEDAN[n]:
+            P.galat(f"gambar medan peta_medan_{n}.png: {len(isi)} B, melebihi {BATAS_MEDAN[n]} B (P-35 galat 12)")
+        lepas = _periksa_jalan(P, n, im)
+        if lepas:
+            P.galat(f"gambar medan peta_medan_{n}.png: jalan terputus di {len(lepas)} sel, misalnya {lepas[:4]} "
+                    f"(P-35 galat 13)", [(x, y) for _, x, y in lepas])
+        px = im.convert("RGB").load()
+        veg = [o for o in P.objek if o["jenis"] in VEGETASI]
+        tampak = 0
+        for o in veg:
+            w, h = OBJEK[o["jenis"]][1]
+            tampak += any(px[x, y] != dasar[y // n][x // n] for y in range(o["y"] * n, min(o["y"] + h, TINGGI) * n)
+                          for x in range(o["x"] * n, min(o["x"] + w, LEBAR) * n))
+        P.medan_tampak[n] = (tampak, len(veg))
+        if tampak < len(veg):
+            P.peringat(f"gambar medan peta_medan_{n}.png: {len(veg) - tampak} dari {len(veg)} pohon dan semak tidak tampak")
+    if total > BATAS_MEDAN_TOTAL:
+        P.galat(f"gambar medan: bertiga {total} B, melebihi {BATAS_MEDAN_TOTAL} B (P-35 galat 12)")
+
+
 def gambar_peta(P, masa, pemain=True):
     """Peta penuh dari lapisan dan objek, dengan cara yang sama seperti layar pemain (Design System 7)."""
     lembar, cache = lembar_ubin(masa).im, {}
@@ -1056,12 +1292,170 @@ def gambar_denah(P, siang):
     return L
 
 
+def _bulat_js(v):
+    """Math.round JavaScript (setengah selalu ke atas), agar tiruan sama dengan kanvas layar pemain."""
+    return math.floor(v + 0.5)
+
+
+def _contoh_kejadian(P):
+    """Dua titik contoh untuk tiruan peta: satu kejadian yang sudah terlihat dan satu yang sudah selesai."""
+    titik = {i: (x, y) for i, _, x, y in P.titik}
+    return [(titik.get("t-z4-03", P.titik[0][2:]), False), (titik.get("t-z1-05", P.titik[1][2:]), True)]
+
+
+def _diri_contoh(P):
+    gb = P.gerbang
+    return (gb["kiri"] + gb["kanan"] + 1) / 2, gb["bawah"] + 3
+
+
+def _tiruan_mini(P, rasio):
+    """Tiruan peta mini 112 × 75 px CSS (PetaMini.tsx) dengan medan di bawah halte, penanda, dan panah diri."""
+    w, h = _bulat_js(112 * rasio), _bulat_js(75 * rasio)
+    kan = Image.new("RGBA", (w, h), PA.INK)
+    s = 0.7 * rasio
+    dy = _bulat_js((75 - TINGGI * 0.7) / 2 * rasio)
+    medan = P.medan[2 if rasio >= 2 else 1][0].convert("RGBA")
+    kan.alpha_composite(medan.resize((_bulat_js(LEBAR * s), _bulat_js(TINGGI * s)), Image.NEAREST), (0, dy))
+    k = max(1, _bulat_js(rasio))
+    ikon = 7 * k
+
+    def tempel(im, ux, uy):
+        kan.alpha_composite(im, (_bulat_js(ux * s - ikon / 2), _bulat_js(uy * s + dy - ikon / 2)))
+    for _, _, x, y in P.halte:
+        tempel(_ikon("ikon_mini_halte", k), x + 0.5, y + 0.5)
+    for (x, y), selesai in _contoh_kejadian(P):
+        tempel(_ikon("ikon_mini_selesai" if selesai else "ikon_mini_kejadian", k), x + 0.5, y + 0.5)
+    tempel(_ikon("tanda_diri", k, bingkai=2), *_diri_contoh(P))
+    return kan.convert("RGB")
+
+
+def _label(d, kan, xy, teks, f, latar, ikon=None, tengah=True):
+    """Kotak label bergaris ink 2 px (gaya js-label-zona dan js-kamu-label)."""
+    bb = d.textbbox((0, 0), teks, font=f)
+    lebar = bb[2] - bb[0] + 12 + (20 if ikon is not None else 0)
+    tinggi = max(bb[3] - bb[1], 16 if ikon is not None else 0) + 8
+    x0, y0 = (_bulat_js(xy[0] - lebar / 2), _bulat_js(xy[1] - tinggi / 2)) if tengah else (int(xy[0]), int(xy[1]))
+    d.rectangle((x0, y0, x0 + lebar - 1, y0 + tinggi - 1), fill=latar, outline=PA.INK[:3], width=2)
+    tx = x0 + 6
+    if ikon is not None:
+        kan.alpha_composite(ikon, (tx, y0 + (tinggi - 16) // 2))
+        tx += 20
+    d.text((tx, y0 + 4 - bb[1]), teks, font=f, fill=PA.INK[:3])
+
+
+def _tiruan_besar(P, s=3):
+    """Tiruan peta besar s px per ubin (PetaBesar.tsx) dengan medan di bawah halte, penanda, label zona, dan diri."""
+    kan = P.medan[4][0].convert("RGBA").resize((LEBAR * s, TINGGI * s), Image.NEAREST)
+    d = ImageDraw.Draw(kan)
+    for _, _, x, y in P.halte:
+        kan.alpha_composite(_ikon("ikon_mini_halte", 2), (_bulat_js((x + 0.5) * s - 7), _bulat_js((y + 0.5) * s - 7)))
+    for (x, y), selesai in _contoh_kejadian(P):
+        ikon = _ikon("ikon_mini_selesai" if selesai else "ikon_mini_kejadian", 2)
+        kan.alpha_composite(ikon, (_bulat_js((x + 0.5) * s - 7), _bulat_js((y + 0.5) * s - 7)))
+    f = BJ._huruf(11)
+    for z in P.sumber["zona"]:
+        n = int(z["id"][1:])
+        _label(d, kan, ((z["kiri"] + z["kanan"] + 1) / 2 * s, (z["atas"] + z["bawah"] + 1) / 2 * s), z["nama"], f,
+               PA.CREAM[:3], _ikon(f"ikon_zona_{n}", 1))
+    ux, uy = _diri_contoh(P)
+    kan.alpha_composite(_ikon("tanda_diri", 3, bingkai=2), (_bulat_js(ux * s) - 10, _bulat_js(uy * s) - 10))
+    _label(d, kan, (_bulat_js(ux * s) + 14, _bulat_js(uy * s) - 12), "Kamu di sini", f, PA.SUN[:3], tengah=False)
+    return kan.convert("RGB")
+
+
+def _tiruan_kelas(P):
+    """Tiruan layar kelas 1024 × 768: peta 508 × 319 px (3,18 px per ubin, ukuran Plan v1.1 percobaan 2) dari gambar
+    4 px per ubin tanpa penghalusan, ikon zona kecil di sudut zona, dan titik pemain 3 ubin bergaris ganda."""
+    L = Image.new("RGBA", (1024, 768), PA.CREAM)
+    d = ImageDraw.Draw(L)
+    fj, f = BJ._huruf(22, True), BJ._huruf(15)
+    d.rectangle((0, 0, 1023, 51), fill=PA.SIANG1[:3])
+    d.text((20, 13), "Siang 11.40", font=fj, fill=PA.INK[:3])
+    d.text((600, 13), "Sisa 08:12", font=fj, fill=PA.INK[:3])
+    x0, y0, pw, ph = 20, 72, 508, 319
+    d.rectangle((x0 - 3, y0 - 3, x0 + pw + 2, y0 + ph + 2), fill=PA.INK[:3])
+    L.alpha_composite(P.medan[4][0].convert("RGBA").resize((pw, ph), Image.NEAREST), (x0, y0))
+    sx, sy = pw / LEBAR, ph / TINGGI
+    for z in P.sumber["zona"]:
+        ikon = Image.open(ASET / "ikon" / f"ikon_zona_{int(z['id'][1:])}.png").convert("RGBA").resize((22, 22), Image.NEAREST)
+        L.alpha_composite(ikon, (x0 + _bulat_js((z["kiri"] + 1.5) * sx), y0 + _bulat_js((z["atas"] + 1.5) * sy)))
+    acak = acak_berbenih(benih("pratinjau-kelas", P.sumber["benih"]))
+    bebas = [(x, y) for y in range(TINGGI) for x in range(LEBAR) if P.terjangkau[y][x]]
+    warna = list(BJ.WARNA_TAS.values())
+    sisi = _bulat_js(3 * sx)
+    for i in range(24):
+        x, y = bebas[int(acak() * len(bebas))]
+        cx, cy = x0 + _bulat_js((x + 0.5) * sx), y0 + _bulat_js((y + 0.5) * sy)
+        a, b = cx - sisi // 2, cy - sisi // 2
+        d.rectangle((a, b, a + sisi - 1, b + sisi - 1), fill=warna[i % len(warna)][0][:3], outline=PA.INK[:3])
+        d.rectangle((a + 1, b + 1, a + sisi - 2, b + sisi - 2), outline=PA.WHITE[:3])
+    d.rectangle((560, 72, 1003, 391), fill=PA.WHITE[:3], outline=PA.INK[:3], width=3)
+    d.text((576, 84), "10 besar", font=fj, fill=PA.INK[:3])
+    for j, (nama, skor) in enumerate((("Jalak Biru", 480), ("Anoa Hijau", 440), ("Kancil Jingga", 410))):
+        d.text((576, 124 + j * 32), f"{j + 1}   {nama}", font=f, fill=PA.INK[:3])
+        d.text((930, 124 + j * 32), str(skor), font=f, fill=PA.INK[:3])
+    d.text((576, 124 + 3 * 32), "…", font=f, fill=PA.INK[:3])
+    d.rectangle((20, 700, 1003, 747), fill=PA.WHITE[:3], outline=PA.INK[:3], width=3)
+    d.text((36, 713), "Kemajuan kelas 38%", font=f, fill=PA.INK[:3])
+    return L.convert("RGB")
+
+
+def gambar_pratinjau_medan(P):
+    """P-36: ketiga gambar medan diperbesar, tiruan peta mini pada rasio 1 dan 2,625, peta besar 3 px per ubin, dan
+    peta kelas 1024 × 768. Tiruan bukan tata letak final; tampilan akhirnya ditetapkan JS-23."""
+    L = Image.new("RGB", (2072, 1880), PA.CREAM[:3])
+    d = ImageDraw.Draw(L)
+    fj, fs, f, fk = BJ._huruf(26, True), BJ._huruf(18, True), BJ._huruf(15), BJ._huruf(14)
+    d.text((24, 18), "Gambar medan peta Jejak Setara (PC-1): kampung masa siang dalam tiga ukuran", font=fj, fill=PA.INK[:3])
+    d.text((24, 58), "Dibangun peta:build dari kampung.json, kampung_gambar.json, ubin_siang.png, dan sprite objek. Tanpa "
+           "avatar, kotak, titik kejadian, penanda, dan tulisan; gerbang lobi terbuka.", font=f, fill=PA.DUSK[:3])
+
+    def tempel(im, x, y, k=1):
+        im = im.convert("RGB")
+        if k != 1:
+            im = im.resize((im.width * k, im.height * k), Image.NEAREST)
+        d.rectangle((x - 2, y - 2, x + im.width + 1, y + im.height + 1), fill=PA.INK[:3])
+        L.paste(im, (x, y))
+    for j, n in enumerate(MEDAN_N):
+        im, isi = P.medan[n]
+        x = 24 + j * 664
+        d.text((x, 98), f"peta_medan_{n}.png: {LEBAR * n} × {TINGGI * n} px, {n} px per ubin, {len(im.getcolors())} warna, "
+               f"{angka(len(isi) / 1024)} KB" + (f" (×{4 // n})" if n < 4 else " (ukuran asli)"), font=f, fill=PA.INK[:3])
+        tempel(im, x, 128, 4 // n)
+    d.text((24, 562), "Tiruan peta mini 112 × 75 px: halte, dua penanda kejadian, dan panah diri sebagai contoh",
+           font=fs, fill=PA.INK[:3])
+    d.text((24, 594), "Rasio 1 (laptop): peta_medan_1.png pada 0,7 px per ubin. Kiri ×4, kanan ukuran asli",
+           font=fk, fill=PA.DUSK[:3])
+    mini1 = _tiruan_mini(P, 1)
+    tempel(mini1, 24, 622, 4)
+    tempel(mini1, 24 + mini1.width * 4 + 20, 622)
+    d.text((640, 594), "Rasio 2,625 (HP 731 × 411): peta_medan_2.png pada 1,84 piksel perangkat per ubin. Kiri ×2, kanan "
+           "ukuran asli", font=fk, fill=PA.DUSK[:3])
+    mini2 = _tiruan_mini(P, 2.625)
+    tempel(mini2, 640, 622, 2)
+    tempel(mini2, 640 + mini2.width * 2 + 20, 622)
+    d.text((24, 1050), "Tiruan peta besar 3 px per ubin (480 × 300 px, rasio 1) dari peta_medan_4.png, ditampilkan ×2",
+           font=fs, fill=PA.INK[:3])
+    tempel(_tiruan_besar(P), 24, 1084, 2)
+    d.text((1008, 1050), "Tiruan peta kelas 1024 × 768: peta 508 × 319 px (3,18 px per ubin) dari peta_medan_4.png",
+           font=fs, fill=PA.INK[:3])
+    tempel(_tiruan_kelas(P), 1008, 1084)
+    for j, b in enumerate(("Halte, penanda, panah, label, dan titik pemain di tiruan digambar antarmuka, bukan bagian "
+                           "gambar medan.", "Tiruan bukan tata letak final: tampilan akhir peta mini, peta besar, dan peta "
+                           "kelas ditetapkan JS-23.", "Titik pemain di peta kelas: 3 ubin, garis dalam putih dan garis "
+                           "luar ink (usulan 6a rencana v1.1).")):
+        d.text((24, 1706 + j * 26), b, font=fk, fill=PA.INK[:3])
+    return L
+
+
 def buat_pratinjau(P, folder, lengkap=True):
     folder.mkdir(parents=True, exist_ok=True)
     siang = gambar_peta(P, "siang")
     gambar_periksa(P, siang).save(folder / "peta_periksa.png", optimize=True)
     if not lengkap:
         return
+    if len(getattr(P, "medan", {})) == len(MEDAN_N):
+        gambar_pratinjau_medan(P).save(folder / "peta_medan.png", optimize=True)
     siang.convert("RGB").save(folder / "peta_siang.png", optimize=True)
     for masa in ("pagi", "sore"):
         gambar_peta(P, masa).convert("RGB").save(folder / f"peta_{masa}.png", optimize=True)
@@ -1075,7 +1469,7 @@ def buat_pratinjau(P, folder, lengkap=True):
 
 # --------------------------------------------------------------------------- utama
 def main():
-    ap = argparse.ArgumentParser(description="Bangun dan periksa peta kampung Jejak Setara (JS-06).")
+    ap = argparse.ArgumentParser(description="Bangun dan periksa peta kampung Jejak Setara (JS-06) dan gambar medannya (PC-1).")
     ap.add_argument("--periksa", action="store_true", help="bangun di memori dan bandingkan dengan berkas di repositori")
     ap.add_argument("--tanpa-pratinjau", action="store_true", help="lewati pembuatan pratinjau")
     ap.add_argument("--keluar", type=Path, help="tulis hasil dan pratinjau ke folder lain")
@@ -1083,7 +1477,10 @@ def main():
 
     P = bangun()
     folder_hasil = args.keluar or HASIL
+    folder_medan = (args.keluar / "assets" / "peta") if args.keluar else FOLDER_MEDAN
     folder_pratinjau = (args.keluar / "preview") if args.keluar else PRATINJAU
+    if hasattr(P, "teks_peta") and not P.masalah:
+        bangun_medan(P)
     if hasattr(P, "teks_peta"):
         kb = [len(P.teks_peta) / 1024, P.gzip[0] / 1024, len(P.teks_gambar) / 1024, P.gzip[1] / 1024]
         print(f"Peta {LEBAR} × {TINGGI} ubin: {len(P.titik)} titik kejadian, {len(P.kotak)} kotak, {len(P.halte)} halte, "
@@ -1092,11 +1489,21 @@ def main():
               f"({angka(kb[3])} KB gzip) · jumlah gzip {angka(kb[1] + kb[3])} KB dari {BATAS_GZIP // 1024} KB")
         print(f"Keterlihatan penanda: {angka(P.persen_penanda)}% posisi.")
         print(f"Dari gerbang lobi ke titik kejadian terjauh: {angka(P.waktu_terjauh)} detik berjalan.")
+    if len(getattr(P, "medan", {})) == len(MEDAN_N):
+        isi = " · ".join(f"peta_medan_{n}.png {angka(len(P.medan[n][1]) / 1024)} KB ({len(P.medan[n][0].getcolors())} "
+                         f"warna)" for n in MEDAN_N)
+        total = sum(len(P.medan[n][1]) for n in MEDAN_N)
+        print(f"Gambar medan: {isi} · jumlah {angka(total / 1024)} KB dari {BATAS_MEDAN_TOTAL // 1024} KB")
+        print("Pohon dan semak yang tampak di gambar medan: " + ", ".join(
+            f"{P.medan_tampak[n][0]} dari {P.medan_tampak[n][1]} ({n} px per ubin)" for n in MEDAN_N) + ".")
     if args.periksa and not P.masalah:
         for nama, isi in (("kampung.json", P.teks_peta), ("kampung_gambar.json", P.teks_gambar)):
             jalur = HASIL / nama
             if not jalur.exists() or jalur.read_bytes().replace(b"\r\n", b"\n") != isi:
                 P.galat(f"{nama} berbeda dengan hasil bangun dari sumber; jalankan peta:build")
+        for n in MEDAN_N:
+            if not medan_sama(FOLDER_MEDAN / f"peta_medan_{n}.png", P.medan[n][0], P.sidik):
+                P.galat(f"peta_medan_{n}.png berbeda dengan hasil bangun dari sumber (piksel atau sidik); jalankan peta:build")
     if P.peringatan:
         print("PERINGATAN:")
         for teks, _ in P.peringatan:
@@ -1112,6 +1519,11 @@ def main():
         folder_hasil.mkdir(parents=True, exist_ok=True)
         (folder_hasil / "kampung.json").write_bytes(P.teks_peta)
         (folder_hasil / "kampung_gambar.json").write_bytes(P.teks_gambar)
+        folder_medan.mkdir(parents=True, exist_ok=True)
+        for n in MEDAN_N:                                      # P-34: PNG hanya ditulis bila isinya berubah
+            im, isi = P.medan[n]
+            if not medan_sama(folder_medan / f"peta_medan_{n}.png", im, P.sidik):
+                (folder_medan / f"peta_medan_{n}.png").write_bytes(isi)
     print("Semua pemeriksaan peta lulus.")
 
 
