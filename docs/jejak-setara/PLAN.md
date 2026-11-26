@@ -20,7 +20,7 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-14 | Selesai (22 Nov 2026; `Diterima: JS-14`) | [JS-14-pengaturan.md](specs/JS-14-pengaturan.md) | [JS-14-hasil.md](tests/JS-14-hasil.md) |
 | JS-15 | Selesai (24 Nov 2026; `Diterima: JS-15`) | [JS-15-beban.md](specs/JS-15-beban.md) | [JS-15-hasil.md](tests/JS-15-hasil.md) |
 | JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Selesai (25 Nov 2026; `Diterima: JS-16b`, penyimpangan 1a dan 2a). JS-16c (dipersempit: tautan layar judul Sehari Setara dan rilis v1.0): Selesai (25 Nov 2026; `Diterima: JS-16c`, penyimpangan 1a; produksi v1.0 terpasang 25 Nov 2026). JS-16d (panduan guru, tautan galeri, catatan uji coba): belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md), [JS-16c-tautan-judul.md](specs/JS-16c-tautan-judul.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus; [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus; [JS-16c-hasil.md](tests/JS-16c-hasil.md), lulus |
-| JS-18 | Direncanakan (Plan lanjutan 26 Nov 2026; menunggu `Setuju: JS-18`). Disetujui dalam rencana v1.1 (25 Nov 2026; `Setuju: JS-21`); `PC-2-kotak.zip` dilampirkan saat Build | — | — |
+| JS-18 | Direncanakan (Plan lanjutan 26 Nov 2026; menunggu `Setuju: JS-18`). Disetujui dalam rencana v1.1 (25 Nov 2026; `Setuju: JS-21`); `PC-2-kotak.zip` diterima dan diperiksa 26 Nov 2026, isinya masuk ZIP Build | — | — |
 | JS-21 | Selesai (26 Nov 2026, dinyatakan pemilik proyek di awal Plan lanjutan JS-23; dibangun dan diuji 25 Nov 2026). Masuk rilis v1.1 | [JS-21-musik.md](specs/JS-21-musik.md) | [JS-21-hasil.md](tests/JS-21-hasil.md) |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
 | JS-23 | Selesai (26 Nov 2026); pemeriksaan manual AC-17 oleh pemilik proyek di lingkungan uji. Masuk rilis v1.1 | [JS-23-peta-medan.md](specs/JS-23-peta-medan.md) | [JS-23-hasil.md](tests/JS-23-hasil.md) |
@@ -2571,7 +2571,12 @@ Dibangun dan diuji dalam mode ZIP dari ZIP `main` sesudah commit `c1c1a86` ditam
 #### Pemeriksaan awal (26 Nov 2026)
 
 - ZIP sesuai keadaan yang disebut pemilik proyek: JS-21 dan JS-23 Selesai, baris JS-18 "Disetujui dalam rencana v1.1", `Daftar_Aset.md` versi 1.6, dan tidak ada folder `audit/`.
-- `PC-2-kotak.zip` belum sampai di sesi ini (tidak ada di lampiran dua pesan berturut-turut). Isinya dibaca dari `Daftar_Aset.md` (11 berkas; bagian "Rincian giliran gambar dan letak"), dan ZIP itu diperiksa di awal Build (usulan 14). Percobaan di bawah memakai letak PC-2 yang Disetujui.
+- `PC-2-kotak.zip` diterima sesudah entri ini ditulis (26 Nov 2026) dan diperiksa di salinan terpisah tanpa di-commit (KT-C34 a):
+  - 11 berkas sesuai `Daftar_Aset.md` (bagian "Rincian giliran gambar dan letak"), semuanya berakhiran baris LF.
+  - `kampung.json` hanya berubah di `kotak`: 24 menjadi 31 (9 sepatu, 6 kompas, 9 buku, 3 teropong, dan 4 karcis), urut menurut id, dan letak ketujuh kotak baru sama dengan tabel PC-2. `objek.json` hanya berubah di `kotak`, dan `kampung_gambar.json` hanya di `sumber`.
+  - Ketiga gambar medan berpiksel sama dengan `main`, dan sidik di setiap PNG sama dengan `sumber` baru.
+  - Dengan isi itu terpasang: `build_peta.py --periksa` lulus (peringatan kantong tertutup 4 sel di Z1 sudah ada di `main`); `content:check:jejak` 395 uji lulus; `test:jejak` 1.404 dari 1.405 uji lulus, dan satu-satunya yang gagal adalah `skill-ruang` "24 kotak" (C-19); `skill.uji-server.ts` 4 uji lulus; dan `build:jejak` lulus dengan kode layar pemain 141,25 KB (+0,06 KB) serta kedua berkas peta 13,55 KB gzip.
+  - Percobaan di bawah memakai letak yang sama. Isi ZIP itu tetap disalin dan diperiksa ulang di awal Build (usulan 14).
 - Hasil pemeriksaan manual AC-15 JS-21 dan AC-17 JS-23 belum dikirim (pesan pemilik proyek masih memuat teks contoh), jadi kedua laporan tidak diubah. Keduanya dicatat sebelum `Rilis: v1.1` (bagian "Rencana rilis v1.1 (rinci)").
 - `naskah/STATUS.md` tanpa permintaan baru (tidak ada A-19); `Daftar_Aset.md` memuat C-19 dan C-20 (tabel tanggapan di bawah).
 - `install --frozen-lockfile` berhasil dalam 28 detik, dan `build:pages` dasar menghasilkan 178 berkas.
@@ -2698,6 +2703,6 @@ Dibaca dari ZIP `main` sesudah commit `406c8c0`: `naskah/STATUS.md` (23 Nov 2026
 4. **Bingkai panjang sesudah pindah:** usulan 6a; diukur lagi di Test (HP 731 × 411 dengan CPU 6 kali lebih lambat) dan diperiksa di HP sungguhan di lingkungan uji.
 5. **Teropong membuka letak kejadian:** sesuai Architecture 12.1 (lokasi lewat skill), dibatasi radius 12 ubin, 1 muatan, dan titik aktif yang belum selesai.
 6. **Protokol 6:** klien lama dimuat ulang; rilis di luar jam pelajaran, dan alur kerja menahan rilis selama ada ruang produksi terbuka.
-7. **`PC-2-kotak.zip` belum diperiksa di sesi ini:** diperiksa di awal Build (usulan 14).
+7. **`main` berubah sebelum Build:** isi `PC-2-kotak.zip` cocok dengan `main` sesudah commit `406c8c0` (Pemeriksaan awal). Bila sumber peta di `main` berubah sebelum Build, pemeriksaan diulang, dan ketidakcocokan menjadi permintaan untuk Sesi C (usulan 14).
 8. **Ukuran kode:** perkiraan +2,5 sampai +4 KB untuk layar pemain, dengan batas +5 KB (141,19 dari 200 KB).
 9. **Galeri:** setiap ZIP dicek dengan `build:pages`, dan ke-178 berkas harus identik byte.
