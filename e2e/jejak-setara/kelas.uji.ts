@@ -1,7 +1,8 @@
 // Uji ujung ke ujung layar kelas dan halaman ruang (spesifikasi JS-10; AC-1, AC-2, AC-7, AC-12, AC-14 sampai AC-19).
 // Guru masuk, membuat ruang, membuka layar kelas di tab baru; tiga pemain bergabung lewat peramban dan satu bot menjawab
 // satu kejadian lewat WebSocket; ronde berjalan sampai podium, pembahasan, dan ruang ditutup. Tangkapan layar disimpan
-// di docs/jejak-setara/tests/JS-10/.
+// di docs/jejak-setara/tests/JS-10/. Musik latar JS-21 (AC-1, AC-4 sampai AC-8, AC-17) diperiksa di alur yang sama, dengan
+// tangkapan layar kepala di docs/jejak-setara/tests/JS-21/.
 import { readFileSync } from "node:fs";
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { PROTOKOL_VERSI } from "../../app/jejak-setara/inti/versi";
@@ -13,6 +14,7 @@ test.afterAll(tutupRuangBerkas);
 const V = PROTOKOL_VERSI;
 const KUNCI_ADMIN = "lokal-kunci-admin-bukan-rahasia";
 const FOTO = "docs/jejak-setara/tests/JS-10";
+const FOTO21 = "docs/jejak-setara/tests/JS-21";
 const UKURAN_KELAS = [
   { width: 1024, height: 768 },
   { width: 1280, height: 720 },
@@ -63,6 +65,32 @@ async function fotoKelas(page: Page, nama: string): Promise<void> {
     expect(luap, `${nama} ${u.width}x${u.height}`).toBe(0);
     if (gulir) console.log(`[JS-10] ${nama} ${u.width}x${u.height}: kartu pembahasan perlu digulir`);
     await page.screenshot({ path: `${FOTO}/kelas-${nama}-${u.width}x${u.height}.png` });
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
+}
+
+/** JS-21 (AC-4, AC-5, AC-17): kelompok tombol di tiga ukuran layar kelas; isi kanan kepala ≥ 8 px dari tombol Musik. */
+async function fotoKepala(page: Page, nama: string, isiKanan: string): Promise<void> {
+  for (const u of UKURAN_KELAS) {
+    await page.setViewportSize(u);
+    await page.waitForTimeout(150);
+    const k = await page.evaluate((sel) => {
+      const kotak = (s: string) => {
+        const r = document.querySelector(s)?.getBoundingClientRect();
+        return r ? { kiri: r.left, kanan: r.right, lebar: r.width, tinggi: r.height } : null;
+      };
+      return { musik: kotak(".js-kelas-musik"), suara: kotak(".js-kelas-suara"), isi: kotak(sel) };
+    }, isiKanan);
+    const ukuran = `${nama} ${u.width}x${u.height}`;
+    expect(k.musik && k.suara && k.isi, ukuran).toBeTruthy();
+    expect(k.musik!.lebar, ukuran).toBeGreaterThanOrEqual(48);
+    expect(k.musik!.tinggi, ukuran).toBeGreaterThanOrEqual(48);
+    expect(k.suara!.tinggi, ukuran).toBeGreaterThanOrEqual(48);
+    expect(k.musik!.kanan, ukuran).toBeLessThanOrEqual(k.suara!.kiri);
+    const jarak = k.musik!.kiri - k.isi!.kanan;
+    console.log(`[JS-21] ${ukuran}: jarak isi kanan ke tombol Musik ${Math.round(jarak)} px, tombol Musik ${Math.round(k.musik!.lebar)} x ${Math.round(k.musik!.tinggi)} px`);
+    expect(jarak, ukuran).toBeGreaterThanOrEqual(8);
+    await page.screenshot({ path: `${FOTO21}/kepala-${nama}-${u.width}x${u.height}.png`, clip: { x: 0, y: 0, width: u.width, height: Math.round(u.height * 0.18) } });
   }
   await page.setViewportSize({ width: 1280, height: 720 });
 }
@@ -131,13 +159,37 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   const [kelas] = await Promise.all([guru.ctx.waitForEvent("page"), g.getByRole("link", { name: "Buka layar kelas" }).click()]);
   const galatHalaman: string[] = [];
   kelas.on("pageerror", (e) => galatHalaman.push(e.message));
+  // JS-21 (P-13, AC-8): musik hanya diunduh layar kelas, sekali per muat halaman.
+  const musikKelas: string[] = [];
+  const musikLain: string[] = [];
+  kelas.on("request", (r) => {
+    if (r.url().includes("musik_kelas")) musikKelas.push(r.url());
+  });
+  g.on("request", (r) => {
+    if (r.url().includes("musik_kelas")) musikLain.push(r.url());
+  });
   await expect(kelas.locator(".js-kelas-kode")).toHaveText(kode);
   await expect(kelas).toHaveTitle(`Layar kelas · ${kode}`);
   await expect(kelas.getByText("Menunggu pemain bergabung…")).toBeVisible();
   await expect(kelas.getByRole("button", { name: /Mulai/ })).toBeDisabled();
 
+  // JS-21 (P-14, D-2): sebelum ketukan pertama, musik lobi menunggu izin peramban.
+  const akar = kelas.locator(".js-kelas");
+  const bunyi = kelas.locator(".js-kelas-bunyi");
+  const tombolMusik = bunyi.locator(".js-kelas-musik");
+  const umumKelas = kelas.locator('.js-kelas > .js-sr[aria-live="polite"]');
+  await expect(bunyi.locator(".js-kelas-suara-tertahan")).toHaveText("Klik untuk menyalakan suara");
+  await expect(akar).toHaveAttribute("data-musik", "diam");
+  await fotoKepala(kelas, "lobi-tertahan", ".js-kelas-tanda-kepala");
+  expect(musikKelas).toEqual([]);
+
   // Tiga pemain lewat peramban dan satu bot.
   const pemain = await Promise.all([1, 2, 3].map(() => konteks(browser, asal, { width: 731, height: 411 }, true)));
+  for (const p of pemain) {
+    p.page.on("request", (r) => {
+      if (r.url().includes("musik_kelas")) musikLain.push(r.url());
+    });
+  }
   const nama: string[] = [];
   for (const [i, p] of pemain.entries()) nama.push(await gabung(p.page, kode, i + 1));
   const bot = await botPemain(asal, kode);
@@ -150,6 +202,51 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   await expect(kelas.locator(".js-kelas-kepala").getByText("Ruang dikunci")).toBeVisible();
   await kelas.keyboard.press("l");
   await expect(kelas.locator(".js-kelas-kepala").getByText("Ruang dikunci")).toBeHidden();
+
+  // JS-21 (P-1, P-3, P-7, P-13): ketukan pertama membuat konteks; musik lobi berbunyi dan diunduh sekali.
+  await expect(akar).toHaveAttribute("data-musik", "berbunyi", { timeout: 15_000 });
+  await expect(bunyi.locator(".js-kelas-suara-tertahan")).toHaveCount(0);
+  expect(musikKelas).toHaveLength(1);
+  await expect(tombolMusik).toHaveText("Musik");
+  await expect(tombolMusik).toHaveAttribute("aria-pressed", "true");
+  await expect(tombolMusik).toHaveAttribute("aria-label", "Musik nyala. Tekan untuk mematikan.");
+  await expect(tombolMusik).toHaveAttribute("aria-keyshortcuts", "U");
+  // P-10, P-11, P-6: U membalik pilihan dan diumumkan; Alt+U diabaikan; pilihan bertahan sesudah muat ulang.
+  await kelas.keyboard.press("u");
+  await expect(akar).toHaveAttribute("data-musik", "mati");
+  await expect(tombolMusik).toHaveAttribute("aria-pressed", "false");
+  await expect(tombolMusik).toHaveAttribute("aria-label", "Musik mati. Tekan untuk menyalakan.");
+  await expect(umumKelas).toHaveText("Musik dimatikan.");
+  expect(await kelas.evaluate(() => sessionStorage.getItem("jejak:musik-kelas"))).toBe("mati");
+  await kelas.keyboard.press("Alt+u");
+  await expect(akar).toHaveAttribute("data-musik", "mati");
+  await fotoKepala(kelas, "lobi-musik-mati", ".js-kelas-tanda-kepala");
+  await kelas.reload();
+  await expect(kelas.locator(".js-kelas-kode")).toHaveText(kode);
+  await expect(akar).toHaveAttribute("data-musik", "mati");
+  await expect(tombolMusik).toHaveAttribute("aria-pressed", "false");
+  await expect(bunyi.locator(".js-kelas-suara-tertahan")).toHaveCount(0);
+  await tombolMusik.click();
+  await expect(akar).toHaveAttribute("data-musik", "berbunyi", { timeout: 15_000 });
+  await expect(umumKelas).toHaveText("Musik dinyalakan.");
+  expect(musikKelas).toHaveLength(2);
+  // Tekanan berulang karena tombol ditahan tidak membalik lagi.
+  await kelas.keyboard.down("u");
+  await kelas.keyboard.down("u");
+  await kelas.keyboard.up("u");
+  await expect(akar).toHaveAttribute("data-musik", "mati");
+  await kelas.keyboard.press("u");
+  await expect(akar).toHaveAttribute("data-musik", "berbunyi", { timeout: 15_000 });
+  // U juga bekerja saat panel Pemain terbuka (P-10).
+  await kelas.keyboard.press("p");
+  await expect(kelas.getByRole("dialog")).toBeVisible();
+  await kelas.keyboard.press("u");
+  await expect(akar).toHaveAttribute("data-musik", "mati");
+  await kelas.keyboard.press("u");
+  await kelas.keyboard.press("Escape");
+  await expect(kelas.getByRole("dialog")).toBeHidden();
+  await expect(akar).toHaveAttribute("data-musik", "berbunyi", { timeout: 15_000 });
+  await fotoKepala(kelas, "lobi", ".js-kelas-tanda-kepala");
   await fotoKelas(kelas, "lobi");
 
   // Konsol: daftar ruang di 1280 x 720 dan HP 360 x 640 (AC-18).
@@ -165,7 +262,9 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   await kelas.bringToFront();
   await kelas.keyboard.press(" ");
   await expect(kelas.locator(".js-kelas-hitung")).toHaveText(/^[123]$/);
+  await expect(akar).toHaveAttribute("data-musik", "diam"); // JS-21 (P-2)
   await expect(kelas.locator(".js-kelas-sisa")).toBeVisible({ timeout: 8000 });
+  await expect(akar).toHaveAttribute("data-musik", "berbunyi", { timeout: 15_000 });
   await expect(kelas.locator(".js-kelas-papan li")).toHaveCount(4);
 
   // Bot menjawab kejadian pertama ruang; papan dan kemajuan berubah (P-18, P-19).
@@ -186,14 +285,23 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   await expect(selesaiBot.locator(".js-sr")).toHaveText("1 kejadian selesai");
   await expect(selesaiBot.locator("img")).toHaveAttribute("alt", "");
   await expect(kelas.locator(".js-kelas-kemajuan .js-kelas-angka")).toHaveText("1%");
+  // JS-21 (P-12): M mematikan semua bunyi termasuk musik, tanpa mengubah pilihan musik.
+  await kelas.keyboard.press("m");
+  await expect(akar).toHaveAttribute("data-musik", "diam");
+  await expect(tombolMusik).toHaveAttribute("aria-pressed", "true");
+  await kelas.keyboard.press("m");
+  await expect(akar).toHaveAttribute("data-musik", "berbunyi", { timeout: 15_000 });
+  await fotoKepala(kelas, "bermain", ".js-kelas-sisa");
   await fotoKelas(kelas, "bermain");
 
   // Jeda dan lanjut lewat Spasi, tambah waktu lewat T (P-27, P-30).
   await kelas.keyboard.press(" ");
   await expect(kelas.locator(".js-kelas-dijeda")).toBeVisible();
+  await expect(akar).toHaveAttribute("data-musik", "diam"); // JS-21 (P-2)
   await fotoKelas(kelas, "jeda");
   await kelas.keyboard.press(" ");
   await expect(kelas.locator(".js-kelas-dijeda")).toBeHidden();
+  await expect(akar).toHaveAttribute("data-musik", "berbunyi", { timeout: 15_000 });
   await kelas.keyboard.press("t");
 
   // Akhiri dengan konfirmasi (A), lalu podium (P-28).
@@ -206,13 +314,20 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   await akhiri.getByRole("button", { name: "Akhiri" }).click();
   await expect(kelas.getByText("Ronde selesai · IX B")).toBeVisible();
   await expect(kelas.locator(".js-kelas-tiang-1")).toContainText(bot.nama);
+  await expect(akar).toHaveAttribute("data-musik", "diam"); // JS-21 (P-2)
+  await fotoKepala(kelas, "podium", ".js-kelas-kepala .js-kelas-besar");
   await fotoKelas(kelas, "podium");
 
   // Pembahasan kejadian pertama: satu pemain menjawab, 100% pada pilihan bot (P-22, P-29).
   await kelas.keyboard.press("ArrowRight");
   await expect(kelas.getByText(`Kejadian 1 dari ${kejadian.length} · 1 pemain menjawab`)).toBeVisible();
   await expect(kelas.locator(".js-kelas-grafik .js-kelas-angka").filter({ hasText: "100%" })).toHaveCount(2);
+  await expect(akar).toHaveAttribute("data-musik", "diam"); // JS-21 (P-2)
+  await expect(tombolMusik).toBeVisible(); // JS-21 (P-8): tombol tetap ada walaupun musik diam
   await fotoKelas(kelas, "pembahasan");
+  // JS-21 (AC-8): dua kali muat layar kelas, dua unduhan; halaman konsol dan HP pemain tidak mengunduh musik.
+  expect(musikKelas).toHaveLength(2);
+  expect(musikLain).toEqual([]);
   await kelas.keyboard.press("ArrowRight");
   await expect(kelas.getByText(`Kejadian 2 dari ${kejadian.length} · 0 pemain menjawab`)).toBeVisible();
 
@@ -234,6 +349,8 @@ test("guru membuat ruang, membuka layar kelas, dan menjalankan ronde sampai pemb
   await kelas.getByRole("button", { name: "Tutup ruang" }).click();
   await kelas.getByRole("dialog", { name: `Tutup ruang ${kode}?` }).getByRole("button", { name: "Tutup ruang" }).click();
   await expect(kelas.getByText("Ruang sudah ditutup.")).toBeVisible();
+  await expect(kelas.locator(".js-kelas-bunyi")).toHaveCount(0); // JS-21 (P-8): tidak tampil di "Ruang ditutup"
+  await expect(akar).not.toHaveAttribute("data-musik", "berbunyi");
   expect(galatHalaman).toEqual([]);
   bot.ws.close();
   await Promise.all([guru.ctx.close(), ...pemain.map((p) => p.ctx.close())]);

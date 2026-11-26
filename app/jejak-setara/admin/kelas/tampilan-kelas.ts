@@ -73,3 +73,18 @@ export function persenPilihan(jumlah: readonly number[]): { persen: number[]; me
   const menjawab = jumlah.reduce((a, b) => a + b, 0);
   return { persen: jumlah.map((j) => (menjawab > 0 ? Math.round((j * 100) / menjawab) : 0)), menjawab };
 }
+
+/** JS-21 (P-1): syarat musik selain konteks audio dan berkas: suara dan musik nyala, status `lobi` atau `main`, dan
+ * sambungan yang tidak berhenti. Selama menyambung ulang, musik mengikuti status terakhir yang diketahui. */
+export function musikSeharusnya(k: { status: string | null; sambungan: string; suaraNyala: boolean; musikNyala: boolean }): boolean {
+  if (!k.suaraNyala || !k.musikNyala) return false;
+  if (k.sambungan === "ditutup" || k.sambungan === "diganti" || k.sambungan === "tidakAda" || k.sambungan === "terputus") return false;
+  return k.status === "lobi" || k.status === "main";
+}
+
+/** JS-21 (P-4): posisi musik dalam detik, yaitu posisi saat mulai ditambah lama berbunyi, modulo panjang berkas. */
+export function posisiMusik(posisiMulai: number, lamaBerbunyi: number, panjang: number): number {
+  if (!(panjang > 0)) return 0;
+  const p = (posisiMulai + Math.max(0, lamaBerbunyi)) % panjang;
+  return p < 0 ? p + panjang : p;
+}

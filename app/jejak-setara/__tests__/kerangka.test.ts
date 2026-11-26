@@ -374,9 +374,18 @@ describe("Teks dan halaman", () => {
         !(k in js11.konsol) &&
         !(k in kunciJs14().konsol) &&
         !(k in kunciJs15().konsol) &&
-        !(k in js16b.konsol),
+        !(k in js16b.konsol) &&
+        !(k in kunciJs21()),
     );
     expect(kunciJs10.sort()).toEqual(Object.keys(harapan).sort());
+  });
+
+  it("JS-21: TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-21", () => {
+    const harapan = kunciJs21();
+    expect(Object.keys(harapan).sort()).toEqual(["kelas.musik", "kelas.musikMati", "kelas.musikNyala", "kelas.umumMusikMati", "kelas.umumMusikNyala"]);
+    const datar = ratakanTeks(TEKS_KONSOL);
+    for (const [kunci, teks] of Object.entries(harapan)) expect(datar[kunci], kunci).toBe(teks);
+    expect(Object.keys(datar).filter((k) => /^kelas\.(umumM|m)usik/.test(k)).sort()).toEqual(Object.keys(harapan).sort());
   });
 
   it("JS-09: TEKS.skill, TEKS_KONSOL.skill, dan TEKS_KONSOL.csv.petunjuk sama persis dengan bagian Teks yang tampil (final) spesifikasi JS-09 (AC-21)", () => {
@@ -1420,6 +1429,11 @@ const TOKEN_HURUF = {
 };
 
 /** JS-16b (bagian Teks): teks pemain dan konsol dari tabel spesifikasi, serta kunci yang dihapus (D-1a). */
+/** JS-21 (P-7, P-11): teks tombol Musik dan pengumumannya, dari tabel dua kolom spesifikasi JS-21. */
+function kunciJs21(): Record<string, string> {
+  return uraiTabelTeks(baca("docs/jejak-setara/specs/JS-21-musik.md"));
+}
+
 function kunciJs16b(): { pemain: Record<string, string>; konsol: Record<string, string>; hapus: string[] } {
   const isi = baca("docs/jejak-setara/specs/JS-16b-tampilan.md");
   const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"), isi.indexOf("## Data, protokol, API, dan migrasi"));

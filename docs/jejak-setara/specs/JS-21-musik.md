@@ -1,6 +1,6 @@
 # JS-21 — Musik latar layar kelas
 
-Status: **Ditulis (25 Nov 2026)**, menunggu `Spesifikasi disetujui: JS-21` beserta pilihan DRAF D-1 sampai D-3. Dasar: rencana v1.1 di `PLAN.md` (`Setuju: JS-21`, semua saran a), Design System 12, dan spesifikasi JS-14 P-29 sampai P-31.
+Status: **Disetujui (25 Nov 2026)**, `Spesifikasi disetujui: JS-21` (D-1 sampai D-3 = a). Diuji: [JS-21-hasil.md](../tests/JS-21-hasil.md). Dasar: rencana v1.1 di `PLAN.md` (`Setuju: JS-21`, semua saran a), Design System 12, dan spesifikasi JS-14 P-29 sampai P-31.
 
 ## Ringkasan
 
@@ -25,7 +25,8 @@ Layar kelas memutar musik latar M-01 (`musik_kelas.wav`) pelan dan berulang di l
 | `app/jejak-setara/teks-konsol.ts` | Diubah | Teks tombol dan pengumuman musik |
 | `app/jejak-setara/styles/kelas.css` | Diubah | Kelompok tombol, tombol Musik, dan ruang kanan kepala serta bilah (P-7 sampai P-9) |
 | `app/jejak-setara/__tests__/pengaturan/suara.test.ts` | Diubah | Uji unit musik dengan konteks tiruan |
-| `e2e/jejak-setara/kelas.uji.ts` atau `e2e/jejak-setara/pengaturan.uji.ts` | Diubah | Uji ujung ke ujung musik dan tangkapan layar (ditetapkan saat Build) |
+| `app/jejak-setara/__tests__/kerangka.test.ts` | Diubah | Uji teks JS-21, dan teks JS-21 dikecualikan dari uji teks JS-10 |
+| `e2e/jejak-setara/kelas.uji.ts` | Diubah | Uji ujung ke ujung musik dan tangkapan layar kepala |
 | `docs/jejak-setara/tests/JS-21-hasil.md` dan `docs/jejak-setara/tests/JS-21/` | Baru | Laporan dan tangkapan layar Test |
 
 Tidak disentuh: server, `inti/`, layar pemain, `package.json`, lockfile, alur kerja, `wrangler.jsonc`, `scripts/jejak-setara/anggaran.mjs` (baris musik latar sudah ada sejak JS-15), berkas Sesi B dan C, Sehari Setara, dan galeri.
@@ -101,13 +102,13 @@ Kelompok `kelas` di `TEKS_KONSOL`:
 
 | Kunci | Teks |
 |---|---|
-| `musik` | Musik |
-| `musikNyala` | Musik nyala. Tekan untuk mematikan. |
-| `musikMati` | Musik mati. Tekan untuk menyalakan. |
-| `umumMusikNyala` | Musik dinyalakan. |
-| `umumMusikMati` | Musik dimatikan. |
+| `kelas.musik` | Musik |
+| `kelas.musikNyala` | Musik nyala. Tekan untuk mematikan. |
+| `kelas.musikMati` | Musik mati. Tekan untuk menyalakan. |
+| `kelas.umumMusikNyala` | Musik dinyalakan. |
+| `kelas.umumMusikMati` | Musik dimatikan. |
 
-Teks yang tetap: "Klik untuk menyalakan suara" (`suaraTertahan`, P-30 JS-14).
+Teks yang tetap: "Klik untuk menyalakan suara" (`kelas.suaraTertahan`, P-30 JS-14).
 
 ## Data, protokol, API, dan migrasi
 

@@ -1704,16 +1704,45 @@
 
 /* JS-14: suara layar kelas (P-29, P-30), nama sebagai tombol kelola dan menunya (P-53, P-54), dan panel Pemain (P-55). */
 .js-kelas-kepala {
-  padding-right: calc(12 * var(--u));
+  padding-right: calc(24 * var(--u));
 }
-.js-kelas-suara {
+/* JS-21 (P-9): bilah saat bermain juga memberi ruang untuk kelompok tombol Musik dan suara. */
+.js-kelas-bilah {
+  padding-right: calc(24 * var(--u));
+}
+/* JS-21 (P-8): tombol Musik dan tombol suara dalam satu kelompok di kanan atas; tulisan tertahan di kiri keduanya. */
+.js-kelas-bunyi {
   position: absolute;
   top: calc(0.4 * var(--u));
   right: calc(6 * var(--u));
   z-index: 3;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: calc(1 * var(--u));
+}
+/* JS-21 (P-7): saat musik mati, latar mist dan tulisan bercoret, jadi keadaannya tidak hanya lewat warna. */
+.js-kelas-musik {
+  box-sizing: border-box;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 calc(1 * var(--u));
+  border: 3px solid var(--js-ink);
+  background: var(--js-cream);
+  color: var(--js-ink);
+  font-family: var(--js-huruf-teks);
+  font-size-adjust: var(--js-huruf-teks-sesuai);
+  font-size: calc(2.5 * var(--u));
+  line-height: 1;
+  cursor: pointer;
+}
+.js-kelas-musik[aria-pressed="false"] {
+  background: var(--js-mist);
+  text-decoration: line-through;
+}
+.js-kelas-suara {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 48px;
   min-height: 48px;
   padding: 0 calc(0.6 * var(--u));
@@ -1736,6 +1765,7 @@
   line-height: var(--js-huruf-teks-baris);
 }
 .js-kelas-suara:focus-visible,
+.js-kelas-musik:focus-visible,
 .js-kelas-nama-tombol:focus-visible {
   outline: 3px solid var(--js-ink);
   outline-offset: 2px;

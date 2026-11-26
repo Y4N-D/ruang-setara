@@ -1,4 +1,4 @@
-// Layar kelas (spesifikasi JS-10, P-15 dan P-23 sampai P-31): tampil tanpa kerangka konsol untuk proyektor. Tombol dan
+// Layar kelas (spesifikasi JS-10, P-15 dan P-23 sampai P-31; musik latar JS-21): tampil tanpa kerangka konsol untuk proyektor. Tombol dan
 // pintasan papan ketik mengendalikan ronde; konfirmasi Akhiri dan Tutup ruang tanpa nama siswa; status sambungan dan
 // pengumuman untuk pembaca layar. Mengeluarkan pemain hanya di halaman detail ruang (usulan 5a).
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -11,13 +11,13 @@ import Dialog from "../Dialog";
 import { keHash } from "../rute";
 import { IKON_KELAS } from "./ikon-kelas";
 import { cariTombolNama, PanelPemain, TombolPemain, type AksiKelola } from "./KelolaNama";
-import { bacaSuaraKelas, buatSuaraKelas, lewatDuaMenit, simpanSuaraKelas, type NamaSuaraKelas } from "./suara-kelas";
+import { bacaMusikKelas, bacaSuaraKelas, buatSuaraKelas, lewatDuaMenit, simpanMusikKelas, simpanSuaraKelas, type KeadaanMusik, type NamaSuaraKelas } from "./suara-kelas";
 import Langsung, { useJamServer } from "./Langsung";
 import Lobi, { KepalaKelas } from "./Lobi";
 import Pembahasan from "./Pembahasan";
 import Podium from "./Podium";
 import { useSambunganKelas } from "./sambungan-kelas";
-import { angkaHitungMundur, sisaRonde } from "./tampilan-kelas";
+import { angkaHitungMundur, musikSeharusnya, sisaRonde } from "./tampilan-kelas";
 
 const t = TEKS_KONSOL.kelas;
 const V = PROTOKOL_VERSI;
@@ -91,6 +91,34 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
     simpanSuaraKelas(nyala);
     suara.sentuh();
     setUmum(nyala ? t.umumSuaraNyala : t.umumSuaraMati);
+  };
+
+  // JS-21 (P-1 sampai P-16): musik latar di lobi dan selama ronde, dengan pilihan sendiri (tombol Musik dan U).
+  const [musikNyala, setMusikNyala] = useState(bacaMusikKelas);
+  const musikRef = useRef(musikNyala);
+  const [keadaanMusik, setKeadaanMusik] = useState<KeadaanMusik>("diam");
+  useEffect(() => suara.pantau(setKeadaanMusik), [suara]);
+  useEffect(() => {
+    suara.pilihMusik(musikNyala);
+  }, [suara, musikNyala]);
+  const inginMusik = musikSeharusnya({ status, sambungan, suaraNyala, musikNyala });
+  // Keadaan musik datang lewat pantau(), karena konteks dan berkas berubah di luar React.
+  useEffect(() => {
+    suara.musik(inginMusik);
+  }, [suara, inginMusik]);
+  useEffect(
+    () => () => {
+      suara.musik(false);
+    },
+    [suara],
+  );
+  const balikMusik = () => {
+    const nyala = !musikRef.current;
+    musikRef.current = nyala;
+    setMusikNyala(nyala);
+    simpanMusikKelas(nyala);
+    suara.sentuh();
+    setUmum(nyala ? t.umumMusikNyala : t.umumMusikMati);
   };
 
   // JS-14 (P-53 sampai P-56): menu nama, konfirmasi keluarkan tanpa nama, panel Pemain, dan pita tanpa nama lama.
@@ -213,6 +241,12 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
         balikSuara();
         return;
       }
+      // JS-21 (P-10): U bekerja di mana saja seperti M.
+      if (tombol === "u" && !e.repeat && status !== "ditutup") {
+        e.preventDefault();
+        balikMusik();
+        return;
+      }
       if (konfirmasi || keluarkanPemain || panelPemain !== false || menuNama) return;
       // JS-16b (P-9): selama lapisan Perbesar QR terbuka, hanya Q dan Esc yang bekerja (menutupnya).
       if (qrBesar) {
@@ -282,7 +316,7 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
   else isi = <Pembahasan ref={kartu} info={info} indeks={indeks} bahas={data.bahas} pindah={(arah) => minta(indeks + arah)} tutup={() => bukaKonfirmasi("tutup")} tombolPemain={tombolPemain} />;
 
   return (
-    <div className="js-kelas">
+    <div className="js-kelas" data-musik={!musikNyala ? "mati" : keadaanMusik === "berbunyi" ? "berbunyi" : "diam"}>
       {sambungan === "menyambungUlang" ? (
         <p className="js-kelas-pita" role="status">
           {t.menyambungUlang}
@@ -294,11 +328,17 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
         </p>
       ) : null}
       {sambungan !== "ditutup" && status !== "ditutup" ? (
-        <button type="button" className="js-kelas-suara" aria-pressed={suaraNyala} aria-label={suaraNyala ? t.suaraNyala : t.suaraMati} aria-keyshortcuts="M" onClick={balikSuara}>
-          {tertahan && suaraNyala ? <span className="js-kelas-suara-tertahan">{t.suaraTertahan}</span> : null}
-          {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
-          <img src={suaraNyala ? IKON_KELAS.suaraNyala : IKON_KELAS.suaraMati} alt="" />
-        </button>
+        // JS-21 (P-8): tombol Musik dan tombol suara dalam satu kelompok; tulisan tertahan di kiri keduanya.
+        <div className="js-kelas-bunyi">
+          {suaraNyala && (tertahan || keadaanMusik === "tertahan") ? <span className="js-kelas-suara-tertahan">{t.suaraTertahan}</span> : null}
+          <button type="button" className="js-kelas-musik" aria-pressed={musikNyala} aria-label={musikNyala ? t.musikNyala : t.musikMati} aria-keyshortcuts="U" onClick={balikMusik}>
+            {t.musik}
+          </button>
+          <button type="button" className="js-kelas-suara" aria-pressed={suaraNyala} aria-label={suaraNyala ? t.suaraNyala : t.suaraMati} aria-keyshortcuts="M" onClick={balikSuara}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
+            <img src={suaraNyala ? IKON_KELAS.suaraNyala : IKON_KELAS.suaraMati} alt="" />
+          </button>
+        </div>
       ) : null}
       <button type="button" className="js-kelas-layar-penuh" onClick={aksi.layarPenuh} aria-label={t.layarPenuh} title={t.layarPenuh}>
         {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}

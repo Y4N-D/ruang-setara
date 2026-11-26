@@ -349,6 +349,12 @@ export const TEKS_KONSOL = {
     suaraTertahan: "Klik untuk menyalakan suara",
     umumSuaraNyala: "Suara dinyalakan.",
     umumSuaraMati: "Suara dimatikan.",
+    // JS-21 (P-7, P-11): tombol Musik dan pengumumannya.
+    musik: "Musik",
+    musikNyala: "Musik nyala. Tekan untuk mematikan.",
+    musikMati: "Musik mati. Tekan untuk menyalakan.",
+    umumMusikNyala: "Musik dinyalakan.",
+    umumMusikMati: "Musik dimatikan.",
     kelolaNama: "Kelola {nama}",
     menuGantiNama: "Ganti nama",
     menuKeluarkan: "Keluarkan",
