@@ -156,7 +156,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 |---|---|---|
 | JFR-23 | Kotak bantuan tersebar di setiap zona dan diambil dengan melewatinya. Setiap pemain punya kotaknya sendiri; kotak yang diambil muncul lagi 90 detik kemudian untuk pemain itu | P0 |
 | JFR-24 | Skill P0: Lari cepat, Kompas kejadian, dan Petunjuk (bagian 8.5), paling banyak 2 muatan per skill. Jawaban "tepat" di Langkah 2 memberi +1 muatan Kompas | P0 |
-| JFR-25 | Skill P1: Teropong dan Angkot (jalan pintas antarhalte) | P1 |
+| JFR-25 | Skill P1 di versi 1.1 (JS-18): Teropong, yang selama 30 detik mengungkap kejadian dalam radius 12 ubin dari pemain di peta mini dan peta besar, dan Angkot, jalan pintas dari halte ke halte lain yang dipilih di peta besar | P1 |
 | JFR-26 | Guru dapat mematikan skill tertentu untuk satu ruang | P0 |
 
 ### E. Layar kelas (proyektor)
@@ -276,8 +276,8 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 | Lari cepat | Kecepatan ×1,6 selama 6 detik | Kotak sepatu (zona jalan, pasar, taman) | 2 | P0 |
 | Kompas kejadian | Panah di tepi layar menunjuk kejadian terdekat yang belum selesai, selama 20 detik atau sampai pemain tiba | Kotak kompas (zona rumah dan balai warga); +1 setiap jawaban "tepat" | 2 | P0 |
 | Petunjuk | Di Langkah 1: menampilkan satu kalimat petunjuk dan mencoret satu pilihan keliru | Kotak buku (zona sekolah, puskesmas, pojok gawai) | 2 | P0 |
-| Teropong | Memperlihatkan kejadian dalam radius 12 ubin di peta mini selama 30 detik | Kotak teropong (zona taman dan pantai) | 1 | P1 |
-| Angkot | Pindah ke halte lain yang dipilih | Karcis dari kotak di halte | 1 | P1 |
+| Teropong | Selama 30 detik, setiap titik kejadian yang belum selesai dalam radius 12 ubin dari posisi pemain saat itu terungkap dan tetap tercatat seperti kejadian yang pernah terlihat; lingkaran radiusnya tampil di peta mini dan peta besar (KT-16) | Kotak teropong (tiga di pantai Z6) | 1 | P1 (v1.1) |
+| Angkot | Dari halte (paling jauh 1,5 ubin dari titik halte), tujuan dipilih di peta besar, lalu pemain pindah seketika ke titik halte tujuan; tidak bisa dipakai selama dialog, sedangkan Lari cepat dan Kompas yang aktif tetap berjalan (KT-17) | Kotak karcis di dekat setiap halte | 1 | P1 (v1.1) |
 
 - Kotak diambil dengan berjalan melewatinya. Isi setiap kotak tetap menurut tempatnya.
 - Jeda antarpemakaian skill yang sama 2 detik. Skill tidak bisa dipakai selama dialog terbuka, kecuali Petunjuk.
@@ -302,12 +302,12 @@ Peta adalah **kampung Nara**, tempat fiktif yang terasa dekat dengan Buleleng: r
 |---|---|---|---|---|
 | Z1 | Rumah dan gang | Rumah Nara, pagar bambu, warung Pak Made | K-01, K-02 | Kompas |
 | Z2 | Sekolah | Gedung SMP dua lantai, lapangan, kantin | K-03, K-04 | Buku |
-| Z3 | Jalan dan halte | Persimpangan, zebra cross, halte angkot | K-05, K-06 | Sepatu |
+| Z3 | Jalan dan halte | Persimpangan, zebra cross, halte angkot | K-05, K-06 | Sepatu, Karcis (dekat halte) |
 | Z4 | Pasar | Tenda bergaris, los pedagang, parkir | K-07, K-08 | Sepatu |
 | Z5 | Balai warga | Bale terbuka, pos ronda dengan kentongan | K-09, K-10 | Kompas |
-| Z6 | Taman, sungai, dan pantai | Jembatan kayu, pohon kelapa, lapangan taman | K-11, K-12 | Sepatu, Teropong (P1) |
-| Z7 | Puskesmas dan kantor desa | Puskesmas beratap hijau toska, kantor desa | K-13, K-14 | Buku |
-| Z8 | Pojok gawai | Warung berwifi, bangku dan colokan | K-15, K-16 | Buku |
+| Z6 | Taman, sungai, dan pantai | Jembatan kayu, pohon kelapa, lapangan taman | K-11, K-12 | Sepatu, Teropong |
+| Z7 | Puskesmas dan kantor desa | Puskesmas beratap hijau toska, kantor desa | K-13, K-14 | Buku, Karcis (dekat halte) |
+| Z8 | Pojok gawai | Warung berwifi, bangku dan colokan | K-15, K-16 | Buku, Karcis (dekat halte) |
 
 Halaman lobi berada di depan sekolah dan tertutup gerbang sampai ronde dimulai.
 
@@ -591,3 +591,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 25 Nov 2026 | Gerbang 1 rencana v1.1 (`Setuju: JS-21`, semua saran a): v1.1 berisi JS-21 musik latar, JS-23 peta bermedan, dan JS-18 Teropong dan Angkot, dirilis sebelum uji coba kelas, dengan JS-16d sesudahnya; KT-15 sampai KT-18 dijawab (bagian 20); peta mini tertutup tetap seluruh kampung dengan medan; satu gambar medan masa siang dalam tiga ukuran (1, 2, dan 4 px per ubin) dari Sesi C (PC-1); titik pemain di peta kelas 3 ubin bergaris ganda; lima tombol skill dengan Teropong dan Angkot di baris bawah; protokol naik ke versi 6 di JS-18; musik diputar di lobi dan selama ronde, lanjut dari posisi terakhir, dengan tombol "Musik" dan pintasan `U` |
 | 25 Nov 2026 | Spesifikasi JS-21 disetujui (`Spesifikasi disetujui: JS-21`, D-1 sampai D-3 = a): tombol bertulisan "Musik" yang bercoret di latar `mist` saat musik mati, tulisan "Klik untuk menyalakan suara" di lobi sebelum klik pertama, dan musik yang lanjut dari posisi lobi saat ronde dimulai. JS-21 diuji dan lulus pada hari yang sama; kenaikan kode konsol awal 0,10 KB karena teks baru diterima |
 | 26 Nov 2026 | Gerbang 1 JS-23 (`Setuju: JS-23`, usulan 1 sampai 9 = a): peta mini, peta besar, dan peta kelas memakai gambar medan masa siang tanpa penghalusan dan tanpa garis batas zona, dengan warna zona hanya sebagai cadangan selama gambar belum siap; label zona peta besar pindah ke sudut kiri atas zonanya, di bawah halte dan penanda kejadian (mengubah D-3 JS-07); titik pemain peta kelas 3 ubin bergaris `white` dan `ink` bertebal tetap; gambar dimuat sejak lobi tanpa menahan tombol Masuk; `PETA` tetap berisi alamat berkas; dua galat ESLint lama diperbaiki di Build JS-23 |
+| 26 Nov 2026 | Gerbang 1 JS-18 (`Setuju: JS-18`, usulan 1 sampai 14 = a): lima tombol skill (baris bawah Teropong dan Angkot di HP; satu kolom `1` sampai `5` di laptop, atau dua kolom bila dunia terlalu pendek); kotak aman panah Kompas berbatas bawah 80 px; tombol Angkot menyala di dekat halte dan membuka peta besar mode "Pilih halte tujuan" dengan tombol halte dan daftar; server memindahkan pemain lewat `koreksi`, dan pemain lain serta layar kelas melihat perpindahan seketika; Teropong mengungkap kejadian lewat jalur keterlihatan tanpa pita baru, dengan lingkaran di peta mini dan peta besar; kelima skill tercentang secara bawaan; isi `PC-2-kotak.zip` masuk commit Build JS-18 |

@@ -421,7 +421,7 @@ Setiap pesan adalah objek JSON `{ "v": 5, "t": "<tipe>", ...isi }`. `v` adalah `
 | `kunci_1` | `kejadianId`, `opsiId` | Mengunci Langkah 1 |
 | `kunci_2` | `kejadianId`, `opsiId` | Mengunci Langkah 2 |
 | `tutup_dialog` | `kejadianId` | Menutup dialog |
-| `pakai_skill` | `skill`, `kejadianId?` | `kejadianId` hanya untuk Petunjuk |
+| `pakai_skill` | `skill`, `kejadianId?`, `halteId?` | `kejadianId` hanya untuk Petunjuk; `halteId` hanya untuk Angkot, sejak versi 6 (JS-18) |
 | `ambil_kotak` | `kotakId` | Tidak dikirim layar pemain sejak JS-09: server mengambil kotak dari ruas gerak (bagian 8.5) dan mengabaikan pesan ini tanpa mencatat pelanggaran |
 | `ping` | `tKlien`; `rttMs` pilihan, waktu pulang-pergi terakhir yang diukur HP (bilangan bulat 0–60.000, sejak JS-15) | Setiap 5 detik |
 
@@ -434,7 +434,7 @@ Setiap pesan adalah objek JSON `{ "v": 5, "t": "<tipe>", ...isi }`. `v` adalah `
 | `nama_baru` | `id`, `nama`: nama pemain diganti guru; dikirim ke semua pemain, termasuk pemain itu (JS-14) |
 | `mode_nama` | `modeNama`: mode nama yang berlaku untuk pemain itu menjadi `daftar`, sesudah lima penolakan atau Ganti semua nama (JS-14) |
 | `status_ruang` | `status`, `mulaiPada`, `berakhirPada`, `jedaSejak` |
-| `dunia` | `w` (waktu server), `p`: larik `[id, x, y, arah, jalan, dialog]` untuk pemain yang berubah di sekitar pemain ini (`dialog` sejak versi 2, JS-08), `n` (jumlah pemain) |
+| `dunia` | `w` (waktu server), `p`: larik `[id, x, y, arah, jalan, dialog]` untuk pemain yang berubah di sekitar pemain ini (`dialog` sejak versi 2, JS-08), `n` (jumlah pemain). Sejak JS-18, pemain yang pindah halte dikirim sekali lagi dengan posisi barunya kepada pemain yang kotaknya memuat posisi lamanya (butir perpisahan, di luar batas 24 terdekat) |
 | `pemain_baru` · `pemain_pergi` | `id`, `nama`, `avatar`, `warnaTas` · `id` |
 | `pribadi` | `skor`, `peringkat`, `selesai` (id kejadian), `terlihat`, `muatan`, `aktifSampai` (akhir masa aktif dalam jam server), dan `kotakMenunggu` (kotak yang belum muncul lagi, dengan `siapPada` dalam jam server). Sejak JS-09 dikirim juga setiap muatan, masa aktif, atau kotak pemain itu berubah |
 | `kejadian_terlihat` | `kejadianId`, `x`, `y`, `setTokoh` — satu titik aktif yang baru masuk pandangan pemain (atau terungkap Teropong), beserta tokoh dan propertinya (`setTokoh` sejak versi 2, JS-08) |
@@ -443,8 +443,8 @@ Setiap pesan adalah objek JSON `{ "v": 5, "t": "<tipe>", ...isi }`. `v` adalah `
 | `petunjuk` | `kejadianId`, `kalimat`, `opsiDicoret` (id pilihan milik pemain itu). Dikirim lagi tanpa mengurangi muatan saat dialog yang sama dibuka ulang sebelum Langkah 1 dikunci (JS-09) |
 | `hasil_1` | `benar`, `opsiBenar`, umpan balik pilihan pemain dan pilihan benar, `poin`, `pertanyaan2`, `opsi2` (diacak) |
 | `hasil_2` | `tingkat`, `poin`, `terjadi`, `opsiTepat`, kartu (`hak`, `kewajiban`, `rujukan` berupa teks) |
-| `koreksi` | `x`, `y`, `seq` — posisi dari server bila laporan gerak ditolak |
-| `pemberitahuan` | `kode` (misalnya `dua_menit`). Sejak JS-09: `kotak_lari`, `kotak_kompas`, dan `kotak_petunjuk` (kotak terambil), `kompas_tepat` (+1 Kompas dari jawaban "tepat"), dan `kompas_tanpa_sasaran`. Layar pemain mengabaikan kode yang tidak dikenalnya |
+| `koreksi` | `x`, `y`, `seq` — posisi dari server bila laporan gerak ditolak, dan sejak JS-18 sesudah pindah halte |
+| `pemberitahuan` | `kode` (misalnya `dua_menit`). Sejak JS-09: `kotak_lari`, `kotak_kompas`, dan `kotak_petunjuk` (kotak terambil), `kompas_tepat` (+1 Kompas dari jawaban "tepat"), dan `kompas_tanpa_sasaran`. Sejak JS-18: `kotak_teropong`, `kotak_angkot`, dan `angkot_tiba` (pemain tiba di halte tujuan). Layar pemain mengabaikan kode yang tidak dikenalnya |
 | `selesai` | `skor`, `peringkat`, `jumlahPemain`, `rekap`: kejadian yang Langkah 1-nya dikunci pemain itu, menurut urutan ruang, paling banyak 64 butir, dengan judul, pilihan dan kebenaran Langkah 1, pilihan dan tingkat Langkah 2 (`null` bila belum dikunci), pilihan yang tepat, poin, dan rujukan berupa teks (JS-11). Dikirim saat ronde berakhir, saat menyambung ulang di `selesai` atau `pembahasan`, dan sesudah peringkat akhir berubah |
 | `galat` | `kode`, `pesan` (bagian 6.7) |
 | `pong` | `tKlien`, `waktuServer` |
@@ -579,6 +579,7 @@ stateDiagram-v2
 - Hitungan tabrakan memakai `inti/gerak.ts` dan grid tabrakan yang sama dengan klien. Server memakai `kampung.json` yang diimpor saat build; di lingkup modul Worker hanya lapisan `tabrakan`, `titikMuncul`, dan `gerbangLobi` yang diurai, sedangkan pemeriksaan penuh `bacaPeta` dijalankan uji (JS-07).
 - Posisi awal pemain (titik muncul menurut urutan bergabung) dan posisi sesudah sambung ulang dikirim lewat `koreksi` dengan `seq` gerak terakhir yang diterima, paling kecil 0 (JS-07).
 - Pemeriksaan jarak memakai **anggaran jarak** yang terkumpul (spesifikasi JS-07, P-52): anggaran bertambah kecepatan × 1,25 per detik sejak laporan diterima terakhir, paling banyak setengah detik berjalan (45 piksel pada kecepatan 72); laporan diterima bila jaraknya ≤ anggaran + 4 dan jalurnya bebas, lalu anggaran berkurang sejauh jaraknya. Dipakai sejak Build JS-07, karena uji jaringan lokal (latensi 80 ms, jitter eksponensial rata-rata 40 ms) menunjukkan 16,25% `gerak` jujur ditolak dengan batas per selang JS-02; dengan anggaran, 0 dari 14.512 laporan ditolak.
+- **Pindah halte (JS-18):** sesudah Angkot diterima, server menaruh pemain di titik kaki halte tujuan (16x + 8, 16y + 12), mengatur anggaran jarak ke 0 dan waktu gerak terakhir ke sekarang, lalu mengirim `koreksi`. Laporan gerak lama dari halte asal ditolak dan dijawab `koreksi` ke halte tujuan, dan perpindahan tidak mengambil kotak.
 
 ### 8.3 Kejadian
 
@@ -621,6 +622,9 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 - Petunjuk: hanya di Langkah 1 dialog yang terbuka, sekali per kejadian. Server memilih satu dari tiga pilihan keliru dengan pembangkit berbenih (benih ruang, id pemain, kode kejadian, dan label `petunjuk`), menyimpannya di tabel `petunjuk`, mengirim kalimat petunjuk dan id pilihan milik pemain, lalu mengantrekan ulang baris jawaban dengan `petunjuk_dipakai` 1.
 - +1 Kompas: saat Langkah 2 dikunci dengan tingkat `tepat`, Kompas aktif di ruang, dan muatan Kompas kurang dari 2, muatan bertambah 1. Pemain menerima `hasil_2`, lalu `pemberitahuan kompas_tepat`, lalu `pribadi`.
 - Pemakaian yang ditolak tidak dijawab, kecuali Kompas tanpa sasaran, agar pesan berulang tidak memperbesar lalu lintas keluar.
+- Teropong (JS-18): selama 30 detik waktu ronde, di setiap putaran 100 ms, titik aktif kejadian yang belum selesai dan belum terlihat dalam 192 piksel (12 ubin) dari titik kaki pemain dicatat lewat jalur keterlihatan bagian 8.3 (`dalamTeropong`). Teropong berakhir hanya karena waktu.
+- Angkot (JS-18): diterima bila pemain paling jauh 32 piksel dari pusat ubin halte asal (`halteDekat`), `halteId` adalah halte lain, dan tidak ada dialog. Server mengurangi muatan, memindahkan pemain (bagian 8.2), lalu mengirim `koreksi`, `pribadi`, dan `pemberitahuan angkot_tiba`.
+- Sejak JS-18 peta memuat 31 kotak: tiga kotak teropong di Z6 dan satu kotak karcis di dekat setiap halte, sehingga `kotakMenunggu` paling banyak 31 butir.
 
 ### 8.6 Penyimpanan dan kiriman ke D1
 
@@ -633,12 +637,12 @@ export function bandingkanPeringkat(a: DataPeringkat, b: DataPeringkat): number 
 ## 9. Klien pemain
 
 - **Loop:** `requestAnimationFrame`; gerak pemain sendiri dihitung dengan langkah tetap 60 Hz memakai `inti/gerak.ts` (langsung terasa tanpa menunggu server).
-- **Pemain lain:** digambar di belakang waktu server dengan tunda yang menyesuaikan jaringan: 100 ms ditambah dua kali jitter terukur, dijepit 120–250 ms, dengan interpolasi di antara dua butir dan penerusan paling lama 100 ms (JS-07). Sejak JS-15, di lobi dan hitung mundur tunda itu paling sedikit 320 ms, mengikuti jarak kiriman lobi 300 ms (D-5 a). Di status `main`, pemain lain yang tidak muncul di `dunia` selama 2,5 detik disembunyikan; di lobi tidak.
+- **Pemain lain:** digambar di belakang waktu server dengan tunda yang menyesuaikan jaringan: 100 ms ditambah dua kali jitter terukur, dijepit 120–250 ms, dengan interpolasi di antara dua butir dan penerusan paling lama 100 ms (JS-07). Sejak JS-15, di lobi dan hitung mundur tunda itu paling sedikit 320 ms, mengikuti jarak kiriman lobi 300 ms (D-5 a). Di status `main`, pemain lain yang tidak muncul di `dunia` selama 2,5 detik disembunyikan; di lobi tidak. Sejak JS-18, butir yang melompat lebih jauh daripada yang mungkin dengan Lari cepat dan anggaran jarak (`melompat`) mengosongkan penyangga pemain itu, sehingga pemain yang pindah halte tidak meluncur.
 - **Kanvas:** ukuran *backing store* = 320 × k dan 180 × k piksel perangkat dengan k bilangan bulat terbesar yang muat, boleh terpotong paling banyak 2 piksel logis per sisi (Design System bagian 3.2). Dunia digambar di kanvas logis 320 × 180, lalu diperbesar sekali tanpa penghalusan (JS-07). Peta digambar dari potongan 256 × 256 yang disiapkan di kanvas luar layar per masa. Peta sekitar 160 × 100 ubin berarti sekitar 70 potongan per masa (sekitar 17,5 MB memori gambar bila semuanya disiapkan), jadi hanya potongan di sekitar kamera yang disiapkan dan yang jauh dilepas (JS-07). Setiap potongan punya lapis bawah (tanah, tumpang, bayangan, bagian bawah objek) dan lapis atas (bagian atas objek, dipakai bersama semua masa); paling banyak 16 potongan disimpan, dan potongan untuk masa berikutnya disiapkan mulai 10 detik sebelum masa berganti. Potongan cincin dan potongan masa berikutnya disiapkan bertahap, satu irisan (4 baris ubin, objek bawah, atau objek atas) per bingkai, agar tidak ada bingkai yang tersendat; potongan yang terlihat disiapkan utuh (Build JS-07).
 - **Langit sehari:** kemajuan dihitung dari sisa waktu (`berakhirPada` dikurangi jam server, atau dikurangi `jedaSejak` saat jeda) dibagi durasi ronde, sehingga sama di setiap perangkat; tambah waktu memundurkan langit (JS-07).
 - **Urutan gambar:** lapisan Design System bagian 7; tokoh diurutkan menurut y kaki; siluet pemain sendiri digambar di atas objek atas.
 - **Warna tas:** saat memuat, setiap strip avatar disalin untuk warna tas yang dipakai, dengan mengganti warna kunci `sun` dan `mango` serentak memakai pasangan Design System bagian 8 (JS-07).
-- **Peta mini dan peta besar (JS-23):** gambar medan dari kelompok `PETA` (bagian 11.2). Peta mini memakai `medan2` di rasio layar 2 ke atas dan `medan1` di bawahnya, diubah ukurannya sekali ke kanvas simpanan; peta besar memakai `medan4`. Semuanya digambar tanpa penghalusan, dimuat sejak layar dunia terpasang, dan memakai warna zona sebagai cadangan selama gambar belum siap.
+- **Peta mini dan peta besar (JS-23):** gambar medan dari kelompok `PETA` (bagian 11.2). Peta mini memakai `medan2` di rasio layar 2 ke atas dan `medan1` di bawahnya, diubah ukurannya sekali ke kanvas simpanan; peta besar memakai `medan4`. Semuanya digambar tanpa penghalusan, dimuat sejak layar dunia terpasang, dan memakai warna zona sebagai cadangan selama gambar belum siap. Sejak JS-18, kedua peta menggambar lingkaran Teropong (jari-jari 12 ubin) selama Teropong aktif, dan peta besar punya mode "Pilih halte tujuan" untuk Angkot.
 - **Input:** keyboard (`keydown`/`keyup` dengan peta tombol), joystick sentuh (*pointer events*, satu penunjuk di separuh kiri), dan tombol HTML untuk Periksa serta skill.
 - **HUD dan dialog:** komponen React di atas kanvas. Dialog dibuka dari `kejadian_terbuka` dan memakai komponen `bersama/` yang juga dipakai pratinjau konsol.
 - **Label nama:** kanvas lapisan kedua dengan resolusi perangkat, agar teks tajam; paling banyak 8 label; huruf 13 px atau 17 px CSS menurut pengaturan (JS-14).
@@ -740,7 +744,7 @@ Statistik per kejadian lintas ruang (JS-13; spesifikasi `specs/JS-13-statistik.m
 - Satu ruang hanya punya satu layar kelas aktif. Sejak JS-14, guru bisa mengganti nama atau mengeluarkan pemain dari layar kelas lewat menu nama di lobi dan panel "Pemain", tanpa skor dan tanpa menulis nama lama lagi, selain dari halaman detail ruang.
 - Pintasan keyboard: `Spasi` mulai atau jeda/lanjut, `T` tambah 2 menit, `A` akhiri (dengan konfirmasi), `L` kunci ruang, `←` `→` berpindah kejadian di pembahasan, `F` layar penuh, `M` suara, `P` panel Pemain (JS-14), `Q` Perbesar QR di lobi (JS-16b), dan `U` musik (JS-21).
 - Musik latar (JS-21): `suara-kelas.ts` mengimpor `musik_kelas.wav` langsung dan memutarnya berulang di lobi dan selama ronde, dengan tombol "Musik" di samping tombol suara; rinciannya di spesifikasi JS-21.
-- Peta kelas (JS-23): `PetaKelas.tsx` mengimpor `peta_medan_4.png` langsung (P-35 JS-10) dan menggambarnya di bawah ikon zona dan titik pemain; gambar dimuat sejak layar kelas terbuka di lobi.
+- Peta kelas (JS-23): `PetaKelas.tsx` mengimpor `peta_medan_4.png` langsung (P-35 JS-10) dan menggambarnya di bawah ikon zona dan titik pemain; gambar dimuat sejak layar kelas terbuka di lobi. Sejak JS-18, titik pemain yang melompat (pindah halte) berpindah tanpa transisi.
 - Halaman ini tidak menampilkan lokasi kejadian selama ronde (JFR-28).
 
 ## 11. Peta, aset, dan anggaran
