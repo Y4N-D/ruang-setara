@@ -272,6 +272,16 @@ Berkas ini dibuat otomatis oleh `build_jejak.py` dan hanya memuat aset berstatus
 | `npc/npc_warga3_bawah_diam.png` | N-10 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 | `npc/npc_wayan_bawah_diam.png` | N-18 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 6 November 2026 |
 
+## Gambar medan peta (`peta/`)
+
+Gambar medan dibangun `peta:build` (`scripts/jejak-setara/peta/build_peta.py`) dari sumber peta, lembar ubin siang, dan sprite objek yang sudah Disetujui, dengan sidik sumber yang sama dengan `app/jejak-setara/peta/kampung_gambar.json`. Kode adalah sumber utama; PNG tidak disunting manual.
+
+| File | ID | Atribusi |
+|---|---|---|
+| `peta/peta_medan_1.png` | G-01 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 26 November 2026 |
+| `peta/peta_medan_2.png` | G-02 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 26 November 2026 |
+| `peta/peta_medan_4.png` | G-03 | Digambar dengan kode (kit Sehari Setara) oleh Claude, disetujui YAN, 26 November 2026 |
+
 ## Efek suara dan musik latar (`sfx/`)
 
 Efek suara dan musik latar dibuat dengan kode memakai kit suara Jejak Setara (`scripts/game/suara/`: `chip.py`, `efek.py`, dan `musik.py`), hanya dengan pustaka bawaan Python, lalu dibangun dengan `python scripts/game/art/build_jejak.py`. Kode adalah sumber utama; WAV tidak disunting manual. Format atribusinya: "Dibuat dengan kode oleh Claude, disetujui [nama], [tanggal]". Bunyi klik dan bunyi teks adalah salinan identik dari Sehari Setara.

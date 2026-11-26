@@ -250,6 +250,10 @@ import objWarungMadeAtas from "./obj/obj_warung_made_atas.png";
 import objWarungWifi from "./obj/obj_warung_wifi.png";
 import objWarungWifiAtas from "./obj/obj_warung_wifi_atas.png";
 
+import petaMedan1 from "./peta/peta_medan_1.png";
+import petaMedan2 from "./peta/peta_medan_2.png";
+import petaMedan4 from "./peta/peta_medan_4.png";
+
 import sfxAkhir from "./sfx/sfx_akhir.wav";
 import sfxHitung from "./sfx/sfx_hitung.wav";
 import sfxKejadian from "./sfx/sfx_kejadian.wav";
@@ -977,6 +981,13 @@ export const TANDA: Readonly<Record<string, Gambar>> = {
   tanda_kotak_teropong: { url: tandaKotakTeropong, lebar: 14, tinggi: 12, bingkai: 3 },
   tanda_selesai: { url: tandaSelesai, lebar: 10, tinggi: 10, bingkai: 1 },
 };
+
+/**
+ * Gambar medan peta (PC-1): kampung masa siang dengan n piksel per ubin (medan1 160 × 100, medan2 320 × 200, dan medan4
+ * 640 × 400 piksel); ubin (x, y) menempati piksel x·n sampai (x+1)·n − 1. Dibangun peta:build dari sumber peta. Layar
+ * kelas mengimpor peta_medan_4.png langsung (P-35 JS-10).
+ */
+export const PETA = { medan1: petaMedan1, medan2: petaMedan2, medan4: petaMedan4 } as const;
 
 /**
  * Efek suara berkunci nama peristiwa (nama berkas tanpa awalan sfx_ dan .wav): URL WAV PCM mono 16 bit 22.050 Hz di

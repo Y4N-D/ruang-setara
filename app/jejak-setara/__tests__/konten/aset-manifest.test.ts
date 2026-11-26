@@ -5,9 +5,11 @@
 // SUARA (usulan KT-C24 a, 21 Nov 2026): setiap efek menunjuk WAV PCM mono 16 bit 22.050 Hz di sfx/ dalam batas lama
 // dan ukurannya, klik dan teks identik dengan Sehari Setara, dan hanya efek Disetujui di CREDITS.md yang masuk.
 // Musik latar Disetujui (M-01) berupa WAV 11.025 Hz yang diimpor langsung oleh layar kelas, jadi tidak ada di SUARA.
+// PETA (PC-1, 26 Nov 2026): tiga gambar medan di peta/ berukuran peta kampung kali n piksel per ubin, dan hanya gambar
+// medan Disetujui di CREDITS.md yang masuk. Isi PNG-nya diperiksa peta-medan.test.ts.
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { AVATAR, IKON, KUNCI_TAS, NPC, OBJEK, SUARA, TANDA, TOKOH, UBIN, WARNA_TAS, type Gambar } from "../../assets/manifest";
+import { AVATAR, IKON, KUNCI_TAS, NPC, OBJEK, PETA, SUARA, TANDA, TOKOH, UBIN, WARNA_TAS, type Gambar } from "../../assets/manifest";
 import type { PetaJejak, WarnaTas } from "../../inti/tipe";
 
 const AKAR = new URL("../../../../", import.meta.url);
@@ -52,7 +54,9 @@ const BUTIR: { label: string; gambar: Gambar }[] = [
   ...Object.entries(TANDA).map(([kunci, gambar]) => ({ label: `TANDA.${kunci}`, gambar })),
 ];
 const LEMBAR_UBIN = (["pagi", "siang", "sore"] as const).map((masa) => ({ label: `UBIN.${masa}`, url: UBIN[masa] }));
-const SEMUA_URL = [...BUTIR.map((b) => ({ label: b.label, url: b.gambar.url })), ...LEMBAR_UBIN];
+/** Gambar medan peta (PC-1): URL saja, berkunci medan{n} untuk n piksel per ubin. */
+const MEDAN_URL = Object.entries(PETA).map(([kunci, url]) => ({ label: `PETA.${kunci}`, url }));
+const SEMUA_URL = [...BUTIR.map((b) => ({ label: b.label, url: b.gambar.url })), ...LEMBAR_UBIN, ...MEDAN_URL];
 /** Efek suara: URL WAV di sfx/, berkunci nama peristiwa (nama berkas tanpa awalan sfx_ dan .wav). */
 const SUARA_URL = Object.entries(SUARA).map(([kunci, url]) => ({ label: `SUARA.${kunci}`, url }));
 
@@ -65,7 +69,7 @@ describe("berkas manifest.ts", () => {
 
   it("hanya mengimpor PNG dan WAV dari folder aset, masing-masing sekali, tanpa impor dari inti/", () => {
     const impor = sumber.split("\n").filter((b) => /^\s*import\b/.test(b) || /\bfrom\s*["']/.test(b));
-    const pola = /^import [A-Za-z][A-Za-z0-9]* from "\.\/((ava|ikon|npc|obj|ubin)\/[a-z0-9_]+\.png|sfx\/[a-z0-9_]+\.wav)";$/;
+    const pola = /^import [A-Za-z][A-Za-z0-9]* from "\.\/((ava|ikon|npc|obj|peta|ubin)\/[a-z0-9_]+\.png|sfx\/[a-z0-9_]+\.wav)";$/;
     expect(impor.filter((b) => !pola.test(b))).toEqual([]);
     expect(/\bimport\s*\(|\brequire\s*\(/.test(sumber)).toBe(false);
     const jalur = impor.map((b) => b.slice(b.indexOf('"./') + 3, -2)).sort();
@@ -109,6 +113,18 @@ describe("UBIN", () => {
       const [w, h] = ukuranPng(`ubin/ubin_${masa}.png`);
       expect(w).toBe(UBIN.kolom * UBIN.ukuran);
       expect(UBIN.kolom * Math.floor(h / UBIN.ukuran)).toBeGreaterThanOrEqual(UBIN.jumlah);
+    }
+  });
+});
+
+describe("PETA", () => {
+  it("medan1, medan2, dan medan4 menunjuk peta/peta_medan_{n}.png seukuran peta kampung kali n piksel per ubin", () => {
+    const peta = JSON.parse(bacaTeks("app/jejak-setara/peta/kampung.json")) as PetaJejak<string>;
+    expect(Object.keys(PETA)).toEqual(["medan1", "medan2", "medan4"]);
+    for (const { label, url } of MEDAN_URL) {
+      const n = Number(label.slice("PETA.medan".length));
+      expect(berkasDari(url)).toBe(`peta/peta_medan_${n}.png`);
+      expect(ukuranPng(`peta/peta_medan_${n}.png`)).toEqual([peta.lebar * n, peta.tinggi * n]);
     }
   });
 });

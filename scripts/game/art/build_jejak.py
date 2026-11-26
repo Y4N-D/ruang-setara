@@ -202,8 +202,8 @@ MEDAN = {"peta_medan_1": ("G-01", 1), "peta_medan_2": ("G-02", 2), "peta_medan_4
 BATAS_MEDAN = {"peta_medan_1": 4 * 1024, "peta_medan_2": 8 * 1024, "peta_medan_4": 20 * 1024}
 BATAS_MEDAN_TOTAL = 32 * 1024
 UBIN_PETA = (160, 100)              # ukuran peta dalam ubin (JS-06)
-# Gambar medan berstatus Disetujui: nama -> tanggal. Masih kosong: G-01 sampai G-03 Ditinjau (26 Nov 2026).
-DISETUJUI_PETA = {}
+# Gambar medan berstatus Disetujui: nama -> tanggal. G-01 sampai G-03 disetujui bersama, 26 November 2026.
+DISETUJUI_PETA = {nama: "26 November 2026" for nama in MEDAN}
 
 BATAS_STRIP = 6 * 1024              # satu strip avatar atau tokoh
 BATAS_UBIN = 60 * 1024              # satu lembar ubin per masa
