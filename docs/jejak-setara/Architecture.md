@@ -97,7 +97,7 @@ ruang-setara/
 │  ├─ teks-konsol.ts                 # teks konsol, galat API akun, dan ringkasan "Jejak: admin awal" (JS-04)
 │  ├─ peta/kampung.json              # hasil build_peta.py; jangan disunting manual
 │  ├─ peta/kampung_gambar.json       # hasil build_peta.py: nomor ubin per lapisan untuk layar pemain (C-9)
-│  ├─ assets/                        # manifest.ts, CREDITS.md, ubin/, obj/, ava/, npc/, ikon/, sfx/
+│  ├─ assets/                        # manifest.ts, CREDITS.md, ubin/, obj/, ava/, npc/, ikon/, sfx/, peta/ (gambar medan, C-20)
 │  ├─ styles/jejak.css               # token --js-, bingkai piksel
 │  └─ __tests__/                     # uji unit, konten, peta, dan aset
 ├─ web/jejak-setara/                 # titik masuk Vite
@@ -768,7 +768,7 @@ Statistik per kejadian lintas ruang (JS-13; spesifikasi `specs/JS-13-statistik.m
 
 ### 11.2 Manifest aset
 
-`app/jejak-setara/assets/manifest.ts` menjadi satu-satunya pintu masuk aset, dengan pola Sehari Setara. Kelompoknya: `ubin` (per masa), `objek`, `avatar`, `npc`, `ikon`, `tanda`, dan `suara`. Aset selalu menjadi berkas berhash, bukan data URI.
+`app/jejak-setara/assets/manifest.ts` menjadi satu-satunya pintu masuk aset, dengan pola Sehari Setara. Kelompoknya: `ubin` (per masa), `objek`, `avatar`, `npc`, `ikon`, `tanda`, `suara`, dan `peta` (C-20). Aset selalu menjadi berkas berhash, bukan data URI.
 
 Manifest dibuat otomatis oleh `build_jejak.py` (Sesi C) hanya untuk aset Disetujui, dan tidak disunting manual. Bentuknya mengikuti usulan Sesi C di `Daftar_Aset.md` (Permintaan C-6, disetujui di Gerbang 1 JS-03), dengan tiga ketentuan:
 
@@ -791,11 +791,13 @@ export const NPC: Record<string, Gambar & { kakiX: number; kakiY: number }>;
 export const IKON: Record<string, Gambar>;
 export const TANDA: Record<string, Gambar>;
 export const SUARA: Record<NamaSuara, string>;     // C-15: URL WAV berhash, hanya bunyi Disetujui
+export const PETA = { medan1: url, medan2: url, medan4: url };   // C-20: gambar medan n piksel per ubin, hanya bila Disetujui
 ```
 
 - `OBJEK` berkunci `jenis` di `kampung.json` (tanpa awalan `obj_`); `lebar` dan `tinggi` adalah jejak kaki dalam ubin.
 - `NPC`, `IKON`, dan `TANDA` berkunci nama berkas tanpa `.png`, misalnya `npc_bayu_bawah_diam`, `ikon_menyambung`, dan `tanda_diri`. Kunci `setTokoh` kejadian (Sesi B) dicocokkan langsung ke `NPC`, dan ke `OBJEK` tanpa awalan `obj_`.
 - Kelompok `SUARA` (Permintaan C-15; ditulis `build_jejak.py` sejak 21 November 2026) berisi URL berkas berhash untuk bunyi Disetujui, dengan tipe `NamaSuara` dan kunci `akhir`, `hitung`, `kejadian`, `klik`, `kotak`, `lembut`, `peringatan`, `skill`, `teks`, dan `tepat`. `klik` dan `teks` adalah salinan identik byte dari Sehari Setara. Layar pemain memakai `SUARA` (JS-14). Layar kelas dan konsol tidak mengimpor `manifest.ts` (P-35 JS-10), jadi layar kelas mengimpor WAV langsung dari `assets/sfx/`, termasuk musik latar `musik_kelas.wav` (M-01), yang sengaja tidak masuk `SUARA` (JS-21).
+- Kelompok `PETA` (Permintaan C-20; ditulis `build_jejak.py` sejak penutup PC-1, 26 November 2026) berisi URL berkas berhash ketiga gambar medan di `assets/peta/`: `medan1` (`peta_medan_1.png`, 160 × 100 px), `medan2` (`peta_medan_2.png`, 320 × 200 px), dan `medan4` (`peta_medan_4.png`, 640 × 400 px), yaitu kampung masa siang dengan n piksel per ubin. Ubin (x, y) menempati piksel x·n sampai (x+1)·n − 1 dan y·n sampai (y+1)·n − 1, jadi ukuran gambar tidak perlu disimpan di manifest. Gambar dibangun `peta:build` dari sumber peta, dengan sidik `sumber` yang sama dengan `kampung_gambar.json` (Design System 14). Layar kelas tidak memakai `PETA`, tetapi mengimpor `peta_medan_4.png` langsung (P-35 JS-10). Pemakaian setiap gambar di peta mini, peta besar, dan peta kelas ditetapkan JS-23.
 
 ### 11.3 Anggaran
 
@@ -810,8 +812,9 @@ export const SUARA: Record<NamaSuara, string>;     // C-15: URL WAV berhash, han
 | Satu efek suara pendek (WAV PCM mono 16 bit 22.050 Hz, paling lama 0,65 detik) | ≤ 30 KB |
 | Jingle akhir `sfx_akhir.wav`, hanya layar kelas (C-14) | ≤ 160 KB |
 | Musik latar `musik_kelas.wav`, hanya layar kelas (WAV 11.025 Hz, C-16) | ≤ 1 MB |
+| Gambar medan `peta_medan_1.png`, `peta_medan_2.png`, dan `peta_medan_4.png` (C-20) | ≤ 4 KB, ≤ 8 KB, dan ≤ 20 KB; bertiga ≤ 32 KB |
 
-Jingle akhir dan musik latar tidak dihitung dalam "Seluruh aset layar pemain", karena HP pemain tidak memuatnya. Sejak JS-15, `scripts/jejak-setara/anggaran.mjs` memeriksa semua butir ini sesudah `build:jejak` di "Jejak: uji" dan membuat run merah bila ada yang terlampaui (P-20 sampai P-22). Baris musik latar baru tampil sejak JS-21, saat `musik_kelas.wav` mulai diimpor layar kelas. Per 21 November 2026, aset layar pemain 205,3 KB dan aset khusus layar kelas 967,4 KB (`Daftar_Aset.md`, bagian "Efek suara").
+Jingle akhir dan musik latar tidak dihitung dalam "Seluruh aset layar pemain", karena HP pemain tidak memuatnya. Sejak JS-15, `scripts/jejak-setara/anggaran.mjs` memeriksa semua butir ini sesudah `build:jejak` di "Jejak: uji" dan membuat run merah bila ada yang terlampaui (P-20 sampai P-22). Baris musik latar baru tampil sejak JS-21, saat `musik_kelas.wav` mulai diimpor layar kelas. Per 21 November 2026, aset layar pemain 205,3 KB dan aset khusus layar kelas 967,4 KB (`Daftar_Aset.md`, bagian "Efek suara"). Anggaran gambar medan diperiksa `build_jejak.py` dan uji `peta-medan` Sesi C, bukan `anggaran.mjs`. Begitu layar pemain memakai ketiganya (JS-23), "Seluruh aset layar pemain" bertambah sekitar 15,6 KB, walaupun satu HP hanya mengunduh gambar peta mini sesuai rasio layarnya dan `peta_medan_4.png`.
 
 ## 12. Keamanan dan privasi
 

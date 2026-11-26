@@ -540,6 +540,8 @@ Kit Jejak Setara berada di `scripts/game/art/` dan memakai ulang `palette.json` 
 
 **Kit suara** (Permintaan C-14): efek suara dan musik latar dibuat dengan kode di `scripts/game/suara/`, hanya dengan pustaka bawaan Python (`wave` dan `struct`): `chip.py` (gelombang, selubung, saringan, penulis WAV, pengukur keras terdengar, dan pemeriksaan), `efek.py` (resep setiap efek), dan `musik.py` (musik latar). `build_jejak.py` memanggilnya, menulis WAV ke `app/jejak-setara/assets/sfx/`, memeriksanya, dan mencatat kreditnya, sehingga `assets:build:jejak` membangun gambar dan suara sekaligus. WAV tidak dimampatkan, jadi hasil bangun ulang sama byte di setiap komputer.
 
+**Gambar medan peta** (Permintaan C-20): `peta_medan_1.png`, `peta_medan_2.png`, dan `peta_medan_4.png` di `app/jejak-setara/assets/peta/` tidak digambar kit di atas, tetapi dibangun `peta:build` (`scripts/jejak-setara/peta/build_peta.py`) dari sumber peta, lembar ubin siang, dan sprite objek yang sama dengan dunia. Isinya kampung masa siang dengan n piksel per ubin, dengan gerbang lobi terbuka, tanpa tokoh, penanda, kotak, titik kejadian, tulisan, dan garis pindai. Ubin (x, y) tepat menempati piksel x·n sampai (x+1)·n − 1 dan y·n sampai (y+1)·n − 1. Hanya warna palet tanpa transparansi, dan sidik `sumber` di potongan teks PNG sama dengan `kampung_gambar.json`, sehingga gambar yang tertinggal dari sumber peta membuat `peta:build --periksa` dan uji `peta-medan` gagal. `assets:build:jejak` memeriksa ukuran, warna, sidik, dan anggarannya (Architecture 11.3), lalu mencatat kredit dan kelompok `PETA` sesudah Disetujui. Pratinjaunya `preview/peta_medan.png`.
+
 ### Penamaan berkas
 
 | Jenis | Pola | Contoh |
@@ -554,6 +556,7 @@ Kit Jejak Setara berada di `scripts/game/art/` dan memakai ulang `palette.json` 
 | Penanda dan efek | `tanda_{nama}.png` | `tanda_kejadian.png`, `tanda_debu.png`, `tanda_kilau.png` |
 | Suara | `sfx_{peristiwa}.wav` | `sfx_kotak.wav` |
 | Musik latar (C-16) | `musik_{nama}.wav` | `musik_kelas.wav` |
+| Gambar medan peta (C-20), di folder `peta/` | `peta_medan_{n}.png`, n piksel per ubin | `peta_medan_4.png` |
 
 - Arah tokoh dan avatar hanya `bawah`, `atas`, dan `kanan`. Arah kiri tidak punya berkas, karena antarmuka mencerminkan arah kanan.
 - Berkas `tanda_*.png` disimpan di folder `ikon/`, tetapi tetap kelompok `tanda` di manifest.

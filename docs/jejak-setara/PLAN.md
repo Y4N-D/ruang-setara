@@ -21,9 +21,9 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-15 | Selesai (24 Nov 2026; `Diterima: JS-15`) | [JS-15-beban.md](specs/JS-15-beban.md) | [JS-15-hasil.md](tests/JS-15-hasil.md) |
 | JS-16 | Disetujui (24 Nov 2026; `Setuju: JS-16, 8d`). JS-16a: Selesai (25 Nov 2026; `Diterima: JS-16a`; produksi v0.9 terpasang 24 Nov 2026). JS-16b: Selesai (25 Nov 2026; `Diterima: JS-16b`, penyimpangan 1a dan 2a). JS-16c (dipersempit: tautan layar judul Sehari Setara dan rilis v1.0): Selesai (25 Nov 2026; `Diterima: JS-16c`, penyimpangan 1a; produksi v1.0 terpasang 25 Nov 2026). JS-16d (panduan guru, tautan galeri, catatan uji coba): belum | [JS-16a-produksi.md](specs/JS-16a-produksi.md), [JS-16b-tampilan.md](specs/JS-16b-tampilan.md), [JS-16c-tautan-judul.md](specs/JS-16c-tautan-judul.md) | [JS-16a-hasil.md](tests/JS-16a-hasil.md), lulus; [JS-16b-hasil.md](tests/JS-16b-hasil.md), lulus; [JS-16c-hasil.md](tests/JS-16c-hasil.md), lulus |
 | JS-18 | Disetujui dalam rencana v1.1 (25 Nov 2026; `Setuju: JS-21`). Plan lanjutan sesudah JS-23 Selesai | — | — |
-| JS-21 | Selesai (25 Nov 2026); pemeriksaan manual AC-15 oleh pemilik proyek di lingkungan uji. Masuk rilis v1.1 | [JS-21-musik.md](specs/JS-21-musik.md) | [JS-21-hasil.md](tests/JS-21-hasil.md) |
+| JS-21 | Selesai (26 Nov 2026, dinyatakan pemilik proyek di awal Plan lanjutan JS-23; dibangun dan diuji 25 Nov 2026). Masuk rilis v1.1 | [JS-21-musik.md](specs/JS-21-musik.md) | [JS-21-hasil.md](tests/JS-21-hasil.md) |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
-| JS-23 | Disetujui dalam rencana v1.1 (25 Nov 2026; `Setuju: JS-21`). Plan lanjutan sesudah JS-21 Selesai dan PC-1 Disetujui | — | — |
+| JS-23 | Direncanakan (26 Nov 2026, Plan lanjutan), menunggu `Setuju: JS-23`. Disetujui dalam rencana v1.1 (25 Nov 2026; `Setuju: JS-21`); PC-1 Selesai 26 Nov 2026 | — | — |
 
 ## Backlog
 
@@ -247,9 +247,12 @@ Keputusan pemilik proyek, 25 November 2026 (Gerbang 1 rencana v1.1, `Setuju: JS-
 - Specify JS-21 (dari Plan v1.1, 25 Nov 2026): Architecture 6.2 masih menulis `PROTOKOL_VERSI` 4 dan amplop `{ "v": 4, … }`, padahal `inti/versi.ts` bernilai 5 sejak JS-16b. Diperbaiki bersama dokumen JS-21. **Diperbaiki di Specify JS-21 (Architecture 6.2).**
 - Plan lanjutan JS-16d (dari Plan v1.1, 25 Nov 2026): panduan guru memuat fitur v1.1 (peta bermedan, Teropong, Angkot, dan tombol Musik), dan tangkapan layarnya diambil sesudah rilis v1.1.
 - Specify JS-23 dan JS-18 (dari Gerbang 1 rencana v1.1, 25 Nov 2026): JFR-11 dan JFR-28 ditulis ulang untuk peta bermedan di Specify JS-23, dan aturan KT-16 serta KT-17 masuk PRD 8.5 dan JFR-25 di Specify JS-18. PC-1 dan PC-2 sudah final (semua saran a), jadi Sesi C bisa mulai sebelum JS-21 selesai.
-- Plan lanjutan JS-23 (dari Test JS-21, 25 Nov 2026): perbaiki dua galat ESLint lama `react-hooks/set-state-in-effect` yang sudah ada sejak v1.0, di `admin/halaman/DetailRuang.tsx` (baris 65) dan di efek Perbesar QR `admin/kelas/LayarKelas.tsx`. "Jejak: uji" tidak menjalankan ESLint, jadi keduanya tidak membuat run merah.
-- Specify berikutnya (dari Test JS-21, 25 Nov 2026): kriteria ukuran kode konsol ditulis sebagai batas kenaikan, bukan "tidak berubah", karena teks baru di `TEKS_KONSOL` selalu ikut dimuat konsol awal.
-- Test berikutnya (dari Test JS-21, 25 Nov 2026): `test:e2e:jejak` dijalankan dalam kelompok kecil (sekitar tiga berkas ringan, dengan `jaringan.uji.ts` dan `skill.uji.ts` masing-masing sendiri), karena satu perintah dibatasi sekitar 5 menit dan proses di latar belakang ikut berhenti. Uji `jaringan.uji.ts` "layar kelas ditutup 60 detik" pernah gagal sekali saat berjalan sesudah uji berproksi, lalu lulus saat diulang.
+- Plan lanjutan JS-23 (dari Test JS-21, 25 Nov 2026): perbaiki dua galat ESLint lama `react-hooks/set-state-in-effect` yang sudah ada sejak v1.0, di `admin/halaman/DetailRuang.tsx` (baris 65) dan di efek Perbesar QR `admin/kelas/LayarKelas.tsx`. "Jejak: uji" tidak menjalankan ESLint, jadi keduanya tidak membuat run merah. **Masuk rencana JS-23 (usulan 8).**
+- Specify berikutnya (dari Test JS-21, 25 Nov 2026): kriteria ukuran kode konsol ditulis sebagai batas kenaikan, bukan "tidak berubah", karena teks baru di `TEKS_KONSOL` selalu ikut dimuat konsol awal. **Dipakai di usulan 9 JS-23.**
+- Test berikutnya (dari Test JS-21, 25 Nov 2026): `test:e2e:jejak` dijalankan dalam kelompok kecil (sekitar tiga berkas ringan, dengan `jaringan.uji.ts` dan `skill.uji.ts` masing-masing sendiri), karena satu perintah dibatasi sekitar 5 menit dan proses di latar belakang ikut berhenti. Uji `jaringan.uji.ts` "layar kelas ditutup 60 detik" pernah gagal sekali saat berjalan sesudah uji berproksi, lalu lulus saat diulang. **Dipakai di usulan 9 JS-23.**
+
+- Build JS-18 (dari Plan lanjutan JS-23, 26 Nov 2026; Permintaan C-19): isi `PC-2-kotak.zip` disalin sesudah commit JS-23 dan masuk commit JS-18 bersama perubahan uji Sesi A. ZIP itu juga membawa `build_peta.py`, kedua berkas peta, dan ketiga gambar medan bersidik baru (piksel sama), jadi uji JS-23 tidak memeriksa nilai sidik atau jumlah kotak. Di Build JS-18: `skill-ruang.test.ts` menjadi 31 kotak (9 sepatu, 6 kompas, 9 buku, 3 teropong, dan 4 karcis), `KOTAK_MENUNGGU_MAKS` (kini 24, di `server/jejak-setara/src/ruang/skill-ruang.ts`) diperiksa, komentar "ke-24 kotak" di `peta-kampung.ts` dan `pemain/dunia/petaKampung.ts` diperbarui, dan uji ujung ke ujung yang menghitung kotak tampak (misalnya `skill.uji.ts`) menyaring kotak yang skillnya tidak aktif.
+- Plan JS-18 (dari Plan lanjutan JS-23, 26 Nov 2026): lingkaran Teropong (KT-16) dan mode "Pilih halte tujuan" (KT-17) digambar di atas gambar medan dan mengikuti urutan lapisan JS-23, dengan halte dan penanda di atas label zona.
 
 ## JS-01 — Kerangka
 
@@ -2179,7 +2182,7 @@ Dikerjakan 25 November 2026 pada hasil `build:pages` yang disajikan di bawah `/r
 
 ## Rencana v1.1 — JS-21, JS-23, dan JS-18 (musik latar, peta bermedan, Teropong dan Angkot)
 
-- Status: **Disetujui (25 Nov 2026)** dengan `Setuju: JS-21`, yaitu semua saran (a): usulan 1a sampai 8a, usulan JS-21 1a sampai 8a, dan KT-15 sampai KT-18 pilihan a. JS-21: Selesai 25 Nov 2026 (spesifikasi disetujui dengan D-1 sampai D-3 = a; [JS-21-hasil.md](tests/JS-21-hasil.md)). Sebelumnya: **Direncanakan (25 Nov 2026)**. Permintaan pemilik proyek (25 Nov 2026): rilis v1.1 sebelum uji coba kelas, berisi (1) peta bermedan di peta mini (tertutup dan peta besar) serta peta kelas, dengan penanda pemain, halte, dan arah tetap tampil dan kejadian yang belum terlihat tetap tersembunyi; (2) Teropong dan Angkot (JS-18) dengan kotaknya di peta, HUD yang memuat lima skill di ketiga ukuran HP, dan pilihan skill per ruang di konsol; (3) musik latar M-01 di layar kelas (JS-21): berulang, berhenti saat jeda, hitung mundur, dan jingle akhir, serta bisa dimatikan. JS-16d (panduan guru dan tautan galeri) ditunda sampai fitur ini selesai, dan uji coba kelas sesudahnya. Dikerjakan dalam mode ZIP dari ZIP `main` 25 Nov 2026. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Seperti JS-16, gerbang ini menyetujui pemecahan, urutan, rencana rinci JS-21, dan permintaan PC-1 serta PC-2 untuk Sesi C; JS-23 dan JS-18 mendapat Plan lanjutan singkat saat dimulai (AGENTS 4.1: satu fitur sekali rencana). Nomor JS-23 belum pernah dipakai: usulan 1b JS-14 yang menyebutnya untuk nama pemain tidak dipilih.
+- Status: **Disetujui (25 Nov 2026)** dengan `Setuju: JS-21`, yaitu semua saran (a): usulan 1a sampai 8a, usulan JS-21 1a sampai 8a, dan KT-15 sampai KT-18 pilihan a. JS-21: Selesai (dibangun dan diuji 25 Nov 2026, dinyatakan selesai oleh pemilik proyek 26 Nov 2026; spesifikasi disetujui dengan D-1 sampai D-3 = a; [JS-21-hasil.md](tests/JS-21-hasil.md)). PC-1: Selesai 26 Nov 2026 (`Daftar_Aset.md` versi 1.6). JS-23: Plan lanjutan 26 Nov 2026, menunggu `Setuju: JS-23`. Sebelumnya: **Direncanakan (25 Nov 2026)**. Permintaan pemilik proyek (25 Nov 2026): rilis v1.1 sebelum uji coba kelas, berisi (1) peta bermedan di peta mini (tertutup dan peta besar) serta peta kelas, dengan penanda pemain, halte, dan arah tetap tampil dan kejadian yang belum terlihat tetap tersembunyi; (2) Teropong dan Angkot (JS-18) dengan kotaknya di peta, HUD yang memuat lima skill di ketiga ukuran HP, dan pilihan skill per ruang di konsol; (3) musik latar M-01 di layar kelas (JS-21): berulang, berhenti saat jeda, hitung mundur, dan jingle akhir, serta bisa dimatikan. JS-16d (panduan guru dan tautan galeri) ditunda sampai fitur ini selesai, dan uji coba kelas sesudahnya. Dikerjakan dalam mode ZIP dari ZIP `main` 25 Nov 2026. Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori. Seperti JS-16, gerbang ini menyetujui pemecahan, urutan, rencana rinci JS-21, dan permintaan PC-1 serta PC-2 untuk Sesi C; JS-23 dan JS-18 mendapat Plan lanjutan singkat saat dimulai (AGENTS 4.1: satu fitur sekali rencana). Nomor JS-23 belum pernah dipakai: usulan 1b JS-14 yang menyebutnya untuk nama pemain tidak dipilih.
 - Memenuhi: PRD 17 (versi 1.1, diubah menurut KT-15); JFR-11 dan JFR-28 (peta mini dan peta kelas kini bermedan); JFR-25 (Teropong dan Angkot); JFR-26 (skill per ruang, kini lima); PRD 8.5 dan 9 (kotak teropong di Z6, karcis di halte); Design System 3.3, 3.4, 3.6, 9, 10, 12, 13, dan 14; Architecture 6.3, 8.5, 9, 10.9, 11.2, dan 11.3; Permintaan C-16; serta catatan Plan JS-18 dan JS-21.
 - Bergantung pada: JS-07, JS-09, JS-10, dan JS-14 (peta mini, peta besar, skill, peta kelas, dan suara layar kelas), semuanya Selesai; JS-16c Selesai (produksi v1.0). JS-23 menunggu PC-1 Disetujui, dan JS-18 menunggu JS-23 Selesai, PC-2 Disetujui, serta jawaban KT-16 sampai KT-18.
 
@@ -2285,6 +2288,7 @@ Dikerjakan 25 November 2026 di luar repositori, pada salinan ZIP `main` dengan d
 - Bergantung pada: JS-21 Selesai dan PC-1 Disetujui.
 - Perkiraan isi: `PetaMini.tsx` dan `PetaBesar.tsx` menggambar gambar medan di bawah halte, kejadian yang sudah terlihat, label zona (peta besar), dan panah diri; `PetaKelas.tsx` memakai gambar 4 px per ubin dengan `image-rendering: pixelated` dan titik pemain menurut usulan 6; teks dan gaya; serta uji unit, ujung ke ujung, dan tangkapan layar empat ukuran. Kejadian yang belum terlihat tetap tidak digambar, dan peta kelas tetap tanpa letak kejadian (JFR-28). Tanpa migrasi, tanpa perubahan protokol, dan tanpa perubahan server.
 - Ukuran: M.
+- Plan lanjutan: bagian "Plan lanjutan JS-23 — Peta bermedan" di akhir entri ini (26 Nov 2026).
 
 ### Garis besar JS-18 — Teropong dan Angkot (Plan lanjutan saat dimulai)
 
@@ -2390,3 +2394,124 @@ Dikerjakan dalam mode ZIP sesudah `Spesifikasi disetujui: JS-21` (D-1 sampai D-3
 - **Temuan:** kenaikan konsol 0,10 KB karena teks baru (diterima pemilik proyek), dua galat ESLint lama dari v1.0 (dicatat untuk Plan lanjutan JS-23), dan satu uji jaringan yang lulus saat diulang. Kunci di tabel Teks spesifikasi ditulis lengkap (`kelas.musik`) agar uji teks bisa membacanya; isi teksnya tidak berubah.
 - **Tangkapan layar lama:** uji ujung ke ujung juga menulis ulang tangkapan layar fitur lama (misalnya `tests/JS-10/`). Berkas itu tidak disertakan, agar tetap menjadi catatan fitur masing-masing.
 - **Galeri:** `build:pages` tetap 178 berkas identik byte.
+
+### Plan lanjutan JS-23 — Peta bermedan (26 Nov 2026)
+
+- Status: **Direncanakan (26 Nov 2026)**, menunggu `Setuju: JS-23`. Dasar: Gerbang 1 rencana v1.1 (usulan 3a sampai 6a: peta mini seluruh kampung dengan medan, satu gambar masa siang, tiga ukuran gambar, dan titik pemain 3 ubin bergaris ganda), garis besar JS-23 di atas, dan penutup PC-1 Sesi C. Dikerjakan dalam mode ZIP dari ZIP `main` sesudah commit `c1c1a86` (26 Nov 2026). Maket diperlihatkan di balasan Gerbang 1 dan tidak disimpan di repositori.
+- Memenuhi: JFR-11 dan JFR-28 (peta mini, peta besar, dan peta kelas bermedan; kalimatnya ditulis ulang di Specify); PRD 17 (versi 1.1); Design System 3.3, 3.6, 9, 10, dan 14; Architecture 3, 9, 10.9, 11.2, dan 11.3; Permintaan C-20 (dan C-19 untuk JS-18); catatan Plan dari Test JS-21.
+- Bergantung pada: JS-21 Selesai (26 Nov 2026) dan PC-1 Selesai (G-01 sampai G-03 Disetujui 26 Nov 2026; kelompok `PETA` di `manifest.ts`).
+- File yang dibuat/diubah (perkiraan, dipastikan di Specify):
+  - **Layar pemain.** `pemain/PetaMini.tsx` (gambar medan dari kanvas simpanan, pilihan gambar menurut rasio, dan warna zona sebagai cadangan), `pemain/PetaBesar.tsx` (gambar `medan4` di kanvas, label zona di sudut zona, dan urutan lapisan), `pemain/LayarDunia.tsx` (memuat gambar medan dan menggambar ulang peta mini sesudah gambar siap), serta `styles/jejak.css`.
+  - **Layar kelas dan konsol.** `admin/kelas/PetaKelas.tsx` (gambar medan, ikon zona, dan titik bergaris ganda), `admin/kelas/LayarKelas.tsx` (memuat gambar medan di lobi dan perbaikan ESLint Perbesar QR), `admin/halaman/DetailRuang.tsx` (perbaikan ESLint), serta `styles/kelas.css` (kotak zona berwarna dihapus).
+  - **Uji.** Uji unit di `__tests__/dunia/` (pilihan gambar, ukuran kanvas simpanan, dan cadangan) dan `__tests__/kelas/` (letak titik dan ikon); uji ujung ke ujung `dunia.uji.ts` dan `kelas.uji.ts`; tangkapan layar di `tests/JS-23/`.
+  - **Dokumen.** `specs/JS-23-peta-medan.md` dan `tests/JS-23-hasil.md`; PRD JFR-11, JFR-28, dan 21; Design System 3.3, 3.6, 9, dan 10; Architecture 9 dan 10.9; dokumen ini. Design System 14 dan Architecture 3, 11.2, serta 11.3 sudah diubah di ZIP ini (C-20).
+  - **Tidak disentuh:** server, `inti/`, protokol, `manifest.ts` dan gambar medan, sumber peta dan `kampung.json`, teks pemain dan konsol (tidak ada teks baru; dipastikan di Specify), berkas Sesi B dan C, `package.json`, lockfile, alur kerja, `wrangler.jsonc`, Sehari Setara, dan galeri.
+- Migrasi D1: tidak ada.
+- Pesan protokol baru/berubah: tidak ada (`PROTOKOL_VERSI` tetap 5).
+- Aset yang dibutuhkan: G-01 sampai G-03 (`peta/peta_medan_1.png`, `peta_medan_2.png`, dan `peta_medan_4.png`; Disetujui 26 Nov 2026), ikon zona, ikon peta mini, dan `tanda_diri` (Disetujui 6 Nov 2026). Tidak ada aset baru.
+- Hasil percobaan risiko: bagian "Hasil percobaan risiko" di bawah.
+- Usulan: bagian "Usulan" di bawah.
+- Keputusan terbuka yang perlu dijawab: tidak ada KT baru. JFR-11 dan JFR-28 ditulis ulang di Specify sesuai Gerbang 1 rencana v1.1, dan usulan 5 mengubah D-3 JS-07 (letak label zona).
+- Dependensi baru: tidak ada.
+- Risiko: bagian "Risiko" di bawah.
+- Ukuran: M.
+
+#### Pemeriksaan awal (26 Nov 2026)
+
+- ZIP sesuai keadaan yang disebut pemilik proyek: `Daftar_Aset.md` versi 1.6 (26 Nov 2026) mencatat penutup PC-1 dan PC-2; G-01 sampai G-03 ada di `assets/peta/` (160 × 100 px, 18 warna, 1,8 KB; 320 × 200 px, 22 warna, 4,0 KB; 640 × 400 px, 25 warna, 9,9 KB) dengan sidik yang sama; dan `PETA = { medan1, medan2, medan4 }` ada di `manifest.ts`.
+- JS-21: pemilik proyek menyatakan JS-21 Selesai (26 Nov 2026), jadi baris tabel status diubah. Laporan JS-21 tidak diubah: butir AC-15 (pemeriksaan musik manual) tetap "Menunggu" sampai pemilik proyek menyebut hasil pemeriksaannya. Bila ada yang tidak sesuai, perbaikannya masuk sebelum rilis v1.1.
+- Folder `docs/jejak-setara/audit/` tidak ada. `naskah/STATUS.md` (23 Nov 2026) tidak memuat permintaan baru, sedangkan `Daftar_Aset.md` memuat Permintaan C-19 dan C-20 (tabel tanggapan di bawah).
+- `install --frozen-lockfile` berhasil dalam 25 detik, dan `build:pages` dasar menghasilkan 178 berkas.
+
+#### Keadaan sekarang (v1.0)
+
+- Peta mini digambar ulang hanya saat pemain pindah ubin, berbelok, ukuran berubah, atau penanda berubah. Ikonnya dimuat saat layar dunia terpasang di lobi, tanpa menahan tombol Masuk.
+- Di peta besar, label zona di tengah setiap zona berada di atas penanda kejadian dan halte, karena digambar sesudahnya.
+- Peta kelas memakai kotak zona 55% dan titik 2,5 ubin bergaris `ink` 0,5 ubin. Warna kotak zonanya berbeda dengan peta mini untuk Z3, Z6, Z7, dan Z8; perbedaan itu ikut hilang bersama kotak zona.
+- `PETA` belum dipakai kode. Ketiga gambar sudah menjadi berkas berhash di build, tetapi belum dihitung sebagai aset layar pemain.
+- Tidak ada uji unit atau ujung ke ujung yang memeriksa warna zona atau kotak zona (pencarian `js-kelas-zona`, `WARNA_ZONA`, dan `gambarZona`).
+
+#### Hasil percobaan risiko
+
+Dikerjakan 26 November 2026 di luar repositori, pada salinan ZIP `main` dengan dependensi terpasang, CSS hasil `build:jejak`, dan Chromium 1243 tanpa GPU. Salinan percobaan tidak ikut ZIP.
+
+1. **Skala tampil.**
+   - Peta mini (peta 112 × 70 px CSS, 0,7 px CSS per ubin): rasio 1 memakai `medan1` diperkecil 0,7 kali (112 × 70 piksel perangkat), rasio 1,5 `medan1` × 1,05, rasio 2 `medan2` × 0,7, rasio 2,625 `medan2` × 0,92 (294 × 184 piksel perangkat), dan rasio 3 `medan2` × 1,05.
+   - Peta besar (skala bulat JS-07 P-38): HP 731 × 411 memakai 3 px CSS per ubin atau 7,875 piksel layar (`medan4` × 1,97); HP 640 × 360 rasio 3 dan dunia 610 × 343 memakai 2 px CSS (× 1,5 dan × 1,31); laptop 1280 × 720 memakai 6 px (× 1,5); 1024 × 768 (dunia 960 × 540) memakai 4 px (× 1, pas); dan 1920 × 1080 memakai 9 px (× 2,25).
+   - Peta kelas: 3,15 px per ubin di 1024 × 768, 3,94 di 1280 × 720, dan 5,89 di 1920 × 1080, sehingga titik 3 ubin selebar 9,4, 11,8, dan 17,7 px (titik v1.0: 7,9, 9,8, dan 14,7 px).
+2. **Keutuhan jalan di peta mini.** Piksel aspal hasil Chromium dikelompokkan menjadi bagian yang bersambung. Rasio 1: 3 bagian, terbesar 99,4% (sumber `medan1`: 3 bagian, 99,5%); rasio 1,5: 3 bagian, 99,6%; rasio 2: 27 bagian, 97,0% (sumber `medan2`: 57 bagian, 97,1%); rasio 2,625: 53 bagian, 96,6%; rasio 3: 57 bagian, 97,3%. Jaringan jalan tetap satu kesatuan, dan bagian kecil yang terpisah sudah terpisah di sumbernya (marka dan angkot yang parkir). Ini menjawab risiko yang dicatat Sesi C bahwa peta mini rasio 1 membuang sebagian piksel `medan1`.
+3. **Waktu menggambar ulang peta mini** (CPU diperlambat 6 kali, 200 kali gambar ulang, median): v1.0 0,1–0,5 ms; medan dari kanvas simpanan 0,1–0,2 ms; medan yang diperkecil langsung setiap kali 0,1 ms di rasio di bawah 2 dan 0,6–0,9 ms di rasio 2 ke atas. Nilai p95 semua cara 1,4–8 ms karena derau mesin agen.
+4. **Maket peta mini** (empat varian di rasio 1, 1,5, 2,625, dan 3): medan tanpa penghalusan terbaca di semua rasio (jalan, laut, sungai, sekolah, pasar, dan atap), dan halte, penanda kejadian, serta panah diri tetap menonjol. Garis batas zona tipis memotong jalan dan atap, sedangkan versi yang dihaluskan kabur di rasio 1.
+5. **Label zona menutupi penanda kejadian di peta besar.** Bila ke-96 titik kejadian sudah terlihat, label zona v1.0 (di tengah zona) menutupi sebagian penanda di 34 titik dan separuh atau lebih di 23 titik pada HP 731 × 411; 62 dan 45 titik pada HP 640 × 360 dan dunia 610 × 343; 21 dan 15 pada 1024 × 768; 11 dan 5 pada 1280 × 720; serta 4 dan 2 pada 1920 × 1080. Dengan label di sudut kiri atas zona: 31 dan 13 (HP 731 × 411), 57 dan 33 (dunia 610 × 343), 13 dan 6 (1024 × 768), 9 dan 5 (1280 × 720), serta 1 dan 0 (1920 × 1080). Masalah ini sudah ada di v1.0, tetapi di peta bermedan label di tengah juga menutupi bangunan penanda zona seperti sekolah dan pasar.
+6. **Ketajaman peta besar.** Di 1280 × 720, `medan4` yang diperbesar 1,5 kali lebar pikselnya sedikit tidak rata, tetapi batang pohon, pagar bertiang, dan semak tetap tampak. `medan2` yang diperbesar 3 kali rata, tetapi pohon menjadi kotak dan rincian 4 px per ubin hilang.
+7. **Titik pemain di peta kelas.** Garis dalam putih berkontras di bawah 3 : 1 pada 81,8% piksel medan (rumput, `mist`, dan `cream`), sedangkan garis luar `ink` di bawah 3 : 1 hanya pada 3,7% piksel (warna gelap seperti `dusk` dan `ink`). Setiap warna medan berkontras sedikitnya 3,8 : 1 dengan salah satu garis; yang terendah `sky-d`, 3,8 : 1 terhadap keduanya. Di maket 1024 × 768, garis yang ikut skala peta (0,35 ubin, sekitar 1 px) kurang menonjol, sedangkan garis bertebal tetap (putih 2 px dan `ink` 1,5 px di luarnya) jelas di ketiga ukuran. Garis batas zona putus-putus `cream` dan `ink` membuat peta kelas tampak penuh garis.
+8. **Prototipe dan ukuran.** Prototipe kecil di salinan percobaan (peta mini dari kanvas simpanan, `medan4` di peta besar, label di sudut, dan peta kelas bermedan) lulus `build:jejak` dan `tsc`. Kode layar pemain naik dari 140,52 ke 140,84 KB (+0,32 KB), konsol awal dari 137,08 ke 137,09 KB, potongan layar kelas dari 11,13 ke 11,17 KB, dan aset layar pemain dari 233,46 ke 249,07 KB (251 menjadi 254 berkas). Satu HP hanya mengunduh paling banyak 14 KB dari ketiga gambar. Alamat `peta_medan_4.png` untuk layar kelas masuk potongan bersama yang sudah dimuat layar kelas untuk efek suara, bukan konsol awal.
+9. **Dua galat ESLint lama** (catatan Plan dari Test JS-21) masih ada. Perbaikan percobaan: `setKini(Date.now())` dipindah dari efek ke tempat kode masuk ulang diterima (`DetailRuang.tsx`), dan Perbesar QR memakai nilai turunan dari pilihan dan status lobi sebagai ganti efek (`LayarKelas.tsx`). ESLint kedua berkas menjadi 0 masalah, dan `tsc` bersih.
+10. **Galeri.** `build:pages` sesudah semua dokumen ZIP ini diubah: 178 berkas identik byte dengan build dasar.
+
+#### Usulan
+
+1. **Bentuk `PETA`** (Permintaan C-20).
+   - (a, saran) Tetap `PETA = { medan1, medan2, medan4 }` berisi alamat berkas, seperti yang ditulis Sesi C. Ukuran setiap gambar adalah ukuran peta dikali n, dan uji `aset-manifest` Sesi C sudah memeriksanya, jadi Sesi C tidak perlu mengubah apa pun. Layar kelas tetap mengimpor `peta_medan_4.png` langsung (P-35 JS-10).
+   - (b) Bentuk `Gambar` (`url`, `lebar`, dan `tinggi`): seragam dengan kelompok lain, tetapi `build_jejak.py` dan uji Sesi C ikut berubah tanpa manfaat bagi JS-23.
+2. **Menggambar peta mini** (percobaan 2 sampai 4).
+   - (a, saran) Gambar menurut rasio (usulan 3a: `medan2` di rasio 2 ke atas dan `medan1` di bawahnya) diperkecil sekali tanpa penghalusan ke kanvas simpanan seukuran peta, lalu kanvas itu disalin setiap kali peta mini digambar ulang, di bawah halte, penanda kejadian, dan panah diri. Kanvas simpanan dibuat lagi hanya bila rasio atau ukuran berubah. Selama gambar belum termuat atau gagal dimuat, peta mini memakai warna zona v1.0.
+   - (b) Diperkecil langsung setiap gambar ulang: kodenya lebih pendek, tetapi 0,6–0,9 ms per gambar ulang di rasio 2 ke atas pada CPU yang diperlambat 6 kali.
+   - (c) Dihaluskan: kabur di laptop rasio 1.
+3. **Garis batas zona** (percobaan 4 dan 7).
+   - (a, saran) Tanpa garis di ketiga peta. Daerah zona terbaca dari medannya (rumah dan gang, sekolah, pasar, dan pantai), peta besar tetap berlabel nama dan ikon zona, dan peta kelas tetap berikon zona di sudut setiap zona.
+   - (b) Garis tipis `ink` di peta mini dan garis putus-putus `cream` dan `ink` di peta besar serta peta kelas: batasnya tegas, tetapi garis memotong jalan dan atap.
+   - (c) Garis hanya di peta besar.
+4. **Gambar peta besar** (percobaan 1 dan 6).
+   - (a, saran) Selalu `medan4` (usulan 5a), di kanvas tanpa penghalusan dengan skala bulat JS-07 P-38 yang sama, sehingga zebra cross, garis lapangan, dan pohon tetap tampak. Lebar piksel yang sedikit tidak rata pada pembesaran 1,31 sampai 2,25 kali diterima. Warna zona hanya cadangan selama gambar belum siap.
+   - (b) Gambar yang pas kelipatan bulat bila ada (misalnya `medan2` × 3 di 1280 × 720 dan HP 640 × 360 rasio 3): pikselnya rata, tetapi rincian hilang, dan hanya berlaku di 2 dari 6 ukuran yang diukur.
+5. **Label zona dan urutan lapisan di peta besar** (percobaan 5).
+   - (a, saran) Urutan dari bawah: medan, label zona, halte, penanda kejadian, lalu "Kamu di sini", sehingga tidak ada penanda yang tertutup label. Label pindah dari tengah ke sudut kiri atas zonanya (3 px dari tepi zona), agar bangunan penanda di tengah zona tetap tampak dan label lebih jarang bertumpuk dengan penanda. Ini mengubah D-3 JS-07, yang menaruh nama zona di tengah zona.
+   - (b) Label tetap di tengah, tetapi di bawah penanda: perubahannya paling kecil, tetapi sekolah dan pasar tertutup label.
+   - (c) Seperti v1.0: sampai 45 dari 96 titik kejadian tertutup separuh atau lebih di HP kecil.
+6. **Peta kelas** (percobaan 7; merinci usulan 6a).
+   - (a, saran) `peta_medan_4.png` di elemen `<image>` dengan `image-rendering: pixelated`, lalu ikon zona 7 × 7 ubin di sudut kiri atas setiap zona (seperti v1.0), lalu titik pemain. Titik 3 × 3 ubin berpusat 0,75 ubin di atas titik kaki, berisi warna tas, dengan garis dalam putih 2 px dan garis luar `ink` 1,5 px yang tebalnya tetap dalam piksel layar. Kotak zona berwarna dihapus. Pemain terputus tetap pucat 40%, dan titik tetap bergerak halus 0,5 detik di antara dua kiriman.
+   - (b) Garis ikut skala peta (0,35 ubin): sekitar 1 px di 1024 × 768, sehingga kurang menonjol.
+7. **Pemuatan gambar medan.**
+   - (a, saran) Layar pemain mulai memuat gambar peta mini sesuai rasio dan `medan4` saat layar dunia terpasang di lobi, seperti ikon peta mini, tanpa menahan tombol Masuk. Layar kelas mulai memuat `peta_medan_4.png` saat terbuka di lobi. Ronde biasanya dimulai sesudah gambar termuat. Bila belum, peta mini dan peta besar memakai warna zona, dan peta kelas tampil polos sebentar.
+   - (b) Termasuk aset yang ditunggu sebelum tombol Masuk aktif: medan pasti ada sejak awal, tetapi masuk lobi sedikit lebih lambat di jaringan lemah.
+   - (c) `medan4` baru dimuat saat peta besar pertama kali dibuka: hemat 10 KB bagi pemain yang tidak membukanya, tetapi peta besar sekilas tampil tanpa medan.
+8. **Dua galat ESLint lama** (catatan Plan dari Test JS-21; percobaan 9).
+   - (a, saran) Diperbaiki di Build JS-23 seperti percobaan 9, tanpa mengubah perilaku. Uji ujung ke ujung kode masuk ulang dan Perbesar QR yang sudah ada menjadi pengamannya, dan ESLint Jejak menjadi 0 galat.
+   - (b) Ditunda sampai fitur yang menyentuh kedua berkas itu.
+9. **Ukuran dan uji** (catatan Test JS-21).
+   - (a, saran) Kriteria ukuran ditulis sebagai batas kenaikan: kode layar pemain paling banyak +1 KB gzip, konsol awal paling banyak +0,2 KB, potongan layar kelas paling banyak +0,5 KB, dan aset layar pemain paling banyak +16 KB. Uji unit untuk pilihan gambar, ukuran kanvas simpanan, cadangan, dan letak titik; uji ujung ke ujung untuk piksel medan di peta mini dan peta besar, urutan lapisan, serta peta kelas; tangkapan layar di empat ukuran wajib ditambah HP 640 × 360; dan pemeriksaan manual di proyektor. Uji ujung ke ujung dijalankan dalam kelompok kecil. `sim:beban` tidak wajib, karena protokol, inti ruang, dan kiriman ke D1 tidak berubah.
+   - (b) Tangkapan layar hanya di empat ukuran wajib AGENTS 4.4, tanpa HP 640 × 360.
+
+#### Tanggapan permintaan Sesi B dan C (Plan lanjutan JS-23, 26 Nov 2026)
+
+Dibaca dari ZIP `main` sesudah commit `c1c1a86`: `naskah/STATUS.md` (23 Nov 2026) dan `Daftar_Aset.md` (versi 1.6, 26 Nov 2026).
+
+| Kode | Permintaan singkat | Tanggapan Sesi A | Perubahan |
+|---|---|---|---|
+| C-19 (Sesi C) | Di Build JS-18, dalam commit yang sama dengan `PC-2-kotak.zip`, uji `skill-ruang` menjadi 31 kotak; periksa `skill.uji.ts`, `KOTAK_MENUNGGU_MAKS`, dan komentar "ke-24 kotak" | Diterima, dikerjakan di Build JS-18 dengan `PC-2-kotak.zip` terlampir (KT-C34 a), bukan di JS-23. JS-23 tidak mengubah `kampung.json`, kotak, sumber peta, maupun gambar medan, dan ujinya tidak memeriksa nilai sidik, karena ZIP itu membawa gambar medan bersidik baru | Catatan Build JS-18 di "Catatan untuk Plan berikutnya"; berkas tidak berubah sekarang |
+| C-20 (Sesi C) | Catat gambar medan di Design System 14 dan Architecture 3, 11.2, dan 11.3 | Diterapkan di ZIP ini dengan bentuk `PETA` yang sekarang (usulan 1a). Pemakaian setiap gambar ditulis di Specify JS-23 (Design System 3.3, 3.6, 9, dan 10; Architecture 9 dan 10.9) | Design System 14; Architecture 3, 11.2, dan 11.3 |
+| A-1 sampai A-18 (Sesi B) | Berbagai permintaan sampai 23 Nov 2026 | Semuanya sudah diterapkan; tidak ada A-19 | Tidak ada |
+
+Sesi C bisa mengubah status C-20 menjadi Diterapkan dan C-19 menjadi Diterima (dikerjakan di Build JS-18).
+
+#### Catatan Plan yang ditanggapi
+
+| Catatan di "Catatan untuk Plan berikutnya" | Tanggapan |
+|---|---|
+| Plan lanjutan JS-23 (dari Test JS-21): dua galat ESLint lama | Percobaan 9 dan usulan 8 |
+| Specify JS-23 dan JS-18 (dari Gerbang 1 rencana v1.1): JFR-11 dan JFR-28 ditulis ulang | Bagian File (dokumen Specify) |
+| Specify berikutnya (dari Test JS-21): batas kenaikan kode konsol | Usulan 9 |
+| Test berikutnya (dari Test JS-21): uji ujung ke ujung dalam kelompok kecil | Usulan 9 |
+| Semua fitur: `build:pages` identik dengan galeri | Percobaan 10 |
+| Risiko Sesi C (`Daftar_Aset.md`): peta mini rasio 1 membuang sebagian piksel `medan1` | Percobaan 2 |
+
+#### Risiko
+
+1. **Gambar medan belum termuat** di jaringan lemah: peta mini dan peta besar memakai warna zona sampai gambar siap (usulan 7a).
+2. **Lebar piksel tidak rata** di peta besar pada pembesaran bukan bilangan bulat: diterima menurut maket dan diperiksa lagi di tangkapan layar Test.
+3. **Titik pemain di proyektor dari 8 m:** garis bertebal tetap terlihat di maket; tetap diperiksa saat uji coba kelas (Risiko 6 rencana v1.1).
+4. **Label di sudut zona** bisa bertumpuk dengan halte atau "Kamu di sini" di HP kecil; penanda selalu berada di atas label (usulan 5a).
+5. **`PC-2-kotak.zip`** membawa gambar medan bersidik baru: JS-23 tidak menyentuh gambar dan tidak memeriksa sidik, jadi isi ZIP itu tetap berlaku di Build JS-18.
+6. **Galeri:** setiap ZIP dicek dengan `build:pages`, dan ke-178 berkas harus identik byte.
+7. **Ukuran kode:** prototipe +0,32 KB untuk layar pemain (140,84 dari 200 KB); JS-18 masih diperkirakan +3 sampai +5 KB.
