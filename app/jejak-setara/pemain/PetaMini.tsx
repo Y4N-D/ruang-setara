@@ -1,9 +1,11 @@
 // Peta mini (spesifikasi JS-07, P-35 sampai P-37; DRAF D-4 pilihan a; Design System 3.3 dan 10): 112 × 75 px di
 // kanan atas, peta 0,7 px per ubin dengan delapan zona berwarna dominan, garis batas ink, halte, dan panah diri.
 // Peta mini adalah tombol untuk membuka peta besar. JS-08 (P-18): penanda kejadian yang sudah terlihat, "!" atau ✓.
+// JS-23 (P-7 sampai P-10): gambar medan dari kanvas simpanan menggantikan zona berwarna, yang kini hanya cadangan.
 import type { RefObject } from "react";
 import type { Arah, ZonaId } from "../inti/tipe";
 import { TEKS } from "../teks";
+import { buatSimpananMedan, ukuranMedanMini } from "./dunia/medan";
 import { HALTE, UKURAN_PETA, ZONA } from "./dunia/petaKampung";
 
 /** Warna dominan zona dari palet (D-4a; Design System 7): coral, sky-d, slate, mango, wood, leaf, teal, berry. */
@@ -28,6 +30,8 @@ export interface GambarPeta {
   halte: CanvasImageSource | null;
   kejadian?: CanvasImageSource | null;
   selesai?: CanvasImageSource | null;
+  /** JS-23 (P-2): gambar medan peta mini yang sudah siap, atau null selama cadangan. */
+  medan?: CanvasImageSource | null;
 }
 
 /** Titik kejadian yang terlihat untuk peta (ubin), dan apakah kejadiannya selesai (JS-08, P-18, P-19). */
@@ -36,6 +40,13 @@ export interface PenandaPeta {
   y: number;
   selesai: boolean;
 }
+
+const simpanMedan = buatSimpananMedan((lebar, tinggi) => {
+  const k = document.createElement("canvas");
+  k.width = lebar;
+  k.height = tinggi;
+  return k;
+});
 
 /** Zona berwarna dan garis batasnya, di kanvas dengan `s` piksel perangkat per ubin dan geser tegak `dy`. */
 export function gambarZona(ctx: CanvasRenderingContext2D, s: number, dy: number, garis: number): void {
@@ -78,7 +89,10 @@ export function gambarPetaMini(
   ctx.fillRect(0, 0, w, h);
   const s = PETA_MINI.pxPerUbin * rasio;
   const dy = Math.round(((PETA_MINI.tinggi - UKURAN_PETA.tinggi * PETA_MINI.pxPerUbin) / 2) * rasio);
-  gambarZona(ctx, s, dy, Math.max(1, Math.round(rasio)));
+  if (gambar.medan) {
+    const u = ukuranMedanMini(rasio, UKURAN_PETA, PETA_MINI.pxPerUbin);
+    ctx.drawImage(simpanMedan(gambar.medan, u.lebar, u.tinggi), 0, dy);
+  } else gambarZona(ctx, s, dy, Math.max(1, Math.round(rasio)));
   const ikon = Math.max(1, Math.round(rasio)) * 7;
   if (gambar.halte) {
     for (const t of HALTE) {

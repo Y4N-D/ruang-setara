@@ -469,22 +469,27 @@
   max-height: 100%;
   aspect-ratio: 160 / 100;
   border: calc(0.4 * var(--u)) solid var(--js-ink);
+  /* JS-23 (P-18; D-2 a): latar selama gambar medan belum siap atau gagal. */
+  background: var(--js-mist);
 }
-.js-kelas-zona {
-  opacity: 0.55;
+/* JS-23 (P-16, P-17): gambar medan tanpa penghalusan; titik 3 × 3 ubin dengan garis ink 5 px di belakang dan garis
+   white 2 px di depan, bertebal tetap dalam piksel layar. Kotak zona berwarna JS-10 dihapus. */
+.js-kelas-medan {
+  image-rendering: pixelated;
 }
-.js-kelas-zona-1 { fill: var(--js-coral); }
-.js-kelas-zona-2 { fill: var(--js-sky-d); }
-.js-kelas-zona-3 { fill: var(--js-mist); }
-.js-kelas-zona-4 { fill: var(--js-mango); }
-.js-kelas-zona-5 { fill: var(--js-wood); }
-.js-kelas-zona-6 { fill: var(--js-teal); }
-.js-kelas-zona-7 { fill: var(--js-leaf); }
-.js-kelas-zona-8 { fill: var(--js-sun); }
 .js-kelas-titik {
-  stroke: var(--js-ink);
-  stroke-width: 0.5;
   transition: transform 0.5s linear;
+}
+.js-kelas-titik-luar {
+  fill: none;
+  stroke: var(--js-ink);
+  stroke-width: 5px;
+  vector-effect: non-scaling-stroke;
+}
+.js-kelas-titik-isi {
+  stroke: var(--js-white);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
 }
 .js-kelas-titik[data-terhubung="tidak"] {
   opacity: 0.4;

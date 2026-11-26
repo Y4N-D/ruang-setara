@@ -62,7 +62,6 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
   const [kini, setKini] = useState(() => Date.now());
   useEffect(() => {
     if (!kodeUlang) return;
-    setKini(Date.now());
     const pewaktu = window.setInterval(() => setKini(Date.now()), 1000);
     return () => window.clearInterval(pewaktu);
   }, [kodeUlang]);
@@ -128,6 +127,8 @@ export default function DetailRuang({ id, akun, galatSesi, umumkan, buka: bukaHa
     setSibuk(false);
     if (h.ok) {
       setGalatAksi(null);
+      // JS-23 (P-20): waktu sekarang diisi bersama kode, bukan di dalam efek pewaktu.
+      setKini(Date.now());
       setKodeUlang({ nama, kode: h.data.kode, berlakuSampai: h.data.berlakuSampai });
     } else if (!galatSesi(h)) setGalatAksi(t.kodeMasukUlangGagal);
   }

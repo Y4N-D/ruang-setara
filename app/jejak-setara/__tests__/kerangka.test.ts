@@ -1464,3 +1464,19 @@ describe("JS-16c: catatan rilis v1.0 (P-7; AC-9)", () => {
     for (const kata of ["JS-16b", "JS-16c", "JS-16d", "`PROTOKOL_VERSI` naik dari 4 ke 5", "Jejak: hentikan", "Rollback"]) expect(isi, kata).toContain(kata);
   });
 });
+
+describe("JS-23: teks peta tetap dan aturan impor peta kelas (bagian Teks; P-1)", () => {
+  it("tabel Teks spesifikasi JS-23 sama dengan TEKS dan TEKS_KONSOL", () => {
+    const harapan = uraiTabelTeks(baca("docs/jejak-setara/specs/JS-23-peta-medan.md"));
+    expect(Object.keys(harapan).sort()).toEqual(["kelas.petaLabel", "peta.bukaBesar", "peta.halte", "peta.judul", "peta.kamuDiSini", "peta.ringkasanKejadian", "peta.tutup"]);
+    const pemain = ratakanTeks(TEKS);
+    const konsol = ratakanTeks(TEKS_KONSOL);
+    for (const [kunci, teks] of Object.entries(harapan)) expect((kunci.startsWith("kelas.") ? konsol : pemain)[kunci], kunci).toBe(teks);
+  });
+
+  it("PetaKelas.tsx mengimpor peta_medan_4.png langsung, bukan manifest.ts (P-35 JS-10)", () => {
+    const isi = baca("app/jejak-setara/admin/kelas/PetaKelas.tsx");
+    expect(isi).toContain('import medan4 from "../../assets/peta/peta_medan_4.png";');
+    expect(isi).not.toMatch(/assets\/manifest/);
+  });
+});

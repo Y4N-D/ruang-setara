@@ -1,11 +1,13 @@
 // Peta besar (spesifikasi JS-07, P-37 sampai P-39; DRAF D-3 dan D-4 pilihan a): menutupi dunia di bawah bilah atas,
 // dengan skala bulat terbesar yang muat (paling kecil 2 px per ubin), zona berwarna, nama dan ikon setiap zona di
 // tengahnya, halte, dan panah diri berlabel "Kamu di sini". Ditutup dengan tombol, P, atau Esc. JS-08 (P-19): penanda
-// kejadian yang terlihat 14 × 14 px dan ringkasan "Kejadian terlihat n, selesai m." di bawah judul.
-import { useEffect, useLayoutEffect, useRef } from "react";
-import { IKON, TANDA } from "../assets/manifest";
+// kejadian yang terlihat 14 × 14 px dan ringkasan "Kejadian terlihat n, selesai m." di bawah judul. JS-23 (P-11 sampai
+// P-13): medan 4 px per ubin dengan zona berwarna sebagai cadangan, label zona di sudut kiri atas zona, dan urutan lapisan.
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { IKON, PETA, TANDA } from "../assets/manifest";
 import type { Arah } from "../inti/tipe";
 import { isiTeks, TEKS } from "../teks";
+import { letakLabelZona, MEDAN } from "./dunia/medan";
 import { HALTE, UKURAN_PETA, ZONA } from "./dunia/petaKampung";
 import { gambarZona, type PenandaPeta } from "./PetaMini";
 
@@ -38,12 +40,17 @@ export default function PetaBesar({
   const s = skalaPetaBesar(lebar, tinggi);
   const kanvas = useRef<HTMLCanvasElement | null>(null);
   const tutup = useRef<HTMLButtonElement | null>(null);
+  // JS-23 (P-11): medan4 bila sudah siap, zona berwarna v1.0 sebagai cadangan; digambar ulang saat gambar menjadi siap.
+  const [medanSiap, setMedanSiap] = useState(0);
+  useEffect(() => MEDAN.dengar(() => setMedanSiap((n) => n + 1)), []);
   useLayoutEffect(() => {
     const ctx = kanvas.current?.getContext("2d");
     if (!ctx) return;
     ctx.imageSmoothingEnabled = false;
-    gambarZona(ctx, s * rasio, 0, Math.max(1, Math.round(rasio)));
-  }, [s, rasio]);
+    const medan = MEDAN.ambil(PETA.medan4);
+    if (medan) ctx.drawImage(medan, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    else gambarZona(ctx, s * rasio, 0, Math.max(1, Math.round(rasio)));
+  }, [s, rasio, medanSiap]);
   useEffect(() => {
     tutup.current?.focus();
   }, []);
@@ -96,8 +103,9 @@ export default function PetaBesar({
           ))}
         {ZONA.map((z) => {
           const n = Number(z.id.slice(1));
+          const l = letakLabelZona(z, s);
           return (
-            <span key={z.id} className="js-label-zona" style={{ left: ((z.kiri + z.kanan + 1) / 2) * s, top: ((z.atas + z.bawah + 1) / 2) * s }}>
+            <span key={z.id} className="js-label-zona" style={{ left: l.kiri, top: l.atas, maxWidth: l.lebarMaks }}>
               {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
               <img src={IKON[`ikon_zona_${n}`]?.url} alt="" width={16} height={16} />
               {z.nama}

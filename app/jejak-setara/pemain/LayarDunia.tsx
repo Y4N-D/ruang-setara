@@ -7,7 +7,7 @@
 // JS-09: tombol skill dan tombol 1 sampai 3, antrean pita, pengumuman skill, kotak aman panah Kompas, dan atribut data
 // kanvas `data-kotak`, `data-lari`, dan `data-kompas` (spesifikasi JS-09, P-18, P-20, P-26, P-33 sampai P-43).
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as PointerEventReact } from "react";
-import { TANDA, IKON } from "../assets/manifest";
+import { TANDA, IKON, PETA } from "../assets/manifest";
 import DialogKejadian, { type AksiDialog } from "../bersama/DialogKejadian";
 import { modeRingkas, TINGGI_BILAH_PX, type KeadaanDialog } from "../bersama/dialogKeadaan";
 import { PANDANGAN, SKILL_P0, type SkillP0 } from "../inti/aturan";
@@ -28,6 +28,7 @@ import { KelompokMenuSuara } from "./PanelPengaturan";
 import type { NamaSuara } from "./suara";
 import PanelLobi from "./PanelLobi";
 import PetaBesar from "./PetaBesar";
+import { MEDAN, pilihMedan } from "./dunia/medan";
 import PetaMini, { gambarPetaMini, type PenandaPeta } from "./PetaMini";
 import { AjakanPeriksa, TombolPeriksa } from "./TombolPeriksa";
 import TombolSkill from "./TombolSkill";
@@ -368,6 +369,10 @@ export default function LayarDunia(props: PropsLayarDunia) {
     };
     gambarMini.tandaDiri = muatIkon(TANDA.tanda_diri.url);
     gambarMini.halte = muatIkon(IKON.ikon_mini_halte.url);
+    // JS-23 (P-4): gambar medan mulai dimuat saat layar dunia terpasang, tanpa menahan tombol Masuk.
+    const urlMedanMini = (r: number) => (pilihMedan(r) === 2 ? PETA.medan2 : PETA.medan1);
+    MEDAN.ambil(urlMedanMini(terbaru.current.rasio));
+    MEDAN.ambil(PETA.medan4);
     const gambarKejadian = { kejadian: muatIkon(IKON.ikon_mini_kejadian.url), selesai: muatIkon(IKON.ikon_mini_selesai.url) };
     // Satu detik terakhir untuk angka fps (P-70).
     const detik = { mulai: 0, bingkai: 0, histogram: KELOMPOK_WAKTU.map(() => 0) };
@@ -469,12 +474,14 @@ export default function LayarDunia(props: PropsLayarDunia) {
         if (km && cm && gambarMini.tandaDiri?.complete && gambarMini.halte?.complete) {
           // Peta mini digambar ulang hanya bila posisi (per ubin), arah, ukuran, atau penanda kejadian berubah.
           const p = mesin.gerak.posisi;
-          const kunci = `${km.width}x${km.height}:${p ? `${Math.round(p.x / 16)},${Math.round(p.y / 16)},${mesin.gerak.arah}` : "-"}:${kunciPenanda}`;
+          // JS-23 (P-2, P-10): gambar menurut rasio saat ini; peta mini digambar ulang saat gambar menjadi siap atau berganti.
+          const medan = MEDAN.ambil(urlMedanMini(t.rasio));
+          const kunci = `${km.width}x${km.height}:${p ? `${Math.round(p.x / 16)},${Math.round(p.y / 16)},${mesin.gerak.arah}` : "-"}:${kunciPenanda}:${medan ? medan.src : "-"}`;
           if (kunci !== kunciMini || km !== kanvasMini) {
             kunciMini = kunci;
             kanvasMini = km;
             const daftar = mesin.kejadian.daftar().map((x) => ({ x: x.x, y: x.y, selesai: mesin.kejadian.selesai.has(x.kejadianId) }));
-            gambarPetaMini(cm, t.rasio, { ...gambarMini, ...gambarKejadian }, p ? { x: p.x, y: p.y, arah: mesin.gerak.arah } : null, daftar);
+            gambarPetaMini(cm, t.rasio, { ...gambarMini, ...gambarKejadian, medan }, p ? { x: p.x, y: p.y, arah: mesin.gerak.arah } : null, daftar);
           }
         } else {
           kunciMini = "";

@@ -1,6 +1,7 @@
 // Layar kelas (spesifikasi JS-10, P-15 dan P-23 sampai P-31; musik latar JS-21): tampil tanpa kerangka konsol untuk proyektor. Tombol dan
 // pintasan papan ketik mengendalikan ronde; konfirmasi Akhiri dan Tutup ruang tanpa nama siswa; status sambungan dan
 // pengumuman untuk pembaca layar. Mengeluarkan pemain hanya di halaman detail ruang (usulan 5a).
+import medan4 from "../../assets/peta/peta_medan_4.png";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { PROTOKOL_VERSI } from "../../inti/protokol";
 import type { PesanKelas } from "../../inti/protokol-kelas";
@@ -125,7 +126,14 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
   const [menuNama, setMenuNama] = useState<string | null>(null);
   const [panelPemain, setPanelPemain] = useState<HTMLElement | null | false>(false);
   // JS-16b (P-9): lapisan Perbesar QR di lobi; tertutup sendiri saat ronde dimulai, lalu fokus kembali ke tombolnya.
-  const [qrBesar, setQrBesar] = useState(false);
+  const [qrBesarPilihan, setQrBesar] = useState(false);
+  // JS-23 (P-21): QR besar hanya tampil di lobi, dihitung langsung, bukan lewat efek yang mengubah keadaan.
+  const qrBesar = qrBesarPilihan && status === "lobi";
+  // JS-23 (P-18): gambar medan peta kelas mulai dimuat saat layar kelas terbuka, agar siap saat ronde dimulai.
+  useEffect(() => {
+    const gambar = new Image();
+    gambar.src = medan4;
+  }, []);
   const tombolQr = useRef<HTMLButtonElement>(null);
   const bukaTutupQr = useCallback(() => {
     setQrBesar((b) => {
@@ -133,9 +141,6 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
       return !b;
     });
   }, []);
-  useEffect(() => {
-    if (status !== "lobi") setQrBesar(false);
-  }, [status]);
   const [keluarkanPemain, setKeluarkanPemain] = useState<{ id: string; pembuka: HTMLElement | null } | null>(null);
   const [pita, setPita] = useState<string | null>(null);
   const waktuPita = useRef<number | undefined>(undefined);

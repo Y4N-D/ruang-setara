@@ -763,13 +763,16 @@ body {
   image-rendering: pixelated;
 }
 
+/* JS-23 (P-12, P-13): label di sudut kiri atas zonanya, selebar zona paling besar (lebar luar), di bawah halte, penanda
+   kejadian, dan "Kamu di sini". */
 .js-label-zona {
   position: absolute;
-  transform: translate(-50%, -50%);
+  z-index: 1;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 4px;
-  max-width: 180px;
+  max-width: 196px;
   padding: 2px 6px;
   border: 2px solid var(--js-ink);
   background: var(--js-cream);
@@ -788,11 +791,13 @@ body {
 
 .js-peta-halte {
   position: absolute;
+  z-index: 2;
   image-rendering: pixelated;
 }
 
 .js-kamu {
   position: absolute;
+  z-index: 3;
   width: 0;
   height: 0;
 }
@@ -1622,6 +1627,7 @@ body {
 /* Peta besar (P-19): penanda kejadian 14 × 14 dan ringkasan di bawah judul. */
 .js-peta-kejadian {
   position: absolute;
+  z-index: 2;
   width: 14px;
   height: 14px;
   image-rendering: pixelated;

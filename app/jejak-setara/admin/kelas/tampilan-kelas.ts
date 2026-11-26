@@ -13,6 +13,11 @@ export const ZONA_KELAS: readonly (readonly [number, number, number, number])[] 
 ];
 export const PETA_UBIN = { lebar: 160, tinggi: 100, piksel: 16 } as const;
 
+/** JS-23 (P-17): pergeseran titik pemain 3 × 3 ubin di peta kelas, berpusat 0,75 ubin di atas titik kaki (x, y piksel logis). */
+export function letakTitikKelas(x: number, y: number): readonly [number, number] {
+  return [x / PETA_UBIN.piksel - 1.5, y / PETA_UBIN.piksel - 2.25];
+}
+
 /** Jeda menyambung ulang: 1, 2, 4, 8, lalu 15 detik (P-15). */
 export const JEDA_SAMBUNG_ULANG = [1000, 2000, 4000, 8000, 15000] as const;
 /** Sesudah 10 menit gagal terus, percobaan otomatis berhenti (P-15). */

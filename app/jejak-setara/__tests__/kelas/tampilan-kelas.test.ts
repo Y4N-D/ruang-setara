@@ -11,6 +11,7 @@ import {
   formatSisaKelas,
   jedaSambungUlang,
   kemajuanKelas,
+  letakTitikKelas,
   persenPilihan,
   potongLobi,
   putusanTutup,
@@ -110,5 +111,14 @@ describe("konsol tidak mengimpor modul layar pemain (P-35; AC-23)", () => {
       }
       expect(isi, f).not.toMatch(/import \{[^}]*\bTEKS\b[^}]*\} from "\.\.\/(\.\.\/)?teks"/);
     }
+  });
+});
+
+describe("JS-23: letak titik peta kelas (P-17; AC-9)", () => {
+  it("kotak 3 × 3 ubin berpusat 0,75 ubin di atas titik kaki", () => {
+    const [gx, gy] = letakTitikKelas(16 * 10 + 8, 16 * 20 + 14);
+    expect([gx, gy]).toEqual([9, 18.625]);
+    expect(gx + 1.5).toBe((16 * 10 + 8) / 16);
+    expect(gy + 1.5).toBe((16 * 20 + 14) / 16 - 0.75);
   });
 });

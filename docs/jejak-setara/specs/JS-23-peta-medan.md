@@ -1,6 +1,6 @@
 # JS-23 — Peta bermedan
 
-Status: **DRAF untuk Gerbang 2 (26 Nov 2026)**, menunggu `Spesifikasi disetujui: JS-23`. Dasar: Plan lanjutan JS-23 di `PLAN.md` (`Setuju: JS-23`, usulan 1 sampai 9 = a, 26 Nov 2026), Gerbang 1 rencana v1.1 (usulan 3a sampai 6a), gambar medan G-01 sampai G-03 (PC-1, Disetujui 26 Nov 2026), serta spesifikasi JS-07 (P-35 sampai P-39) dan JS-10 (P-26, P-31, dan P-35).
+Status: **Disetujui (26 Nov 2026)**, `Spesifikasi disetujui: JS-23` (D-1 sampai D-3 = a). Diuji: [JS-23-hasil.md](../tests/JS-23-hasil.md). Dasar: Plan lanjutan JS-23 di `PLAN.md` (`Setuju: JS-23`, usulan 1 sampai 9 = a, 26 Nov 2026), Gerbang 1 rencana v1.1 (usulan 3a sampai 6a), gambar medan G-01 sampai G-03 (PC-1, Disetujui 26 Nov 2026), serta spesifikasi JS-07 (P-35 sampai P-39) dan JS-10 (P-26, P-31, dan P-35).
 
 ## Ringkasan
 
@@ -191,3 +191,13 @@ Tidak ada aset baru, dan `CREDITS.md` tidak berubah.
 
 - HP sungguhan di lingkungan uji: peta mini dan peta besar terbaca, dan kejadian baru muncul di peta sesudah terlihat.
 - Proyektor: titik pemain terlihat dari sekitar 8 m, dan peta tidak kabur di laptop guru.
+
+## Catatan Build (26 November 2026)
+
+Ditulis Sesi A saat Build. Perilaku dan kriteria di atas tidak berubah.
+
+- **Berkas uji ujung ke ujung.** Uji JS-23 ditulis di berkas baru `e2e/jejak-setara/medan.uji.ts`, bukan dengan mengubah `dunia.uji.ts` dan `kelas.uji.ts` seperti di tabel Berkas dan Rencana uji, sehingga uji lama tetap utuh dan bisa dijalankan sendiri. Isinya sama dengan rencana uji: gambar per rasio, piksel medan, cadangan, label dan lapisan, peta kelas, dan tangkapan layar.
+- **Pemeriksaan piksel medan (AC-3 dan AC-6).** Untuk setiap sel yang bloknya dan kedelapan tetangganya satu warna di gambar sumber, piksel peta di tengah sel harus berwarna sama, jauh dari halte dan titik muncul. Jalan aspal selebar 2 ubin tidak pernah punya tetangga yang semuanya aspal, jadi warna aspal `#6B7A99` diperiksa di titik sudut bersama blok 2 × 2 ubin yang seluruhnya aspal.
+- **Ikon zona peta kelas** mendapat kelas `js-kelas-ikon-zona` agar bisa dihitung uji. Tampilannya sama dengan v1.0.
+- **Lebar label zona (P-12).** Lebar luar label v1.0 adalah 196 px (isi 180 px, jarak dalam 6 px, dan garis 2 px di kedua sisi), jadi `letakLabelZona` memakai batas `LEBAR_LABEL_V10` = 196, dan label kini diukur dengan lebar luar.
+- **Pemuat gambar bersama.** `MEDAN` di `pemain/dunia/medan.ts` dipakai bersama peta mini dan peta besar, sehingga satu gambar hanya dimuat sekali per halaman. Peta besar digambar ulang lewat pendengar `dengar` saat `medan4` menjadi siap.
