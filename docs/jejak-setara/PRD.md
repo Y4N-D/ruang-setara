@@ -132,7 +132,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 |---|---|---|
 | JFR-09 | Peta tampak atas 3/4 sekitar 160 × 100 ubin dengan 8 zona (bagian 9), dijelajah dengan keyboard (WASD atau panah) atau joystick sentuh | P0 |
 | JFR-10 | Pemain lain terlihat sebagai avatar dengan nama samaran. Pemain saling tembus dan tidak bisa saling mengganggu | P0 |
-| JFR-11 | Peta mini pribadi: posisi sendiri, zona, halte, dan kejadian yang **sudah pernah terlihat**; kejadian yang belum terlihat tidak ditampilkan | P0 |
+| JFR-11 | Peta mini pribadi bermedan (gambar kampung masa siang): posisi sendiri, halte, dan kejadian yang **sudah pernah terlihat**; kejadian yang belum terlihat tidak ditampilkan. Peta besar memakai medan yang sama dengan nama zona (JS-23) | P0 |
 | JFR-12 | "Langit sehari": waktu ronde dipetakan ke satu hari (pagi, siang, sore), warna peta berganti per masa, dan busur hari tampil di bilah atas | P0 |
 | JFR-13 | Bantuan gerak: memilih kejadian di peta mini atau daftar kejadian terdekat membuat avatar berjalan sendiri ke sana dengan kecepatan jalan biasa | P1 |
 | JFR-14 | Layar tetap menyala selama bermain (bila perangkat mendukung), agar HP tidak terkunci dan koneksi tidak putus | P0 |
@@ -164,7 +164,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
 | JFR-27 | Lobi: kode besar, tautan, jumlah pemain, dan daftar nama samaran | P0 |
-| JFR-28 | Saat bermain: sisa waktu dan busur hari, papan 10 besar, kemajuan kelas (jumlah jawaban terhadap jumlah kemungkinan), dan peta kecil berisi titik pemain **tanpa** lokasi kejadian | P0 |
+| JFR-28 | Saat bermain: sisa waktu dan busur hari, papan 10 besar, kemajuan kelas (jumlah jawaban terhadap jumlah kemungkinan), dan peta kecil bermedan berisi titik pemain **tanpa** lokasi kejadian (JS-23) | P0 |
 | JFR-29 | Kontrol guru: Mulai (hitung mundur 3 detik), Jeda dan Lanjut (semua pemain berhenti), Tambah 2 menit, dan Akhiri (dengan konfirmasi), juga lewat pintasan keyboard | P0 |
 | JFR-30 | Akhir ronde: podium 3 besar dan daftar 4–10. Peringkat lengkap hanya di konsol, bukan di proyektor | P0 |
 | JFR-31 | Pembahasan: per kejadian tampil situasi, jawaban yang tepat, sebaran pilihan kelas dalam persen, dan kartu dampak, untuk didiskusikan | P0 |
@@ -590,3 +590,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 25 Nov 2026 | `Rilis: v1.0` dan `Diterima: JS-16c; penyimpangan 1a`: produksi naik ke v1.0, tautan layar judul Sehari Setara terbit, dan sisa uji ujung ke ujung Sehari Setara dijalankan di awal JS-16d |
 | 25 Nov 2026 | Gerbang 1 rencana v1.1 (`Setuju: JS-21`, semua saran a): v1.1 berisi JS-21 musik latar, JS-23 peta bermedan, dan JS-18 Teropong dan Angkot, dirilis sebelum uji coba kelas, dengan JS-16d sesudahnya; KT-15 sampai KT-18 dijawab (bagian 20); peta mini tertutup tetap seluruh kampung dengan medan; satu gambar medan masa siang dalam tiga ukuran (1, 2, dan 4 px per ubin) dari Sesi C (PC-1); titik pemain di peta kelas 3 ubin bergaris ganda; lima tombol skill dengan Teropong dan Angkot di baris bawah; protokol naik ke versi 6 di JS-18; musik diputar di lobi dan selama ronde, lanjut dari posisi terakhir, dengan tombol "Musik" dan pintasan `U` |
 | 25 Nov 2026 | Spesifikasi JS-21 disetujui (`Spesifikasi disetujui: JS-21`, D-1 sampai D-3 = a): tombol bertulisan "Musik" yang bercoret di latar `mist` saat musik mati, tulisan "Klik untuk menyalakan suara" di lobi sebelum klik pertama, dan musik yang lanjut dari posisi lobi saat ronde dimulai. JS-21 diuji dan lulus pada hari yang sama; kenaikan kode konsol awal 0,10 KB karena teks baru diterima |
+| 26 Nov 2026 | Gerbang 1 JS-23 (`Setuju: JS-23`, usulan 1 sampai 9 = a): peta mini, peta besar, dan peta kelas memakai gambar medan masa siang tanpa penghalusan dan tanpa garis batas zona, dengan warna zona hanya sebagai cadangan selama gambar belum siap; label zona peta besar pindah ke sudut kiri atas zonanya, di bawah halte dan penanda kejadian (mengubah D-3 JS-07); titik pemain peta kelas 3 ubin bergaris `white` dan `ink` bertebal tetap; gambar dimuat sejak lobi tanpa menahan tombol Masuk; `PETA` tetap berisi alamat berkas; dua galat ESLint lama diperbaiki di Build JS-23 |
