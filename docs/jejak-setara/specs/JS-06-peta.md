@@ -7,7 +7,7 @@
 | Rencana | `docs/jejak-setara/Daftar_Aset.md`, bagian "JS-06 Peta: rencana" |
 | Keputusan Gerbang 1 | Balasan `Setuju: JS-06` (8 Nov 2026): semua saran (a), yaitu usulan 1a sampai 9a (KT-C11 sampai KT-C19) |
 | Dikerjakan | Sesi C (aset dan peta) |
-| Perubahan sesudah Selesai | Gambar medan PC-1 (26 Nov 2026, rencana v1.1): P-32 sampai P-36 di bagian "Perubahan sesudah JS-06" |
+| Perubahan sesudah Selesai | Gambar medan PC-1 (26 Nov 2026, rencana v1.1): P-32 sampai P-36; kotak teropong dan karcis PC-2 (26 Nov 2026, masuk bersama JS-18): P-25 galat 7 diubah. Keduanya di bagian "Perubahan sesudah JS-06" |
 
 ## Ringkasan
 
@@ -349,3 +349,18 @@ Permintaan PC-1 rencana v1.1 di `PLAN.md` untuk JS-23 (peta bermedan), direncana
 - **P-36. Pratinjau.** `preview/peta_medan.png`: ketiga gambar diperbesar, tiruan peta mini 112 × 75 px pada rasio 1 dan 2,625, tiruan peta besar 3 px per ubin, dan tiruan peta kelas 1024 × 768. Tiruan bukan tata letak final; tampilan akhirnya ditetapkan JS-23.
 - **Uji.** `peta-medan.test.ts` (berawalan `peta-`, dijalankan `content:check:jejak` dan `test:jejak`): ukuran, PNG palet berwarna `palette.json` saja tanpa `tRNS`, data piksel utuh, anggaran setiap berkas dan bertiga, serta sidik di potongan `tEXt` yang sama dengan kelima berkas sumber dan `kampung_gambar.json`.
 - **Pemeriksaan ulang `build_jejak.py`.** `assets:build:jejak` tidak menggambar ulang medan, tetapi memeriksa ukuran, palet, transparansi, sidik, dan anggarannya, menghitungnya dalam anggaran aset layar pemain, dan menyalinnya bila `--out` bukan folder aset.
+
+### PC-2 Kotak teropong dan karcis (26 November 2026)
+
+Permintaan PC-2 rencana v1.1 di `PLAN.md` untuk JS-18 (Teropong dan Angkot), disetujui bersama PC-1. Letak kotak berstatus Ditinjau sampai pemilik proyek menyetujuinya, dan perubahan ini masuk `main` dalam commit Build JS-18 (KT-C34 a), bersama perubahan uji Sesi A (Permintaan C-19).
+
+- **P-13 dan P-25 galat 7 (diubah).** `kotak` kini memuat tiga kotak teropong di Z6 dan empat kotak karcis, satu di dekat setiap halte (31 kotak). Aturannya:
+  - kotak sepatu, kompas, dan buku tetap tepat 3 per zona dengan isi PRD 8.5;
+  - kotak teropong tepat 3, semuanya di Z6;
+  - kotak karcis tepat satu untuk setiap halte, 1–3 ubin dari titik halte itu dan bukan di titik itu sendiri, sehingga jumlahnya sama dengan jumlah halte;
+  - semua kotak memakai id `k-z{n}-{m}`, berada di zonanya dan di luar kotak `lobi`, di sel bebas yang bukan aspal, air, atau air dalam, dan tidak tertutup jejak kaki objek;
+  - kotak sepatu, kompas, buku, dan teropong berjarak sedikitnya 3 ubin dari titik kejadian dan 6 ubin dari kotak lain selain karcis;
+  - kotak karcis berada di luar ruang 3 × 3 titik kejadian dan berjarak sedikitnya 2 ubin dari kotak lain.
+- **Letak.** Teropong `k-z6-4` (26, 7), `k-z6-5` (51, 7), dan `k-z6-6` (76, 7) di pasir pantai Z6 barat, tengah, dan timur. Karcis `k-z3-4` (57, 64), `k-z3-5` (86, 88), dan `k-z7-4` (107, 25) di trotoar 2 ubin di kanan titik `halte-1`, `halte-2`, dan `halte-3`, serta `k-z8-4` (116, 75) di trotoar 2 ubin di bawah titik `halte-4`. Ruang 3 × 3 setiap kotak baru tidak menyentuh objek sebaran (P-12), sehingga objek, tabrakan, bahan, dan lapisan gambar tidak berubah.
+- **Pratinjau.** `peta_periksa.png` dan `peta_denah.png` menandai kotak teropong (`dusk`) dan karcis (`sun`). Gambar medan tidak menggambar kotak, jadi hanya sidiknya yang berubah.
+- **Uji.** `peta-aturan.test.ts` memeriksa aturan di atas dalam tiga uji: kotak sepatu, kompas, dan buku; kotak teropong; dan kotak karcis.

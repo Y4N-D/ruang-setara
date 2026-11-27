@@ -45,7 +45,16 @@ describe("ruang dari konsol dan pemeriksaan kode (JS-03 AC-2 dan AC-4; JS-10 P-5
     expect(isi.kejadian).toBe(16);
     expect(baris).toMatchObject({ label_kelas: "Ruang uji", paket_id: "9880c4d5-8294-51c9-971a-e95531a2e039", status: "lobi", uji: 1 });
     expect(baris.pemilik_id).toEqual(expect.any(String));
-    expect(JSON.parse(String(baris.pengaturan_json))).toEqual({ durasiMenit: 15, batasPemain: 30, batasTerlambatMenit: 5, skillAktif: ["lari", "kompas", "petunjuk"], modeNomorAbsen: false, uji: true, modeNama: "daftar" });
+    // JS-18 (P-7): tanpa isian skillAktif, kelima skill tersimpan.
+    expect(JSON.parse(String(baris.pengaturan_json))).toEqual({
+      durasiMenit: 15,
+      batasPemain: 30,
+      batasTerlambatMenit: 5,
+      skillAktif: ["lari", "kompas", "petunjuk", "teropong", "angkot"],
+      modeNomorAbsen: false,
+      uji: true,
+      modeNama: "daftar",
+    });
   });
 
   it("isi tidak sah 400 ISI_SALAH; nomor absen untuk lebih dari 50 pemain 400; PUT 405 (JS-10, P-2)", async () => {

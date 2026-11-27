@@ -138,7 +138,11 @@ const pPeriksa = /* @__PURE__ */ pesan("periksa", () => ({ kejadianId: id() }));
 const pKunci1 = /* @__PURE__ */ pesan("kunci_1", () => ({ kejadianId: id(), opsiId: id() }));
 const pKunci2 = /* @__PURE__ */ pesan("kunci_2", () => ({ kejadianId: id(), opsiId: id() }));
 const pTutupDialog = /* @__PURE__ */ pesan("tutup_dialog", () => ({ kejadianId: id() }));
-const pPakaiSkill = /* @__PURE__ */ pesan("pakai_skill", () => ({ skill: skill(), kejadianId: id().optional() }));
+const pPakaiSkill = /* @__PURE__ */ pesan("pakai_skill", () => ({
+  skill: skill(),
+  kejadianId: id().optional(),
+  halteId: z.string().regex(/^halte-[0-9]{1,2}$/).optional(), // JS-18 (P-40): hanya untuk Angkot, sejak versi 6
+}));
 const pAmbilKotak = /* @__PURE__ */ pesan("ambil_kotak", () => ({ kotakId: id() }));
 // JS-15 (P-27): `rttMs` = waktu pulang-pergi terakhir yang diukur HP; `ping` pertama tanpa nilai ini.
 const pPing = /* @__PURE__ */ pesan("ping", () => ({ tKlien: waktu(), rttMs: angkaBulat(0, BATAS_PESAN.rttMsMaks).optional() }));

@@ -1,4 +1,4 @@
-// Uji aturan peta kampung (spesifikasi JS-06: P-3 dan P-25 galat 3 sampai 10; AC-5 sampai AC-9).
+// Uji aturan peta kampung (spesifikasi JS-06: P-3 dan P-25 galat 3 sampai 10; AC-5 sampai AC-9; kotak P1 PC-2).
 // Aturan dihitung ulang dari kampung.json; jejak kaki objek dari ukuran sprite yang sudah disetujui,
 // sedangkan kotak halaman lobi dan daftar penanda dibaca dari objek.json.
 import { existsSync, readFileSync } from "node:fs";
@@ -25,6 +25,8 @@ const BAHAN = { rumput: 0, tanah: 1, pasir: 4, aspal: 5, air: 6, airDalam: 7 } a
 const KOTAK_ZONA: Record<string, string> = {
   z1: "kompas", z2: "buku", z3: "sepatu", z4: "sepatu", z5: "kompas", z6: "sepatu", z7: "buku", z8: "buku",
 };
+/** Kotak P1 sejak PC-2: tidak termasuk hitungan tiga kotak per zona. */
+const P1 = new Set(["teropong", "karcis"]);
 
 const bebas = (x: number, y: number) => x >= 0 && y >= 0 && x < W && y < H && peta.tabrakan[y * W + x] === 0;
 const dalam = (x: number, y: number, b: Batas) => b.kiri <= x && x <= b.kanan && b.atas <= y && y <= b.bawah;
@@ -147,14 +149,47 @@ describe("titik kejadian (AC-6)", () => {
 describe("kotak dan halte (AC-7)", () => {
   it("tiga kotak per zona dengan isi menurut PRD 8.5 dan letak yang sah", () => {
     const masalah: string[] = [];
-    for (const z of peta.zona) if (peta.kotak.filter((k) => k.zona === z.id).length !== 3) masalah.push(`${z.id}: jumlah kotak`);
-    peta.kotak.forEach((k, i) => {
+    const p0 = peta.kotak.filter((k) => !P1.has(k.jenis));
+    for (const z of peta.zona) if (p0.filter((k) => k.zona === z.id).length !== 3) masalah.push(`${z.id}: jumlah kotak`);
+    p0.forEach((k, i) => {
       if (k.jenis !== KOTAK_ZONA[k.zona]) masalah.push(`${k.id}: isi ${k.jenis}`);
       if (zonaDi(k.x, k.y) !== k.zona || dalam(k.x, k.y, sumber.lobi)) masalah.push(`${k.id}: letak`);
       if (!bebas(k.x, k.y) || jejak[k.y * W + k.x] >= 0 || peta.ubin[k.y * W + k.x] >= BAHAN.aspal) masalah.push(`${k.id}: sel`);
       if (peta.titikKejadian.some((t) => jarak(t, k) < 3)) masalah.push(`${k.id}: terlalu dekat titik kejadian`);
-      if (peta.kotak.slice(i + 1).some((l) => jarak(k, l) < 6)) masalah.push(`${k.id}: terlalu dekat kotak lain`);
+      if (p0.slice(i + 1).some((l) => jarak(k, l) < 6)) masalah.push(`${k.id}: terlalu dekat kotak lain`);
     });
+    expect(masalah).toEqual([]);
+  });
+
+  // PC-2 (JS-18; spesifikasi JS-06, bagian "Perubahan sesudah JS-06"): kotak teropong tepat tiga di Z6 dengan aturan
+  // kotak biasa, dan kotak karcis tepat satu di dekat setiap halte.
+  it("tiga kotak teropong di Z6 dengan letak yang sah", () => {
+    const masalah: string[] = [];
+    const teropong = peta.kotak.filter((k) => k.jenis === "teropong");
+    if (teropong.length !== 3) masalah.push(`jumlah teropong ${teropong.length}`);
+    for (const k of teropong) {
+      if (k.zona !== "z6" || !new RegExp(`^k-${k.zona}-\\d+$`).test(k.id)) masalah.push(`${k.id}: zona atau id`);
+      if (zonaDi(k.x, k.y) !== k.zona || dalam(k.x, k.y, sumber.lobi)) masalah.push(`${k.id}: letak`);
+      if (!bebas(k.x, k.y) || jejak[k.y * W + k.x] >= 0 || peta.ubin[k.y * W + k.x] >= BAHAN.aspal) masalah.push(`${k.id}: sel`);
+      if (peta.titikKejadian.some((t) => jarak(t, k) < 3)) masalah.push(`${k.id}: terlalu dekat titik kejadian`);
+      if (peta.kotak.some((l) => l.id !== k.id && l.jenis !== "karcis" && jarak(k, l) < 6)) masalah.push(`${k.id}: terlalu dekat kotak lain`);
+    }
+    expect(masalah).toEqual([]);
+  });
+
+  it("satu kotak karcis 1–3 ubin dari setiap titik halte, di luar ruang 3 × 3 titik kejadian, sedikitnya 2 ubin dari kotak lain", () => {
+    const masalah: string[] = [];
+    const karcis = peta.kotak.filter((k) => k.jenis === "karcis");
+    const dekatHalte = (k: { x: number; y: number }, h: { x: number; y: number }) => jarak(k, h) >= 1 && jarak(k, h) <= 3;
+    if (karcis.length !== peta.halte.length) masalah.push(`jumlah karcis ${karcis.length}`);
+    for (const h of peta.halte) if (karcis.filter((k) => dekatHalte(k, h)).length !== 1) masalah.push(`${h.id}: karcis`);
+    for (const k of karcis) {
+      if (!new RegExp(`^k-${k.zona}-\\d+$`).test(k.id)) masalah.push(`${k.id}: id`);
+      if (zonaDi(k.x, k.y) !== k.zona || dalam(k.x, k.y, sumber.lobi)) masalah.push(`${k.id}: letak`);
+      if (!bebas(k.x, k.y) || jejak[k.y * W + k.x] >= 0 || peta.ubin[k.y * W + k.x] >= BAHAN.aspal) masalah.push(`${k.id}: sel`);
+      if (peta.titikKejadian.some((t) => Math.max(Math.abs(t.x - k.x), Math.abs(t.y - k.y)) <= 1)) masalah.push(`${k.id}: di ruang 3 × 3 titik kejadian`);
+      if (peta.kotak.some((l) => l.id !== k.id && jarak(k, l) < 2)) masalah.push(`${k.id}: terlalu dekat kotak lain`);
+    }
     expect(masalah).toEqual([]);
   });
 

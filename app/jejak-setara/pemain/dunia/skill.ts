@@ -3,15 +3,18 @@
 // modul ini hanya menyimpan isi pesan terakhir, menghitung tampilan, dan menolak tekanan yang pasti ditolak. Semua
 // waktu skill dibandingkan dengan waktu efektif `w`: perkiraan jam server di `main`, dan `jedaSejak` selama `jeda`.
 // Ditulis ringkas karena anggaran ukuran P-51 (4 KB gzip untuk seluruh JS-09 di layar pemain).
-import { bolehPakaiSkill, jarak, KOTAK, PANDANGAN, SKILL, SKILL_KOTAK, SKILL_P0, type SkillP0 } from "../../inti/aturan";
+// JS-18 (P-18, P-27 sampai P-30, P-35 sampai P-37): lima skill, halte dalam jangkauan, susunan kolom laptop, kotak aman
+// panah Kompas, dan bunyi pesan skill.
+import { bolehPakaiSkill, halteDekat, JANGKAUAN_HALTE_KLIEN_PX, jarak, KOTAK, PANDANGAN, SKILL, SKILL_KOTAK, SKILL_P0, SKILL_URUT } from "../../inti/aturan";
+import type { PesanServerPemain } from "../../inti/protokol";
 import type { KotakJenis, SkillId, StatusRuang } from "../../inti/tipe";
 import { isiTeks, TEKS } from "../../teks";
 
 const T = TEKS.skill;
 /** Nama pendek (pita, kartu dampak, dan `skill.penuh`); nama lengkap untuk label dan pengumuman ada di `TEKS.skill[s]`. */
-export const namaPendek = (s: SkillP0) => (s === "kompas" ? T.kompasPendek : T[s]);
-const CARI: Readonly<Record<SkillP0, string>> = { lari: T.cariLari, kompas: T.cariKompas, petunjuk: T.cariPetunjuk };
-const BERDURASI = ["lari", "kompas"] as const;
+export const namaPendek = (s: SkillId) => (s === "kompas" ? T.kompasPendek : T[s]);
+const CARI: Readonly<Record<SkillId, string>> = { lari: T.cariLari, kompas: T.cariKompas, petunjuk: T.cariPetunjuk, teropong: T.cariTeropong, angkot: T.cariAngkot };
+const BERDURASI = ["lari", "kompas", "teropong"] as const;
 /** Tombol yang ditekan tampak menunggu jawaban server paling lama 2 detik (P-36). */
 export const TUNGGU_JAWABAN_MS = 2000;
 /** Pita tampil 3 detik; antrean paling banyak 3 butir (P-41). */
@@ -26,13 +29,24 @@ export interface KotakKlien {
   y: number;
 }
 
-/** Status satu tombol skill (P-36). `jeda`: langkah blok yang masih menutupi tombol (8 sampai 1), 0 di luar jeda. */
+/** Halte peta (ubin), menurut urutan kampung.json (JS-18, P-2). */
+export interface HalteKlien {
+  id: string;
+  x: number;
+  y: number;
+}
+
+/**
+ * Status satu tombol skill (P-36). `jeda`: langkah blok yang masih menutupi tombol (8 sampai 1), 0 di luar jeda. JS-18
+ * (P-18): `dekat` bila tombol Angkot berkarcis dan titik kaki dalam 24 px dari pusat ubin satu halte.
+ */
 export interface StatusTombol {
-  skill: SkillP0;
+  skill: SkillId;
   muatan: number;
   aktif: boolean;
   jeda: number;
   menunggu: boolean;
+  dekat: boolean;
 }
 
 const pusat = (k: { x: number; y: number }) => ({ x: k.x * 16 + 8, y: k.y * 16 + 8 });
@@ -47,13 +61,51 @@ export const ARAH_PANAH = ["atas", "kanan_atas", "kanan", "kanan_bawah", "bawah"
 export const indeksArah = (dx: number, dy: number) => Math.round((Math.atan2(dx, -dy) * 4) / Math.PI + 8) % 8;
 
 /**
- * Batas pusat panah dalam piksel logis pandangan (P-26, butir 4): kotak aman (pandangan dikurangi 12, 40, 160, dan 56 px
+ * Batas pusat panah dalam piksel logis pandangan (P-26, butir 4): kotak aman (pandangan dikurangi 12, 40, 160, dan 80 px
  * CSS di kiri, atas, kanan, dan bawah, ditambah bagian kanvas yang terpotong jendela) yang diperkecil 7 piksel di setiap
- * sisi. `px` = px CSS per piksel logis. Hasil: [x0, y0, x1, y1].
+ * sisi. `px` = px CSS per piksel logis. Hasil: [x0, y0, x1, y1]. JS-18 (P-29): batas bawah 80 px, dan batas kanan
+ * 220 px saat tombol laptop membentuk dua kolom.
  */
-export function batasPanah(px: number, potong: readonly [number, number, number, number] = [0, 0, 0, 0]): [number, number, number, number] {
+export function batasPanah(px: number, potong: readonly [number, number, number, number] = [0, 0, 0, 0], kolom2 = false): [number, number, number, number] {
   const ke = (css: number, i: number) => Math.round((css + potong[i]) / px);
-  return [ke(12, 0) + 7, ke(40, 1) + 7, PANDANGAN.lebar - ke(160, 2) - 7, PANDANGAN.tinggi - ke(56, 3) - 7];
+  return [ke(12, 0) + 7, ke(40, 1) + 7, PANDANGAN.lebar - ke(kolom2 ? 220 : 160, 2) - 7, PANDANGAN.tinggi - ke(80, 3) - 7];
+}
+
+/**
+ * JS-18 (P-28): susunan tombol laptop untuk `n` skill aktif. Satu kolom bila tinggi dunia yang tampil (px CSS) dikurangi
+ * tinggi kolom (16 + 48n + 10(n − 1)) sedikitnya 123 px (tepi bawah peta mini 115 px ditambah 8 px), selain itu dua kolom.
+ */
+export function susunanLaptop(tinggiDunia: number, n: number): "kolom" | "kolom2" {
+  return tinggiDunia - (16 + 48 * n + 10 * (n - 1)) >= 123 ? "kolom" : "kolom2";
+}
+
+/**
+ * JS-18 (P-28): tingkat tombol laptop dari bawah (0 untuk `bottom` 16 px, lalu 74, 132, 190, dan 248 px) dan kolomnya.
+ * Satu kolom: semua skill aktif menurut urutan P-1 dari atas. Dua kolom: skill P0 di kolom kanan, Teropong dan Angkot di
+ * kolom kiri, masing-masing tersusun dari bawah dengan urutan yang sama.
+ */
+export function letakTombol(aktif: readonly SkillId[], letak: "kolom" | "kolom2"): Map<SkillId, { tingkat: number; kiri: boolean }> {
+  const hasil = new Map<SkillId, { tingkat: number; kiri: boolean }>();
+  const p0 = (s: SkillId) => (SKILL_P0 as readonly SkillId[]).includes(s);
+  const kolom = letak === "kolom" ? [aktif] : [aktif.filter(p0), aktif.filter((s) => !p0(s))];
+  kolom.forEach((daftar, i) => daftar.forEach((s, j) => hasil.set(s, { tingkat: daftar.length - 1 - j, kiri: i === 1 })));
+  return hasil;
+}
+
+/**
+ * Bunyi pesan skill (JS-14 P-22; JS-18 P-37): `kotak` saat kotak skill terambil, dan `skill` saat `pribadi` membawa masa
+ * aktif Lari cepat, Kompas, atau Teropong yang lebih baru daripada yang terakhir diingat. `ingat` diperbarui.
+ */
+export function bunyiSkill(p: PesanServerPemain, ingat: Partial<Record<SkillId, number>>, putar: (nama: "kotak" | "skill") => void): void {
+  if (p.t === "pemberitahuan" && /^kotak_(lari|kompas|petunjuk|teropong|angkot)$/.test(p.kode)) putar("kotak");
+  if (p.t !== "pribadi") return;
+  let baru = false;
+  for (const s of BERDURASI) {
+    const a = p.aktifSampai[s] ?? 0;
+    if (a > (ingat[s] ?? 0)) baru = true;
+    ingat[s] = a;
+  }
+  if (baru) putar("skill");
 }
 
 /**
@@ -107,27 +159,32 @@ export class AntreanPita {
 }
 
 export class SkillKlien {
-  /** Skill P0 yang aktif di ruang, urutan P-1. */
-  ruang: SkillP0[] = [];
-  muatan: Record<SkillP0, number> = { lari: 0, kompas: 0, petunjuk: 0 };
-  /** Akhir masa aktif dari `pribadi` terakhir (jam server). */
-  sampai: { lari?: number; kompas?: number } = {};
+  /** Skill yang aktif di ruang, urutan P-1 (JS-18: sampai lima). */
+  ruang: SkillId[] = [];
+  muatan: Record<SkillId, number> = { lari: 0, kompas: 0, petunjuk: 0, teropong: 0, angkot: 0 };
+  /** Akhir masa aktif Lari cepat, Kompas, dan Teropong dari `pribadi` terakhir (jam server). */
+  sampai: Partial<Record<SkillId, number>> = {};
   /** Kotak yang menunggu muncul lagi: id → siapPada (jam server). */
   tunggu = new Map<string, number>();
   /** Waktu efektif saat `pribadi` yang mengurangi muatan skill itu tiba (P-37). */
-  pakai: Partial<Record<SkillP0, number>> = {};
+  pakai: Partial<Record<SkillId, number>> = {};
   /** Sasaran `kompas` terakhir (ubin); masa aktifnya sama dengan `aktifSampai.kompas`. */
   kompas: { x: number; y: number } | null = null;
   /** Tombol yang menunggu jawaban server: skill → jam lokal saat ditekan. */
-  ditekan: Partial<Record<SkillP0, number>> = {};
+  ditekan: Partial<Record<SkillId, number>> = {};
   /** Kilau kotak yang baru diambil: [x, y, jam lokal]. */
   kilau: [number, number, number][] = [];
+  /** JS-18 (P-18): halte dalam 24 px dari titik kaki pada bingkai terakhir, atau null. */
+  halte: HalteKlien | null = null;
   /** Skill berdurasi yang tampak aktif, untuk "{skill} selesai." (P-39). */
-  private tampak = new Set<"lari" | "kompas">();
+  private tampak = new Set<SkillId>();
   /** Kotak yang pita penuhnya sudah tampil (P-43). */
   private penuh = new Set<string>();
 
-  constructor(readonly kotak: readonly KotakKlien[]) {}
+  constructor(
+    readonly kotak: readonly KotakKlien[],
+    readonly daftarHalte: readonly HalteKlien[] = [],
+  ) {}
 
   /** Status `jeda` ke `main` (P-20, butir 2): masa aktif, `berakhirPada`, dan `siapPada` digeser sebesar lama jeda. */
   geser(ms: number): void {
@@ -138,11 +195,11 @@ export class SkillKlien {
 
   /** `pribadi` (P-13): muatan, masa aktif, dan kotak yang menunggu; kilau bagi kotak yang baru diambil (P-18). */
   pribadi(p: { muatan: Record<SkillId, number>; aktifSampai: Partial<Record<SkillId, number>>; kotakMenunggu: readonly { id: string; siapPada: number }[] }, w: number, jam: number, kurangiGerak: boolean): void {
-    for (const s of SKILL_P0) {
+    for (const s of SKILL_URUT) {
       if (p.muatan[s] < this.muatan[s]) this.pakai[s] = w;
       this.muatan[s] = p.muatan[s];
     }
-    this.sampai = { lari: p.aktifSampai.lari, kompas: p.aktifSampai.kompas };
+    this.sampai = { lari: p.aktifSampai.lari, kompas: p.aktifSampai.kompas, teropong: p.aktifSampai.teropong };
     const baru = new Map(p.kotakMenunggu.map((k) => [k.id, k.siapPada]));
     for (const k of this.kotak) if (!kurangiGerak && baru.has(k.id) && !this.tunggu.has(k.id)) this.kilau.push([k.x * 16 + 8, k.y * 16 + 8, jam]);
     this.tunggu = baru;
@@ -155,18 +212,26 @@ export class SkillKlien {
     this.ditekan = {};
   }
 
-  /** `pemberitahuan` (P-42): [pita, pengumuman], atau null untuk kode lain. */
+  /**
+   * `pemberitahuan` (P-42; JS-18 P-35): [pita, pengumuman], atau null untuk kode lain. `angkot_tiba` ditangani mesin
+   * dunia sesudah bingkai pertama di halte tujuan tergambar (JS-18, P-21 butir 6).
+   */
   pemberitahuan(kode: string): [string | null, string] | null {
     this.ditekan = {};
-    const s = /^kotak_(lari|kompas|petunjuk)$/.exec(kode)?.[1] as SkillP0 | undefined;
+    const s = /^kotak_(lari|kompas|petunjuk|teropong|angkot)$/.exec(kode)?.[1] as SkillId | undefined;
     if (s) return [isiTeks(T.pita, { skill: namaPendek(s) }), isiTeks(T.dapat, { skill: T[s] })];
     if (kode === "kompas_tanpa_sasaran") return [T.semuaSelesai, T.semuaSelesai];
     return kode === "kompas_tepat" ? [null, isiTeks(T.dapat, { skill: T.kompas })] : null;
   }
 
-  /** Skill berdurasi yang sedang aktif. */
-  aktif(s: SkillP0, w: number): boolean {
-    return s !== "petunjuk" && w < (this.sampai[s] ?? -Infinity);
+  /** Skill berdurasi yang sedang aktif (Petunjuk dan Angkot tidak pernah tercatat di `sampai`). */
+  aktif(s: SkillId, w: number): boolean {
+    return w < (this.sampai[s] ?? -Infinity);
+  }
+
+  /** JS-18 (P-18): halte dalam jangkauan klien dari titik kaki, diperbarui setiap bingkai. */
+  dekatHalte(kaki: { x: number; y: number } | null): void {
+    this.halte = kaki ? halteDekat(kaki, this.daftarHalte, JANGKAUAN_HALTE_KLIEN_PX) : null;
   }
 
   /**
@@ -188,27 +253,36 @@ export class SkillKlien {
   }
 
   /** Tombol yang `pakai_skill`-nya terkirim tampak ditekan sampai jawaban tiba (P-36). */
-  catatTekan(s: SkillP0, jam: number): void {
+  catatTekan(s: SkillId, jam: number): void {
     this.ditekan[s] = jam;
   }
 
-  /** Status tombol untuk HUD (P-36). */
-  status(s: SkillP0, w: number, jam: number): StatusTombol {
+  /** Status tombol untuk HUD (P-36; JS-18 P-18). */
+  status(s: SkillId, w: number, jam: number): StatusTombol {
     const lewat = w - (this.pakai[s] ?? -Infinity);
-    return { skill: s, muatan: this.muatan[s], aktif: this.aktif(s, w), jeda: lewat >= 0 && lewat < 2000 ? 8 - Math.floor(lewat / 250) : 0, menunggu: jam - (this.ditekan[s] ?? -Infinity) < TUNGGU_JAWABAN_MS };
+    return {
+      skill: s,
+      muatan: this.muatan[s],
+      aktif: this.aktif(s, w),
+      jeda: lewat >= 0 && lewat < 2000 ? 8 - Math.floor(lewat / 250) : 0,
+      menunggu: jam - (this.ditekan[s] ?? -Infinity) < TUNGGU_JAWABAN_MS,
+      dekat: s === "angkot" && this.muatan.angkot > 0 && this.halte !== null,
+    };
   }
 
   /**
-   * Menekan tombol skill di luar dialog (P-37): true bila `pakai_skill` perlu dikirim, teks pita bila tanpa muatan atau
-   * Petunjuk di luar dialog, selain itu false.
+   * Menekan tombol skill di luar dialog (P-37): true bila boleh dipakai (`pakai_skill` dikirim, atau untuk Angkot mode
+   * "Pilih halte tujuan" dibuka; JS-18 P-19), teks pita bila tanpa muatan, Petunjuk di luar dialog, atau Angkot jauh
+   * dari halte, selain itu false.
    */
-  tekan(s: SkillP0, w: number, jam: number): boolean | string {
+  tekan(s: SkillId, w: number, jam: number): boolean | string {
     const b = this.status(s, w, jam);
     if (!this.ruang.includes(s) || b.menunggu) return false;
     if (s === "petunjuk") return b.muatan > 0 ? T.diLangkah1 : CARI[s];
     if (b.aktif || b.jeda) return false;
     if (!b.muatan) return CARI[s];
-    return bolehPakaiSkill({ skill: s, now: w, skillAktif: this.ruang, keadaan: { muatan: { ...this.muatan, teropong: 0, angkot: 0 }, aktifSampaiMs: this.sampai, terakhirPakaiMs: this.pakai }, langkahDialog: null });
+    if (s === "angkot" && !b.dekat) return T.keHalte;
+    return bolehPakaiSkill({ skill: s, now: w, skillAktif: this.ruang, keadaan: { muatan: this.muatan, aktifSampaiMs: this.sampai, terakhirPakaiMs: this.pakai }, langkahDialog: null });
   }
 
   /**
@@ -220,7 +294,7 @@ export class SkillKlien {
     const hasil: [KotakKlien, number][] = [];
     for (const k of this.kotak) {
       const lewat = w - (this.tunggu.get(k.id) ?? -Infinity);
-      if (!this.ruang.includes(SKILL_KOTAK[k.jenis] as SkillP0) || lewat < 0) continue;
+      if (!this.ruang.includes(SKILL_KOTAK[k.jenis]) || lewat < 0) continue;
       hasil.push([k, status === "main" && !kurangiGerak && lewat < 2 * EFEK_MS ? Math.floor(lewat / EFEK_MS) : 2]);
     }
     return hasil;
@@ -234,7 +308,8 @@ export class SkillKlien {
 
   /**
    * Pita penuh (P-43): titik kaki paling jauh 12 piksel dari pusat kotak yang tergambar, sedangkan muatan skill isinya
-   * sudah 2; sekali per kotak sampai avatar menjauh lebih dari 24 piksel atau kotak tidak tergambar lagi.
+   * sudah penuh (2, atau 1 untuk Teropong dan Angkot; JS-18 P-13); sekali per kotak sampai avatar menjauh lebih dari 24
+   * piksel atau kotak tidak tergambar lagi.
    */
   periksaPenuh(kaki: { x: number; y: number } | null, tampil: readonly [KotakKlien, number][]): string[] {
     const pita: string[] = [];
@@ -243,7 +318,7 @@ export class SkillKlien {
       const d = kaki ? jarak(kaki, pusat(k)) : Infinity;
       if (d > 24) continue;
       dekat.add(k.id);
-      const s = SKILL_KOTAK[k.jenis] as SkillP0;
+      const s = SKILL_KOTAK[k.jenis];
       if (d <= KOTAK.jangkauanPx && this.muatan[s] >= SKILL[s].muatanMaks && !this.penuh.has(k.id)) {
         this.penuh.add(k.id);
         pita.push(isiTeks(T.penuh, { skill: namaPendek(s) }));

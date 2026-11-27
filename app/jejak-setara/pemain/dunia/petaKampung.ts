@@ -51,8 +51,9 @@ export interface ZonaPeta {
   bawah: number;
 }
 export const ZONA: readonly ZonaPeta[] = zona.map((z) => ({ ...z, id: z.id as ZonaId }));
-export const HALTE: readonly { id: string; x: number; y: number }[] = halte.map((h) => ({ id: h.id, x: h.x, y: h.y }));
+/** Halte menurut urutan kampung.json (nomor halte = urutannya); JS-18 (P-21): zona halte untuk daftar halte tujuan. */
+export const HALTE: readonly { id: string; x: number; y: number; zona: ZonaId }[] = halte.map((h) => ({ id: h.id, x: h.x, y: h.y, zona: h.zona as ZonaId }));
 export const TITIK_MUNCUL: readonly { x: number; y: number }[] = titikMuncul;
 
-/** JS-09 (P-18): ke-24 kotak bantuan kampung.json (sudah urut menurut id; diperiksa uji). */
+/** JS-09 (P-18): ke-31 kotak bantuan kampung.json (JS-18, P-10), sudah urut menurut id (diperiksa uji). */
 export const KOTAK_PETA = kotak as readonly KotakKlien[];

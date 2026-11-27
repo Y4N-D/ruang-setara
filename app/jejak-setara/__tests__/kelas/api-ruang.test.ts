@@ -73,7 +73,12 @@ describe.skipIf(!sqlite)("rute ruang di atas D1 tiruan", () => {
     expect(ketiga.status).toBe(503);
     expect(await ketiga.json()).toEqual({ galat: { kode: "SERVER_PENUH", pesan: "Server sedang penuh. Tutup ruang yang tidak dipakai atau coba lagi nanti." } });
     expect(inisialisasi).toHaveLength(2);
-    expect(inisialisasi[0]).toMatchObject({ labelKelas: "IX B", pengaturan: { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: ["lari", "kompas", "petunjuk"], modeNomorAbsen: false, uji: true }, kejadian: [] });
+    // JS-18 (P-7): tanpa isian skillAktif, kelima skill aktif.
+    expect(inisialisasi[0]).toMatchObject({
+      labelKelas: "IX B",
+      pengaturan: { durasiMenit: 15, batasPemain: 40, batasTerlambatMenit: 5, skillAktif: ["lari", "kompas", "petunjuk", "teropong", "angkot"], modeNomorAbsen: false, uji: true },
+      kejadian: [],
+    });
   });
 
   it("dua permintaan serentak dengan sisa kuota satu: tepat satu berhasil (P-4)", async () => {

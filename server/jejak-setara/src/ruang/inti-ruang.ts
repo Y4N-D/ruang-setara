@@ -9,12 +9,14 @@
 // P-13), serta tanda menulis ringkasan hasil ke `ruang.ringkasan_json` (P-14).
 // JS-09: skill dan kotak bantuan (spesifikasi JS-09, P-11 sampai P-32): `pakai_skill`, kotak dari ruas `gerak`, Lari
 // cepat di pemeriksaan gerak, sasaran dan tiba Kompas di putaran, Petunjuk, +1 Kompas, dan `pribadi` berisi skill.
+// JS-18: Teropong dan Angkot (spesifikasi JS-18, P-14 sampai P-16, P-22, dan P-23): pengungkapan Teropong di putaran
+// lewat jalur keterlihatan JS-08, pindah halte lewat `koreksi`, dan butir `dunia` perpisahan bagi pengamat posisi lama.
 import { HAPUS_PAKSA_MS } from "./pengaman";
 import { rondeDimainkan, type RingkasanHasilRuang } from "../../../../app/jejak-setara/inti/hasil";
-import { BATAS, hitungPeringkat, kompasTiba, lariBerlaku, SKILL_KOTAK, SKILL_P0 } from "../../../../app/jejak-setara/inti/aturan";
+import { BATAS, dalamTeropong, hitungPeringkat, kompasTiba, lariBerlaku, SKILL_KOTAK, SKILL_URUT, titikHalte } from "../../../../app/jejak-setara/inti/aturan";
 import { koreksi, periksaGerak, posisiSah, STATUS_GERAK } from "../../../../app/jejak-setara/inti/gerak";
 import { UKURAN_UBIN } from "../../../../app/jejak-setara/inti/peta";
-import { PROTOKOL_VERSI, type KodeGalat, type PesanPemain, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
+import { BATAS_PESAN, PROTOKOL_VERSI, type KodeGalat, type PesanPemain, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
 import type { PesanKelas, PesanServerKelas } from "../../../../app/jejak-setara/inti/protokol-kelas";
 import type { Arah, KejadianRuang, ModeNama, PengaturanRuang, SkillId, StatusRuang, TitikPeta, WarnaTas } from "../../../../app/jejak-setara/inti/tipe";
 import { bentukNamaSah, kunciNama, rapikanNama, sidikNama } from "../../../../app/jejak-setara/inti/nama";
@@ -48,12 +50,15 @@ import {
   keJamServer,
   kompasAktif,
   pakai,
+  pakaiAngkot,
   pilihCoretan,
   pilihSasaran,
   skillBaru,
   skillDariJson,
   skillKeJson,
   tambahKompas,
+  teropongAktif,
+  type HaltePeta,
   type KotakPeta,
   type SkillPemain,
 } from "./skill-ruang";
@@ -117,6 +122,8 @@ export interface PetaRuang {
   titikMuncul: readonly { x: number; y: number }[];
   /** JS-09 (P-16): kotak bantuan peta; peta tanpa kotak (peta uji) tidak punya kotak. */
   kotak?: readonly KotakPeta[];
+  /** JS-18 (P-22): halte peta menurut urutan kampung.json; peta tanpa halte tidak menerima Angkot. */
+  halte?: readonly HaltePeta[];
 }
 
 export interface PosisiPemain {
@@ -205,6 +212,8 @@ export interface KeadaanRuang {
   // JS-14: mode nama yang berlaku di ruang (P-41) dan sidik nama yang diganti guru (P-50); keduanya di meta.
   modeNama: ModeNama;
   namaDiblokir: string[];
+  // JS-18 (P-23, hanya di memori): posisi lama pemain yang baru pindah halte, untuk butir perpisahan di putaran berikutnya.
+  pindahHalte: Map<string, { x: number; y: number }>;
 }
 
 export type KunciMeta = "ruang" | "status" | "waktu" | "terkunci" | "ditutupPada" | "sambunganTerakhirPutus" | "modeNama" | "namaDiblokir";
@@ -326,6 +335,7 @@ export function buatKeadaan(ruang: DataRuang, peta: PetaRuang, kejadian: readonl
     petunjuk: new Map(),
     modeNama: ruang.pengaturan.modeNama === "bebas" ? "bebas" : "daftar", // ruang sebelum JS-14 tanpa isian
     namaDiblokir: [],
+    pindahHalte: new Map(),
   };
 }
 
@@ -889,9 +899,9 @@ function terimaKunci(k: KeadaanRuang, o: Keluaran, p: PemainRuang, sid: string, 
 // ---------------------------------------------------------------------------------------------
 // Skill dan kotak bantuan (JS-09, P-11 sampai P-32). Waktu keadaan skill memakai waktu ronde (P-11).
 
-/** Skill P0 yang aktif di ruang, menurut urutan P-1 (P-8, P-10). */
+/** Skill yang aktif di ruang, menurut urutan P-1 (JS-09 P-8 dan P-10; JS-18 P-1 dan P-7: kini lima). */
 function skillAktifRuang(k: KeadaanRuang): SkillId[] {
-  return SKILL_P0.filter((s) => k.ruang.pengaturan.skillAktif.includes(s));
+  return SKILL_URUT.filter((s) => k.ruang.pengaturan.skillAktif.includes(s));
 }
 
 function petunjukPemain(k: KeadaanRuang, pemainId: string): Map<string, string> {
@@ -946,10 +956,21 @@ function ambilKotakGerak(k: KeadaanRuang, o: Keluaran, p: PemainRuang, sid: stri
   for (const kotak of hasil.diambil) kirimKe(o, sid, { v: V, t: "pemberitahuan", kode: `kotak_${SKILL_KOTAK[kotak.jenis]}` });
 }
 
-/** `pakai_skill` (P-15, P-19, P-24, P-28). Pemakaian yang ditolak tidak dijawab, kecuali Kompas tanpa sasaran. */
-function terimaPakaiSkill(k: KeadaanRuang, o: Keluaran, p: PemainRuang, sid: string, skill: SkillId, kejadianId: string | undefined, sekarang: number): void {
+/**
+ * `pakai_skill` (JS-09 P-15, P-19, P-24, P-28; JS-18 P-14 dan P-22). Pemakaian yang ditolak tidak dijawab, kecuali Kompas
+ * tanpa sasaran. Teropong memakai jalur skill berdurasi yang sama dengan Lari cepat; Angkot ditangani `terimaAngkot`.
+ */
+function terimaPakaiSkill(
+  k: KeadaanRuang,
+  o: Keluaran,
+  p: PemainRuang,
+  sid: string,
+  skill: SkillId,
+  kejadianId: string | undefined,
+  halteId: string | undefined,
+  sekarang: number,
+): void {
   if (!bolehMenjawab(k, sekarang) || !berkeidentitas(p) || !p.posisi) return;
-  if (!(SKILL_P0 as readonly SkillId[]).includes(skill)) return;
   const aktif = skillAktifRuang(k);
   const t = waktuRonde(k, sekarang);
   const s = k.skill.get(p.id) ?? skillBaru();
@@ -959,6 +980,10 @@ function terimaPakaiSkill(k: KeadaanRuang, o: Keluaran, p: PemainRuang, sid: str
     return;
   }
   const langkahDialog = kodeDialog === undefined ? null : k.jawaban.get(p.id)?.get(kodeDialog)?.status === "langkah1" ? 1 : 2;
+  if (skill === "angkot") {
+    terimaAngkot(k, o, p, sid, s, aktif, t, langkahDialog, halteId, sekarang);
+    return;
+  }
   if (!bolehPakai(s, skill, t, aktif, langkahDialog)) return;
   let sasaran: { kode: string; titikId: string } | null = null;
   if (skill === "kompas") {
@@ -975,6 +1000,42 @@ function terimaPakaiSkill(k: KeadaanRuang, o: Keluaran, p: PemainRuang, sid: str
   const pesan = sasaran ? pesanKompas(k, baru) : null;
   if (pesan) kirimKe(o, sid, pesan);
   kirimPribadi(k, o, p, sid, sekarang);
+}
+
+/**
+ * JS-18 (P-22): Angkot dari halte asal (titik kaki paling jauh 32 piksel dari pusat ubinnya) ke halte tujuan yang lain,
+ * tanpa dialog terbuka. Muatan −1 dan satu baris `skill`; pemain dipindah ke titik halte tujuan dengan arah yang sama,
+ * anggaran jarak 0, dan waktu gerak terakhir sekarang, tanpa mengambil kotak dan tanpa menulis posisi ke SQLite. Pemain
+ * menerima `koreksi`, `pribadi`, lalu `pemberitahuan` `angkot_tiba`; posisi lamanya dicatat untuk butir perpisahan.
+ */
+function terimaAngkot(
+  k: KeadaanRuang,
+  o: Keluaran,
+  p: PemainRuang,
+  sid: string,
+  s: SkillPemain,
+  aktif: readonly SkillId[],
+  t: number,
+  langkahDialog: 1 | 2 | null,
+  halteId: string | undefined,
+  sekarang: number,
+): void {
+  const lama = p.posisi;
+  if (!lama) return;
+  const hasil = pakaiAngkot(s, lama, halteId, k.peta.halte ?? [], t, aktif, langkahDialog);
+  if (!hasil) return;
+  aturSkill(k, o, p.id, hasil.s);
+  const g = siapkanGerak(k, p, sekarang);
+  const tujuan = titikHalte(hasil.tujuan);
+  if (!k.pindahHalte.has(p.id)) k.pindahHalte.set(p.id, { x: lama.x, y: lama.y });
+  p.posisi = { x: tujuan.x, y: tujuan.y, arah: lama.arah };
+  g.anggaranPx = 0;
+  g.gerakTerakhirMs = sekarang;
+  g.jalan = false;
+  g.berubah = true;
+  kirimKe(o, sid, { v: V, t: "koreksi", x: tujuan.x, y: tujuan.y, seq: Math.max(0, g.seqTerakhir) });
+  kirimPribadi(k, o, p, sid, sekarang);
+  kirimKe(o, sid, { v: V, t: "pemberitahuan", kode: "angkot_tiba" });
 }
 
 /** Petunjuk (P-28): dialog kejadian itu terbuka di Langkah 1, dan Petunjuk belum dipakai untuk kejadian itu. */
@@ -1025,6 +1086,31 @@ function periksaKompas(k: KeadaanRuang, o: Keluaran, aktif: readonly PemainRuang
     aturSkill(k, o, p.id, akhiriKompas(s));
     const sid = k.sambunganPemain.get(p.id);
     if (sid !== undefined) kirimPribadi(k, o, p, sid, sekarang);
+  }
+}
+
+/**
+ * JS-18 (P-15): pengungkapan Teropong pada setiap putaran `main`, sesudah keterlihatan JS-08. Untuk setiap pemain yang
+ * tersambung, punya posisi, dan Teropong-nya aktif, setiap titik aktif kejadian yang belum selesai baginya, belum
+ * terlihat olehnya, dan berada dalam radius 12 ubin dicatat lewat jalur keterlihatan JS-08, menurut urutan kode kejadian
+ * lalu id titik. Di ruang lebih dari 50 pemain kedua titik aktif ikut diperiksa, karena keduanya ada di `kj.titik`.
+ */
+function periksaTeropong(k: KeadaanRuang, o: Keluaran, aktif: readonly PemainRuang[], sekarang: number): void {
+  if (k.skill.size === 0 || k.kejadian.length === 0 || !skillAktifRuang(k).includes("teropong")) return;
+  const t = waktuRonde(k, sekarang);
+  let urut: { kj: KejadianRuang; titik: TitikPeta[] }[] | null = null;
+  for (const p of aktif) {
+    const sid = k.sambunganPemain.get(p.id);
+    if (sid === undefined || !p.posisi || !teropongAktif(k.skill.get(p.id), t)) continue;
+    urut ??= [...k.kejadian]
+      .sort((a, b) => (a.kode < b.kode ? -1 : a.kode > b.kode ? 1 : 0))
+      .map((kj) => ({ kj, titik: [...kj.titik].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)) }));
+    const jaw = k.jawaban.get(p.id);
+    const lihat = terlihatPemain(k, p.id);
+    for (const { kj, titik } of urut) {
+      if (jaw?.get(kj.kode)?.status === "selesai") continue;
+      for (const tt of titik) if (!lihat.has(tt.id) && dalamTeropong(p.posisi, tt)) catatTerlihat(k, o, p, sid, kj, tt, sekarang);
+    }
   }
 }
 
@@ -1483,7 +1569,7 @@ export function terimaPemain(k: KeadaanRuang, sid: string, pesan: PesanPemain, s
       if (k.dialog.get(p.id) === pesan.kejadianId) tutupDialog(k, o, p.id);
       return o;
     case "pakai_skill":
-      terimaPakaiSkill(k, o, p, sid, pesan.skill, pesan.kejadianId, sekarang);
+      terimaPakaiSkill(k, o, p, sid, pesan.skill, pesan.kejadianId, pesan.halteId, sekarang);
       return o;
     default:
       return o; // halo kedua dan ambil_kotak (JS-09, P-17: kotak hanya diambil dari ruas gerak)
@@ -1676,12 +1762,18 @@ export function putaran(k: KeadaanRuang, sekarang: number): Keluaran {
   const penuh = k.putaranKe % KERANGKA_PENUH_SETIAP === 0;
   const aktif = pemainAktif(k);
   const berubah = aktif.filter((p) => k.gerak.get(p.id)?.berubah);
+  // JS-18 (P-23): pemain yang baru pindah halte, dengan posisi lamanya.
+  const pindah = [...k.pindahHalte].flatMap(([id, lama]) => {
+    const q = k.pemain.get(id);
+    return q && q.posisi && aktif.includes(q) ? [{ q, lama }] : [];
+  });
   if (berubah.length > 0 || penuh) {
     for (const p of aktif) {
       const sid = k.sambunganPemain.get(p.id);
       if (sid === undefined) continue;
       const isi = isiDunia(k, p, penuh ? aktif : berubah);
       if (penuh) k.kerangkaTerakhir.set(p.id, sekarang);
+      if (pindah.length > 0) tambahPerpisahan(k, p, isi, pindah);
       if (isi.length === 0) continue;
       kirimKe(o, sid, { v: V, t: "dunia", w: sekarang, p: isi, n: aktif.length });
     }
@@ -1690,13 +1782,30 @@ export function putaran(k: KeadaanRuang, sekarang: number): Keluaran {
       if (g) g.berubah = false;
     }
   }
+  k.pindahHalte.clear();
   periksaKeterlihatan(k, o, aktif, sekarang);
+  periksaTeropong(k, o, aktif, sekarang); // JS-18, P-15
   periksaKompas(k, o, aktif, sekarang); // JS-09, P-25
   jadwalPribadi(k, o, sekarang);
   // JS-10: peta kelas 2 kali per detik (P-20), papan dan kemajuan paling sering sekali per detik (P-18, P-19).
   if (k.putaranKe % DUNIA_KELAS_SETIAP === 0) o.kelas.push(pesanDuniaKelas(k, sekarang));
   if (k.putaranKe % PAPAN_KELAS_SETIAP === 0) kirimPapanKelas(k, o, false);
   return o;
+}
+
+/**
+ * JS-18 (P-23): butir perpisahan. Pemain yang pindah halte ikut dikirim dengan posisi barunya kepada pemain `p` yang
+ * kotak 480 × 270-nya memuat posisi lama itu, di luar batas 24 pemain terdekat, bila belum ada di isi `dunia`-nya. Isi
+ * pesan tetap paling banyak 64 butir.
+ */
+function tambahPerpisahan(k: KeadaanRuang, p: PemainRuang, isi: IsiDunia[], pindah: readonly { q: PemainRuang; lama: { x: number; y: number } }[]): void {
+  if (!p.posisi) return;
+  for (const { q, lama } of pindah) {
+    if (q === p || isi.length >= BATAS_PESAN.duniaMaks || isi.some((b) => b[0] === q.id)) continue;
+    if (Math.abs(lama.x - p.posisi.x) > SETENGAH_KOTAK.x || Math.abs(lama.y - p.posisi.y) > SETENGAH_KOTAK.y) continue;
+    const pos = q.posisi as PosisiPemain;
+    isi.push([q.id, pos.x, pos.y, pos.arah, k.gerak.get(q.id)?.jalan ?? false, k.dialog.has(q.id)]);
+  }
 }
 
 /**

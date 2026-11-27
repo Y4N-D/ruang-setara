@@ -836,11 +836,14 @@ export const TEKS_KONSOL = {
     petunjuk: "Petunjuk dipakai", // JS-09, P-47
   },
   // JS-09 (P-7, P-9, P-46): pilihan skill di dialog Ruang baru, baris "Skill", dan tanda Petunjuk di rincian.
+  // JS-18 (P-6, P-8): Teropong dan Angkot.
   skill: {
     judul: "Skill",
     lari: "Lari cepat",
     kompas: "Kompas kejadian",
     petunjuk: "Petunjuk",
+    teropong: "Teropong",
+    angkot: "Angkot",
     keterangan: "Hapus centang untuk mematikan skill di ruang ini.",
     tidakAda: "Tidak ada",
   },

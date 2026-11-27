@@ -138,8 +138,8 @@ describe("Worker kerangka", () => {
     }
   });
 
-  it("PROTOKOL_VERSI bernilai 5 (JS-16b) dan sama dengan protokol jawaban Worker", async () => {
-    expect(PROTOKOL_VERSI).toBe(5);
+  it("PROTOKOL_VERSI bernilai 6 (JS-18) dan sama dengan protokol jawaban Worker", async () => {
+    expect(PROTOKOL_VERSI).toBe(6);
     const isi = (await (await minta("/api/sehat")).json()) as { protokol: number };
     expect(isi.protokol).toBe(PROTOKOL_VERSI);
   });
@@ -157,6 +157,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(kunciJs09().pemain),
         ...Object.keys(kunciJs14().pemain),
         ...Object.keys(kunciJs16b().pemain),
+        ...Object.keys(kunciJs18().pemain),
       ]),
     ).toEqual({
       judulTabPemain: "Jejak Setara",
@@ -397,9 +398,10 @@ describe("Teks dan halaman", () => {
     const datarKonsol = ratakanTeks(TEKS_KONSOL);
     for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
     for (const [k, t] of Object.entries({ ...konsol, ...csv })) expect(datarKonsol[k], k).toBe(t);
-    // Kelompok skill tidak memuat kunci di luar spesifikasi.
-    expect(Object.keys(datarPemain).filter((k) => k.startsWith("skill.")).sort()).toEqual(Object.keys(pemain).sort());
-    expect(Object.keys(datarKonsol).filter((k) => k.startsWith("skill.")).sort()).toEqual(Object.keys(konsol).sort());
+    // Kelompok skill tidak memuat kunci di luar spesifikasi, di luar kunci JS-18 (Teropong dan Angkot).
+    const js18 = kunciJs18();
+    expect(Object.keys(datarPemain).filter((k) => k.startsWith("skill.") && !(k in js18.pemain)).sort()).toEqual(Object.keys(pemain).sort());
+    expect(Object.keys(datarKonsol).filter((k) => k.startsWith("skill.") && !(k in js18.konsol)).sort()).toEqual(Object.keys(konsol).sort());
   });
 
   it("JS-11: TEKS dan TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-11 (AC-21)", () => {
@@ -469,6 +471,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(kunciJs16b().konsol),
         ...Object.keys(TEKS_A14_KONSOL),
         ...Object.keys(kunciJs15().konsol),
+        ...Object.keys(kunciJs18().konsol),
       ]),
     ).toEqual({
       merek: "Jejak Setara",
@@ -1162,6 +1165,20 @@ function kunciJs09(): { pemain: Record<string, string>; konsol: Record<string, s
   };
 }
 
+/** JS-18 (AC-12): kunci dan teks dari tabel spesifikasi JS-18, menurut subjudul tebalnya: layar pemain dan konsol. */
+function kunciJs18(): { pemain: Record<string, string>; konsol: Record<string, string> } {
+  const isi = baca("docs/jejak-setara/specs/JS-18-teropong-angkot.md");
+  const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"), isi.indexOf("\n## Data, protokol"));
+  const potong = (dari: string, sampai: string | null) => {
+    const awal = bagian.indexOf(dari);
+    return "## Teks yang tampil (final)\n" + bagian.slice(awal, sampai === null ? undefined : bagian.indexOf(sampai)) + "\n## ";
+  };
+  return {
+    pemain: uraiTabelTeks(potong("**Layar pemain**", "**Konsol**")),
+    konsol: uraiTabelTeks(potong("**Konsol**", null)),
+  };
+}
+
 /** JS-12 (AC-16): kunci dan teks dari tabel spesifikasi JS-12 (konsol, kalimat temuan, dan layar pemain). */
 function kunciJs12(): { konsol: string[]; pemain: string[]; teks: Record<string, string> } {
   const isi = baca("docs/jejak-setara/specs/JS-12-bank.md");
@@ -1462,6 +1479,39 @@ describe("JS-16c: catatan rilis v1.0 (P-7; AC-9)", () => {
       "## Cara kembali ke versi sebelumnya",
     ]);
     for (const kata of ["JS-16b", "JS-16c", "JS-16d", "`PROTOKOL_VERSI` naik dari 4 ke 5", "Jejak: hentikan", "Rollback"]) expect(isi, kata).toContain(kata);
+  });
+});
+
+describe("JS-18: teks Teropong dan Angkot (bagian Teks yang tampil (final); AC-12)", () => {
+  it("TEKS dan TEKS_KONSOL memuat tepat teks spesifikasi JS-18", () => {
+    const { pemain, konsol } = kunciJs18();
+    expect(Object.keys(pemain).sort()).toEqual(
+      [
+        "skill.teropong",
+        "skill.angkot",
+        "skill.cariTeropong",
+        "skill.cariAngkot",
+        "skill.keHalte",
+        "skill.tombolHalte",
+        "skill.tiba",
+        "peta.judulHalte",
+        "peta.batal",
+        "peta.dariHalte",
+        "peta.halteNomor",
+        "peta.halteTujuan",
+      ].sort(),
+    );
+    expect(Object.keys(konsol).sort()).toEqual(["skill.angkot", "skill.teropong"]);
+    const datarPemain = ratakanTeks(TEKS);
+    const datarKonsol = ratakanTeks(TEKS_KONSOL);
+    for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
+    for (const [k, t] of Object.entries(konsol)) expect(datarKonsol[k], k).toBe(t);
+    // Kelompok skill dan peta hanya memuat kunci JS-09, JS-23, dan JS-18.
+    const js09 = kunciJs09();
+    const js23 = uraiTabelTeks(baca("docs/jejak-setara/specs/JS-23-peta-medan.md"));
+    expect(Object.keys(datarPemain).filter((k) => k.startsWith("skill.")).sort()).toEqual(Object.keys({ ...js09.pemain, ...pemain }).filter((k) => k.startsWith("skill.")).sort());
+    expect(Object.keys(datarPemain).filter((k) => k.startsWith("peta.")).sort()).toEqual(Object.keys({ ...js23, ...pemain }).filter((k) => k.startsWith("peta.")).sort());
+    expect(Object.keys(datarKonsol).filter((k) => k.startsWith("skill.")).sort()).toEqual(Object.keys({ ...js09.konsol, ...konsol }).sort());
   });
 });
 

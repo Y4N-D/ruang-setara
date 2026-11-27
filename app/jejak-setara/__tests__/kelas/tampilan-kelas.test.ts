@@ -17,6 +17,7 @@ import {
   putusanTutup,
   sisaRonde,
   susunPodium,
+  titikMelompat,
   ZONA_KELAS,
 } from "../../admin/kelas/tampilan-kelas";
 import peta from "../../peta/kampung.json";
@@ -120,5 +121,29 @@ describe("JS-23: letak titik peta kelas (P-17; AC-9)", () => {
     expect([gx, gy]).toEqual([9, 18.625]);
     expect(gx + 1.5).toBe((16 * 10 + 8) / 16);
     expect(gy + 1.5).toBe((16 * 20 + 14) / 16 - 0.75);
+  });
+});
+
+describe("JS-18: titik layar kelas yang melompat (P-25; AC-10)", () => {
+  it("lebih dari 136 piksel antara dua kiriman (dtMs 500) berpindah tanpa transisi; gerak biasa dan pemain baru tidak", () => {
+    const sebelum = [
+      ["a", 888, 1036, true],
+      ["b", 400, 400, true],
+      ["c", 100, 100, false],
+    ] as const;
+    const kini = [
+      ["a", 1688, 412, true], // pindah halte
+      ["b", 400 + 136, 400, true], // tepat di ambang: bukan lompatan
+      ["c", 100, 100 + 136.01, false], // sedikit di atas ambang
+      ["d", 50, 50, true], // pemain baru di peta
+    ] as const;
+    expect([...titikMelompat(sebelum, kini)].sort()).toEqual(["a", "c"]);
+    expect(titikMelompat(null, kini).size).toBe(0);
+    expect(titikMelompat(kini, kini).size).toBe(0);
+  });
+
+  it("PetaKelas memberi data-lompat dan kelas.css mematikan transisinya", () => {
+    expect(readFileSync("app/jejak-setara/admin/kelas/PetaKelas.tsx", "utf8")).toContain('data-lompat={lompat.has(id) ? "ya" : undefined}');
+    expect(readFileSync("app/jejak-setara/styles/kelas.css", "utf8")).toMatch(/\.js-kelas-titik\[data-lompat="ya"\] \{\n  transition: none;\n\}/);
   });
 });

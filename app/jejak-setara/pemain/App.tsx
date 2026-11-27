@@ -23,11 +23,10 @@ import {
   TUNGGU_PETUNJUK_MS,
   type KeadaanDialog,
 } from "../bersama/dialogKeadaan";
-import type { SkillP0 } from "../inti/aturan";
 import { normalkanKode, normalkanKodeMasukUlang, POLA_KODE_MASUK_ULANG, POLA_KODE_RUANG } from "../inti/aturan";
 import type { KodeGalat, PesanPemain, PesanServerPemain } from "../inti/protokol";
 import { PROTOKOL_VERSI } from "../inti/versi";
-import type { StatusRuang, WarnaTas } from "../inti/tipe";
+import type { SkillId, StatusRuang, WarnaTas } from "../inti/tipe";
 import { isiTeks, TEKS } from "../teks";
 import { buatKanvasPeramban, muatAsetDunia } from "./dunia/aset";
 import { depPeramban, mulaiSaatSenggang } from "./dunia/penjadwal";
@@ -36,6 +35,7 @@ import { nomorZona } from "./dunia/kejadian";
 import { perangkatSentuh } from "./dunia/masukan";
 import { MesinDunia } from "./dunia/mesin";
 import { VERSI_PETA } from "./dunia/petaKampung";
+import { bunyiSkill } from "./dunia/skill";
 import { LayarAbsen, LayarIdentitas, LayarIdentitasBebas, LayarKode, LayarMasukUlang, LayarMenghubungkan } from "./Gabung";
 import { KelompokMenuSuara, PanelPengaturan, PanelPrivasi, PanelTentang, type JenisLembar } from "./PanelPengaturan";
 import { LABEL_HURUF, useKurangiGerak, usePengaturan } from "./pengaturan";
@@ -118,7 +118,8 @@ export default function App() {
   const pembukaLembar = useRef<HTMLElement | null>(null);
   const [modeNama, setModeNama] = useState<"daftar" | "bebas">("daftar");
   const laptop = useMemo(() => !perangkatSentuh(window), []);
-  const aktifSkill = useRef({ lari: 0, kompas: 0 });
+  // JS-14 (P-22) dan JS-18 (P-37): masa aktif Lari cepat, Kompas, dan Teropong terakhir, untuk bunyi skill.
+  const aktifSkill = useRef<Partial<Record<SkillId, number>>>({});
   const [asetSiap, setAsetSiap] = useState(false);
   // Kode sah yang dikirim sebelum aset dunia termuat; diperiksa begitu aset siap (JS-07).
   const [kodeTertunda, setKodeTertunda] = useState<string | null>(null);
@@ -370,9 +371,9 @@ export default function App() {
           // JS-09 (P-32): "+1 Kompas" di kepala kartu dampak; pengumumannya datang dari mesin dunia.
           const d = dialogRef.current;
           if (p.kode === "kompas_tepat" && d?.hasil2) aturDialog({ ...d, tambahKompas: true });
-          // JS-14 (P-22): kotak skill dan dua menit terakhir.
-          if (p.kode === "kotak_lari" || p.kode === "kotak_kompas" || p.kode === "kotak_petunjuk") putar("kotak");
-          else if (p.kode === "dua_menit") putar("peringatan");
+          // JS-14 (P-22) dan JS-18 (P-37): kotak skill dan dua menit terakhir.
+          if (p.kode === "dua_menit") putar("peringatan");
+          else bunyiSkill(p, aktifSkill.current, putar);
           break;
         }
         case "hasil_1": {
@@ -397,11 +398,8 @@ export default function App() {
         case "pribadi": {
           pribadiRef.current = { skor: p.skor, peringkat: p.peringkat };
           setPribadi(pribadiRef.current);
-          // JS-14 (P-22): masa aktif Lari cepat atau Kompas yang baru.
-          const lari = p.aktifSampai.lari ?? 0;
-          const kompas = p.aktifSampai.kompas ?? 0;
-          if (lari > aktifSkill.current.lari || kompas > aktifSkill.current.kompas) putar("skill");
-          aktifSkill.current = { lari, kompas };
+          // JS-14 (P-22) dan JS-18 (P-37): masa aktif Lari cepat, Kompas, atau Teropong yang baru.
+          bunyiSkill(p, aktifSkill.current, putar);
           const d = dialogRef.current;
           if (d?.petunjuk && d.petunjuk.muatan !== p.muatan.petunjuk) aturDialog(aturPetunjuk(d, { muatan: p.muatan.petunjuk })); // JS-09, P-27
           break;
@@ -750,7 +748,11 @@ export default function App() {
 
   const selisihJam = useCallback(() => klien.current?.selisihJamMs ?? 0, []);
   const kirimGerak = useCallback((p: Extract<PesanPemain, { t: "gerak" }>) => klien.current?.kirim(p) ?? false, []);
-  const kirimSkill = useCallback((skill: SkillP0) => klien.current?.kirim({ v: PROTOKOL_VERSI, t: "pakai_skill", skill }) ?? false, []);
+  // JS-18 (P-21): Angkot membawa `halteId` tujuan.
+  const kirimSkill = useCallback(
+    (skill: SkillId, halteId?: string) => klien.current?.kirim({ v: PROTOKOL_VERSI, t: "pakai_skill", skill, ...(halteId ? { halteId } : {}) }) ?? false,
+    [],
+  );
   const bufferedAmount = useCallback(() => klien.current?.bufferedAmount ?? 0, []);
   const diri = diriId ? pemain[diriId] : undefined;
   // JS-11 (P-7): di layar rekap, pita menggantikan lapisan menyambung ulang.

@@ -4,18 +4,22 @@
 // dipakai yang diimpor, agar Worker tidak membawa daftar objek peta. Pemeriksaan penuh `bacaPeta` dijalankan uji.
 // JS-08: titik kejadian per zona untuk penempatan kejadian ruang (P-2, P-9).
 // JS-09: kotak bantuan untuk deteksi kotak dari ruas gerak (spesifikasi JS-09, P-16).
-import { gerbangLobi, kotak, lebar, tabrakan, tinggi, titikKejadian, titikMuncul, zona } from "../../../../app/jejak-setara/peta/kampung.json";
+// JS-18: halte untuk Angkot (spesifikasi JS-18, P-22), dan 31 kotak termasuk teropong dan karcis (P-10).
+import { gerbangLobi, halte, kotak, lebar, tabrakan, tinggi, titikKejadian, titikMuncul, zona } from "../../../../app/jejak-setara/peta/kampung.json";
 import { tutupGerbang, uraiRle, versiPeta } from "../../../../app/jejak-setara/inti/peta";
 import type { KotakJenis, TitikPeta, ZonaId } from "../../../../app/jejak-setara/inti/tipe";
 import type { PetaRuang } from "./inti-ruang";
-import type { KotakPeta } from "./skill-ruang";
+import type { HaltePeta, KotakPeta } from "./skill-ruang";
 
 const grid = uraiRle(tabrakan, lebar * tinggi);
 
-/** JS-09 (P-16): ke-24 kotak bantuan kampung.json, urut menurut id (urutan pemeriksaan kotak). */
+/** JS-09 (P-16): ke-31 kotak bantuan kampung.json (JS-18, P-10), urut menurut id (urutan pemeriksaan kotak). */
 export const KOTAK_KAMPUNG: readonly KotakPeta[] = kotak
   .map((k) => ({ id: k.id, jenis: k.jenis as KotakJenis, x: k.x, y: k.y }))
   .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+
+/** JS-18 (P-2, P-22): keempat halte kampung.json menurut urutannya, sehingga nomor halte sama dengan angka di id. */
+export const HALTE_KAMPUNG: readonly HaltePeta[] = halte.map((h) => ({ id: h.id, x: h.x, y: h.y }));
 
 /** Peta yang dipakai ruang baru dan ruang yang dipulihkan. */
 export const PETA_KAMPUNG: PetaRuang = {
@@ -26,6 +30,7 @@ export const PETA_KAMPUNG: PetaRuang = {
   tabrakanLobi: tutupGerbang({ lebar, tinggi, tabrakan: grid, gerbangLobi }),
   titikMuncul,
   kotak: KOTAK_KAMPUNG,
+  halte: HALTE_KAMPUNG,
 };
 
 /** Titik kejadian peta kampung per zona, menurut urutan kampung.json (JS-08). */

@@ -1,9 +1,9 @@
 // Halaman Ruang (spesifikasi JS-10, P-2, P-6, P-7): daftar ruang yang belum ditutup dan dialog "Ruang baru". Sejak JS-11
 // (P-16): tab "Berjalan" (halaman ini) dan "Riwayat" (RiwayatRuang.tsx). JS-09 (P-7, P-9): kelompok "Skill" di dialog
-// Ruang baru, dan teks daftar skill aktif untuk halaman ruang dan hasil.
+// Ruang baru, dan teks daftar skill aktif untuk halaman ruang dan hasil. JS-18 (P-6, P-8): kini lima skill.
 import { useEffect, useId, useState, type FormEvent } from "react";
 import type { Saya } from "../../inti/akun";
-import { SKILL_P0, type SkillP0 } from "../../inti/aturan";
+import { SKILL_URUT } from "../../inti/aturan";
 import {
   BATAS_PEMAIN,
   BATAS_TERLAMBAT,
@@ -17,6 +17,7 @@ import {
   type PilihanRuang,
   type RingkasanRuang,
 } from "../../inti/ruang";
+import type { SkillId } from "../../inti/tipe";
 import { isiTeks } from "../../teks";
 import { TEKS_KONSOL } from "../../teks-konsol";
 import { api, useMuat, type GalatApi } from "../api";
@@ -29,9 +30,9 @@ const t = TEKS_KONSOL.ruang;
 const tb = TEKS_KONSOL.ruangBaru;
 const ts = TEKS_KONSOL.skill;
 
-/** JS-09 (P-9): nama skill yang aktif dipisah koma menurut urutan P-1, atau "Tidak ada". */
-export function teksSkill(skillAktif: readonly SkillP0[]): string {
-  return skillAktif.length > 0 ? SKILL_P0.filter((s) => skillAktif.includes(s)).map((s) => ts[s]).join(", ") : ts.tidakAda;
+/** JS-09 (P-9) dan JS-18 (P-8): nama skill yang aktif dipisah koma menurut urutan P-1, atau "Tidak ada". */
+export function teksSkill(skillAktif: readonly SkillId[]): string {
+  return skillAktif.length > 0 ? SKILL_URUT.filter((s) => skillAktif.includes(s)).map((s) => ts[s]).join(", ") : ts.tidakAda;
 }
 export const FORMAT_WAKTU_RUANG = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
@@ -208,8 +209,8 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
   const [terlambat, setTerlambat] = useState(String(BATAS_TERLAMBAT.bawaan));
   const [absen, setAbsen] = useState(false);
   const [uji, setUji] = useState(true);
-  // JS-09 (P-7): ketiga skill tercentang setiap kali dialog dibuka.
-  const [skill, setSkill] = useState<SkillP0[]>([...SKILL_P0]);
+  // JS-09 (P-7) dan JS-18 (P-6): kelima skill tercentang setiap kali dialog dibuka.
+  const [skill, setSkill] = useState<SkillId[]>([...SKILL_URUT]);
   const [modeNama, setModeNama] = useState<"daftar" | "bebas">("daftar"); // JS-14 (P-32)
   const [galat, setGalat] = useState<GalatIsianRuang[]>([]);
   const [galatUmum, setGalatUmum] = useState<{ pesan: string; lama?: { id: string; kode: string } } | null>(null);
@@ -306,9 +307,9 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
           <fieldset className="js-ruang-skill">
             <legend className="js-konsol-label">{ts.judul}</legend>
             <div className="js-ruang-skill-daftar">
-              {SKILL_P0.map((s) => (
+              {SKILL_URUT.map((s) => (
                 <label key={s} className="js-konsol-centang">
-                  <input type="checkbox" checked={skill.includes(s)} onChange={(e) => setSkill(SKILL_P0.filter((x) => (x === s ? e.target.checked : skill.includes(x))))} />
+                  <input type="checkbox" checked={skill.includes(s)} onChange={(e) => setSkill(SKILL_URUT.filter((x) => (x === s ? e.target.checked : skill.includes(x))))} />
                   {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
                   <img src={IKON_SKILL[s]} alt="" width={16} height={16} />
                   <span>{ts[s]}</span>

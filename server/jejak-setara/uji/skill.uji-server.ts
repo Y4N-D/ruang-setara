@@ -1,5 +1,6 @@
 // Uji server skill dan kotak bantuan (spesifikasi JS-09, rencana uji "Uji server"; AC-3, AC-4, AC-5, AC-7, AC-9 sampai
-// AC-12, AC-18, AC-19): Worker hasil build di vite preview dengan D1 lokal yang sudah disemai (port 4320).
+// AC-12, AC-18, AC-19): Worker hasil build di vite preview dengan D1 lokal yang sudah disemai (port 4320). JS-18 (P-7;
+// AC-2, AC-16): ruang tanpa isian skillAktif kini memakai kelima skill, dan Teropong serta Angkot sah di permintaan.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { kejadianTerdekat } from "../../../app/jejak-setara/inti/aturan";
@@ -235,15 +236,15 @@ describe("kotak, Lari cepat, Kompas, Petunjuk, dan +1 Kompas di ruang uji (AC-4,
       ]),
     );
 
-    // Detail dan hasil membawa skillAktif; CSV jawaban berkolom 18 dengan "Petunjuk dipakai".
+    // Detail dan hasil membawa skillAktif (JS-18: kelima skill bawaan); CSV jawaban berkolom 18 dengan "Petunjuk dipakai".
     const id = String(isi.ruangId);
     await tungguSampai(
       async () => (await konsol("GET", `/api/ruang/${id}/hasil`)).status,
       (s) => s === 200,
     );
-    expect(((await konsol("GET", `/api/ruang/${id}`)).isi.ruang as Pesan).skillAktif).toEqual(["lari", "kompas", "petunjuk"]);
+    expect(((await konsol("GET", `/api/ruang/${id}`)).isi.ruang as Pesan).skillAktif).toEqual(["lari", "kompas", "petunjuk", "teropong", "angkot"]);
     const hasil = await konsol("GET", `/api/ruang/${id}/hasil`);
-    expect((hasil.isi.ruang as Pesan).skillAktif).toEqual(["lari", "kompas", "petunjuk"]);
+    expect((hasil.isi.ruang as Pesan).skillAktif).toEqual(["lari", "kompas", "petunjuk", "teropong", "angkot"]);
     const rincian = await konsol("GET", `/api/ruang/${id}/hasil/${a.id}`);
     expect((rincian.isi.jawaban as { kode: string; petunjukDipakai: boolean }[]).find((j) => j.kode === kj.kejadianId)?.petunjukDipakai).toBe(true);
     const csv = await fetch(`${alamat()}/api/ruang/${id}/ekspor?jenis=jawaban`, { headers: { Cookie: await sesiAdmin(), "CF-Connecting-IP": "10.9.70.9" } });
@@ -302,9 +303,9 @@ describe("ruang tanpa skill dan ruang tanpa Petunjuk (AC-19)", () => {
   });
 });
 
-describe("API ruang dengan skillAktif (P-8, P-9; AC-3, AC-18)", () => {
+describe("API ruang dengan skillAktif (P-8, P-9; AC-3, AC-18; JS-18 P-7, AC-2)", () => {
   it("skillAktif tidak sah dijawab 400 ISI_SALAH tanpa membuat ruang; urutan disimpan menurut P-1", async () => {
-    for (const salah of [["teropong"], ["lari", "lari"], "lari", ["lari", "kompas", "petunjuk", "angkot"], [1]]) {
+    for (const salah of [["lompat"], ["lari", "lari"], ["teropong", "teropong"], "lari", ["lari", "kompas", "petunjuk", "teropong", "angkot", "lari"], [1]]) {
       const j = await buatRuang({ skillAktif: salah, labelKelas: "Skill salah" });
       expect(j.status).toBe(400);
       expect((j.isi.galat as Pesan).kode).toBe("ISI_SALAH");
@@ -315,6 +316,10 @@ describe("API ruang dengan skillAktif (P-8, P-9; AC-3, AC-18)", () => {
     const [baris] = d1<{ pengaturan_json: string }>(`SELECT pengaturan_json FROM ruang WHERE id = '${String(isi.ruangId)}'`);
     expect((JSON.parse(baris.pengaturan_json) as Pesan).skillAktif).toEqual(["lari", "petunjuk"]);
     const tanpa = await buatRuang({});
-    expect((tanpa.isi.ruang as Pesan).skillAktif).toEqual(["lari", "kompas", "petunjuk"]);
+    expect((tanpa.isi.ruang as Pesan).skillAktif).toEqual(["lari", "kompas", "petunjuk", "teropong", "angkot"]);
+    // JS-18: Teropong dan Angkot sah, disimpan menurut urutan P-1.
+    const dua = await buatRuang({ skillAktif: ["angkot", "teropong"] });
+    expect(dua.status).toBe(201);
+    expect((dua.isi.ruang as Pesan).skillAktif).toEqual(["teropong", "angkot"]);
   });
 });

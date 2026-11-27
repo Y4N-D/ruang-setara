@@ -480,6 +480,10 @@
 .js-kelas-titik {
   transition: transform 0.5s linear;
 }
+/* JS-18 (P-25): titik yang melompat berpindah tanpa transisi untuk pembaruan itu. */
+.js-kelas-titik[data-lompat="ya"] {
+  transition: none;
+}
 .js-kelas-titik-luar {
   fill: none;
   stroke: var(--js-ink);

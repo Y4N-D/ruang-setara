@@ -1,9 +1,12 @@
 // Aturan skill dan kotak bantuan di server ruang (spesifikasi JS-09, P-6 dan P-11 sampai P-32). Murni: tanpa API
 // Workers, jam, atau acak langsung. Semua waktu keadaan memakai waktu ronde (milidetik ronde tanpa jeda, P-11), sehingga
 // jeda menggeser masa aktif, jeda 2 detik, dan kotak tanpa menulis ulang baris (P-12). Pesan memakai jam server (P-13).
+// JS-18: kelima skill di `pribadi`, 31 kotak, Teropong yang aktif, dan syarat pindah halte Angkot (P-10, P-14, P-22).
 import { acakBerbenih, benih } from "../../../../app/jejak-setara/inti/acak";
 import {
   bolehPakaiSkill,
+  halteDekat,
+  JANGKAUAN_HALTE_PX,
   KOTAK,
   kotakDilewati,
   kotakSiap,
@@ -95,14 +98,17 @@ export interface IsiPribadiSkill {
   kotakMenunggu: { id: string; siapPada: number }[];
 }
 
-/** Paling banyak 24 kotak di `kotakMenunggu` (P-13), sebanyak kotak kampung.json. */
-export const KOTAK_MENUNGGU_MAKS = 24;
+/** Paling banyak 31 kotak di `kotakMenunggu` (JS-09 P-13; JS-18 P-10), sama dengan jumlah kotak kampung.json. */
+export const KOTAK_MENUNGGU_MAKS = 31;
 
-/** Bagian skill pesan `pribadi` (P-13). `t` adalah waktu ronde sekarang. */
+/**
+ * Bagian skill pesan `pribadi` (JS-09 P-13; JS-18 P-14): muatan kelima skill, serta `aktifSampai` Lari cepat, Kompas, dan
+ * Teropong yang masih aktif. `t` adalah waktu ronde sekarang.
+ */
 export function isiPribadiSkill(s: SkillPemain | undefined, t: number, mulaiPada: number | null, jedaMs: number): IsiPribadiSkill {
   if (!s || mulaiPada === null) return { muatan: { ...MUATAN_NOL }, aktifSampai: {}, kotakMenunggu: [] };
   const aktifSampai: Partial<Record<SkillId, number>> = {};
-  for (const id of ["lari", "kompas"] as const) {
+  for (const id of ["lari", "kompas", "teropong"] as const) {
     const a = s.keadaan.aktifSampaiMs[id];
     if (a !== undefined && a > t) aktifSampai[id] = keJamServer(a, mulaiPada, jedaMs);
   }
@@ -111,11 +117,7 @@ export function isiPribadiSkill(s: SkillPemain | undefined, t: number, mulaiPada
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .slice(0, KOTAK_MENUNGGU_MAKS)
     .map(([id, ambil]) => ({ id, siapPada: keJamServer(ambil + KOTAK.munculLagiMs, mulaiPada, jedaMs) }));
-  return {
-    muatan: { lari: s.keadaan.muatan.lari, kompas: s.keadaan.muatan.kompas, petunjuk: s.keadaan.muatan.petunjuk, teropong: 0, angkot: 0 },
-    aktifSampai,
-    kotakMenunggu,
-  };
+  return { muatan: { ...s.keadaan.muatan }, aktifSampai, kotakMenunggu };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -173,6 +175,40 @@ export function pakai(s: SkillPemain, skill: SkillId, t: number, skillAktif: rea
 /** Boleh dipakai tanpa mengubah keadaan (untuk Kompas yang perlu sasaran lebih dulu). */
 export function bolehPakai(s: SkillPemain, skill: SkillId, t: number, skillAktif: readonly SkillId[], langkahDialog: 1 | 2 | null): boolean {
   return bolehPakaiSkill({ skill, now: t, skillAktif, keadaan: s.keadaan, langkahDialog });
+}
+
+/** JS-18 (P-15): Teropong aktif pada waktu ronde `t`. */
+export function teropongAktif(s: SkillPemain | undefined, t: number): boolean {
+  const a = s?.keadaan.aktifSampaiMs.teropong;
+  return a !== undefined && a > t;
+}
+
+/** Satu halte peta (kampung.json): id, lalu ubinnya. */
+export interface HaltePeta {
+  id: string;
+  x: number;
+  y: number;
+}
+
+/**
+ * JS-18 (P-22): pemakaian Angkot. Diterima bila `bolehPakaiSkill` terpenuhi tanpa dialog, `halteId` ada di peta, titik
+ * kaki `pos` paling jauh 32 piksel dari pusat ubin satu halte (halte asal), dan halte tujuan berbeda dari halte asal.
+ * Mengembalikan keadaan baru (muatan −1 dan waktu pakai), halte asal, dan halte tujuan; null bila ditolak.
+ */
+export function pakaiAngkot(
+  s: SkillPemain,
+  pos: Posisi,
+  halteId: string | undefined,
+  halte: readonly HaltePeta[],
+  t: number,
+  skillAktif: readonly SkillId[],
+  langkahDialog: 1 | 2 | null,
+): { s: SkillPemain; asal: HaltePeta; tujuan: HaltePeta } | null {
+  const tujuan = halte.find((h) => h.id === halteId);
+  const asal = halteDekat(pos, halte, JANGKAUAN_HALTE_PX);
+  if (!tujuan || !asal || asal.id === tujuan.id) return null;
+  const baru = pakai(s, "angkot", t, skillAktif, langkahDialog);
+  return baru ? { s: baru, asal, tujuan } : null;
 }
 
 /** Kompas aktif pada waktu ronde `t`. */

@@ -46,6 +46,9 @@ NAMA_ZONA = {"z1": "Rumah dan gang", "z2": "Sekolah", "z3": "Jalan dan halte", "
              "z6": "Taman, sungai, dan pantai", "z7": "Puskesmas dan kantor desa", "z8": "Pojok gawai"}
 KOTAK_ZONA = {"z1": "kompas", "z2": "buku", "z3": "sepatu", "z4": "sepatu", "z5": "kompas", "z6": "sepatu",
               "z7": "buku", "z8": "buku"}
+# PC-2 (JS-18): kotak teropong tepat 3 di Z6, dan kotak karcis tepat 1 di dekat setiap halte (P-25 galat 7)
+KOTAK_P1 = {"teropong", "karcis"}
+TEROPONG_ZONA, TEROPONG_JUMLAH = "z6", 3
 HALTE_ZONA = {"z3": 2, "z7": 1, "z8": 1}
 KODE_BAHAN = {"rumput": 0, "tanah": 1, "paving": 2, "semen": 3, "pasir": 4, "aspal": 5, "air": 6, "air_dalam": 7}
 AIR = ("air", "air_dalam")
@@ -695,30 +698,51 @@ def periksa(P):
             if math.hypot(x - x2, y - y2) < 6:
                 P.galat(f"titik {i} dan {j} berjarak {angka(math.hypot(x - x2, y - y2))} ubin, sedikitnya 6", [(x, y), (x2, y2)])
 
-    # kotak (galat 7)
+    # kotak (galat 7): sepatu, kompas, dan buku tiga per zona; teropong dan karcis (P1) sejak PC-2
     per_zona = {}
     for n, (i, j, z, x, y) in enumerate(P.kotak):
-        per_zona[z] = per_zona.get(z, 0) + 1
         alasan = []
         if not re.match(rf"^k-{z}-\d+$", i):
             alasan.append(f"id harus k-{z}-n")
-        if j != KOTAK_ZONA[z]:
-            alasan.append(f"jenis {j}, seharusnya {KOTAK_ZONA[z]} di {z}")
+        if j not in KOTAK_P1:
+            per_zona[z] = per_zona.get(z, 0) + 1
+            if j != KOTAK_ZONA[z]:
+                alasan.append(f"jenis {j}, seharusnya {KOTAK_ZONA[z]} di {z}")
+        elif j == "teropong" and z != TEROPONG_ZONA:
+            alasan.append(f"teropong hanya di {TEROPONG_ZONA}")
         if P.zona_di(x, y) != z:
             alasan.append(f"berada di zona {P.zona_di(x, y)}")
         if not bebas(x, y) or OCC[y][x] is not None or BAHAN[y][x] in ("aspal", "air", "air_dalam"):
             alasan.append("sel padat, tertutup objek, aspal, atau air")
         if dalam(x, y, P.lobi):
             alasan.append("di halaman lobi")
-        if any(math.hypot(x - tx, y - ty) < 3 for _, _, tx, ty in P.titik):
-            alasan.append("kurang dari 3 ubin dari titik kejadian")
-        if any(math.hypot(x - kx, y - ky) < 6 for _, _, _, kx, ky in P.kotak[n + 1:]):
-            alasan.append("kurang dari 6 ubin dari kotak lain")
+        if j == "karcis":                                    # aturan PC-2
+            if any(max(abs(x - tx), abs(y - ty)) <= 1 for _, _, tx, ty in P.titik):
+                alasan.append("di ruang 3 x 3 titik kejadian")
+            if any(math.hypot(x - kx, y - ky) < 2 for i2, _, _, kx, ky in P.kotak if i2 != i):
+                alasan.append("kurang dari 2 ubin dari kotak lain")
+            if not any(1 <= math.hypot(x - hx, y - hy) <= 3 for _, _, hx, hy in P.halte):
+                alasan.append("tidak 1-3 ubin dari titik halte mana pun")
+        else:
+            if any(math.hypot(x - tx, y - ty) < 3 for _, _, tx, ty in P.titik):
+                alasan.append("kurang dari 3 ubin dari titik kejadian")
+            if any(math.hypot(x - kx, y - ky) < 6 for _, j2, _, kx, ky in P.kotak[n + 1:] if j2 != "karcis"):
+                alasan.append("kurang dari 6 ubin dari kotak lain")
         if alasan:
             P.galat(f"kotak {i} ({x}, {y}): " + "; ".join(alasan), [(x, y)])
     for z in NAMA_ZONA:
         if per_zona.get(z, 0) != 3:
-            P.galat(f"zona {z}: {per_zona.get(z, 0)} kotak, seharusnya 3")
+            P.galat(f"zona {z}: {per_zona.get(z, 0)} kotak sepatu, kompas, atau buku, seharusnya 3")
+    teropong = [k for k in P.kotak if k[1] == "teropong"]
+    if len(teropong) != TEROPONG_JUMLAH:
+        P.galat(f"kotak teropong: {len(teropong)}, seharusnya {TEROPONG_JUMLAH} di {TEROPONG_ZONA}")
+    karcis = [k for k in P.kotak if k[1] == "karcis"]
+    if len(karcis) != len(P.halte):
+        P.galat(f"kotak karcis: {len(karcis)}, seharusnya satu per halte ({len(P.halte)})")
+    for h, _, hx, hy in P.halte:
+        dekat = [k[0] for k in karcis if 1 <= math.hypot(k[3] - hx, k[4] - hy) <= 3]
+        if len(dekat) != 1:
+            P.galat(f"halte {h} ({hx}, {hy}): {len(dekat)} kotak karcis 1-3 ubin dari titiknya, seharusnya 1", [(hx, hy)])
 
     # halte (galat 8)
     rumah_halte = [o for o in P.objek if o["jenis"] == "halte"]
@@ -1203,7 +1227,8 @@ def gambar_periksa(P, siang):
         cx, cy = x * UBIN + 8, y * UBIN + 8
         d.ellipse((cx - 6, cy - 6, cx + 6, cy + 6), fill=PA.SUN[:3], outline=PA.INK[:3], width=2)
         d.text((cx + 9, cy - 8), i[2:], font=fb, fill=PA.INK[:3])
-    warna = {"sepatu": PA.CORAL[:3], "kompas": PA.TEAL[:3], "buku": PA.SKYD[:3]}
+    warna = {"sepatu": PA.CORAL[:3], "kompas": PA.TEAL[:3], "buku": PA.SKYD[:3], "teropong": PA.DUSK[:3],
+             "karcis": PA.SUN[:3]}
     for i, j, _, x, y in P.kotak:
         cx, cy = x * UBIN + 8, y * UBIN + 8
         d.rectangle((cx - 5, cy - 5, cx + 5, cy + 5), fill=warna[j], outline=PA.INK[:3], width=2)
@@ -1241,7 +1266,8 @@ def gambar_denah(P, siang):
     for _, _, x, y in P.titik:
         cx, cy = pusat(x, y)
         d.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), fill=PA.SUN[:3], outline=PA.INK[:3], width=2)
-    warna = {"sepatu": PA.CORAL[:3], "kompas": PA.TEAL[:3], "buku": PA.SKYD[:3]}
+    warna = {"sepatu": PA.CORAL[:3], "kompas": PA.TEAL[:3], "buku": PA.SKYD[:3], "teropong": PA.DUSK[:3],
+             "karcis": PA.SUN[:3]}
     for _, j, _, x, y in P.kotak:
         cx, cy = pusat(x, y)
         d.rectangle((cx - 4, cy - 4, cx + 4, cy + 4), fill=warna[j], outline=PA.INK[:3], width=2)
@@ -1261,7 +1287,8 @@ def gambar_denah(P, siang):
     d.text((lx, ly), "Keterangan", font=fj, fill=PA.INK[:3])
     ly += 40
     for jenis, teks in (("titik", f"Titik kejadian ({len(P.titik)})"), ("sepatu", "Kotak sepatu (Lari cepat)"),
-                        ("kompas", "Kotak kompas"), ("buku", "Kotak buku (Petunjuk)"), ("halte", f"Halte ({len(P.halte)})"),
+                        ("kompas", "Kotak kompas"), ("buku", "Kotak buku (Petunjuk)"), ("teropong", "Kotak teropong (P1)"),
+                        ("karcis", "Kotak karcis (Angkot, P1)"), ("halte", f"Halte ({len(P.halte)})"),
                         ("lobi", "Halaman lobi bertembok"), ("gerbang", "Bukaan gerbang (2 ubin)"),
                         ("muncul", f"Titik muncul pemain ({len(P.muncul)})"), ("zona", "Batas zona")):
         x, y = lx, ly + 3

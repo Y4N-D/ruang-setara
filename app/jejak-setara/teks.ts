@@ -95,6 +95,12 @@ export const TEKS = {
     kamuDiSini: "Kamu di sini",
     halte: "Halte",
     ringkasanKejadian: "Kejadian terlihat {n}, selesai {m}.",
+    // JS-18 (P-21): mode "Pilih halte tujuan".
+    judulHalte: "Pilih halte tujuan",
+    batal: "Batal",
+    dariHalte: "Kamu di Halte {n}.",
+    halteNomor: "Halte {n}",
+    halteTujuan: "Halte {n}, {zona}",
   },
   tombol: { kembali: "Kembali", muatUlang: "Muat ulang" },
   // JS-08: kejadian, dialog dua langkah, kartu dampak, dan skor (spesifikasi JS-08, bagian "Teks yang tampil").
@@ -218,6 +224,14 @@ export const TEKS = {
     dipakai: "Petunjuk dipakai",
     dicoret: "dicoret Petunjuk",
     umumPetunjuk: "Petunjuk: {kalimat} Satu pilihan dicoret.",
+    // JS-18 (spesifikasi JS-18, bagian "Teks yang tampil (final)"): Teropong dan Angkot.
+    teropong: "Teropong",
+    angkot: "Angkot",
+    cariTeropong: "Cari kotak teropong.",
+    cariAngkot: "Cari kotak karcis.",
+    keHalte: "Naik angkot dari halte.",
+    tombolHalte: "{skill}, {n} muatan, di halte",
+    tiba: "Tiba di Halte {n}.",
   },
   // JS-12 (P-12): mode pratinjau untuk penyunting konsol.
   // JS-14 (spesifikasi JS-14, bagian "Teks yang tampil (final)"): Menu, suara, Pengaturan, Privasi, Tentang, dan nama.

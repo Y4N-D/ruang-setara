@@ -74,7 +74,11 @@ export const PETA_UJI_JSON: PetaJejak<string> = {
 
 const GRID_UJI = uraiRle(PETA_UJI_JSON.tabrakan, LEBAR_UJI * TINGGI_UJI);
 
-/** Peta uji dalam bentuk yang dipakai inti ruang: lapisan tabrakan terurai, grid lobi, dan titik muncul. */
+/**
+ * Peta uji dalam bentuk yang dipakai inti ruang: lapisan tabrakan terurai, grid lobi, dan titik muncul. Peta ini tanpa
+ * kotak bantuan dan tanpa halte, jadi Angkot tidak pernah diterima di peta uji (JS-18, P-22); kotak dan halte kampung
+ * (31 kotak dan empat halte, P-10) diuji lewat PETA_KAMPUNG.
+ */
 export const PETA_UJI = {
   versi: VERSI_PETA_UJI,
   lebar: LEBAR_UJI,
@@ -82,4 +86,5 @@ export const PETA_UJI = {
   tabrakan: GRID_UJI,
   tabrakanLobi: tutupGerbang({ lebar: LEBAR_UJI, tinggi: TINGGI_UJI, tabrakan: GRID_UJI, gerbangLobi: PETA_UJI_JSON.gerbangLobi }),
   titikMuncul: PETA_UJI_JSON.titikMuncul,
+  halte: [],
 };

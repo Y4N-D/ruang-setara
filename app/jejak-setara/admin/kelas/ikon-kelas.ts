@@ -21,6 +21,7 @@ import emosiHati from "../../assets/ikon/ikon_emosi_hati.png";
 import emosiKeringat from "../../assets/ikon/ikon_emosi_keringat.png";
 import emosiSeru from "../../assets/ikon/ikon_emosi_seru.png";
 import emosiTanya from "../../assets/ikon/ikon_emosi_tanya.png";
+import karcis from "../../assets/ikon/ikon_karcis.png"; // JS-18 (P-6)
 import kompas from "../../assets/ikon/ikon_kompas.png";
 import lari from "../../assets/ikon/ikon_lari.png";
 import layarPenuh from "../../assets/ikon/ikon_layar_penuh.png";
@@ -28,6 +29,7 @@ import matahari from "../../assets/ikon/ikon_matahari.png";
 import petunjuk from "../../assets/ikon/ikon_petunjuk.png";
 import suaraMati from "../../assets/ikon/ikon_suara_mati.png"; // JS-14 (P-29)
 import suaraNyala from "../../assets/ikon/ikon_suara_nyala.png"; // JS-14 (P-29)
+import teropong from "../../assets/ikon/ikon_teropong.png"; // JS-18 (P-6)
 
 /** Avatar 0–7 (JS-03). */
 export const AVATAR: readonly string[] = [ava1, ava2, ava3, ava4, ava5, ava6, ava7, ava8];
@@ -43,5 +45,5 @@ export const EMOSI_HASIL = { tepat: emosiHati, kurang: emosiKeringat, berisiko: 
 export const IKON_KELAS = {
   suaraNyala,
   suaraMati, layarPenuh, matahari, centang } as const;
-/** JS-09 (P-7, P-46): ikon skill di dialog Ruang baru dan tanda Petunjuk di rincian hasil. */
-export const IKON_SKILL = { lari, kompas, petunjuk } as const;
+/** JS-09 (P-7, P-46): ikon skill di dialog Ruang baru dan tanda Petunjuk di rincian hasil. JS-18 (P-6): kini lima. */
+export const IKON_SKILL = { lari, kompas, petunjuk, teropong, angkot: karcis } as const;

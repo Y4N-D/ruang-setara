@@ -66,7 +66,6 @@ import { bacaIsi, belumTersedia, galatAkun, jagaRute, metodeSalah, type SesiAkti
 
 const ruangTidakAda = () => jawabGalat("RUANG_TIDAK_ADA", TEKS.api.RUANG_TIDAK_ADA, 404);
 const terlaluSering = () => jawabGalat("TERLALU_SERING", TEKS.api.TERLALU_SERING, 429);
-/** Ketiga skill P0 tersimpan aktif sampai JS-09 menambah pilihannya (P-5). */
 
 export function galatRuang(kode: KodeGalatRuang, status: number, tambahan: Record<string, unknown> = {}): Response {
   return jawabJson({ galat: { kode, pesan: TEKS_KONSOL.galatRuang[kode] }, ...tambahan }, status);
@@ -109,7 +108,7 @@ export function ringkasanRuang(b: BarisRuangKonsol): RingkasanRuang {
     batasPemain,
     namaGuru: b.nama_guru,
     dibuatPada: b.dibuat_pada,
-    skillAktif: skillAktifRuang(skillAktif), // JS-09, P-9
+    skillAktif: skillAktifRuang(skillAktif), // JS-09 P-9; JS-18 P-7: sampai lima skill
     modeNama,
   };
 }
@@ -225,7 +224,7 @@ async function buat(request: Request, env: Env, url: URL): Promise<Response> {
     durasiMenit: isi.durasiMenit,
     batasPemain: isi.batasPemain,
     batasTerlambatMenit: isi.batasTerlambatMenit,
-    // JS-09 (P-8): skill P0 yang dicentang menurut urutan P-1; tanpa isian berarti ketiganya.
+    // JS-09 (P-8) dan JS-18 (P-7): skill yang dicentang menurut urutan P-1; tanpa isian berarti kelimanya.
     skillAktif: skillAktifRuang(isi.skillAktif),
     modeNomorAbsen: isi.modeNomorAbsen,
     uji: isi.uji,

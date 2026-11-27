@@ -302,8 +302,8 @@ const KELOMPOK = [
 ] as const;
 
 describe("versi dan daftar pesan (P-33 sampai P-37)", () => {
-  it("PROTOKOL_VERSI 5 sejak JS-16b (P-16)", () => {
-    expect(PROTOKOL_VERSI).toBe(5);
+  it("PROTOKOL_VERSI 6 sejak JS-18 (P-40; sebelumnya 5 sejak JS-16b P-16)", () => {
+    expect(PROTOKOL_VERSI).toBe(6);
   });
 
   it("JS-15 (P-27): ping boleh membawa rttMs bilangan bulat 0–60.000", () => {

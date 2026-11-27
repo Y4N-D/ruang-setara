@@ -98,3 +98,27 @@ describe("tunda tampilan per status (JS-15, P-24, D-5 a)", () => {
   });
 });
 
+describe("JS-18: pemain lain yang melompat (P-24; AC-10)", () => {
+  it("butir yang melompat dari butir terakhir mengganti penyangga: langsung tampil di tempat baru tanpa meluncur", () => {
+    const l = new PemainLain();
+    l.kenal("b", info);
+    for (let i = 0; i <= 5; i++) l.terimaDunia(1000 + i * 100, [["b", 888 + i * 7, 1036, "kanan", true]], 1000 + i * 100, 0);
+    // Pindah halte: 100 ms kemudian di titik halte 3 (sekitar 1000 piksel jauhnya).
+    l.terimaDunia(1600, [["b", 1688, 412, "kiri", false]], 1600, 0);
+    // Pada waktu tampil sebelum butir baru pun, avatar sudah di tempat baru: tidak ada posisi antara dan tidak tertinggal.
+    for (const t of [1450, 1550, 1600, 1700]) {
+      const q = l.tampil(t + l.tunda.tundaMs, t + l.tunda.tundaMs, "main")[0];
+      expect([q.x, q.y], String(t)).toEqual([1688, 412]);
+    }
+  });
+
+  it("tepat di ambang (64 + 144 × dtMs / 1000) bukan lompatan, sedikit di atasnya lompatan; gerak biasa tetap diinterpolasi", () => {
+    const l = new PemainLain();
+    l.kenal("b", info);
+    l.terimaDunia(1000, [["b", 0, 0, "kanan", true]], 1000, 0);
+    l.terimaDunia(1100, [["b", 78.4, 0, "kanan", true]], 1100, 0); // ambang dtMs 100: 78,4 px
+    expect(l.tampil(1050 + l.tunda.tundaMs, 1150, "main")[0].x).toBeCloseTo(39.2, 6);
+    l.terimaDunia(1200, [["b", 78.4 + 78.41, 0, "kanan", true]], 1200, 0);
+    expect(l.tampil(1150 + l.tunda.tundaMs, 1250, "main")[0].x).toBeCloseTo(156.81, 6);
+  });
+});

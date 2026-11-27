@@ -1,4 +1,5 @@
 // Perhitungan murni layar kelas (spesifikasi JS-10, P-15, P-24 sampai P-29). Tanpa DOM, sehingga diuji di Node.
+import { melompat } from "../../inti/aturan";
 
 /** Batas zona `kampung.json` (z1–z8) dalam ubin: kiri, atas, kanan, bawah. Diuji sama dengan peta (P-26). */
 export const ZONA_KELAS: readonly (readonly [number, number, number, number])[] = [
@@ -16,6 +17,26 @@ export const PETA_UBIN = { lebar: 160, tinggi: 100, piksel: 16 } as const;
 /** JS-23 (P-17): pergeseran titik pemain 3 × 3 ubin di peta kelas, berpusat 0,75 ubin di atas titik kaki (x, y piksel logis). */
 export function letakTitikKelas(x: number, y: number): readonly [number, number] {
   return [x / PETA_UBIN.piksel - 1.5, y / PETA_UBIN.piksel - 2.25];
+}
+
+/** JS-10 (P-20): `dunia_kelas` dua kali per detik. */
+export const SELANG_DUNIA_KELAS_MS = 500;
+
+/**
+ * JS-18 (P-25): id pemain yang posisinya di `dunia_kelas` melompat (P-5, dtMs 500) dari posisinya di kiriman sebelumnya;
+ * titiknya berpindah tanpa transisi untuk pembaruan itu.
+ */
+export function titikMelompat(
+  sebelum: readonly (readonly [string, number, number, ...unknown[]])[] | null,
+  kini: readonly (readonly [string, number, number, ...unknown[]])[],
+): Set<string> {
+  const lama = new Map((sebelum ?? []).map(([id, x, y]) => [id, { x, y }]));
+  const hasil = new Set<string>();
+  for (const [id, x, y] of kini) {
+    const a = lama.get(id);
+    if (a && melompat(a, { x, y }, SELANG_DUNIA_KELAS_MS)) hasil.add(id);
+  }
+  return hasil;
 }
 
 /** Jeda menyambung ulang: 1, 2, 4, 8, lalu 15 detik (P-15). */

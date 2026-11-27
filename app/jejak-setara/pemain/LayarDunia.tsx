@@ -6,13 +6,15 @@
 // dan angka fps bila alamat diakhiri #fps (P-18 sampai P-25, P-39, P-51 sampai P-54, P-57, P-68, P-70).
 // JS-09: tombol skill dan tombol 1 sampai 3, antrean pita, pengumuman skill, kotak aman panah Kompas, dan atribut data
 // kanvas `data-kotak`, `data-lari`, dan `data-kompas` (spesifikasi JS-09, P-18, P-20, P-26, P-33 sampai P-43).
+// JS-18: tombol 4 dan 5, susunan tombol laptop, lingkaran Teropong di peta mini dan peta besar, dan mode "Pilih halte
+// tujuan" dengan pita "Tiba di Halte {n}." (spesifikasi JS-18, P-19 sampai P-21, P-28, P-29, P-32, P-33, P-37).
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as PointerEventReact } from "react";
 import { TANDA, IKON, PETA } from "../assets/manifest";
 import DialogKejadian, { type AksiDialog } from "../bersama/DialogKejadian";
 import { modeRingkas, TINGGI_BILAH_PX, type KeadaanDialog } from "../bersama/dialogKeadaan";
-import { PANDANGAN, SKILL_P0, type SkillP0 } from "../inti/aturan";
+import { PANDANGAN, SKILL_URUT } from "../inti/aturan";
 import type { PesanPemain } from "../inti/protokol";
-import type { StatusRuang } from "../inti/tipe";
+import type { SkillId, StatusRuang } from "../inti/tipe";
 import { isiTeks, TEKS } from "../teks";
 import AjakanPutar from "./AjakanPutar";
 import BilahAtas from "./BilahAtas";
@@ -21,7 +23,8 @@ import { hitungLangit, type Langit, type WaktuRuangKlien } from "./dunia/langit"
 import { perangkatSentuh, TOMBOL_GULIR, type KeadaanJoystick } from "./dunia/masukan";
 import type { MesinDunia } from "./dunia/mesin";
 import { hitungSkala, type UkuranDunia } from "./dunia/skala";
-import { batasPanah, type StatusTombol } from "./dunia/skill";
+import { HALTE } from "./dunia/petaKampung";
+import { batasPanah, susunanLaptop, type StatusTombol } from "./dunia/skill";
 import Joystick from "./Joystick";
 import { LapisanHitungMundur } from "./LayarRonde";
 import { KelompokMenuSuara } from "./PanelPengaturan";
@@ -68,9 +71,23 @@ function ukuranLayar(): UkuranDunia {
   return hitungSkala(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
 }
 
-/** Batas panah Kompas (P-26): px CSS per piksel logis, ditambah bagian kanvas yang terpotong jendela. */
-const batasDari = (u: UkuranDunia, l: { lebar: number; tinggi: number; rasio: number }) =>
-  batasPanah(u.k / l.rasio, [-u.kiriCss, -u.atasCss, u.kiriCss + u.lebarCss - l.lebar, u.atasCss + u.tinggiCss - l.tinggi].map((x) => Math.max(0, x)) as [number, number, number, number]);
+/** Batas panah Kompas (P-26): px CSS per piksel logis, ditambah bagian kanvas yang terpotong jendela; JS-18 (P-29): dua kolom. */
+const batasDari = (u: UkuranDunia, l: { lebar: number; tinggi: number; rasio: number }, kolom2 = false) =>
+  batasPanah(
+    u.k / l.rasio,
+    [-u.kiriCss, -u.atasCss, u.kiriCss + u.lebarCss - l.lebar, u.atasCss + u.tinggiCss - l.tinggi].map((x) => Math.max(0, x)) as [number, number, number, number],
+    kolom2,
+  );
+
+/** Tinggi dunia yang tampil (px CSS): irisan kotak dunia dengan jendela. */
+const tinggiTampil = (u: UkuranDunia, l: { tinggi: number }) => Math.min(l.tinggi, u.atasCss + u.tinggiCss) - Math.max(0, u.atasCss);
+
+/** JS-18 (P-21): mode "Pilih halte tujuan": nomor halte asal, lalu halte yang dipilih dan jam lokal saat dikirim. */
+interface ModeHalte {
+  dari: number;
+  dipilih: string | null;
+  pada: number;
+}
 
 function persentil(nilai: number[], q: number): number {
   if (nilai.length === 0) return 0;
@@ -89,8 +106,8 @@ export interface PropsLayarDunia {
   menyambung: boolean;
   selisihJam: () => number;
   kirim: (p: PesanGerak) => boolean;
-  /** JS-09 (P-37): `pakai_skill` dari tombol skill; mengembalikan true bila terkirim. */
-  kirimSkill: (s: SkillP0) => boolean;
+  /** JS-09 (P-37): `pakai_skill` dari tombol skill; mengembalikan true bila terkirim. JS-18 (P-21): `halteId` untuk Angkot. */
+  kirimSkill: (s: SkillId, halteId?: string) => boolean;
   bufferedAmount: () => number;
   umumkan: (teks: string) => void;
   // JS-08
@@ -138,6 +155,11 @@ export default function LayarDunia(props: PropsLayarDunia) {
   // JS-09 (P-41): pita yang tampil dari antrean mesin dunia, dan status tombol skill (P-36).
   const [pita, setPita] = useState("");
   const [tombolSkill, setTombolSkill] = useState<StatusTombol[]>([]);
+  // JS-18: Teropong aktif (lingkaran di peta mini dan peta besar; P-32, P-33), mode pilih halte (P-21), dan permintaan
+  // fokus ke tombol Angkot sesudah tiba (P-21 butir 6).
+  const [teropong, setTeropong] = useState(false);
+  const [modeHalte, setModeHalte] = useState<ModeHalte | null>(null);
+  const [fokusAngkot, setFokusAngkot] = useState(0);
   // JS-14 (P-28): nilai efektif kurangi gerak dari pengaturan pemain atau perangkat.
   const kurangiGerak = props.kurangiGerak;
   const kanvas = useRef<HTMLCanvasElement | null>(null);
@@ -155,10 +177,51 @@ export default function LayarDunia(props: PropsLayarDunia) {
   const [penanda, setPenanda] = useState<{ daftar: PenandaPeta[]; terlihat: number; selesai: number }>({ daftar: [], terlihat: 0, selesai: 0 });
   const [fps, setFps] = useState<string | null>(null);
 
+  // JS-18 (P-28): susunan tombol skill: lengkung di perangkat sentuh, satu atau dua kolom di laptop.
+  const letakSkill = sentuh ? "lengkung" : susunanLaptop(tinggiTampil(ukuran, layar), tombolSkill.length);
+
   // Nilai terbaru untuk loop bingkai tanpa memasang ulang loop.
-  const terbaru = useRef({ menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, tertahan, labelHuruf, saatMenu, menungguPeriksa, umumkan, batas: batasDari(ukuran, layar) as readonly number[] });
+  const terbaru = useRef({
+    menyambung,
+    petaBesar,
+    tegak,
+    kurangiGerak,
+    ukuran,
+    rasio: layar.rasio,
+    kirim,
+    bufferedAmount,
+    selisihJam,
+    adaDialog,
+    tertahan,
+    labelHuruf,
+    saatMenu,
+    menungguPeriksa,
+    umumkan,
+    putarSuara,
+    modeHalte,
+    batas: batasDari(ukuran, layar) as readonly number[],
+  });
   useEffect(() => {
-    terbaru.current = { menyambung, petaBesar, tegak, kurangiGerak, ukuran, rasio: layar.rasio, kirim, bufferedAmount, selisihJam, adaDialog, tertahan, labelHuruf, saatMenu, menungguPeriksa, umumkan, batas: [...batasDari(ukuran, layar), ...zonaHud(ukuran, layar, hudKiri.current, kotak.current)] };
+    terbaru.current = {
+      menyambung,
+      petaBesar,
+      tegak,
+      kurangiGerak,
+      ukuran,
+      rasio: layar.rasio,
+      kirim,
+      bufferedAmount,
+      selisihJam,
+      adaDialog,
+      tertahan,
+      labelHuruf,
+      saatMenu,
+      menungguPeriksa,
+      umumkan,
+      putarSuara,
+      modeHalte,
+      batas: [...batasDari(ukuran, layar, letakSkill === "kolom2"), ...zonaHud(ukuran, layar, hudKiri.current, kotak.current)],
+    };
   });
 
   // Tombol skill tampil dengan syarat tombol Periksa (P-33).
@@ -169,13 +232,32 @@ export default function LayarDunia(props: PropsLayarDunia) {
   });
 
   // Menekan tombol skill (P-37): pesan bila boleh dipakai, pita bila tanpa muatan atau Petunjuk di luar dialog.
+  // JS-18 (P-19): Angkot berkarcis di halte membuka mode "Pilih halte tujuan" tanpa pesan ke server.
   const tekanSkill = useCallback(
-    (s: SkillP0) => {
+    (s: SkillId) => {
       if (!tampilSkillRef.current) return;
       const kini = Date.now();
       const hasil = mesin.skill.tekan(s, mesin.waktuEfektif(kini, terbaru.current.selisihJam()), kini);
       if (typeof hasil === "string") mesin.tambahPita(hasil, kini);
-      else if (hasil && kirimSkill(s)) mesin.skill.catatTekan(s, kini);
+      else if (hasil && s === "angkot") {
+        const asal = mesin.skill.halte;
+        mesin.masukan.lepasSemua();
+        setModeHalte({ dari: asal ? HALTE.findIndex((h) => h.id === asal.id) + 1 : 0, dipilih: null, pada: 0 });
+        setPetaBesar(true);
+      } else if (hasil && kirimSkill(s)) mesin.skill.catatTekan(s, kini);
+    },
+    [mesin, kirimSkill],
+  );
+
+  // JS-18 (P-21 butir 5): memilih halte tujuan mengirim `pakai_skill` Angkot; tombol lalu tampak nonaktif sampai 2 detik.
+  const pilihHalte = useCallback(
+    (id: string) => {
+      const m = terbaru.current.modeHalte;
+      if (!m || m.dipilih !== null || HALTE.findIndex((h) => h.id === id) + 1 === m.dari) return;
+      const kini = Date.now();
+      if (!kirimSkill("angkot", id)) return;
+      mesin.skill.catatTekan("angkot", kini);
+      setModeHalte({ ...m, dipilih: id, pada: kini });
     },
     [mesin, kirimSkill],
   );
@@ -251,6 +333,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
   // Peta besar hanya selama ronde; tertutup sendiri bila ronde berhenti.
   const tutupPetaBesar = useCallback(() => {
     setPetaBesar(false);
+    setModeHalte(null);
     kanvas.current?.focus();
   }, []);
   useEffect(() => {
@@ -259,6 +342,21 @@ export default function LayarDunia(props: PropsLayarDunia) {
       return () => window.clearTimeout(id);
     }
   }, [ronde, petaBesar]);
+  // JS-18 (P-21 butir 8): mode pilih halte tertutup sendiri tanpa pesan bila status bukan lagi `main`, lapisan
+  // menyambung ulang tampil, atau HP menjadi tegak.
+  useEffect(() => {
+    if (modeHalte && (status !== "main" || menyambung || tegak)) {
+      const id = window.setTimeout(() => {
+        setModeHalte(null);
+        setPetaBesar(false);
+      }, 0);
+      return () => window.clearTimeout(id);
+    }
+  }, [modeHalte, status, menyambung, tegak]);
+  // JS-18 (P-21 butir 6): sesudah tiba, fokus kembali ke tombol Angkot.
+  useEffect(() => {
+    if (fokusAngkot > 0) document.querySelector<HTMLButtonElement>('.js-tombol-skill[data-skill="angkot"]')?.focus();
+  }, [fokusAngkot]);
 
   // Keyboard (P-12, P-37, P-39).
   useEffect(() => {
@@ -277,11 +375,28 @@ export default function LayarDunia(props: PropsLayarDunia) {
           return;
         }
       }
-      // Tombol 1 sampai 3 selama tombol skill tampil (P-38); tekanan berulang karena ditahan diabaikan.
-      const angka = /^(?:Digit|Numpad)([1-3])$/.exec(e.code);
+      // JS-18 (P-21 butir 4 dan 5): di mode pilih halte, 1 sampai 4 memilih halte bernomor itu (halte asal diabaikan),
+      // serta Esc dan P sama dengan Batal, kecuali selama menunggu jawaban.
+      const mh = terbaru.current.modeHalte;
+      if (mh && terbaru.current.petaBesar) {
+        const nomor = /^(?:Digit|Numpad)([1-9])$/.exec(e.code);
+        if (nomor) {
+          e.preventDefault();
+          const h = HALTE[Number(nomor[1]) - 1];
+          if (h && !e.repeat) pilihHalte(h.id);
+          return;
+        }
+        if (e.code === "Escape" || e.code === "KeyP") {
+          e.preventDefault();
+          if (mh.dipilih === null && !e.repeat) tutupPetaBesar();
+          return;
+        }
+      }
+      // Tombol 1 sampai 5 selama tombol skill tampil (P-38; JS-18 P-20); tekanan berulang karena ditahan diabaikan.
+      const angka = /^(?:Digit|Numpad)([1-5])$/.exec(e.code);
       if (angka && tampilSkillRef.current) {
         e.preventDefault();
-        if (!e.repeat) tekanSkill(SKILL_P0[Number(angka[1]) - 1]);
+        if (!e.repeat) tekanSkill(SKILL_URUT[Number(angka[1]) - 1]);
         return;
       }
       if (e.code === "KeyP" && ronde) {
@@ -323,7 +438,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
       document.removeEventListener("visibilitychange", terlihat);
       m.lepasSemua();
     };
-  }, [mesin, ronde, tutupPetaBesar, periksa, tekanSkill]);
+  }, [mesin, ronde, tutupPetaBesar, periksa, tekanSkill, pilihHalte]);
 
   // Joystick sentuh (P-13): sentuhan pertama di separuh kiri dunia, bukan di tombol HUD.
   const titikDunia = (e: PointerEventReact<HTMLElement>) => {
@@ -386,9 +501,10 @@ export default function LayarDunia(props: PropsLayarDunia) {
     let ukuranLabel = "";
     let kunciMini = "";
     let kanvasMini: HTMLCanvasElement | null = null;
-    // JS-09: pita dan tombol skill hanya memicu React bila berubah (P-36, P-41).
+    // JS-09: pita dan tombol skill hanya memicu React bila berubah (P-36, P-41). JS-18: Teropong aktif (P-32, P-33).
     let kunciPita = "";
     let kunciSkill = "";
+    let teropongTampil = false;
     let id = 0;
     const bingkai = (jam: number) => {
       id = requestAnimationFrame(bingkai);
@@ -476,12 +592,13 @@ export default function LayarDunia(props: PropsLayarDunia) {
           const p = mesin.gerak.posisi;
           // JS-23 (P-2, P-10): gambar menurut rasio saat ini; peta mini digambar ulang saat gambar menjadi siap atau berganti.
           const medan = MEDAN.ambil(urlMedanMini(t.rasio));
-          const kunci = `${km.width}x${km.height}:${p ? `${Math.round(p.x / 16)},${Math.round(p.y / 16)},${mesin.gerak.arah}` : "-"}:${kunciPenanda}:${medan ? medan.src : "-"}`;
+          // JS-18 (P-32): peta mini juga digambar ulang saat Teropong mulai dan selesai.
+          const kunci = `${km.width}x${km.height}:${p ? `${Math.round(p.x / 16)},${Math.round(p.y / 16)},${mesin.gerak.arah}` : "-"}:${kunciPenanda}:${medan ? medan.src : "-"}:${teropongTampil}`;
           if (kunci !== kunciMini || km !== kanvasMini) {
             kunciMini = kunci;
             kanvasMini = km;
             const daftar = mesin.kejadian.daftar().map((x) => ({ x: x.x, y: x.y, selesai: mesin.kejadian.selesai.has(x.kejadianId) }));
-            gambarPetaMini(cm, t.rasio, { ...gambarMini, ...gambarKejadian, medan }, p ? { x: p.x, y: p.y, arah: mesin.gerak.arah } : null, daftar);
+            gambarPetaMini(cm, t.rasio, { ...gambarMini, ...gambarKejadian, medan }, p ? { x: p.x, y: p.y, arah: mesin.gerak.arah } : null, daftar, teropongTampil);
           }
         } else {
           kunciMini = "";
@@ -504,6 +621,25 @@ export default function LayarDunia(props: PropsLayarDunia) {
       if (kSkill !== kunciSkill) {
         kunciSkill = kSkill;
         setTombolSkill(daftarSkill);
+      }
+      // JS-18 (P-32, P-33): lingkaran Teropong selama `pribadi` terakhir memuat masa aktifnya (diam selama jeda).
+      const tr = (mesin.status === "main" || mesin.status === "jeda") && mesin.skill.aktif("teropong", waktuSkill);
+      if (tr !== teropongTampil) setTeropong((teropongTampil = tr));
+      // JS-18 (P-21 butir 6 dan 7): tiba di halte tujuan sesudah bingkai pertama di posisi baru, atau tanpa jawaban dalam
+      // 2 detik: mode pilih halte tertutup (dengan pita, bunyi, dan fokus ke tombol Angkot hanya bila tiba).
+      const tiba = mesin.selesaiTiba(jamKini, t.putarSuara);
+      const mh = t.modeHalte;
+      if (tiba !== null) {
+        if (mh) {
+          t.modeHalte = null;
+          setModeHalte(null);
+          setPetaBesar(false);
+        }
+        setFokusAngkot((n) => n + 1);
+      } else if (mh?.dipilih && jamKini - mh.pada >= 2000) {
+        t.modeHalte = null;
+        setModeHalte(null);
+        setPetaBesar(false);
       }
       // Jangkauan Periksa dan penanda peta hanya memicu React bila berubah (P-19, P-21).
       if (mesin.jangkauan !== jangkauanTampil) {
@@ -635,9 +771,11 @@ export default function LayarDunia(props: PropsLayarDunia) {
         {ronde ? (
           <BilahAtas langit={langit} denyut={langit.duaMenit && !kurangiGerak && status === "main"} skor={skor} peringkat={peringkat} kurangiGerak={kurangiGerak} />
         ) : null}
-        {ronde && !petaBesar && !menuTerbuka && !(adaDialog && bentuk === "lembar") ? <PetaMini kanvasRef={mini} rasio={layar.rasio} saatBuka={() => setPetaBesar(true)} /> : null}
+        {ronde && !petaBesar && !menuTerbuka && !(adaDialog && bentuk === "lembar") ? (
+          <PetaMini kanvasRef={mini} rasio={layar.rasio} saatBuka={() => setPetaBesar(true)} teropong={teropong && p !== null} />
+        ) : null}
         {tampilPeriksa && sentuh ? <TombolPeriksa dekat={jangkauan !== null} ditekan={menungguPeriksa} saatTekan={periksa} /> : null}
-        {tampilSkill && tombolSkill.length > 0 ? <TombolSkill daftar={tombolSkill} sentuh={sentuh} kurangiGerak={kurangiGerak} saatTekan={tekanSkill} /> : null}
+        {tampilSkill && tombolSkill.length > 0 ? <TombolSkill daftar={tombolSkill} letak={letakSkill} kurangiGerak={kurangiGerak} saatTekan={tekanSkill} /> : null}
         {tampilPeriksa && !sentuh && jangkauan ? <AjakanPeriksa /> : null}
         {fps ? (
           <p className="js-fps" aria-hidden="true">
@@ -670,6 +808,8 @@ export default function LayarDunia(props: PropsLayarDunia) {
               saatTutup={tutupPetaBesar}
               kejadian={penanda.daftar}
               ringkasan={{ terlihat: penanda.terlihat, selesai: penanda.selesai }}
+              teropong={teropong}
+              halte={modeHalte ? { dari: modeHalte.dari, dipilih: modeHalte.dipilih, saatPilih: pilihHalte } : null}
             />
           </div>
         ) : null}

@@ -1,5 +1,6 @@
 // Modul skill server ruang (spesifikasi JS-09, P-6, P-11 sampai P-16, P-19, P-24, P-25, P-28, P-32; AC-2, AC-4,
-// AC-6, AC-7). Murni: semua waktu diberikan uji dalam waktu ronde.
+// AC-6, AC-7). Murni: semua waktu diberikan uji dalam waktu ronde. JS-18 (AC-3, AC-4, AC-5, AC-8): 31 kotak (C-19),
+// kotak teropong dan karcis, isi `pribadi` kelima skill, Teropong, dan syarat Angkot.
 import { describe, expect, it } from "vitest";
 import { KOTAK, SKILL } from "../../inti/aturan";
 import type { IsiKejadian, SkillId } from "../../inti/tipe";
@@ -9,21 +10,25 @@ import {
   bolehPakai,
   isiPribadiSkill,
   keJamServer,
+  KOTAK_MENUNGGU_MAKS,
   kompasAktif,
   pakai,
+  pakaiAngkot,
   pilihCoretan,
   pilihSasaran,
   skillBaru,
   skillDariJson,
   skillKeJson,
   tambahKompas,
+  teropongAktif,
   type KotakPeta,
   type SkillPemain,
 } from "../../../../server/jejak-setara/src/ruang/skill-ruang";
-import { KOTAK_KAMPUNG, PETA_KAMPUNG } from "../../../../server/jejak-setara/src/ruang/peta-kampung";
+import { HALTE_KAMPUNG, KOTAK_KAMPUNG, PETA_KAMPUNG } from "../../../../server/jejak-setara/src/ruang/peta-kampung";
 import { MASUK } from "../ruang/bankUji";
 
 const SEMUA: SkillId[] = ["lari", "kompas", "petunjuk"];
+const LIMA: SkillId[] = ["lari", "kompas", "petunjuk", "teropong", "angkot"];
 const pusat = (k: { x: number; y: number }) => ({ x: k.x * 16 + 8, y: k.y * 16 + 8 });
 const SEPATU: KotakPeta = { id: "k-a", jenis: "sepatu", x: 10, y: 10 };
 const BUKU: KotakPeta = { id: "k-b", jenis: "buku", x: 11, y: 10 };
@@ -83,19 +88,56 @@ describe("kotak dari ruas gerak (P-16)", () => {
     expect(hasil.s.kotak).toEqual({ "k-a": 700, "k-b": 700 });
   });
 
-  it("kotak teropong dan karcis bukan skill P0, dan ruas jauh tidak mengambil apa pun", () => {
+  it("kotak teropong dan karcis tidak terambil di ruang tanpa Teropong dan Angkot (JS-18 P-9), dan ruas jauh tidak mengambil apa pun", () => {
     const teropong: KotakPeta = { id: "k-t", jenis: "teropong", x: 10, y: 10 };
-    expect(ambilKotak(skillBaru(), dari, ke, [teropong], SEMUA, 0).diambil).toEqual([]);
+    const karcis: KotakPeta = { id: "k-u", jenis: "karcis", x: 10, y: 10 };
+    expect(ambilKotak(skillBaru(), dari, ke, [teropong, karcis], SEMUA, 0).diambil).toEqual([]);
     expect(ambilKotak(skillBaru(), { x: 0, y: 0 }, { x: 10, y: 0 }, [SEPATU, BUKU, KOMPAS], SEMUA, 0).diambil).toEqual([]);
   });
 
-  it("kampung.json: 24 kotak urut menurut id (9 sepatu, 6 kompas, 9 buku) dan sama dengan PETA_KAMPUNG.kotak", () => {
-    expect(KOTAK_KAMPUNG).toHaveLength(24);
+  it("JS-18 (P-11): kotak teropong menambah Teropong dan kotak karcis menambah Angkot sampai 1; muatan penuh tidak mengambil", () => {
+    const teropong: KotakPeta = { id: "k-t", jenis: "teropong", x: 10, y: 10 };
+    const karcis: KotakPeta = { id: "k-u", jenis: "karcis", x: 10, y: 10 };
+    const hasil = ambilKotak(skillBaru(), dari, ke, [teropong, karcis], LIMA, 3000);
+    expect(hasil.diambil.map((k) => k.id)).toEqual(["k-t", "k-u"]);
+    expect(hasil.s.keadaan.muatan).toMatchObject({ teropong: 1, angkot: 1 });
+    expect(hasil.s.kotak).toEqual({ "k-t": 3000, "k-u": 3000 });
+    const penuh = denganMuatan({ teropong: SKILL.teropong.muatanMaks, angkot: SKILL.angkot.muatanMaks });
+    const tolak = ambilKotak(penuh, dari, ke, [teropong, karcis], LIMA, 0);
+    expect(tolak.diambil).toEqual([]);
+    expect(tolak.s).toBe(penuh);
+    // Hanya Angkot yang aktif: kotak teropong tidak terambil.
+    expect(ambilKotak(skillBaru(), dari, ke, [teropong, karcis], ["angkot"], 0).diambil.map((k) => k.id)).toEqual(["k-u"]);
+  });
+
+  it("kampung.json (C-19): 31 kotak urut menurut id (9 sepatu, 6 kompas, 9 buku, 3 teropong, 4 karcis) dan sama dengan PETA_KAMPUNG.kotak", () => {
+    expect(KOTAK_KAMPUNG).toHaveLength(31);
     expect(PETA_KAMPUNG.kotak).toBe(KOTAK_KAMPUNG);
+    expect(KOTAK_MENUNGGU_MAKS).toBe(KOTAK_KAMPUNG.length);
     const id = KOTAK_KAMPUNG.map((k) => k.id);
     expect(id).toEqual([...id].sort());
     const jumlah = (j: string) => KOTAK_KAMPUNG.filter((k) => k.jenis === j).length;
-    expect([jumlah("sepatu"), jumlah("kompas"), jumlah("buku")]).toEqual([9, 6, 9]);
+    expect([jumlah("sepatu"), jumlah("kompas"), jumlah("buku"), jumlah("teropong"), jumlah("karcis")]).toEqual([9, 6, 9, 3, 4]);
+    const baru = KOTAK_KAMPUNG.filter((k) => k.jenis === "teropong" || k.jenis === "karcis").map((k) => [k.id, k.jenis, k.x, k.y]);
+    expect(baru).toEqual([
+      ["k-z3-4", "karcis", 57, 64],
+      ["k-z3-5", "karcis", 86, 88],
+      ["k-z6-4", "teropong", 26, 7],
+      ["k-z6-5", "teropong", 51, 7],
+      ["k-z6-6", "teropong", 76, 7],
+      ["k-z7-4", "karcis", 107, 25],
+      ["k-z8-4", "karcis", 116, 75],
+    ]);
+  });
+
+  it("JS-18 (P-2, P-22): empat halte kampung.json menurut urutan nomor, dan PETA_KAMPUNG memakainya", () => {
+    expect(HALTE_KAMPUNG.map((h) => [h.id, h.x, h.y])).toEqual([
+      ["halte-1", 55, 64],
+      ["halte-2", 84, 88],
+      ["halte-3", 105, 25],
+      ["halte-4", 116, 73],
+    ]);
+    expect(PETA_KAMPUNG.halte).toBe(HALTE_KAMPUNG);
   });
 });
 
@@ -128,6 +170,23 @@ describe("memakai skill (P-19, P-24, P-28; D-1a)", () => {
     expect(pakai(s, "petunjuk", 7000, SEMUA, 1)?.keadaan.muatan.petunjuk).toBe(0);
   });
 
+  it("JS-18 (P-4, P-14): Teropong aktif 30 detik dan tidak bisa dipakai lagi selama aktif; teropongAktif mengikuti masa aktif", () => {
+    const s = denganMuatan({ teropong: 1 });
+    const baru = pakai(s, "teropong", 40_000, LIMA, null)!;
+    expect(baru.keadaan.muatan.teropong).toBe(0);
+    expect(baru.keadaan.aktifSampaiMs.teropong).toBe(70_000);
+    expect(baru.keadaan.terakhirPakaiMs.teropong).toBe(40_000);
+    expect(teropongAktif(baru, 69_999)).toBe(true);
+    expect(teropongAktif(baru, 70_000)).toBe(false);
+    expect(teropongAktif(undefined, 0)).toBe(false);
+    // Muatan bertambah lagi dari kotak, tetapi Teropong yang masih aktif tidak bisa dipakai lagi.
+    baru.keadaan.muatan.teropong = 1;
+    expect(pakai(baru, "teropong", 69_999, LIMA, null)).toBeNull();
+    expect(bolehPakai(baru, "teropong", 70_000, LIMA, null)).toBe(true);
+    expect(pakai(s, "teropong", 0, SEMUA, null)).toBeNull(); // skill mati
+    expect(pakai(s, "teropong", 0, LIMA, 1)).toBeNull(); // dialog terbuka
+  });
+
   it("kompasAktif dan akhiriKompas; +1 Kompas hanya bila Kompas aktif di ruang dan muatan kurang dari 2", () => {
     const s = pakai(denganMuatan({ kompas: 1 }), "kompas", 0, SEMUA, null)!;
     expect(kompasAktif(s, 100)).toBe(false); // tanpa sasaran
@@ -142,6 +201,43 @@ describe("memakai skill (P-19, P-24, P-28; D-1a)", () => {
     expect(tambahKompas(denganMuatan({ kompas: 1 }), SEMUA)?.keadaan.muatan.kompas).toBe(2);
     expect(tambahKompas(denganMuatan({ kompas: 2 }), SEMUA)).toBeNull();
     expect(tambahKompas(skillBaru(), ["lari", "petunjuk"])).toBeNull();
+  });
+});
+
+describe("JS-18: syarat Angkot (P-22)", () => {
+  const halte = HALTE_KAMPUNG;
+  const pusatHalte = (i: number) => ({ x: halte[i].x * 16 + 8, y: halte[i].y * 16 + 8 });
+
+  it("di halte 1 (32 px dari pusat ubin) ke halte 3: muatan −1, waktu pakai, halte asal dan tujuan", () => {
+    const s = denganMuatan({ angkot: 1 });
+    const c = pusatHalte(0);
+    const hasil = pakaiAngkot(s, { x: c.x + 32, y: c.y }, "halte-3", halte, 9000, LIMA, null);
+    expect(hasil?.asal.id).toBe("halte-1");
+    expect(hasil?.tujuan.id).toBe("halte-3");
+    expect(hasil?.s.keadaan.muatan.angkot).toBe(0);
+    expect(hasil?.s.keadaan.terakhirPakaiMs.angkot).toBe(9000);
+    expect(hasil?.s.keadaan.aktifSampaiMs.angkot).toBeUndefined();
+    expect(s.keadaan.muatan.angkot).toBe(1);
+  });
+
+  it("ditolak: 32,01 px dari halte, halte tujuan sama, tidak ada, atau tanpa isian, dialog terbuka, tanpa karcis, skill mati, dan jeda 2 detik", () => {
+    const s = denganMuatan({ angkot: 1 });
+    const c = pusatHalte(0);
+    const di = { x: c.x, y: c.y + 4 };
+    expect(pakaiAngkot(s, { x: c.x + 32.01, y: c.y }, "halte-3", halte, 0, LIMA, null)).toBeNull();
+    expect(pakaiAngkot(s, di, "halte-1", halte, 0, LIMA, null)).toBeNull();
+    expect(pakaiAngkot(s, di, "halte-9", halte, 0, LIMA, null)).toBeNull();
+    expect(pakaiAngkot(s, di, undefined, halte, 0, LIMA, null)).toBeNull();
+    expect(pakaiAngkot(s, di, "halte-2", halte, 0, LIMA, 1)).toBeNull();
+    expect(pakaiAngkot(s, di, "halte-2", halte, 0, LIMA, 2)).toBeNull();
+    expect(pakaiAngkot(skillBaru(), di, "halte-2", halte, 0, LIMA, null)).toBeNull();
+    expect(pakaiAngkot(s, di, "halte-2", halte, 0, SEMUA, null)).toBeNull();
+    expect(pakaiAngkot(s, di, "halte-2", [], 0, LIMA, null)).toBeNull(); // peta tanpa halte
+    const sekali = pakaiAngkot(s, di, "halte-2", halte, 5000, LIMA, null)!.s;
+    sekali.keadaan.muatan.angkot = 1;
+    const c2 = pusatHalte(1);
+    expect(pakaiAngkot(sekali, c2, "halte-1", halte, 6999, LIMA, null)).toBeNull();
+    expect(pakaiAngkot(sekali, c2, "halte-1", halte, 7000, LIMA, null)?.tujuan.id).toBe("halte-1");
   });
 });
 
@@ -194,13 +290,14 @@ describe("pribadi dan jam server (P-12, P-13)", () => {
     expect(isiPribadiSkill(denganMuatan({ lari: 2 }), 0, null, 0)).toEqual(kosong);
   });
 
-  it("aktifSampai hanya Lari cepat dan Kompas yang masih aktif; kotakMenunggu urut id dengan siapPada; Teropong dan Angkot 0", () => {
-    const s = denganMuatan({ lari: 1, kompas: 2, petunjuk: 1, teropong: 2 });
-    s.keadaan.aktifSampaiMs = { lari: 12_000, kompas: 9000, petunjuk: 50_000 };
+  it("JS-18 (P-14): muatan kelima skill; aktifSampai Lari cepat, Kompas, dan Teropong yang masih aktif; kotakMenunggu urut id dengan siapPada", () => {
+    const s = denganMuatan({ lari: 1, kompas: 2, petunjuk: 1, teropong: 1, angkot: 1 });
+    s.keadaan.aktifSampaiMs = { lari: 12_000, kompas: 9000, petunjuk: 50_000, teropong: 35_000, angkot: 60_000 };
     s.kotak = { "k-z3-1": 4000, "k-z1-2": 9000, "k-z2-2": 9000 - KOTAK.munculLagiMs };
     const isi = isiPribadiSkill(s, 10_000, 1_000_000, 30_000);
-    expect(isi.muatan).toEqual({ lari: 1, kompas: 2, petunjuk: 1, teropong: 0, angkot: 0 });
-    expect(isi.aktifSampai).toEqual({ lari: 1_042_000 });
+    expect(isi.muatan).toEqual({ lari: 1, kompas: 2, petunjuk: 1, teropong: 1, angkot: 1 });
+    expect(isi.aktifSampai).toEqual({ lari: 1_042_000, teropong: 1_065_000 });
+    expect(isiPribadiSkill(s, 35_000, 1_000_000, 30_000).aktifSampai).toEqual({});
     expect(isi.kotakMenunggu).toEqual([
       { id: "k-z1-2", siapPada: 1_000_000 + 30_000 + 9000 + KOTAK.munculLagiMs },
       { id: "k-z3-1", siapPada: 1_000_000 + 30_000 + 4000 + KOTAK.munculLagiMs },
@@ -225,6 +322,18 @@ describe("baris skill (P-14)", () => {
     });
     expect(skillDariJson(json)).toEqual(s);
     expect(skillDariJson(skillKeJson(skillBaru()))).toEqual(skillBaru());
+  });
+
+  it("JS-18: contoh baris spesifikasi dengan Teropong dan Angkot bolak-balik tanpa perubahan; muatan dijepit ke 1", () => {
+    const contoh = {
+      muatan: { lari: 0, kompas: 1, petunjuk: 0, teropong: 0, angkot: 0 },
+      aktif: { teropong: 412_300 },
+      pakai: { teropong: 382_300, angkot: 118_000 },
+      kotak: { "k-z6-4": 380_000, "k-z3-4": 110_000 },
+      kompas: null,
+    };
+    expect(JSON.parse(skillKeJson(skillDariJson(JSON.stringify(contoh))))).toEqual(contoh);
+    expect(skillDariJson(JSON.stringify({ muatan: { teropong: 3, angkot: 2 } })).keadaan.muatan).toMatchObject({ teropong: 1, angkot: 1 });
   });
 
   it("isi rusak atau di luar batas menjadi keadaan awal atau dijepit", () => {

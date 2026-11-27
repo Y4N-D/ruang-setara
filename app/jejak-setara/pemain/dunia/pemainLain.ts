@@ -2,6 +2,8 @@
 // yang menyesuaikan jaringan, interpolasi dan penerusan paling lama 100 ms, serta sembunyi sesudah 2,5 detik di
 // status `main`. Pemain saling tembus, jadi tidak ada tabrakan antarpemain di sini.
 // JS-09 (P-23): pemain lain tampak berlari bila menempuh lebih dari 45 piksel dalam 500 ms tampilan.
+// JS-18 (P-24): butir yang melompat (misalnya sesudah naik Angkot) mengganti penyangga, tanpa meluncur.
+import { melompat } from "../../inti/aturan";
 import type { Arah, StatusRuang, WarnaTas } from "../../inti/tipe";
 
 /** Tunda tampilan = 100 + 2J ms, dijepit 120–250 ms; J dan d̄ rata-rata bergerak eksponensial α 0,1 (P-20). */
@@ -163,8 +165,11 @@ export class PemainLain {
       c.terlihatLokal = jamLokal;
       c.dialog = dialog === true;
       const daftar = c.butir;
-      if (daftar.length > 0 && w < daftar[daftar.length - 1].w) continue; // butir lama yang tertukar urutan
-      if (daftar.length > 0 && w === daftar[daftar.length - 1].w) daftar.pop();
+      const akhir = daftar[daftar.length - 1];
+      if (akhir && w < akhir.w) continue; // butir lama yang tertukar urutan
+      if (akhir && w === akhir.w) daftar.pop();
+      // JS-18 (P-24): butir yang melompat dari butir terakhir mengganti seluruh penyangga.
+      else if (akhir && melompat(akhir, { x, y }, w - akhir.w)) daftar.length = 0;
       daftar.push({ w, x, y, arah, jalan });
       if (daftar.length > PENYANGGA_MAKS) daftar.splice(0, daftar.length - PENYANGGA_MAKS);
     }

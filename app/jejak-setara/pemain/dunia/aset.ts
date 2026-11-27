@@ -123,6 +123,9 @@ export const IKON_DUNIA = [
   "ikon_lari",
   "ikon_kompas",
   "ikon_petunjuk",
+  // JS-18 (P-30): tombol Teropong dan Angkot.
+  "ikon_teropong",
+  "ikon_karcis",
 ] as const;
 export const TANDA_DUNIA = [
   "tanda_diri",
@@ -136,6 +139,9 @@ export const TANDA_DUNIA = [
   "tanda_kompas",
   "tanda_debu",
   "tanda_kilau",
+  // JS-18 (P-12): kotak teropong dan karcis.
+  "tanda_kotak_teropong",
+  "tanda_kotak_karcis",
 ] as const;
 
 /** Jenis objek yang digambar layar dunia: semua jenis di kampung.json, ditambah kedua gambar gerbang. */

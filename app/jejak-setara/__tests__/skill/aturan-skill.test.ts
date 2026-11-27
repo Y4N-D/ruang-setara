@@ -1,16 +1,25 @@
-// Uji aturan inti skill JS-09 (spesifikasi JS-09, P-1 sampai P-5; AC-1).
+// Uji aturan inti skill JS-09 (spesifikasi JS-09, P-1 sampai P-5; AC-1). JS-18 (P-1 sampai P-5; AC-1): urutan lima
+// skill, halte, radius Teropong, lompatan, dan Teropong yang aktif.
 import { describe, expect, it } from "vitest";
 import {
   bolehPakaiSkill,
+  dalamTeropong,
+  halteDekat,
+  JANGKAUAN_HALTE_KLIEN_PX,
+  JANGKAUAN_HALTE_PX,
   jarakRuas,
   kompasTiba,
   kotakDilewati,
   lariBerlaku,
+  melompat,
   pakaiSkill,
+  RADIUS_TEROPONG_PX,
   sasaranKompas,
   SKILL_KOTAK,
   SKILL_P0,
+  SKILL_URUT,
   tambahMuatanKompas,
+  titikHalte,
   TOLERANSI_LARI_MS,
 } from "../../inti/aturan";
 import type { KeadaanSkill } from "../../inti/tipe";
@@ -25,6 +34,62 @@ describe("skill P0 dan isi kotak (P-1)", () => {
   it("urutan tampil dan pemetaan jenis kotak", () => {
     expect(SKILL_P0).toEqual(["lari", "kompas", "petunjuk"]);
     expect(SKILL_KOTAK).toEqual({ sepatu: "lari", kompas: "kompas", buku: "petunjuk", teropong: "teropong", karcis: "angkot" });
+  });
+  it("JS-18 (P-1): urutan lima skill, dengan skill P0 di depan", () => {
+    expect(SKILL_URUT).toEqual(["lari", "kompas", "petunjuk", "teropong", "angkot"]);
+    expect(SKILL_URUT.slice(0, 3)).toEqual([...SKILL_P0]);
+  });
+});
+
+describe("JS-18: halte (P-2)", () => {
+  // Halte di ubin (55, 64): pusat ubin (888, 1032), titik kaki (888, 1036).
+  const h1 = { id: "halte-1", x: 55, y: 64 };
+  const h2 = { id: "halte-2", x: 57, y: 64 }; // pusat (920, 1032)
+  it("jangkauan klien 24 px dan server 32 px dari pusat ubin", () => {
+    expect([JANGKAUAN_HALTE_KLIEN_PX, JANGKAUAN_HALTE_PX]).toEqual([24, 32]);
+    expect(halteDekat({ x: 888, y: 1032 + 24 }, [h1], JANGKAUAN_HALTE_KLIEN_PX)).toBe(h1);
+    expect(halteDekat({ x: 888, y: 1032 + 24.01 }, [h1], JANGKAUAN_HALTE_KLIEN_PX)).toBeNull();
+    expect(halteDekat({ x: 888 - 32, y: 1032 }, [h1], JANGKAUAN_HALTE_PX)).toBe(h1);
+    expect(halteDekat({ x: 888 - 32.01, y: 1032 }, [h1], JANGKAUAN_HALTE_PX)).toBeNull();
+  });
+  it("halte terdekat menang; seri diputus id terkecil; tanpa halte: null", () => {
+    expect(halteDekat({ x: 910, y: 1032 }, [h1, h2], 32)).toBe(h2);
+    expect(halteDekat({ x: 904, y: 1032 }, [h2, h1], 32)).toBe(h1); // tepat di tengah: 16 px dari keduanya
+    expect(halteDekat({ x: 904, y: 1032 }, [h1, h2], 32)).toBe(h1);
+    expect(halteDekat({ x: 904, y: 1032 }, [], 32)).toBeNull();
+  });
+  it("titikHalte: titik kaki di ubin halte (16x + 8, 16y + 12)", () => {
+    expect(titikHalte(h1)).toEqual({ x: 888, y: 1036 });
+    expect(titikHalte({ x: 0, y: 0 })).toEqual({ x: 8, y: 12 });
+    // Titik halte ada dalam jangkauan klien halte itu.
+    expect(halteDekat(titikHalte(h1), [h1], JANGKAUAN_HALTE_KLIEN_PX)).toBe(h1);
+  });
+});
+
+describe("JS-18: radius Teropong (P-3)", () => {
+  // Titik kejadian di ubin (20, 10): pusat (328, 168).
+  const titik = { x: 20, y: 10 };
+  it("benar sampai 192 px dari pusat ubin titik", () => {
+    expect(RADIUS_TEROPONG_PX).toBe(192);
+    expect(dalamTeropong({ x: 328 + 192, y: 168 }, titik)).toBe(true);
+    expect(dalamTeropong({ x: 328 + 192.01, y: 168 }, titik)).toBe(false);
+    expect(dalamTeropong({ x: 328, y: 168 - 192 }, titik)).toBe(true);
+    // Jarak lurus, bukan per sumbu: (135, 136) = 191,6 px di dalam; (136, 136) = 192,3 px di luar.
+    expect(dalamTeropong({ x: 328 + 135, y: 168 + 136 }, titik)).toBe(true);
+    expect(dalamTeropong({ x: 328 + 136, y: 168 + 136 }, titik)).toBe(false);
+  });
+});
+
+describe("JS-18: lompatan (P-5)", () => {
+  it("jarak lebih dari 64 + 144 × dtMs / 1000", () => {
+    // dtMs 100: ambang 78,4 px; dtMs 500: ambang 136 px.
+    expect(melompat({ x: 0, y: 0 }, { x: 78.4, y: 0 }, 100)).toBe(false);
+    expect(melompat({ x: 0, y: 0 }, { x: 78.41, y: 0 }, 100)).toBe(true);
+    expect(melompat({ x: 0, y: 0 }, { x: 0, y: 136 }, 500)).toBe(false);
+    expect(melompat({ x: 0, y: 0 }, { x: 0, y: 136.01 }, 500)).toBe(true);
+    // Dua halte terdekat (sekitar 35 ubin) selalu melompat dalam 500 ms; Lari cepat 500 ms tidak.
+    expect(melompat({ x: 888, y: 1036 }, { x: 1352, y: 1420 }, 500)).toBe(true);
+    expect(melompat({ x: 0, y: 0 }, { x: 115.2 * 1.25 * 0.5, y: 0 }, 500)).toBe(false);
   });
 });
 
@@ -112,5 +177,30 @@ describe("syarat memakai skill tetap seperti JS-02, ditambah D-1a (P-2)", () => 
     expect(k.muatan.petunjuk).toBe(0);
     expect(k.aktifSampaiMs.petunjuk).toBeUndefined();
     expect([0, 1, 2].map(tambahMuatanKompas)).toEqual([1, 2, 2]);
+  });
+});
+
+describe("JS-18: syarat memakai Teropong dan Angkot (P-4)", () => {
+  const minta = (k: KeadaanSkill, now: number, skill: "teropong" | "angkot", langkahDialog: 1 | 2 | null = null) => ({
+    skill,
+    now,
+    skillAktif: [...SKILL_URUT],
+    keadaan: k,
+    langkahDialog,
+  });
+  it("Teropong aktif 30 detik dan tidak bisa dipakai lagi selama aktif, walaupun bermuatan", () => {
+    const k = pakaiSkill(minta(keadaan({ teropong: 1 }), 1000, "teropong")).keadaan;
+    expect(k.aktifSampaiMs.teropong).toBe(31_000);
+    const lagi: KeadaanSkill = { ...k, muatan: { ...k.muatan, teropong: 1 } };
+    expect(bolehPakaiSkill(minta(lagi, 30_999, "teropong"))).toBe(false);
+    expect(bolehPakaiSkill(minta(lagi, 31_000, "teropong"))).toBe(true);
+  });
+  it("Angkot sekali pakai tanpa masa aktif; keduanya ditolak saat dialog terbuka atau skill mati", () => {
+    const k = pakaiSkill(minta(keadaan({ angkot: 1 }), 1000, "angkot")).keadaan;
+    expect(k.muatan.angkot).toBe(0);
+    expect(k.aktifSampaiMs.angkot).toBeUndefined();
+    expect(bolehPakaiSkill(minta(keadaan({ angkot: 1, teropong: 1 }), 0, "angkot", 1))).toBe(false);
+    expect(bolehPakaiSkill(minta(keadaan({ angkot: 1, teropong: 1 }), 0, "teropong", 2))).toBe(false);
+    expect(bolehPakaiSkill({ ...minta(keadaan({ angkot: 1 }), 0, "angkot"), skillAktif: [...SKILL_P0] })).toBe(false);
   });
 });

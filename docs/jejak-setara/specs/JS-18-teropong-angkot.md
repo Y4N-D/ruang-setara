@@ -1,6 +1,6 @@
 # JS-18 — Teropong dan Angkot
 
-Status: **Menunggu persetujuan (26 Nov 2026)**, `Spesifikasi disetujui: JS-18`. Dasar: Plan lanjutan JS-18 di `PLAN.md` (`Setuju: JS-18`, usulan 1 sampai 14 = a, 26 Nov 2026), Gerbang 1 rencana v1.1 (usulan 7a dan 8a; KT-16 sampai KT-18 = a), spesifikasi JS-09 (skill dan kotak), JS-07 (peta besar), JS-23 (peta bermedan), dan JS-10 (peta kelas), serta letak tujuh kotak PC-2 (Disetujui 26 Nov 2026; isi `PC-2-kotak.zip` diperiksa 26 Nov 2026).
+Status: **Disetujui (27 Nov 2026)**, `Spesifikasi disetujui: JS-18` (D-1 sampai D-3 = a). Diuji: [JS-18-hasil.md](../tests/JS-18-hasil.md). Dasar: Plan lanjutan JS-18 di `PLAN.md` (`Setuju: JS-18`, usulan 1 sampai 14 = a, 26 Nov 2026), Gerbang 1 rencana v1.1 (usulan 7a dan 8a; KT-16 sampai KT-18 = a), spesifikasi JS-09 (skill dan kotak), JS-07 (peta besar), JS-23 (peta bermedan), dan JS-10 (peta kelas), serta letak tujuh kotak PC-2 (Disetujui 26 Nov 2026; isi `PC-2-kotak.zip` diperiksa 26 Nov 2026).
 
 ## Ringkasan
 
@@ -372,6 +372,23 @@ Langkah pemilik proyek sesudah ZIP Build di-push:
 
 Butir daftar periksa AGENTS 9 yang relevan: lancar di HP saat lingkaran tampil dan sesudah pindah halte; bisa dimainkan hanya dengan papan ketik di laptop, termasuk memilih halte; dan kurangi gerak tidak mengubah lingkaran.
 
-## Catatan Build
+## Catatan Build (27 November 2026)
 
-Ditulis saat Build.
+Ditulis Sesi A saat Build dan Test. Perilaku dan kriteria di atas tidak berubah.
+
+- **Isi `PC-2-kotak.zip`** disalin apa adanya sebelum kode diubah. Kesebelas berkasnya sama byte dengan isi ZIP itu, dan `peta:build --periksa` lulus. Peringatan kantong tertutup 4 sel di Z1 sudah ada di `main`.
+- **`app/jejak-setara/pemain/dunia/aset.ts`** (tidak ada di tabel Berkas) mendapat `ikon_teropong` dan `ikon_karcis` di `IKON_DUNIA`, serta `tanda_kotak_teropong` dan `tanda_kotak_karcis` di `TANDA_DUNIA`. Tanpa itu layar dunia tidak memuat gambar tombol dan kotak (P-12, P-30). Keempat aset sudah terdaftar di `assets/manifest.ts` sebelum JS-18, jadi `manifest.ts` dan `CREDITS.md` tidak berubah.
+- **`HALTE` di `pemain/dunia/petaKampung.ts`** kini memuat `zona` dari `kampung.json`, untuk nama zona di daftar halte (P-21 butir 3). Tabel Berkas hanya menyebut komentar 31 kotak.
+- **Daftar halte (P-21 butir 3, D-1 a).** Daftar diberi bantalan 6 px dan digeser 6 px ke atas dan ke kiri agar garis fokus tidak terpotong gulir. Isinya tetap mulai di tepi atas peta, selebar ruang kanan dikurangi 16 px. Terukur di uji ujung ke ujung:
+  - lebar isi 110 px (HP 731 × 411), 129 px (dunia 610 × 343), serta 144 px (HP 640 × 360 rasio 3 dan laptop 1280 × 720);
+  - tinggi baris 51–68 px; tinggi daftar beserta bantalan 172–206 px;
+  - tanpa luapan mendatar;
+  - tepi bawah daftar 94, 28, 11, dan 411 px di atas tepi bawah peta.
+- **Titik layar kelas yang melompat (P-25).** `PetaKelas.tsx` menyimpan kiriman `dunia_kelas` sebelumnya di keadaan React dan menghitung `data-lompat` saat menggambar. Penanda di `ref` atau efek ditolak aturan ESLint `react-hooks` versi 7 yang aktif di repositori.
+- **`server/jejak-setara/src/api/ruang.ts`:** hanya komentar yang berubah. Komentar usang "Ketiga skill P0 tersimpan aktif sampai JS-09 …" dihapus. Lima skill bawaan datang dari `skillAktifRuang` di `inti/ruang.ts`.
+- **Uji JS-09 (`skill.uji.ts`, C-19).** Ruang utama dibuat dengan ketiga skill P0, seperti ruang sebelum JS-18 (P-9), sehingga hitungan kotak, tata letak, dan tangkapan layar JS-09 tetap. Hitungan kotak tampak menyaring kotak yang skillnya tidak aktif.
+- **Uji ujung ke ujung JS-18.**
+  - Kotak teropong yang dipakai adalah `k-z6-5` dan `k-z6-6`, karena baris kaki `k-z6-4` hanya bebas sampai 2,5 ubin di kanannya.
+  - Pengamat di halte tujuan dipindah ke sana tepat sebelum memilih halte. Akibatnya butir A di halte asal di layarnya berumur jauh di bawah 6,6 detik, dan butir di halte tujuan `melompat` (P-24). Kasus butir yang lebih lama dicatat sebagai Temuan 2 laporan Test.
+  - Tombol yang `aria-disabled` diketuk dengan `force`, seperti uji JS-09.
+- **`sim:beban` (P-38).** "Waktu putaran" dicatat sebagai selang rata-rata antarputaran server selama menjelajah. Selang itu dihitung dari statistik ruang sebelum dan sesudah menjelajah. Waktu CPU per putaran diukur terpisah di Node (laporan Test).

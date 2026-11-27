@@ -1012,6 +1012,8 @@
     {"id": "k-z3-1", "jenis": "sepatu", "zona": "z3", "x": 81, "y": 79},
     {"id": "k-z3-2", "jenis": "sepatu", "zona": "z3", "x": 55, "y": 95},
     {"id": "k-z3-3", "jenis": "sepatu", "zona": "z3", "x": 103, "y": 95},
+    {"id": "k-z3-4", "jenis": "karcis", "zona": "z3", "x": 57, "y": 64},
+    {"id": "k-z3-5", "jenis": "karcis", "zona": "z3", "x": 86, "y": 88},
     {"id": "k-z4-1", "jenis": "sepatu", "zona": "z4", "x": 111, "y": 32},
     {"id": "k-z4-2", "jenis": "sepatu", "zona": "z4", "x": 155, "y": 36},
     {"id": "k-z4-3", "jenis": "sepatu", "zona": "z4", "x": 133, "y": 46},
@@ -1021,12 +1023,17 @@
     {"id": "k-z6-1", "jenis": "sepatu", "zona": "z6", "x": 6, "y": 7},
     {"id": "k-z6-2", "jenis": "sepatu", "zona": "z6", "x": 84, "y": 7},
     {"id": "k-z6-3", "jenis": "sepatu", "zona": "z6", "x": 49, "y": 16},
+    {"id": "k-z6-4", "jenis": "teropong", "zona": "z6", "x": 26, "y": 7},
+    {"id": "k-z6-5", "jenis": "teropong", "zona": "z6", "x": 51, "y": 7},
+    {"id": "k-z6-6", "jenis": "teropong", "zona": "z6", "x": 76, "y": 7},
     {"id": "k-z7-1", "jenis": "buku", "zona": "z7", "x": 107, "y": 9},
     {"id": "k-z7-2", "jenis": "buku", "zona": "z7", "x": 155, "y": 10},
     {"id": "k-z7-3", "jenis": "buku", "zona": "z7", "x": 131, "y": 16},
+    {"id": "k-z7-4", "jenis": "karcis", "zona": "z7", "x": 107, "y": 25},
     {"id": "k-z8-1", "jenis": "buku", "zona": "z8", "x": 155, "y": 68},
     {"id": "k-z8-2", "jenis": "buku", "zona": "z8", "x": 133, "y": 81},
-    {"id": "k-z8-3", "jenis": "buku", "zona": "z8", "x": 155, "y": 95}
+    {"id": "k-z8-3", "jenis": "buku", "zona": "z8", "x": 155, "y": 95},
+    {"id": "k-z8-4", "jenis": "karcis", "zona": "z8", "x": 116, "y": 75}
   ],
   "halte": [
     {"id": "halte-1", "zona": "z3", "x": 55, "y": 64},

@@ -3,6 +3,8 @@
 // sama: pemain dipindah ke samping kotak lewat kait uji `pindahkan`, lalu berjalan melewatinya dengan papan ketik.
 // Sesudahnya: ruang tanpa Petunjuk dan tanpa skill, konsol (dialog Ruang baru, kepala ruang, hasil, rincian, CSV, dasbor,
 // layar kelas), dan pratinjau penyunting. Tangkapan layar disimpan di docs/jejak-setara/tests/JS-09/.
+// JS-18 (C-19): ruang utama dibuat dengan ketiga skill P0 (seperti ruang sebelum JS-18, P-9), hitungan kotak tampak
+// menyaring kotak yang skillnya tidak aktif, dan dialog Ruang baru memuat lima kotak centang.
 import { readFileSync } from "node:fs";
 import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { sasaranKompas } from "../../app/jejak-setara/inti/aturan";
@@ -22,8 +24,10 @@ const SKILL = ["lari", "kompas", "petunjuk"] as const;
 type Skill = (typeof SKILL)[number];
 const NAMA: Record<Skill, string> = { lari: "Lari cepat", kompas: "Kompas kejadian", petunjuk: "Petunjuk" };
 
-type Jenis = "sepatu" | "kompas" | "buku";
+type Jenis = "sepatu" | "kompas" | "buku" | "teropong" | "karcis";
 type Kotak = { id: string; jenis: Jenis; x: number; y: number };
+/** JS-18 (C-19): skill isi setiap jenis kotak (SKILL_KOTAK di inti/aturan.ts). */
+const SKILL_KOTAK: Record<Jenis, string> = { sepatu: "lari", kompas: "kompas", buku: "petunjuk", teropong: "teropong", karcis: "angkot" };
 type Ubin = { x: number; y: number };
 type Titik = { kejadianId: string; titik: Ubin[] };
 const kampung = JSON.parse(readFileSync(new URL("../../app/jejak-setara/peta/kampung.json", import.meta.url), "utf8")) as {
@@ -72,6 +76,8 @@ function tampak(f: Ubin, p: Ubin, tepi = 0): boolean {
 /** Jumlah kotak yang tergambar di pandangan kamera k (P-18 butir 8): sprite 14 × 12 di (16x + 1, 16y + 2). */
 const kotakTampak = (k: Ubin, daftar: readonly Kotak[]) =>
   daftar.filter((b) => b.x * 16 + 15 > k.x && b.x * 16 + 1 < k.x + PANDANG.lebar && b.y * 16 + 14 > k.y && b.y * 16 + 2 < k.y + PANDANG.tinggi).length;
+/** JS-18 (C-19): kotak yang tergambar hanya bila skill isinya aktif di ruang. */
+const kotakAktif = (skill: readonly string[]) => kampung.kotak.filter((k) => skill.includes(SKILL_KOTAK[k.jenis]));
 
 /** Kotak berjenis itu yang baris kakinya bebas dari satu ubin di kirinya sampai tiga ubin di kanannya. */
 function kotakDatar(jenis: Jenis, kecuali: readonly string[]): Kotak {
@@ -103,7 +109,8 @@ interface TempatKompas {
  */
 function cariTempatKompas(titik: readonly Titik[], kecuali: readonly string[]): TempatKompas {
   const daftar = titik.map((k) => ({ kode: k.kejadianId, selesai: false, titik: k.titik.map((t, i) => ({ id: `t${i}`, x: t.x, y: t.y })) }));
-  for (const kt of kampung.kotak) {
+  // JS-18 (C-19): hanya kotak yang tergambar di ruang utama (ketiga skill P0).
+  for (const kt of kotakAktif(SKILL)) {
     if (kecuali.includes(kt.id)) continue;
     for (const dy of [2, -2, 3, -3, 4, -4]) {
       const berdiri = { x: kt.x, y: kt.y + dy };
@@ -408,7 +415,8 @@ test("HP dan laptop di ruang yang sama: kotak, Lari cepat, Kompas, Petunjuk, +1 
   request,
 }) => {
   test.setTimeout(420_000);
-  const kode = await buatRuang(request, { durasiMenit: 15 });
+  // JS-18 (C-19): ketiga skill P0 saja, seperti ruang yang dibuat sebelum JS-18 (P-9).
+  const kode = await buatRuang(request, { durasiMenit: 15, skillAktif: [...SKILL] });
   utama.kode = kode;
   utama.id = idDariKode(kode);
   const laptop = await gabung(browser, baseURL!, kode, "laptop", 2, { umum: true });
@@ -459,7 +467,7 @@ test("HP dan laptop di ruang yang sama: kotak, Lari cepat, Kompas, Petunjuk, +1 
   // Kotak sepatu: tergambar di pandangan, terambil saat dilewati, lalu hilang (P-15 sampai P-18).
   const sepatuL = kotakDatar("sepatu", laptop.diambil);
   await pindahkan(request, laptop, { x: sepatuL.x - 1, y: sepatuL.y });
-  const kotakAwal = kotakTampak(await kameraDari(laptop.page), kampung.kotak);
+  const kotakAwal = kotakTampak(await kameraDari(laptop.page), kotakAktif(SKILL));
   expect(kotakAwal).toBeGreaterThanOrEqual(1);
   await expect(dunia(laptop.page)).toHaveAttribute("data-kotak", String(kotakAwal));
   await tahan(laptop.page, "ArrowRight", 450);
@@ -471,7 +479,7 @@ test("HP dan laptop di ruang yang sama: kotak, Lari cepat, Kompas, Petunjuk, +1 
   await expect(tombol(laptop.page, "lari").locator(".js-skill-lencana")).toHaveText("1");
   periksaPita(await tataHud(laptop.page), "laptop 1280x720 +1 Lari cepat", 1);
   await pindahkan(request, laptop, { x: sepatuL.x - 1, y: sepatuL.y });
-  await expect(dunia(laptop.page)).toHaveAttribute("data-kotak", String(kotakTampak(await kameraDari(laptop.page), kampung.kotak.filter((k) => k.id !== sepatuL.id))));
+  await expect(dunia(laptop.page)).toHaveAttribute("data-kotak", String(kotakTampak(await kameraDari(laptop.page), kotakAktif(SKILL).filter((k) => k.id !== sepatuL.id))));
 
   // Kotak kompas, lalu Kompas dengan tombol 2 di tempat yang sasarannya di luar pandangan (P-24, P-26).
   await ambilKotak(request, laptop, "kompas");
@@ -879,7 +887,7 @@ test("ruang tanpa Petunjuk dan ruang tanpa skill; kurangi gerak (AC-15, AC-19)",
   // Kotak buku tidak tergambar dan tidak terambil; tombol 3 tidak berbuat apa-apa.
   const buku = kotakDatar("buku", []);
   await pindahkan(request, a, { x: buku.x - 1, y: buku.y });
-  const aktif = kampung.kotak.filter((k) => k.jenis !== "buku");
+  const aktif = kotakAktif(["lari", "kompas"]);
   await expect(dunia(a.page)).toHaveAttribute("data-kotak", String(kotakTampak(await kameraDari(a.page), aktif)));
   await tahan(a.page, "ArrowRight", 450);
   await a.page.keyboard.press("Digit3");
@@ -983,14 +991,14 @@ test("konsol: dasbor 48 px, kelompok Skill di dialog Ruang baru, baris Skill, ta
   const tinggi = await tautan.evaluateAll((a) => a.map((x) => x.getBoundingClientRect().height));
   for (const t of tinggi) expect(t).toBeGreaterThanOrEqual(48);
 
-  // Dialog Ruang baru: kelompok Skill dengan tiga kotak centang tercentang, ikon, dan keterangan (P-7, P-8).
+  // Dialog Ruang baru: kelompok Skill dengan lima kotak centang tercentang (JS-18 P-6), ikon, dan keterangan (P-7, P-8).
   await g.getByRole("link", { name: "Ruang" }).first().click();
   await g.getByRole("button", { name: "+ Ruang baru" }).click();
   const d = g.getByRole("dialog", { name: "Ruang baru" });
   const kelompok = d.getByRole("group", { name: "Skill" });
   await expect(kelompok).toBeVisible();
-  for (const s of SKILL) await expect(kelompok.getByRole("checkbox", { name: NAMA[s] })).toBeChecked();
-  await expect(kelompok.locator(".js-konsol-centang img")).toHaveCount(3);
+  for (const nama of [...SKILL.map((s) => NAMA[s]), "Teropong", "Angkot"]) await expect(kelompok.getByRole("checkbox", { name: nama })).toBeChecked();
+  await expect(kelompok.locator(".js-konsol-centang img")).toHaveCount(5);
   await expect(kelompok.getByText("Hapus centang untuk mematikan skill di ruang ini.")).toBeVisible();
   for (const t of await kelompok.locator(".js-konsol-centang").evaluateAll((l) => l.map((x) => x.getBoundingClientRect().height))) expect(t).toBeGreaterThanOrEqual(48);
   await d.getByLabel("Label kelas", { exact: true }).fill("IX C");
@@ -1000,12 +1008,12 @@ test("konsol: dasbor 48 px, kelompok Skill di dialog Ruang baru, baris Skill, ta
     g.waitForRequest((r) => r.method() === "POST" && new URL(r.url()).pathname === "/api/ruang"),
     d.getByRole("button", { name: "Buat ruang" }).click(),
   ]);
-  expect((JSON.parse(kirim.postData() ?? "{}") as { skillAktif?: unknown }).skillAktif).toEqual(["lari", "kompas"]);
+  expect((JSON.parse(kirim.postData() ?? "{}") as { skillAktif?: unknown }).skillAktif).toEqual(["lari", "kompas", "teropong", "angkot"]);
   await expect(g.getByText(/Ruang [A-Z0-9]{5} dibuat\./)).toBeVisible();
   const idBaru = /^#\/ruang\/([^/]+)$/.exec(new URL(g.url()).hash)?.[1] ?? "";
   expect(idBaru).not.toBe("");
   catatRuang(idBaru);
-  await expect(g.locator('[data-baris="skill"]')).toHaveText("Skill Lari cepat, Kompas kejadian");
+  await expect(g.locator('[data-baris="skill"]')).toHaveText("Skill Lari cepat, Kompas kejadian, Teropong, Angkot");
 
   // Hasil ruang uji pertama: baris Skill sesudah Durasi, tanda Petunjuk di rincian, CSV kolom ke-18 (P-9, P-45 sampai P-47).
   await g.goto(`/admin/#/ruang/${utama.id}`);

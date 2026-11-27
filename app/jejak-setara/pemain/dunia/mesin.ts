@@ -5,8 +5,10 @@
 // laporan berhenti sebelum `periksa` (P-14 sampai P-24).
 // JS-09: keadaan skill dari `pribadi`, `kompas`, dan `pemberitahuan`; lari, kotak bantuan, kilau, debu, panah Kompas,
 // antrean pita, dan pengumuman skill (spesifikasi JS-09, P-18 sampai P-26, P-39, P-41 sampai P-43).
+// JS-18: lima skill, halte dalam jangkauan, dan tanda bingkai pertama yang tergambar di halte tujuan sesudah
+// `angkot_tiba` (spesifikasi JS-18, P-18, P-21 butir 6, dan P-26).
 import { NPC, OBJEK } from "../../assets/manifest";
-import { PANDANGAN, SKILL_P0 } from "../../inti/aturan";
+import { halteDekat, JANGKAUAN_HALTE_KLIEN_PX, PANDANGAN, SKILL_URUT } from "../../inti/aturan";
 import type { PesanPemain, PesanServerPemain } from "../../inti/protokol";
 import type { Arah, Masa, StatusRuang } from "../../inti/tipe";
 import { buatSetAvatar, buatSetSiluet, type AsetDunia, type BuatKanvas, type SetStrip, type Strip } from "./aset";
@@ -17,7 +19,7 @@ import { Masukan } from "./masukan";
 import { kejadianDalamJangkauan, KejadianKlien, tataLetakKejadian, type LetakTokoh } from "./kejadian";
 import { bingkaiTokoh, gambarBingkai, type EkstraGambar, type GerbangGambar, type SpriteGambar, type TokohGambar } from "./penggambar";
 import { PemainLain, type InfoPemain } from "./pemainLain";
-import { GERBANG, GRID_KAMPUNG, GRID_LOBI, KOTAK_PETA, LAPISAN_GAMBAR, OBJEK_PETA, TITIK_MUNCUL, UKURAN_PETA } from "./petaKampung";
+import { GERBANG, GRID_KAMPUNG, GRID_LOBI, HALTE, KOTAK_PETA, LAPISAN_GAMBAR, OBJEK_PETA, TITIK_MUNCUL, UKURAN_PETA } from "./petaKampung";
 import { PengelolaPotongan, type ObjekGambar } from "./potongan";
 import { AntreanPita, ARAH_PANAH, batasPanah, SkillKlien } from "./skill";
 import { isiTeks, TEKS } from "../../teks";
@@ -96,7 +98,7 @@ export class MesinDunia {
   /** Set strip per objek info pemain, agar tidak membuat kunci teks setiap bingkai. */
   private readonly stripInfo = new WeakMap<InfoPemain, SetStrip>();
   /** JS-09: keadaan skill, antrean pita, dan pengumuman skill yang belum disampaikan HUD (P-39, P-41). */
-  skill = new SkillKlien(KOTAK_PETA);
+  skill = new SkillKlien(KOTAK_PETA, HALTE);
   pita = new AntreanPita();
   umum: string[] = [];
   /** Atribut uji kanvas (P-18, P-20, P-26): lari diri, kotak yang tergambar di pandangan, dan arah panah Kompas. */
@@ -109,6 +111,13 @@ export class MesinDunia {
   private langitUntuk: WaktuRuangKlien | null = null;
   private siluet: { kunci: string; set: SetStrip } | null = null;
   private jamPerformaTerakhir: number | null = null;
+  /**
+   * JS-18 (P-21 butir 6): `koreksi` yang sudah diterima dan yang sudah tergambar (bingkai yang digambar sesudahnya), serta
+   * `angkot_tiba` yang menunggu bingkai pertama di halte tujuan: jam lokal saat tiba dan nomor `koreksi` saat itu.
+   */
+  private koreksiKe = 0;
+  private digambarKe = 0;
+  private tiba: { pada: number; koreksi: number } | null = null;
 
   constructor(buatKanvas: BuatKanvas) {
     this.buat = buatKanvas;
@@ -177,10 +186,11 @@ export class MesinDunia {
           this.gerak.posisi = null;
           this.kamera = kameraPusat(tengahLobi(), UKURAN_PETA.lebarPx, UKURAN_PETA.tinggiPx);
           this.kejadian.kosongkan();
-          this.skill = new SkillKlien(KOTAK_PETA);
+          this.skill = new SkillKlien(KOTAK_PETA, HALTE);
           this.pita = new AntreanPita();
         }
-        this.skill.ruang = SKILL_P0.filter((s) => p.pengaturan.skillAktif.includes(s));
+        this.skill.ruang = SKILL_URUT.filter((s) => p.pengaturan.skillAktif.includes(s));
+        this.tiba = null;
         this.dialogKode = null;
         this.diriId = p.pemainId;
         this.lain.kosongkan();
@@ -221,6 +231,7 @@ export class MesinDunia {
       case "koreksi":
         this.gerak.terapkanKoreksi(p);
         if (this.gerak.posisi) this.kamera = kameraPusat(this.gerak.posisi, UKURAN_PETA.lebarPx, UKURAN_PETA.tinggiPx);
+        this.koreksiKe++;
         break;
       case "kejadian_terlihat":
         this.kejadian.terima({ kejadianId: p.kejadianId, x: p.x, y: p.y, setTokoh: p.setTokoh });
@@ -236,6 +247,8 @@ export class MesinDunia {
         const e = this.skill.pemberitahuan(p.kode);
         if (e?.[0]) this.tambahPita(e[0], jamLokal, e[1]);
         else if (e) this.umum.push(e[1]);
+        // JS-18 (P-21 butir 6): `koreksi` ke halte tujuan tiba lebih dulu; pita menunggu bingkai pertama di sana.
+        else if (p.kode === "angkot_tiba") this.tiba = { pada: jamLokal, koreksi: this.koreksiKe };
         break;
       }
       case "hasil_2":
@@ -348,6 +361,7 @@ export class MesinDunia {
     const kilau = tanda("tanda_kilau", 2);
     if (kilau) for (const [x, y, bingkai] of skill.kilauTampil(o.jamLokal)) efek.push({ id: `kilau:${x},${y}`, urutY: y, x: x - 4, y: y - 4, strip: kilau, bingkai });
     const kaki = this.gerak.menungguAwal ? null : this.gerak.posisi;
+    skill.dekatHalte(kaki); // JS-18 (P-18)
     const debu = tanda("tanda_debu", 2);
     const berlari: { id: string; x: number; y: number; arah: Arah }[] = this.tokohLain.filter((q) => q.lari && q.jalan);
     if (lari && this.gerak.jalan && kaki) berlari.push({ id: "diri", ...kaki, arah: this.gerak.arah });
@@ -372,6 +386,22 @@ export class MesinDunia {
     this.masukan.lepasSemua();
     this.gerak.jalan = false;
     this.gerak.kirimBila(jamLokal, 0, 0, kirim);
+  }
+
+  /**
+   * JS-18 (P-21 butir 6, P-36, P-37): sesudah `angkot_tiba`, pada bingkai pertama yang digambar di posisi baru (semua
+   * potongan yang terlihat disiapkan `perbarui` sebelum menggambar), atau paling lama 1 detik sesudahnya: pita dan
+   * pengumuman "Tiba di Halte {n}." dan bunyi `skill`. Mengembalikan nomor halte tujuan, atau null bila belum.
+   */
+  selesaiTiba(jamLokal: number, putar: (nama: "skill") => void): number | null {
+    const t = this.tiba;
+    if (!t || (this.digambarKe < t.koreksi && jamLokal - t.pada < 1000)) return null;
+    this.tiba = null;
+    const h = this.gerak.posisi ? halteDekat(this.gerak.posisi, HALTE, JANGKAUAN_HALTE_KLIEN_PX) : null;
+    const n = h ? HALTE.indexOf(h) + 1 : 0;
+    if (n > 0) this.tambahPita(isiTeks(TEKS.skill.tiba, { n }), jamLokal);
+    putar("skill");
+    return n;
   }
 
   /** Dialog kejadian di layar ini dibuka (kode) atau ditutup (null): penandanya menjadi "…" selama terbuka (P-16). */
@@ -496,6 +526,7 @@ export class MesinDunia {
       const terang = !kurangiGerak && this.status === "main" && Math.floor(jamLokal / 500) % 2;
       ctx.drawImage(img, (2 * pn[0] + (terang ? 1 : 0)) * s, 0, s, img.height, pn[1] - 7, pn[2] - 7, 14, 14);
     }
+    this.digambarKe = this.koreksiKe; // JS-18 (P-21 butir 6)
   }
 
   /** Paling banyak `maks` pemain lain terdekat yang terlihat di pandangan, untuk label nama (P-23). */

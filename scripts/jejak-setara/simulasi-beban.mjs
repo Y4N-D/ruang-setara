@@ -24,6 +24,11 @@
 // (bawaan 4) per detik, satu sambungan pengukur mengirim 30 `ping` di lobi sebelum bot lain bergabung, --mulai-pada
 // <milidetik epoch> memulai ronde bersama, dan sesudah ronde pemakaian dibaca dari GET /api/ruang/{id} lalu data ruang
 // dihapus lewat DELETE /api/ruang/{id} (kecuali --simpan-ruang). Bot mengirim `rttMs` di `ping` (JS-15, P-29).
+// JS-18 (P-38): kotak teropong dan karcis ikut menjadi tujuan jelajah bila skillnya belum penuh; bot bermuatan Teropong
+// memakainya saat menjelajah; bot berkarcis tanpa sasaran kejadian berjalan ke halte terdekat, lalu mengirim
+// `pakai_skill` Angkot dengan halte lain yang dipilih acak dan menyelaraskan posisinya dari `koreksi`. Ringkasan mencatat
+// kotak dan pemakaian kedua skill itu, `kejadian_terlihat` selama Teropong aktif yang titiknya di luar pandangan,
+// `angkot_tiba`, gerak yang dikoreksi dalam 1 detik sesudah pindah (terpisah dari koreksi lain), dan selang putaran.
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { register } from "node:module";
@@ -83,11 +88,15 @@ try {
 }
 const frekuensi = (batas) => (batas > 50 ? 6 : 10); // sama dengan frekuensiGerak() di inti/aturan.ts
 // JS-09: sama dengan KECEPATAN, KECEPATAN_LARI (inti/gerak.ts), JEDA_SKILL_MS, dan SKILL_KOTAK (inti/aturan.ts).
+// JS-18 (P-38): kelima skill, muatan penuhnya (SKILL di inti/aturan.ts), dan jangkauan halte klien (24 piksel).
 const KECEPATAN = 72;
 const KECEPATAN_LARI = 115.2;
 const JEDA_SKILL_MS = 2000;
-const SKILL_KOTAK = { sepatu: "lari", kompas: "kompas", buku: "petunjuk" };
-const KODE_KOTAK = { kotak_lari: "sepatu", kotak_kompas: "kompas", kotak_petunjuk: "buku" };
+const SKILL_KOTAK = { sepatu: "lari", kompas: "kompas", buku: "petunjuk", teropong: "teropong", karcis: "angkot" };
+const KODE_KOTAK = { kotak_lari: "sepatu", kotak_kompas: "kompas", kotak_petunjuk: "buku", kotak_teropong: "teropong", kotak_angkot: "karcis" };
+const SKILL_SEMUA = ["lari", "kompas", "petunjuk", "teropong", "angkot"];
+const MUATAN_MAKS = { lari: 2, kompas: 2, petunjuk: 2, teropong: 1, angkot: 1 };
+const JANGKAUAN_HALTE_KLIEN_PX = 24;
 
 /** Perkiraan permintaan Durable Object per ruang untuk satu sesi 15 menit: pesan masuk ÷ 20 + satu per sambungan. */
 const perkiraanPermintaan = (pesanNaikPerDetik, bot) => Math.round((pesanNaikPerDetik * 900) / 20 + bot);
@@ -330,8 +339,20 @@ function jalurUbin(grid, a, b) {
 
 const UBIN_LOBI = ubinTercapai(GRID_LOBI);
 const UBIN_JELAJAH = ubinTercapai(GRID);
-/** JS-09: kotak bantuan di peta kampung yang skillnya P0. */
+/** JS-09: kotak bantuan di peta kampung; JS-18: termasuk kotak teropong dan karcis. */
 const KOTAK_PETA = kampung.kotak.filter((k) => SKILL_KOTAK[k.jenis]);
+/** JS-18 (P-38): halte peta kampung, menurut urutan nomornya. */
+const HALTE = kampung.halte;
+/** Halte terdekat dari titik kaki bot (jarak ke pusat ubin halte). */
+const halteTerdekat = (b) => [...HALTE].sort((p, q) => Math.hypot(b.x - (p.x * 16 + 8), b.y - (p.y * 16 + 8)) - Math.hypot(b.x - (q.x * 16 + 8), b.y - (q.y * 16 + 8)))[0];
+/** Pusat titik kejadian di dalam pandangan 320 × 180 bot (kamera dijepit di tepi peta, sama dengan terlihatDiLayar). */
+const dalamPandangan = (b, x, y) => {
+  const kiri = Math.max(0, Math.min(b.x - 160, L * 16 - 320));
+  const atas = Math.max(0, Math.min(b.y - 90, T * 16 - 180));
+  const cx = x * 16 + 8;
+  const cy = y * 16 + 8;
+  return cx >= kiri && cx <= kiri + 320 && cy >= atas && cy <= atas + 180;
+};
 const pusatUbin = ([x, y]) => ({ x: x * 16 + 8, y: y * 16 + 12 });
 const acakDari = (larik) => larik[Math.floor(Math.random() * larik.length)];
 const eksponensial = (rata) => (rata > 0 ? -Math.log(1 - Math.random()) * rata : 0);
@@ -346,9 +367,11 @@ function buatBot(kode, nomor) {
     // JS-15 (D-6 a): sambung ulang dengan token seperti HP, beserta catatan setiap penutupan yang tidak disengaja.
     token: null, sambungUlang: 0, gagalSambung: 0, putusRinci: [], menyambung: false, berhenti: false, gerakDilewati: 0,
     // JS-09 (P-50): keadaan skill dari `pribadi` terakhir, perkiraan selisih jam server dari `pong`, dan hitungan.
-    muatan: { lari: 0, kompas: 0, petunjuk: 0 }, aktifSampai: {}, kotakMenunggu: new Map(), selisihJam: 0, pakaiTerakhir: {}, menungguSkill: {},
-    tujuanKompas: null, lariSampaiLokal: 0, kotak: { sepatu: 0, kompas: 0, buku: 0 }, dipakai: { lari: 0, kompas: 0, petunjuk: 0 },
-    pesanKompas: 0, pesanPetunjuk: 0, kompasTanpaSasaran: 0, kompasTepat: 0, bytePribadi: 0, jumlahPribadi: 0, koreksiLari: 0 };
+    muatan: { lari: 0, kompas: 0, petunjuk: 0, teropong: 0, angkot: 0 }, aktifSampai: {}, kotakMenunggu: new Map(), selisihJam: 0, pakaiTerakhir: {}, menungguSkill: {},
+    tujuanKompas: null, lariSampaiLokal: 0, kotak: { sepatu: 0, kompas: 0, buku: 0, teropong: 0, karcis: 0 }, dipakai: { lari: 0, kompas: 0, petunjuk: 0, teropong: 0, angkot: 0 },
+    pesanKompas: 0, pesanPetunjuk: 0, kompasTanpaSasaran: 0, kompasTepat: 0, bytePribadi: 0, jumlahPribadi: 0, koreksiLari: 0,
+    // JS-18 (P-38): Angkot yang menunggu jawaban (halte tujuan), halte yang sedang dituju, saat pindah, dan hitungan.
+    angkot: null, menujuHalte: null, pindahPada: -Infinity, koreksiPindah: 0, angkotTiba: 0, terlihatTeropong: 0 };
   return new Promise((ok, gagal) => {
     // Di lokal, setiap ruang dianggap sekolah sendiri (alamat IP berbeda) agar pembatas 300 sambungan per menit
     // per alamat (D-5) tidak menahan simulasi; di Cloudflare tajuk ini diisi jaringan Cloudflare, bukan klien.
@@ -391,6 +414,8 @@ function buatBot(kode, nomor) {
       }
       else if (m.t === "kejadian_terlihat") {
         b.terlihat++;
+        // JS-18 (P-38): titik yang terungkap selama Teropong aktif dan berada di luar pandangan bot.
+        if ((b.aktifSampai.teropong ?? 0) > jamServer(b) && b.x !== null && !dalamPandangan(b, m.x, m.y)) b.terlihatTeropong++;
         if (!b.selesai.has(m.kejadianId)) b.lihat.set(`${m.kejadianId}@${m.x},${m.y}`, { kode: m.kejadianId, x: m.x, y: m.y });
       } else if (m.t === "selesai") {
         b.pesanSelesai = m;
@@ -401,7 +426,7 @@ function buatBot(kode, nomor) {
         // JS-09 (P-50): muatan yang berkurang berarti skill itu dipakai; jeda 2 detik dihitung dari saat ini.
         b.jumlahPribadi++;
         b.bytePribadi += Buffer.byteLength(teks);
-        for (const s of ["lari", "kompas", "petunjuk"]) {
+        for (const s of SKILL_SEMUA) {
           if (m.muatan[s] < b.muatan[s]) {
             b.dipakai[s]++;
             b.pakaiTerakhir[s] = Date.now();
@@ -415,6 +440,7 @@ function buatBot(kode, nomor) {
         if (m.aktifSampai.kompas === undefined) b.tujuanKompas = null;
       } else if (m.t === "pemberitahuan") {
         if (KODE_KOTAK[m.kode]) b.kotak[KODE_KOTAK[m.kode]]++;
+        else if (m.kode === "angkot_tiba") b.angkotTiba++; // JS-18 (P-38)
         else if (m.kode === "kompas_tanpa_sasaran") {
           b.kompasTanpaSasaran++;
           b.menungguSkill.kompas = 0;
@@ -469,14 +495,25 @@ function buatBot(kode, nomor) {
         }
       }
       else if (m.t === "koreksi") {
-        // Koreksi pertama berisi posisi awal (P-49); sesudah itu koreksi berarti laporan jujur ditolak.
-        if (b.tersinkron) b.koreksi++;
-        // JS-09 (P-50): koreksi selama lari atau sampai 1 detik sesudahnya.
-        if (b.tersinkron && Date.now() <= b.lariSampaiLokal + 1000) b.koreksiLari++;
+        // JS-18 (P-38): koreksi ke titik halte tujuan sesudah `pakai_skill` Angkot adalah perpindahan, bukan laporan yang
+        // ditolak; koreksi lain dalam 1 detik sesudahnya dicatat terpisah.
+        const pindah = b.angkot !== null && m.x === b.angkot.x && m.y === b.angkot.y;
+        if (pindah) {
+          b.angkot = null;
+          b.menujuHalte = null;
+          b.pindahPada = Date.now();
+        } else if (b.tersinkron && Date.now() - b.pindahPada <= 1000) b.koreksiPindah++;
+        else {
+          // Koreksi pertama berisi posisi awal (P-49); sesudah itu koreksi berarti laporan jujur ditolak.
+          if (b.tersinkron) b.koreksi++;
+          // JS-09 (P-50): koreksi selama lari atau sampai 1 detik sesudahnya.
+          if (b.tersinkron && Date.now() <= b.lariSampaiLokal + 1000) b.koreksiLari++;
+        }
         b.x = m.x;
         b.y = m.y;
         b.seq = Math.max(b.seq, m.seq);
         b.jalur = [];
+        b.menujuHalte = null; // JS-18: jalur ke halte dihitung ulang dari posisi baru
         if (!b.tersinkron) {
           b.tersinkron = true;
           ok(b);
@@ -556,6 +593,41 @@ function langkahBot(b, sekarang, hz, fase) {
   }
   // JS-09 (P-50): tanpa sasaran kejadian, bot bermuatan Kompas memakainya; jalurnya diatur saat `kompas` tiba.
   if (fase === "jelajah" && !b.sasaran && !b.tujuanKompas && bolehPakai(b, "kompas", sekarang)) pakaiSkill(b, "kompas", sekarang);
+  // JS-18 (P-38): bot bermuatan Teropong memakainya saat menjelajah.
+  if (fase === "jelajah" && bolehPakai(b, "teropong", sekarang)) pakaiSkill(b, "teropong", sekarang);
+  // JS-18 (P-38): bot berkarcis tanpa sasaran kejadian berjalan ke halte terdekat, berhenti, lalu naik Angkot ke halte lain
+  // yang dipilih acak; selama menunggu jawaban (paling lama 2,5 detik) bot diam.
+  if (b.angkot && sekarang - b.angkot.pada > 2500) b.angkot = null;
+  if (b.angkot) return;
+  if (fase === "jelajah" && !b.sasaran && b.muatan.angkot > 0) {
+    const h = halteTerdekat(b);
+    if (b.jalur.length === 0 && Math.hypot(b.x - (h.x * 16 + 8), b.y - (h.y * 16 + 8)) <= JANGKAUAN_HALTE_KLIEN_PX) {
+      if (b.jalan) {
+        if (b.ws.bufferedAmount > 0) return void b.gerakDilewati++;
+        b.jalan = false;
+        b.gerak++;
+        b.kirimTerakhir = sekarang;
+        b.kirim({ v: V, t: "gerak", x: Math.round(b.x * 10) / 10, y: Math.round(b.y * 10) / 10, arah: b.arah, jalan: false, seq: ++b.seq });
+        return;
+      }
+      if (bolehPakai(b, "angkot", sekarang)) {
+        const tujuan = acakDari(HALTE.filter((x) => x.id !== h.id));
+        b.angkot = { id: tujuan.id, x: tujuan.x * 16 + 8, y: tujuan.y * 16 + 12, pada: sekarang };
+        b.menungguSkill.angkot = sekarang;
+        b.kirim({ v: V, t: "pakai_skill", skill: "angkot", halteId: tujuan.id });
+      }
+      return;
+    }
+    if (b.menujuHalte !== h.id) {
+      // Dicatat walaupun jalurnya tidak ada, agar pencarian jalur tidak diulang setiap langkah.
+      b.menujuHalte = h.id;
+      const jalur = jalurUbin(GRID, [Math.floor(b.x / 16), Math.floor(b.y / 16)], [h.x, h.y]);
+      if (jalur) {
+        b.jalur = jalur.map(pusatUbin);
+        b.diamSampai = 0;
+      }
+    }
+  }
   if (fase === "jelajah" && b.jalur.length === 0) {
     // Kejadian terlihat yang belum selesai, paling jauh 12 ubin (atau sasaran yang jalurnya terputus koreksi):
     // jalur ke ubin titiknya.
@@ -585,7 +657,7 @@ function langkahBot(b, sekarang, hz, fase) {
     // JS-09 (P-50): saat menjelajah, separuh tujuan acak adalah kotak yang siap dan skillnya belum penuh.
     if (fase === "jelajah" && Math.random() < 0.5) {
       const w = jamServer(b);
-      const siap = KOTAK_PETA.filter((k) => b.muatan[SKILL_KOTAK[k.jenis]] < 2 && !((b.kotakMenunggu.get(k.id) ?? 0) > w));
+      const siap = KOTAK_PETA.filter((k) => b.muatan[SKILL_KOTAK[k.jenis]] < MUATAN_MAKS[SKILL_KOTAK[k.jenis]] && !((b.kotakMenunggu.get(k.id) ?? 0) > w));
       if (siap.length > 0) {
         const k = acakDari(siap);
         jalur = jalurUbin(grid, asal, [k.x, k.y]);
@@ -765,6 +837,9 @@ try {
   // sesudah jeda ini, jadi jeda itu ikut terukur sebagai waktu pulang-pergi walaupun bukan berasal dari server.
   const jedaLoop = monitorEventLoopDelay({ resolution: 10 });
   jedaLoop.enable();
+  // JS-18 (P-38): hitungan putaran server di awal menjelajah, untuk selang putaran rata-rata.
+  const statJelajahAwal = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
+  const mulaiJelajah = Date.now();
   const waktuUjiPutus = UJI_PUTUS_DETIK > 0 ? setTimeout(() => bot[1]?.ws.close(4100, "uji putus"), UJI_PUTUS_DETIK * 1000) : null;
   const waktuUjiPutusKelas = UJI_PUTUS_KELAS_DETIK > 0 ? setTimeout(() => layarKelas.get(kodeRuang[0])?.ws.close(4100, "uji putus kelas"), UJI_PUTUS_KELAS_DETIK * 1000) : null;
   const jelajah = await jalankanFase(bot, "jelajah", DETIK, hz);
@@ -785,6 +860,7 @@ try {
   const kodeTutupTakTerduga = {};
   for (const b of bot) for (const p of b.putusRinci) kodeTutupTakTerduga[p.kode] = (kodeTutupTakTerduga[p.kode] ?? 0) + 1;
   const stat = SASARAN === "lokal" ? await Promise.all(kodeRuang.map(statistik)) : [];
+  const lamaJelajahMs = Date.now() - mulaiJelajah;
   // Pesan layar kelas sampai akhir menjelajah, sebelum ruang diakhiri (JS-10, AC-24).
   const kelasJelajah = kodeRuang.map((kode) => JSON.parse(JSON.stringify(layarKelas.get(kode)?.jenis ?? {})));
   // JS-15: pemakaian dibaca juga sebelum ronde diakhiri, selagi waktu pulang-pergi (hanya di memori ruang) pasti ada.
@@ -869,6 +945,11 @@ try {
       gerakDikirim: jumlah((b) => b.gerak),
       gerakDikoreksi: jumlah((b) => b.koreksi),
       gerakDikoreksiPersen: +((100 * jumlah((b) => b.koreksi)) / Math.max(1, jumlah((b) => b.gerak))).toFixed(3),
+      // JS-18 (P-38): koreksi dalam 1 detik sesudah pindah halte, terpisah dari koreksi di atas.
+      gerakDikoreksiSesudahPindah: jumlah((b) => b.koreksiPindah),
+      // JS-18 (P-38): putaran server selama menjelajah dan selang rata-ratanya (sasaran 100 ms).
+      putaranServer: stat.map((x, i) => x.putaran - statJelajahAwal[i].putaran),
+      selangPutaranMsRata: stat.map((x, i) => +(lamaJelajahMs / Math.max(1, x.putaran - statJelajahAwal[i].putaran)).toFixed(1)),
     },
     // JS-08 (P-71): kejadian dibuka dan dijawab bot, serta hitungan server.
     kejadian: {
@@ -888,8 +969,23 @@ try {
       const bs = bot.filter((b) => b.kode === kode);
       const j = (f) => bs.reduce((s, b) => s + f(b), 0);
       return {
-        kotakTerambil: { sepatu: j((b) => b.kotak.sepatu), kompas: j((b) => b.kotak.kompas), buku: j((b) => b.kotak.buku) },
-        dipakai: { lari: j((b) => b.dipakai.lari), kompas: j((b) => b.dipakai.kompas), petunjuk: j((b) => b.dipakai.petunjuk) },
+        kotakTerambil: {
+          sepatu: j((b) => b.kotak.sepatu),
+          kompas: j((b) => b.kotak.kompas),
+          buku: j((b) => b.kotak.buku),
+          teropong: j((b) => b.kotak.teropong),
+          karcis: j((b) => b.kotak.karcis),
+        },
+        dipakai: {
+          lari: j((b) => b.dipakai.lari),
+          kompas: j((b) => b.dipakai.kompas),
+          petunjuk: j((b) => b.dipakai.petunjuk),
+          teropong: j((b) => b.dipakai.teropong),
+          angkot: j((b) => b.dipakai.angkot),
+        },
+        // JS-18 (P-38): titik yang terungkap selama Teropong aktif di luar pandangan, dan `angkot_tiba`.
+        terlihatSaatTeropongLuarPandangan: j((b) => b.terlihatTeropong),
+        angkotTiba: j((b) => b.angkotTiba),
         pesanKompas: j((b) => b.pesanKompas),
         pesanPetunjuk: j((b) => b.pesanPetunjuk),
         kompasTanpaSasaran: j((b) => b.kompasTanpaSasaran),

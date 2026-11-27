@@ -162,11 +162,17 @@ export function tambahMuatanKompas(muatan: number): number {
   return Math.min(SKILL.kompas.muatanMaks, muatan + 1);
 }
 
-/** JS-09 (P-1): skill P0, menurut urutan tampil di HUD, dialog Ruang baru, detail ruang, dan hasil. */
+/** JS-09 (P-1): skill P0. Sejak JS-18 dipakai untuk kolom kanan tombol laptop (P-28); urutan tampil memakai SKILL_URUT. */
 export const SKILL_P0 = ["lari", "kompas", "petunjuk"] as const satisfies readonly SkillId[];
 export type SkillP0 = (typeof SKILL_P0)[number];
 
-/** JS-09 (P-1): isi setiap jenis kotak bantuan. Kotak teropong dan karcis belum ada di peta (JS-18). */
+/**
+ * JS-18 (P-1): kelima skill menurut urutan tampil di HUD, tanda tombol papan ketik (`1` sampai `5`), dialog Ruang baru,
+ * detail ruang, dan hasil.
+ */
+export const SKILL_URUT = ["lari", "kompas", "petunjuk", "teropong", "angkot"] as const satisfies readonly SkillId[];
+
+/** JS-09 (P-1): isi setiap jenis kotak bantuan. Kotak teropong dan karcis ada di peta sejak JS-18 (PC-2). */
 export const SKILL_KOTAK = {
   sepatu: "lari",
   kompas: "kompas",
@@ -322,6 +328,51 @@ export function kompasTiba(pos: Posisi, titik: { x: number; y: number }): boolea
 /** Tombol Periksa aktif bila jarak pemain ke titik kejadian paling jauh 32 piksel. */
 export function dapatMemeriksa(jarakPx: number): boolean {
   return jarakPx <= JANGKAUAN_PERIKSA_PX;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Teropong, Angkot, dan lompatan (JS-18, P-2, P-3, dan P-5)
+
+/** JS-18 (P-2): layar pemain menganggap pemain di halte pada 24 piksel; server menerima sampai 32 (24 + 8, seperti Periksa). */
+export const JANGKAUAN_HALTE_KLIEN_PX = 24;
+export const JANGKAUAN_HALTE_PX = 32;
+/** JS-18 (P-3): radius Teropong 12 ubin. */
+export const RADIUS_TEROPONG_PX = 192;
+
+/** JS-18 (P-2): titik kaki di ubin halte (16x + 8, 16y + 12), tempat pemain tiba sesudah naik Angkot. */
+export function titikHalte(h: { x: number; y: number }): Posisi {
+  return { x: h.x * 16 + 8, y: h.y * 16 + 12 };
+}
+
+/**
+ * JS-18 (P-2): halte yang pusat ubinnya paling dekat dengan titik kaki `pos` dan berjarak paling jauh `batasPx` piksel,
+ * atau null; seri diputus id terkecil.
+ */
+export function halteDekat<T extends { id: string; x: number; y: number }>(pos: Posisi, daftar: readonly T[], batasPx: number): T | null {
+  let terbaik: T | null = null;
+  let jarakTerbaik = Infinity;
+  for (const h of daftar) {
+    const d = jarak(pos, pusatUbinPx(h));
+    if (d > batasPx) continue;
+    if (d < jarakTerbaik || (d === jarakTerbaik && terbaik !== null && h.id < terbaik.id)) {
+      terbaik = h;
+      jarakTerbaik = d;
+    }
+  }
+  return terbaik;
+}
+
+/** JS-18 (P-3): titik kejadian di dalam radius Teropong: jarak titik kaki ke pusat ubin titik paling jauh 192 piksel. */
+export function dalamTeropong(pos: Posisi, titik: { x: number; y: number }): boolean {
+  return jarak(pos, pusatUbinPx(titik)) <= RADIUS_TEROPONG_PX;
+}
+
+/**
+ * JS-18 (P-5): dua posisi berselang `dtMs` lebih jauh daripada yang mungkin dengan Lari cepat dan anggaran jarak, yaitu
+ * lebih dari 64 + 144 × dtMs / 1000 piksel (136 piksel untuk dtMs 500). Dipakai untuk pemain lain dan titik layar kelas.
+ */
+export function melompat(a: Posisi, b: Posisi, dtMs: number): boolean {
+  return jarak(a, b) > 64 + (144 * dtMs) / 1000;
 }
 
 // ---------------------------------------------------------------------------------------------

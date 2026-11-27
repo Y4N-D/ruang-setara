@@ -2,6 +2,7 @@
 // kanan atas, peta 0,7 px per ubin dengan delapan zona berwarna dominan, garis batas ink, halte, dan panah diri.
 // Peta mini adalah tombol untuk membuka peta besar. JS-08 (P-18): penanda kejadian yang sudah terlihat, "!" atau ✓.
 // JS-23 (P-7 sampai P-10): gambar medan dari kanvas simpanan menggantikan zona berwarna, yang kini hanya cadangan.
+// JS-18 (P-32): lingkaran Teropong berjari-jari 12 ubin di antara medan dan halte selama Teropong aktif.
 import type { RefObject } from "react";
 import type { Arah, ZonaId } from "../inti/tipe";
 import { TEKS } from "../teks";
@@ -20,6 +21,7 @@ export const WARNA_ZONA: Readonly<Record<ZonaId, string>> = {
   z8: "#9B5DE5",
 };
 const TINTA = "#1F2A44";
+const MATAHARI = "#FFD23F";
 
 export const PETA_MINI = { lebar: 112, tinggi: 75, pxPerUbin: 0.7 } as const;
 /** Urutan bingkai tanda_diri: bawah, atas, kanan, kiri (manifest TANDA). */
@@ -73,7 +75,8 @@ export function gambarZona(ctx: CanvasRenderingContext2D, s: number, dy: number,
 
 /**
  * Menggambar peta mini lengkap ke kanvas berukuran 112r × 75r piksel perangkat: zona, halte, lalu panah diri.
- * Ikon 7 × 7 digambar dengan skala bulat agar tetap tajam.
+ * Ikon 7 × 7 digambar dengan skala bulat agar tetap tajam. JS-18 (P-32): bila `teropong`, lingkaran Teropong sesudah
+ * medan dan sebelum halte.
  */
 export function gambarPetaMini(
   ctx: CanvasRenderingContext2D,
@@ -81,6 +84,7 @@ export function gambarPetaMini(
   gambar: GambarPeta,
   diri: { x: number; y: number; arah: Arah } | null,
   kejadian: readonly PenandaPeta[] = [],
+  teropong = false,
 ): void {
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
@@ -93,6 +97,17 @@ export function gambarPetaMini(
     const u = ukuranMedanMini(rasio, UKURAN_PETA, PETA_MINI.pxPerUbin);
     ctx.drawImage(simpanMedan(gambar.medan, u.lebar, u.tinggi), 0, dy);
   } else gambarZona(ctx, s, dy, Math.max(1, Math.round(rasio)));
+  // JS-18 (P-32): lingkaran tanpa isi berpusat di titik kaki, garis ink 3 px CSS lalu sun 1 px CSS di jalur yang sama.
+  if (teropong && diri) {
+    ctx.beginPath();
+    ctx.arc((diri.x / 16) * s, (diri.y / 16) * s + dy, 12 * s, 0, 2 * Math.PI);
+    ctx.strokeStyle = TINTA;
+    ctx.lineWidth = Math.max(1, Math.round(3 * rasio));
+    ctx.stroke();
+    ctx.strokeStyle = MATAHARI;
+    ctx.lineWidth = Math.max(1, Math.round(rasio));
+    ctx.stroke();
+  }
   const ikon = Math.max(1, Math.round(rasio)) * 7;
   if (gambar.halte) {
     for (const t of HALTE) {
@@ -111,9 +126,20 @@ export function gambarPetaMini(
   }
 }
 
-export default function PetaMini({ kanvasRef, rasio, saatBuka }: { kanvasRef: RefObject<HTMLCanvasElement | null>; rasio: number; saatBuka: () => void }) {
+export default function PetaMini({
+  kanvasRef,
+  rasio,
+  saatBuka,
+  teropong = false,
+}: {
+  kanvasRef: RefObject<HTMLCanvasElement | null>;
+  rasio: number;
+  saatBuka: () => void;
+  /** JS-18 (P-32): lingkaran Teropong sedang tergambar. */
+  teropong?: boolean;
+}) {
   return (
-    <button type="button" className="js-peta-mini" aria-label={TEKS.peta.bukaBesar} onClick={saatBuka}>
+    <button type="button" className="js-peta-mini" aria-label={TEKS.peta.bukaBesar} data-teropong={teropong ? "ya" : "tidak"} onClick={saatBuka}>
       <canvas
         ref={kanvasRef}
         width={Math.round(PETA_MINI.lebar * rasio)}

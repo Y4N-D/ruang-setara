@@ -1,6 +1,7 @@
 // Isi API ruang konsol (spesifikasi JS-10, P-2 sampai P-12). Satu sumber aturan isian untuk konsol dan server.
 import { z } from "zod";
-import { SKILL_P0, type SkillP0 } from "./aturan";
+import { SKILL_URUT } from "./aturan";
+import type { SkillId } from "./tipe";
 
 export const LABEL_KELAS_MAKS = 20;
 export const DURASI_RUANG = [10, 15, 20] as const;
@@ -108,19 +109,22 @@ export const skemaRuangBaru = z
     modeNomorAbsen: z.boolean(),
     uji: z.boolean(),
     modeNama: z.enum(MODE_NAMA).optional(), // JS-14 (P-32): tanpa isian berarti daftar
-    // JS-09 (P-8): skill P0 yang aktif di ruang, tanpa duplikat; tanpa isian berarti ketiganya.
+    // JS-09 (P-8); JS-18 (P-7): skill yang aktif di ruang, tanpa duplikat, paling banyak lima; tanpa isian berarti kelimanya.
     skillAktif: z
-      .array(z.enum(SKILL_P0))
-      .max(SKILL_P0.length)
+      .array(z.enum(SKILL_URUT))
+      .max(SKILL_URUT.length)
       .refine((d) => new Set(d).size === d.length)
       .optional(),
   })
   .strict();
 
-/** JS-09 (P-8, P-9): skill P0 menurut urutan tampil; butir yang bukan skill P0 dibuang, dan selain larik menjadi ketiganya. */
-export function skillAktifRuang(nilai: unknown): SkillP0[] {
-  if (!Array.isArray(nilai)) return [...SKILL_P0];
-  return SKILL_P0.filter((s) => nilai.includes(s));
+/**
+ * JS-09 (P-8, P-9); JS-18 (P-7): skill menurut urutan tampil (SKILL_URUT); butir yang tidak dikenal dibuang, dan isian
+ * yang bukan larik menjadi kelima skill. Ruang yang dibuat sebelum JS-18 menyimpan tiga skill P0 dan tetap begitu (P-9).
+ */
+export function skillAktifRuang(nilai: unknown): SkillId[] {
+  if (!Array.isArray(nilai)) return [...SKILL_URUT];
+  return SKILL_URUT.filter((s) => nilai.includes(s));
 }
 
 export const skemaKelola = z.object({ aksi: z.enum(AKSI_KELOLA), pemainId: z.string().regex(POLA_ID_PEMAIN).optional() }).strict();
@@ -135,8 +139,8 @@ export const skemaRingkasanRuang = z.object({
   batasPemain: z.number().int(),
   namaGuru: z.string().nullable(),
   dibuatPada: z.number(),
-  /** JS-09 (P-9): skill yang aktif di ruang, menurut urutan P-1. */
-  skillAktif: z.array(z.enum(SKILL_P0)),
+  /** JS-09 (P-9); JS-18 (P-7): skill yang aktif di ruang, menurut urutan P-1, sampai lima butir. */
+  skillAktif: z.array(z.enum(SKILL_URUT)),
   /** JS-14 (P-33): mode nama awal ruang dari pengaturannya; ruang lama dibaca sebagai daftar. */
   modeNama: z.enum(MODE_NAMA).optional(),
 });

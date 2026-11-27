@@ -405,7 +405,7 @@ Worker memeriksa tajuk `Origin` (hanya domain Jejak Setara sendiri dan `localhos
 
 ### 6.2 Amplop pesan
 
-Setiap pesan adalah objek JSON `{ "v": 5, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/versi.ts`, yang diekspor ulang `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08, 3 sejak JS-14, 4 sejak JS-15, 5 sejak JS-16b). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
+Setiap pesan adalah objek JSON `{ "v": 6, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/versi.ts`, yang diekspor ulang `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08, 3 sejak JS-14, 4 sejak JS-15, 5 sejak JS-16b, 6 sejak JS-18). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
 
 ### 6.3 Pesan pemain
 
