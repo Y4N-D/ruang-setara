@@ -18,10 +18,10 @@ Dibangun dan diuji dalam mode ZIP dari ZIP `main` sesudah commit `6ec9f96`, dita
 | AC-12 Teks, bunyi, dan pengumuman | Lulus | `kerangka.test.ts` ("TEKS dan TEKS_KONSOL memuat tepat teks spesifikasi JS-18"; uji `TEKS` utama, kelompok `skill.*` JS-09, dan teks konsol JS-04 mengecualikan kunci JS-18 seperti kunci JS-11 dan JS-12); `klien-skill.test.ts` (`bunyiSkill` dengan pemutar tiruan: kotak teropong dan karcis berbunyi `kotak`, Teropong mulai berbunyi `skill`; tiba berbunyi `skill` lewat `selesaiTiba`) |
 | AC-13 Protokol dan kompatibilitas | Lulus | `inti/protokol.test.ts` dan `kerangka.test.ts` (`PROTOKOL_VERSI` 6, sama dengan jawaban Worker); setiap pesan server di uji unit JS-18 lolos skema; `halteId` yang tidak sesuai pola ditolak skema; kode `pemberitahuan` tak dikenal diabaikan (`klien-skill.test.ts`); pemulihan tanpa baris `skill` tetap berjalan (`inti-ruang-js18.test.ts`); `sim:beban` memakai versi 6 (rekap lolos skema) |
 | AC-14 Beban | Lulus, dengan Temuan 3 | Bagian "Simulasi beban": tanpa putus tak terduga, pelanggaran, dan galat; kelima jenis kotak terambil; Teropong dipakai 28 sampai 38 kali dan Angkot 30 sampai 62 kali per run; gerak dikoreksi di luar 1 detik sesudah pindah 0 tanpa tunda, dan dengan tunda 0,051% (34 dari 66.249) di run 1 serta 0 di run 2 dan dua run ulang bercatatan; lalu lintas turun paling banyak 2,86 MB per pemain per 15 menit (lobi); waktu putaran, ukuran `pribadi`, dan baris tulis tercatat |
-| AC-15 Ukuran dan kinerja | Lulus, kecuali konsol awal (Temuan 1) | Bagian "Anggaran ukuran dan kinerja": layar pemain +1,90 KB (batas +5), gaya +0,29 KB (batas +0,6), potongan layar kelas +0,14 KB (batas +0,3), konsol awal +0,64 KB (batas +0,3); `kerangka.test.ts` (layar pemain tidak mengimpor `teks-konsol.ts`); waktu server jauh di bawah 5 ms; bingkai HP sesudah pindah halte tercatat; uji kinerja JS-07 dan JS-08 (`dunia.uji.ts`, 40 pemain tiruan) dan JS-09 (`skill.uji.ts`) lulus. Kunci manifest (misalnya `ubin_siang`) hanya ada di `pemain-*.js`, tidak di `admin-*.js`, potongan bersama, dan `LayarKelas-*.js` |
+| AC-15 Ukuran dan kinerja | Lulus, kecuali konsol awal (Temuan 1, diterima pemilik proyek 27 Nov 2026, pilihan a) | Bagian "Anggaran ukuran dan kinerja": layar pemain +1,90 KB (batas +5), gaya +0,29 KB (batas +0,6), potongan layar kelas +0,14 KB (batas +0,3), konsol awal +0,64 KB (batas +0,3); `kerangka.test.ts` (layar pemain tidak mengimpor `teks-konsol.ts`); waktu server jauh di bawah 5 ms; bingkai HP sesudah pindah halte tercatat; uji kinerja JS-07 dan JS-08 (`dunia.uji.ts`, 40 pemain tiruan) dan JS-09 (`skill.uji.ts`) lulus. Kunci manifest (misalnya `ubin_siang`) hanya ada di `pemain-*.js`, tidak di `admin-*.js`, potongan bersama, dan `LayarKelas-*.js` |
 | AC-16 Tanpa regresi | Lulus | Semua uji unit, server, dan ujung ke ujung lulus (bagian "Perintah yang dijalankan"); uji lama hanya diubah untuk lima skill (misalnya Teropong kini diterima `POST /api/ruang`) dan 31 kotak; `build:pages` 178 berkas identik byte; `tsc --noEmit` dan ESLint Jejak tanpa masalah |
 | AC-17 Tangkapan layar | Lulus | 16 berkas di [JS-18/](JS-18/) (bagian "Tangkapan layar") |
-| AC-18 Pemeriksaan manual | Menunggu | Pemilik proyek di lingkungan uji dengan dua HP, sesudah ZIP di-push dan "Jejak: uji" hijau |
+| AC-18 Pemeriksaan manual | Lulus | Pemilik proyek, 27 Nov 2026, di lingkungan uji sesudah "Jejak: uji" hijau untuk commit `69f5e57`: Teropong (kotak, lingkaran, dan kejadian terlihat di peta) dan Angkot (karcis, halte, dan pindah halte) berhasil. Pemeriksaan sesudah rilis v1.1 di produksi dengan dua HP juga baik (bagian "Penutupan") |
 | AC-19 Dokumen | Lulus | PRD 21, Architecture 6.2 (versi 6, "6 sejak JS-18"), spesifikasi (status dan Catatan Build), `PLAN.md`, dan `rilis/v1.1.md`. Bagian lain PRD, Design System, dan Architecture sudah diubah di ZIP Gerbang 2 |
 
 ## Perintah yang dijalankan dan hasilnya
@@ -135,8 +135,20 @@ Di [JS-18/](JS-18/):
 
 ## Keputusan: Lulus
 
-Semua kriteria yang bisa diuji agen lulus. Yang masih menunggu pemilik proyek:
+Semua kriteria yang bisa diuji agen lulus. Saat laporan ini ditulis, yang masih menunggu pemilik proyek:
 
 - **Temuan 1:** konsol awal +0,64 KB, di atas batas kenaikan +0,3 KB. Saran: diterima.
 - **Temuan 2 dan 3:** catatan pada AC-10 dan AC-14. Saran: diterima untuk v1.1, lalu ditangani di pekerjaan berikutnya (`PLAN.md`, "Catatan untuk Plan berikutnya").
 - **AC-18:** pemeriksaan manual di lingkungan uji dengan dua HP.
+
+## Penutupan (27 November 2026)
+
+Menurut laporan pemilik proyek di awal sesi Sesi A berikutnya:
+
+- "Jejak: uji" untuk commit `69f5e57` hijau.
+- **AC-18 lulus** di lingkungan uji: Teropong (kotak, lingkaran, dan kejadian terlihat di peta) dan Angkot (karcis, halte, dan pindah halte) berhasil.
+- **Temuan 1 diterima** (pilihan a). Temuan 2 dan 3 tetap menjadi catatan untuk pekerjaan berikutnya.
+- **Rilis v1.1** terpasang di produksi pada 27 November 2026 lewat "Jejak: produksi". `/api/sehat` produksi menjawab `{"ok":true,"protokol":6,"lingkungan":"produksi"}`, dan pemeriksaan sesudah rilis di [rilis/v1.1.md](../rilis/v1.1.md) semuanya baik.
+- Dua masalah kontrol di HP yang sudah ada sejak v1.0 (tombol layar penuh hanya di lobi, dan tombol HUD yang tidak bereaksi pada jari kedua selama analog dipegang) dikerjakan di JS-24, bukan di JS-18.
+
+**JS-18 Selesai.**
