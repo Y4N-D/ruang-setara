@@ -24,6 +24,8 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-21 | Selesai (26 Nov 2026, dinyatakan pemilik proyek di awal Plan lanjutan JS-23; dibangun dan diuji 25 Nov 2026). Masuk rilis v1.1, terpasang di produksi 27 Nov 2026 | [JS-21-musik.md](specs/JS-21-musik.md) | [JS-21-hasil.md](tests/JS-21-hasil.md) |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
 | JS-23 | Selesai (26 Nov 2026); pemeriksaan manual AC-17 oleh pemilik proyek di lingkungan uji. Masuk rilis v1.1, terpasang di produksi 27 Nov 2026 | [JS-23-peta-medan.md](specs/JS-23-peta-medan.md) | [JS-23-hasil.md](tests/JS-23-hasil.md) |
+| JS-24 | Direncanakan dan spesifikasi ditulis (27 Nov 2026; rencana v1.2). Menunggu `Setuju: JS-24, JS-25` dan `Spesifikasi disetujui: JS-24, JS-25` | [JS-24-kontrol-sentuh.md](specs/JS-24-kontrol-sentuh.md) | Belum ada |
+| JS-25 | Direncanakan dan spesifikasi ditulis (27 Nov 2026; rencana v1.2, usulan 1a). Menunggu jawaban yang sama dengan JS-24 | [JS-25-ronde-5-menit.md](specs/JS-25-ronde-5-menit.md) | Belum ada |
 
 ## Backlog
 
@@ -51,6 +53,8 @@ Salinan backlog AGENTS bagian 5 (versi 0.1, 4 November 2026), ditambah kolom ses
 
 **Versi 1.1 (P1):** ~~JS-17 kode QR dan kode masuk ulang (JFR-03, 07)~~, dikerjakan di JS-16b untuk rilis 1.0 (Gerbang 1 JS-16, 24 Nov 2026); JS-18 Teropong, Angkot, dan bantuan gerak (JFR-13, 25); JS-19 log audit, pengaturan umum, ruang uji, impor dan ekspor bank (JFR-39, 40, 47, 48); JS-20 statistik kelas dan per siswa serta cetak ringkasan (JFR-51, 52, 54); JS-21 musik latar (berkas M-01 `app/jejak-setara/assets/sfx/musik_kelas.wav` sudah Disetujui 21 Nov 2026; JS-21 memutarnya di layar kelas dan menghentikannya saat jeda, hitung mundur, dan jingle akhir; Permintaan C-16). **Rencana v1.1 (disetujui 25 Nov 2026, `Setuju: JS-21`):** atas permintaan pemilik proyek, v1.1 berisi JS-21, fitur baru JS-23 (peta bermedan), dan JS-18 (Teropong dan Angkot), dan dirilis sebelum uji coba kelas; bantuan gerak pindah ke JS-24 di v1.2 bersama JS-19 dan JS-20 (KT-15 a) (entri "Rencana v1.1" di akhir dokumen ini).
 
+**Rencana v1.2 (ditulis 27 Nov 2026, menunggu persetujuan):** atas permintaan pemilik proyek sesudah rilis v1.1, v1.2 berisi fitur baru JS-24 (kontrol sentuh dan tombol layar penuh) dan JS-25 (waktu main 5 menit), dan dirilis sebelum uji coba kelas. Nomor JS-24 dipakai pemilik proyek untuk permintaan ini, sehingga bantuan gerak (JFR-13) diusulkan mendapat nomor JS-26 di v1.3 bersama JS-19 dan JS-20 (KT-19; entri "Rencana v1.2" di akhir dokumen ini).
+
 - Pembuatan aset gambar (Sesi C) dan penulisan naskah kejadian (Sesi B) berjalan paralel dengan backlog ini. Selama aset belum "Disetujui", fitur memakai *placeholder* berupa kotak warna palet dengan label kunci aset. *Placeholder* wajib diganti sebelum rilis 1.0.
 - Sebelum Build JS-03, pemilik proyek menyelesaikan langkah 1 dan 3–6 Architecture bagian 18 dengan paket gratis. Langkah 2 (Workers Paid) dikerjakan sebelum JS-15 atau uji coba kelas pertama (bagian "Keputusan server" di bawah). Sesi A mengingatkannya di Plan JS-03 dan Plan JS-15.
 - Pembagian JS-08 dan sesudahnya ke Sesi A mengikuti kalimat pemilik proyek "JS-07 dan fitur jalur utama berikutnya", dan bisa diubah pemilik proyek.
@@ -61,7 +65,7 @@ Keputusan pemilik proyek, 5 November 2026. Tiga sesi Claude bekerja bersamaan. S
 
 | Sesi | Pekerjaan | Status dicatat di |
 |---|---|---|
-| Sesi A (mesin) | JS-01, JS-02, JS-03, lalu JS-07, JS-08, dan JS-04 (urutan 8 Nov 2026), lalu JS-10, JS-22, JS-12, JS-11, dan JS-09 (urutan 14 Nov 2026; JS-22 dari usulan 14a JS-10), lalu JS-13, JS-14, JS-15, dan JS-16 (urutan 21 Nov 2026), lalu JS-21, JS-23, dan JS-18 sebelum JS-16d (rencana v1.1, 25 Nov 2026) | Dokumen ini |
+| Sesi A (mesin) | JS-01, JS-02, JS-03, lalu JS-07, JS-08, dan JS-04 (urutan 8 Nov 2026), lalu JS-10, JS-22, JS-12, JS-11, dan JS-09 (urutan 14 Nov 2026; JS-22 dari usulan 14a JS-10), lalu JS-13, JS-14, JS-15, dan JS-16 (urutan 21 Nov 2026), lalu JS-21, JS-23, dan JS-18 sebelum JS-16d (rencana v1.1, 25 Nov 2026), lalu JS-24 dan JS-25 sebelum JS-16d (rencana v1.2, ditulis 27 Nov 2026) | Dokumen ini |
 | Sesi B (naskah) | Naskah 16 kejadian dan rujukan, lalu JS-05, lalu naskah tambahan K-17 sampai K-40 dan semai tambahan sebagai lanjutan JS-05 (Permintaan A-16, 23 Nov 2026) | `docs/jejak-setara/naskah/STATUS.md` |
 | Sesi C (aset dan peta) | Aset gambar tampak atas, lalu peta JS-06 | `docs/jejak-setara/Daftar_Aset.md` |
 
@@ -2768,3 +2772,207 @@ Dicatat dalam mode ZIP dari ZIP `main` sesudah commit `69f5e57`, menurut laporan
 - **Rilis v1.1** (JS-21, JS-23, dan JS-18): pemilik proyek menjalankan "Jejak: produksi" dengan nomor `v1.1` pada 27 Nov 2026. `/api/sehat` produksi menjawab `{"ok":true,"protokol":6,"lingkungan":"produksi"}`. Pemeriksaan sesudah rilis butir 1 sampai 5 di [rilis/v1.1.md](rilis/v1.1.md) sudah dijalankan, dan semuanya baik. Hasil AC-15 JS-21 dan AC-17 JS-23 tidak dikirim terpisah; butir 3 pemeriksaan sesudah rilis (peta kelas bermedan dan musik di layar kelas) baik.
 - **Dua masalah kontrol di HP** ditemukan pemilik proyek saat mencoba v1.1: tombol "Layar penuh" hanya ada di panel lobi, dan tombol HUD tidak bereaksi bila diketuk jari kedua selama analog dipegang. Keduanya sudah ada sejak v1.0, jadi v1.1 tidak dikembalikan (*roll back*). Keduanya dikerjakan di JS-24 (rilis v1.2), bersama pilihan waktu main 5 menit.
 - **Berikutnya:** Plan dan Specify JS-24 untuk rilis v1.2, lalu Plan lanjutan JS-16d dan uji coba kelas.
+
+## Rencana v1.2 — JS-24 dan JS-25 (kontrol sentuh, layar penuh, dan waktu main 5 menit)
+
+- Status: **Direncanakan dan spesifikasi ditulis (27 Nov 2026)**. Menunggu `Setuju: JS-24, JS-25` dan `Spesifikasi disetujui: JS-24, JS-25` (boleh dalam satu balasan, dengan pilihan untuk usulan atau DRAF tertentu). Atas instruksi pemilik proyek, Plan dan spesifikasi ditulis sekaligus dalam satu ZIP, lalu Build dan Test dikerjakan di chat yang sama sesudah persetujuan. Dikerjakan dalam mode ZIP dari ZIP `main` sesudah commit `69f5e57` (27 Nov 2026), ditambah ZIP Bagian 1 (penutupan JS-18 dan rilis v1.1). Maket diperlihatkan di balasan gerbang dan tidak disimpan di repositori.
+- Permintaan pemilik proyek (27 Nov 2026, sesudah rilis v1.1): (1) tombol layar penuh selalu tersedia, berupa ikon kecil di HUD yang tampil hanya bila belum layar penuh dan perangkat mendukung, ditambah pilihan di Menu, dengan orientasi mendatar dikunci lagi seperti P-43 JS-07; (2) tombol HUD bisa ditekan sambil memegang analog, tanpa aksi ganda dan tanpa mengganggu tetikus dan papan ketik; (3) pilihan waktu main 5 menit di dialog Ruang baru, beserta pertimbangan paket, masa, kotak, skill, peringatan, musik, statistik, CSV, PRD, dan panduan guru. `PROTOKOL_VERSI` sebaiknya tidak naik.
+- Memenuhi: JFR-01 (diubah: durasi 5 menit), JFR-09, JFR-55, dan JFR-57 (kontrol), JFR-29, JFR-37, JFR-38, JFR-49, JFR-50, dan JFR-53 (durasi di hasil, riwayat, dasbor, statistik, dan CSV); PRD 8.1, 11.2, 12, 16, dan 17; Design System 3.3, 3.4, 10, dan 13; Architecture 6.2, 6.3, dan 9; catatan Plan dari penutupan JS-18 dan Test JS-18.
+- Bergantung pada: JS-07, JS-08, JS-09, JS-10, JS-11, JS-13, JS-14, dan JS-18, semuanya Selesai; rilis v1.1 terpasang di produksi (27 Nov 2026).
+- Spesifikasi: [JS-24-kontrol-sentuh.md](specs/JS-24-kontrol-sentuh.md) dan [JS-25-ronde-5-menit.md](specs/JS-25-ronde-5-menit.md).
+
+### Pemeriksaan awal (27 Nov 2026)
+
+- ZIP sesuai keadaan yang disebut pemilik proyek: baris JS-18 "Dibangun dan diuji", Temuan 1 menunggu keputusan, dan `rilis/v1.1.md` ada. Penutupan JS-18 dan rilis v1.1 dicatat di ZIP Bagian 1 (`JS-18-penutupan.zip`).
+- Folder `docs/jejak-setara/audit/` tidak ada.
+- `naskah/STATUS.md` (23 Nov 2026) tanpa permintaan baru (tidak ada A-19). `Daftar_Aset.md` (versi 1.6, 26 Nov 2026) masih menulis C-19 dan C-20 "Diajukan", padahal keduanya sudah diterapkan di JS-18 dan JS-23.
+- `install --frozen-lockfile` berhasil dalam 18 detik, dan `build:pages` dasar menghasilkan 178 berkas.
+- Nomor JS-24 sebelumnya disiapkan untuk bantuan gerak dan daftar "Kejadian terdekat" (JFR-13; KT-15 a, PRD 17, AGENTS 5), tetapi belum pernah direncanakan. Pemilik proyek memakai JS-24 untuk permintaan ini, jadi bantuan gerak perlu nomor baru (KT-19).
+
+### Keadaan sekarang (v1.1)
+
+- **Layar penuh:** hanya tombol "Layar penuh" di panel lobi (P-26 dan P-43 JS-07), tampil di lobi dan hitung mundur bila `document.fullscreenEnabled` dan belum layar penuh. `masukLayarPenuh` dan `useBisaLayarPenuh` ada di `PanelLobi.tsx`. Menu (JS-14) tidak punya pilihan layar penuh.
+- **Tombol HUD:** kelima tombol skill, Periksa, peta mini, Menu, suara (`detail` ≤ 1), dan tombol panel lobi memakai `onClick`. Joystick (P-13 JS-07) mengikuti satu `pointerId` dengan *pointer capture* di `<main>`, dan sentuhan yang dimulai di tombol tidak memulai joystick (P-6 JS-14).
+- **Joystick dan lapisan:** gerak berhenti selama dialog, peta besar, panel, menyambung, atau HP tegak (P-14 JS-07), tetapi lingkaran joystick tetap mengikuti jari. `Masukan.lepasSemua()` (tombol `P` dan `hentiUntukPeriksa`) melepas joystick di mesin tanpa menghapus gambarnya.
+- **Durasi:** `DURASI_RUANG` [10, 15, 20] dan `skemaRuangBaru` (`inti/ruang.ts`), `PengaturanRuang.durasiMenit` (`inti/tipe.ts`), `pengaturan.durasiMenit` di `selamat_datang` (`inti/protokol.ts`) dan `info_kelas.durasiMenit` (`inti/protokol-kelas.ts`) berupa gabungan 10, 15, dan 20; `BATAS.durasiMenit` (`inti/aturan.ts`). Server menyimpan durasi di `pengaturan_json` dan menghitung `berakhirPada` = `mulaiPada` + durasi × 60.000 ms; halaman Hasil membaca angka biasa.
+- **Peringatan akhir ronde:** `HARI.duaMenitDetik` 120 (`inti/aturan.ts`) untuk pita, sisa waktu `mango`, dan busur berdenyut di layar pemain; `DUA_MENIT_MS` (`admin/kelas/suara-kelas.ts`) untuk bunyi peringatan layar kelas. Ambang masa 0,3 dan 0,65 dihitung dari bagian ronde.
+- **Statistik:** ringkasan dasbor 30 hari menjumlahkan `ringkasan_json.hasil` semua ruang bukan uji; riwayat dan Sesi terakhir menampilkan rata-rata skor per ruang tanpa durasi; CSV tanpa durasi.
+
+### Hasil percobaan risiko
+
+Dikerjakan 27 November 2026 di luar repositori, pada salinan ZIP `main` sesudah commit `69f5e57` ditambah ZIP Bagian 1, dengan dependensi terpasang, server lokal, dan Chromium 1243. Prototipe, uji percobaan, dan maket tidak ikut ZIP.
+
+1. **Masalah jari kedua di v1.1** (Playwright, HP 731 × 411 rasio 2,625, dua pointer sentuh lewat `Input.dispatchTouchEvent`):
+   - Satu jari pada peta mini: `pointerdown`, `pointerup`, `touchend`, `mousedown`, lalu `click`; peta besar terbuka.
+   - Jari kedua (pointer bukan utama) pada peta mini, Lari cepat tanpa muatan, Menu, dan Periksa dalam jangkauan, selama analog dipegang: `pointerdown` dan `pointerup` sampai ke tombol, tetapi tanpa `click`, sehingga tidak ada reaksi (peta besar, pita, panel, dan dialog tidak muncul), sedangkan avatar terus berjalan.
+   - Urutan terbalik (halaman uji kecil): jari di tombol lebih dulu, jari lain menyentuh, lalu jari tombol diangkat. Jari tombol itu pointer utama, tetapi tetap tanpa `click`.
+   - CDP: `touchMove` atau `touchStart` tanpa jari kedua tidak melepas jari itu. `touchEnd` dengan `touchPoints` berisi jari kedua saja melepas jari itu saja. Cara ini dipakai di uji ujung ke ujung JS-24.
+2. **Prototipe pertama** (aksi saat `pointerup`, klik pengganti tidak dicegah): jari kedua berhasil, tetapi ketukan satu jari pada peta mini membuka lalu langsung menutup peta besar, karena klik pengganti jatuh di tombol "Tutup peta" yang baru muncul di bawah jari. Ketukan satu jari pada Menu menjatuhkan klik di latar panel. Tombol yang hilang sesudah aksi juga tidak lagi menerima `touchend`, sehingga React tidak bisa mencegah kliknya.
+3. **Prototipe akhir** (aksi saat `touchend` dengan `preventDefault`, penjadwal cadangan, dan pengaman klik; P-8 sampai P-10 JS-24):
+   - jari kedua: peta besar terbuka dan tetap terbuka, pita "Cari kotak sepatu." tampil dengan avatar terus berjalan, panel Menu terbuka, dan dialog Periksa terbuka di tampilan pertama (`situasi1`);
+   - urutan terbalik: pita tampil;
+   - satu jari: peta mini, Menu (pilihan Suara tetap "Mati"), dan Periksa (`situasi1`) bereaksi sekali, tanpa satu pun `click` tercatat;
+   - laptop 1280 × 720: klik tetikus pada peta mini, `Enter` pada Menu, klik Lari cepat, dan klik ganda pada suara (terbalik sekali) sama dengan v1.1;
+   - ditemukan: sesudah Periksa, `hentiUntukPeriksa` melepas joystick di mesin, tetapi gambar joystick tetap tampil sampai jari diangkat. Diperbaiki di Build lewat P-13 JS-24.
+4. **Layar penuh di Chromium tanpa tampilan:** ketukan jari kedua pada tombol panel lobi selama analog dipegang memasuki layar penuh (`document.fullscreenElement` berisi HTML), `lock("landscape")` dipanggil, tombol hilang selama layar penuh, dan tampil lagi sesudah keluar. Ukuran jendela tidak berubah di peramban tanpa tampilan, sehingga P-14 JS-24 diuji lewat `fullscreenchange` dan `setViewportSize`.
+5. **Letak ikon layar penuh** (maket di atas halaman sungguhan, CSS asli; HP 731 × 411, 915 × 356 dengan dunia 610 × 343, dan 640 × 360 rasio 3; laptop 1280 × 720, 1024 × 768 dengan dunia 960 × 540, dan 700 × 400 dengan dunia 640 × 360):
+   - kelompok Menu: Menu 61 × 48 dan suara 48 × 48 di HP; 107 × 48 dan 77 × 48 di laptop;
+   - pita terlebar "Petunjuk dipakai di Langkah 1." selebar 314 px, dengan tepi kiri 148 px (HUD 610), 163 px (640), dan 208 px (731);
+   - di kanan tombol suara (133 sampai 181 px): bertumpuk 33 px dengan pita terlebar di HUD 610 dan 18 px di HUD 640;
+   - di bawah Menu (8 sampai 56 px × 92 sampai 140 px): tanpa tumpang tindih di keenam ukuran; ke pita sedikitnya 92 px, ke peta mini sedikitnya 430 px, dan ke bilah atas 64 px;
+   - di bawah peta mini: hanya 24 px dari Lari cepat di dunia 610 × 343.
+6. **Panel Menu:** dengan empat kelompok, tinggi panel 344 px (731 × 411), 340 px (915 × 356, isinya sudah tergulir 4 px), dan 344 px (640 × 360). Kelompok kelima "Layar penuh" membuat isi harus digulir 27, 82, dan 78 px. Tombol "Layar penuh" di baris kaki membuat kaki tetap satu baris 48 px di keenam ukuran, dan tinggi panel tidak berubah.
+7. **Kode lama dan ronde 5 menit** (uji unit klien sementara dengan `KlienRuang` v1.1):
+   - `selamat_datang` berdurasi 5 ditolak skema, dan klien tetap "menghubungkan" tanpa pesan, juga sesudah 2 menit jam tiruan;
+   - `galat` `VERSI_BERBEDA` beramplop versi 6, lalu tutup 4005: klien berhenti dengan galat itu, sehingga layar menampilkan "Ada pembaruan. Muat ulang halaman." dan tombol "Muat ulang";
+   - skema jawaban API konsol tidak ketat, jadi isian baru di jawaban riwayat dan dasbor aman bagi konsol yang belum dimuat ulang. Layar kelas selalu dibuka di tab baru dari konsol.
+8. **Konsol:** empat tombol durasi muat satu baris (48 px) di 1280 × 720 dan dua baris (104 px, sama dengan sekarang) di 360 × 640, tanpa luapan; catatan tiga baris di bawahnya juga muat. Kolom "Durasi" di riwayat tidak meluap di 1280 × 720 maupun 360 × 640.
+9. **Hitungan ronde 5 menit:** siang mulai di 1 menit 30 detik dan sore di 3 menit 15 detik. Peringatan 2 menit memakan 40% ronde, sedangkan 1 menit memakan 20%, sama dengan peringatan 2 menit di ronde 10 menit. Kotak muncul lagi sesudah 90 detik (30% ronde, sekitar tiga kali per kotak). Sasaran PRD 16 (sedikitnya 10 kejadian per 15 menit) setara sekitar 3 sampai 4 kejadian per 5 menit.
+10. **Ukuran dasar** (`build:jejak` tiga kali, hasil sama, lalu `anggaran.mjs`): kode layar pemain 143,44 KB, kode konsol awal 137,72 KB, dan potongan layar kelas 11,35 KB. Gzip level 9 per berkas: `pemain.js` 59.883 B, `protokol.js` 79.913 B, `protokol.css` 7.306 B, `admin.js` 48.056 B, `admin.css` 6.107 B, dan `LayarKelas.js` 11.650 B. Perkiraan kenaikan: JS-24 sekitar +0,7 KB di layar pemain; JS-25 sekitar +0,2 KB di layar pemain dan +0,4 KB di konsol.
+11. **Galeri:** `build:pages` sesudah ZIP Bagian 1 dan sesudah entri ini: 178 berkas identik byte dengan build dasar.
+
+### Usulan
+
+**Umum**
+
+1. **Pemecahan, nomor, dan rilis.**
+   - (a, saran) Dua fitur di rilis v1.2: **JS-24** kontrol sentuh dan layar penuh (S, hanya layar pemain) dan **JS-25** waktu main 5 menit (M: inti, server, konsol, layar kelas, dan statistik). Build berurutan JS-24 lalu JS-25, masing-masing dengan ZIP dan laporan uji sendiri, lalu satu rilis v1.2 di luar jam pelajaran.
+   - (b) Satu fitur JS-24 berisi ketiganya (M ke L): satu gerbang dan satu laporan, tetapi uji dan ZIP lebih besar, dan perbaikan kontrol baru bisa dicoba di HP sesudah semuanya selesai.
+   - (c) Dua rilis, v1.2 untuk JS-24 dan v1.3 untuk JS-25: kontrol lebih cepat sampai kelas, tetapi dua kali rilis di luar jam pelajaran.
+
+**JS-24 kontrol sentuh dan layar penuh**
+
+2. **Letak ikon layar penuh** (percobaan 5).
+   - (a, saran) Baris kedua kelompok Menu, tepat di bawah tombol Menu (`left` 8 px, `top` 92 px di HUD), 48 × 48 px bergaya tombol suara, dengan `ikon_layar_penuh` pada skala 2. Kelompok Menu menjadi kisi dua kolom.
+   - (b) Di kanan tombol suara, di baris yang sama: bertumpuk dengan pita terlebar 33 px di HUD 610 dan 18 px di HUD 640.
+   - (c) Di bawah peta mini: hanya 24 px dari Lari cepat di dunia 610 × 343.
+3. **Kapan ikon tampil.**
+   - (a, saran) Selama ronde (`main` dan `jeda`), bila perangkat mendukung dan belum layar penuh, dengan syarat tampil kelompok Menu. Di lobi dan hitung mundur tetap tombol bertulisan di panel lobi. Di laptop ikon juga tampil, tanpa pintasan.
+   - (b) Di semua keadaan dunia, sehingga di lobi ada dua tombol layar penuh.
+   - (c) Ikon menggantikan tombol panel lobi.
+4. **Pilihan di Menu** (percobaan 6).
+   - (a, saran) Tombol "Layar penuh" di baris kaki panel Pengaturan, sebelum "Privasi", hanya bila perangkat mendukung dan belum layar penuh. Menekannya memasuki layar penuh, mengunci orientasi, lalu menutup panel.
+   - (b) Kelompok kelima "Layar penuh: Mati, Nyala" di kisi pilihan, yang juga bisa keluar dari layar penuh, tetapi isi panel harus digulir 27 sampai 82 px di ketiga ukuran HP.
+5. **Cara tombol HUD bereaksi pada sentuhan** (percobaan 1 sampai 3).
+   - (a, saran) Setiap tombol HUD bereaksi saat jari yang menekannya diangkat, di dalam kotak tombol yang diperluas 8 px, untuk jari mana pun dan urutan apa pun. Aksi berjalan saat `touchend` dengan `preventDefault`, sehingga peramban tidak membuat klik pengganti: aksi tepat sekali dan tidak ada klik yang jatuh ke lapisan baru. Tetikus, papan ketik, dan pena tetap memakai klik.
+   - (b) Hanya pointer bukan utama lewat `pointerup`, sedangkan pointer utama tetap memakai klik: lebih sedikit kode, tetapi urutan terbalik (tombol lebih dulu, lalu analog) tetap gagal.
+   - (c) Bereaksi saat ditekan (`pointerdown`): terasa lebih cepat, tetapi tidak bisa dibatalkan dengan menggeser jari keluar, dan tombol yang membuka lapisan tetap terkena klik pengganti.
+6. **Tombol yang tercakup.**
+   - (a, saran) Semua tombol HUD di dunia: lima tombol skill, Periksa, peta mini, Menu, suara, ikon layar penuh, dan tombol "Layar penuh" di panel lobi. Tombol di dalam dialog, peta besar, dan panel tetap memakai klik, karena joystick berakhir saat lapisan itu terbuka.
+   - (b) Hanya tombol skill dan Periksa.
+7. **Joystick saat lapisan muncul atau ukuran berubah.**
+   - (a, saran) Joystick yang dipegang berakhir (lingkaran hilang, pemain berhenti) saat peta besar, panel Menu, dialog, menunggu jawaban Periksa, lapisan menyambung ulang, ajakan memutar HP, atau mode pilih halte muncul, serta saat ukuran tampilan berubah atau layar penuh dimulai atau berakhir. Jari harus diangkat lalu menyentuh lagi. Tombol skill, suara, dan Petunjuk di luar dialog tidak mengubah joystick.
+   - (b) Joystick tetap dipegang, dan avatar berjalan lagi saat lapisan tertutup bila jari masih menempel.
+8. **Uji JS-24.**
+   - (a, saran) Uji unit aturan ketukan dengan peristiwa tiruan; uji ujung ke ujung dengan dua pointer sentuh CDP di HP 731 × 411 untuk setiap tombol HUD (reaksi, tepat sekali, urutan terbalik, satu jari, joystick); ikon dan tombol Menu di tiga ukuran HP dan tiga ukuran laptop; regresi tetikus dan papan ketik; ditambah butir manual di HP sungguhan. `sim:beban` tidak wajib (layar pemain saja). Batas kenaikan: layar pemain JS +1,2 KB dan gaya +0,15 KB, konsol awal +0,3 KB (termasuk potongan bersama, Temuan 1 JS-18).
+   - (b) Hanya uji manual di HP.
+
+**JS-25 waktu main 5 menit**
+
+9. **Paket untuk ronde 5 menit.**
+   - (a, saran) Tanpa paket bawaan baru di v1.2. Dialog Ruang baru menampilkan catatan (tanpa menolak) bila "5 menit" dipilih dengan paket berisi lebih dari 8 kejadian, seperti peringatan A-14 yang tidak menolak. Panduan guru (JS-16d) menjelaskan cara admin menyusun paket kecil, misalnya delapan kejadian satu per zona, di halaman Paket konsol.
+   - (b) Sesi B menambah "Paket kilat 8" ke data semai lewat semai tambahan kedua (Permintaan PB-1), lalu verifikasi dan penerbitannya diulang di produksi: tersedia di semua lingkungan, tetapi menunggu giliran Sesi B.
+   - (c) Keduanya.
+10. **Masa dan peringatan akhir ronde** (percobaan 9).
+    - (a, saran) Masa tetap menurut bagian ronde (siang di 1:30, sore di 3:15). Peringatan akhir ronde 5 menit mulai di sisa 60 detik dengan pita "Satu menit lagi", sisa waktu `mango`, busur berdenyut, dan bunyi peringatan layar kelas. Ronde 10, 15, dan 20 menit tetap 120 detik dengan "Dua menit lagi".
+    - (b) Tetap 2 menit untuk semua durasi: 40% ronde 5 menit dalam keadaan peringatan.
+11. **Skill, kotak, hitung mundur, musik, tambah waktu, dan batas terlambat.**
+    - (a, saran) Tidak berubah: kotak muncul lagi 90 detik, masa aktif dan muatan skill tetap, hitung mundur 3 detik, musik di lobi dan selama ronde, tambah 2 menit, dan batas terlambat 0 sampai 10 menit (bawaan 5, yang di ronde 5 menit berarti boleh bergabung sepanjang ronde; dijelaskan di panduan guru). Nilai PRD 8.5 tetap nilai awal yang ditimbang ulang sesudah uji coba kelas.
+    - (b) Kotak muncul lagi 45 detik di ronde 5 menit: aturan server dan ujinya berubah.
+12. **Kode lama di HP dan protokol** (percobaan 7).
+    - (a, saran) `PROTOKOL_VERSI` tetap 6, dan `PROTOKOL_TAMBAHAN` baru bernilai 1. Layar pemain menyambung dengan `?tambahan=1`. Durable Object menolak sambungan tanpa angka itu ke ruang 5 menit dengan `galat` `VERSI_BERBEDA` lalu tutup 4005, sehingga HP dengan kode lama langsung diminta memuat ulang; ruang 10, 15, dan 20 menit tetap menerima kode lama. `/api/sehat` memuat `"tambahan":1`. AGENTS 7 butir 14 mendapat satu kalimat tentang tambahan protokol.
+    - (b) `PROTOKOL_VERSI` naik ke 7: paling sederhana, tetapi semua HP, layar kelas, dan konsol yang terbuka sejak sebelum rilis harus memuat ulang sekali.
+    - (c) Tanpa penjaga: HP dengan kode lama tertahan di "Menghubungkan…" bila masuk ruang 5 menit, dan tombol "Muat ulang" baru muncul sesudah 2 menit.
+13. **Statistik, riwayat, dasbor, dan CSV.**
+    - (a, saran) Statistik per kejadian (JS-13) tetap menghitung semua ronde, karena ukurannya per jawaban. "Rata-rata skor" di ringkasan dasbor 30 hari hanya menghitung ronde 10 menit atau lebih, dengan catatan bila ada ronde 5 menit. Riwayat ruang dan Sesi terakhir menampilkan durasi, dan kedua CSV mendapat kolom terakhir "Durasi (menit)". PRD 11.2 dan 16 mencatat bahwa ronde 5 menit tidak dihitung untuk ukuran "kejadian per siswa per sesi 15 menit".
+    - (b) Hanya menampilkan durasi (riwayat, Sesi terakhir, dan CSV), tanpa mengubah hitungan.
+    - (c) Ronde 5 menit tidak masuk statistik apa pun.
+14. **Beban dan uji JS-25.**
+    - (a, saran) `sim:beban` wajib (protokol dan inti ruang berubah): satu ruang 5 menit × 50 bot sampai ronde berakhir sendiri, sekali tanpa tunda dan sekali dengan `--latensi-ms 80 --jitter-eksp-ms 40`, dengan ambang di AC-13 spesifikasi JS-25. Sekalian, antrean tunda `simulasi-beban.mjs` dibuat menjaga urutan (Temuan 3 JS-18), karena berkas itu ikut berubah. Uji unit, server, dan ujung ke ujung dengan jam tiruan peramban; ditambah pemeriksaan manual di lingkungan uji.
+    - (b) `sim:beban` 180 detik seperti JS-18, tanpa sampai akhir ronde.
+
+### Keputusan terbuka yang perlu dijawab
+
+- **KT-19 Lingkup v1.2 dan nomor bantuan gerak.** (a, saran) v1.2 berisi JS-24 dan JS-25. Bantuan gerak dan daftar "Kejadian terdekat" (JFR-13) mendapat nomor baru **JS-26** dan pindah ke v1.3 bersama JS-19 dan JS-20. JS-16d (panduan guru yang memuat fitur v1.1 dan v1.2, tautan galeri, dan catatan uji coba) dikerjakan sesudah rilis v1.2, lalu uji coba kelas. PRD 17, AGENTS 5, dan backlog dokumen ini diperbarui di ZIP Build JS-24. (b) v1.2 menunggu juga JS-19, JS-20, dan bantuan gerak: rilis jauh lebih lambat.
+- KT-12 (durasi bawaan 15 menit dan 16 kejadian) tetap terbuka sampai sesudah uji coba kelas. Durasi bawaan tetap 15 menit; 5 menit hanya pilihan tambahan.
+
+### Rencana rinci JS-24 — Kontrol sentuh dan layar penuh
+
+- Status: Direncanakan dan spesifikasi ditulis (27 Nov 2026).
+- Memenuhi: JFR-09, JFR-55, dan JFR-57; PRD 4 dan 12; Design System 3.3, 3.4, 10, dan 13; permintaan pemilik proyek butir 1 dan 2.
+- Bergantung pada: JS-07, JS-08, JS-09, JS-14, dan JS-18 (Selesai).
+- File yang dibuat/diubah: daftar di spesifikasi, bagian "Berkas": `pemain/tekanHud.ts` dan `pemain/layarPenuh.ts` (baru); `PanelLobi.tsx`, `PanelPengaturan.tsx`, `TombolSkill.tsx`, `TombolPeriksa.tsx`, `PetaMini.tsx`, `LayarDunia.tsx`, `App.tsx`, `dunia/masukan.ts`, dan `styles/jejak.css`; uji unit dan `e2e/jejak-setara/kontrol-sentuh.uji.ts`; dokumen utama (Design System, Architecture 9, PRD 21, AGENTS 5, backlog, dan PRD 17 untuk KT-19).
+- Migrasi D1: tidak ada.
+- Pesan protokol baru/berubah: tidak ada; `PROTOKOL_VERSI` tetap 6.
+- Aset yang dibutuhkan: `ikon_layar_penuh` (I-19, Disetujui 6 Nov 2026), sudah tersedia.
+- Hasil percobaan risiko: percobaan 1 sampai 6, 10, dan 11.
+- Usulan: 1 sampai 8.
+- Keputusan terbuka yang perlu dijawab: KT-19.
+- Dependensi baru: tidak ada.
+- Risiko: perbedaan peramban dalam urutan `pointerup` dan `touchend` (Chrome dan Safari mengirimnya berurutan dalam pemrosesan sentuhan yang sama; peramban tanpa Touch Events memakai penjadwal cadangan); ikon di separuh kiri dunia, tempat joystick muncul (ukurannya kecil, di pojok kiri atas, dan sentuhan yang dimulai di tombol tidak memulai joystick); joystick yang berakhir saat lapisan muncul mungkin terasa baru bagi siswa.
+- Ukuran: S.
+
+### Rencana rinci JS-25 — Waktu main 5 menit
+
+- Status: Direncanakan dan spesifikasi ditulis (27 Nov 2026).
+- Memenuhi: JFR-01 (diubah), JFR-29, JFR-37, JFR-38, JFR-49, JFR-50, dan JFR-53; PRD 8.1, 11.2, 16, dan 17; permintaan pemilik proyek butir 3.
+- Bergantung pada: JS-24 (urutan Build, bukan kode), JS-10, JS-11, JS-13, dan JS-14 (Selesai).
+- File yang dibuat/diubah: daftar di spesifikasi, bagian "Berkas": `inti/ruang.ts`, `tipe.ts`, `protokol.ts`, `protokol-kelas.ts`, `versi.ts`, dan `aturan.ts`; layar pemain (`App.tsx`, `dunia/langit.ts`, `LayarDunia.tsx`, dan `teks.ts`); konsol (`Ruang.tsx`, `RiwayatRuang.tsx`, `Dasbor.tsx`, `inti/hasil.ts`, `inti/akun.ts`, dan `teks-konsol.ts`); layar kelas (`suara-kelas.ts` dan `LayarKelas.tsx`); server (`RuangJejak.ts`, `index.ts`, `api/ruang.ts`, `api/dasbor.ts`, `db/ruang.ts`, dan `ekspor/csv.ts`); `simulasi-beban.mjs`; uji; `rilis/v1.2.md`; dokumen utama.
+- Migrasi D1: tidak ada (durasi dibaca dari `pengaturan_json`).
+- Pesan protokol baru/berubah: `selamat_datang.pengaturan.durasiMenit` dan `info_kelas.durasiMenit` menerima 5; alamat sambungan pemain `?tambahan=1`; `/api/sehat` memuat `tambahan`. `PROTOKOL_VERSI` tetap 6 (usulan 12a).
+- Aset yang dibutuhkan: tidak ada yang baru (`sfx_peringatan.wav`, S-07, dipakai ulang).
+- Hasil percobaan risiko: percobaan 7 sampai 11.
+- Usulan: 1 dan 9 sampai 14.
+- Keputusan terbuka yang perlu dijawab: KT-19; KT-12 tetap terbuka.
+- Dependensi baru: tidak ada.
+- Risiko: HP dengan tab lama di ruang 5 menit (ditangani penjaga); rata-rata skor yang tidak sebanding (ditangani usulan 13a); paket besar yang terlalu banyak untuk pembahasan 5 menit (catatan dialog dan panduan guru); rilis kembali ke v1.1 (konsol v1.2 yang masih terbuka mendapat galat saat membuat ruang 5 menit, sampai dimuat ulang).
+- Ukuran: M.
+
+### Rencana rilis v1.2
+
+1. JS-24 lalu JS-25 melewati Build dan Test di chat ini, masing-masing dengan ZIP sendiri. Sesudah setiap push, "Jejak: uji" memasangnya di lingkungan uji, lalu pemilik proyek mencoba butir manual di HP sungguhan (JS-24) dan ronde 5 menit dengan dua HP (JS-25).
+2. ZIP Build JS-25 memuat `rilis/v1.2.md` (templat 12.4): JS-24 dan JS-25, migrasi D1 (tidak ada), protokol (tetap 6, tambahan 1), pemeriksaan sesudah rilis, risiko, dan cara kembali ke v1.1.
+3. Pemilik proyek membalas `Rilis: v1.2`, lalu menjalankan "Jejak: produksi" dengan nomor `v1.2` di luar jam pelajaran. Alur kerja menolak berjalan selama masih ada ruang produksi yang belum ditutup.
+4. Sesudah hijau: `/api/sehat` produksi menjawab `"protokol":6` dan `"tambahan":1`; konsol dimuat ulang, lalu dialog Ruang baru memuat "5 menit"; satu ruang uji 5 menit dicoba dengan dua HP sampai selesai, termasuk ikon layar penuh dan tombol HUD sambil memegang analog; lalu ruang ditutup.
+5. Protokol tetap 6, sehingga HP, layar kelas, dan konsol yang masih terbuka tidak diminta memuat ulang. HP dengan kode lama tetap bisa masuk ruang 10, 15, dan 20 menit (tanpa perbaikan JS-24 sampai dimuat ulang), dan diminta memuat ulang bila masuk ruang 5 menit.
+6. Cara kembali: **Workers & Pages → jejak-setara → Deployments**, pilih versi v1.1, lalu **Rollback**. D1 tidak berubah. Ruang 5 menit yang sudah ditutup tetap terbaca di Hasil. Konsol v1.2 yang masih terbuka perlu dimuat ulang agar tidak mencoba membuat ruang 5 menit.
+
+### Risiko
+
+1. **Aksi ganda atau klik nyasar:** dicegah lewat `touchend` dan pengaman klik (P-10 JS-24), lalu dibuktikan di uji unit, uji ujung ke ujung yang menghitung `click`, uji lama yang memakai `tap()`, dan butir manual di HP.
+2. **Perbedaan peramban:** Chrome Android dan Safari iOS mengirim `pointerup` lalu `touchend` dalam satu pemrosesan sentuhan; peramban lain memakai penjadwal cadangan. Diperiksa di HP sungguhan pemilik proyek, dan iPhone bila ada.
+3. **Ikon di separuh kiri:** kecil dan di pojok kiri atas, jauh dari tempat jempol memegang analog; sentuhan yang dimulai di tombol tidak memulai joystick.
+4. **Kode lama dan ronde 5 menit:** ditangani penjaga P-9 JS-25 dan diuji di server.
+5. **Statistik campuran:** ditangani usulan 13a; panduan guru menjelaskan bahwa rata-rata skor dasbor tanpa ronde 5 menit.
+6. **Ukuran kode:** perkiraan +0,9 KB di layar pemain dan +0,4 KB di konsol, jauh di bawah batas 200 KB dan 350 KB.
+7. **Galeri:** setiap ZIP dicek dengan `build:pages`, dan ke-178 berkas harus identik byte.
+
+### Tanggapan permintaan Sesi B dan C (Plan v1.2, 27 Nov 2026)
+
+Dibaca dari ZIP `main` sesudah commit `69f5e57`: `naskah/STATUS.md` (23 Nov 2026) dan `Daftar_Aset.md` (versi 1.6, 26 Nov 2026).
+
+| Kode | Permintaan singkat | Tanggapan Sesi A | Perubahan |
+|---|---|---|---|
+| A-1 sampai A-18 (Sesi B) | Berbagai permintaan sampai 23 Nov 2026 | Semuanya sudah diterapkan; tidak ada A-19 | Tidak ada |
+| C-19 dan C-20 (Sesi C) | Uji 31 kotak dan dokumen gambar medan | Sudah diterapkan di Build JS-18 dan JS-23, tetapi `Daftar_Aset.md` masih menulis "Diajukan" | Tidak ada; Sesi C bisa mengubah statusnya menjadi Diterapkan |
+| Catatan untuk Sesi C | S-07 `sfx_peringatan.wav` tertulis "Dua menit terakhir" | Sejak JS-25, bunyi itu menandai peringatan akhir ronde, juga di sisa 60 detik ronde 5 menit | Tidak ada perubahan aset; keterangan di `Daftar_Aset.md` bisa diperbarui Sesi C |
+| PB-1 (untuk Sesi B, hanya bila usulan 9b atau 9c dipilih) | Paket semai "Paket kilat 8" | Ditulis lengkap di ZIP Build bila dipilih | Belum diajukan |
+
+### Catatan Plan yang ditanggapi
+
+| Catatan di "Catatan untuk Plan berikutnya" | Tanggapan |
+|---|---|
+| Plan lanjutan JS-16d (dari penutupan JS-18): panduan guru memuat fitur v1.1 dan JS-24 | Bagian "Bahan panduan guru (JS-16d)" di kedua spesifikasi |
+| Specify berikutnya (dari Test JS-18, Temuan 1): batas kenaikan konsol menghitung `protokol.js` dan `protokol.css` | AC-12 JS-24 dan AC-14 JS-25 |
+| Pekerjaan berikutnya pada `simulasi-beban.mjs` (dari Test JS-18, Temuan 3): antrean tunda yang menjaga urutan | Usulan 14a dan P-19 JS-25 |
+| Specify berikutnya yang menyentuh pemain lain (dari Test JS-18, Temuan 2) | Tidak tersentuh: JS-24 dan JS-25 tidak mengubah tampilan pemain lain; catatan tetap |
+| Semua fitur: `build:pages` identik dengan galeri | Percobaan 11 |
+
+### Specify JS-24 dan JS-25 (27 Nov 2026)
+
+Ditulis bersama Plan, atas instruksi pemilik proyek, dengan saran (a) untuk semua usulan dan KT-19. Bila pemilik proyek memilih lain, spesifikasi disesuaikan di awal Build sebelum kode ditulis.
+
+- [JS-24-kontrol-sentuh.md](specs/JS-24-kontrol-sentuh.md): 17 butir perilaku dan 16 kriteria penerimaan. DRAF: D-1 label ikon, D-2 letak tombol di kaki Menu, dan D-3 panel Menu sesudah layar penuh.
+- [JS-25-ronde-5-menit.md](specs/JS-25-ronde-5-menit.md): 19 butir perilaku dan 18 kriteria penerimaan. DRAF: D-1 catatan di dialog Ruang baru, D-2 letak kolom Durasi, dan D-3 catatan ringkasan dasbor.
+- Dokumen utama (PRD, Design System, Architecture, dan AGENTS) belum diubah di ZIP ini, karena kedua gerbang dijawab bersamaan; perubahannya ikut ZIP Build sesuai pilihan pemilik proyek (P-17 JS-24 dan P-18 JS-25).
+- Berkas Sesi B dan C tidak disentuh.
