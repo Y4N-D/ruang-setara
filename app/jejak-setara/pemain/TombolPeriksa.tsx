@@ -1,9 +1,13 @@
 // Tombol Periksa di perangkat sentuh dan ajakan "E Periksa" tanpa layar sentuh (spesifikasi JS-08, P-21 sampai P-24;
 // Design System 3.3, 3.4, dan 10). Tombol bulat 64 px di kanan bawah dunia, dengan ruang kosong di atasnya untuk
-// tombol skill JS-09.
+// tombol skill JS-09. JS-24 (P-7): aturan ketukan HUD, sehingga jari kedua bisa memeriksa selama analog dipegang.
 import { TEKS } from "../teks";
+import { useTekanHud } from "./tekanHud";
 
 export function TombolPeriksa({ dekat, ditekan, saatTekan }: { dekat: boolean; ditekan: boolean; saatTekan: () => void }) {
+  const tekan = useTekanHud(() => {
+    if (dekat && !ditekan) saatTekan();
+  });
   return (
     <button
       type="button"
@@ -12,9 +16,7 @@ export function TombolPeriksa({ dekat, ditekan, saatTekan }: { dekat: boolean; d
       data-ditekan={ditekan ? "ya" : undefined}
       aria-disabled={dekat ? undefined : true}
       aria-label={dekat ? TEKS.kejadian.periksaLabel : TEKS.kejadian.periksaJauh}
-      onClick={() => {
-        if (dekat && !ditekan) saatTekan();
-      }}
+      {...tekan}
     >
       <span aria-hidden="true">{TEKS.kejadian.periksa}</span>
     </button>

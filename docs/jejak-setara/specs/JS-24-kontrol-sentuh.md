@@ -1,6 +1,6 @@
 # JS-24 — Kontrol sentuh dan layar penuh
 
-Status: **Ditulis (27 Nov 2026)**, menunggu `Setuju: JS-24` dan `Spesifikasi disetujui: JS-24`. Plan dan spesifikasi ditulis sekaligus atas instruksi pemilik proyek. Dasar: entri "Rencana v1.2" di `PLAN.md` (spesifikasi ini memakai saran a untuk usulan 1 sampai 8 dan KT-19), spesifikasi JS-07 (P-13, P-14, P-26, P-42, P-43), JS-08 (P-21 sampai P-24), JS-09 (P-33 sampai P-38), JS-14 (P-4 sampai P-10), dan JS-18 (P-19 sampai P-21 dan P-28).
+Status: **Disetujui (28 Nov 2026)**: `Setuju: JS-24, JS-25` dan `Spesifikasi disetujui: JS-24, JS-25`, dengan D-1, D-2, dan D-3 = a. Dibangun dan diuji 28 Nov 2026 ([laporan](../tests/JS-24-hasil.md)). Plan dan spesifikasi ditulis sekaligus atas instruksi pemilik proyek. Dasar: entri "Rencana v1.2" di `PLAN.md` (spesifikasi ini memakai saran a untuk usulan 1 sampai 8 dan KT-19), spesifikasi JS-07 (P-13, P-14, P-26, P-42, P-43), JS-08 (P-21 sampai P-24), JS-09 (P-33 sampai P-38), JS-14 (P-4 sampai P-10), dan JS-18 (P-19 sampai P-21 dan P-28).
 
 ## Ringkasan
 
@@ -261,3 +261,11 @@ Klik dihitung lewat pendengar `click` di tingkat jendela (skrip awal halaman), d
 
 - HP siswa yang keluar dari layar penuh bisa kembali ke layar penuh lewat ikon di bawah tombol Menu, atau lewat Menu lalu "Layar penuh".
 - Siswa bisa memakai skill, Periksa, peta mini, dan Menu dengan jempol kanan sambil tetap memegang analog dengan jempol kiri.
+
+## Catatan Build (28 Nov 2026)
+
+- Nama akhir bagian murni (`tekanHud.ts`): `dalamKotak`, `klikPertama` (penyaring klik tombol suara), dan kelas `PencatatTekan`; pengikat React `useTekanHud`. Cara mengakhiri joystick tanpa jari diangkat: `Masukan.hentiJoystick()`.
+- Pendengar `touchend` dipasang langsung di setiap tombol HUD dan tidak dilepas, agar klik pengganti tetap dicegah walaupun tombolnya hilang dari halaman sebelum jari diangkat (P-9 butir 4 dan P-10). `touchend` yang tidak bisa dibatalkan tidak dicegah, agar tidak ada peringatan konsol.
+- Selama lapisan P-13 tampil, joystick baru juga tidak dimulai, sehingga lingkarannya tidak muncul di atas lapisan.
+- Uji ujung ke ujung: Periksa dan Angkot diketuk jari kedua dengan analog dipegang di zona diam (avatar diam), karena pemain harus tetap dalam jangkauan 24 px. Tombol lain diketuk selama avatar berjalan.
+- Temuan 1 laporan uji: selama jeda, kelompok Menu (termasuk ikon) berada di bawah lapisan jeda yang tembus pandang, seperti Menu dan suara sejak v1.1. Baris "Jeda" di tabel status belum terpenuhi, dan keputusannya menunggu pemilik proyek.

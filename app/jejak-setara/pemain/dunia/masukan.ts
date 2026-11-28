@@ -112,6 +112,18 @@ export class Masukan {
     return true;
   }
 
+  /**
+   * JS-24 (P-13, P-14): joystick yang sedang dipegang berakhir tanpa jari diangkat, misalnya saat lapisan menutupi dunia.
+   * Tombol papan ketik tidak dilepas. Jari yang sama tidak menggerakkan pemain lagi, karena joystick hanya dimulai oleh
+   * sentuhan baru. Mengembalikan true bila ada joystick yang berakhir.
+   */
+  hentiJoystick(): boolean {
+    if (!this.joystick) return false;
+    this.joystick = null;
+    this.joyArah = { dx: 0, dy: 0 };
+    return true;
+  }
+
   /** Arah gerak saat ini: joystick bila sedang dipakai, selain itu keyboard. */
   arah(): { dx: number; dy: number } {
     if (this.joystick) return { ...this.joyArah };

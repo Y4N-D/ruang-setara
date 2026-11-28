@@ -37,6 +37,7 @@ import { MesinDunia } from "./dunia/mesin";
 import { VERSI_PETA } from "./dunia/petaKampung";
 import { bunyiSkill } from "./dunia/skill";
 import { LayarAbsen, LayarIdentitas, LayarIdentitasBebas, LayarKode, LayarMasukUlang, LayarMenghubungkan } from "./Gabung";
+import { masukLayarPenuh } from "./layarPenuh";
 import { KelompokMenuSuara, PanelPengaturan, PanelPrivasi, PanelTentang, type JenisLembar } from "./PanelPengaturan";
 import { LABEL_HURUF, useKurangiGerak, usePengaturan } from "./pengaturan";
 import { buatPemutarSuara, bunyiTeksJatuh, LAJU_TEKS, type NamaSuara } from "./suara";
@@ -902,6 +903,8 @@ export default function App() {
             lembarDariMenu.current = true;
             setLembar(j);
           }}
+          // JS-24 (P-4, DRAF D-3 pilihan a): panel tertutup begitu layar penuh dimulai; bila ditolak, panel tetap terbuka.
+          saatLayarPenuh={() => void masukLayarPenuh(tutupLembar)}
         />
       ) : null}
       {lembar === "privasi" ? <PanelPrivasi tutup={tutupLembar} /> : null}

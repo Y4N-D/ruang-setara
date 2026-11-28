@@ -8,6 +8,8 @@
 // kanvas `data-kotak`, `data-lari`, dan `data-kompas` (spesifikasi JS-09, P-18, P-20, P-26, P-33 sampai P-43).
 // JS-18: tombol 4 dan 5, susunan tombol laptop, lingkaran Teropong di peta mini dan peta besar, dan mode "Pilih halte
 // tujuan" dengan pita "Tiba di Halte {n}." (spesifikasi JS-18, P-19 sampai P-21, P-28, P-29, P-32, P-33, P-37).
+// JS-24: ikon layar penuh di kelompok Menu selama ronde (P-2, P-3), dan joystick yang dipegang berakhir saat lapisan
+// menutupi dunia, ukuran tampilan berubah, atau layar penuh dimulai dan berakhir (P-13 sampai P-15).
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as PointerEventReact } from "react";
 import { TANDA, IKON, PETA } from "../assets/manifest";
 import DialogKejadian, { type AksiDialog } from "../bersama/DialogKejadian";
@@ -36,6 +38,7 @@ import PetaMini, { gambarPetaMini, type PenandaPeta } from "./PetaMini";
 import { AjakanPeriksa, TombolPeriksa } from "./TombolPeriksa";
 import TombolSkill from "./TombolSkill";
 import { keluargaHurufLabel, ukuranLabel as ukuranHurufLabel } from "./huruf";
+import { masukLayarPenuh, useBisaLayarPenuh } from "./layarPenuh";
 
 type PesanGerak = Extract<PesanPemain, { t: "gerak" }>;
 
@@ -131,6 +134,9 @@ export interface PropsLayarDunia {
   saatHurufKetik: (teks: string, dari: number, ke: number) => void;
 }
 
+/** JS-24 (P-2): ikon layar penuh di HUD menjalankan cara masuk P-1 tanpa aksi lain. */
+const masukLayarPenuhSaja = () => void masukLayarPenuh();
+
 /** JS-14 (P-7): kotak kelompok Menu dan suara, diperluas 8 px CSS dan setengah panah, dalam piksel pandangan. */
 function zonaHud(u: UkuranDunia, l: { rasio: number }, el: HTMLElement | null, wadah: HTMLElement | null): number[] {
   if (!el || !wadah) return [];
@@ -176,6 +182,10 @@ export default function LayarDunia(props: PropsLayarDunia) {
   const [jangkauan, setJangkauan] = useState<string | null>(null);
   const [penanda, setPenanda] = useState<{ daftar: PenandaPeta[]; terlihat: number; selesai: number }>({ daftar: [], terlihat: 0, selesai: 0 });
   const [fps, setFps] = useState<string | null>(null);
+  // JS-24 (P-1 sampai P-3): ikon layar penuh selama ronde, bila perangkat mendukung dan belum layar penuh.
+  const bisaLayarPenuh = useBisaLayarPenuh();
+  // JS-24 (P-13): lapisan yang menutupi dunia. Selama salah satunya tampil, joystick tidak dimulai dan tidak tergambar.
+  const lapisan = petaBesar || tertahan || menungguPeriksa || menyambung || tegak;
 
   // JS-18 (P-28): susunan tombol skill: lengkung di perangkat sentuh, satu atau dua kolom di laptop.
   const letakSkill = sentuh ? "lengkung" : susunanLaptop(tinggiTampil(ukuran, layar), tombolSkill.length);
@@ -286,19 +296,30 @@ export default function LayarDunia(props: PropsLayarDunia) {
     dialogSebelum.current = adaDialog;
   }, [adaDialog]);
 
-  // Ukuran jendela atau orientasi berubah: skala dihitung ulang (P-1).
+  // Ukuran jendela atau orientasi berubah: skala dihitung ulang (P-1). JS-24 (P-14): joystick yang dipegang berakhir,
+  // juga saat layar penuh dimulai atau berakhir, karena letak dunia di layar ikut berubah.
   useEffect(() => {
     const ubah = () => {
+      if (mesin.masukan.hentiJoystick()) setJoystick(null);
       setUkuran(ukuranLayar());
       setLayar({ lebar: window.innerWidth, tinggi: window.innerHeight, rasio: window.devicePixelRatio || 1 });
     };
     window.addEventListener("resize", ubah);
     window.addEventListener("orientationchange", ubah);
+    document.addEventListener("fullscreenchange", ubah);
     return () => {
       window.removeEventListener("resize", ubah);
       window.removeEventListener("orientationchange", ubah);
+      document.removeEventListener("fullscreenchange", ubah);
     };
-  }, []);
+  }, [mesin]);
+
+  // JS-24 (P-13): lapisan muncul selama joystick dipegang: joystick berakhir, sehingga pemain berhenti di bingkai
+  // berikutnya dan laporan berhenti terkirim seperti saat jari diangkat. Jari yang sama tidak menggerakkan pemain lagi
+  // sesudah lapisan tertutup; lingkarannya disembunyikan di bagian gambar (Joystick).
+  useEffect(() => {
+    if (lapisan) mesin.masukan.hentiJoystick();
+  }, [lapisan, mesin]);
 
   // Langit dan bilah atas diperiksa 4 kali per detik (P-30 sampai P-32); React hanya digambar ulang bila
   // yang tampil berubah (jam, sisa waktu per detik, masa, dua menit terakhir, atau letak matahari).
@@ -446,7 +467,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
     return { x: e.clientX - (r?.left ?? 0), y: e.clientY - (r?.top ?? 0), lebar: r?.width ?? 0 };
   };
   const saatTurun = (e: PointerEventReact<HTMLElement>) => {
-    if (!sentuh || e.pointerType === "mouse" || petaBesar || tegak || tertahan) return;
+    if (!sentuh || e.pointerType === "mouse" || lapisan) return;
     if ((e.target as HTMLElement | null)?.closest?.("button")) return; // JS-14 (P-6)
     if ((e.target as Element).closest("button, a, [role='dialog']")) return;
     const p = titikDunia(e);
@@ -766,7 +787,17 @@ export default function LayarDunia(props: PropsLayarDunia) {
       </div>
       <div className="js-hud" style={hud}>
         {lobi ? <PanelLobi kode={kode} nama={diri?.nama ?? ""} avatar={diri?.avatar ?? 0} jumlah={jumlahPemain} umumkan={umumkan} /> : null}
-        {tampilMenu ? <KelompokMenuSuara ref={hudKiri} kelas="js-hud-kiri" laptop={!sentuh} suara={suara} saatMenu={saatMenu} saatSuara={saatSuara} /> : null}
+        {tampilMenu ? (
+          <KelompokMenuSuara
+            ref={hudKiri}
+            kelas="js-hud-kiri"
+            laptop={!sentuh}
+            suara={suara}
+            saatMenu={saatMenu}
+            saatSuara={saatSuara}
+            layarPenuh={ronde && bisaLayarPenuh ? masukLayarPenuhSaja : undefined}
+          />
+        ) : null}
         {hitungMundur ? <LapisanHitungMundur mulaiPada={waktu.mulaiPada as number} selisihJam={selisihJam} saatAngka={() => putarSuara("hitung")} /> : null}
         {ronde ? (
           <BilahAtas langit={langit} denyut={langit.duaMenit && !kurangiGerak && status === "main"} skor={skor} peringkat={peringkat} kurangiGerak={kurangiGerak} />
@@ -813,7 +844,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
             />
           </div>
         ) : null}
-        <Joystick j={joystick} />
+        <Joystick j={lapisan || !mesin.masukan.joystick ? null : joystick} />
       </div>
       {tegak ? <AjakanPutar /> : null}
     </main>

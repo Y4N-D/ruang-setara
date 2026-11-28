@@ -3,11 +3,13 @@
 // Peta mini adalah tombol untuk membuka peta besar. JS-08 (P-18): penanda kejadian yang sudah terlihat, "!" atau ✓.
 // JS-23 (P-7 sampai P-10): gambar medan dari kanvas simpanan menggantikan zona berwarna, yang kini hanya cadangan.
 // JS-18 (P-32): lingkaran Teropong berjari-jari 12 ubin di antara medan dan halte selama Teropong aktif.
+// JS-24 (P-7): aturan ketukan HUD, sehingga jari kedua bisa membuka peta besar selama analog dipegang.
 import type { RefObject } from "react";
 import type { Arah, ZonaId } from "../inti/tipe";
 import { TEKS } from "../teks";
 import { buatSimpananMedan, ukuranMedanMini } from "./dunia/medan";
 import { HALTE, UKURAN_PETA, ZONA } from "./dunia/petaKampung";
+import { useTekanHud } from "./tekanHud";
 
 /** Warna dominan zona dari palet (D-4a; Design System 7): coral, sky-d, slate, mango, wood, leaf, teal, berry. */
 export const WARNA_ZONA: Readonly<Record<ZonaId, string>> = {
@@ -138,8 +140,9 @@ export default function PetaMini({
   /** JS-18 (P-32): lingkaran Teropong sedang tergambar. */
   teropong?: boolean;
 }) {
+  const tekan = useTekanHud(saatBuka);
   return (
-    <button type="button" className="js-peta-mini" aria-label={TEKS.peta.bukaBesar} data-teropong={teropong ? "ya" : "tidak"} onClick={saatBuka}>
+    <button type="button" className="js-peta-mini" aria-label={TEKS.peta.bukaBesar} data-teropong={teropong ? "ya" : "tidak"} {...tekan}>
       <canvas
         ref={kanvasRef}
         width={Math.round(PETA_MINI.lebar * rasio)}

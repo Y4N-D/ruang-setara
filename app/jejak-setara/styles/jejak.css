@@ -2650,13 +2650,17 @@ body {
 }
 
 /* JS-14: tombol Menu dan suara (P-4, P-5), panel Pengaturan, Privasi, dan Tentang (P-9 sampai P-12), privasi singkat
-   (P-15), dan layar identitas nama buatan siswa (P-36). */
+   (P-15), dan layar identitas nama buatan siswa (P-36). JS-24 (P-2): kelompok Menu berupa kisi dua kolom; ikon layar
+   penuh di baris kedua, tepat di bawah tombol Menu (left 8 px, top 92 px di HUD). */
 .js-hud-kiri {
   position: absolute;
   top: 36px;
   left: 8px;
   z-index: 30;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-items: start;
+  align-items: start;
   gap: 8px;
 }
 .js-hud-tombol {
@@ -2674,10 +2678,12 @@ body {
   font-size-adjust: var(--js-huruf-teks-sesuai);
   cursor: pointer;
 }
-.js-hud-suara {
+.js-hud-suara,
+.js-hud-layar-penuh {
   padding: 0 4px;
 }
-.js-hud-suara img {
+.js-hud-suara img,
+.js-hud-layar-penuh img {
   image-rendering: pixelated;
 }
 .js-hud-tombol kbd {

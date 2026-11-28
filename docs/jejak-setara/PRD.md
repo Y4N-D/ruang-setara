@@ -489,7 +489,8 @@ Semua aset gambar digambar dengan kode oleh Claude, mengikuti Design System bagi
 
 - **Versi 1.0:** semua kebutuhan P0, Paket inti 16, peta 8 zona, serta kode QR dan kode masuk ulang (JFR-03 dan JFR-07, ditarik dari 1.1 di Gerbang 1 JS-16, 24 Nov 2026).
 - **Versi 1.1:** musik latar layar kelas (JS-21), peta bermedan di peta mini, peta besar, dan peta kelas (JS-23), serta Teropong dan Angkot (JFR-25, JS-18), dirilis sebelum uji coba kelas (Gerbang 1 rencana v1.1, 25 Nov 2026; KT-15).
-- **Versi 1.2:** P1 lainnya: bantuan gerak dan daftar "Kejadian terdekat" (JFR-13, JS-24), log audit, pengaturan umum, ruang uji, dan impor-ekspor bank (JS-19), serta statistik kelas dan per siswa dan cetak ringkasan (JS-20).
+- **Versi 1.2 (rencana v1.2, disetujui 28 Nov 2026):** kontrol sentuh dan tombol layar penuh (JS-24) serta waktu main 5 menit (JS-25), dirilis sebelum uji coba kelas (KT-19).
+- **Versi 1.3:** P1 lainnya: bantuan gerak dan daftar "Kejadian terdekat" (JFR-13, JS-26), log audit, pengaturan umum, ruang uji, dan impor-ekspor bank (JS-19), serta statistik kelas dan per siswa dan cetak ringkasan (JS-20).
 - **Nanti (P2):** rekap pribadi sebagai gambar, mode tim, mode latihan mandiri tanpa ruang, dan paket kejadian tambahan.
 
 ## 18. Risiko dan mitigasi
@@ -546,6 +547,7 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | KT-16 | Aturan Teropong | Dijawab pemilik proyek (25 Nov 2026): selama 30 detik, setiap titik aktif yang belum selesai dalam radius 12 ubin dari posisi pemain saat itu terungkap dan tetap tercatat seperti kejadian yang pernah terlihat; lingkaran radiusnya tampil di peta mini dan peta besar selama aktif |
 | KT-17 | Aturan Angkot | Dijawab pemilik proyek (25 Nov 2026): hanya dari halte (paling jauh 1,5 ubin dari titik halte); tujuan dipilih di peta besar, pemain langsung pindah ke titik halte tujuan, dan karcis terpakai; tidak bisa selama dialog |
 | KT-18 | Halte di sisi barat | Dijawab pemilik proyek (25 Nov 2026): tetap empat halte untuk v1.1; ditinjau lagi sesudah uji coba kelas |
+| KT-19 | Lingkup v1.2 dan nomor bantuan gerak | Dijawab pemilik proyek (28 Nov 2026, Gerbang 1 rencana v1.2): v1.2 berisi JS-24 (kontrol sentuh dan tombol layar penuh) dan JS-25 (waktu main 5 menit); bantuan gerak dan daftar "Kejadian terdekat" (JFR-13) menjadi JS-26 di v1.3 bersama JS-19 dan JS-20 |
 
 ## 21. Catatan keputusan
 
@@ -594,3 +596,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 26 Nov 2026 | Gerbang 1 JS-18 (`Setuju: JS-18`, usulan 1 sampai 14 = a): lima tombol skill (baris bawah Teropong dan Angkot di HP; satu kolom `1` sampai `5` di laptop, atau dua kolom bila dunia terlalu pendek); kotak aman panah Kompas berbatas bawah 80 px; tombol Angkot menyala di dekat halte dan membuka peta besar mode "Pilih halte tujuan" dengan tombol halte dan daftar; server memindahkan pemain lewat `koreksi`, dan pemain lain serta layar kelas melihat perpindahan seketika; Teropong mengungkap kejadian lewat jalur keterlihatan tanpa pita baru, dengan lingkaran di peta mini dan peta besar; kelima skill tercentang secara bawaan; isi `PC-2-kotak.zip` masuk commit Build JS-18 |
 | 27 Nov 2026 | Spesifikasi JS-18 disetujui (`Spesifikasi disetujui: JS-18`, D-1 sampai D-3 = a): daftar halte hanya memuat tiga halte tujuan, dan halte asal disebut di ringkasan "Kamu di Halte {n}."; tanpa jawaban server dalam 2 detik, mode pilih halte tertutup tanpa pita; lingkaran Teropong berwarna `sun` bergaris `ink`. `PROTOKOL_VERSI` naik ke 6. JS-18 dibangun dan diuji pada hari yang sama |
 | 27 Nov 2026 | JS-18 Selesai: "Jejak: uji" hijau dan percobaan pemilik proyek di lingkungan uji berhasil; kenaikan kode konsol awal 0,64 KB (Temuan 1) diterima. Rilis v1.1 (JS-21, JS-23, dan JS-18) terpasang di produksi dengan `PROTOKOL_VERSI` 6 |
+| 28 Nov 2026 | Gerbang 1 dan 2 rencana v1.2 dalam satu balasan (`Setuju: JS-24, JS-25`, semua usulan dan KT-19 = a; `Spesifikasi disetujui: JS-24, JS-25`, D-1 sampai D-3 = a untuk keduanya): ikon layar penuh di bawah tombol Menu selama ronde dan tombol "Layar penuh" di Menu; tombol HUD bereaksi pada jari yang mengetuknya, juga selama analog dipegang; joystick berakhir saat lapisan muncul; waktu main 5 menit dengan peringatan "Satu menit lagi" dan `PROTOKOL_VERSI` tetap 6; bantuan gerak menjadi JS-26 di v1.3 |

@@ -64,6 +64,37 @@ describe("joystick (P-13)", () => {
     expect(m.arah()).toEqual({ dx: 1, dy: 0 });
   });
 
+  it("JS-24 (P-13, P-14): joystick berakhir tanpa jari diangkat; jari yang sama tidak menggerakkan pemain lagi", () => {
+    const m = new Masukan();
+    m.tekan("KeyD");
+    expect(m.mulaiJoystick(7, 100, 200, 600)).toBe(true);
+    expect(m.gerakJoystick(7, 100, 150)).toBe(true);
+    expect(m.arah()).toEqual({ dx: 0, dy: -1 });
+    expect(m.hentiJoystick()).toBe(true);
+    expect(m.joystick).toBeNull();
+    // Tombol papan ketik tidak dilepas.
+    expect(m.arah()).toEqual({ dx: 1, dy: 0 });
+    m.lepas("KeyD");
+    // Jari 7 yang masih menempel tidak menggerakkan pemain lagi dan tidak mengakhiri apa pun saat diangkat.
+    expect(m.gerakJoystick(7, 100, 120)).toBe(false);
+    expect(m.arah()).toEqual({ dx: 0, dy: 0 });
+    expect(m.akhiriJoystick(7)).toBe(false);
+    expect(m.hentiJoystick()).toBe(false);
+    // Sentuhan baru memulai joystick lagi.
+    expect(m.mulaiJoystick(8, 120, 220, 600)).toBe(true);
+    expect(m.gerakJoystick(8, 170, 220)).toBe(true);
+    expect(m.arah()).toEqual({ dx: 1, dy: 0 });
+  });
+
+  it("JS-24 (P-16): jari kedua di separuh kiri tidak memulai joystick kedua dan tidak mengambil alih yang pertama", () => {
+    const m = new Masukan();
+    expect(m.mulaiJoystick(1, 100, 200, 600)).toBe(true);
+    expect(m.mulaiJoystick(2, 120, 260, 600)).toBe(false);
+    expect(m.gerakJoystick(2, 120, 300)).toBe(false);
+    expect(m.akhiriJoystick(2)).toBe(false);
+    expect(m.joystick?.pointerId).toBe(1);
+  });
+
   it("perangkat sentuh: pointer coarse atau maxTouchPoints > 0", () => {
     const mq = (cocok: boolean) => () => ({ matches: cocok });
     expect(perangkatSentuh({ matchMedia: mq(true), navigator: { maxTouchPoints: 0 } })).toBe(true);

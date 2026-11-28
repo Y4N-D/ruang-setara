@@ -3,11 +3,44 @@
 // tombol 1, 2, dan 3. Status tombol dihitung modul murni dunia/skill.ts; komponen ini hanya menampilkannya.
 // JS-18 (P-18, P-27 sampai P-30): lima tombol dengan tanda 1 sampai 5; di perangkat sentuh Teropong dan Angkot di baris
 // bawah, dan di laptop satu kolom atau dua kolom (`kolom2`) menurut tinggi dunia. Angkot ber-`data-dekat` di halte.
+// JS-24 (P-7): setiap tombol memakai aturan ketukan HUD, sehingga jari kedua bisa memakai skill selama analog dipegang.
 import { IKON } from "../assets/manifest";
 import { SKILL_URUT } from "../inti/aturan";
 import type { SkillId } from "../inti/tipe";
 import { isiTeks, TEKS } from "../teks";
 import { letakTombol, type StatusTombol } from "./dunia/skill";
+import { useTekanHud } from "./tekanHud";
+
+function ButirSkill({ b, label, sentuh, kunci, tinggiJeda, saatTekan }: { b: StatusTombol; label: string; sentuh: boolean; kunci: string; tinggiJeda: number; saatTekan: (s: SkillId) => void }) {
+  const tekan = useTekanHud(() => saatTekan(b.skill));
+  return (
+    <button
+      type="button"
+      className="js-tombol-skill"
+      data-skill={b.skill}
+      data-muatan={b.muatan}
+      data-aktif={b.aktif ? "ya" : "tidak"}
+      data-jeda={b.jeda > 0 ? "ya" : "tidak"}
+      data-dekat={b.skill === "angkot" ? (b.dekat ? "ya" : "tidak") : undefined}
+      data-ditekan={b.menunggu ? "ya" : undefined}
+      aria-label={label}
+      aria-disabled={b.muatan === 0 || b.aktif ? true : undefined}
+      aria-keyshortcuts={sentuh ? undefined : kunci}
+      {...tekan}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
+      <img className="js-skill-ikon" src={IKON[b.skill === "angkot" ? "ikon_karcis" : `ikon_${b.skill}`].url} alt="" width={32} height={32} />
+      {b.jeda > 0 ? (
+        <span className="js-skill-tutup" aria-hidden="true">
+          <span className="js-skill-jeda" style={{ height: `${tinggiJeda}%` }} />
+        </span>
+      ) : null}
+      <span className="js-skill-lencana" aria-hidden="true">
+        {b.muatan}
+      </span>
+    </button>
+  );
+}
 
 export interface PropsTombolSkill {
   /** Skill yang aktif di ruang, menurut urutan P-1. */
@@ -38,31 +71,7 @@ export default function TombolSkill({ daftar, letak, kurangiGerak, saatTekan }: 
                 {kunci}
               </kbd>
             )}
-            <button
-              type="button"
-              className="js-tombol-skill"
-              data-skill={b.skill}
-              data-muatan={b.muatan}
-              data-aktif={b.aktif ? "ya" : "tidak"}
-              data-jeda={b.jeda > 0 ? "ya" : "tidak"}
-              data-dekat={b.skill === "angkot" ? (b.dekat ? "ya" : "tidak") : undefined}
-              data-ditekan={b.menunggu ? "ya" : undefined}
-              aria-label={label}
-              aria-disabled={b.muatan === 0 || b.aktif ? true : undefined}
-              aria-keyshortcuts={sentuh ? undefined : kunci}
-              onClick={() => saatTekan(b.skill)}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
-              <img className="js-skill-ikon" src={IKON[b.skill === "angkot" ? "ikon_karcis" : `ikon_${b.skill}`].url} alt="" width={32} height={32} />
-              {b.jeda > 0 ? (
-                <span className="js-skill-tutup" aria-hidden="true">
-                  <span className="js-skill-jeda" style={{ height: `${tinggiJeda}%` }} />
-                </span>
-              ) : null}
-              <span className="js-skill-lencana" aria-hidden="true">
-                {b.muatan}
-              </span>
-            </button>
+            <ButirSkill b={b} label={label} sentuh={sentuh} kunci={kunci} tinggiJeda={tinggiJeda} saatTekan={saatTekan} />
           </div>
         );
       })}

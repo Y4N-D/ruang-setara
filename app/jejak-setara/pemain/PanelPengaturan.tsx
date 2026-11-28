@@ -1,14 +1,19 @@
 // Menu, Pengaturan, Privasi, dan Tentang di layar pemain (spesifikasi JS-14, P-4 sampai P-19; JFR-55, JFR-56).
+// JS-24: tombol Menu, suara, dan ikon layar penuh memakai aturan ketukan HUD (P-7); ikon layar penuh di baris kedua
+// kelompok Menu selama ronde (P-2); tombol "Layar penuh" di baris kaki panel Pengaturan (P-4, DRAF D-2 pilihan a).
 import { forwardRef, useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { IKON } from "../assets/manifest";
 import { TEKS } from "../teks";
+import { useBisaLayarPenuh } from "./layarPenuh";
 import type { PengaturanPemain } from "./pengaturan";
+import { klikPertama, useTekanHud } from "./tekanHud";
 
 const T = TEKS.pengaturan;
 
 export function TombolMenu({ saatTekan, laptop }: { saatTekan: () => void; laptop: boolean }) {
+  const tekan = useTekanHud(saatTekan);
   return (
-    <button type="button" className="js-hud-tombol js-hud-menu" aria-label={TEKS.menu.label} aria-keyshortcuts={laptop ? "Escape" : undefined} onClick={saatTekan}>
+    <button type="button" className="js-hud-tombol js-hud-menu" aria-label={TEKS.menu.label} aria-keyshortcuts={laptop ? "Escape" : undefined} {...tekan}>
       {TEKS.menu.tombol}
       {laptop ? <kbd>Esc</kbd> : null}
     </button>
@@ -17,6 +22,8 @@ export function TombolMenu({ saatTekan, laptop }: { saatTekan: () => void; lapto
 
 export function TombolSuara({ nyala, saatTekan, laptop }: { nyala: boolean; saatTekan: () => void; laptop: boolean }) {
   const ikon = nyala ? IKON.ikon_suara_nyala : IKON.ikon_suara_mati;
+  // Klik ganda tetikus tetap membalik suara sekali (P-4 JS-14); setiap ketukan jari membalik sekali (JS-24 P-8).
+  const tekan = useTekanHud(saatTekan, klikPertama);
   return (
     <button
       type="button"
@@ -24,9 +31,7 @@ export function TombolSuara({ nyala, saatTekan, laptop }: { nyala: boolean; saat
       aria-pressed={nyala}
       aria-label={nyala ? TEKS.suara.labelNyala : TEKS.suara.labelMati}
       aria-keyshortcuts={laptop ? "M" : undefined}
-      onClick={(e) => {
-        if (e.detail <= 1) saatTekan();
-      }}
+      {...tekan}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
       <img src={ikon.url} alt="" width={32} height={32} />
@@ -35,17 +40,33 @@ export function TombolSuara({ nyala, saatTekan, laptop }: { nyala: boolean; saat
   );
 }
 
-/** P-4: kelompok tombol Menu dan suara; letaknya diatur pemanggil lewat `kelas`. */
-export const KelompokMenuSuara = forwardRef<HTMLDivElement, { kelas: string; laptop: boolean; suara: boolean; saatMenu: () => void; saatSuara: () => void }>(
-  function KelompokMenuSuara({ kelas, laptop, suara, saatMenu, saatSuara }, ref) {
-    return (
-      <div ref={ref} className={kelas}>
-        <TombolMenu laptop={laptop} saatTekan={saatMenu} />
-        <TombolSuara laptop={laptop} nyala={suara} saatTekan={saatSuara} />
-      </div>
-    );
-  },
-);
+/** JS-24 (P-2, DRAF D-1 pilihan a): ikon layar penuh 48 × 48 px bergaya tombol suara, tanpa tanda papan ketik. */
+export function TombolLayarPenuh({ saatTekan }: { saatTekan: () => void }) {
+  const tekan = useTekanHud(saatTekan);
+  return (
+    <button type="button" className="js-hud-tombol js-hud-layar-penuh" aria-label={TEKS.dunia.layarPenuh} {...tekan}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- halaman Vite, bukan Next.js */}
+      <img src={IKON.ikon_layar_penuh.url} alt="" width={32} height={32} />
+    </button>
+  );
+}
+
+/**
+ * P-4: kelompok tombol Menu dan suara; letaknya diatur pemanggil lewat `kelas`. JS-24 (P-2): bila `layarPenuh` diisi,
+ * ikon layar penuh tampil sebagai tombol ketiga, di baris kedua di bawah tombol Menu.
+ */
+export const KelompokMenuSuara = forwardRef<
+  HTMLDivElement,
+  { kelas: string; laptop: boolean; suara: boolean; saatMenu: () => void; saatSuara: () => void; layarPenuh?: () => void }
+>(function KelompokMenuSuara({ kelas, laptop, suara, saatMenu, saatSuara, layarPenuh }, ref) {
+  return (
+    <div ref={ref} className={kelas}>
+      <TombolMenu laptop={laptop} saatTekan={saatMenu} />
+      <TombolSuara laptop={laptop} nyala={suara} saatTekan={saatSuara} />
+      {layarPenuh ? <TombolLayarPenuh saatTekan={layarPenuh} /> : null}
+    </div>
+  );
+});
 
 const DAPAT_FOKUS = 'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
@@ -144,7 +165,10 @@ function PilihanDua<N extends string | boolean>({
 
 export type JenisLembar = "pengaturan" | "privasi" | "tentang";
 
-/** P-9: empat pengaturan, lalu Privasi, Tentang, dan Tutup. */
+/**
+ * P-9: empat pengaturan, lalu Privasi, Tentang, dan Tutup. JS-24 (P-4): "Layar penuh" paling kiri di baris kaki selama
+ * layar penuh bisa dimasuki; menekannya menjalankan `saatLayarPenuh`.
+ */
 export function PanelPengaturan({
   p,
   ubah,
@@ -152,6 +176,7 @@ export function PanelPengaturan({
   saatSuara,
   tutup,
   buka,
+  saatLayarPenuh,
 }: {
   p: PengaturanPemain;
   ubah: (u: Partial<PengaturanPemain>) => void;
@@ -159,7 +184,9 @@ export function PanelPengaturan({
   saatSuara: (nyala: boolean) => void;
   tutup: () => void;
   buka: (j: Exclude<JenisLembar, "pengaturan">) => void;
+  saatLayarPenuh?: () => void;
 }) {
+  const bisaLayarPenuh = useBisaLayarPenuh();
   const matiNyala = [
     [false, T.mati],
     [true, T.nyala],
@@ -172,6 +199,11 @@ export function PanelPengaturan({
       tutup={tutup}
       kaki={
         <>
+          {bisaLayarPenuh && saatLayarPenuh ? (
+            <button type="button" className="js-tombol" onClick={saatLayarPenuh}>
+              {TEKS.dunia.layarPenuh}
+            </button>
+          ) : null}
           <button type="button" className="js-tombol" onClick={() => buka("privasi")}>
             {T.privasi}
           </button>
