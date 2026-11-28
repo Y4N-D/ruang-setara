@@ -214,7 +214,7 @@ describe.skipIf(!sqlite)("GET /api/dasbor (JS-13, P-24 sampai P-26)", () => {
     expect(d.siapTinjau).toBe(1);
     expect(d.sesi.map((x) => x.kode)).toEqual(["R0010", "R0009", "R0008", "R0007", "R0003"]);
     expect(d.sesi[4]).toMatchObject({ uji: true, namaGuru: "Bu Sari", jumlahPemain: 1, rataSkor: 100 });
-    expect(d.ringkasan).toEqual({ hari: 30, sesi: 2, pemain: 6, rataSkor: 77.5, ketepatan1: 42.9, tingkat: { tepat: 66.7, kurang: 16.7, berisiko: 16.7 } });
+    expect(d.ringkasan).toEqual({ hari: 30, sesi: 2, sesiPendek: 0, pemain: 6, rataSkor: 77.5, ketepatan1: 42.9, tingkat: { tepat: 66.7, kurang: 16.7, berisiko: 16.7 } });
   });
 
   it("guru: tanpa Siap tinjau, hanya ruang miliknya, dan ruang yang tidak dimainkan dilewati (D-1a)", async () => {
@@ -225,6 +225,6 @@ describe.skipIf(!sqlite)("GET /api/dasbor (JS-13, P-24 sampai P-26)", () => {
       ["R0003", true, 1, 100],
       ["R0001", false, 4, 41.3],
     ]);
-    expect(d.ringkasan).toEqual({ hari: 30, sesi: 1, pemain: 4, rataSkor: 75, ketepatan1: 40, tingkat: { tepat: 50, kurang: 25, berisiko: 25 } });
+    expect(d.ringkasan).toEqual({ hari: 30, sesi: 1, sesiPendek: 0, pemain: 4, rataSkor: 75, ketepatan1: 40, tingkat: { tepat: 50, kurang: 25, berisiko: 25 } });
   });
 });

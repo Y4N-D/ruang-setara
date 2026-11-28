@@ -6,3 +6,7 @@
 // Versi 5 sejak JS-16b (P-16): `halo` membawa `kodeMasukUlang` pilihan dan galat `KODE_MASUK_ULANG_SALAH`.
 // Versi 6 sejak JS-18 (P-40): `pakai_skill` membawa `halteId` pilihan untuk Angkot.
 export const PROTOKOL_VERSI = 6;
+// Tambahan protokol (JS-25, P-8): naik bila pesan yang sudah ada mendapat nilai baru yang tidak dikenal kode lama, tetapi
+// kode lama tetap sah untuk ruang yang tidak memakai nilai itu. Tambahan 1 sejak JS-25: `durasiMenit` 5 di
+// `selamat_datang` dan `info_kelas`. Layar pemain menyambung dengan `?tambahan=1`, dan `/api/sehat` memuat angka ini.
+export const PROTOKOL_TAMBAHAN = 1;

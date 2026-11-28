@@ -1,6 +1,6 @@
 # JS-25 — Waktu main 5 menit
 
-Status: **Ditulis (27 Nov 2026)**, menunggu `Setuju: JS-25` dan `Spesifikasi disetujui: JS-25`. Plan dan spesifikasi ditulis sekaligus atas instruksi pemilik proyek. Dasar: entri "Rencana v1.2" di `PLAN.md` (spesifikasi ini memakai saran a untuk usulan 1, 9 sampai 14, dan KT-19), JFR-01, PRD 8.1 dan 11.2, serta spesifikasi JS-03, JS-07 (P-30 sampai P-32), JS-10 (dialog Ruang baru), JS-11 (hasil dan CSV), JS-13 (dasbor), dan JS-14 (P-31).
+Status: **Disetujui (28 Nov 2026)**: `Setuju: JS-24, JS-25` dan `Spesifikasi disetujui: JS-24, JS-25`, dengan D-1, D-2, dan D-3 = a. Dibangun dan diuji 28 Nov 2026 ([laporan](../tests/JS-25-hasil.md)).
 
 ## Ringkasan
 
@@ -116,7 +116,7 @@ Kelompok `dunia` di `TEKS` (layar pemain):
 | Kunci | Teks |
 |---|---|
 | `ruangBaru.catatanLimaMenit` | Paket ini memuat {n} kejadian. Dalam ronde 5 menit, setiap siswa biasanya sempat menjawab 3 sampai 4 kejadian, jadi paket berisi sekitar 8 kejadian lebih mudah dibahas. |
-| `riwayat.kolomDurasi` | Durasi |
+| `riwayatRuang.kolomDurasi` | Durasi |
 | `dasbor.sesiItem` (diubah) | {tanggal} · {kelas} · {durasi} menit · {n} pemain · rata-rata {rata} |
 | `dasbor.sesiItemGuru` (diubah) | {tanggal} · {kelas} · {guru} · {durasi} menit · {n} pemain · rata-rata {rata} |
 | `dasbor.ringkasanTanpaPendek` | Rata-rata skor tanpa ronde 5 menit. |
@@ -250,3 +250,14 @@ Tidak ada aset baru. Bunyi peringatan `sfx_peringatan.wav` (S-07, Disetujui 21 N
 - Batas bergabung terlambat 5 menit berarti siswa boleh bergabung sepanjang ronde 5 menit. Isi 2 bila ingin membatasinya.
 - Riwayat ruang dan CSV memuat durasi. Rata-rata skor di ringkasan dasbor tidak menghitung ronde 5 menit, karena skor ronde pendek tidak sebanding dengan ronde yang lebih panjang.
 - HP yang tabnya terbuka sejak sebelum pembaruan diminta memuat ulang saat masuk ruang 5 menit. Ruang 10, 15, dan 20 menit tidak memintanya.
+
+## Catatan Build (28 Nov 2026)
+
+- Kunci teks `riwayat.kolomDurasi` di tabel "Teks yang tampil (final)" ditulis `riwayatRuang.kolomDurasi`, karena halaman Riwayat ruang memakai kelompok `riwayatRuang` (kelompok `riwayat` milik riwayat versi kejadian). Teksnya tetap "Durasi".
+- Nama akhir: `PROTOKOL_TAMBAHAN` (`inti/versi.ts`), `tambahanDiperlukan`, `bacaTambahan`, dan `durasiSah` (`inti/ruang.ts`), `ambangPeringatanDetik` dan `peringatanAkhir` (`inti/aturan.ts`), `lewatPeringatan` (`admin/kelas/suara-kelas.ts`), dan `alamatSambungan` (`pemain/jaringan.ts`, agar alamat dengan `?tambahan=1` bisa diuji unit). Isian `Langit.duaMenit` dan atribut `data-dua-menit` tetap bernama sama dan berarti peringatan akhir ronde.
+- Isian baru di skema jawaban konsol (`durasiMenit` di riwayat dan sesi dasbor, `sesiPendek` di ringkasan) dibuat tidak wajib; konsol menganggap durasi yang tidak ada 15, seperti halaman Hasil.
+- Ruang yang ditolak penjaga P-9 memakai `WebSocket.accept()` biasa, bukan soket berhibernasi, sehingga pesannya tidak pernah sampai ke penanganan pesan ruang.
+- Uji server ringkasan dasbor memakai ruang uji yang ditandai bukan uji lewat D1 sesudah ditutup, karena paket bawaan belum siap untuk ruang biasa di server uji.
+- Uji ujung ke ujung memeriksa bunyi peringatan layar kelas lewat uji unit `lewatPeringatan` dan pemakaian `info.durasiMenit` di layar kelas; bunyinya didengar pemilik proyek di AC-15.
+- `simulasi-beban.mjs` juga mencatat lama ronde dari sisi bot (`lamaRondeBotMs`) di samping lama ronde dari sisi layar kelas (`lamaRondeMs`).
+

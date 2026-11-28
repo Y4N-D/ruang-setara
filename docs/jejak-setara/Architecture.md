@@ -272,7 +272,7 @@ export interface IsiKejadian {               // satu versi kejadian
 }
 
 export interface PengaturanRuang {
-  durasiMenit: 10 | 15 | 20;
+  durasiMenit: 5 | 10 | 15 | 20; // 5 sejak JS-25
   batasPemain: number;                       // 2–100, bawaan 40; mode nomor absen hanya sampai 50 (C-8)
   batasTerlambatMenit: number;               // 0–10, bawaan 5
   skillAktif: SkillId[];
@@ -406,6 +406,8 @@ Worker memeriksa tajuk `Origin` (hanya domain Jejak Setara sendiri dan `localhos
 ### 6.2 Amplop pesan
 
 Setiap pesan adalah objek JSON `{ "v": 6, "t": "<tipe>", ...isi }`. `v` adalah `PROTOKOL_VERSI` di `inti/versi.ts`, yang diekspor ulang `inti/protokol.ts` (1 sampai JS-07, 2 sejak JS-08, 3 sejak JS-14, 4 sejak JS-15, 5 sejak JS-16b, 6 sejak JS-18). Pesan yang tidak lolos skema diabaikan dan dihitung sebagai pelanggaran (bagian 6.6).
+
+**Tambahan protokol (JS-25).** `PROTOKOL_TAMBAHAN` di `inti/versi.ts` (1 sejak JS-25) naik bila pesan yang sudah ada mendapat nilai baru yang tidak dikenal kode lama, tetapi kode lama tetap sah untuk ruang yang tidak memakai nilai itu. Tambahan 1: `durasiMenit` 5 di `selamat_datang` dan `info_kelas`. Layar pemain menyambung ke `/ws/ruang/{KODE}?tambahan=1`. Ruang yang memerlukan tambahan lebih tinggi daripada angka di alamat (ruang 5 menit memerlukan 1) menerima soket, mengirim `galat` `VERSI_BERBEDA` dengan `v` 6, lalu menutup 4005 sebelum `halo`, tanpa mengubah pemain, batas halo, atau alarm ruang (hanya hitungan sambungan). Worker meneruskan alamat lengkap ke Durable Object, dan Worker v1.1 mengabaikan parameter itu. `/api/sehat` memuat `"tambahan"`.
 
 ### 6.3 Pesan pemain
 
@@ -667,7 +669,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `POST /api/masuk` · `POST /api/keluar` · `GET /api/saya` | Masuk, keluar, akun saat ini. `GET /api/saya` selalu menjawab 200 dengan `masuk` benar atau salah (JS-04) | Umum · umum · umum |
 | `POST /api/sandi` | Ganti sandi sendiri | Masuk |
 | `GET` · `POST /api/akun`; `PATCH /api/akun/{id}` | Daftar, buat, ubah, nonaktifkan, atur ulang sandi | Admin |
-| `GET /api/dasbor` | Isi dasbor: jumlah rujukan yang belum diverifikasi (JS-04), ruang yang sedang berjalan (JS-10), serta kejadian Siap tinjau untuk admin, lima sesi terakhir, dan ringkasan 30 hari dari `ruang.ringkasan_json` (JS-13, P-24 sampai P-26); tidak membaca tabel `jawaban` | Admin, guru |
+| `GET /api/dasbor` | Isi dasbor: jumlah rujukan yang belum diverifikasi (JS-04), ruang yang sedang berjalan (JS-10), serta kejadian Siap tinjau untuk admin, lima sesi terakhir, dan ringkasan 30 hari dari `ruang.ringkasan_json` (JS-13, P-24 sampai P-26); tidak membaca tabel `jawaban`. Sejak JS-25 setiap sesi memuat `durasiMenit`, ringkasan memuat `sesiPendek`, dan `rataSkor` ringkasan hanya dari ruang 10 menit atau lebih | Admin, guru |
 | `POST /api/admin-awal` | Membuat atau memulihkan akun admin; hanya dengan kunci sekali pakai `KUNCI_ADMIN` (JS-04) | Alur kerja "Jejak: admin awal" |
 | `GET` · `POST /api/kejadian`; `GET /api/kejadian/pilihan`; `GET /api/kejadian/{K-xx}`; `PUT /api/kejadian/{K-xx}/kerja` | Daftar, buat (kode diberikan saat simpan pertama), pilihan isian, detail, simpan versi kerja dengan penanda versi (JS-12) | Admin; guru untuk kejadian miliknya berstatus Draf atau Siap tinjau |
 | `POST /api/kejadian/{K-xx}/aksi` | Ajukan, kembalikan, terbitkan, arsipkan, pulihkan, hapus (JS-12, P-14) | Menurut aksi: terbitkan, arsipkan, kembalikan, dan pulihkan hanya admin |
@@ -675,7 +677,7 @@ Semua API memakai JSON. Galat berbentuk `{ "galat": { "kode": "...", "pesan": ".
 | `GET` · `POST /api/rujukan`; `PUT` · `DELETE /api/rujukan/{JR-xx}`; `POST /api/rujukan/{JR-xx}/verifikasi` | Pustaka rujukan; tambah (admin, guru), ubah dan hapus (admin), verifikasi (tanda Peninjau) (JS-12) | Lihat kolom isi |
 | `GET` · `POST /api/paket`; `GET` · `PUT /api/paket/{id}` | Paket kejadian (JS-12) | Admin |
 | `POST /api/ruang`; `GET /api/ruang`; `GET /api/ruang/{id}` | Buat, daftar ruang yang belum ditutup, detail | Admin, guru (miliknya) |
-| `GET /api/ruang/riwayat` | Ruang yang sudah ditutup, dengan saringan `dari`, `sampai`, `label`, `guru` (admin), `batas`, dan `mulai` (JS-11) | Admin, guru (miliknya) |
+| `GET /api/ruang/riwayat` | Ruang yang sudah ditutup, dengan saringan `dari`, `sampai`, `label`, `guru` (admin), `batas`, dan `mulai` (JS-11); sejak JS-25 setiap ruang memuat `durasiMenit` (tidak ada atau tidak sah dianggap 15) | Admin, guru (miliknya) |
 | `GET /api/ruang/{id}/hasil`; `GET /api/ruang/{id}/hasil/{pesertaId}` | Hasil ronde dan rincian jawaban satu pemain; 409 `HASIL_BELUM_ADA` sebelum ronde berakhir (JS-11) | Admin, guru (miliknya) |
 | `DELETE /api/ruang/{id}` | Hapus data ruang yang sudah ditutup (409 `BELUM_DITUTUP` bila belum), dalam satu batch bersama log audit `ruang.hapus` (JS-11, D-3) | Admin |
 | `POST /api/ruang/{id}/tiket` | Tiket layar kelas | Pemilik ruang, admin |
@@ -736,7 +738,7 @@ Statistik per kejadian lintas ruang (JS-13; spesifikasi `specs/JS-13-statistik.m
 
 - CSV memakai **titik koma** sebagai pemisah, koma sebagai tanda desimal, akhir baris CRLF, dan diawali BOM UTF-8, agar langsung rapi di Excel berbahasa Indonesia. Sel teks dikutip menurut RFC 4180, dan sel yang diawali `=`, `+`, `-`, `@`, tab, atau CR diberi tanda kutip tunggal agar tidak dibaca sebagai rumus. Waktu ditulis dalam WITA (JS-11).
 - Nama berkas: `jejak-setara_{label-kelas}_{tanggal}_{jenis}.csv`; label dalam huruf kecil dengan karakter selain `a`–`z` dan `0`–`9` menjadi tanda minus, paling panjang 40 karakter, atau `ruang` bila kosong; tanggal ruang dibuat dalam WITA (JS-11).
-- CSV peserta berisi 16 kolom dan CSV jawaban 17 kolom (spesifikasi JS-11, P-28 dan P-29). Pemain yang dikeluarkan ikut dengan keterangan "Dikeluarkan". Ruang yang tidak dimainkan menghasilkan baris judul saja. Sejak JS-14, judul kolom nama di kedua CSV adalah "Nama pemain".
+- CSV peserta berisi 16 kolom dan CSV jawaban 17 kolom (spesifikasi JS-11, P-28 dan P-29). Pemain yang dikeluarkan ikut dengan keterangan "Dikeluarkan". Ruang yang tidak dimainkan menghasilkan baris judul saja. Sejak JS-14, judul kolom nama di kedua CSV adalah "Nama pemain". Sejak JS-25 kedua CSV mendapat kolom terakhir "Durasi (menit)": CSV peserta 17 kolom dan CSV jawaban 19 kolom.
 - Ringkasan ruang dicetak lewat fitur cetak peramban dengan gaya `@media print` di `kelas.css`: A4 tegak, ringkasan dan tabel peringkat saja (JS-11).
 
 ### 10.9 Layar kelas

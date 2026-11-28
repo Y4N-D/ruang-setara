@@ -2,6 +2,7 @@
 // pemain dan layar kelas, serta rute akun, ruang, dan dasbor konsol; jalur /api/* dan /ws/* lain belum tersedia. Jalur lain disajikan
 // lapisan aset Cloudflare; yang sampai ke sini diteruskan ke ASSETS. Tidak menulis log permintaan (Architecture 12.3).
 import { PROTOKOL_VERSI } from "../../../app/jejak-setara/inti/protokol";
+import { PROTOKOL_TAMBAHAN } from "../../../app/jejak-setara/inti/versi";
 import { TEKS } from "../../../app/jejak-setara/teks";
 import { jalurAkun, tanganiApiAkun } from "./api/akun";
 import { tanganiApiDasbor } from "./api/dasbor";
@@ -25,7 +26,8 @@ export default {
       if (request.method !== "GET") {
         return jawabGalat("METODE_TIDAK_DIDUKUNG", "Metode ini tidak didukung.", 405, { Allow: "GET" });
       }
-      const sehat = { ok: true, protokol: PROTOKOL_VERSI, lingkungan: env.LINGKUNGAN };
+      // JS-25 (P-8): `tambahan` agar pemilik proyek bisa memastikan v1.2 terpasang walaupun protokol tetap 6.
+      const sehat = { ok: true, protokol: PROTOKOL_VERSI, tambahan: PROTOKOL_TAMBAHAN, lingkungan: env.LINGKUNGAN };
       return jawabJson(env.DARURAT === "1" ? { ...sehat, darurat: true } : sehat, 200);
     }
     // JS-22 (P-12): saat "Jejak: hentikan" aktif, semua API dan WebSocket dijawab 503 sebelum menyentuh D1 atau ruang.

@@ -14,7 +14,7 @@ import {
 } from "../../../../app/jejak-setara/inti/hasil";
 import { skemaIsiKejadian } from "../../../../app/jejak-setara/inti/konten/skema";
 import { PANJANG_TEKS } from "../../../../app/jejak-setara/inti/protokol";
-import {
+import { durasiSah,
   bacaRuangAktifMaks,
   idRuangSah,
   normalkanLabel,
@@ -377,6 +377,7 @@ function ruangRiwayat(b: BarisRiwayat): RuangRiwayat {
     dimainkan,
     jumlahPemain: b.jumlah_pemain,
     rataSkor: dimainkan && b.rata_skor !== null ? Math.round(b.rata_skor * 10) / 10 : null,
+    durasiMenit: durasiSah(b.durasi_menit), // JS-25 (P-13)
   };
 }
 
@@ -504,7 +505,7 @@ async function ekspor(request: Request, env: Env, url: URL, id: string): Promise
   if (!punyaHasil(r)) return galatRuang("HASIL_BELUM_ADA", 409);
   const dimainkan = dimainkanRuang(r);
   const peserta = dimainkan ? urutPeserta((await bacaPesertaHasil(env.DB, r.id)).map(pesertaEkspor)) : [];
-  const ruang = { labelKelas: r.label_kelas, dibuatPada: r.dibuat_pada };
+  const ruang = { labelKelas: r.label_kelas, dibuatPada: r.dibuat_pada, durasiMenit: pengaturanHasil(r).durasiMenit }; // JS-25 (P-17)
   let isi: string;
   if (jenis === "peserta") isi = csvPeserta(ruang, peserta);
   else {

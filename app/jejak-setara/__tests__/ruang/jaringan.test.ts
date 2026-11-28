@@ -270,3 +270,20 @@ describe("JS-07: versi peta dan bufferedAmount (P-16, P-50)", () => {
     expect(u.klien.bufferedAmount).toBe(512);
   });
 });
+
+describe("JS-25: ruang 5 menit dan kode lama (P-9)", () => {
+  it("galat VERSI_BERBEDA versi 6 sebelum halo lalu tutup 4005: klien berhenti dengan galat itu dan tidak menyambung ulang", () => {
+    const u = siapkan();
+    u.klien.mulai();
+    u.soket[0].buka();
+    u.soket[0].terima({ v: PROTOKOL_VERSI, t: "galat", kode: "VERSI_BERBEDA", pesan: "Ada pembaruan. Muat ulang halaman." });
+    // Klien sudah berhenti saat galat itu tiba; tutup 4005 sesudahnya tidak mengubah apa pun.
+    expect(u.klien.keadaan).toBe("berhenti");
+    u.soket[0].putus(4005);
+    expect(u.klien.keadaan).toBe("berhenti");
+    expect(u.keadaan.filter(([k]) => k === "berhenti")).toHaveLength(1);
+    expect(u.pesan.some((p) => (p as { kode?: string }).kode === "VERSI_BERBEDA")).toBe(true);
+    u.majukan(60_000);
+    expect(u.soket).toHaveLength(1);
+  });
+});

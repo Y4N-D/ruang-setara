@@ -73,8 +73,8 @@ export const TEKS_KONSOL = {
     cobaLagi: "Coba lagi",
     // JS-13 (P-27)
     siapTinjau: "{n} kejadian Siap tinjau menunggu diterbitkan.",
-    sesiItem: "{tanggal} · {kelas} · {n} pemain · rata-rata {rata}",
-    sesiItemGuru: "{tanggal} · {kelas} · {guru} · {n} pemain · rata-rata {rata}",
+    sesiItem: "{tanggal} · {kelas} · {durasi} menit · {n} pemain · rata-rata {rata}", // JS-25 (P-14)
+    sesiItemGuru: "{tanggal} · {kelas} · {guru} · {durasi} menit · {n} pemain · rata-rata {rata}",
     sesiUji: "Uji",
     sesiSemua: "Lihat riwayat ruang",
     ringkasan: "Ringkasan 30 hari terakhir",
@@ -86,6 +86,7 @@ export const TEKS_KONSOL = {
     ringkasanLangkah2: "Langkah 2",
     ringkasanTingkat: "Tepat {a}% · Kurang tepat {b}% · Berisiko {c}%",
     ringkasanCatatan: "Ruang uji tidak dihitung.",
+    ringkasanTanpaPendek: "Rata-rata skor tanpa ronde 5 menit.", // JS-25 (P-15, DRAF D-3 a)
     keStatistik: "Lihat statistik per kejadian",
     kosongNilai: "–",
   },
@@ -246,6 +247,8 @@ export const TEKS_KONSOL = {
     paketOpsi: "{nama} ({n} kejadian)",
     durasi: "Durasi",
     durasiOpsi: "{n} menit",
+    // JS-25 (P-2, DRAF D-1 a)
+    catatanLimaMenit: "Paket ini memuat {n} kejadian. Dalam ronde 5 menit, setiap siswa biasanya sempat menjawab 3 sampai 4 kejadian, jadi paket berisi sekitar 8 kejadian lebih mudah dibahas.",
     batasPemain: "Batas pemain",
     batasPemainPetunjuk: "2–100 pemain.",
     terlambat: "Batas bergabung terlambat",
@@ -710,6 +713,7 @@ export const TEKS_KONSOL = {
     kolomTanggal: "Tanggal",
     kolomKelas: "Kelas",
     kolomKode: "Kode",
+    kolomDurasi: "Durasi", // JS-25 (P-13, DRAF D-2 a)
     kolomPemain: "Pemain",
     kolomRata: "Rata-rata skor",
     kolomGuru: "Guru",
@@ -834,6 +838,7 @@ export const TEKS_KONSOL = {
     tingkatKurang: "Kurang tepat",
     tingkatBerisiko: "Berisiko",
     petunjuk: "Petunjuk dipakai", // JS-09, P-47
+    durasi: "Durasi (menit)", // JS-25 (P-17): kolom terakhir kedua CSV
   },
   // JS-09 (P-7, P-9, P-46): pilihan skill di dialog Ruang baru, baris "Skill", dan tanda Petunjuk di rincian.
   // JS-18 (P-6, P-8): Teropong dan Angkot.

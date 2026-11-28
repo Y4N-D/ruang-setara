@@ -117,7 +117,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
-| JFR-01 | Guru atau admin yang sudah masuk membuat ruang: label kelas (misalnya "IX B"), paket kejadian, durasi 10, 15 (bawaan), atau 20 menit, skill yang aktif, batas pemain (bawaan 40, paling banyak 100), batas bergabung terlambat (bawaan 5 menit sesudah mulai), dan mode nomor absen (mati secara bawaan; hanya untuk ruang sampai 50 pemain), dan nama pemain: daftar nama samaran (bawaan) atau nama buatan siswa | P0 |
+| JFR-01 | Guru atau admin yang sudah masuk membuat ruang: label kelas (misalnya "IX B"), paket kejadian, durasi 5, 10, 15 (bawaan), atau 20 menit (5 menit sejak JS-25), skill yang aktif, batas pemain (bawaan 40, paling banyak 100), batas bergabung terlambat (bawaan 5 menit sesudah mulai), dan mode nomor absen (mati secara bawaan; hanya untuk ruang sampai 50 pemain), dan nama pemain: daftar nama samaran (bawaan) atau nama buatan siswa | P0 |
 | JFR-02 | Ruang mendapat kode 5 karakter tanpa huruf dan angka yang mirip (misalnya tanpa O dan 0) serta tautan pendek untuk dibuka di HP | P0 |
 | JFR-03 | Kode QR tautan ruang di lobi layar kelas | P1, dikerjakan untuk rilis 1.0 di JS-16b |
 | JFR-04 | Siswa masuk tanpa akun: buka tautan, ketik kode, isi nomor absen bila mode nomor absen aktif, lalu pilih satu dari tiga saran nama samaran (boleh acak ulang) atau, di ruang nama buatan siswa, ketik nama pemain 3–14 karakter yang unik di ruang itu dan lolos penyaring kata, lalu pilih satu dari 8 avatar | P0 |
@@ -224,7 +224,7 @@ Prioritas: **P0** wajib ada di versi pertama, **P1** sebaiknya ada, **P2** nanti
 
 ### 8.1 Waktu dan langit sehari
 
-- Durasi ronde D = 10, 15, atau 20 menit, didahului hitung mundur 3 detik.
+- Durasi ronde D = 5, 10, 15, atau 20 menit, didahului hitung mundur 3 detik. Ronde 5 menit (JS-25) memakai perbandingan masa yang sama (siang mulai 90 detik dan sore 195 detik sesudah mulai), dan peringatan akhir ronde mulai di sisa 60 detik ("Satu menit lagi"); ronde lain tetap di sisa 120 detik.
 - Waktu ronde dipetakan ke jam cerita 06.00–18.00:
 
 | Masa | Bagian ronde | Jam cerita |
@@ -597,3 +597,4 @@ Pembuatan aset dan penulisan naskah kejadian berjalan paralel sejak M1.
 | 27 Nov 2026 | Spesifikasi JS-18 disetujui (`Spesifikasi disetujui: JS-18`, D-1 sampai D-3 = a): daftar halte hanya memuat tiga halte tujuan, dan halte asal disebut di ringkasan "Kamu di Halte {n}."; tanpa jawaban server dalam 2 detik, mode pilih halte tertutup tanpa pita; lingkaran Teropong berwarna `sun` bergaris `ink`. `PROTOKOL_VERSI` naik ke 6. JS-18 dibangun dan diuji pada hari yang sama |
 | 27 Nov 2026 | JS-18 Selesai: "Jejak: uji" hijau dan percobaan pemilik proyek di lingkungan uji berhasil; kenaikan kode konsol awal 0,64 KB (Temuan 1) diterima. Rilis v1.1 (JS-21, JS-23, dan JS-18) terpasang di produksi dengan `PROTOKOL_VERSI` 6 |
 | 28 Nov 2026 | Gerbang 1 dan 2 rencana v1.2 dalam satu balasan (`Setuju: JS-24, JS-25`, semua usulan dan KT-19 = a; `Spesifikasi disetujui: JS-24, JS-25`, D-1 sampai D-3 = a untuk keduanya): ikon layar penuh di bawah tombol Menu selama ronde dan tombol "Layar penuh" di Menu; tombol HUD bereaksi pada jari yang mengetuknya, juga selama analog dipegang; joystick berakhir saat lapisan muncul; waktu main 5 menit dengan peringatan "Satu menit lagi" dan `PROTOKOL_VERSI` tetap 6; bantuan gerak menjadi JS-26 di v1.3 |
+| 28 Nov 2026 | Temuan 1 JS-24 diterima pemilik proyek (pilihan a): selama jeda, kelompok Menu (termasuk ikon layar penuh) tetap di bawah lapisan jeda untuk v1.2. JS-25 dibangun dan diuji: ronde 5 menit dengan `PROTOKOL_TAMBAHAN` 1, sedangkan `PROTOKOL_VERSI` tetap 6 |

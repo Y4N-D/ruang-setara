@@ -177,6 +177,7 @@ export default function RiwayatRuang({ akun, galatSesi }: PropsRiwayat) {
                   <th scope="col">{tr.kolomTanggal}</th>
                   <th scope="col">{tr.kolomKelas}</th>
                   <th scope="col">{tr.kolomKode}</th>
+                  <th scope="col">{tr.kolomDurasi}</th>
                   <th scope="col">{tr.kolomPemain}</th>
                   <th scope="col">{tr.kolomRata}</th>
                   {admin ? <th scope="col">{tr.kolomGuru}</th> : null}
@@ -220,6 +221,7 @@ function BarisRiwayat({ r, admin }: { r: RuangRiwayat; admin: boolean }) {
       <td data-label={tr.kolomKode}>
         <span className="js-ruang-kode">{r.kode}</span>
       </td>
+      <td data-label={tr.kolomDurasi}>{isiTeks(TEKS_KONSOL.hasil.durasiIsi, { n: r.durasiMenit ?? 15 })}</td>
       <td data-label={tr.kolomPemain}>{r.jumlahPemain}</td>
       <td data-label={tr.kolomRata}>{!r.dimainkan ? tr.tidakDimainkan : r.rataSkor === null ? TEKS_KONSOL.hasil.kosongNilai : FORMAT_RATA.format(r.rataSkor)}</td>
       {admin ? <td data-label={tr.kolomGuru}>{r.namaGuru ?? TEKS_KONSOL.hasil.kosongNilai}</td> : null}

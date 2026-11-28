@@ -24,8 +24,8 @@ Status fitur dari backlog di `docs/jejak-setara/AGENTS.md` bagian 5. Setiap fitu
 | JS-21 | Selesai (26 Nov 2026, dinyatakan pemilik proyek di awal Plan lanjutan JS-23; dibangun dan diuji 25 Nov 2026). Masuk rilis v1.1, terpasang di produksi 27 Nov 2026 | [JS-21-musik.md](specs/JS-21-musik.md) | [JS-21-hasil.md](tests/JS-21-hasil.md) |
 | JS-22 | Selesai (16 Nov 2026) | [JS-22-biaya.md](specs/JS-22-biaya.md) | [JS-22-hasil.md](tests/JS-22-hasil.md), lulus (AC-18 diterima) |
 | JS-23 | Selesai (26 Nov 2026); pemeriksaan manual AC-17 oleh pemilik proyek di lingkungan uji. Masuk rilis v1.1, terpasang di produksi 27 Nov 2026 | [JS-23-peta-medan.md](specs/JS-23-peta-medan.md) | [JS-23-hasil.md](tests/JS-23-hasil.md) |
-| JS-24 | Dibangun dan diuji (28 Nov 2026; `Setuju: JS-24, JS-25` dan `Spesifikasi disetujui: JS-24, JS-25` dalam satu balasan, semua usulan, KT-19, dan D-1 sampai D-3 = a). Menunggu "Jejak: uji" hijau, percobaan pemilik proyek di HP sungguhan (AC-15), dan keputusan Temuan 1 | [JS-24-kontrol-sentuh.md](specs/JS-24-kontrol-sentuh.md) | [JS-24-hasil.md](tests/JS-24-hasil.md), lulus dengan Temuan 1 (lapisan jeda) dan Temuan 2 (uji waktu di mesin agen) |
-| JS-25 | Disetujui (28 Nov 2026; jawaban yang sama dengan JS-24, rencana v1.2 usulan 1a). Build sesudah JS-24 | [JS-25-ronde-5-menit.md](specs/JS-25-ronde-5-menit.md) | Belum ada |
+| JS-24 | Dibangun dan diuji (28 Nov 2026; `Setuju: JS-24, JS-25` dan `Spesifikasi disetujui: JS-24, JS-25` dalam satu balasan, semua usulan, KT-19, dan D-1 sampai D-3 = a). Temuan 1 diterima pemilik proyek (28 Nov 2026, pilihan a). Menunggu "Jejak: uji" hijau dan percobaan pemilik proyek di HP sungguhan (AC-15) | [JS-24-kontrol-sentuh.md](specs/JS-24-kontrol-sentuh.md) | [JS-24-hasil.md](tests/JS-24-hasil.md), lulus; Temuan 1 (lapisan jeda) diterima pemilik proyek (pilihan a), Temuan 2 (uji waktu di mesin agen) dicatat |
+| JS-25 | Dibangun dan diuji (28 Nov 2026; `Setuju: JS-24, JS-25` dan `Spesifikasi disetujui: JS-24, JS-25`, D-1 sampai D-3 = a). Menunggu "Jejak: uji" hijau dan percobaan pemilik proyek: ronde 5 menit dari konsol sampai rekap (AC-15) | [JS-25-ronde-5-menit.md](specs/JS-25-ronde-5-menit.md) | [JS-25-hasil.md](tests/JS-25-hasil.md) |
 
 ## Backlog
 
@@ -2914,7 +2914,7 @@ Dikerjakan 27 November 2026 di luar repositori, pada salinan ZIP `main` sesudah 
 
 ### Rencana rinci JS-25 — Waktu main 5 menit
 
-- Status: Disetujui (28 Nov 2026); Build sesudah JS-24.
+- Status: Dibangun dan diuji (28 Nov 2026), [laporan](tests/JS-25-hasil.md).
 - Memenuhi: JFR-01 (diubah), JFR-29, JFR-37, JFR-38, JFR-49, JFR-50, dan JFR-53; PRD 8.1, 11.2, 16, dan 17; permintaan pemilik proyek butir 3.
 - Bergantung pada: JS-24 (urutan Build, bukan kode), JS-10, JS-11, JS-13, dan JS-14 (Selesai).
 - File yang dibuat/diubah: daftar di spesifikasi, bagian "Berkas": `inti/ruang.ts`, `tipe.ts`, `protokol.ts`, `protokol-kelas.ts`, `versi.ts`, dan `aturan.ts`; layar pemain (`App.tsx`, `dunia/langit.ts`, `LayarDunia.tsx`, dan `teks.ts`); konsol (`Ruang.tsx`, `RiwayatRuang.tsx`, `Dasbor.tsx`, `inti/hasil.ts`, `inti/akun.ts`, dan `teks-konsol.ts`); layar kelas (`suara-kelas.ts` dan `LayarKelas.tsx`); server (`RuangJejak.ts`, `index.ts`, `api/ruang.ts`, `api/dasbor.ts`, `db/ruang.ts`, dan `ekspor/csv.ts`); `simulasi-beban.mjs`; uji; `rilis/v1.2.md`; dokumen utama.
@@ -2983,7 +2983,7 @@ Ditulis bersama Plan, atas instruksi pemilik proyek, dengan saran (a) untuk semu
 - Kode: `pemain/tekanHud.ts` (aturan ketukan P-7 sampai P-12) dan `pemain/layarPenuh.ts` (P-1) baru; `PanelLobi.tsx`, `PanelPengaturan.tsx`, `TombolSkill.tsx` (satu komponen per tombol), `TombolPeriksa.tsx`, `PetaMini.tsx`, `LayarDunia.tsx`, `App.tsx`, `dunia/masukan.ts` (`hentiJoystick`), dan `styles/jejak.css` (kelompok Menu berupa kisi) diubah. Server, inti, protokol, D1, konsol, layar kelas, aset, `package.json`, dan alur kerja tidak berubah.
 - Uji: `__tests__/dunia/tekanHud.test.ts` (13 uji) baru, `masukan.test.ts` +2 uji, dan `e2e/jejak-setara/kontrol-sentuh.uji.ts` (5 uji, dua pointer sentuh lewat CDP) baru.
 - Hasil: semua perintah resmi lulus; kenaikan kode layar pemain +0,90 KB untuk JS dan +0,03 KB untuk gaya, konsol awal +0,03 KB, isi potongan layar kelas sama; `build:pages` 178 berkas identik byte. `sim:beban` tidak wajib. Rincian di [JS-24-hasil.md](tests/JS-24-hasil.md).
-- Temuan 1 (menunggu keputusan pemilik proyek, sementara pilihan a): selama jeda, ikon layar penuh, seperti tombol Menu dan suara sejak v1.1, berada di bawah lapisan jeda yang tembus pandang, sehingga tampil tetapi tidak bisa diketuk. Design System 3.3, JS-14 P-5, dan tabel status JS-24 menulis ketiganya di atas lapisan jeda. Pilihan: (a) terima untuk v1.2; (b) perbaiki di JS-24 dengan memindahkan lapisan jeda ke dalam layar dunia; (c) perbaiki terpisah sesudah rilis v1.2.
+- Temuan 1 (diterima pemilik proyek 28 Nov 2026, pilihan a: diterima untuk v1.2): selama jeda, ikon layar penuh, seperti tombol Menu dan suara sejak v1.1, berada di bawah lapisan jeda yang tembus pandang, sehingga tampil tetapi tidak bisa diketuk. Design System 3.3, JS-14 P-5, dan tabel status JS-24 menulis ketiganya di atas lapisan jeda. Pilihan: (a) terima untuk v1.2; (b) perbaiki di JS-24 dengan memindahkan lapisan jeda ke dalam layar dunia; (c) perbaiki terpisah sesudah rilis v1.2.
 - Temuan 2: uji ujung ke ujung yang memeriksa batas waktu kadang gagal di mesin agen (satu CPU), juga dengan kode v1.1. Pemeriksaan penentu adalah "Jejak: uji" di GitHub sesudah push.
 - Berikutnya: pemilik proyek commit dan push ZIP JS-24, memastikan "Jejak: uji" hijau, lalu mencoba butir manual di HP sungguhan (AC-15). Sesudah itu Build JS-25 di chat yang sama.
 
@@ -2991,3 +2991,17 @@ Ditulis bersama Plan, atas instruksi pemilik proyek, dengan saran (a) untuk semu
 
 - Plan atau Specify yang menyentuh lapisan jeda: putuskan Temuan 1 JS-24 (kelompok Menu di atas lapisan jeda seperti Design System 3.3, atau sebaliknya dokumen disesuaikan).
 - Specify berikutnya yang menyentuh panel Menu: tombol Menu disembunyikan selama panel terbuka (JS-14 P-5), sehingga panel yang dibuka dengan `Enter` pada tombol Menu tidak bisa mengembalikan fokus ke tombol itu; fokus kembali ke dunia bila panel dibuka dari dunia.
+
+### Build dan Test JS-25 (28 Nov 2026)
+
+- Persetujuan sama dengan JS-24 (28 Nov 2026). Temuan 1 JS-24 diterima pemilik proyek (pilihan a) di chat yang sama. Dikerjakan Sesi A dalam mode ZIP, di atas keadaan sesudah ZIP JS-24.
+- Kode:
+  - pilihan durasi 5 menit di inti, protokol (tetap 6), dan konsol, dengan catatan paket di dialog Ruang baru;
+  - ambang peringatan per durasi ("Satu menit lagi" di sisa 60 detik untuk ronde 5 menit) di layar pemain dan layar kelas;
+  - `PROTOKOL_TAMBAHAN` 1: layar pemain menyambung dengan `?tambahan=1`, ruang 5 menit menolak kode lama sebelum `halo` (`VERSI_BERBEDA`, 4005), dan `/api/sehat` memuat `"tambahan":1`;
+  - durasi di riwayat, Sesi terakhir dasbor, dan kedua CSV; rata-rata skor ringkasan dasbor tanpa ronde 5 menit;
+  - `simulasi-beban.mjs`: `--durasi-ruang`, alamat dengan `?tambahan=1`, ronde yang berakhir sendiri, dan antrean tunda yang menjaga urutan (Temuan 3 JS-18 tertutup).
+- Uji: `__tests__/inti/ronde-5-menit.test.ts`, `server/jejak-setara/uji/ronde-5-menit.uji-server.ts`, dan `e2e/jejak-setara/ronde-5-menit.uji.ts` baru; uji lama disesuaikan dengan keluaran yang memang berubah (isi `/api/sehat`, isian dasbor, kolom CSV, dan daftar durasi). Rincian dan angka di [JS-25-hasil.md](tests/JS-25-hasil.md).
+- Rilis v1.2: catatan rilis [rilis/v1.2.md](rilis/v1.2.md) (protokol tetap 6, tanpa migrasi D1, cara kembali ke v1.1).
+- Berikutnya: pemilik proyek commit dan push ZIP JS-24 lalu ZIP JS-25, memastikan "Jejak: uji" hijau, mencoba AC-15 JS-24 dan JS-25 di lingkungan uji, lalu menjalankan "Jejak: produksi" `v1.2` di luar jam pelajaran.
+

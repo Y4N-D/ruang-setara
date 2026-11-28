@@ -399,9 +399,10 @@ test("ronde sampai rekap, ruang ditutup, lalu riwayat, hasil, rincian, CSV, ceta
     expect([...bita.subarray(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
     const teks = bita.subarray(3).toString("utf8");
     // JS-09 (P-47): CSV jawaban mendapat kolom ke-18 "Petunjuk dipakai" di ujung kanan.
-    expect(teks.split("\r\n")[0].split(";").length).toBe(jenis === "peserta" ? 16 : 18);
+    expect(teks.split("\r\n")[0].split(";").length).toBe(jenis === "peserta" ? 17 : 19); // JS-25 (P-17): kolom terakhir "Durasi (menit)"
+    expect(teks.split("\r\n")[0].endsWith(";Durasi (menit)")).toBe(true);
     if (jenis === "peserta") expect(teks).toContain(";Dikeluarkan");
-    else expect(teks.split("\r\n")[0]).toMatch(/;Keterangan;Petunjuk dipakai$/);
+    else expect(teks.split("\r\n")[0]).toMatch(/;Keterangan;Petunjuk dipakai;Durasi \(menit\)$/);
   }
 
   // Cetak: hanya bagian P-31; ruang 40 pemain menjadi PDF A4 satu halaman (AC-18).

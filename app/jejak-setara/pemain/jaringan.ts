@@ -5,6 +5,7 @@
 // memeriksa apakah ruang masih ada, lalu mencoba setiap 30 detik; sesudah 10 menit gagal, klien berhenti.
 import { BATAS } from "../inti/aturan";
 import { BATAS_PESAN, PROTOKOL_VERSI, skemaServerPemain, type KodeGalat, type PesanPemain, type PesanServerPemain } from "../inti/protokol";
+import { PROTOKOL_TAMBAHAN } from "../inti/versi";
 
 /** Jeda percobaan sambung ulang: 0,5, 1, 2, 4, lalu 8 detik seterusnya (P-29). */
 export const JADWAL_SAMBUNG_ULANG_MS = [500, 1000, 2000, 4000, 8000] as const;
@@ -17,6 +18,14 @@ export const BATAS_PUTUS_MS = 10 * 60_000;
 export const KODE_LAYANAN_BERHENTI = 4900;
 export const KODE_PUTUS_LAMA = 4901;
 export type HasilPeriksaRuang = "ada" | "tidak_ada" | "berhenti" | "tidak_tahu";
+
+/**
+ * JS-25 (P-8): alamat WebSocket pemain. `tambahan` menyatakan kode ini mengenal nilai baru di pesan yang sudah ada
+ * (ronde 5 menit); ruang 5 menit menolak sambungan tanpa angka ini dengan `VERSI_BERBEDA` (P-9).
+ */
+export function alamatSambungan(protokolHalaman: string, host: string, kode: string): string {
+  return `${protokolHalaman === "https:" ? "wss:" : "ws:"}//${host}/ws/ruang/${kode}?tambahan=${PROTOKOL_TAMBAHAN}`;
+}
 
 export function jedaPercobaan(percobaan: number): number {
   return JADWAL_SAMBUNG_ULANG_MS[Math.min(Math.max(0, percobaan), JADWAL_SAMBUNG_ULANG_MS.length - 1)];

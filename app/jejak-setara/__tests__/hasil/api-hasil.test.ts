@@ -265,7 +265,8 @@ describe.skipIf(!sqlite)("ekspor CSV (P-26 sampai P-30)", () => {
     const baris = new TextDecoder().decode(byte).slice(1).split("\r\n");
     expect(baris).toHaveLength(5);
     expect(baris[1].startsWith("IX B;2026-11-20;1;Jalak Biru;7;165;2;2;1;50,0;1;1;0;61,0;")).toBe(true);
-    expect(baris[3].endsWith(";Dikeluarkan")).toBe(true);
+    expect(baris[3].endsWith(";Dikeluarkan;15")).toBe(true); // JS-25 (P-17): Durasi di ujung kanan
+    expect(baris[0].endsWith(";Durasi (menit)")).toBe(true);
     const jawaban = await minta(env, "GET", `/api/ruang/${id}/ekspor?jenis=jawaban`, guru);
     const isi = new TextDecoder().decode(new Uint8Array(await jawaban.arrayBuffer())).slice(1).split("\r\n");
     expect(isi.slice(1, -1).map((b) => b.split(";").slice(2, 5).join(";"))).toEqual(["Jalak Biru;7;K-06", "Jalak Biru;7;K-13", "Kancil Hijau;3;K-13", "Rusa Merah;9;K-13"]);

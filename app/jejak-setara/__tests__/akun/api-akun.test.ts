@@ -157,7 +157,7 @@ describe.skipIf(!sqlite)("kunci Worker belum siap (P-34, AC-11)", () => {
       jumlahRuang: 0,
       siapTinjau: 0,
       sesi: [],
-      ringkasan: { hari: 30, sesi: 0, pemain: 0, rataSkor: null, ketepatan1: null, tingkat: { tepat: null, kurang: null, berisiko: null } },
+      ringkasan: { hari: 30, sesi: 0, sesiPendek: 0, pemain: 0, rataSkor: null, ketepatan1: null, tingkat: { tepat: null, kurang: null, berisiko: null } },
     });
     expect((await minta(rusak, "PATCH", `/api/akun/${guru.id}`, { cookie: admin, isi: { namaTampilan: "Bu Sari W." } })).status).toBe(200);
     expect((await minta(rusak, "POST", "/api/keluar", { cookie: admin })).status).toBe(200);

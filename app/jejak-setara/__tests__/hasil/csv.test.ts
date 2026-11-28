@@ -123,7 +123,7 @@ describe("rincian jawaban (P-24)", () => {
 });
 
 describe("CSV peserta dan jawaban (P-28, P-29)", () => {
-  const ruang = { labelKelas: "IX B", dibuatPada: Date.UTC(2026, 10, 20, 1, 0, 0) };
+  const ruang = { labelKelas: "IX B", dibuatPada: Date.UTC(2026, 10, 20, 1, 0, 0) , durasiMenit: 5 }; // JS-25 (P-17)
   const p = (id: string, lain: Partial<PesertaEkspor>): PesertaEkspor => ({
     id,
     nama: `Pemain ${id}`,
@@ -143,23 +143,24 @@ describe("CSV peserta dan jawaban (P-28, P-29)", () => {
   });
   const peserta = [p("p1", { nomorAbsen: 7 }), p("p2", { dikeluarkan: true, peringkat: null, skor: 0, waktuSkorMs: null, langkah1Dijawab: 0, langkah1Benar: 0 })];
 
-  it("CSV peserta: 16 kolom menurut urutan, peringkat kosong dan keterangan untuk yang dikeluarkan", () => {
+  it("CSV peserta: 17 kolom menurut urutan (JS-25: Durasi terakhir), peringkat kosong dan keterangan untuk yang dikeluarkan", () => {
     const baris = csvPeserta(ruang, peserta).slice(1).split("\r\n");
-    expect(baris[0].split(";")).toEqual([T.kelas, T.tanggal, T.peringkat, T.nama, T.absen, T.skor, T.selesai, T.l1Dijawab, T.l1Benar, T.ketepatan, T.tepat, T.kurang, T.berisiko, T.waktuSkor, T.gabung, T.keterangan]);
-    expect(baris[1].split(";")).toEqual(["IX B", "2026-11-20", "1", "Pemain p1", "7", "65", "1", "3", "2", "66,7", "0", "1", "0", "12,3", "2026-11-20 09:30:00", ""]);
-    expect(baris[2].split(";")).toEqual(["IX B", "2026-11-20", "", "Pemain p2", "", "0", "1", "0", "0", "", "0", "1", "0", "", "2026-11-20 09:30:00", T.dikeluarkan]);
+    expect(baris[0].split(";")).toEqual([T.kelas, T.tanggal, T.peringkat, T.nama, T.absen, T.skor, T.selesai, T.l1Dijawab, T.l1Benar, T.ketepatan, T.tepat, T.kurang, T.berisiko, T.waktuSkor, T.gabung, T.keterangan, T.durasi]);
+    expect(baris[1].split(";")).toEqual(["IX B", "2026-11-20", "1", "Pemain p1", "7", "65", "1", "3", "2", "66,7", "0", "1", "0", "12,3", "2026-11-20 09:30:00", "", "5"]);
+    expect(baris[2].split(";")).toEqual(["IX B", "2026-11-20", "", "Pemain p2", "", "0", "1", "0", "0", "", "0", "1", "0", "", "2026-11-20 09:30:00", T.dikeluarkan, "5"]);
     expect(baris[3]).toBe("");
   });
 
-  it("CSV jawaban: 18 kolom (JS-09 P-47), urut menurut peserta lalu nomor kode, Kerja untuk versi kerja, Ya dan Tidak, tingkat sebagai teks", () => {
+  it("CSV jawaban: 19 kolom (JS-09 P-47, JS-25 P-17), urut menurut peserta lalu nomor kode, Kerja untuk versi kerja, Ya dan Tidak, tingkat sebagai teks", () => {
     const rinci = rincianJawaban([jawaban("p2", "v-10", "1a", "2c"), jawaban("p1", "v-10", "1a", "2b", 1), jawaban("p1", "v-2", "1b", null)], VERSI);
     const baris = csvJawaban(ruang, peserta, rinci).slice(1).split("\r\n");
-    expect(baris[0].split(";")).toHaveLength(18);
-    expect(baris[0].split(";").slice(15)).toEqual([T.waktuMenjawab, T.keterangan, T.petunjuk]);
-    expect(baris[1].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p1", "7", "K-2", "Zebra cross", T.versiKerja, "C", "Hak penjual", T.tidak, "", "", "", "0", "2026-11-20 10:00:00", "", "", T.tidak]);
-    expect(baris[2].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p1", "7", "K-10", "Antrean", "2", "D", "Hak ibu", T.ya, "B", "Diam saja", T.tingkatKurang, "65", "2026-11-20 10:00:00", "41,6", "", T.ya]);
-    expect(baris[3].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p2", "", "K-10", "Antrean", "2", "D", "Hak ibu", T.ya, "A", "Ikut menyerobot", T.tingkatBerisiko, "40", "2026-11-20 10:00:00", "41,6", T.dikeluarkan, T.tidak]);
+    expect(baris[0].split(";")).toHaveLength(19);
+    expect(baris[0].split(";").slice(15)).toEqual([T.waktuMenjawab, T.keterangan, T.petunjuk, T.durasi]);
+    expect(baris[1].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p1", "7", "K-2", "Zebra cross", T.versiKerja, "C", "Hak penjual", T.tidak, "", "", "", "0", "2026-11-20 10:00:00", "", "", T.tidak, "5"]);
+    expect(baris[2].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p1", "7", "K-10", "Antrean", "2", "D", "Hak ibu", T.ya, "B", "Diam saja", T.tingkatKurang, "65", "2026-11-20 10:00:00", "41,6", "", T.ya, "5"]);
+    expect(baris[3].split(";")).toEqual(["IX B", "2026-11-20", "Pemain p2", "", "K-10", "Antrean", "2", "D", "Hak ibu", T.ya, "A", "Ikut menyerobot", T.tingkatBerisiko, "40", "2026-11-20 10:00:00", "41,6", T.dikeluarkan, T.tidak, "5"]);
     expect(T.petunjuk).toBe("Petunjuk dipakai");
+    expect(T.durasi).toBe("Durasi (menit)");
   });
 
   it("ruang tidak dimainkan: hanya baris judul", () => {

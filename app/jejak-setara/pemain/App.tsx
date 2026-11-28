@@ -41,7 +41,7 @@ import { masukLayarPenuh } from "./layarPenuh";
 import { KelompokMenuSuara, PanelPengaturan, PanelPrivasi, PanelTentang, type JenisLembar } from "./PanelPengaturan";
 import { LABEL_HURUF, useKurangiGerak, usePengaturan } from "./pengaturan";
 import { buatPemutarSuara, bunyiTeksJatuh, LAJU_TEKS, type NamaSuara } from "./suara";
-import { ketergantunganPeramban, KlienRuang, type KeadaanKlien, KODE_LAYANAN_BERHENTI, KODE_PUTUS_LAMA } from "./jaringan";
+import { alamatSambungan, ketergantunganPeramban, KlienRuang, type KeadaanKlien, KODE_LAYANAN_BERHENTI, KODE_PUTUS_LAMA } from "./jaringan";
 import LayarDunia, { areaDialog } from "./LayarDunia";
 import { LapisanJeda, LapisanMenyambung } from "./LayarMenyambung";
 import { LayarDitutup, LayarGalat, type SkorAkhir, type WaktuStatus, LayarBerhenti } from "./LayarRonde";
@@ -491,7 +491,8 @@ export default function App() {
       hapusRekap();
       pribadiRef.current = { skor: 0, peringkat: 1 };
       setPribadi(pribadiRef.current);
-      const alamat = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/ruang/${k}`;
+      // JS-25 (P-8): `tambahan` menyatakan kode ini mengenal ronde 5 menit; ruang 5 menit menolak kode tanpa angka ini.
+      const alamat = alamatSambungan(window.location.protocol, window.location.host, k);
       const c: KlienRuang = new KlienRuang(
         alamat,
         k,

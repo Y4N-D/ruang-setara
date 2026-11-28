@@ -6,7 +6,7 @@
 // tabel itu, kait uji lokal `kejadian` dan `pindahkan`, dan kiriman berkunci berversi (P-60 sampai P-63, P-66, P-67).
 import { PROTOKOL_VERSI, type PesanServerPemain } from "../../../../app/jejak-setara/inti/protokol";
 import { skemaKelas, type PesanKelas } from "../../../../app/jejak-setara/inti/protokol-kelas";
-import { skemaKelola, STATUS_BOLEH_TUTUP } from "../../../../app/jejak-setara/inti/ruang";
+import { bacaTambahan, skemaKelola, STATUS_BOLEH_TUTUP, tambahanDiperlukan } from "../../../../app/jejak-setara/inti/ruang";
 import { normalkanKodeMasukUlang } from "../../../../app/jejak-setara/inti/aturan";
 import { tulisRingkasanRuang } from "../db/ruang";
 import {
@@ -576,6 +576,15 @@ export class RuangJejak {
     const pasangan = new WebSocketPair();
     const klien = pasangan[0];
     const server = pasangan[1];
+    // JS-25 (P-9): ruang 5 menit menolak kode lama sebelum `halo`, agar HP dengan tab lama langsung diminta memuat ulang.
+    // Hanya hitungan sambungan yang berubah: tanpa pemain, batas halo, atau alarm, dan pesan dari soket ini tidak diproses.
+    if (bacaTambahan(new URL(request.url).searchParams.get("tambahan")) < tambahanDiperlukan(k.ruang.pengaturan.durasiMenit)) {
+      server.accept();
+      this.pemakaian.sambungan++;
+      server.send(JSON.stringify({ v: PROTOKOL_VERSI, t: "galat", kode: "VERSI_BERBEDA", pesan: TEKS.galat.VERSI_BERBEDA } satisfies PesanServerPemain));
+      server.close(KODE_TUTUP.versi, "versi berbeda");
+      return new Response(null, { status: 101, webSocket: klien });
+    }
     const sambunganId = base64url(crypto.getRandomValues(new Uint8Array(9)));
     this.ctx.acceptWebSocket(server, ["pemain"]);
     this.pemakaian.sambungan++; // JS-22, P-15

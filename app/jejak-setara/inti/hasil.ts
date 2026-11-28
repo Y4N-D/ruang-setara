@@ -44,6 +44,7 @@ export const skemaRuangRiwayat = z.object({
   dimainkan: z.boolean(),
   jumlahPemain: bulat(),
   rataSkor: z.number().nullable(),
+  durasiMenit: z.number().int().optional(), // JS-25 (P-13): tidak wajib, agar konsol tetap membaca Worker lama (dianggap 15)
 });
 export type RuangRiwayat = z.infer<typeof skemaRuangRiwayat>;
 export const skemaRiwayat = z.object({ ruang: z.array(skemaRuangRiwayat), berikutnya: z.string().nullable() });

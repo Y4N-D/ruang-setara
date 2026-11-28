@@ -44,7 +44,7 @@ describe("Worker kerangka", () => {
     const jawaban = await minta("/api/sehat");
     expect(jawaban.status).toBe(200);
     periksaTajukJson(jawaban);
-    expect(await jawaban.text()).toBe(`{"ok":true,"protokol":${PROTOKOL_VERSI},"lingkungan":"lokal"}`);
+    expect(await jawaban.text()).toBe(`{"ok":true,"protokol":${PROTOKOL_VERSI},"tambahan":1,"lingkungan":"lokal"}`); // JS-25 (P-8)
   });
 
   it.each(["POST", "PUT", "DELETE"])("%s /api/sehat menjawab 405 dengan Allow: GET (AC-4)", async (metode) => {
@@ -158,6 +158,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(kunciJs14().pemain),
         ...Object.keys(kunciJs16b().pemain),
         ...Object.keys(kunciJs18().pemain),
+        ...Object.keys(kunciJs25().pemain),
       ]),
     ).toEqual({
       judulTabPemain: "Jejak Setara",
@@ -376,7 +377,8 @@ describe("Teks dan halaman", () => {
         !(k in kunciJs14().konsol) &&
         !(k in kunciJs15().konsol) &&
         !(k in js16b.konsol) &&
-        !(k in kunciJs21()),
+        !(k in kunciJs21()) &&
+        !(k in kunciJs25().konsol),
     );
     expect(kunciJs10.sort()).toEqual(Object.keys(harapan).sort());
   });
@@ -419,7 +421,7 @@ describe("Teks dan halaman", () => {
     expect(Object.keys(datarPemain).filter((k) => k.startsWith("rekap.")).sort()).toEqual(Object.keys(pemain).sort());
     const js09 = kunciJs09();
     for (const grup of ["riwayatRuang", "hasil", "csv"]) {
-      const ada = Object.keys(datarKonsol).filter((k) => k.startsWith(`${grup}.`) && !(k in js09.csv));
+      const ada = Object.keys(datarKonsol).filter((k) => k.startsWith(`${grup}.`) && !(k in js09.csv) && !(k in kunciJs25().konsol));
       expect(ada.sort(), grup).toEqual(Object.keys({ ...konsol, ...csv }).filter((k) => k.startsWith(`${grup}.`)).sort());
     }
   });
@@ -428,7 +430,7 @@ describe("Teks dan halaman", () => {
     const js13 = kunciJs13();
     expect(Object.keys(js13)).toHaveLength(79);
     const datar = ratakanTeks(TEKS_KONSOL);
-    for (const [kunci, teks] of Object.entries(js13)) expect(datar[kunci], kunci).toBe(teks);
+    for (const [kunci, teks] of Object.entries(js13)) expect(datar[kunci], kunci).toBe(kunciJs25().ubah[kunci] ?? teks); // JS-25 mengubah sesiItem
     // Kelompok baru statistik tidak memuat kunci di luar spesifikasi.
     expect(Object.keys(datar).filter((x) => x.startsWith("statistik.")).sort()).toEqual(Object.keys(js13).filter((x) => x.startsWith("statistik.")).sort());
   });
@@ -472,6 +474,7 @@ describe("Teks dan halaman", () => {
         ...Object.keys(TEKS_A14_KONSOL),
         ...Object.keys(kunciJs15().konsol),
         ...Object.keys(kunciJs18().konsol),
+        ...Object.keys(kunciJs25().konsol),
       ]),
     ).toEqual({
       merek: "Jejak Setara",
@@ -1530,3 +1533,38 @@ describe("JS-23: teks peta tetap dan aturan impor peta kelas (bagian Teks; P-1)"
     expect(isi).not.toMatch(/assets\/manifest/);
   });
 });
+
+/** JS-25: kunci dan teks dari tabel spesifikasi JS-25; `ubah` memuat kunci lama yang teksnya diubah JS-25. */
+function kunciJs25(): { pemain: Record<string, string>; konsol: Record<string, string>; ubah: Record<string, string> } {
+  const isi = baca("docs/jejak-setara/specs/JS-25-ronde-5-menit.md");
+  const bagian = isi.slice(isi.indexOf("## Teks yang tampil (final)"), isi.indexOf("\n## Data, protokol"));
+  const batas = bagian.indexOf("`TEKS_KONSOL`:");
+  const urai = (teks: string) => {
+    const semua: Record<string, string> = {};
+    const ubah: Record<string, string> = {};
+    for (const baris of teks.split("\n")) {
+      const m = /^\| `([^`]+)`( \(diubah\))? \| (.+) \|$/.exec(baris);
+      if (!m) continue;
+      semua[m[1]] = m[3];
+      if (m[2]) ubah[m[1]] = m[3];
+    }
+    return { semua, ubah };
+  };
+  const pemain = urai(bagian.slice(0, batas));
+  const konsol = urai(bagian.slice(batas));
+  return { pemain: pemain.semua, konsol: konsol.semua, ubah: konsol.ubah };
+}
+
+describe("JS-25: teks final", () => {
+  it("TEKS dan TEKS_KONSOL memuat tepat teks bagian Teks yang tampil (final) spesifikasi JS-25", () => {
+    const { pemain, konsol, ubah } = kunciJs25();
+    expect(Object.keys(pemain)).toEqual(["dunia.satuMenit"]);
+    expect(Object.keys(konsol)).toHaveLength(6);
+    expect(Object.keys(ubah).sort()).toEqual(["dasbor.sesiItem", "dasbor.sesiItemGuru"]);
+    const datarPemain = ratakanTeks(TEKS);
+    const datarKonsol = ratakanTeks(TEKS_KONSOL);
+    for (const [k, t] of Object.entries(pemain)) expect(datarPemain[k], k).toBe(t);
+    for (const [k, t] of Object.entries(konsol)) expect(datarKonsol[k], k).toBe(t);
+  });
+});
+

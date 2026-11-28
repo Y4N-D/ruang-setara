@@ -86,12 +86,20 @@ describe("kartu dasbor (P-27)", () => {
     sesi: [{ id: "r1", kode: "AB123", labelKelas: "IX B", uji: true, namaGuru: "Bu Sari", dibuatPada: Date.UTC(2026, 10, 20, 2), jumlahPemain: 31, rataSkor: 793.4 }],
     ringkasan: { hari: 30, sesi: 22, pemain: 863, rataSkor: 797.7, ketepatan1: 66.7, tingkat: { tepat: 60.5, kurang: 24.5, berisiko: 15 } },
   };
+  it("JS-25 (P-14, P-15): sesi 5 menit membawa durasinya, dan catatan rata-rata tampil bila ada ronde 5 menit", () => {
+    const lima = { ...data, sesi: [{ ...data.sesi[0], durasiMenit: 5 }], ringkasan: { ...data.ringkasan, sesiPendek: 2 } };
+    const html = renderToStaticMarkup(<IsiDasbor data={lima} admin={false} />);
+    expect(html).toMatch(/20 Nov 2026 · IX B · 5 menit · 31 pemain · rata-rata 793,4/);
+    expect(html).toContain("Ruang uji tidak dihitung. Rata-rata skor tanpa ronde 5 menit.");
+  });
+
   it("admin: peringatan bertaut, sesi dengan nama guru dan tanda Uji, ringkasan", () => {
     const html = renderToStaticMarkup(<IsiDasbor data={data} admin />);
     expect(html).toContain('href="#/rujukan"');
     expect(html).toContain('href="#/kejadian"');
     expect(html).toContain("kejadian Siap tinjau menunggu diterbitkan.");
-    expect(html).toMatch(/20 Nov 2026 · IX B · Bu Sari · 31 pemain · rata-rata 793,4/);
+    expect(html).toMatch(/20 Nov 2026 · IX B · Bu Sari · 15 menit · 31 pemain · rata-rata 793,4/); // JS-25: durasi tanpa isian dianggap 15
+    expect(html).not.toContain("Rata-rata skor tanpa ronde 5 menit.");
     expect(html).toContain(">Uji<");
     expect(html).toContain('href="#/ruang/riwayat"');
     expect(html).toContain("863");

@@ -161,6 +161,8 @@ export function namaBerkasCsv(label: string, dibuatPada: number, jenis: "peserta
 export interface RuangEkspor {
   labelKelas: string;
   dibuatPada: number;
+  /** JS-25 (P-17): durasi ruang, kolom terakhir kedua CSV. */
+  durasiMenit: number;
 }
 
 export interface PesertaEkspor {
@@ -185,7 +187,7 @@ const keterangan = (dikeluarkan: boolean) => (dikeluarkan ? T.dikeluarkan : "");
 
 /** Peserta sudah urut menurut P-21 (peringkat, lalu yang dikeluarkan). */
 export function csvPeserta(ruang: RuangEkspor, peserta: readonly PesertaEkspor[]): string {
-  const judul = [T.kelas, T.tanggal, T.peringkat, T.nama, T.absen, T.skor, T.selesai, T.l1Dijawab, T.l1Benar, T.ketepatan, T.tepat, T.kurang, T.berisiko, T.waktuSkor, T.gabung, T.keterangan];
+  const judul = [T.kelas, T.tanggal, T.peringkat, T.nama, T.absen, T.skor, T.selesai, T.l1Dijawab, T.l1Benar, T.ketepatan, T.tepat, T.kurang, T.berisiko, T.waktuSkor, T.gabung, T.keterangan, T.durasi]; // JS-25 (P-17): Durasi di ujung kanan
   const tanggal = tanggalWita(ruang.dibuatPada);
   const baris = peserta.map((p) => [
     selTeks(ruang.labelKelas),
@@ -204,6 +206,7 @@ export function csvPeserta(ruang: RuangEkspor, peserta: readonly PesertaEkspor[]
     selDesimal(p.skor > 0 && p.waktuSkorMs !== null ? p.waktuSkorMs / 1000 : null),
     selTeks(waktuWita(p.gabungPada)),
     selTeks(keterangan(p.dikeluarkan)),
+    selBulat(ruang.durasiMenit),
   ]);
   return susunCsv(judul, baris);
 }
@@ -229,6 +232,7 @@ export function csvJawaban(ruang: RuangEkspor, peserta: readonly PesertaEkspor[]
     T.waktuMenjawab,
     T.keterangan,
     T.petunjuk, // JS-09 (P-47): kolom ke-18 di ujung kanan, agar kolom JS-11 tidak bergeser
+    T.durasi, // JS-25 (P-17): kolom ke-19, sesudah kolom terakhir yang lama
   ];
   const kelas = selTeks(ruang.labelKelas);
   const tanggal = selTeks(tanggalWita(ruang.dibuatPada));
@@ -263,6 +267,7 @@ export function csvJawaban(ruang: RuangEkspor, peserta: readonly PesertaEkspor[]
         selDesimal(j.waktuMenjawabMs === null ? null : j.waktuMenjawabMs / 1000),
         ket,
         selTeks(j.petunjukDipakai ? T.ya : T.tidak),
+        selBulat(ruang.durasiMenit),
       ]);
     }
   }

@@ -1,7 +1,7 @@
 // Langit sehari di layar pemain (spesifikasi JS-07, P-9, P-10, P-30 sampai P-32; PRD 8.1; Architecture 9).
 // Kemajuan dihitung dari sisa waktu, sehingga sama di setiap perangkat, juga sesudah sambung ulang, dan tambah
 // waktu memundurkan langit.
-import { duaMenitTerakhir, formatJam, HARI, masa as masaDari, menitCerita } from "../../inti/aturan";
+import { formatJam, HARI, masa as masaDari, menitCerita, peringatanAkhir } from "../../inti/aturan";
 import type { Masa, StatusRuang } from "../../inti/tipe";
 
 export interface WaktuRuangKlien {
@@ -64,7 +64,8 @@ export function hitungLangit(w: WaktuRuangKlien, durasiMenit: number, jamServer:
     kemajuan,
     masa: m,
     jam: formatJam(menitCerita(kemajuan)),
-    duaMenit: berjalan && duaMenitTerakhir(Math.ceil(sisa / 1000)),
+    // JS-25 (P-6): peringatan akhir ronde, 60 detik di ronde 5 menit dan 120 detik di ronde lain (nama isian tetap).
+    duaMenit: berjalan && peringatanAkhir(Math.ceil(sisa / 1000), durasiMenit),
     masaBerikut,
     msSampaiBerikut,
   };

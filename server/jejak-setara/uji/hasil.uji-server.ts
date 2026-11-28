@@ -176,14 +176,14 @@ describe("ronde penuh sampai hapus data ruang (P-1 sampai P-33)", () => {
     expect(teksP.startsWith("﻿")).toBe(true);
     const barisP = teksP.slice(1).split("\r\n").filter(Boolean);
     expect(barisP).toHaveLength(4);
-    expect(barisP[0].split(";")).toHaveLength(16);
+    expect(barisP[0].split(";")).toHaveLength(17); // JS-25 (P-17): kolom ke-17 "Durasi (menit)"
     expect(barisP[3]).toContain(b.nama);
-    expect(barisP[3].endsWith(";Dikeluarkan")).toBe(true);
+    expect(barisP[3].endsWith(";Dikeluarkan;15")).toBe(true);
     const csvJ = await fetch(`${B}/api/ruang/${id}/ekspor?jenis=jawaban`, { headers: tajuk });
     const teksJ = new TextDecoder("utf-8", { ignoreBOM: true }).decode(await csvJ.arrayBuffer());
     const barisJ = teksJ.slice(1).split("\r\n").filter(Boolean);
     expect(barisJ).toHaveLength(3);
-    expect(barisJ[0].split(";")).toHaveLength(18); // JS-09 (P-47): kolom ke-18 "Petunjuk dipakai"
+    expect(barisJ[0].split(";")).toHaveLength(19); // JS-09 (P-47): kolom ke-18 "Petunjuk dipakai"; JS-25 (P-17): ke-19 "Durasi (menit)"
     expect((await konsol("GET", `/api/ruang/${id}/ekspor?jenis=lain`)).status).toBe(400);
 
     // Hapus: guru 403 (D-3a), admin 200; satu baris audit; ruang hilang dari riwayat dan hasil 404 (P-33; AC-19).

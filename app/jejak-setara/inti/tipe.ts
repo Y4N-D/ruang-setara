@@ -41,7 +41,7 @@ export interface IsiKejadian {
 export type ModeNama = "daftar" | "bebas";
 
 export interface PengaturanRuang {
-  durasiMenit: 10 | 15 | 20;
+  durasiMenit: 5 | 10 | 15 | 20; // 5 sejak JS-25
   batasPemain: number; // 2–100, bawaan 40; mode nomor absen hanya sampai 50 (JS-03)
   batasTerlambatMenit: number; // 0–10, bawaan 5
   skillAktif: SkillId[];

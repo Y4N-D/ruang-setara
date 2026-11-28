@@ -266,3 +266,9 @@ export function buatSuaraKelas(deps: Partial<DepsSuaraKelas> = {}): SuaraKelas {
 export function lewatDuaMenit(sebelum: number | null, kini: number): boolean {
   return sebelum !== null && sebelum > DUA_MENIT_MS && kini <= DUA_MENIT_MS && kini > 0;
 }
+
+/** JS-25 (P-6): seperti `lewatDuaMenit`, dengan ambang 60 detik untuk ronde 5 menit dan 120 detik untuk ronde lain. */
+export function lewatPeringatan(sebelum: number | null, kini: number, durasiMenit: number): boolean {
+  const ambang = durasiMenit === 5 ? 60_000 : DUA_MENIT_MS;
+  return sebelum !== null && sebelum > ambang && kini <= ambang && kini > 0;
+}

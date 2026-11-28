@@ -250,8 +250,9 @@ describe("kotak, Lari cepat, Kompas, Petunjuk, dan +1 Kompas di ruang uji (AC-4,
     const csv = await fetch(`${alamat()}/api/ruang/${id}/ekspor?jenis=jawaban`, { headers: { Cookie: await sesiAdmin(), "CF-Connecting-IP": "10.9.70.9" } });
     expect(csv.status).toBe(200);
     const baris = new TextDecoder("utf-8", { ignoreBOM: true }).decode(await csv.arrayBuffer()).slice(1).split("\r\n").filter(Boolean);
-    expect(baris[0].split(";")).toHaveLength(18);
+    expect(baris[0].split(";")).toHaveLength(19); // JS-25 (P-17): kolom ke-19 "Durasi (menit)"
     expect(baris[0].split(";")[17]).toBe("Petunjuk dipakai");
+    expect(baris[0].split(";")[18]).toBe("Durasi (menit)");
     // Baris dicari lewat kolom yang sama persis dengan nama: "Kancil Merah" juga terkandung di "Kancil Merah Muda".
     const barisA = baris.find((x) => x.split(";").includes(a.nama));
     expect(barisA?.split(";")[17]).toBe("Ya");

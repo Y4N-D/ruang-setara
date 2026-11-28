@@ -94,7 +94,7 @@ export function IsiDasbor({ data, admin }: { data: DataDasbor; admin: boolean })
         {sesi.length > 0 ? (
           <ul className="js-konsol-daftar-ruang js-dasbor-sesi">
             {sesi.map((s) => {
-              const isi = { tanggal: TANGGAL.format(s.dibuatPada), kelas: s.labelKelas, guru: s.namaGuru ?? t.kosongNilai, n: s.jumlahPemain, rata: satu(s.rataSkor) };
+              const isi = { tanggal: TANGGAL.format(s.dibuatPada), kelas: s.labelKelas, guru: s.namaGuru ?? t.kosongNilai, durasi: s.durasiMenit ?? 15, n: s.jumlahPemain, rata: satu(s.rataSkor) };
               return (
                 <li key={s.id}>
                   <a href={keHash("ruang", s.id)}>{isiTeks(admin ? t.sesiItemGuru : t.sesiItem, isi)}</a>
@@ -142,7 +142,8 @@ export function IsiDasbor({ data, admin }: { data: DataDasbor; admin: boolean })
                 <p>{isiTeks(t.ringkasanTingkat, { a: SATU.format(r.tingkat.tepat), b: SATU.format(r.tingkat.kurang), c: SATU.format(r.tingkat.berisiko) })}</p>
               </div>
             ) : null}
-            <p className="js-dasbor-catatan">{t.ringkasanCatatan}</p>
+            {/* JS-25 (P-15): rata-rata skor hanya dari ronde 10 menit atau lebih. */}
+            <p className="js-dasbor-catatan">{(r.sesiPendek ?? 0) > 0 ? `${t.ringkasanCatatan} ${t.ringkasanTanpaPendek}` : t.ringkasanCatatan}</p>
             <a className="js-dasbor-tautan" href={keHash("statistik")}>
               {t.keStatistik}
             </a>

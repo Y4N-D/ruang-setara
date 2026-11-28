@@ -24,6 +24,7 @@ export const HARI = {
   ambangSiang: 0.3,
   ambangSore: 0.65,
   duaMenitDetik: 120,
+  satuMenitDetik: 60, // JS-25 (P-6): peringatan akhir ronde 5 menit
 } as const;
 
 /** Bagian ronde yang sudah berjalan, tanpa lama jeda, dijepit ke 0–1. */
@@ -61,6 +62,16 @@ export function formatJam(menit: number): string {
 /** Benar selama sisa waktu 1–120 detik; 0 detik berarti ronde selesai. */
 export function duaMenitTerakhir(sisaDetik: number): boolean {
   return sisaDetik > 0 && sisaDetik <= HARI.duaMenitDetik;
+}
+
+/** JS-25 (P-6): ambang peringatan akhir ronde: 60 detik untuk ronde 5 menit, 120 detik untuk ronde 10, 15, dan 20 menit. */
+export function ambangPeringatanDetik(durasiMenit: number): number {
+  return durasiMenit === 5 ? HARI.satuMenitDetik : HARI.duaMenitDetik;
+}
+
+/** JS-25 (P-6): benar selama sisa waktu 1 detik sampai ambang peringatan ronde ini; 0 detik berarti ronde selesai. */
+export function peringatanAkhir(sisaDetik: number, durasiMenit: number): boolean {
+  return sisaDetik > 0 && sisaDetik <= ambangPeringatanDetik(durasiMenit);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -390,7 +401,7 @@ export const BATAS = {
   pemainMaks: 100, // JS-03, Permintaan C-8 (bawaan tetap 40)
   pemainMaksNomorAbsen: 50, // mode nomor absen hanya untuk ruang sampai 50 pemain (KT-02)
   ruangBesarLebihDari: 50, // ruang lebih dari 50 pemain memakai frekuensi gerak lebih rendah
-  durasiMenit: [10, 15, 20],
+  durasiMenit: [5, 10, 15, 20], // 5 sejak JS-25
   terlambatMenit: 5,
   nomorAbsenMin: 1,
   nomorAbsenMaks: 50,

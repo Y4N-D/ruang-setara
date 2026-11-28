@@ -172,7 +172,7 @@ test("tajuk halaman dan jawaban Worker (AC-3, AC-4, AC-8)", async ({ request }) 
 
   const sehat = await request.get("/api/sehat");
   expect(sehat.status()).toBe(200);
-  expect(await sehat.text()).toBe(`{"ok":true,"protokol":${PROTOKOL_VERSI},"lingkungan":"lokal"}`);
+  expect(await sehat.text()).toBe(`{"ok":true,"protokol":${PROTOKOL_VERSI},"tambahan":1,"lingkungan":"lokal"}`); // JS-25 (P-8)
   for (const [nama, nilai] of Object.entries(TAJUK_JSON)) expect(sehat.headers()[nama], nama).toBe(nilai);
 
   const kirim = await request.post("/api/sehat");

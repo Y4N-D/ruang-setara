@@ -223,6 +223,7 @@ export async function tulisRingkasanRuang(db: D1Database, ruangId: string, ringk
 // Riwayat, hasil, ekspor, dan hapus data ruang (spesifikasi JS-11)
 
 export interface BarisRiwayat {
+  durasi_menit: number | null; // JS-25 (P-13)
   id: string;
   kode: string;
   label_kelas: string;
@@ -248,11 +249,12 @@ export async function daftarRiwayat(
   // ruang yang tampil. Batas tanggal selalu tertulis agar indeks `ruang_dibuat` terpakai. Isi jawaban tidak berubah.
   const hasil = await db
     .prepare(
-      "WITH t AS (SELECT r.id, r.kode, r.label_kelas, r.uji, r.dibuat_pada, r.mulai_pada, r.selesai_pada, r.pemilik_id FROM ruang r " +
+      "WITH t AS (SELECT r.id, r.kode, r.label_kelas, r.uji, r.dibuat_pada, r.mulai_pada, r.selesai_pada, r.pemilik_id, r.pengaturan_json FROM ruang r " +
         "WHERE r.status = 'ditutup' AND (?1 IS NULL OR r.pemilik_id = ?1) AND r.dibuat_pada >= ?2 AND r.dibuat_pada < ?3 " +
         "AND (?4 IS NULL OR instr(lower(r.label_kelas), lower(?4)) > 0) AND (?5 IS NULL OR r.dibuat_pada < ?5 OR (r.dibuat_pada = ?5 AND r.id < ?6)) " +
         "ORDER BY r.dibuat_pada DESC, r.id DESC LIMIT ?7) " +
         "SELECT t.id, t.kode, t.label_kelas, t.uji, t.dibuat_pada, t.mulai_pada, t.selesai_pada, g.nama_tampilan AS nama_guru, " +
+        "CASE WHEN json_valid(t.pengaturan_json) THEN json_extract(t.pengaturan_json, '$.durasiMenit') END AS durasi_menit, " +
         "(SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = t.id AND s.dikeluarkan = 0) AS jumlah_pemain, " +
         "(SELECT AVG(s.skor) FROM peserta s WHERE s.ruang_id = t.id AND s.dikeluarkan = 0) AS rata_skor " +
         "FROM t LEFT JOIN pengguna g ON g.id = t.pemilik_id ORDER BY t.dibuat_pada DESC, t.id DESC",
@@ -266,6 +268,7 @@ export async function daftarRiwayat(
 // Dasbor (spesifikasi JS-13, P-25 dan P-26). Tidak membaca tabel jawaban.
 
 export interface BarisSesiDasbor {
+  durasi_menit: number | null; // JS-25 (P-14)
   id: string;
   kode: string;
   label_kelas: string;
@@ -280,10 +283,11 @@ export interface BarisSesiDasbor {
 export async function sesiTerakhir(db: D1Database, pemilikId: string | null, maks: number): Promise<BarisSesiDasbor[]> {
   const hasil = await db
     .prepare(
-      "WITH t AS (SELECT r.id, r.kode, r.label_kelas, r.uji, r.dibuat_pada, r.pemilik_id FROM ruang r WHERE r.status = 'ditutup' AND r.dibuat_pada >= 0 " +
+      "WITH t AS (SELECT r.id, r.kode, r.label_kelas, r.uji, r.dibuat_pada, r.pemilik_id, r.pengaturan_json FROM ruang r WHERE r.status = 'ditutup' AND r.dibuat_pada >= 0 " +
         "AND r.mulai_pada IS NOT NULL AND r.selesai_pada IS NOT NULL AND r.mulai_pada <= r.selesai_pada AND (?1 IS NULL OR r.pemilik_id = ?1) " +
         "ORDER BY r.dibuat_pada DESC, r.id DESC LIMIT ?2) " +
         "SELECT t.id, t.kode, t.label_kelas, t.uji, t.dibuat_pada, g.nama_tampilan AS nama_guru, " +
+        "CASE WHEN json_valid(t.pengaturan_json) THEN json_extract(t.pengaturan_json, '$.durasiMenit') END AS durasi_menit, " +
         "(SELECT COUNT(*) FROM peserta s WHERE s.ruang_id = t.id AND s.dikeluarkan = 0) AS jumlah_pemain, " +
         "(SELECT AVG(s.skor) FROM peserta s WHERE s.ruang_id = t.id AND s.dikeluarkan = 0) AS rata_skor " +
         "FROM t LEFT JOIN pengguna g ON g.id = t.pemilik_id ORDER BY t.dibuat_pada DESC, t.id DESC",
@@ -295,6 +299,9 @@ export async function sesiTerakhir(db: D1Database, pemilikId: string | null, mak
 
 export interface BarisRingkasanDasbor {
   sesi: number;
+  sesi_pendek: number | null; // JS-25 (P-15)
+  pemain_panjang: number | null;
+  skor_panjang: number | null;
   pemain: number | null;
   skor: number | null;
   l1: number | null;
@@ -308,16 +315,21 @@ export interface BarisRingkasanDasbor {
 export async function ringkasanDasbor(db: D1Database, pemilikId: string | null, sejak: number): Promise<BarisRingkasanDasbor> {
   const baris = await db
     .prepare(
-      "WITH h AS (SELECT CASE WHEN json_valid(r.ringkasan_json) THEN json_extract(r.ringkasan_json, '$.hasil') END AS hasil FROM ruang r " +
+      "WITH h AS (SELECT CASE WHEN json_valid(r.ringkasan_json) THEN json_extract(r.ringkasan_json, '$.hasil') END AS hasil, " +
+        "CASE WHEN json_valid(r.pengaturan_json) THEN json_extract(r.pengaturan_json, '$.durasiMenit') END AS durasi FROM ruang r " +
         "WHERE r.dibuat_pada >= ?2 AND r.dibuat_pada < ?3 AND (?1 IS NULL OR r.pemilik_id = ?1) AND r.uji = 0 AND r.status IN ('selesai', 'pembahasan', 'ditutup') " +
         "AND r.mulai_pada IS NOT NULL AND r.selesai_pada IS NOT NULL AND r.mulai_pada <= r.selesai_pada) " +
         "SELECT COUNT(*) AS sesi, SUM(json_extract(hasil, '$.jumlahPemain')) AS pemain, SUM(json_extract(hasil, '$.jumlahSkor')) AS skor, " +
+        // JS-25 (P-15): rata-rata skor hanya dari ronde 10 menit atau lebih; ruang tanpa durasi dianggap 15 menit.
+        "SUM(CASE WHEN COALESCE(durasi, 15) >= 10 THEN json_extract(hasil, '$.jumlahPemain') END) AS pemain_panjang, " +
+        "SUM(CASE WHEN COALESCE(durasi, 15) >= 10 THEN json_extract(hasil, '$.jumlahSkor') END) AS skor_panjang, " +
+        "SUM(CASE WHEN durasi = 5 THEN 1 ELSE 0 END) AS sesi_pendek, " +
         "SUM(json_extract(hasil, '$.langkah1Dijawab')) AS l1, SUM(json_extract(hasil, '$.langkah1Benar')) AS b1, SUM(json_extract(hasil, '$.tepat')) AS tepat, " +
         "SUM(json_extract(hasil, '$.kurang')) AS kurang, SUM(json_extract(hasil, '$.berisiko')) AS berisiko FROM h WHERE hasil IS NOT NULL AND json_extract(hasil, '$.versi') IS NOT NULL",
     )
     .bind(pemilikId, sejak, WAKTU_MAKS)
     .first<BarisRingkasanDasbor>();
-  return baris ?? { sesi: 0, pemain: 0, skor: 0, l1: 0, b1: 0, tepat: 0, kurang: 0, berisiko: 0 };
+  return baris ?? { sesi: 0, pemain_panjang: 0, skor_panjang: 0, sesi_pendek: 0, pemain: 0, skor: 0, l1: 0, b1: 0, tepat: 0, kurang: 0, berisiko: 0 };
 }
 
 export interface BarisPesertaHasil {

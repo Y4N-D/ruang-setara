@@ -423,7 +423,7 @@ describe("batas (P-39)", () => {
       pemainMaks: 100,
       pemainMaksNomorAbsen: 50,
       ruangBesarLebihDari: 50,
-      durasiMenit: [10, 15, 20],
+      durasiMenit: [5, 10, 15, 20],
       terlambatMenit: 5,
       nomorAbsenMin: 1,
       nomorAbsenMaks: 50,

@@ -56,7 +56,7 @@ describe("darurat di Worker", () => {
           env(true),
         )
       ).json(),
-    ).toEqual({ ok: true, protokol: PROTOKOL_VERSI, lingkungan: "uji", darurat: true });
+    ).toEqual({ ok: true, protokol: PROTOKOL_VERSI, tambahan: 1, lingkungan: "uji", darurat: true });
     expect(
       await (
         await worker.fetch(
@@ -64,7 +64,7 @@ describe("darurat di Worker", () => {
           env(false),
         )
       ).json(),
-    ).toEqual({ ok: true, protokol: PROTOKOL_VERSI, lingkungan: "uji" });
+    ).toEqual({ ok: true, protokol: PROTOKOL_VERSI, tambahan: 1, lingkungan: "uji" });
   });
 
   it("halaman statis tetap disajikan", async () => {

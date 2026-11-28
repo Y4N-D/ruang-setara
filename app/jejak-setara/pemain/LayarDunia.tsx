@@ -340,16 +340,18 @@ export default function LayarDunia(props: PropsLayarDunia) {
     };
   }, [waktu, durasiMenit, selisihJam]);
 
-  // Dua menit terakhir: pita 3 detik dan pengumuman sekali per penurunan (P-32).
+  // Dua menit terakhir: pita 3 detik dan pengumuman sekali per penurunan (P-32). JS-25 (P-6): "Satu menit lagi" di
+  // ronde 5 menit, karena peringatannya mulai di sisa 60 detik.
+  const teksPeringatan = durasiMenit === 5 ? TEKS.dunia.satuMenit : TEKS.dunia.duaMenit;
   const duaMenitSebelum = useRef(langit.duaMenit);
   useEffect(() => {
     const sebelum = duaMenitSebelum.current;
     duaMenitSebelum.current = langit.duaMenit;
     if (!langit.duaMenit || sebelum || status !== "main") return;
     // JS-09 (P-41): "Dua menit lagi" masuk antrean pita yang sama, tanpa perubahan lain.
-    mesin.pita.tambah(TEKS.dunia.duaMenit, Date.now());
-    umumkan(TEKS.dunia.duaMenit);
-  }, [langit.duaMenit, status, umumkan, mesin]);
+    mesin.pita.tambah(teksPeringatan, Date.now());
+    umumkan(teksPeringatan);
+  }, [langit.duaMenit, status, umumkan, mesin, teksPeringatan]);
 
   // Peta besar hanya selama ronde; tertutup sendiri bila ronde berhenti.
   const tutupPetaBesar = useCallback(() => {
@@ -634,7 +636,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
       const jamKini = Date.now();
       // Pita skill tidak tampil selama dialog terbuka (P-41); "Dua menit lagi" tetap seperti JS-07.
       let pt = mesin.pita.perbarui(jamKini);
-      if (t.adaDialog && pt !== TEKS.dunia.duaMenit) pt = "";
+      if (t.adaDialog && pt !== TEKS.dunia.duaMenit && pt !== TEKS.dunia.satuMenit) pt = "";
       if (pt !== kunciPita) setPita((kunciPita = pt));
       const waktuSkill = mesin.waktuEfektif(jamKini, t.selisihJam());
       const daftarSkill = mesin.skill.ruang.map((s) => mesin.skill.status(s, waktuSkill, jamKini));
@@ -825,7 +827,7 @@ export default function LayarDunia(props: PropsLayarDunia) {
         ) : null}
         {pita ? (
           // Pita skill tanpa role="status": teksnya sudah masuk antrean pengumuman (P-39).
-          <p className="js-pita" role={pita === TEKS.dunia.duaMenit ? "status" : undefined}>
+          <p className="js-pita" role={pita === TEKS.dunia.duaMenit || pita === TEKS.dunia.satuMenit ? "status" : undefined}>
             {pita}
           </p>
         ) : null}

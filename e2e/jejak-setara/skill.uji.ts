@@ -1047,7 +1047,7 @@ test("konsol: dasbor 48 px, kelompok Skill di dialog Ruang baru, baris Skill, ta
     return baris.map((x) => x.split(";"));
   };
   const jawaban = await csv(utama.id);
-  expect(jawaban[0].length).toBe(18);
+  expect(jawaban[0].length).toBe(19); // JS-25 (P-17): kolom ke-19 "Durasi (menit)"
   expect(jawaban[0][17]).toBe("Petunjuk dipakai");
   const kolom18 = jawaban.slice(1).map((r) => r[17]);
   expect(kolom18.length).toBeGreaterThanOrEqual(2);

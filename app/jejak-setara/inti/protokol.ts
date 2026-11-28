@@ -98,7 +98,7 @@ export const kartu = () =>
 const pengaturan = () =>
   z
     .object({
-      durasiMenit: z.union([z.literal(10), z.literal(15), z.literal(20)]),
+      durasiMenit: z.union([z.literal(5), z.literal(10), z.literal(15), z.literal(20)]), // 5 sejak JS-25 (tambahan 1)
       batasPemain: angkaBulat(2, BATAS_PESAN.pemainMaks),
       batasTerlambatMenit: angkaBulat(0, 10),
       skillAktif: z

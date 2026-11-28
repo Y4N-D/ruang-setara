@@ -48,6 +48,11 @@ const SK = TABEL_SKENARIO[ambil("--skenario", "")] ?? null;
 const RUANG = Number(ambil("--ruang", String(SK?.ruang ?? 1)));
 const BOT = Number(ambil("--bot", String(SK?.bot ?? 50)));
 const DETIK = Number(ambil("--detik", String(SK?.detikJelajah ?? 120)));
+// JS-25 (P-19): durasi ruang simulasi (5, 10, 15, atau 20 menit; bawaan tetap 20). Bila lebih pendek dari lama menjelajah,
+// ronde dibiarkan berakhir sendiri, dan simulasi menunggu `selesai` untuk semua bot.
+const DURASI_RUANG = Number(ambil("--durasi-ruang", "20"));
+if (![5, 10, 15, 20].includes(DURASI_RUANG)) throw new Error("--durasi-ruang harus 5, 10, 15, atau 20");
+const RONDE_SENDIRI = DURASI_RUANG * 60 < DETIK;
 const JITTER = Number(ambil("--jitter-ms", "0"));
 const LATENSI = Number(ambil("--latensi-ms", "0"));
 const JITTER_EKSP = Number(ambil("--jitter-eksp-ms", "0"));
@@ -69,6 +74,25 @@ const UJI_PUTUS_DETIK = Number(ambil("--uji-putus-bot", "0"));
 // Hanya untuk menguji sambung ulang layar kelas tiruan (D-8 a).
 const UJI_PUTUS_KELAS_DETIK = Number(ambil("--uji-putus-kelas", "0"));
 const tidur = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * JS-25 (P-19; Temuan 3 JS-18): antrean tunda yang menjaga urutan seperti TCP. Waktu tiap pesan tidak pernah lebih awal
+ * dari pesan sebelumnya, dan satu pewaktu menjalankan antrean menurut urutan masuk, sehingga pembulatan pewaktu Node
+ * tidak bisa menukar dua pesan yang waktunya berdekatan.
+ */
+function antreanTunda() {
+  const isi = [];
+  let pewaktu = null;
+  const jalan = () => {
+    pewaktu = null;
+    while (isi.length > 0 && isi[0].pada <= Date.now()) isi.shift().f();
+    if (isi.length > 0) pewaktu = setTimeout(jalan, Math.max(0, isi[0].pada - Date.now()));
+  };
+  return (pada, f) => {
+    isi.push({ pada, f });
+    if (pewaktu === null) pewaktu = setTimeout(jalan, Math.max(0, pada - Date.now()));
+  };
+}
 
 /**
  * JS-11 (AC-23): skema pesan server dari inti/protokol.ts, dimuat lewat pelucutan tipe bawaan Node (22.18 ke atas).
@@ -185,7 +209,12 @@ async function sambungKelas(id, l) {
     x.byte += teks.length;
     x.byteMaks = Math.max(x.byteMaks, teks.length);
     if (m.t === "info_kelas") l.info = m;
-    if (m.t === "status_ruang") l.status = m.status;
+    if (m.t === "status_ruang") {
+      l.status = m.status;
+      // JS-25 (AC-13): lama ronde dari sisi layar kelas (tanpa tunda buatan): status main sampai selesai.
+      if (m.status === "main" && l.mainPada === undefined) l.mainPada = Date.now();
+      if ((m.status === "selesai" || m.status === "pembahasan") && l.selesaiPada === undefined) l.selesaiPada = Date.now();
+    }
   };
   ws.onclose = (e) => {
     if (l.berhenti || ws !== l.ws) return;
@@ -223,7 +252,7 @@ async function buatRuang() {
   const j = await fetch(`${alamat}/api/ruang`, {
     method: "POST",
     headers: tajukKonsol(),
-    body: JSON.stringify({ labelKelas: "Uji beban", paketId: PAKET_INTI, durasiMenit: 20, batasPemain: Math.max(2, Math.min(100, BOT)), batasTerlambatMenit: 10, modeNomorAbsen: false, uji: true , modeNama: MODE_NAMA }),
+    body: JSON.stringify({ labelKelas: "Uji beban", paketId: PAKET_INTI, durasiMenit: DURASI_RUANG, batasPemain: Math.max(2, Math.min(100, BOT)), batasTerlambatMenit: 10, modeNomorAbsen: false, uji: true , modeNama: MODE_NAMA }),
   });
   if (j.status !== 201) throw await galatJawaban("ruang", j);
   const { ruang } = await j.json();
@@ -248,6 +277,7 @@ const kelas = async (kode, pesan) => {
 /** JS-15 (D-8 a): `akhiri` dipastikan sampai: status ruang harus menjadi `selesai`, dicoba dua kali. */
 async function akhiriRuang(kode) {
   const l = layarKelas.get(kode);
+  if (l.status === "selesai" || l.status === "pembahasan") return; // JS-25 (P-19): ronde sudah berakhir sendiri
   for (let coba = 0; coba < 2; coba++) {
     await kelas(kode, { t: "akhiri" });
     for (let i = 0; i < 150 && l.status !== "selesai" && l.status !== "pembahasan"; i++) await tidur(100);
@@ -383,11 +413,14 @@ function buatBot(kode, nomor) {
       if (!tundaNaik) return b.ws.readyState === 1 && b.ws.send(teks);
       const pada = Math.max(b.antreKirim, Date.now() + LATENSI + eksponensial(JITTER_EKSP) + Math.random() * JITTER);
       b.antreKirim = pada;
-      setTimeout(() => b.ws.readyState === 1 && b.ws.send(teks), pada - Date.now());
+      (b.tundaKirim ??= antreanTunda())(pada, () => b.ws.readyState === 1 && b.ws.send(teks));
     };
     b.kirim = kirim;
     const proses = (teks) => {
       const m = JSON.parse(teks);
+      // JS-25 (AC-13): lama ronde dari sisi bot: status main sampai `selesai` (keduanya tertunda sama besar bila ada tunda).
+      if (m.t === "status_ruang" && m.status === "main" && b.mainPada === undefined) b.mainPada = Date.now();
+      if (m.t === "selesai" && b.selesaiPada === undefined) b.selesaiPada = Date.now();
       if (m.t === "selamat_datang") {
         b.token = m.token;
         if (b.menyambung) {
@@ -527,14 +560,15 @@ function buatBot(kode, nomor) {
       if (LATENSI <= 0 && JITTER_EKSP <= 0) return proses(teks);
       const pada = Math.max(b.antreTerima, Date.now() + LATENSI + eksponensial(JITTER_EKSP));
       b.antreTerima = pada;
-      setTimeout(() => proses(teks), pada - Date.now());
+      (b.tundaTerima ??= antreanTunda())(pada, () => proses(teks));
     };
     // JS-15 (D-6 a, D-7 a): penutupan yang tidak disambung ulang sama dengan TUTUP_BERHENTI HP (pemain/jaringan.ts): ruang
     // ditutup (4000), ditolak (4003), dikeluarkan (4004), dan versi berbeda (4005). Penutupan lain, termasuk pelanggaran
     // batas pesan (1008) karena jaringan tersendat dan 1006, disambung ulang dengan token sampai 6 kali berturut-turut.
     const AKHIR = new Set([4000, 4003, 4004, 4005]);
     const sambung = () => {
-      const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/ruang/${kode}`, { headers: tajuk });
+      // JS-25 (P-8): bot menyambung seperti layar pemain v1.2, dengan tambahan protokol.
+      const ws = new WebSocket(`${alamat.replace(/^http/, "ws")}/ws/ruang/${kode}?tambahan=1`, { headers: tajuk });
       b.ws = ws;
       ws.onopen = () => kirim(b.token ? { v: V, t: "halo", peran: "pemain", token: b.token } : { v: V, t: "halo", peran: "pemain" });
       ws.onmessage = terima;
@@ -726,8 +760,11 @@ async function jalankanFase(bot, fase, detik, hz) {
   const akhir = mulai + detik * 1000;
   let ping = 0;
   while (Date.now() < akhir) {
+    // JS-25 (P-19): ronde yang berakhir sendiri: fase berhenti begitu semua bot menerima `selesai`, dan bot yang sudah
+    // menerimanya tidak bergerak lagi.
+    if (RONDE_SENDIRI && fase === "jelajah" && bot.every((b) => b.pesanSelesai !== null)) break;
     const sekarang = Date.now();
-    for (const b of bot) langkahBot(b, sekarang, hz, fase);
+    for (const b of bot) if (!(RONDE_SENDIRI && b.pesanSelesai)) langkahBot(b, sekarang, hz, fase);
     if (sekarang - ping >= 5000) {
       ping = sekarang;
       for (const b of bot) if (b.ws.readyState === 1) b.kirim(pesanPing(b.rttTerakhir));
@@ -924,6 +961,16 @@ try {
     sasaran: SASARAN,
     ruang: RUANG,
     botPerRuang: BOT,
+    durasiRuangMenit: DURASI_RUANG,
+    rondeBerakhirSendiri: RONDE_SENDIRI,
+    lamaRondeBotMs: (() => {
+      const d = bot.filter((b) => b.mainPada !== undefined && b.selesaiPada !== undefined).map((b) => b.selesaiPada - b.mainPada).sort((a, c) => a - c);
+      return d.length === 0 ? null : { bot: d.length, min: d[0], median: d[Math.floor(d.length / 2)], maks: d.at(-1) };
+    })(),
+    lamaRondeMs: kodeRuang.map((k) => {
+      const l = layarKelas.get(k);
+      return l?.mainPada !== undefined && l?.selesaiPada !== undefined ? l.selesaiPada - l.mainPada : null;
+    }),
     latensiMs: LATENSI,
     jitterEksponensialRataMs: JITTER_EKSP,
     jitterSeragamMs: JITTER,

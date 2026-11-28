@@ -172,8 +172,10 @@ export async function tungguSampai<T>(ambil: () => T | Promise<T>, cocok: (hasil
   }
 }
 
-export function klien(kode: string, port = 4320, asal = alamat(port)): Promise<Klien> {
-  const ws = new WebSocket(`ws://127.0.0.1:${port}/ws/ruang/${kode}`, { headers: { Origin: asal } } as unknown as string[]);
+export function klien(kode: string, port = 4320, asal = alamat(port), tambahan: number | null = null): Promise<Klien> {
+  // JS-25 (P-8, P-9): `tambahan` menambahkan ?tambahan={n} seperti layar pemain v1.2; null meniru kode lama.
+  const kueri = tambahan === null ? "" : `?tambahan=${tambahan}`;
+  const ws = new WebSocket(`ws://127.0.0.1:${port}/ws/ruang/${kode}${kueri}`, { headers: { Origin: asal } } as unknown as string[]);
   const k: Klien = {
     ws,
     masuk: [],

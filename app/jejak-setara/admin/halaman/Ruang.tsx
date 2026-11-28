@@ -262,6 +262,10 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
   }
 
   const galatDi = (k: GalatIsianRuang) => (galat.includes(k) ? PESAN_ISIAN[k] : null);
+  // JS-25 (P-2): catatan, tanpa menolak, bila "5 menit" dipilih dengan paket berisi lebih dari 8 kejadian.
+  const idCatatanLima = `${idDurasi}-lima`;
+  const jumlahPaket = pilihan?.find((p) => p.id === paketId)?.jumlahKejadian ?? 0;
+  const catatanLima = durasi === 5 && jumlahPaket > 8;
   return (
     <Dialog judul={tb.judul} tutup={mengirim ? null : tutup} kembaliKe={kembaliKe}>
       {gagalMuat ? (
@@ -294,11 +298,23 @@ function DialogRuangBaru({ tutup, kembaliKe, galatSesi, berhasil, bukaRuang }: P
             </span>
             <div className="js-ruang-pilih">
               {DURASI_RUANG.map((d) => (
-                <button key={d} type="button" className="js-konsol-tombol" aria-pressed={durasi === d} onClick={() => setDurasi(d)}>
+                <button
+                  key={d}
+                  type="button"
+                  className="js-konsol-tombol"
+                  aria-pressed={durasi === d}
+                  aria-describedby={d === 5 && catatanLima ? idCatatanLima : undefined}
+                  onClick={() => setDurasi(d)}
+                >
                   {isiTeks(tb.durasiOpsi, { n: d })}
                 </button>
               ))}
             </div>
+            {catatanLima ? (
+              <p id={idCatatanLima} className="js-konsol-petunjuk">
+                {isiTeks(tb.catatanLimaMenit, { n: jumlahPaket })}
+              </p>
+            ) : null}
           </div>
           <div className="js-ruang-dua">
             <Kolom label={tb.batasPemain} nilai={batas} ubah={setBatas} galat={galatDi("batasPemain")} petunjuk={tb.batasPemainPetunjuk} />

@@ -83,6 +83,7 @@ export const TEKS = {
     layarPenuh: "Layar penuh",
     putarHp: "Putar HP ke posisi mendatar",
     duaMenit: "Dua menit lagi",
+    satuMenit: "Satu menit lagi", // JS-25 (P-6)
     jamCerita: "Jam cerita {jam}",
     sisaWaktu: "Sisa waktu {waktu}",
     masa: { pagi: "Pagi", siang: "Siang", sore: "Sore" },

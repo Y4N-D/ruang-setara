@@ -170,6 +170,7 @@ export const skemaDasbor = z.object({
         dibuatPada: z.number(),
         jumlahPemain: z.number().int().min(0),
         rataSkor: z.number().nullable(),
+        durasiMenit: z.number().int().optional(), // JS-25 (P-14): tidak wajib (dianggap 15)
       }),
     )
     .default([]),
@@ -177,6 +178,7 @@ export const skemaDasbor = z.object({
     .object({
       hari: z.number().int(),
       sesi: z.number().int().min(0),
+      sesiPendek: z.number().int().min(0).optional(), // JS-25 (P-15): ruang 5 menit dalam 30 hari (tidak wajib)
       pemain: z.number().int().min(0),
       rataSkor: z.number().nullable(),
       ketepatan1: z.number().nullable(),

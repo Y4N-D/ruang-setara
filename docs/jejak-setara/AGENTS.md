@@ -2,6 +2,7 @@
 
 Panduan untuk agen AI pemrograman (dan manusia) yang mengerjakan **Jejak Setara** di repositori `ruang-setara`. Baca seluruh file ini, lalu PRD, Design System, dan Architecture Jejak Setara, sebelum mengubah apa pun.
 
+Versi 0.12 (28 November 2026): aturan tambahan protokol di bagian 7 butir 14 (JS-25).
 Versi 0.11 (28 November 2026): rencana v1.2 di bagian 5: JS-24 kontrol sentuh dan layar penuh serta JS-25 waktu main 5 menit; bantuan gerak menjadi JS-26 di versi 1.3 (Gerbang 1 rencana v1.2, KT-19).
 Versi 0.10 (25 November 2026): rencana v1.1 di bagian 5: JS-21, JS-23, dan JS-18 sebelum uji coba kelas, serta JS-24 dan versi 1.2 (Gerbang 1 rencana v1.1, KT-15).
 Versi 0.9 (23 November 2026): Workers Paid aktif; bagian 0, 5, 6, dan 7 butir 16 diperbarui untuk uji beban berbayar (JS-15, P-9).
@@ -203,7 +204,7 @@ Nama skrip ditetapkan di JS-01 dan terdaftar di `package.json` sejak ZIP akhir J
 11. **Dependensi** (`package.json`, lockfile) hanya berubah dengan izin tertulis `Izinkan dependensi: …`.
 12. **Jangan menyentuh** Sehari Setara, galeri, atau `deploy-pages.yml`. Pengecualiannya hanya paragraf penunjuk di `AGENTS.md` akar (JS-01), tautan dari layar judul Sehari Setara (JS-16c), dan tautan galeri (JS-16d), semuanya dengan izin pemilik proyek. Perubahan yang menyentuh Sehari Setara juga mengikuti `AGENTS.md` akar dan uji Sehari Setara.
 13. **Jangan commit** `node_modules/`, `dist-jejak/`, `dist-pages/`, `.wrangler/`, atau berkas `.dev.vars`.
-14. **Protokol:** perubahan yang tidak kompatibel menaikkan `PROTOKOL_VERSI`.
+14. **Protokol:** perubahan yang tidak kompatibel menaikkan `PROTOKOL_VERSI`. Nilai baru di pesan yang sudah ada, yang aman bagi kode lama selama ruangnya tidak memakai nilai itu, menaikkan `PROTOKOL_TAMBAHAN` (`inti/versi.ts`, 1 sejak JS-25). Ruang yang memakai nilai baru menolak sambungan pemain dengan tambahan lebih rendah lewat `VERSI_BERBEDA` dan kode tutup 4005.
 15. **Produksi:** agen tidak pernah melakukan deploy ke produksi (bagian 4.5).
 16. **Uji beban jarak jauh (Workers Paid sejak 23 November 2026, JS-15):** `sim:beban` atau uji otomatis dengan banyak sambungan ke lingkungan uji hanya dijalankan lewat alur kerja "Jejak: uji beban", hanya atas perintah pemilik proyek, dan setiap run mencetak perkiraan biaya lebih dulu; run di atas 400.000 permintaan Durable Object ditolak. Peringatan anggaran 3 USD dan batas pakai 5 USD untuk Workers dan Durable Objects tetap terpasang (Architecture bagian 13).
 

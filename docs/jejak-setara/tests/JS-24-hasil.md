@@ -85,7 +85,7 @@ Di `docs/jejak-setara/tests/JS-24/`:
      - (a, saran) terima untuk v1.2, karena perilakunya sama dengan Menu dan suara di v1.1;
      - (b) perbaiki di JS-24 dengan memindahkan lapisan jeda ke dalam layar dunia di bawah kelompok Menu;
      - (c) perbaiki terpisah sesudah rilis v1.2.
-   - Sampai pemilik proyek memutuskan, kode mengikuti pilihan a.
+   - **Keputusan pemilik proyek (28 Nov 2026): pilihan a.** Diterima untuk v1.2, dan kode tidak berubah.
 2. **Uji waktu di mesin agen.** Uji ujung ke ujung yang memeriksa batas waktu kadang gagal di mesin agen yang hanya punya satu CPU.
    - Uji panjang "Teropong dan Angkot" (JS-18) dengan kode JS-24 lulus 1 dari 6 percobaan. Kegagalannya ada di tiga titik:
      - peta layar kelas belum tampil dalam 15 detik (empat kali);
@@ -99,4 +99,4 @@ Di `docs/jejak-setara/tests/JS-24/`:
 
 ## Keputusan: Lulus
 
-Semua kriteria yang bisa diuji agen lulus. Temuan 1 menunggu keputusan pemilik proyek. AC-15 diperiksa pemilik proyek di lingkungan uji sesudah "Jejak: uji" hijau.
+Semua kriteria yang bisa diuji agen lulus. Temuan 1 diterima pemilik proyek (pilihan a, 28 Nov 2026). AC-15 diperiksa pemilik proyek di lingkungan uji sesudah "Jejak: uji" hijau.

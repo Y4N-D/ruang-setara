@@ -1,6 +1,7 @@
 // GET /api/dasbor (spesifikasi JS-04, P-36): jumlah rujukan yang belum diverifikasi. Sejak JS-10 (P-11) juga paling
 // banyak 5 ruang yang sedang berjalan beserta jumlah seluruhnya. Sejak JS-13 (P-24 sampai P-26): jumlah kejadian Siap
 // tinjau (admin), sesi terakhir, dan ringkasan 30 hari dari `ruang.ringkasan_json`, tanpa membaca tabel jawaban.
+import { durasiSah } from "../../../../app/jejak-setara/inti/ruang";
 import { persen, rataRata } from "../../../../app/jejak-setara/inti/hasil";
 import { RUANG_DAFTAR_MS, RUANG_DASBOR_MAKS } from "../../../../app/jejak-setara/inti/ruang";
 import { HARI_MS, HARI_RINGKASAN } from "../../../../app/jejak-setara/inti/statistik";
@@ -24,6 +25,7 @@ function sesiDasbor(b: BarisSesiDasbor) {
     dibuatPada: b.dibuat_pada,
     jumlahPemain: b.jumlah_pemain,
     rataSkor: b.rata_skor === null ? null : Math.round(b.rata_skor * 10) / 10,
+    durasiMenit: durasiSah(b.durasi_menit), // JS-25 (P-14)
   };
 }
 
@@ -33,8 +35,9 @@ function ringkasan(b: BarisRingkasanDasbor) {
   return {
     hari: HARI_RINGKASAN,
     sesi: b.sesi,
+    sesiPendek: n(b.sesi_pendek), // JS-25 (P-15)
     pemain: n(b.pemain),
-    rataSkor: rataRata(n(b.skor), n(b.pemain)),
+    rataSkor: rataRata(n(b.skor_panjang), n(b.pemain_panjang)), // JS-25 (P-15): tanpa ronde 5 menit
     ketepatan1: persen(n(b.b1), n(b.l1)),
     tingkat: { tepat: persen(n(b.tepat), l2), kurang: persen(n(b.kurang), l2), berisiko: persen(n(b.berisiko), l2) },
   };

@@ -12,7 +12,7 @@ import Dialog from "../Dialog";
 import { keHash } from "../rute";
 import { IKON_KELAS } from "./ikon-kelas";
 import { cariTombolNama, PanelPemain, TombolPemain, type AksiKelola } from "./KelolaNama";
-import { bacaMusikKelas, bacaSuaraKelas, buatSuaraKelas, lewatDuaMenit, simpanMusikKelas, simpanSuaraKelas, type KeadaanMusik, type NamaSuaraKelas } from "./suara-kelas";
+import { bacaMusikKelas, bacaSuaraKelas, buatSuaraKelas, lewatPeringatan, simpanMusikKelas, simpanSuaraKelas, type KeadaanMusik, type NamaSuaraKelas } from "./suara-kelas";
 import Langsung, { useJamServer } from "./Langsung";
 import Lobi, { KepalaKelas } from "./Lobi";
 import Pembahasan from "./Pembahasan";
@@ -221,10 +221,12 @@ export default function LayarKelas({ ruangId, galatSesi }: { ruangId: string; ga
   }, [angkaHitung, putarKelas]);
   const sisaDetik = status === "main" && data.status ? Math.ceil(sisaRonde(data.status.berakhirPada, data.status.jedaSejak, jam) / 1000) : null;
   const sisaSebelum = useRef<number | null>(null);
+  const durasiKelas = info?.durasiMenit ?? 15;
   useEffect(() => {
-    if (sisaDetik !== null && lewatDuaMenit(sisaSebelum.current === null ? null : sisaSebelum.current * 1000, sisaDetik * 1000)) putarKelas("peringatan");
+    // JS-25 (P-6): ambang menurut durasi ruang (60 detik untuk ronde 5 menit).
+    if (sisaDetik !== null && lewatPeringatan(sisaSebelum.current === null ? null : sisaSebelum.current * 1000, sisaDetik * 1000, durasiKelas)) putarKelas("peringatan");
     sisaSebelum.current = sisaDetik;
-  }, [sisaDetik, putarKelas]);
+  }, [sisaDetik, putarKelas, durasiKelas]);
 
   // Data pembahasan diminta lagi sesudah tersambung ulang di tengah pembahasan.
   useEffect(() => {

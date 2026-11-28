@@ -124,7 +124,7 @@ const kelasInfo = /* @__PURE__ */ pesan("info_kelas", () => ({
   labelKelas: teks(LABEL_KELAS_MAKS),
   kode: z.string().regex(POLA_KODE_RUANG),
   tautan: z.string().url().max(200),
-  durasiMenit: z.union([z.literal(10), z.literal(15), z.literal(20)]),
+  durasiMenit: z.union([z.literal(5), z.literal(10), z.literal(15), z.literal(20)]), // 5 sejak JS-25 (tambahan 1)
   batasPemain: angkaBulat(2, BATAS_PESAN.pemainMaks),
   uji: z.boolean(),
   terkunci: z.boolean(),

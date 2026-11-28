@@ -4,10 +4,26 @@ import { SKILL_URUT } from "./aturan";
 import type { SkillId } from "./tipe";
 
 export const LABEL_KELAS_MAKS = 20;
-export const DURASI_RUANG = [10, 15, 20] as const;
+// JS-25 (P-1): 5 menit ditambahkan; bawaan tetap 15 (KT-12).
+export const DURASI_RUANG = [5, 10, 15, 20] as const;
 export type DurasiRuang = (typeof DURASI_RUANG)[number];
 export const BATAS_PEMAIN = { min: 2, maks: 100, bawaan: 40 } as const;
 export const BATAS_TERLAMBAT = { min: 0, maks: 10, bawaan: 5 } as const;
+/** JS-25 (P-13, P-14): durasi dari `pengaturan_json`; nilai yang tidak ada atau tidak sah dianggap 15, seperti halaman Hasil. */
+export function durasiSah(n: unknown): DurasiRuang {
+  return (DURASI_RUANG as readonly unknown[]).includes(n) ? (n as DurasiRuang) : 15;
+}
+
+/** JS-25 (P-9): tambahan protokol yang diperlukan sambungan pemain ke ruang berdurasi ini: 1 untuk ronde 5 menit. */
+export function tambahanDiperlukan(durasiMenit: number): number {
+  return durasiMenit === 5 ? 1 : 0;
+}
+
+/** JS-25 (P-9): angka `tambahan` dari alamat sambungan pemain; tidak ada atau tidak sah berarti 0. */
+export function bacaTambahan(nilai: string | null): number {
+  return nilai !== null && /^\d{1,3}$/.test(nilai) ? Number(nilai) : 0;
+}
+
 /** Mode nomor absen hanya untuk ruang dengan batas sampai 50 pemain (JS-03). */
 export const NOMOR_ABSEN_PEMAIN_MAKS = 50;
 export const DURASI_BAWAAN: DurasiRuang = 15;
@@ -103,7 +119,7 @@ export const skemaRuangBaru = z
   .object({
     labelKelas: z.string().max(200),
     paketId: z.string().min(1).max(64),
-    durasiMenit: z.union([z.literal(10), z.literal(15), z.literal(20)]),
+    durasiMenit: z.union([z.literal(5), z.literal(10), z.literal(15), z.literal(20)]),
     batasPemain: z.number().int(),
     batasTerlambatMenit: z.number().int(),
     modeNomorAbsen: z.boolean(),
